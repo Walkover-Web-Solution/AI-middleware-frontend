@@ -123,13 +123,7 @@ const ToneDropdown = ({ params, searchParams }) => {
 
   return (
     <label className="form-control w-full">
-      <div className="flex items-center pb-1">
         <InfoTooltip tooltipContent={"Select your response tone (optional)."}>
-        <div className="label-text info">
-          Tone
-        </div>
-        </InfoTooltip>
-      </div>
       <div className="flex items-center gap-2">
         <select
           value={selectedTone}
@@ -149,6 +143,7 @@ const ToneDropdown = ({ params, searchParams }) => {
           ))}
         </select>
       </div>
+      </InfoTooltip>
     </label>
   );
 };

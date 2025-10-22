@@ -7,7 +7,7 @@ import { DIFFERNCE_DATA_DISPLAY_NAME } from '@/jsonFiles/bridgeParameter';
 const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
 
   const {apikeyData, functionData, knowledgeBaseData} = useCustomSelector((state) => ({
-    apikeyData: state?.bridgeReducer?.apikeys[params.org_id] || [],
+    apikeyData: state?.apiKeysReducer?.apikeys[params.org_id] || [],
     functionData: state?.bridgeReducer?.org[params.org_id]?.functionData || {},
     knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params.org_id] || []
   }));

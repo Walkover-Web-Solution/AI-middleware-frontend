@@ -59,7 +59,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [loadingData, setLoadingData] = useState(false);
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
-  const [updateMessageAgentVariables, setUpdateMessageAgentVariables] = useState([]);
   const [isImprovingPrompt, setIsImprovingPrompt] = useState(false);
 
   const formatDateAndTime = useCallback((created_at) => {
@@ -122,7 +121,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       const variables = {};
       thread.forEach((item) => {
         if (item.Id === modalInput?.Id) {
-          debugger
           const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
           const filteredConversation = conversation.filter((value) => {
             if (value.role === 'developer') {

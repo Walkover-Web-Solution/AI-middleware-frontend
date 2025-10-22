@@ -29,12 +29,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [autoGenerateSummary, setAutoGenerateSummary] = useState(false);
 
-  const { bridge, versionData, bridgeData, agentList, bridge_summary } = useCustomSelector((state) => ({
+  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
     versionData: state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.version],
     bridgeData: state.bridgeReducer.allBridgesMap?.[params?.id],
     agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
     bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
+    allBridgesMap: state.bridgeReducer.allBridgesMap || {},
   }));
 
   // Memoized form data initialization
@@ -59,78 +60,202 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     }
   }, [bridge]);
   
-  const getAllConnectedAgents = useCallback(async (agentId, versionData, agentList, useVersionData = false, visited = new Set()) => {
-    if (!agentId || visited.has(agentId)) return [];  
+  const getAllConnectedAgents = useCallback(async (agentId, versionData, agentList, useVersionData = false, visited = new Set(), level = 0, allBridgesMap = null) => {
+    // Prevent infinite loops and invalid agents
+    if (!agentId || visited.has(agentId)) return [];
+    
+    // Add current agent to visited set
     visited.add(agentId);
-    let agent = useVersionData ? versionData : agentList?.find(a => a._id === agentId);
-    if (!agent) return [];
-    if (useVersionData) {
-      agent = {
-        ...agent,
-        name: agentList?.find(a => a._id === agent?.parent_id)?.name || agent.name,
-        haveToPublish: agent.is_drafted,
-        isVersionData: true
-      };
+    
+    // Get agent data - either from version data, bridge data, or agent list
+    let agent;
+    
+    if (useVersionData && versionData) {
+      agent = { ...versionData };
+      // Get the parent agent name from agentList
+      const parentAgent = agentList?.find(a => a._id === agent?.parent_id);
+      agent.name = parentAgent?.name || agent.name || 'Unknown Agent';
+      agent.haveToPublish = agent.is_drafted || false;
+      agent.isVersionData = true;
+    } else if (!useVersionData && versionData) {
+      // This is bridge data from allBridgesMap
+      agent = { ...versionData };
+      agent.name = agent.name || 'Unknown Agent';
+      agent.haveToPublish = false; // Bridge data doesn't need publishing
+      agent.isVersionData = false;
+      agent.isBridgeData = true;
+    } else {
+      const foundAgent = agentList?.find(a => a._id === agentId);
+      if (!foundAgent) {
+        return [];
+      }
+      // Create a copy to avoid modifying the original
+      agent = { ...foundAgent };
+      agent.haveToPublish = false; // Regular agents don't need publishing
+      agent.isVersionData = false;
+      agent.isBridgeData = false;
     }
     
-    let result = [agent];
-    const connectedAgents = agent?.connected_agents || {};
-  
-    const nestedPromises = Object.entries(connectedAgents).map(async ([agentName, agentInfo]) => {
-      const connectedId = agentInfo.bridge_id;
-      if (!connectedId) return [];
+    // Add hierarchy information
+    const agentWithHierarchy = {
+      ...agent,
+      hierarchyLevel: level,
+      children: []
+    };
+    
+    // Get connected agents from the current agent
+    // For bridge data, connected_agents might be in different locations
+    let connectedAgents = agent?.connected_agents || {};
+    
+    // If no connected_agents found, try other possible locations
+    if (Object.keys(connectedAgents).length === 0) {
+      // Try page_config.connected_agents for bridge data
+      connectedAgents = agent?.page_config?.connected_agents || {};
       
-      const hasVersionId = agentInfo?.version_id !== undefined && agentInfo?.version_id !== "";
-      let updatedVersionData;
+      // Try configuration.connected_agents
+      if (Object.keys(connectedAgents).length === 0) {
+        connectedAgents = agent?.configuration?.connected_agents || {};
+      }
+      
+      // For version data, try the direct structure
+      if (Object.keys(connectedAgents).length === 0 && agent.isVersionData) {
+        // Version data might have connected_agents at root level
+        connectedAgents = versionData?.connected_agents || {};
+      }
+    }
+    
+    // Process each connected agent
+    for (const [agentName, agentInfo] of Object.entries(connectedAgents)) {
+      const connectedId = agentInfo?.bridge_id;
+      if (!connectedId || visited.has(connectedId)) {
+        continue;
+      }
+      
+      // Check if this connection has a specific version
+      const hasVersionId = agentInfo?.version_id && agentInfo.version_id.trim() !== "";
+      
+      let childVersionData = null;
+      let shouldUseVersionData = false;
+      
       if (hasVersionId) {
         try {
+          // Fetch the specific version data
           const fetchedData = await dispatch(getBridgeVersionAction({
             versionId: agentInfo.version_id
           }));
           
-          updatedVersionData = fetchedData ? { ...fetchedData } : null;
+          if (fetchedData) {
+            childVersionData = fetchedData;
+            shouldUseVersionData = true;
+          }
         } catch (error) {
-          console.error('Error fetching version data:', error);
-          return [];
+          console.error(`Error fetching version data for ${agentInfo.version_id}:`, error);
+          // Continue with regular agent data if version fetch fails
         }
       } else {
-        updatedVersionData = versionData ? { ...versionData } : null;
+        // If no version_id, try to get bridge data from allBridgesMap
+        if (allBridgesMap && allBridgesMap[connectedId]) {
+          childVersionData = allBridgesMap[connectedId];
+          shouldUseVersionData = false; // This is bridge data, not version data
+        }
       }
       
-      return getAllConnectedAgents(
+      // Always try to process the agent, even if we don't have specific data
+      // The recursive function will try to find it in agentList
+      const childAgents = await getAllConnectedAgents(
         connectedId,
-        updatedVersionData,
+        childVersionData,
         agentList,
-        hasVersionId,
-        new Set([...visited])
+        shouldUseVersionData,
+        new Set([...visited]), // Pass a copy of visited set
+        level + 1,
+        allBridgesMap // Pass allBridgesMap to recursive calls
       );
-    });
+      
+      // Add children to current agent
+      if (childAgents.length > 0) {
+        agentWithHierarchy.children.push(...childAgents);
+      }
+    }
     
-    const nestedResults = await Promise.all(nestedPromises);
-    return result.concat(nestedResults.flat());
+    // Return structure based on level
+    if (level === 0) {
+      // For root call, collect all connected agents without duplicates
+      const result = [];
+      const seenIds = new Set();
+      
+      // Add the root agent if it needs publishing
+      if (agentWithHierarchy.haveToPublish && !seenIds.has(agentWithHierarchy._id)) {
+        result.push(agentWithHierarchy);
+        seenIds.add(agentWithHierarchy._id);
+      }
+      
+      // Collect all agents in a flat structure, avoiding duplicates
+      const collectAllAgents = (currentAgent) => {
+        if (currentAgent.children && currentAgent.children.length > 0) {
+          currentAgent.children.forEach(child => {
+            if (!seenIds.has(child._id)) {
+              result.push(child);
+              seenIds.add(child._id);
+            }
+            collectAllAgents(child);
+          });
+        }
+      };
+      
+      collectAllAgents(agentWithHierarchy);
+      
+      return result;
+    } else {
+      // For nested calls, return the current agent
+      return [agentWithHierarchy];
+    }
   }, [dispatch]);
 
-  useEffect(() => {
-    const fetchConnectedAgents = async () => {
-      if (!params?.id || !versionData || !agentList.length) {
-        setAllConnectedAgents([]);
-        return;
-      }
+  const fetchConnectedAgents = useCallback(async () => {
+    if (!params?.id || !versionData || !agentList.length) {
+      setAllConnectedAgents([]);
+      return;
+    }
 
-      setIsLoadingAgents(true);
-      try {
-        const agents = await getAllConnectedAgents(params.id, versionData, agentList, true);
-        setAllConnectedAgents(Array.isArray(agents) ? agents : []);
-      } catch (error) {
-        console.error('Error fetching connected agents:', error);
-        setAllConnectedAgents([]);
-      } finally {
-        setIsLoadingAgents(false);
-      }
-    };
-    
-    fetchConnectedAgents();
-  }, [params?.id, versionData, agentList, getAllConnectedAgents]);
+    setIsLoadingAgents(true);
+    try {
+      const agents = await getAllConnectedAgents(params.id, versionData, agentList, true, new Set(), 0, allBridgesMap);
+      setAllConnectedAgents(Array.isArray(agents) ? agents : []);
+    } catch (error) {
+      console.error('Error fetching connected agents:', error);
+      setAllConnectedAgents([]);
+    } finally {
+      setIsLoadingAgents(false);
+    }
+  }, [params?.id, versionData, agentList, getAllConnectedAgents, allBridgesMap]);
+
+  // Listen for modal open events using MutationObserver
+  useEffect(() => {
+    const modalElement = document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
+    if (!modalElement) return;
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'open') {
+          const isOpen = modalElement.hasAttribute('open');
+          if (isOpen) {
+            // Modal just opened, fetch connected agents
+            fetchConnectedAgents();
+          }
+        }
+      });
+    });
+
+    // Observe changes to the 'open' attribute
+    observer.observe(modalElement, {
+      attributes: true,
+      attributeFilter: ['open']
+    });
+
+    // Cleanup observer on unmount
+    return () => observer.disconnect();
+  }, [fetchConnectedAgents]);
 
   const { filteredBridgeData, filteredVersionData } = useMemo(() => {
     const filterData = (data, keys) => {
@@ -143,7 +268,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       });
       return filtered;
     };
-
     return {
       filteredBridgeData: filterData(bridgeData, KEYS_TO_COMPARE),
       filteredVersionData: filterData(versionData, KEYS_TO_COMPARE)
@@ -253,8 +377,24 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     }));
   }, []);
 
+  // Helper function to get all agents recursively (flattened for operations)
+  const getAllAgentsFlat = useCallback((agents) => {
+    const result = [];
+    const traverse = (agentList) => {
+      agentList.forEach(agent => {
+        result.push(agent);
+        if (agent.children && agent.children.length > 0) {
+          traverse(agent.children);
+        }
+      });
+    };
+    traverse(agents);
+    return result;
+  }, []);
+
   const toggleAgentSelection = useCallback((agentId) => {
-    const agent = allConnectedAgents.find(a => a._id === agentId);
+    const flatAgents = getAllAgentsFlat(allConnectedAgents);
+    const agent = flatAgents.find(a => a._id === agentId);
     if (!agent?.haveToPublish) return;
     
     setSelectedAgentsToPublish(prev => {
@@ -266,23 +406,24 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       }
       return newSet;
     });
-  }, [allConnectedAgents]);
-  
+  }, [allConnectedAgents, getAllAgentsFlat]);
+
   const toggleSelectAllAgents = useCallback(() => {
-    const publishableAgents = allConnectedAgents
+    const flatAgents = getAllAgentsFlat(allConnectedAgents);
+    const publishableAgents = flatAgents
       .filter(agent => agent._id !== params?.id && agent?.haveToPublish)
       .map(agent => agent._id);
       
-    if (publishableAgents.length === 0) return;
-    
-    const allSelected = publishableAgents.every(agentId => selectedAgentsToPublish.has(agentId));
+    const allSelected = publishableAgents.every(agentId => 
+      selectedAgentsToPublish.has(agentId)
+    );
     
     if (allSelected) {
       setSelectedAgentsToPublish(new Set());
     } else {
       setSelectedAgentsToPublish(new Set(publishableAgents));
     }
-  }, [allConnectedAgents, params?.id, selectedAgentsToPublish]);
+  }, [allConnectedAgents, params?.id, selectedAgentsToPublish, getAllAgentsFlat]);
 
   const toggleComparison = useCallback(() => {
     setShowComparison(prev => !prev);
@@ -315,6 +456,100 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       }
     }
   }, [agentList, allConnectedAgents]);
+
+  // Recursive function to render agents with hierarchy
+  const renderAgentHierarchy = useCallback((agents, level = 0) => {
+    if (!agents || agents.length === 0) return null;
+    
+    return agents
+      .filter(agent => {
+        // Filter out the current agent and any versions of the current agent
+        if (agent._id === params?.id) return false;
+        
+        // Check if this agent is a version of the current agent
+        const currentAgent = agentList.find(a => a._id === params?.id);
+        if (currentAgent?.versions?.includes(agent._id)) return false;
+        
+        return true;
+      })
+      .map(agent => {
+        const isSelected = selectedAgentsToPublish.has(agent._id);
+        const actualLevel = agent.hierarchyLevel || level;
+        const indentLevel = actualLevel * 24; // 24px per level
+        
+        return (
+          <div key={`${agent._id}-${actualLevel}`} className="relative">
+            {/* Connection lines for hierarchy visualization */}
+            {actualLevel > 0 && (
+              <>
+                <div 
+                  className="absolute left-0 top-0 bottom-0 w-px bg-base-300" 
+                  style={{ left: `${indentLevel - 12}px` }}
+                ></div>
+                <div 
+                  className="absolute top-6 w-3 h-px bg-base-300" 
+                  style={{ left: `${indentLevel - 12}px` }}
+                ></div>
+              </>
+            )}
+            
+            <div 
+              className="card bg-base-100 shadow-sm border border-base-300 mb-3"
+              style={{ marginLeft: `${indentLevel}px` }}
+            >
+              <div className="card-body p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-medium text-sm">{agent.name || 'Unknown Agent'}</h5>
+                        {agent?.haveToPublish ? (
+                          <div className="badge badge-warning badge-sm text-white">Needs Publish</div>
+                        ) : (
+                          <div className="badge badge-success badge-sm text-white">Already Published</div>
+                        )}
+                      </div>
+                      <p className="text-xs text-base-content/70 mt-1">
+                        Service: {agent.service || 'N/A'} | Model: {agent.configuration?.model || 'N/A'}
+                      </p>
+                      {agent.url_slugname && (
+                        <p className="text-xs text-base-content/50">
+                          Slug: {agent.url_slugname}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {agent?.haveToPublish && (
+                    <div className="flex items-center gap-2">
+                      {isSelected && (
+                        <div className="flex items-center gap-1 text-warning text-sm">
+                          <AlertTriangle className="w-3 h-3" />
+                          Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published
+                        </div>
+                      )}
+                      <span className="text-xs text-base-content/70">Include in publish</span>
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-primary toggle-sm"
+                        checked={isSelected}
+                        onChange={() => toggleAgentSelection(agent._id)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Children are already included in the flattened list, no need to render recursively */}
+          </div>
+        );
+      });
+  }, [params?.id, agentList, selectedAgentsToPublish, toggleAgentSelection, isLoading, getVersionIndexToPublish]);
 
   const handlePublishBridge = useCallback(async () => {
     setIsLoading(true);
@@ -556,63 +791,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                   </div>
                 
                   <div className="space-y-3">
-                    {allConnectedAgents
-                      .filter(agent => agent._id !== params?.id && !agentList.filter(oneAgent => oneAgent._id === params?.id)?.[0]?.versions.includes(agent._id))
-                      .map(agent => {
-                        const isSelected = selectedAgentsToPublish.has(agent._id);
-                        
-                        return (
-                          <div key={agent._id} className="card bg-base-100 shadow-sm border border-base-300">
-                            <div className="card-body p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="bg-primary/10 p-2 rounded-full">
-                                    <Bot className="w-4 h-4 text-primary" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <h5 className="font-medium text-sm">{agent.name}</h5>
-                                      {agent?.haveToPublish ? (
-                                        <div className="badge badge-warning badge-sm text-white">Needs Publish</div>
-                                      ) : (
-                                        <div className="badge badge-success badge-sm text-white">Already Published</div>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-base-content/70 mt-1">
-                                      Service: {agent.service} | Model: {agent.configuration?.model || 'N/A'}
-                                    </p>
-                                    {agent.slugName && (
-                                      <p className="text-xs text-base-content/50">
-                                        Slug: {agent.slugName}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                {agent?.haveToPublish && (
-                                  <div className="flex items-center gap-2">
-                                    {agent?.haveToPublish && isSelected && (
-                                    <div className="flex items-center gap-1 text-warning text-sm">
-                                      <AlertTriangle className="w-3 h-3" />
-                                      Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published | 
-
-                                    </div>
-                                  )}
-                                    <span className="text-xs text-base-content/70">Include in publish</span>
-                                    <input
-                                      type="checkbox"
-                                      className="toggle toggle-primary toggle-sm"
-                                      checked={isSelected}
-                                      onChange={() => toggleAgentSelection(agent._id)}
-                                      disabled={isLoading}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    {renderAgentHierarchy(allConnectedAgents)}
                   </div>
                 </div>
               ) : null}

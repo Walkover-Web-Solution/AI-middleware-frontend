@@ -26,7 +26,9 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
- 
+  useEffect(() => {
+    setFilterKnowledgeBase(knowledgeBaseData)
+  }, [knowledgeBaseData]); 
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     actualName: item?.name,
@@ -35,14 +37,15 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
         {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 14, 14)}
         </div>
       <div className="tooltip" data-tip={item.name}>
-        {truncate(item.name, 30)}
+        {item.name}
       </div>
     </div>,
     description: <div className="tooltip" data-tip={item.description}>{truncate(item.description, 30)}</div>,
     actual_name: item?.name,
   }));
   const handleUpdateKnowledgeBase = (item) => {
-    setSelectedKnowledgeBase(item);
+    const originalItem = knowledgeBaseData.find(kb => kb._id === item._id);
+    setSelectedKnowledgeBase(originalItem);
     openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
   };
 
@@ -99,8 +102,10 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
           </div>
         </MainLayout>
         <div className="flex flex-row gap-4 justify-between ">
-          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
-          <div className="flex-shrink-0 mr-2">
+          {knowledgeBaseData?.length>5 && (
+            <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
+          )}
+          <div className={`flex-shrink-0 ${knowledgeBaseData?.length>5 ? 'mr-2' : 'ml-auto mr-2'}`}>
               <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ Create Knowledge Base</button>
             </div>
         </div>

@@ -23,7 +23,7 @@ const CommandPalette = ({isEmbedUser}) => {
 
   const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData, orchestralFlowData } = useCustomSelector((state) => ({
     agentList: state?.bridgeReducer?.org?.[orgId]?.orgs || [],
-    apikeys: state?.bridgeReducer?.apikeys?.[orgId] || [],
+    apikeys: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     knowledgeBase: state?.knowledgeBaseReducer?.knowledgeBaseData?.[orgId] || [],
     functionData: state?.bridgeReducer?.org?.[orgId]?.functionData || {},
     integrationData: state?.integrationReducer?.integrationData?.[orgId] || [],
@@ -41,11 +41,13 @@ const CommandPalette = ({isEmbedUser}) => {
         fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
       );
     };
-    const agentsGroup = filterBy(agentList, ["name", "slugName", "service"]).map((a) => ({
+    const agentsGroup = filterBy(agentList, ["name", "slugName", "service", "_id"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
       subtitle: `${a.service || ""}${a.configuration?.model ? " · " + a.configuration?.model : ""}`,
       type: "agents",
+      published_version_id: a.published_version_id,
+      versions: a.versions
     }));
 
     // Also support searching by version_id: include results when the query matches
@@ -69,6 +71,13 @@ const CommandPalette = ({isEmbedUser}) => {
           }));
         });
 
+      const orchestralFlowGroup = filterBy(orchestralFlowData, ["flow_name", "_id"]).map((d) => ({
+      id: d._id,
+      title: d.flow_name || d._id,
+      subtitle: "Orchestral Flow",
+      type: "flows",
+    }));
+
     const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
       id: k._id,
       title: k.name || k._id,
@@ -83,12 +92,12 @@ const CommandPalette = ({isEmbedUser}) => {
       type: "docs",
     }));
 
-    const functionsGroup = filterBy(functions, ["endpoint_name", "_id"]).map((fn) => ({
-      id: fn._id,
-      title: fn.endpoint_name || fn._id,
-      subtitle: "Function",
-      type: "functions",
-    }));
+    // const functionsGroup = filterBy(functions, ["endpoint_name", "_id"]).map((fn) => ({
+    //   id: fn._id,
+    //   title: fn.endpoint_name || fn._id,
+    //   subtitle: "Function",
+    //   type: "functions",
+    // }));
 
     const integrationGroup = filterBy(integrationData, ["name", "service", "_id"]).map((d) => ({
       id: d._id,
@@ -104,22 +113,15 @@ const CommandPalette = ({isEmbedUser}) => {
       type: "Pauths",
     }));
 
-    const orchestralFlowGroup = filterBy(orchestralFlowData, ["flow_name", "_id"]).map((d) => ({
-      id: d._id,
-      title: d.flow_name || d._id,
-      subtitle: "Orchestral Flow",
-      type: "flows",
-    }));
-
     return {
       // Combine normal agent matches with version-id based matches
       agents: [...agentsGroup, ...agentsVersionMatches],
+      flows: orchestralFlowGroup,
       apikeys: apikeysGroup,
       docs: kbGroup,
-      functions: functionsGroup,
+      // functions: functionsGroup,
       integrations: integrationGroup,
       auths: authGroup,
-      flows: orchestralFlowGroup,
     };
   }, [query, agentList, apikeys, knowledgeBase, functions]);
 
@@ -128,7 +130,7 @@ const CommandPalette = ({isEmbedUser}) => {
       ...items.agents.map((it) => ({ group: "Agents", ...it })),
       ...items.apikeys.map((it) => ({ group: "API Keys", ...it })),
       ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
-      ...items.functions.map((it) => ({ group: "Functions", ...it })),
+      // ...items.functions.map((it) => ({ group: "Functions", ...it })),
       ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
       ...items.auths.map((it) => ({ group: "Pauth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
@@ -182,7 +184,7 @@ const CommandPalette = ({isEmbedUser}) => {
         if (item.versionId) {
           router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.versionId}`);
         } else {
-          router.push(`/org/${orgId}/agents/configure/${item.id}`);
+          router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.published_version_id || item.versions?.[0]}`);
         }
         break;
       case "apikeys":
@@ -312,12 +314,12 @@ const CommandPalette = ({isEmbedUser}) => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-2">
                 {[
                   { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
-                  { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
-                  { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
-                  { key: 'functions', label: 'Functions', desc: 'Tools and endpoints' },
-                  { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-                  { key: 'Pauths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
                   { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
+                  { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
+                  { key: 'Pauths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
+                  { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
+                  // { key: 'functions', label: 'Functions', desc: 'Tools and endpoints' },
+                  { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
                 ].map((c) => (
                   <button
                     key={c.key}

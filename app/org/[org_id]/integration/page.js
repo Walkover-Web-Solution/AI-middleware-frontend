@@ -38,7 +38,7 @@ const Page = ({ params }) => {
     name: (
       <div className="flex gap-2">
         <div className="tooltip" data-tip={item.name}>
-          {truncate(item.name, 30)}
+          {truncate(item.name, 50)}
         </div>
       </div>
     ),
@@ -68,7 +68,7 @@ const Page = ({ params }) => {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full">
           <PageHeader
             title=" GTWY Embed Integration"
-            docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
+            docLink="https://gtwy.ai/blogs/features/gtwy-embed--1"
             description={descriptions?.['Gtwy as Embed'] || "Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."}
           />
           
@@ -80,9 +80,10 @@ const Page = ({ params }) => {
         {/* Content Section */}
         <div className="w-full">
         <div className="flex flex-row gap-4 justify-between ">
-
-          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
-          <div className="flex-shrink-0">
+          {integrationData?.length>5 && (
+            <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
+          )}
+          <div className={`flex-shrink-0 ${integrationData?.length>5 ? 'mr-2' : 'ml-auto mr-2'}`}>
             <button 
               className="btn btn-primary mr-2" 
               onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}

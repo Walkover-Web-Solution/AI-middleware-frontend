@@ -1,4 +1,5 @@
-import PublishBridgeVersionModal from '@/components/modals/publishBridgeVersionModal';
+import dynamic from 'next/dynamic';
+const PublishBridgeVersionModal = dynamic(() => import('@/components/modals/publishBridgeVersionModal'), { ssr: false });
 import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
 import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -6,47 +7,77 @@ import { createBridgeVersionAction, getBridgeVersionAction } from '@/store/actio
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
     const router = useRouter();
     const dispatch = useDispatch();
-    const versionDescriptionRef = React?.useRef('');
+    const versionDescriptionRef = useRef('');
+    const hasInitialized = useRef(false);
+    const lastFetchedVersion = useRef(null);
+    const isProcessing = useRef(false);
+    
     const { bridgeVersionsArray, publishedVersion, bridgeName, versionDescription} = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
     }));
+
+    // Memoized function to fetch version data only when needed
+    const fetchVersionData = useCallback((versionId) => {
+        if (!versionId || lastFetchedVersion.current === versionId || isProcessing.current) {
+            return;
+        }
+        isProcessing.current = true;
+        lastFetchedVersion.current = versionId;
+        dispatch(getBridgeVersionAction({ versionId, version_description: versionDescriptionRef }))
+            .finally(() => {
+                isProcessing.current = false;
+            });
+    }, [dispatch]);
+
+    // SendDataToChatbot effect - only runs when version changes
     useEffect(() => {
+        if (!searchParams?.version) return;
+        
         const timer = setInterval(() => {
-            if (typeof SendDataToChatbot !== 'undefined' && searchParams?.version) {
+            if (typeof SendDataToChatbot !== 'undefined') {
                 SendDataToChatbot({ "version_id": searchParams.version });
                 clearInterval(timer);
             }
         }, 300);
-        return () => {
-            clearInterval(timer);
-        }
-    }, [searchParams?.version])
+        
+        return () => clearInterval(timer);
+    }, [searchParams?.version]);
 
-    const handleVersionChange = (version) => {
-        if(searchParams?.version === version) return;
+    // Initialize version only once on mount or when versions become available
+    useEffect(() => { 
+        if (hasInitialized.current) {
+            return;
+        }
+        // If no version in URL but we have versions available
+        if (!searchParams?.version && (bridgeVersionsArray.length > 0 || publishedVersion)) {
+            const defaultVersion = publishedVersion || bridgeVersionsArray[0];
+            if (defaultVersion) {
+                hasInitialized.current = true;
+                // Only update URL, don't fetch yet - the next effect will handle fetching
+                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${defaultVersion}`);
+            }
+        }
+        // If version exists in URL, fetch its data
+        else if (searchParams?.version) {
+            hasInitialized.current = true;
+            fetchVersionData(searchParams.version);
+        }
+    }, []);
+
+    const handleVersionChange = useCallback((version) => {
+        if (searchParams?.version === version) return;
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${version}`);
-        dispatch(getBridgeVersionAction({ versionId: version, version_description:versionDescriptionRef }));
-    };
-
-    useEffect(() => {
-        if ((!searchParams?.version && bridgeVersionsArray.length > 0) || (!searchParams?.version && publishedVersion.length > 0)) {
-            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0]}`);
-            dispatch(getBridgeVersionAction({ versionId: publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0], version_description:versionDescriptionRef }));
-        }
-        else{
-            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}`);
-            dispatch(getBridgeVersionAction({ versionId: searchParams?.version, version_description:versionDescriptionRef }));
-        }
-    }, [publishedVersion, searchParams?.version]);
+        fetchVersionData(version);
+    }, [searchParams?.version, params.org_id, params.id, router]);
 
     const handleCreateNewVersion = () => {
         // create new version

@@ -14,6 +14,7 @@ function Canvas({
   label = "prompt",
   onResetThreadId = () => {}
 }) {
+  const safeMessages = Array.isArray(messages) ? messages : [];
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -42,7 +43,10 @@ function Canvas({
   };
 
   const handleApply = (message) => {
-    handleApplyOptimizedPrompt(message.optimized);
+    // Call the apply function with the optimized content
+    if (typeof handleApplyOptimizedPrompt === 'function') {
+      handleApplyOptimizedPrompt(message.optimized);
+    }
     setAppliedMessages(message.id);
   };
 
@@ -59,6 +63,7 @@ function Canvas({
     } catch (e) {
       // If not JSON, return original content
       return {
+        isJson: false,
         formatted: content
       };
     }
@@ -96,8 +101,11 @@ function Canvas({
       id: Date.now(),
       sender: "user",
       content: instruction,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => {
+      return [...prev, userMessage];
+    });
     setInstruction("");
     setErrorMessage("");
     setLoading(true);
@@ -123,7 +131,9 @@ function Canvas({
         optimized: result.updated, // Keep the original format for functionality
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => {
+        return [...prev, assistantMessage];
+      });
     } catch (err) {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
@@ -157,7 +167,7 @@ function Canvas({
           id="messages" 
           className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 py-4 space-y-4"
         >
-          {messages.length === 0 && !loading && (
+          {safeMessages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                <Lightbulb />
@@ -166,13 +176,13 @@ function Canvas({
             </div>
           )}
 
-          {messages.map((message, index) => {
+          {safeMessages.map((message, index) => {
             const { isJson, formatted } = formatMessageContent(message.content);
             
             return (
               <div
                 key={message.id || index}
-                ref={index === messages.length - 1 ? messagesEndRef : null}
+                ref={index === safeMessages.length - 1 ? messagesEndRef : null}
                 className={`chat group ${message.sender === "user" ? "chat-end" : "chat-start"}`}
               >
                 {/* Chat Header with Apply Button */}

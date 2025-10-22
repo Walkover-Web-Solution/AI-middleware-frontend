@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
@@ -9,12 +10,12 @@ import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal, toggleSidebar } from '@/utils/utility';
 import { toast } from 'react-toastify';
-import ChatBotSlider from './sliders/chatBotSlider';
-import ConfigHistorySlider from './sliders/configHistorySlider';
+const ChatBotSlider = dynamic(() => import('./sliders/chatBotSlider'), { ssr: false });
+const ConfigHistorySlider = dynamic(() => import('./sliders/configHistorySlider'), { ssr: false });
 import Protected from './protected';
-import GuideSlider from './sliders/IntegrationGuideSlider';
+const GuideSlider = dynamic(() => import('./sliders/IntegrationGuideSlider'), { ssr: false });
 import { FilterSliderIcon } from './Icons';
-import DeleteModal from './UI/DeleteModal';
+const DeleteModal = dynamic(() => import('./UI/DeleteModal'), { ssr: false });
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -36,7 +37,7 @@ const Navbar = ({ isEmbedUser }) => {
   const searchParams = useSearchParams();
   const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType,  isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
+    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId)||{},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
     isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[searchParams?.get('version')]?.is_drafted ?? false,
@@ -49,7 +50,6 @@ const Navbar = ({ isEmbedUser }) => {
     hideHomeButton:  state.userDetailsReducer?.userDetails?.hideHomeButton || false,
     showHistory:  state.userDetailsReducer?.userDetails?.showHistory,
   }));
-
   // Define tabs based on user type
   const TABS = useMemo(() => {
     const baseTabs = [
@@ -62,8 +62,8 @@ const Navbar = ({ isEmbedUser }) => {
     return baseTabs;
   }, [isEmbedUser]);
 
-  const agentName = useMemo(() => bridgeData?.name || 'Customer Support AI', [bridgeData?.name]);
-  const orgName = useMemo(() => organizations?.[orgId]?.name || 'Acme Corp', [organizations, orgId]);
+  const agentName = useMemo(() => bridgeData?.name || 'Agent not Found', [bridgeData?.name]);
+  const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization not Found', [organizations, orgId]);
 
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
@@ -160,10 +160,10 @@ const Navbar = ({ isEmbedUser }) => {
     router.push(base + (version ? `?version=${version}` : ''));
   }, [router, orgId, bridgeId, searchParams]);
 
-  const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
+  const toggleOrgSidebar = useCallback(() => router.push(`/org?redirection=false`), [router]);
   const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
-  const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
-  const toggleIntegrationGuideSlider = () => toggleSidebar("integration-guide-slider", "right");
+  const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
+  const toggleIntegrationGuideSlider = useCallback(() => toggleSidebar("integration-guide-slider", "right"), []);
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
@@ -469,4 +469,6 @@ const Navbar = ({ isEmbedUser }) => {
   );
 };
 
-export default Protected(Navbar);
+const MemoNavbar = React.memo(Navbar);
+
+export default Protected(MemoNavbar);

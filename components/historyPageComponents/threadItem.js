@@ -12,7 +12,6 @@ import { openModal } from "@/utils/utility";
 import { MODAL_TYPE, FINISH_REASON_DESCRIPTIONS } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink } from "lucide-react";
-import { original } from "@reduxjs/toolkit";
 
 // Helper function to normalize image data with enhanced fallback
 const normalizeImageUrls = (imageData) => {
@@ -557,7 +556,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </ReactMarkdown>
 
                 {/* Edit button for assistant messages */}
-                {item?.role === 'assistant' && item?.image_urls.length === 0 && !item?.fromRTLayer && (
+                {item?.role === 'assistant' && item?.image_urls?.length === 0 && !item?.fromRTLayer && (
 
                   <div className="tooltip absolute top-2 right-2 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" data-tip="Edit response">
                     <button

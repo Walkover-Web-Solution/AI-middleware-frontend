@@ -1,9 +1,9 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createPortal } from 'react-dom';
+import Dropdown from '@/components/UI/Dropdown';
 // Model Preview component to display model specifications
 const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
     if (!hoveredModel || !modelSpecs || !dropdownRef?.current) return null;
@@ -121,20 +121,7 @@ const ModelDropdown = ({ params, searchParams }) => {
     }));
 
     const [hoveredModel, setHoveredModel] = useState(null);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [modelSpecs, setModelSpecs] = useState();
-
-    // Close when other dropdowns open
-    useEffect(() => {
-        const handler = (e) => {
-            const source = e?.detail?.type;
-            if (source && source !== 'model') {
-                setIsDropdownOpen(false);
-            }
-        };
-        window.addEventListener('open-dropdown', handler);
-        return () => window.removeEventListener('open-dropdown', handler);
-    }, []);
 
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
@@ -150,121 +137,72 @@ const ModelDropdown = ({ params, searchParams }) => {
             }
         }));
     }
-
-    const handleModelHover = (modelName) => {
-        setHoveredModel(modelName);
-        let modelSpec = null;
+    
+    // Build flat options for global Dropdown while preserving group info and specs
+    const modelOptions = useMemo(() => {
+        const opts = [];
         Object.entries(modelsList || {}).forEach(([group, options]) => {
-            Object.entries(options || {}).forEach(([option, config]) => {
-                if (config?.configuration?.model?.default === modelName) {
-                    modelSpec = config?.validationConfig?.specification;
-                }
+            const isInvalidGroup =
+                group === 'models' ||
+                (bridgeType === 'chatbot' && group === 'embedding') ||
+                (bridgeType === 'batch' && (group === 'image' || group === 'embedding'));
+            if (isInvalidGroup) return;
+
+            Object.keys(options || {}).forEach((optionKey) => {
+                const cfg = options?.[optionKey];
+                const modelName = cfg?.configuration?.model?.default;
+                if (!modelName) return;
+                const specs = cfg?.validationConfig?.specification;
+                opts.push({
+                    value: modelName,
+                    label: modelName,
+                    // pass meta to use in onChange and onOptionHover
+                    meta: { group, modelName, specs }
+                });
             });
         });
-        setModelSpecs(modelSpec);
-    };
+        return opts;
+    }, [modelsList, bridgeType]);
 
-    const handleModelClick = (group, modelName) => {
-        const selectedModelType = group;
+    const handleSelect = useCallback((val, opt) => {
+        const selectedGroup = opt?.meta?.group;
+        const modelName = opt?.meta?.modelName || val;
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
             versionId: searchParams?.version,
-            dataToSend: { configuration: { model: modelName, type: selectedModelType } }
+            dataToSend: { configuration: { model: modelName, type: selectedGroup } }
         }));
         setHoveredModel(null);
-        setIsDropdownOpen(false);
-    };
+    }, [dispatch, params.id, searchParams?.version]);
 
-    const handleClickOutside = useCallback((event) => {
-        if (dropdownRef.current && isDropdownOpen && !dropdownRef.current.contains(event.target)) {
-            setIsDropdownOpen(false);
-        }
-    }, [isDropdownOpen]);
-
-    useEffect(() => {
-        if (isDropdownOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [handleClickOutside, isDropdownOpen]);
-
-    const toggleDropdown = () => {
-        const next = !isDropdownOpen;
-        if (next) {
-            // announce opening to close other dropdowns
-            window.dispatchEvent(new CustomEvent('open-dropdown', { detail: { type: 'model' } }));
-        }
-        setIsDropdownOpen(next);
-    };
+    const handleOptionHover = useCallback((opt) => {
+        const name = opt?.meta?.modelName || opt?.label;
+        setHoveredModel(name);
+        setModelSpecs(opt?.meta?.specs);
+    }, []);
 
     return (
         <div className="flex flex-col items-start gap-4 relative">
-            <div className="w-full max-w-xs">
-                
-                <div className="dropdown w-full font-normal" ref={dropdownRef}>
-                    <div
-                        tabIndex={0}
-                        role="button"
-                        className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
-                        onClick={toggleDropdown}
-                    >
-                        {model?.length >15 ? `${model.substring(0, 15)}...` : model|| "Select a Model"}
-                        {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
-                    </div>
-                    {isDropdownOpen && (
-                        <ul
-                            tabIndex={0}
-                            className="dropdown-content dropdown-left z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[500px] w-[260px] overflow-y-auto border border-base-300"
-                            onMouseLeave={() => setHoveredModel(null)}
-                        >
-                            {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
-                                const isInvalidGroup =
-                                    group === 'models' ||
-                                    (bridgeType === 'chatbot' && group === 'embedding') ||
-                                    (bridgeType === 'batch' && (group === 'image' || group === 'embedding'));
-
-                                if (!isInvalidGroup) {
-                                    return (
-                                        <li key={`group_${groupIndex}`} className="px-2 py-1 cursor-pointer">
-                                            <span className="text-sm  text-base-content">{group}</span>
-                                            <ul className="">
-                                                {Object.keys(options || {}).map((option, optionIndex) => {
-                                                    const modelName = options?.[option]?.configuration?.model?.default;
-                                                    return (
-                                                        <li
-                                                            key={`option_${groupIndex}_${optionIndex}`}
-                                                            onMouseEnter={() => handleModelHover(modelName)}
-                                                            onMouseLeave={() => setHoveredModel(null)}
-                                                            onClick={() => {
-                                                                handleModelClick(group, modelName);
-                                                            }}
-                                                            className={`hover:bg-base-200 rounded-md py-1 ${modelName === model && 'bg-base-200'}`}
-                                                        >
-                                                            {modelName === model && <span className="flex-shrink-0 ml-2">✓</span>}
-                                                            <span className={`truncate flex-1 pl-2 ${modelName !== model && 'ml-4'}`}>
-                                                                {modelName?.length > 15 ? `${modelName.substring(0, 15)}...` : modelName}
-                                                            </span>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </li>
-                                    );
-                                }
-                                return null;
-                            })}
-                        </ul>
-                    )}
-                </div>
+            <div className="w-full sm:max-w-xs" ref={dropdownRef}>
+                <Dropdown
+                    options={modelOptions}
+                    value={model || ''}
+                    onChange={handleSelect}
+                    onOptionHover={handleOptionHover}
+                    showGroupHeaders
+                    placeholder="Select a Model"
+                    size="sm"
+                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem]"
+                    menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
+                    maxLabelLength={20}
+                />
             </div>
 
             <ModelPreview hoveredModel={hoveredModel} modelSpecs={modelSpecs} dropdownRef={dropdownRef} />
 
-            {/* If model is fine-tuned model*/}
+            {/* If model is fine-tuned model */}
             {modelType === 'fine-tune' && (
-                <div className="w-full max-w-xs">
+                <div className="w-full sm:max-w-xs">
                     <div className="label">
                         <span className="label-text text-base-content">Fine-Tune Model</span>
                     </div>
@@ -275,7 +213,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                         defaultValue={fineTuneModel}
                         onBlur={handleFinetuneModelChange}
                         placeholder="Fine-tune model Name"
-                        className="input input-bordered input-sm w-full bg-base-100 text-base-content focus:border-primary focus:ring-1 focus:ring-primary"
+                        className="input input-bordered input-sm w-full bg-base-100 text-base-content focus:border-primary focus:ring-1 focus:ring-primary min-h-[2.5rem] sm:min-h-[2rem]"
                     />
                 </div>
             )}

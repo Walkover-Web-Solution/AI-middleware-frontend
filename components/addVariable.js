@@ -1,7 +1,7 @@
 "use client";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
-import { updateVariables } from "@/store/reducer/bridgeReducer";
+import { updateVariables } from "@/store/reducer/variableReducer";
 import { sendDataToParent, } from "@/utils/utility";
 import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +15,7 @@ import Protected from "./protected";
 const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   const versionId = searchParams?.version;
   const { variablesKeyValue, prompt, isFirstVariable, bridgeName } = useCustomSelector((state) => ({
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables || [],
+    variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt || "",
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
@@ -26,8 +26,8 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   });
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
+  const [editMode, setEditMode] = useState('key-value'); // 'key-value' or 'bulk'
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
-  const [height, setHeight] = useState(0); // Dynamic height state
   const [error, setError] = useState(false);
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
@@ -130,14 +130,51 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
     }
   };
 
+  // Helper function to check if previous pairs are complete
+  const canEditField = (index, field) => {
+    // Always allow editing existing pairs
+    if (index < keyValuePairs.length) {
+      return true;
+    }
+    
+    // For new pairs (empty row), check if all previous pairs are complete
+    if (index === keyValuePairs.length) {
+      // If no existing pairs, allow editing the first pair
+      if (keyValuePairs.length === 0) {
+        return true;
+      }
+      
+      // Check if all existing pairs have both key and value filled
+      return areAllPairsValid(keyValuePairs);
+    }
+    
+    return false;
+  };
+
   // Function to handle changes in key or value inputs
   const handleKeyValueChange = (index, field, value) => {
+    // Check if user can edit this field
+    if (!canEditField(index, field)) {
+      setError(true);
+      return;
+    }
+
     const updatedPairs = [...keyValuePairs];
-    updatedPairs[index] = { ...updatedPairs[index], [field]: value };
+    
+    // If this is the empty row (index equals keyValuePairs.length), add a new pair
+    if (index === keyValuePairs.length) {
+      const newPair = { key: "", value: "", required: true };
+      newPair[field] = value;
+      updatedPairs.push(newPair);
+    } else {
+      // Update existing pair
+      updatedPairs[index] = { ...updatedPairs[index], [field]: value };
+    }
+    
     setKeyValuePairs(updatedPairs);
 
     // Dispatch update if the current pair is valid
-    if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
+    if (updatedPairs[index] && updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
       dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     }
 
@@ -148,14 +185,14 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   const handleCheckKeyValuePair = (index) => {
     setError(false); // Reset error when a checkbox is toggled
     const updatedPairs = [...keyValuePairs];
-    updatedPairs[index] = {
-      ...updatedPairs[index],
-      required: !updatedPairs[index].required,
-    };
+      updatedPairs[index] = {
+        ...updatedPairs[index],
+        required: !updatedPairs[index].required,
+      };
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
-    sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: versionId, variables: updatedPairs}, "Agent Version Updated")
-    updateVersionVariable(updatedPairs)
+      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+      sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: versionId, variables: updatedPairs}, "Agent Version Updated")
+      updateVersionVariable(updatedPairs)
   };
 
   // Function to format key-value pairs for the textarea
@@ -225,16 +262,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   };
 
   // Handle dynamic height changes
-  useEffect(() => {
-    if (isAccordionOpen) {
-      if (accordionContentRef.current) {
-        const scrollHeight = accordionContentRef.current.scrollHeight;
-        setHeight(scrollHeight);
-      }
-    } else {
-      setHeight(0); // Close accordion with transition
-    }
-  }, [isAccordionOpen, keyValuePairs, isFormData]);
+  
 
   return (
     <div className="text-base-content " tabIndex={0}>
@@ -257,129 +285,134 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
       )}
 
-      {/* Accordion Content */}
-      <div
-        id="accordion-content"
-        ref={accordionContentRef}
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : ''}`}
-        style={{
-          height: `${height}px`,
-        }}
-      >
-        <div className="min-h-[300px] w-full border border-base-100 rounded-md p-4">
-          <div className="w-full flex flex-col gap-2">
-            {/* Radio Buttons for Form Data and Raw Data */}
-            <div className="flex flex-row gap-4">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="formData"
-                  name="dataType"
-                  className="radio"
-                  value="formData"
-                  checked={isFormData}
-                  onChange={() => handleRadioChange('formData')}
-                />
-                <label htmlFor="formData" className="ml-2 cursor-pointer">
-                  Form Data
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="rawData"
-                  name="dataType"
-                  className="radio"
-                  value="rawData"
-                  checked={!isFormData}
-                  onChange={() => handleRadioChange('rawData')}
-                />
-                <label htmlFor="rawData" className="ml-2 cursor-pointer">
-                  Raw Data
-                </label>
+      {/* Variables Section */}
+      {isAccordionOpen && (
+        <div className="border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg transition-all duration-300 ease-in-out">
+          <div className="h-full w-full bg-base-100 border border-base-300 rounded-lg shadow-sm">
+            <div className="p-4">
+
+            <div className="space-y-3">
+              {/* Header - only show for key-value mode */}
+              {editMode === 'key-value' && (
+                <div className="flex items-center justify-between pb-2 border-b border-base-300">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <div className="w-8 text-xs font-medium text-base-content/60 uppercase tracking-wide text-center">✓</div>
+                    <div className="flex-1 text-xs font-medium text-base-content/60 uppercase tracking-wide">Key</div>
+                    <div className="flex-1 text-xs font-medium text-base-content/60 uppercase tracking-wide">Value</div>
+                    <div className="w-8"></div>
+                  </div>
+                  <button
+                    onClick={() => setEditMode('bulk')}
+                    className="btn btn-xs btn-outline text-xs font-medium"
+                  >
+                    Bulk Edit
+                  </button>
+                </div>
+              )}
+              
+              {/* Bulk Edit Header */}
+              {editMode === 'bulk' && (
+                <div className="flex items-center justify-between pb-2 border-b border-base-300">
+                  <div className="text-sm text-base-content/70">
+                    Enter variables in key:value format (one per line)
+                  </div>
+                  <button
+                    onClick={() => setEditMode('key-value')}
+                    className="btn btn-xs btn-outline text-xs font-medium"
+                  >
+                    Key-Value Edit
+                  </button>
+                </div>
+              )}
+              
+              {/* Content based on edit mode */}
+              {editMode === 'key-value' ? (
+                /* Key-Value Pairs */
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {[...keyValuePairs, { key: "", value: "", required: true }]?.map((pair, index) => (
+                    <div key={index} className="flex items-center space-x-4 group hover:bg-base-200/50 p-2 rounded">
+                      <div className="w-8 flex justify-center">
+                        {(pair?.key && pair?.key.trim() !== "") && (
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-xs checkbox-primary"
+                            checked={index < keyValuePairs.length ? keyValuePairs[index].required : true}
+                            onChange={() => handleCheckKeyValuePair(index)}
+                            title="Required"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          className={`input input-bordered input-sm w-full text-sm focus:border-primary ${
+                            !canEditField(index, "key") ? "input-disabled bg-base-200 cursor-not-allowed" : ""
+                          }`}
+                          placeholder="Key"
+                          value={pair?.key || ""}
+                          disabled={!canEditField(index, "key")}
+                          onChange={(e) =>
+                            handleKeyValueChange(index, "key", e.target.value)
+                          }
+                          title={!canEditField(index, "key") ? "Complete previous fields before adding new ones" : ""}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          className={`input input-bordered input-sm w-full text-sm focus:border-primary ${
+                            !canEditField(index, "value") ? "input-disabled bg-base-200 cursor-not-allowed" : ""
+                          }`}
+                          placeholder="Value"
+                          value={pair?.value || ""}
+                          disabled={!canEditField(index, "value")}
+                          onChange={(e) =>
+                            handleKeyValueChange(index, "value", e.target.value)
+                          }
+                          onBlur={() => updateVersionVariable()}
+                          title={!canEditField(index, "value") ? "Complete previous fields before adding new ones" : ""}
+                        />
+                      </div>
+                      <div className="w-8 flex justify-center">
+                        {index < keyValuePairs.length && (
+                          <button
+                            className="text-base-content/40 hover:text-error transition-colors opacity-0 group-hover:opacity-100"
+                            onClick={() => handleRemoveKeyValuePair(index)}
+                            aria-label="Remove Variable"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Bulk Edit */
+                <div>
+                  <textarea
+                    className="textarea textarea-bordered w-full h-64 font-mono text-sm resize-none focus:border-primary"
+                    placeholder={`key1: value1\nkey2: value2\nkey3: value3`}
+                    onBlur={(e) => onBlurHandler(e.target.value)}
+                    defaultValue={formatPairsForTextarea()}
+                  />
+                </div>
+              )}
+                
+                {/* Error Message */}
+                {error === true && (
+                  <div className="alert alert-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm">Please complete all existing key-value pairs (both key and value) before adding new ones.</span>
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Conditional Rendering based on isFormData */}
-            {!isFormData ? (
-              <textarea
-                className="border-2 border-base-300 rounded-md p-4 w-full max-h-[400px] focus:outline-none resize-none"
-                placeholder={`key: value\nkey: value\nkey: value`}
-                rows="8"
-                onBlur={(e) => onBlurHandler(e.target.value)}
-                defaultValue={formatPairsForTextarea()}
-              />
-            ) : (
-              <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
-                {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
-                  <InfoTooltip
-                    tooltipContent="Mark checkbox if it is required"
-                    className="cursor-pointer"
-                  >
-                    <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
-                      <InfoIcon className="w-4 h-4 text-base-content/70" />
-                    </button>
-                  </InfoTooltip>
-                  <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
-                    <span className="text-sm font-medium text-base-content/80">Key</span>
-                    <span className="text-sm font-medium text-base-content/80">Value</span>
-                  </div>
-                </div>}
-                {keyValuePairs?.map((pair, index) => (
-                  <div key={index} className="flex items-center gap-4 w-full">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-sm w-20"
-                      checked={pair.required}
-                      onChange={() => handleCheckKeyValuePair(index)}
-                    />
-                    <input
-                      type="text"
-                      className="input input-bordered border-base-300 input-sm w-full"
-                      placeholder="Enter key"
-                      value={pair?.key || ""}
-                      onChange={(e) =>
-                        handleKeyValueChange(index, "key", e.target.value)
-                      }
-                    />
-                    <input
-                      type="text"
-                      className="input input-bordered border-base-300 input-sm w-full"
-                      placeholder="Enter value"
-                      value={pair?.value || ""}
-                      onChange={(e) =>
-                        handleKeyValueChange(index, "value", e.target.value)
-                      }
-                      onBlur={() => updateVersionVariable()}
-                    />
-                    <button
-                      className="text-red-500 hover:text-red-700 ml-2"
-                      onClick={() => handleRemoveKeyValuePair(index)}
-                      aria-label="Remove Variable"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {error === true && (
-                  <p className="text-red-400 text-sm">
-                    Please fill out all existing key-value pairs before adding a new one.
-                  </p>
-                )}
-                {variablesKeyValue.length === 0 && (
-                  <p className="text-center text-lg font-semibold w-full">No Variables Found</p>
-                )}
-                <button
-                  className="btn btn-sm mt-4 self-center border border-base-300 bg-base-100 hover:bg-base-200"
-                  onClick={handleAddKeyValuePair}
-                >
-                  Add Variable
-                </button>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
