@@ -38,7 +38,7 @@ const Page = ({ params }) => {
     name: (
       <div className="flex gap-2">
         <div className="tooltip" data-tip={item.name}>
-          {truncate(item.name, 30)}
+          {truncate(item.name, 50)}
         </div>
       </div>
     ),
