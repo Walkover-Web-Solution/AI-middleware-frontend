@@ -44,6 +44,7 @@ const IntegrationModal = ({ params }) => {
           type="text"
           placeholder="Enter integration name"
           className="input input-bordered input-md w-full mb-2 placeholder-opacity-50"
+          maxLength={50}
           ref={integrationNameRef}
           onKeyDown={(e) => {
             if (e.key === "Enter") {

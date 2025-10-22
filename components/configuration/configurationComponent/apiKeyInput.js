@@ -82,7 +82,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
                 showSearch
                 searchPlaceholder="Search API keys..."
                 size="sm"
-                className="btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between font-normal"
+                className="btn btn-sm border-base-content/20 bg-base-100 w-full justify-between font-normal"
                 maxLabelLength={20}
                 menuClassName="w-full"
             />

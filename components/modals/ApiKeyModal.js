@@ -81,7 +81,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                             name={field}
                             placeholder={`Enter ${field}`}
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                            {...(field !== 'apikey' && { maxLength: 40 })}
+                            {...(field !== 'apikey' && { maxLength: 50 })}
                         />
                     </div>
                 ))}

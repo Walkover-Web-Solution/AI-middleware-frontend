@@ -199,7 +199,7 @@ function Home({ params, isEmbedUser }) {
 
   const EndComponent = ({ row }) => {
     return (
-      <div className="flex items-center mr-4">
+      <div className="flex items-center">
        <div className="flex items-center gap-2">
       <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
         e.preventDefault();

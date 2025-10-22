@@ -37,7 +37,7 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
         {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 14, 14)}
         </div>
       <div className="tooltip" data-tip={item.name}>
-        {truncate(item.name, 30)}
+        {item.name}
       </div>
     </div>,
     description: <div className="tooltip" data-tip={item.description}>{truncate(item.description, 30)}</div>,
