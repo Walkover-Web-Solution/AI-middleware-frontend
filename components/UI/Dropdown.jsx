@@ -233,7 +233,10 @@ const Dropdown = ({
                       <li key={String(opt.value)} className="whitespace-nowrap">
                         <a
                           className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
-                          onClick={() => handleSelect(opt.value, opt)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelect(opt.value, opt)
+                          }}
                           onMouseEnter={() => onOptionHover && onOptionHover(opt)}
                           role="option"
                           aria-selected={isActive}
@@ -271,8 +274,8 @@ const Dropdown = ({
                   groups.get(g).push(opt);
                 });
                 return Array.from(groups.entries()).map(([groupLabel, opts]) => (
-                  <li key={`group-${groupLabel}`} className="px-2 py-1">
-                    <div className="text-xs text-base-content/70 mb-1">{groupLabel}</div>
+                  <li key={`group-${groupLabel}`} className="px-2 py-1 cursor-default">
+                    <div className="text-xs text-base-content/70 mb-1 cursor-default pointer-events-none select-none">{groupLabel}</div>
                     <ul>
                       {opts.map((opt) => {
                         const Icon = opt.icon;

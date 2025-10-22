@@ -6,14 +6,14 @@ import {
 } from "@/store/action/bridgeAction";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
-import { CopyIcon, InfoIcon, TrashIcon, PencilIcon, CloseIcon, PlusIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/Icons";
+import { CopyIcon, InfoIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { PlusCircleIcon } from "lucide-react";
+import { ChevronsUpDown, PlusCircleIcon } from "lucide-react";
 
 // Parameter Card Component
 const ParameterCard = ({
@@ -55,14 +55,14 @@ const ParameterCard = ({
   const bgColor = depth % 2 === 0 ? "bg-base-100" : "bg-base-200"
   
   return (
-    <div className={`${bgColor} border border-base-300 rounded-lg p-4`}>
+    <div className={`${bgColor} border border-base-300 rounded-lg p-2`}>
       {/* Parameter Header */}
-      <div className="flex items-center justify-between ">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 justify-between w-full">
           <input
             type="text"
             value={editingName}
-            className={` w-1/2 font-medium bg-transparent p-0 focus:outline-none `}
+            className="w-1/2 text-xs font-medium bg-transparent p-0 focus:outline-none"
             readOnly={false}
             onChange={(e) => {
               setEditingName(e.target.value);
@@ -81,7 +81,7 @@ const ParameterCard = ({
             }}
             placeholder="Parameter name"
           />
-          <div className="flex items-center mr-8 gap-4">
+          <div className="flex items-center mr-4 gap-2">
             <label className="flex items-center gap-1 text-xs">
               <input
                 type="checkbox"
@@ -244,14 +244,14 @@ const ParameterCard = ({
                   onVariablePathChange(updatedVariablesPath);
                 }}
               />
-              Fill with AI
+              <span className="text-xs">Fill with AI</span>
             </label>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-xs">
           <select
-            className="select select-sm select-bordered"
+            className="select select-xs select-bordered text-xs"
             value={param.type || "string"}
             onChange={(e) => onTypeChange(currentPath, e.target.value)}
           >
@@ -263,7 +263,7 @@ const ParameterCard = ({
           </select>
           <button
             onClick={() => onDelete(currentPath)}
-            className="btn btn-xs btn-ghost text-error"
+            className="btn btn-xs btn-ghost text-error text-xs"
             title="Delete parameter"
           >
             <TrashIcon size={14} />
@@ -275,10 +275,10 @@ const ParameterCard = ({
       
 
       {/* Description */}
-      <div className="">
+      <div className="text-xs">
         <textarea
           placeholder="Description of parameter..."
-          className="col-[1] row-[1] m-0 w-full overflow-y-hidden whitespace-pre-wrap break-words outline-none bg-transparent p-0  caret-black placeholder:text-quaternary dark:caret-slate-200 text-sm resize-none"
+          className="col-[1] row-[1] m-0 w-full overflow-y-hidden whitespace-pre-wrap break-words outline-none bg-transparent p-0 caret-black placeholder:text-quaternary dark:caret-slate-200 text-xs resize-none"
           value={param.description || ""}
           onChange={(e) => onDescriptionChange(currentPath, e.target.value)}
         />
@@ -287,7 +287,7 @@ const ParameterCard = ({
       {/* Additional Options */}
         <div className={`flex flex-row ${param.type !== "object" ? 'justify-between' : 'justify-end'}`}>
       {param.type !== "object" && (
-          <div className="flex items-center gap-2 text-xs mb-2">
+          <div className="flex items-center gap-1 text-xs mb-1">
             <input
               type="checkbox"
               className="checkbox checkbox-xs"
@@ -300,13 +300,13 @@ const ParameterCard = ({
                 }
               }}
             />
-            Set allowed values
+            <span className="text-xs">Set allowed values</span>
           
           {param.hasOwnProperty('enum') && (
             <input
               type="text"
               placeholder="['a','b','c']"
-              className="input input-sm input-bordered"
+              className="input input-xs input-bordered text-xs"
               value={editingEnum}
               onChange={(e) => {
                 setEditingEnum(e.target.value);
@@ -324,12 +324,12 @@ const ParameterCard = ({
           </div>
            )}
           {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && (
-            <div className="mb-1 flex flex-row ml-2 items-center justify-end  ">
-              <label className="block text-xs mb-1 mr-2">Value Path:</label>
+            <div className="mb-1 flex flex-row ml-1 items-center justify-end">
+              <label className="block text-xs mb-0 mr-1">Value Path:</label>
               <input
                 type="text"
                 placeholder="your_path"
-                className={`input input-sm input-bordered ${
+                className={`input input-xs input-bordered text-xs ${
                   name === "Pre Tool" && !variablesPath[currentPath] ? "border-red-500" : ""
                 }`}
                 value={variablesPath[currentPath] || ""}
@@ -346,28 +346,28 @@ const ParameterCard = ({
 
       {/* Properties Section for Objects */}
       {param.type === "object" && (
-        <div className="">
-          <div className="flex items-center justify-between ">
+        <div>
+          <div className="flex items-center justify-between">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-1 text-sm font-medium"
+              className="flex items-center gap-1 text-xs font-medium"
             >
               {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRightIcon size={16} />}
-              Properties
+              <span className="text-xs">Properties</span>
             </button>
             <button
               onClick={() => onAddChild(currentPath)}
               className="btn btn-xs btn-ghost text-primary gap-1"
               title="Add property"
             >
-              <PlusCircleIcon size={12} />
-              Add property
+              <PlusCircleIcon size={10} />
+              <span className="text-xs">Add property</span>
             </button>
           </div>
 
           {/* Child Properties */}
           {isExpanded && hasChildren && (
-            <div className="space-y-3">
+            <div className="space-y-1">
               {Object.entries(param.parameter).map(([childKey, childParam], index) => (
                 <ParameterCard
                   key={childKey}
@@ -441,6 +441,7 @@ function FunctionParameterModal({
   const [objectFieldValue, setObjectFieldValue] = useState("");
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);
   const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
+  const [showNameDescription, setShowNameDescription] = useState(false);
 
   useEffect(() => {
     if (!isEqual(toolData, function_details)) {
@@ -1069,11 +1070,11 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box max-w-6xl overflow-hidden text-sm h-[600px] flex flex-col">
+      <div className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col">
         {/* Modal Header */}
-        <div className="flex items-start flex-col mb-4 pb-3 border-b gap-2 border-base-300">
+        <div className="flex items-start flex-col mb-3 pb-2 border-b gap-1 border-base-300">
           <div className="flex justify-between w-full items-center">
-          <h2 className="text-xl font-semibold">Config {name}</h2>
+          <h2 className="text-lg font-semibold">Config {name}</h2>
           <div className="flex justify-end gap-2 mt-1">
             <div className="dropdown">
               <div 
@@ -1081,23 +1082,8 @@ function FunctionParameterModal({
                 role="button" 
                 className="btn btn-xs btn-outline flex items-center justify-between gap-2 min-w-20 text-xs"
               >
-                <span className="text-xs">{isTextareaVisible ? 'Advance' : 'Simple'}</span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="12" 
-                  height="12" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  className="h-3 w-3"
-                >
-                  <path 
-                    stroke="currentColor" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
-                    d="m7 15 5 5 5-5M7 9l5-5 5 5"
-                  />
-                </svg>
+                <span className="text-xs">{isTextareaVisible ? 'Advanced' : 'Simple'}</span>
+                <ChevronsUpDown size={14} />
               </div>
               <ul 
                 tabIndex={0} 
@@ -1124,13 +1110,13 @@ function FunctionParameterModal({
                     }}
                     className={`text-xs py-1 px-2 ${isTextareaVisible ? 'active' : ''}`}
                   >
-                    Advance
+                    Advanced
                   </a>
                 </li>
               </ul>
             </div>
             {isTextareaVisible && (
-              <div className="flex items-center text-sm gap-3">
+              <div className="flex items-center text-xs gap-2">
                 <CopyIcon
                   size={14}
                   onClick={copyToolCallFormat}
@@ -1140,17 +1126,17 @@ function FunctionParameterModal({
             )}
           </div>
         </div>
-          <span className="flex flex-row items-center gap-2">
+          <div className="flex flex-row items-center gap-2">
             {(name === 'Tool' || name === 'Pre Tool') && (
               <div className="flex flex-row gap-1">
                 <InfoIcon size={14} />
-                <span className="label-text-alt">
+                <div className="label-text-alt">
                   Function used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.
-                </span>
+                </div>
               </div>
             )}
-          </span>
-          <p className="flex items-center gap-1 whitespace-nowrap text-xs mb-2">
+          </div>
+          <p className="flex items-center gap-1 whitespace-nowrap text-xs mb-1">
             <InfoIcon size={14} /> You can change the data in raw json format. For more info click{" "}
             <a
               href="/faq/jsonformatdoc"
@@ -1162,16 +1148,11 @@ function FunctionParameterModal({
             </a>
           </p>
         </div>
-        
-        {/* Editor Selection Dropdown */}
-        
-
-
-        <div className="flex flex-row mb-2">
+        <div className="flex flex-row mb-1">
           
           <div className="flex gap-2">
             {(name === 'Agent' || (name === 'orchestralAgent' && isMasterAgent)) && (
-              <div className="flex items-center justify-between gap-1 mr-24 text-xs">
+              <div className="flex items-center justify-between gap-1 mr-12 text-xs">
                 <div className="flex items-center gap-2">
                   <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                     <label className="label p-0 info flex items-center">
@@ -1221,7 +1202,7 @@ function FunctionParameterModal({
         </div>
 
 
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-1">
          
                  
           <div>
@@ -1259,52 +1240,64 @@ function FunctionParameterModal({
         <div className={`flex-1 ${isTextareaVisible ? 'overflow-hidden' : ' overflow-x-hidden overflow-y-auto'}`}>
           {!isTextareaVisible ? (
               <> 
-            {/* Name and Description Form - Now inside scrollable area */}
-            <div className="space-y-4 mb-6">
-              {/* Name Field */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Name
-                </label>
-                {name === "Orchestral Agent" ? (
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    value={tool_name}
-                    disabled
-                  />
-                ) : (
-                    <input className="input input-bordered w-full" value={toolName}
+            {/* Name and Description Toggle */}
+            <div className="mb-3">
+              <button
+                onClick={() => setShowNameDescription(!showNameDescription)}
+                className="flex items-center gap-2 text-xs  font-semibold text-base-content transition-colors"
+              >
+               <h1 className="text-xs">Name & Description</h1>
+                {showNameDescription ? <ChevronDownIcon size={14} /> : <ChevronRightIcon size={14} />}
+              </button>
+              
+              {showNameDescription && (
+                <div className="space-y-1 mt-1 pl-2 border-l-2 border-base-300">
+                  {/* Name Field */}
+                  <div>
+                    <label className="block text-xs font-medium mb-1">
+                      Name
+                    </label>
+                    {name === "Orchestral Agent" ? (
+                      <input
+                        type="text"
+                        className="input input-sm text-xs input-bordered w-full"
+                        value={tool_name}
+                        disabled
+                      />
+                    ) : (
+                        <input className="input input-sm text-xs input-bordered w-full" value={toolName}
+                          onChange={(e) => {
+                            setToolName(e.target.value);
+                            setIsToolNameManuallyChanged(true);
+                            setIsModified(true);
+                          }}
+                          maxLength={50}
+                          placeholder="Enter tool name"></input>
+                    )}
+                  </div>
+
+                  {/* Description Field */}
+                  <div>
+                    <label className="block text-xs mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      className="textarea textarea-sm textarea-bordered w-full resize-y"
+                      rows={2}
+                      value={toolData?.description || ""}
                       onChange={(e) => {
-                        setToolName(e.target.value);
-                        setIsToolNameManuallyChanged(true);
+                        setToolData({ ...toolData, description: e.target.value });
                         setIsModified(true);
                       }}
-                      maxLength={50}
-                      placeholder="Enter tool name"></input>
-                )}
-              </div>
-
-              {/* Description Field */}
-              <div>
-                <label className="block text-sm mb-2">
-                  Description
-                </label>
-                <textarea
-                  className="textarea textarea-bordered w-full resize-none"
-                  rows={3}
-                  value={toolData?.description || ""}
-                  onChange={(e) => {
-                    setToolData({ ...toolData, description: e.target.value });
-                    setIsModified(true);
-                  }}
-                  placeholder="Enter tool description"
-                />
-              </div>
+                      placeholder="Enter tool description"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-lg">Parameters</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-xs text-base-content">Parameters</h3>
               <button
                 onClick={handleAddParameter}
                 className="btn btn-sm btn-primary gap-1"
@@ -1313,28 +1306,36 @@ function FunctionParameterModal({
                 Parameter
               </button>
             </div>
-            <div className="space-y-4">
-              {Object.entries(toolData?.fields || {}).map(([key, param]) => (
-                <ParameterCard
-                  key={key}
-                  paramKey={key}
-                  param={param}
-                  depth={0}
-                  path={[]}
-                  onDelete={handleDeleteParameter}
-                  onAddChild={handleAddChildParameter}
-                  onRequiredChange={handleRequiredChange}
-                  onDescriptionChange={handleDescriptionChange}
-                  onTypeChange={handleTypeChange}
-                  onEnumChange={handleEnumChange}
-                  onParameterNameChange={handleParameterNameChange}
-                  variablesPath={variablesPath}
-                  onVariablePathChange={handleVariablePathChange}
-                  name={name}
-                  isMasterAgent={isMasterAgent}
-                  toolData={toolData}
-                />
-              ))}
+            <div className="space-y-3 flex-1">
+              {Object.entries(toolData?.fields || {}).length > 0 ? (
+                Object.entries(toolData?.fields || {}).map(([key, param]) => (
+                  <ParameterCard
+                    key={key}
+                    paramKey={key}
+                    param={param}
+                    depth={0}
+                    path={[]}
+                    onDelete={handleDeleteParameter}
+                    onAddChild={handleAddChildParameter}
+                    onRequiredChange={handleRequiredChange}
+                    onDescriptionChange={handleDescriptionChange}
+                    onTypeChange={handleTypeChange}
+                    onEnumChange={handleEnumChange}
+                    onParameterNameChange={handleParameterNameChange}
+                    variablesPath={variablesPath}
+                    onVariablePathChange={handleVariablePathChange}
+                    name={name}
+                    isMasterAgent={isMasterAgent}
+                    toolData={toolData}
+                  />
+                ))
+              ) : (
+                <div className="flex items-center justify-center h-full min-h-[200px]">
+                  <div className="text-xs opacity-60 text-gray-500 text-center">
+                    No parameters defined yet. Click the "+ Parameter" button above to add your first parameter.
+                  </div>
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -1363,7 +1364,7 @@ function FunctionParameterModal({
         </div>
         
         {/* Modal Actions - Always visible at bottom */}
-        <div className="modal-action">
+        <div className="modal-action mt-2">
           <form method="dialog" className="flex flex-row gap-2">
             <button className="btn btn-sm" onClick={handleCloseModal}>
               Close

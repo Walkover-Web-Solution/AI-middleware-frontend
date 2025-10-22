@@ -1,9 +1,11 @@
 import { MODAL_TYPE } from '@/utils/enums'
-import { closeModal } from '@/utils/utility'
-import { CloseCircleIcon, CloseIcon } from '@/components/Icons'
+import { closeModal, generateKeyValuePairs } from '@/utils/utility'
+import { CloseCircleIcon, CloseIcon, CopyIcon } from '@/components/Icons'
 import React from 'react'
 import Modal from '../UI/Modal'
 import CopyButton from '../copyButton/copyButton'
+import { ChevronDown } from 'lucide-react'
+import { toast } from 'react-toastify'
 
 const flattenMessage = (message) => {
   if (typeof message !== 'object' || message === null) {
@@ -47,6 +49,18 @@ const renderFlattenedMessage = (message) => {
 }
 
 const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
+  const copyToClipboard = (content, message = "Copied to clipboard") => {
+    navigator.clipboard
+      .writeText(typeof content === 'string' ? content : JSON.stringify(content))
+      .then(() => {
+        toast.success(message);
+      })
+      .catch((error) => {
+        toast.error(`Error while copying to clipboard`);
+        console.log(error);
+      });
+  };
+
   return (
     <Modal MODAL_ID={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
@@ -86,9 +100,59 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
                   ) : (
                     <div className="bg-base-100 p-4 rounded-lg shadow-inner relative">      
                       {typeof value === 'object' && value !== null ? (
-                        <pre className="text-base-content/80 break-words whitespace-pre-wrap">
-                          {JSON.stringify(value, null, 2)}
-                        </pre>
+                        <>
+                          <pre className="text-base-content/80 break-words whitespace-pre-wrap">
+                            {JSON.stringify(value, null, 2)}
+                          </pre>
+                          {key.toLowerCase() === 'variables' && (
+                            <div className="absolute top-2 right-2">
+                              <div className="dropdown dropdown-end">
+                                <div 
+                                  tabIndex={0} 
+                                  role="button" 
+                                  className="btn btn-sm btn-ghost tooltip tooltip-primary tooltip-left hover:bg-base-300 transition-colors duration-200"
+                                  data-tip="Copy options"
+                                >
+                                  <CopyIcon size={16} className="text-base-content" />
+                                  <ChevronDown size={12} className="text-base-content" />
+                                </div>
+                                <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-64 p-2 shadow bg-base-100 border border-base-300">
+                                  <li>
+                                    <a 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        copyToClipboard(value, "Current values copied to clipboard");
+                                      }}
+                                      className="flex items-center gap-2 text-sm"
+                                    >
+                                      <CopyIcon size={14} />
+                                      <div>
+                                        <div className="font-medium">Copy Current Values</div>
+                                        <div className="text-xs opacity-70">Copy actual runtime values</div>
+                                      </div>
+                                    </a>
+                                  </li>
+                                  <li>
+                                    <a 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const keyValuePairs = generateKeyValuePairs(value);
+                                        copyToClipboard(JSON.stringify(keyValuePairs, null, 2), "Key-value pairs copied to clipboard");
+                                      }}
+                                      className="flex items-center gap-2 text-sm"
+                                    >
+                                      <CopyIcon size={14} />
+                                      <div>
+                                        <div className="font-medium">Copy Key-Value Pairs</div>
+                                        <div className="text-xs opacity-70">Copy structure with data types</div>
+                                      </div>
+                                    </a>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <pre className="text-base-content/80 break-words whitespace-pre-wrap">
                           {formatValue(String(value))}
