@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { PlusCircleIcon } from "lucide-react";
+import { ChevronsUpDown, PlusCircleIcon } from "lucide-react";
 
 // Parameter Card Component
 const ParameterCard = ({
@@ -1070,7 +1070,7 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box max-w-4xl overflow-hidden text-xs h-full flex flex-col">
+      <div className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col">
         {/* Modal Header */}
         <div className="flex items-start flex-col mb-3 pb-2 border-b gap-1 border-base-300">
           <div className="flex justify-between w-full items-center">
@@ -1083,22 +1083,7 @@ function FunctionParameterModal({
                 className="btn btn-xs btn-outline flex items-center justify-between gap-2 min-w-20 text-xs"
               >
                 <span className="text-xs">{isTextareaVisible ? 'Advanced' : 'Simple'}</span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="12" 
-                  height="12" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  className="h-3 w-3"
-                >
-                  <path 
-                    stroke="currentColor" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
-                    d="m7 15 5 5 5-5M7 9l5-5 5 5"
-                  />
-                </svg>
+                <ChevronsUpDown size={14} />
               </div>
               <ul 
                 tabIndex={0} 
@@ -1163,11 +1148,6 @@ function FunctionParameterModal({
             </a>
           </p>
         </div>
-        
-        {/* Editor Selection Dropdown */}
-        
-
-
         <div className="flex flex-row mb-1">
           
           <div className="flex gap-2">
@@ -1302,7 +1282,7 @@ function FunctionParameterModal({
                       Description
                     </label>
                     <textarea
-                      className="textarea text-xs textarea-sm textarea-bordered w-full resize-none"
+                      className="textarea textarea-sm textarea-bordered w-full resize-y"
                       rows={2}
                       value={toolData?.description || ""}
                       onChange={(e) => {
