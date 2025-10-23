@@ -32,7 +32,7 @@ function Home({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus ,showHistory } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
@@ -42,7 +42,7 @@ function Home({ params, isEmbedUser }) {
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
       descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
       bridgeStatus: state.bridgeReducer.allBridgesMap,
-
+      showHistory:  state.userDetailsReducer?.userDetails?.showHistory||false,
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
@@ -200,7 +200,8 @@ function Home({ params, isEmbedUser }) {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex items-center">
-       <div className="flex items-center gap-2">
+        {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
+          <div className="flex items-center gap-2">
       <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -209,6 +210,7 @@ function Home({ params, isEmbedUser }) {
         History
       </button>
     </div> 
+        ) : null}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         </div>
         <div className="dropdown dropdown-left bg-transparent">
