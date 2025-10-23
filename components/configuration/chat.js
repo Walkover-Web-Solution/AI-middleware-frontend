@@ -52,7 +52,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (testCaseResultRef.current && !testCaseResultRef.current.contains(event.target)) {
+      // Check if click is outside test case result and not on a toggle button
+      const isToggleButton = event.target.closest('button[class*="absolute -bottom-8"]');
+      if (testCaseResultRef.current && 
+          !testCaseResultRef.current.contains(event.target) && 
+          !isToggleButton) {
         setShowTestCaseResults({});
       }
     }
@@ -293,6 +297,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         testCaseResult: data?.results?.[0]
       }
       setMessages(updatedMessages)
+      
+      // Automatically show the test case results card after running the test
+      const nextMessageId = updatedMessages[index + 1].id;
+      setShowTestCaseResults(prev => ({
+        ...prev,
+        [nextMessageId]: true
+      }));
     } finally {
       setIsRunningTestCase(false)
       setCurrentRunIndex(null)
@@ -718,10 +729,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                           {/* Absolute Toggle Button for Test Case Results */}
                           {message?.testCaseResult && (
                             <button
-                              onClick={() => setShowTestCaseResults(prev => ({
-                                ...prev,
-                                [message.id]: !prev[message.id]
-                              }))}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowTestCaseResults(prev => ({
+                                  ...prev,
+                                  [message.id]: !prev[message.id]
+                                }));
+                              }}
                               className="absolute -bottom-8 left-4 flex items-center gap-2 text-xs text-base-content/70 hover:text-base-content transition-colors px-2 py-1 rounded-full bg-base-100 border border-base-content/20 shadow-sm hover:bg-base-200/50"
                             >
                               {showTestCaseResults[message.id] ? (
