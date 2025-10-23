@@ -122,7 +122,7 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
           />
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-500">No knowledge base entries found</p>
+            <p className="text-gray-500 text-lg">No knowledge base entries found</p>
           </div>
         )}
 
