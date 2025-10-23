@@ -96,11 +96,12 @@ function BridgeNode({ data }) {
         className="!bg-transparent !border-0 !w-4 !h-4"
         style={{ top: '50%', transform: 'translateY(-50%)' }}
       />
-
-      <button
-        onClick={handleBridgeClick}
-        className={`text-white rounded-full w-20 h-20 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 nodrag relative overflow-hidden ${bridgeConfig
-            ? `bg-gradient-to-r ${bridgeConfig.color} hover:opacity-90`
+      {!data?.hasMasterAgent && (
+        <>
+          <button
+            onClick={handleBridgeClick}
+            className={`text-white rounded-full w-20 h-20 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 nodrag relative overflow-hidden ${bridgeConfig
+                ? `bg-gradient-to-r ${bridgeConfig.color} hover:opacity-90`
             : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
           }`}
         title={
@@ -110,21 +111,14 @@ function BridgeNode({ data }) {
         }
       >
         <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-        <Icon className="w-8 h-8 relative z-10 mb-1" />
-        {bridgeConfig && <span className="text-xs font-medium relative z-10">{bridgeConfig.name}</span>}
-        {!data?.hasMasterAgent && !bridgeConfig && <span className="text-xs font-medium relative z-10">Start</span>}
+        <PlusIcon className="w-8 h-8 relative z-10 mb-1" />
       </button>
 
       <span className="mt-3 text-sm font-medium text-base-content">
-        {bridgeConfig ? `${bridgeConfig.name} Bridge` : 'Select Bridge Type'}
+        {'Start'}
       </span>
-
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!bg-transparent !border-0 !w-4 !h-4"
-        style={{ top: '40%', transform: 'translateY(-50%)' }}
-      />
+      </>
+    )}
     </div>
   );
 }
@@ -139,7 +133,7 @@ function AgentNode({ id, data }) {
   }));
 
   const handleRelabel = () => data.openSidebar({ mode: 'select', nodeId: id, title: 'Change agent' });
-  const handleAdd = () => data.openSidebar({ mode: 'add', sourceNodeId: id, title: 'Add next agent' });
+  const handleAdd = () => data.openSidebar({ mode: 'add', sourceNodeId: id, title: 'Add new agent' });
   const handleOpenConfig = () => data.onOpenConfigSidebar(id);
 
   const handleUpdateVariable = () => {
@@ -359,6 +353,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   const [masterAgent, setMasterAgent] = useState(null);
   const [isDiscard, setIsDiscard] = useState(false);
   const [isVariableModified, setIsVariableModified] = useState(false);
+  const [hasMasterAgent, setHasMasterAgent] = useState(false);
 
   const { agents } = useCustomSelector((state) => ({ agents: state.bridgeReducer.org[params.org_id]?.orgs || [] }));
 
@@ -700,18 +695,33 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     }
   }, [agents, selectedBridgeType]);
 
+  /* Track master agent state */
+  useEffect(() => {
+    const currentHasMaster = nodes.some((n) => n.type === 'agentNode' && n.data?.isFirstAgent);
+    if (currentHasMaster !== hasMasterAgent) {
+      setHasMasterAgent(currentHasMaster);
+    }
+  }, [nodes, hasMasterAgent]);
+
   /* Keep node data fresh */
   useEffect(() => {
     setNodes((nds) =>
       nds.map((node) => {
         const common = { agents, openSidebar };
-        const extra = node.type === 'bridgeNode' ? { onBridgeTypeSelect: handleBridgeTypeSelect, bridgeType: selectedBridgeType, masterAgent } : {};
+        const extra = node.type === 'bridgeNode' 
+          ? { 
+              onBridgeTypeSelect: handleBridgeTypeSelect, 
+              bridgeType: selectedBridgeType, 
+              masterAgent,
+              hasMasterAgent
+            } 
+          : {};
         const nextData = { ...node.data, ...common, ...extra };
         if (shallowEqual(node.data, nextData)) return node;
         return { ...node, data: nextData };
       })
     );
-  }, [agents, selectedBridgeType, masterAgent]);
+  }, [agents, selectedBridgeType, masterAgent, hasMasterAgent]);
 
   /* Mark last nodes by edges */
   useEffect(() => {

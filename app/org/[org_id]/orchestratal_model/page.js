@@ -261,9 +261,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
                                  transition-colors duration-200 line-clamp-2 mb-1">
                         {flow.flow_name}
                       </h3>
-                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${bridgeInfo.color}`}>
-                        {bridgeInfo.name}
-                      </div>
+                      
                     </div>
                   </div>
 

@@ -544,15 +544,12 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
         widthClass="w-full sm:w-[460px] md:w-[620px] w-[720px] rounded-lg"
         header={
           <div className="p-4 border-b border-base-300 bg-gradient-to-r from-primary/5 to-secondary/5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="badge badge-primary badge-sm font-medium mb-2">SELECT AGENT</div>
-                <h2 className="text-xl font-bold text-base-content">{title}</h2>
-              </div>
-              <button onClick={onClose} className="btn btn-circle btn-ghost hover:btn-error" aria-label="Close">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+             
+          <div className="flex justify-end">
+            <button onClick={onClose} className="btn btn-circle btn-ghost hover:btn-error" aria-label="Close">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           </div>
         }
         bodyClassName=""
