@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import cloneDeep from 'lodash/cloneDeep';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "../protected";
 import ReactMarkdown from "../LazyMarkdown";
+import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
@@ -42,6 +43,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
   const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
 
+  const channelIdentifier = useMemo(() => {
+    if (!bridgeType) return null;
+    return (params?.id + searchParams?.version).replace(/ /g, "_");
+  }, [bridgeType]);
+  
+  useRtLayerEventHandler(channelIdentifier);
   useEffect(() => {
     const el = messagesContainerRef.current;
     if (el) {
@@ -68,7 +75,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     setEditingMessage(messageId);
     setEditContent(currentContent);
   };
-
+  
   const handleSaveEdit = (messageId) => {
     const updatedMessages = messages.map(msg =>
       msg.id === messageId ? { ...msg, content: editContent, isEdited: true } : msg

@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { didCurrentTabInitiateUpdate } from '@/utils/utility';
 import { RefreshIcon } from "@/components/Icons";
 
-function useRtLayerEventHandler() {
+function useRtLayerEventHandler(channelIdentifier="") {
     const [client, setClient] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState(null);
@@ -34,9 +34,12 @@ function useRtLayerEventHandler() {
 
   // Memoize channel ID to prevent unnecessary recalculations
   const channelId = useMemo(() => {
+    if(channelIdentifier!=""){
+      return channelIdentifier;
+    }
     if (!bridgeId || !orgId) return null;
     return (orgId + bridgeId).replace(/ /g, "_");
-  }, [bridgeId, orgId]);
+  }, [bridgeId, orgId, channelIdentifier]);
 
   // Helper function to show toast notification
   const showAgentUpdatedToast = useCallback(() => {
@@ -91,6 +94,7 @@ function useRtLayerEventHandler() {
       }
 
       const { Thread, Messages, type } = response;
+      
       if (type === 'agent_updated') {
         const agentId = response.version_id || response.bridge_id;
         const currentTabInitiated = didCurrentTabInitiateUpdate(String(agentId));
