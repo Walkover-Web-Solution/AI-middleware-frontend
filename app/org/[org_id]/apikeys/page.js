@@ -140,33 +140,39 @@ const Page = () => {
           </div>
       </div>
       </div>
-      {Object.entries(
-        dataWithIcons.reduce((acc, item) => {
-          const service = item.service.props.children[1].props.children;
-          if (!acc[service]) {
-            acc[service] = [];
-          }
-          acc[service].push(item);
-          return acc;
-        }, {})
-      ).map(([service, items]) => (
-        <div key={service} className="mb-2 mt-4">
-          <h2 className="text-xl font-semibold capitalize flex items-center gap-2 pl-4">
-            {getIconOfService(service.toLowerCase(), 24, 24)}
-            {service}
-          </h2>
-          <CustomTable
-            data={items}
-            columnsToShow={API_KEY_COLUMNS}
-            sorting
-            sortingColumns={["name"]}
-            keysToWrap={["apikey", "comment"]}
-            endComponent={EndComponent}
-            handleRowClick={(data) => showConnectedAgents(data)}
-            keysToExtractOnRowClick={["_id", "name", "version_ids"]}
-          />
+      {filterApiKeys.length > 0 ? (
+        Object.entries(
+          dataWithIcons.reduce((acc, item) => {
+            const service = item.service.props.children[1].props.children;
+            if (!acc[service]) {
+              acc[service] = [];
+            }
+            acc[service].push(item);
+            return acc;
+          }, {})
+        ).map(([service, items]) => (
+          <div key={service} className="mb-2 mt-4">
+            <h2 className="text-xl font-semibold capitalize flex items-center gap-2 pl-4">
+              {getIconOfService(service.toLowerCase(), 24, 24)}
+              {service}
+            </h2>
+            <CustomTable
+              data={items}
+              columnsToShow={API_KEY_COLUMNS}
+              sorting
+              sortingColumns={["name"]}
+              keysToWrap={["apikey", "comment"]}
+              endComponent={EndComponent}
+              handleRowClick={(data) => showConnectedAgents(data)}
+              keysToExtractOnRowClick={["_id", "name", "version_ids"]}
+            />
+          </div>
+        ))
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-gray-500 text-lg">No API keys entries found</p>
         </div>
-      ))}
+      )}
       <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} selectedService={selectedService} />
       
       <ApiKeyGuideSlider/>
