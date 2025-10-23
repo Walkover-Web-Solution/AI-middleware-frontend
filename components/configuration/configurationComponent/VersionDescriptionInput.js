@@ -33,14 +33,12 @@ function VersionDescriptionInput({ params, searchParams, isEmbedUser }) {
     }, [saveBridgeVersionDescription]);
 
     return (
-        <div className='mb-2 '>
+        <div className='w-full'>
             <div className='flex flex-row items-center'>
-                <div className="label pl-0  whitespace-nowrap">
-                </div>
                 <div className="relative w-full">
                     <input
                         type="text"
-                        className="text-md outline-none w-full bg-transparent"
+                        className="input input-sm w-full bg-base-100 border border-base-300 focus:border-primary text-sm"
                         onBlur={saveBridgeVersionDescription}
                         onKeyDown={handleKeyDown}
                         defaultValue={versionDescription}

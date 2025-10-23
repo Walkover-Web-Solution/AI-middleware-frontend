@@ -1,14 +1,14 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive } from 'lucide-react';
+import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, ChevronDown } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction, archiveBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction, archiveBridgeAction, updateBridgeVersionAction, createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal, toggleSidebar } from '@/utils/utility';
+import { closeModal, openModal, toggleSidebar, sendDataToParent } from '@/utils/utility';
 import { toast } from 'react-toastify';
 const ChatBotSlider = dynamic(() => import('./sliders/chatBotSlider'), { ssr: false });
 const ConfigHistorySlider = dynamic(() => import('./sliders/configHistorySlider'), { ssr: false });
@@ -16,6 +16,8 @@ import Protected from './protected';
 const GuideSlider = dynamic(() => import('./sliders/IntegrationGuideSlider'), { ssr: false });
 import { FilterSliderIcon } from './Icons';
 const DeleteModal = dynamic(() => import('./UI/DeleteModal'), { ssr: false });
+const BridgeVersionDropdown = dynamic(() => import('./configuration/configurationComponent/bridgeVersionDropdown'), { ssr: false });
+const VersionDescriptionInput = dynamic(() => import('./configuration/configurationComponent/VersionDescriptionInput'), { ssr: false });
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -26,6 +28,8 @@ const Navbar = ({ isEmbedUser }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
   const ellipsisMenuRef = useRef(null);
 
   const router = useRouter();
@@ -35,7 +39,7 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType,  isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray } = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId)||{},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -49,6 +53,9 @@ const Navbar = ({ isEmbedUser }) => {
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
     hideHomeButton:  state.userDetailsReducer?.userDetails?.hideHomeButton || false,
     showHistory:  state.userDetailsReducer?.userDetails?.showHistory,
+    bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
+    versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[searchParams?.get('version')]?.version_description || "",
+    bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.versions || [],
   }));
   // Define tabs based on user type
   const TABS = useMemo(() => {
@@ -62,8 +69,13 @@ const Navbar = ({ isEmbedUser }) => {
     return baseTabs;
   }, [isEmbedUser]);
 
-  const agentName = useMemo(() => bridgeData?.name || 'Agent not Found', [bridgeData?.name]);
+  const agentName = useMemo(() => bridgeName || bridgeData?.name || 'Agent not Found', [bridgeName, bridgeData?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization not Found', [organizations, orgId]);
+
+  // Create compatible searchParams object for prebuilt components
+  const compatibleSearchParams = useMemo(() => ({
+    version: searchParams?.get('version')
+  }), [searchParams]);
 
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
@@ -106,6 +118,48 @@ const Navbar = ({ isEmbedUser }) => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+
+  // Agent name editing functions
+  const handleNameEdit = useCallback(() => {
+    setIsEditingName(true);
+    setEditedName(agentName);
+  }, [agentName]);
+
+  const handleNameSave = useCallback(() => {
+    const trimmed = editedName.trim();
+    if (trimmed === "") {
+      toast.error("Agent name cannot be empty");
+      setEditedName(agentName);
+      return;
+    }
+    if (trimmed !== agentName) {
+      dispatch(updateBridgeAction({
+        bridgeId: bridgeId,
+        dataToSend: { name: trimmed },
+      }));
+      isEmbedUser && sendDataToParent("updated", {
+        name: trimmed, 
+        agent_id: bridgeId
+      }, "Agent Name Updated");
+    }
+    setIsEditingName(false);
+  }, [editedName, agentName, dispatch, bridgeId, isEmbedUser]);
+
+  const handleNameCancel = useCallback(() => {
+    setIsEditingName(false);
+    setEditedName(agentName);
+  }, [agentName]);
+
+  const handleNameKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleNameSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleNameCancel();
+    }
+  }, [handleNameSave, handleNameCancel]);
 
   const handlePauseBridge = useCallback(async () => {
     const newStatus = bridgeStatus === BRIDGE_STATUS.PAUSED
@@ -182,11 +236,11 @@ const Navbar = ({ isEmbedUser }) => {
     {
       label: agentName,
       icon: null,
-      handleClick: undefined,
-      isClickable: false,
-      current: true
+      handleClick: handleNameEdit,
+      current: true,
+      editable: true
     }
-  ]), [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar]);
+  ]), [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar, handleNameEdit]);
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
@@ -298,7 +352,57 @@ const Navbar = ({ isEmbedUser }) => {
                     {idx > 0 && (
                       <ChevronRight size={12} className="text-base-content/40 flex-shrink-0" />
                     )}
-                    {item.isClickable ? (
+                    {item.editable ? (
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary min-w-0">
+                        {!isEditingName ? (
+                          <div className="flex items-center gap-2">
+                            <span className="truncate font-medium text-sm max-w-[120px] sm:max-w-[200px]" title={item.label}>
+                              {item.label}
+                            </span>
+                            <button
+                              onClick={item.handleClick}
+                              className="btn btn-xs btn-ghost hover:bg-primary/20 p-1 min-h-0 h-6 w-6 rounded"
+                              title="Edit agent name"
+                            >
+                              <Edit2 size={12} className="text-primary" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={editedName}
+                              onChange={(e) => setEditedName(e.target.value)}
+                              onBlur={handleNameSave}
+                              onKeyDown={handleNameKeyDown}
+                              className="bg-transparent border-none outline-none font-medium text-sm max-w-[120px] sm:max-w-[200px]"
+                              autoFocus
+                            />
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={handleNameSave}
+                                className="btn btn-xs btn-ghost hover:bg-green-200 p-1 min-h-0 h-6 w-6 rounded"
+                                title="Save changes"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600">
+                                  <polyline points="20,6 9,17 4,12"></polyline>
+                                </svg>
+                              </button>
+                              <button
+                                onClick={handleNameCancel}
+                                className="btn btn-xs btn-ghost hover:bg-red-200 p-1 min-h-0 h-6 w-6 rounded"
+                                title="Cancel editing"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-600">
+                                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : item.isClickable ? (
                       <button
                         onClick={item.handleClick}
                         className="flex items-center gap-1.5 px-2 py-1 rounded-md text-sm transition-all hover:bg-base-200 text-base-content/70 hover:text-base-content min-w-0"
@@ -309,16 +413,32 @@ const Navbar = ({ isEmbedUser }) => {
                         </span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary min-w-0">
-                        <span className="truncate font-medium text-sm max-w-[120px] sm:max-w-[200px]" title={item.label}>
-                          {item.label}
-                        </span>
-                      </div>
+                      <span className="truncate font-medium text-sm max-w-[120px] sm:max-w-[200px]" title={item.label}>
+                        {item.label}
+                      </span>
                     )}
                   </React.Fragment>
                 ))}
                 {BRIDGE_STATUS?.ACTIVE && <StatusIndicator status={bridgeStatus} />}
               </nav>}
+            
+            {/* Version Controls - show on configure tab for non-embed users */}
+            {activeTab === 'configure' && bridgeId && (
+              <div className="flex items-center gap-2 mx-4">
+                <BridgeVersionDropdown 
+                  params={{ org_id: orgId, id: bridgeId }} 
+                  searchParams={compatibleSearchParams} 
+                  isEmbedUser={isEmbedUser} 
+                />
+                <div className="flex-1 max-w-xs">
+                  <VersionDescriptionInput 
+                    params={{ org_id: orgId, id: bridgeId }} 
+                    searchParams={compatibleSearchParams} 
+                    isEmbedUser={isEmbedUser} 
+                  />
+                </div>
+              </div>
+            )}
             
             
           </div>
@@ -464,6 +584,8 @@ const Navbar = ({ isEmbedUser }) => {
           <GuideSlider params={{ org_id: orgId, id: bridgeId, version:searchParams?.get('version') }} bridgeType={bridgeType}/>
         </>
       )}
+      
+      {/* Modals */}
       <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard"/>
     </div>
   );

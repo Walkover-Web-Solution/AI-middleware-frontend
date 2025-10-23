@@ -90,9 +90,9 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
     }
     return (
         <div className='flex items-center gap-2'>
-        {publishedVersion?.length > 0 && (
-            <div className="dropdown dropdown-bottom dropdown-end mr-2">
-                <div tabIndex={0} role="button" className={`btn ${searchParams?.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
+        {(bridgeVersionsArray?.length > 0 || publishedVersion) && (
+            <div className="dropdown  dropdown-bottom dropdown-end mr-2">
+                <div tabIndex={0} role="button" className={`btn btn-sm ${searchParams?.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
                     <span className={`${searchParams?.version === publishedVersion ? 'text-black' : 'text-base-content'}`}>V{bridgeVersionsArray.indexOf(searchParams?.version) + 1 || 'Select'}</span>
                     {searchParams?.version === publishedVersion &&
                         <span className="relative inline-flex items-center ml-2">

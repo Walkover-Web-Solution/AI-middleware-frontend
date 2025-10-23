@@ -102,7 +102,6 @@ const ConfigurationPage = ({
                 />
                 <div className="absolute right-0 top-0">
                     <div className="flex items-center">
-                        <BridgeVersionDropdown params={params} searchParams={searchParams} />
                         <ConfigurationNavigation 
                             bridgeType={bridgeType} 
                             currentView={currentView} 
