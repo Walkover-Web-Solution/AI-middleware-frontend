@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { PersistGate } from "redux-persist/integration/react";
 import CommandPalette from "@/components/command/CommandPalette";
 import { usePathname } from "next/navigation";
+import { useThemeDetection } from "@/customHooks/useThemeDetection";
 
 export const metadata = {
   title: "Login | Student",
@@ -19,6 +20,7 @@ export const metadata = {
  */
 const Wrapper = ({ children }) => {
   const pathname = usePathname();
+  const currentTheme = useThemeDetection();
 
   useEffect(() => {
     const pathSegments = pathname.split('/').filter(Boolean);
@@ -51,7 +53,10 @@ const Wrapper = ({ children }) => {
             {/* Global Command Palette */}
             <CommandPalette />
             {/* Notification toast container */}
-            <ToastContainer position="bottom-left" />
+            <ToastContainer 
+              position="bottom-left" 
+              theme={currentTheme === 'dark' ? 'dark' : 'light'}
+            />
           </div>
         </PersistGate>
       </Provider>
