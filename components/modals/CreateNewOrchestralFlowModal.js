@@ -21,7 +21,7 @@ const CreateNewOrchestralFlowModal = ({ handleCreateNewFlow, createdFlow, saveDa
                     <div className="form-control mt-2">
                         <label className="label">
                             <span className="label-text">
-                                Flow Name <span className="text-error">*</span>
+                                Orchestral Flow Name <span className="text-error">*</span>
                             </span>
                         </label>
                         <input

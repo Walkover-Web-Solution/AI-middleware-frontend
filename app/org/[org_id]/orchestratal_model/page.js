@@ -212,7 +212,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-3">
-                  Create New Flow
+                  Create New Orchestral Flow
                 </h3>
                 <p className="text-white text-sm leading-relaxed">
                   Start building your AI agent workflow with our intuitive flow builder
