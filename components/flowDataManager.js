@@ -1066,7 +1066,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
         <div className="card-body space-y-2">
           <Section title="Step 1" caption={
             <span className="text-base-content">
-              Create <code className="px-1 py-0.5 rounded bg-base-100">pauthkey</code>
+              Create <code className="px-1 py-0.5 rounded bg-base-100">Auth key</code>
             </span>
           } />
           <p className="text-sm">
@@ -1077,7 +1077,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
             target="_blank"
             className="link link-primary text-sm"
           >
-            Create pauthkey
+            Create Auth key
           </Link>
         </div>
       </div>
