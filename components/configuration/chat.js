@@ -39,6 +39,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const testCaseResultRef = useRef(null);
 
   const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
 
@@ -48,6 +49,18 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
   }, [messages]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (testCaseResultRef.current && !testCaseResultRef.current.contains(event.target)) {
+        setShowTestCaseResults({});
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleResetChat = () => {
     setTestCaseId(null);
@@ -551,9 +564,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
                           {/* Show either assistant message or test case result */}
                           {message?.testCaseResult && showTestCaseResults[message.id] ? (
-                            /* Test Case Result Display */
-                            <div className="chat-bubble gap-0 relative min-w-full">
-                              <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
+                            <div ref={testCaseResultRef}>
+                              {/* Test Case Result Display */}
+                              <div className="chat-bubble gap-0 relative min-w-full">
+                                <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
                                 {/* Header */}
                                 <div className="flex items-center gap-2 mb-4">
                                   <Target className="h-4 w-4" />
@@ -606,6 +620,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                 </div>
                               </div>
                             </div>
+                          </div>
                           ) : (
                             /* Regular Assistant/User/Expected Message - Show model answer if testcase was run */
                             <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
