@@ -64,6 +64,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     }, [variablesKeyValue]);
 
     const handleSendMessage = async (e) => {
+        const timestamp = Date.now();
+        
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
         }
@@ -92,8 +94,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         if (modelType !== "completion") inputRef.current.value = "";
         setLoading(true);
         try {
-            // Generate unique IDs using timestamp to avoid conflicts
-            const timestamp = Date.now();
             const newChat = {
                 id: `user_${timestamp}`,
                 sender: "user",
