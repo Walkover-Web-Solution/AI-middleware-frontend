@@ -665,10 +665,13 @@ export function markUpdateInitiatedByCurrentTab(agentId) {
   
   try {
     sessionStorage.setItem('initiated_update_' + agentId, 'true');
-    sessionStorage.setItem('last_initiated_update', JSON.stringify({
-      agentId: String(agentId),
-      timestamp: Date.now()
-    }));
+    const timestamp = new Date().getTime();
+    let agentIds = JSON.parse(sessionStorage.getItem('last_initiated_update') || '[]');
+    if (agentIds === null) {
+      agentIds = [];
+    }
+    agentIds.push({ id: String(agentId), timestamp });
+    sessionStorage.setItem('last_initiated_update', JSON.stringify(agentIds));
   } catch (error) {
     console.error('Error marking update initiation:', error);
   }
@@ -684,19 +687,21 @@ export function didCurrentTabInitiateUpdate(agentId) {
     const lastInitiated = sessionStorage.getItem('last_initiated_update');
     if (!lastInitiated) return false;
     
-    const { agentId: lastAgentId, timestamp } = JSON.parse(lastInitiated);
+    const agentIds = JSON.parse(lastInitiated);
     const now = Date.now();
     const timeWindow = 5000; // 5 seconds window for multiple events
     
     // Check if this agent was recently updated by current tab and within time window
-    if (String(lastAgentId) === String(agentId) && (now - timestamp) < timeWindow) {
+    if (agentIds.some(agent => agent.id === String(agentId) && (now - agent.timestamp) < timeWindow)) {
       return true;
     }
     
     // Clean up expired entries
-    if ((now - timestamp) >= timeWindow) {
+    if ((now - agentIds[agentIds.length - 1].timestamp) >= timeWindow) {
       sessionStorage.removeItem('last_initiated_update');
-      sessionStorage.removeItem('initiated_update_' + lastAgentId);
+    agentIds.forEach(agent => {
+      sessionStorage.removeItem('initiated_update_' + agent.id);
+    });
     }
     
     return false;
