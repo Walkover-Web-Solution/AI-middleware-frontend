@@ -163,9 +163,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     setErrorMessage("");
     inputRef.current.value = "";
     setLoading(true);
+    const timestamp = Date.now();
+    const tempAssistantId = `assistant_${timestamp}`;
     try {
       // Generate unique IDs using timestamp to avoid conflicts
-      const timestamp = Date.now();
       const newChat = {
         id: `user_${timestamp}`,
         sender: "user",
@@ -185,7 +186,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       setMessages(prevMessages => [...prevMessages, newChat]);
 
       // Insert a temporary assistant "typing" message
-      const tempAssistantId = `assistant_${timestamp}`;
       const loadingAssistant = {
         id: tempAssistantId,
         sender: "assistant",
@@ -239,7 +239,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         modelName: assistConversation?.model,
         finish_reason: assistConversation?.finish_reason
       };
-
       // Replace the temporary loading message with the actual response
       setMessages(prevMessages => {
         const updatedMessages = prevMessages.map(m => m.id === tempAssistantId ? newChatAssist : m);
@@ -248,8 +247,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     } catch (error) {
       console.log(error);
       setErrorMessage("Something went wrong. Please try again.");
-      // Remove the temporary loading assistant message on error
-      setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
+      // Restore the user message to the input field
+      if (inputRef.current) {
+        inputRef.current.value = newMessage;
+      }
+      // Remove both the temporary loading assistant message and the user message on error
+      const userMessageId = `user_${timestamp}`;
+      setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== userMessageId));
     } finally {
       setLoading(false);
       setUploadedImages([]);
