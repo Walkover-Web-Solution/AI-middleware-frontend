@@ -148,7 +148,7 @@ export const toggleSidebar = (sidebarId, direction = "left") => {
     };
 
     const handleEscPress = (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' || (event.key === 'k' && event.ctrlKey)) {
             if (direction === "left") {
                 sidebar.classList.add('-translate-x-full');
             } else {
