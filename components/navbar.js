@@ -368,38 +368,15 @@ const Navbar = ({ isEmbedUser }) => {
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={editedName}
-                              onChange={(e) => setEditedName(e.target.value)}
-                              onBlur={handleNameSave}
-                              onKeyDown={handleNameKeyDown}
-                              className="bg-transparent border-none outline-none font-medium text-sm max-w-[120px] sm:max-w-[200px]"
-                              autoFocus
-                            />
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={handleNameSave}
-                                className="btn btn-xs btn-ghost hover:bg-green-200 p-1 min-h-0 h-6 w-6 rounded"
-                                title="Save changes"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600">
-                                  <polyline points="20,6 9,17 4,12"></polyline>
-                                </svg>
-                              </button>
-                              <button
-                                onClick={handleNameCancel}
-                                className="btn btn-xs btn-ghost hover:bg-red-200 p-1 min-h-0 h-6 w-6 rounded"
-                                title="Cancel editing"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-600">
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
+                          <input
+                            type="text"
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            onBlur={handleNameSave}
+                            onKeyDown={handleNameKeyDown}
+                            className="bg-transparent border-none outline-none font-medium text-sm max-w-[120px] sm:max-w-[200px]"
+                            autoFocus
+                          />
                         )}
                       </div>
                     ) : item.isClickable ? (
