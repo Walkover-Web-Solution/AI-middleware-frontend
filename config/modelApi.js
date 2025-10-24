@@ -114,7 +114,7 @@ export const dryRun = async ({ localDataToSend, bridge_id, orchestrator_id}) => 
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);
     toast.error(error?.response?.data?.error || error?.response?.data?.detail?.error || "Something went wrong.");
-    return { success: false, error: error.response.data.error }
+    throw error
   }
 }
 
