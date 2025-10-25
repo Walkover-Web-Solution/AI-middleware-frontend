@@ -467,7 +467,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                         )}
                     </div>
 
-                    {(message?.images?.length > 0 || message?.files?.length > 0) && (
+                    {(message?.images?.length > 0 || message?.files?.length > 0 || message?.video_data || message?.youtube_url) && (
                       <div className="mt-2">
                         {message?.images?.length > 0 && (
                           <div className="flex flex-wrap items-end justify-end">
@@ -482,6 +482,44 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                 onClick={() => window.open(url, "_blank")}
                               />
                             ))}
+                          </div>
+                        )}
+
+                        {message?.video_data && (
+                          <div className="flex flex-wrap items-end justify-end">
+                            <div className="relative m-1">
+                              <video
+                                src={message.video_data?.uri}
+                                width={160}
+                                height={120}
+                                className="w-40 h-30 object-cover rounded-lg cursor-pointer"
+                                controls
+                                preload="metadata"
+                                onClick={() => window.open(message.video_data?.uri, "_blank")}
+                              />
+                              <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                Video
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {message?.youtube_url && (
+                          <div className="flex flex-wrap items-end justify-end">
+                            <div className="m-1 bg-base-200 p-3 rounded-lg border border-base-content/30">
+                              <div className="flex items-center gap-2 mb-2">
+                                <PlayIcon size={16} className="text-red-500" />
+                                <span className="text-sm font-medium">YouTube Video</span>
+                              </div>
+                              <a
+                                href={message.youtube_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-500 hover:underline block truncate max-w-[200px]"
+                              >
+                                {message.youtube_url}
+                              </a>
+                            </div>
                           </div>
                         )}
 
