@@ -39,6 +39,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const testCaseResultRef = useRef(null);
 
   const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
 
@@ -48,6 +49,22 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
   }, [messages]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // Check if click is outside test case result and not on a toggle button
+      const isToggleButton = event.target.closest('button[class*="absolute -bottom-8"]');
+      if (testCaseResultRef.current && 
+          !testCaseResultRef.current.contains(event.target) && 
+          !isToggleButton) {
+        setShowTestCaseResults({});
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleResetChat = () => {
     setTestCaseId(null);
@@ -284,6 +301,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         testCaseResult: data?.results?.[0]
       }
       setMessages(updatedMessages)
+      
+      // Automatically show the test case results card after running the test
+      const nextMessageId = updatedMessages[index + 1].id;
+      setShowTestCaseResults(prev => ({
+        ...prev,
+        [nextMessageId]: true
+      }));
     } finally {
       setIsRunningTestCase(false)
       setCurrentRunIndex(null)
@@ -593,9 +617,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
                           {/* Show either assistant message or test case result */}
                           {message?.testCaseResult && showTestCaseResults[message.id] ? (
-                            /* Test Case Result Display */
-                            <div className="chat-bubble gap-0 relative min-w-full">
-                              <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
+                            <div ref={testCaseResultRef}>
+                              {/* Test Case Result Display */}
+                              <div className="chat-bubble gap-0 relative min-w-full">
+                                <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
                                 {/* Header */}
                                 <div className="flex items-center gap-2 mb-4">
                                   <Target className="h-4 w-4" />
@@ -648,6 +673,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                 </div>
                               </div>
                             </div>
+                          </div>
                           ) : (
                             /* Regular Assistant/User/Expected Message - Show model answer if testcase was run */
                             <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
@@ -745,10 +771,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                           {/* Absolute Toggle Button for Test Case Results */}
                           {message?.testCaseResult && (
                             <button
-                              onClick={() => setShowTestCaseResults(prev => ({
-                                ...prev,
-                                [message.id]: !prev[message.id]
-                              }))}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowTestCaseResults(prev => ({
+                                  ...prev,
+                                  [message.id]: !prev[message.id]
+                                }));
+                              }}
                               className="absolute -bottom-8 left-4 flex items-center gap-2 text-xs text-base-content/70 hover:text-base-content transition-colors px-2 py-1 rounded-full bg-base-100 border border-base-content/20 shadow-sm hover:bg-base-200/50"
                             >
                               {showTestCaseResults[message.id] ? (
