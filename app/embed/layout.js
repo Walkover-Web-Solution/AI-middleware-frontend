@@ -18,6 +18,8 @@ const Layout = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentAgentName, setCurrentAgentName] = useState(null);
   const [processedAgentName, setProcessedAgentName] = useState(null);
+  const [hasOpenEventReceived, setHasOpenEventReceived] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const interfaceDetailsParam = searchParams.get('interfaceDetails');
   const decodedParam = interfaceDetailsParam ? decodeURIComponent(interfaceDetailsParam) : null;
@@ -29,8 +31,26 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
+    window.parent.postMessage({ type: 'gtwyOpening', data: 'gtwy is opening' }, '*');
     dispatch(getServiceAction());
   }, [dispatch]);
+
+  // Function to handle navigation with open event check
+  const safeNavigate = useCallback((navigationFn, ...args) => {
+    if (hasOpenEventReceived) {
+      navigationFn(...args);
+    } else {
+      setPendingNavigation(() => () => navigationFn(...args));
+    }
+  }, [hasOpenEventReceived]);
+
+  // Execute pending navigation when open event is received
+  useEffect(() => {
+    if (hasOpenEventReceived && pendingNavigation) {
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+  }, [hasOpenEventReceived, pendingNavigation]);
 
   const createNewAgent = useCallback((agent_name, orgId, agent_purpose) => {
     const dataToSend = agent_purpose ? {purpose: agent_purpose.trim()} : {
@@ -53,7 +73,7 @@ const Layout = ({ children }) => {
             },
             'Agent created Successfully'
           );
-          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}?version=${response.data.bridge.versions[0]}`);
+          safeNavigate(router.push, `/org/${orgId}/agents/configure/${response.data.bridge._id}?version=${response.data.bridge.versions[0]}`);
         }
         setIsLoading(false);
         setProcessedAgentName(agent_name);
@@ -62,18 +82,16 @@ const Layout = ({ children }) => {
       setIsLoading(false);
       setProcessedAgentName(agent_name);
     });
-  }, [dispatch, router]);
+  }, [dispatch, router, safeNavigate]);
 
   const navigateToExistingAgent = useCallback((agent, orgId) => {
     const version = agent?.published_version_id || agent?.versions?.[0];
     if(agent?._id && orgId && version){
-      router.push(
-        `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
-      );
+      safeNavigate(router.push, `/org/${orgId}/agents/configure/${agent._id}?version=${version}`);
     }
     setIsLoading(false);
     setProcessedAgentName(agent.name);
-  }, [router]);
+  }, [router, safeNavigate]);
 
   const handleAgentNavigation = useCallback(async (agentName, orgId) => {
     if (!agentName || !orgId || processedAgentName === agentName) {
@@ -84,12 +102,25 @@ const Layout = ({ children }) => {
     setIsLoading(true);
     const trimmedAgentName = agentName.trim();
 
+    // Check if config contains defaultOpen to determine navigation method
+    const hasDefaultOpen = urlParamsObj?.config?.defaultOpen !== undefined;
+console.log(urlParamsObj?.config)
     if (allBridges && allBridges.length > 0) {
       const agentInStore = allBridges.find(
         (agent) => agent?.name?.trim() === trimmedAgentName
       );
       if (agentInStore) {
-        navigateToExistingAgent(agentInStore, orgId);
+        if (hasDefaultOpen) {
+          navigateToExistingAgent(agentInStore, orgId);
+        } else {
+          // Direct navigation without waiting for open event
+          const version = agentInStore?.published_version_id || agentInStore?.versions?.[0];
+          if(agentInStore?._id && orgId && version){
+            router.push(`/org/${orgId}/agents/configure/${agentInStore._id}?version=${version}`);
+          }
+          setIsLoading(false);
+          setProcessedAgentName(agentInStore.name);
+        }
         return;
       }
     }
@@ -105,7 +136,17 @@ const Layout = ({ children }) => {
       );
 
       if (existingAgent) {
-        navigateToExistingAgent(existingAgent, orgId);
+        if (hasDefaultOpen) {
+          navigateToExistingAgent(existingAgent, orgId);
+        } else {
+          // Direct navigation without waiting for open event
+          const version = existingAgent?.published_version_id || existingAgent?.versions?.[0];
+          if(existingAgent?._id && orgId && version){
+            router.push(`/org/${orgId}/agents/configure/${existingAgent._id}?version=${version}`);
+          }
+          setIsLoading(false);
+          setProcessedAgentName(existingAgent.name);
+        }
       } else {
         createNewAgent(agentName, orgId);
       }
@@ -113,7 +154,7 @@ const Layout = ({ children }) => {
       console.error('Error fetching bridges, falling back to create a new agent:', error);
       createNewAgent(agentName, orgId);
     }
-  }, [processedAgentName, dispatch, createNewAgent, navigateToExistingAgent, allBridges]);
+  }, [processedAgentName, dispatch, createNewAgent, navigateToExistingAgent, allBridges, urlParamsObj?.config?.defaultOpen, router]);
 
   useEffect(() => {
     const initialize = () => {
@@ -136,9 +177,16 @@ const Layout = ({ children }) => {
             }
           });
         }
+        // Check if config contains defaultOpen - if yes, prevent navigation until open event
+        const hasDefaultOpen = urlParamsObj?.config?.defaultOpen !== undefined;
+
         if(urlParamsObj?.config?.configureGtwyRedirection === 'orchestral_page'){
           setIsLoading(true);
-          router.push(`/org/${urlParamsObj.org_id}/orchestratal_model`);
+          if (hasDefaultOpen) {
+            safeNavigate(router.push, `/org/${urlParamsObj.org_id}/orchestratal_model`);
+          } else {
+            router.push(`/org/${urlParamsObj.org_id}/orchestratal_model`);
+          }
           return;
         }
 
@@ -147,10 +195,18 @@ const Layout = ({ children }) => {
           setCurrentAgentName(urlParamsObj.agent_name);
         } else if (urlParamsObj?.agent_id) {
           setIsLoading(true)
-          router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
+          if (hasDefaultOpen) {
+            safeNavigate(router.push, `/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
+          } else {
+            router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
+          }
         } else {
           setIsLoading(true)
-          router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
+          if (hasDefaultOpen) {
+            safeNavigate(router.push, `/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
+          } else {
+            router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
+          }
         }
       } else {
         setIsLoading(false);
@@ -158,7 +214,7 @@ const Layout = ({ children }) => {
     };
 
     initialize();
-  }, [decodedParam]);
+  }, [decodedParam, safeNavigate, router, dispatch]);
 
   useEffect(() => {
     if (currentAgentName) {
@@ -172,8 +228,14 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const handleMessage = async (event) => {
 
-      if (event.data?.data?.type !== "gtwyInterfaceData") return;
+      // Handle open event
+      if (event.data?.type === "open") {
+        setHasOpenEventReceived(true);
+        return;
+      }
 
+      if (event.data?.data?.type !== "gtwyInterfaceData") return;
+ 
       const messageData = event.data.data.data;
       const orgId = sessionStorage.getItem('gtwy_org_id');
       if (messageData?.agent_name) {
@@ -181,7 +243,7 @@ const Layout = ({ children }) => {
         handleAgentNavigation(messageData.agent_name, orgId)
       } else if (messageData?.agent_id && orgId) {
         // setIsLoading(true);
-        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        safeNavigate(router.push, `/org/${orgId}/agents/configure/${messageData.agent_id}`);
       }
       else if(messageData?.agent_purpose)
       {
@@ -202,7 +264,7 @@ const Layout = ({ children }) => {
           bridgeId: messageData.agent_id
         }, response => {
           if(response?.data?.bridge){
-            router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+            safeNavigate(router.push, `/org/${orgId}/agents/configure/${messageData.agent_id}`);
           }
         }))
       }

@@ -308,14 +308,15 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     if (existingScript) {
       document.head.removeChild(existingScript);
     }
-    if (doctstar_embed_token) {
+    // Only load script if user is NOT an embed user
+    if (doctstar_embed_token && !isEmbedUser) {
       const script = document.createElement("script");
       script.setAttribute("embedToken", doctstar_embed_token);
       script.id = docstarScriptId;
       script.src = docstarScriptSrc;
       document.head.appendChild(script);
     }
-  }, [doctstar_embed_token]);
+  }, [doctstar_embed_token, isEmbedUser]);
 
   useEffect(() => {
     if (isValidOrg) {

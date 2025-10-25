@@ -12,7 +12,7 @@
                 hideFullScreenButton: 'false', hideHeader: 'false', skipLoadGtwy: false
             };
             this.urls = {
-                gtwyUrl: 'https://dev-embed.gtwy.ai/embed',
+                gtwyUrl: 'http://localhost:3001/embed',
                 login: 'https://dev-db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
@@ -75,6 +75,11 @@
                     case 'gtwyLoaded':
                     case 'configLoaded':
                         this.sendInitialData();
+                        break;
+                    case 'gtwyOpening':
+                        // Handle gtwy opening event if needed
+                        this.sendInitialData();
+                        console.log('GTWY is opening...');
                         break;
                 }
             });
@@ -198,6 +203,10 @@
                 this.initializeGtwyEmbed().then(() => this.openGtwy());
                 return;
             }
+
+            // Send "gtwy is opening" event
+            window.parent?.postMessage?.({ type: 'gtwyOpening', data: 'gtwy is opening' }, '*');
+            document.getElementById('iframe-component-gtwyInterfaceEmbed')?.contentWindow?.postMessage({ type: 'gtwyOpening', data: 'gtwy is opening' }, '*');
 
             [agent_id, { agent_id, meta }, { agent_name }, { agent_purpose }]
                 .filter(data => data && Object.values(data).some(v => v))
