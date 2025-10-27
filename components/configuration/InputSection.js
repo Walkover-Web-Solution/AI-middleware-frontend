@@ -30,7 +30,6 @@ const InputSection = memo(() => {
                 searchParams={searchParams}
                 promptTextAreaRef={promptTextAreaRef}
                 isEmbedUser={isEmbedUser}
-                // Consolidated state props
                 uiState={uiState}
                 updateUiState={updateUiState}
                 promptState={promptState}
