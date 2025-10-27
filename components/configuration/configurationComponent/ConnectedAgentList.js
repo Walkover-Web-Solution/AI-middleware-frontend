@@ -96,7 +96,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         const agent_variables = bridgeItem?.connected_agent_details?.agent_variables || {};
         const description = bridgeItem?.connected_agent_details?.description || item?.description || "";
         const { fields, required_params } = agent_variables;
-        setCurrentVariable({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params });
+        setCurrentVariable({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
         setAgentTools({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools]);
