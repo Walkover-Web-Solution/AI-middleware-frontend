@@ -7,6 +7,7 @@ import Canvas from '@/components/Canvas';
 import { useDispatch } from 'react-redux';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
 import { optimizePromptApi } from '@/config';
+import Protected from './protected';
 
 const PromptHelper = ({
   isVisible,
@@ -24,7 +25,8 @@ const PromptHelper = ({
   showNotes,
   setShowNotes,
   showPromptHelper,
-  setShowPromptHelper
+  setShowPromptHelper, 
+  isEmbedUser
 }) => {
   const dispatch = useDispatch();
   const [optimizedPrompt, setOptimizedPrompt] = useState('');
@@ -101,14 +103,14 @@ const PromptHelper = ({
 
   // Calculate widths based on toggle states
   const getNotesWidth = () => {
-    if (!showNotes) return 'w-0 hidden'; // Hidden
+    if (!showNotes || isEmbedUser) return 'w-0 hidden'; // Hidden
     if (!showPromptHelper) return 'w-full'; // Full width when prompt helper is hidden
     return 'w-1/2'; // 50% when both are visible
   };
 
   const getPromptHelperWidth = () => {
-    if (!showPromptHelper) return 'w-0 hidden'; // Hidden
-    if (!showNotes) return 'w-full'; // Full width when notes is hidden
+    if (!showPromptHelper ) return 'w-0 hidden'; // Hidden
+    if (!showNotes || isEmbedUser) return 'w-full'; // Full width when notes is hidden
     return 'w-1/2'; // 50% when both are visible
   };
 
@@ -175,7 +177,7 @@ const PromptHelper = ({
           <span className="text-xs text-base-content/60 bg-base-200 px-2 py-1 rounded">Press Esc to close</span>
         </div>
         
-        <div className="flex items-center gap-4">
+        { !isEmbedUser && <div className="flex items-center gap-4">
           <label className="flex items-center gap-1 cursor-pointer">
             <input
               type="checkbox"
@@ -204,7 +206,7 @@ const PromptHelper = ({
           >
             <CloseIcon size={14} />
           </button>
-        </div>
+        </div>}
       </div>
 
       {/* Content Area - Split into two sections */}
@@ -245,7 +247,7 @@ const PromptHelper = ({
         )}
 
         {/* Notes Section - Now on RIGHT */}
-        {showNotes && (
+        {showNotes && !isEmbedUser && (
           <div className={`${getNotesWidth()} h-full transition-all duration-500 ease-in-out transform`}
             tabIndex={0}
           >
@@ -262,4 +264,4 @@ const PromptHelper = ({
   );
 };
 
-export default PromptHelper;
+export default Protected(PromptHelper);
