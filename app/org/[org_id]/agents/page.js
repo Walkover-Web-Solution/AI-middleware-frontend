@@ -160,7 +160,7 @@ function Home({ params, isEmbedUser }) {
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
     isLoading: loadingAgentId === item._id,
-    last_used: item.last_used ? formatDateTimeToDisplay(item.last_used) : "Not used"
+    last_used: item.last_used ? formatDateTimeToDisplay(item.last_used) : "No Records found"
   }));
 
   const onClickConfigure = (id, versionId) => {

@@ -680,20 +680,26 @@ export const formatDateTimeToDisplay = (dateString) => {
   if (!dateString) return "Never";
 
   try {
-    const utcDate = new Date(dateString);
-    if (isNaN(utcDate.getTime())) return "Invalid Date";
+    // If timestamp doesn't have timezone info, treat it as UTC
+    let processedDateString = dateString;
+    if (!dateString.includes('Z') && !dateString.includes('+') && !dateString.includes('-', 10)) {
+      processedDateString = dateString + 'Z'; // Add Z to indicate UTC
+    }
 
-    // Convert UTC → IST manually (add 5 hours 30 minutes)
-    const istOffsetMs = 5.5 * 60 * 60 * 1000;
-    const istDate = new Date(utcDate.getTime() + istOffsetMs);
+    const inputDate = new Date(processedDateString);
+    if (isNaN(inputDate.getTime())) return "Invalid Date";
 
-    const day = String(istDate.getUTCDate()).padStart(2, "0");
-    const month = String(istDate.getUTCMonth() + 1).padStart(2, "0");
-    const year = String(istDate.getUTCFullYear()).toString().slice(-2);
-    const hours = String(istDate.getUTCHours()).padStart(2, "0");
-    const minutes = String(istDate.getUTCMinutes()).padStart(2, "0");
+    const formatted = inputDate.toLocaleString("en-GB", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
 
-    return `${day}-${month}-${year} ${hours}:${minutes}`;
+    return formatted.replace(/\//g, '-').replace(',', '');
   } catch (error) {
     return "Invalid Date";
   }
