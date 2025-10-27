@@ -1,7 +1,8 @@
 import React, { useRef, useCallback, useMemo, memo, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 // Ultra-smooth textarea component with zero re-renders during typing
-const PromptTextarea = memo(forwardRef(({ 
+const PromptTextarea = memo(({ 
+    textareaRef,
     initialValue = "",
     onChange, 
     onFocus, 
@@ -9,22 +10,9 @@ const PromptTextarea = memo(forwardRef(({
     isPromptHelperOpen,
     className = "",
     placeholder = ""
-}, ref) => {
-    const textareaRef = useRef(null);
+}) => {
     const isComposingRef = useRef(false);
     const lastExternalValueRef = useRef(initialValue);
-    
-    // Expose textarea methods to parent
-    useImperativeHandle(ref, () => ({
-        focus: () => textareaRef.current?.focus(),
-        blur: () => textareaRef.current?.blur(),
-        getValue: () => textareaRef.current?.value || '',
-        setValue: (value) => {
-            if (textareaRef.current) {
-                textareaRef.current.value = value;
-            }
-        }
-    }), []);
     
     // Update textarea value when external value changes (like from Redux)
     useEffect(() => {
@@ -86,7 +74,7 @@ const PromptTextarea = memo(forwardRef(({
             placeholder={placeholder}
         />
     );
-}));
+});
 
 PromptTextarea.displayName = 'PromptTextarea';
 
