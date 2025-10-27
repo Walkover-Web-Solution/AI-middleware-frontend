@@ -12,6 +12,8 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
+import { formatDateTimeToDisplay } from "@/utils/utility";
+
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from "react";
@@ -109,7 +111,8 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
-    isLoading: loadingAgentId === item._id
+    isLoading: loadingAgentId === item._id,
+    last_used: item.last_used ? formatDateTimeToDisplay(item.last_used) : "No records found",
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -156,7 +159,8 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    isLoading: loadingAgentId === item._id
+    isLoading: loadingAgentId === item._id,
+    last_used: item.last_used ? formatDateTimeToDisplay(item.last_used) : "Not used"
   }));
 
   const onClickConfigure = (id, versionId) => {
@@ -308,9 +312,9 @@ function Home({ params, isEmbedUser }) {
                 
                 <CustomTable 
                   data={UnArchivedBridges} 
-                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                   sorting 
-                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                   handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                   keysToExtractOnRowClick={['_id', 'versionId']} 
                   keysToWrap={['name', 'model']} 

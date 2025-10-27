@@ -676,6 +676,30 @@ export function markUpdateInitiatedByCurrentTab(agentId) {
     console.error('Error marking update initiation:', error);
   }
 }
+export const formatDateTimeToDisplay = (dateString) => {
+  if (!dateString) return "Never";
+
+  try {
+    const utcDate = new Date(dateString);
+    if (isNaN(utcDate.getTime())) return "Invalid Date";
+
+    // Convert UTC → IST manually (add 5 hours 30 minutes)
+    const istOffsetMs = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(utcDate.getTime() + istOffsetMs);
+
+    const day = String(istDate.getUTCDate()).padStart(2, "0");
+    const month = String(istDate.getUTCMonth() + 1).padStart(2, "0");
+    const year = String(istDate.getUTCFullYear()).toString().slice(-2);
+    const hours = String(istDate.getUTCHours()).padStart(2, "0");
+    const minutes = String(istDate.getUTCMinutes()).padStart(2, "0");
+
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  } catch (error) {
+    return "Invalid Date";
+  }
+};
+
+
 
 /**
  * Check if the current tab initiated a specific agent update
