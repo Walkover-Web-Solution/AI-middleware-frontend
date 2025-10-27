@@ -31,19 +31,16 @@ const InputConfigComponent = memo(({
     // Refs for zero-render typing experience
     const debounceTimerRef = useRef(null);
     const oldContentRef = useRef(reduxPrompt);
-    const currentValueRef = useRef(reduxPrompt);
     const hasUnsavedChangesRef = useRef(false);
     const textareaRef = useRef(null);
     // Update refs when redux prompt changes (external updates)
     if (oldContentRef.current !== reduxPrompt) {
         oldContentRef.current = reduxPrompt;
-        currentValueRef.current = reduxPrompt;
         hasUnsavedChangesRef.current = false;
     }
     // Zero-render prompt change handler using refs only
     const handlePromptChange = useCallback((value) => {
         // Update refs immediately - no re-render
-        currentValueRef.current = value;
         const hasChanges = value.trim() !== reduxPrompt.trim();
         hasUnsavedChangesRef.current = hasChanges;
         // Update save button state only when needed
@@ -69,7 +66,7 @@ const InputConfigComponent = memo(({
     
     // Optimized save handler using current ref value
     const handleSavePrompt = useCallback(() => {
-        const currentValue = currentValueRef.current;
+        const currentValue = textareaRef.current?.value;
         savePrompt(currentValue);
         oldContentRef.current = currentValue;
         hasUnsavedChangesRef.current = false;
@@ -134,7 +131,7 @@ const InputConfigComponent = memo(({
             
             <div className="form-control h-full relative">
                 <PromptTextarea
-                    ref={textareaRef}
+                    textareaRef={textareaRef}
                     initialValue={reduxPrompt}
                     onChange={handlePromptChange}
                     onFocus={handleTextareaFocus}
