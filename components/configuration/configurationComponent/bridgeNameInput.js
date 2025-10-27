@@ -35,6 +35,13 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
 
   const handleChange = (e) => {
     const input = e.target.value.slice(0, 50);
+    
+    // Check if the input contains % character
+    if (input.includes('%')) {
+      toast.error("Agent name cannot contain % character");
+      return; // Don't update the value
+    }
+    
     setOriginalValue(input);
     setDisplayValue(input);
   };
