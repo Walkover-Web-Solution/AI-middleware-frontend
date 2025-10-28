@@ -6,7 +6,7 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction} from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, formatDateTimeToDisplay, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
+import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { BookIcon, InfoIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -81,7 +81,6 @@ const Page = () => {
         <span className="capitalize">{item.service}</span>
       </div>
     ),
-    last_used: item.last_used ? formatDateTimeToDisplay(item.last_used) : "No records found",
   }));
 
   const EndComponent = ({ row }) => {
@@ -161,7 +160,7 @@ const Page = () => {
               data={items}
               columnsToShow={API_KEY_COLUMNS}
               sorting
-              sortingColumns={["name", "last_used"]}
+              sortingColumns={["name"]}
               keysToWrap={["apikey", "comment"]}
               endComponent={EndComponent}
               handleRowClick={(data) => showConnectedAgents(data)}
