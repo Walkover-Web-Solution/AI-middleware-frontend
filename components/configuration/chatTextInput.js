@@ -4,14 +4,14 @@ import { uploadImageAction } from '@/store/action/bridgeAction';
 import cloneDeep from 'lodash/cloneDeep';
 import omit from 'lodash/omit';
 import Image from 'next/image';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { CloseCircleIcon, SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon } from '@/components/Icons';
+import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon } from '@/components/Icons';
 import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
+function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
     const [uploading, setUploading] = useState(false);
     const [uploadedVideos, setUploadedVideos] = useState(null);
     const [mediaUrls, setMediaUrls] = useState(null);
@@ -47,12 +47,11 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
     
     const { isVision, isFileSupported, isVideoSupported} = useMemo(() => {
-        const validationConfig = modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig || {};
-        
+        const validationConfig = modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig || {};    
         return {
           isVision: validationConfig.vision,
           isFileSupported: validationConfig.files,
-          isVideoSupported: validationConfig.video || validationConfig.vision || service === 'gemini'
+          isVideoSupported: validationConfig.video
         };
       }, [modelInfo, service, configuration?.type, configuration?.model]);
 
@@ -89,8 +88,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             return;
         }
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
-        const images = uploadedImages?.length > 0 ? uploadedImages : [];
-        const files = uploadedFiles?.length > 0 ? uploadedFiles : [];
+        const images = uploadedImages?.length > 0 ? uploadedImages.filter(img => img !== null && img !== undefined) : [];
+        const files = uploadedFiles?.length > 0 ? uploadedFiles.filter(file => file !== null && file !== undefined) : [];
         const videos = uploadedVideos ? uploadedVideos : null;
         const urls = mediaUrls ? mediaUrls : null;
 
@@ -153,7 +152,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     isLoading: true,
                 };
                 setMessages(prev => [...prev, loadingAssistant]);
-                responseData = await dryRun({
+                const apiPayload = {
                     localDataToSend: {
                         version_id: versionId,
                         testcase_data,
@@ -169,7 +168,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                         variables
                     },
                     bridge_id: params?.id,
-                });
+                };
+                responseData = await dryRun(apiPayload);
                 // Handle unsuccessful response: rollback loading placeholder and user message
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
@@ -197,7 +197,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     isLoading: true,
                 };
                 setMessages(prev => [...prev, loadingAssistant]);
-                responseData = await dryRun({
+                
+                const embeddingPayload = {
                     localDataToSend: {
                         version_id: versionId,
                         testcase_data,
@@ -205,10 +206,16 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                             conversation: conversation,
                             type: modelType
                         },
-                        text: newMessage
+                        text: newMessage,
+                        images: images,
+                        files: files,
+                        video_data: videos,
+                        youtube_url: urls,
+                        variables
                     },
                     bridge_id: params?.id
-                });
+                };
+                responseData = await dryRun(embeddingPayload);
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
                     // remove loading placeholder and the user message we just added
@@ -233,7 +240,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     isLoading: true,
                 };
                 setMessages(prev => [...prev, loadingAssistant]);
-                responseData = await dryRun({
+                
+                const completionPayload = {
                     localDataToSend: {
                         ...localDataToSend,
                         version_id: versionId,
@@ -241,10 +249,16 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                         configuration: {
                             ...localDataToSend.configuration
                         },
-                        input: bridge?.inputConfig?.input?.input
+                        input: bridge?.inputConfig?.input?.input,
+                        images: images,
+                        files: files,
+                        video_data: videos,
+                        youtube_url: urls,
+                        variables
                     },
                     bridge_id: params?.id
-                });
+                };
+                responseData = await dryRun(completionPayload);
                 if (!responseData || !responseData.success) {
                     // remove loading placeholder if present
                     setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
@@ -386,19 +400,40 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 try {
                     const formData = new FormData();
                     const isVedio = file.type.startsWith('video/');
-                    formData.append(isVedio ? 'video' : 'image', file);
-                    const result = await dispatch(uploadImageAction(formData, isVedio));
+                    const isPdf = file.type === 'application/pdf';
+                    let isVedioOrPdf = false;
+                    if(isVedio || isPdf){
+                        isVedioOrPdf = true;
+                    }
+                    formData.append(isVedio ? 'video' : isPdf ? 'file' : 'image', file);
+                    const result = await dispatch(uploadImageAction(formData, isVedioOrPdf));
         
-                    if (result.success) {
+                    if (result && result.success) {
                         if (file.type === 'application/pdf') {
-                            setUploadedFiles(prev => [...prev, result.image_url]);
+                            const fileUrl = result.image_url || result.file_url || result.url || result.data?.url || result.data?.image_url || result.data?.file_url;
+                            if (fileUrl) {
+                                setUploadedFiles(prev => [...prev, fileUrl]);
+                            } else {
+                                console.error('No file URL found in result for PDF:', result);
+                                // Don't add null to the array, just skip
+                                toast.error('File uploaded but URL not found');
+                            }
                         } else if (file.type.startsWith('video/')) {
-                            setUploadedVideos(result.file_data); // Replace existing video
+                            const videoData = result.file_data || result.video_data || result.data || result.data?.video_data;
+                            setUploadedVideos(videoData); // Replace existing video
                         } else if (file.type.startsWith('image/')) {
-                            setUploadedImages(prev => [...prev, result.image_url]);
+                            const imageUrl = result.image_url || result.file_url || result.url || result.data?.url || result.data?.image_url || result.data?.file_url;
+                            if (imageUrl) {
+                                setUploadedImages(prev => [...prev, imageUrl]);
+                            } else {
+                                console.error('No image URL found in result for image:', result);
+                                // Don't add null to the array, just skip
+                                toast.error('Image uploaded but URL not found');
+                            }
                         }
                     } else {
-                        toast.error(result?.data?.error || result?.error || 'Upload failed');
+                        console.error('Upload failed or no success flag:', result);
+                        toast.error(result?.data?.error || result?.error || result?.message || 'Upload failed');
                     }
                 } catch (error) {
                     console.error('Error uploading file:', error);
@@ -746,15 +781,15 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                         )}
 
                         {/* URL Option */}
-                        {(isVision || isVideoSupported) && (
+                        {(isVideoSupported) && (
                             <li>
                                 <a onClick={() => handleAttachmentOption('url')} className="flex items-center gap-3 p-3">
                                     <div className="p-1.5 bg-base-100 rounded-lg">
                                         <LinkIcon size={16} className="text-base-content" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium">Add from URL</div>
-                                        <div className="text-xs text-base-content/60">Image or video URL</div>
+                                        <div className="text-sm font-medium">Add URL</div>
+                                        <div className="text-xs text-base-content/60">Youtube URL</div>
                                     </div>
                                 </a>
                             </li>

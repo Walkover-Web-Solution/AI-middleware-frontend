@@ -5,9 +5,9 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 
 // Utility and Helper APIs
-export const uploadImage = async (formData, isVedio = false) => {
+export const uploadImage = async (formData, isVedioOrPdf) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/image/processing/${isVedio ? 'video' : ''}`, formData, {
+    const response = await axios.post(`${PYTHON_URL}/image/processing/${isVedioOrPdf ? 'upload' : ''}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
