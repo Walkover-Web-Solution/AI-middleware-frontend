@@ -36,7 +36,6 @@ export const getDescriptionsAction = () => {
   return async (dispatch) => {
     try {
       const data = await getDescriptions();
-      console.log(data,"data");
       dispatch(getDescriptionsData(data.data));
     } catch (error) {
       console.error("Failed to fetch tutorial data:", error);

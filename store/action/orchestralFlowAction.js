@@ -63,4 +63,23 @@ export const updateOrchestralFlowAction = (data, orgId, orchestratorId) => async
   }
 };
 
+export const discardOrchestralFlowAction = (originalData, orgId, orchestratorId) => async (dispatch) => {
+  try {
+    const response = await updateOrchestralFlow(originalData, orchestratorId);
+    if (response.data?.data?.orchestrator_id) {
+      toast.success('Changes discarded successfully');
+      dispatch(updateOrchetralFlowDataReducer({ 
+        orgId,
+        data : {...originalData, _id: orchestratorId},
+        orchestrator_id: orchestratorId
+      }));
+    }
+    return {data:{id: orchestratorId}};
+  } catch (error) {
+    toast.error('Failed to discard changes');
+    console.error(error);
+    throw error;
+  }
+};
+
 
