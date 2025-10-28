@@ -1,7 +1,6 @@
 'use client'
 import React, { use, useMemo, Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import OrchestralErrorBoundary from '@/components/orchestral/OrchestralErrorBoundary'
 import { OrchestralDataProvider } from '@/components/orchestral/OrchestralDataProvider'
 
 export const runtime = 'edge'
