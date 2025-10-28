@@ -19,12 +19,9 @@ export const useOrchestralData = (orgId, orchestralId) => {
     state.orchestralFlowReducer.orchetralFlowData[orgId] || []
   );
 
-  console.log('useOrchestralData:', { orgId, orchestralId, orchestralFlowData });
-
   // Fetch data if not available
   useEffect(() => {
     if (orgId && !orchestralFlowData.length) {
-      console.log('Fetching orchestral flow data for org:', orgId);
       dispatch(getAllOrchestralFlowAction(orgId));
     }
   }, [dispatch, orgId, orchestralFlowData.length]);
@@ -32,22 +29,15 @@ export const useOrchestralData = (orgId, orchestralId) => {
   // Find specific orchestral data by ID
   const orchestralData = useMemo(() => {
     if (!orchestralFlowData.length || !orchestralId) {
-      console.log('No orchestral data found:', { 
-        hasData: orchestralFlowData.length > 0, 
-        hasId: !!orchestralId 
-      });
       return null;
     }
     const found = orchestralFlowData.find((item) => item._id === orchestralId);
-    console.log('Found orchestral data:', found);
     return found;
   }, [orchestralFlowData, orchestralId]);
 
   // Process updated data with memoization
   const updatedData = useMemo(() => {
     if (!orchestralData) return null;
-    
-    console.log('Processing orchestral data:', orchestralData);
     
     // Handle different data structures
     let dataToProcess;
@@ -60,11 +50,8 @@ export const useOrchestralData = (orgId, orchestralId) => {
       dataToProcess = orchestralData;
     }
     
-    console.log('Data to process:', dataToProcess);
-    
     try {
       const processedData = createNodesFromAgentDoc(dataToProcess);
-      console.log('Processed data:', processedData);
       return processedData;
     } catch (error) {
       console.error('Error processing orchestral data:', error);
