@@ -131,7 +131,7 @@ export const DOCUMENT_SECTIONS = [
       "Appends additional text to the input before generating the response. It can be used to provide extra context or direct the model's output.",
   },
 ];
-
+export const DEFAULT_PROMPT = "Role: AI Bot\nObjective: Respond logically and clearly, maintaining a neutral, automated tone.\nGuidelines:\nIdentify the task or question first.\nProvide brief reasoning before the answer or action.\nKeep responses concise and contextually relevant.\nAvoid emotion, filler, or self-reference.\nUse examples or placeholders only when helpful.";
 export const JSONFORMATDATA = [
   {
     title: "String, Number, Boolean",
