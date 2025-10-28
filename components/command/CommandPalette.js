@@ -161,7 +161,7 @@ const CommandPalette = ({isEmbedUser}) => {
 
   useEffect(() => {
     const handler = (e) => {
-      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser)) {
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org"))) {
         e.preventDefault();
         openPalette();
       }
@@ -171,7 +171,7 @@ const CommandPalette = ({isEmbedUser}) => {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [openPalette]);
+  }, [openPalette, pathname]);
 
   const navigateTo = useCallback((item) => {
     if (!orgId) {
