@@ -676,36 +676,6 @@ export function markUpdateInitiatedByCurrentTab(agentId) {
     console.error('Error marking update initiation:', error);
   }
 }
-export const formatDateTimeToDisplay = (dateString) => {
-  if (!dateString) return "Never";
-
-  try {
-    // If timestamp doesn't have timezone info, treat it as UTC
-    let processedDateString = dateString;
-    if (!dateString.includes('Z') && !dateString.includes('+') && !dateString.includes('-', 10)) {
-      processedDateString = dateString + 'Z'; // Add Z to indicate UTC
-    }
-
-    const inputDate = new Date(processedDateString);
-    if (isNaN(inputDate.getTime())) return "Invalid Date";
-
-    const formatted = inputDate.toLocaleString("en-GB", {
-      timeZone: "Asia/Kolkata",
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    });
-
-    return formatted.replace(/\//g, '-').replace(',', '');
-  } catch (error) {
-    return "Invalid Date";
-  }
-};
-
-
 
 /**
  * Check if the current tab initiated a specific agent update

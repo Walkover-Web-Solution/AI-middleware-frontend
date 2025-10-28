@@ -48,41 +48,10 @@ const CustomTable = ({
             return [...data].sort((a, b) => {
                 const valueA = activeColumn === 'name' ? a.actualName : a[activeColumn];
                 const valueB = activeColumn === 'name' ? b.actualName : b[activeColumn];
-                
                 if (activeColumn === 'totaltoken') {
                     // Sort by totaltoken in ascending order
                     return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
                 }
-                
-                // Special handling for last_used column (date/time sorting)
-                if (activeColumn === 'last_used') {
-                    // Handle special cases first - always put "No records found" at the bottom
-                    if (valueA === "No records found" || valueA === "Not used" || valueA === "Never") return 1;
-                    if (valueB === "No records found" || valueB === "Not used" || valueB === "Never") return -1;
-                    
-                    // Parse the formatted date strings back to Date objects for proper sorting
-                    // Format is "dd-mm-yy hh:mm"
-                    const parseFormattedDate = (dateStr) => {
-                        if (!dateStr || typeof dateStr !== 'string') return new Date(0);
-                        const parts = dateStr.split(' ');
-                        if (parts.length !== 2) return new Date(0);
-                        
-                        const [datePart, timePart] = parts;
-                        const [day, month, year] = datePart.split('-');
-                        const [hours, minutes] = timePart.split(':');
-                        
-                        // Convert 2-digit year to 4-digit year (assuming 20xx)
-                        const fullYear = parseInt(year) + 2000;
-                        
-                        return new Date(fullYear, parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
-                    };
-                    
-                    const dateA = parseFormattedDate(valueA);
-                    const dateB = parseFormattedDate(valueB);
-                    
-                    return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
-                }
-                
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
                     return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
                 }
@@ -293,7 +262,7 @@ const CustomTable = ({
                                             className="cursor-pointer"
                                             onClick={() => sortByColumn(column)}
                                         >
-                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column==="last_used"?"Last Used At":column}
+                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column}
                                         </span>
                                     </div>
                                 </th>
