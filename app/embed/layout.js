@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
+import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
@@ -53,7 +53,7 @@ const Layout = ({ children }) => {
             },
             'Agent created Successfully'
           );
-          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}?version=${response.data.bridge.versions[0]}`);
+          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}?version=${response.data.bridge.published_version_id || response.data.bridge.versions[0]}`);
         }
         setIsLoading(false);
         setProcessedAgentName(agent_name);
@@ -173,7 +173,10 @@ const Layout = ({ children }) => {
     const handleMessage = async (event) => {
 
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
-
+      let bridges = allBridges;
+       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+        bridges = data
+       }));
       const messageData = event.data.data.data;
       const orgId = sessionStorage.getItem('gtwy_org_id');
       if (messageData?.agent_name) {
@@ -181,18 +184,20 @@ const Layout = ({ children }) => {
         handleAgentNavigation(messageData.agent_name, orgId)
       } else if (messageData?.agent_id && orgId) {
         // setIsLoading(true);
-        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        const bridgeData = bridges.find((bridge) => bridge._id === messageData.agent_id)
+        if(!bridgeData){
+          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+          return
+        }
+        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
       }
       else if(messageData?.agent_purpose)
       {
         createNewAgent('', orgId, messageData.agent_purpose)
         setIsLoading(true);  
       }
-      if(messageData?.meta && messageData?.agent_id && orgId){
-        let bridges = allBridges;
-       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
-        bridges = data
-       }));
+      if(messageData?.meta?.length > 0 && messageData?.agent_id && orgId){
+        
        const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id)
        if(!bridge){
           return

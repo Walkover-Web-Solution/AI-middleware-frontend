@@ -831,12 +831,13 @@ export function FlowControlPanel({
     closeModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL);
   };
 
-  const handleDiscard = () => {
+  const handleDiscard = async () => {
     if (typeof onDiscard === 'function') {
-      onDiscard();
+      await onDiscard();
       return;
     }
 
+    // If no custom discard handler, just reset local state
     setIsChatOpen(false);
     setSaveData({
       name: name || '',

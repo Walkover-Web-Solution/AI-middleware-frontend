@@ -7,6 +7,7 @@ import { ClipboardXIcon } from '../Icons';
 
 const DeleteModal = ({   
   onConfirm = () => {}, 
+  onCancel,
   item,
   name,
   title = "Are you sure?",
@@ -15,7 +16,11 @@ const DeleteModal = ({
   modalType = MODAL_TYPE.DELETE_MODAL
 }) => {
 const handleClose=()=>{
-    closeModal(modalType);
+    if (onCancel) {
+      onCancel();
+    } else {
+      closeModal(modalType);
+    }
 }
 
   return (
