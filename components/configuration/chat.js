@@ -495,17 +495,23 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                       <div className="mt-2">
                         {message?.images?.length > 0 && (
                           <div className="flex flex-wrap items-end justify-end">
-                            {message.images.map((url, imgIndex) => (
-                              <Image
-                                key={imgIndex}
-                                src={url}
-                                alt={`Message Image ${imgIndex + 1}`}
-                                width={80}
-                                height={80}
-                                className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
-                                onClick={() => window.open(url, "_blank")}
-                              />
-                            ))}
+                            {message.images.map((url, imgIndex) => {
+                              // Safety check to ensure url is defined and is a string
+                              if (!url || typeof url !== 'string') {
+                                return null;
+                              }
+                              return (
+                                <Image
+                                  key={imgIndex}
+                                  src={url}
+                                  alt={`Message Image ${imgIndex + 1}`}
+                                  width={80}
+                                  height={80}
+                                  className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
+                                  onClick={() => window.open(url, "_blank")}
+                                />
+                              );
+                            })}
                           </div>
                         )}
 
@@ -549,20 +555,26 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
                         {message?.files?.length > 0 && (
                           <div className="flex flex-wrap items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
-                            {message.files.map((url, fileIndex) => (
-                              <a
-                                key={fileIndex}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center space-x-1 hover:underline"
-                              >
-                                <PdfIcon height={20} width={20} />
-                                <span className="text-sm overflow-hidden truncate max-w-[10rem]">
-                                  {truncate(url.split("/").pop(), 20)}
-                                </span>
-                              </a>
-                            ))}
+                            {message.files.map((url, fileIndex) => {
+                              // Safety check to ensure url is defined and is a string
+                              if (!url || typeof url !== 'string') {
+                                return null;
+                              }
+                              return (
+                                <a
+                                  key={fileIndex}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center space-x-1 hover:underline"
+                                >
+                                  <PdfIcon height={20} width={20} />
+                                  <span className="text-sm overflow-hidden truncate max-w-[10rem]">
+                                    {truncate(url.split("/").pop(), 20)}
+                                  </span>
+                                </a>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
