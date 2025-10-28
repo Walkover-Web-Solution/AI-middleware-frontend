@@ -49,7 +49,6 @@ export const updateOrchestralFlowAction = (data, orgId, orchestratorId) => async
   try {
     const response = await updateOrchestralFlow(data, orchestratorId);
     if (response.data?.data?.orchestrator_id) {
-      toast.success(response?.data?.message);
       dispatch(updateOrchetralFlowDataReducer({ 
         orgId,
         data : {...data, _id: orchestratorId},

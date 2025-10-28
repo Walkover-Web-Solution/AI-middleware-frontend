@@ -377,9 +377,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   }, [params]);
 
   const [shouldLayout, setShouldLayout] = useState(false);
-  const [isModified, setIsModified] = useState(false);
   const [masterAgent, setMasterAgent] = useState(null);
-  const [isDiscard, setIsDiscard] = useState(false);
   const [isVariableModified, setIsVariableModified] = useState(false);
   const [isFlowReady, setIsFlowReady] = useState(false);
 
@@ -477,7 +475,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           };
 
           if (params.orchestralId) {
-            await updateOrchestralFlow(saveStructure, params.orchestralId);
+             dispatch(updateOrchestralFlowAction(saveStructure, params.org_id, params.orchestralId));
           } else {
             const response = await createNewOrchestralFlow(saveStructure);
             if (response.data?.data?.orchestrator_id && !params.orchestralId) {
@@ -584,15 +582,13 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     );
     debouncedSave()
 
-    setIsModified(true);
     setIsVariableModified(true);
+    
+    // Always set status to 'draft' when flow is modified (nodes/edges change)
+    if (orchestralData) {
+      orchestralData.status = 'draft';
+    }
   }, [nodes, edges, selectedAgent, variablesPath, toolData]);
-
-  useEffect(() => {
-    setIsModified(
-      isDrafted 
-    );
-  }, [nodes, edges, isDrafted, orchestralData]);
 
   const [sidebar, setSidebar] = useState({
     isOpen: false,
@@ -719,22 +715,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         // Use Redux action to discard changes with serialized data
         await dispatch(discardOrchestralFlowAction(discardStructure, orgId, orchestralId));
       }
-      
-      // Reset UI state after successful API call
-      setNodes(() => {
-        const seed = discardedData?.nodes ?? (Array.isArray(discardedData) ? discardedData : []) ?? [];
-        return seed.map((node) => ({ ...node, data: { ...(node.data || {}), onFlowChange: null, openSidebar: null } }));
-      });
-      setEdges(() => discardedData?.edges ?? []);
-      setSelectedBridgeType(() => {
-        const bridgeNode =
-          (discardedData?.nodes || []).find?.((n) => n.type === 'bridgeNode') ||
-          (Array.isArray(discardedData) ? discardedData.find((n) => n.type === 'bridgeNode') : null);
-        return bridgeNode?.data?.bridgeType || '';
-      });
-      setIsDiscard((v) => !v);
-      setIsVariableModified(false);
-      setIsModified(false);
     } catch (error) {
       console.error('Error discarding changes:', error);
       // Error toast is already handled in the Redux action
@@ -784,7 +764,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       setShouldLayout(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orchestralData, isDiscard]);
+  }, [orchestralData]);
 
   const selectAgentForNode = useCallback((nodeId, agent) => {
     setNodes((nds) => nds.map((n) => {
@@ -1004,7 +984,13 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             ? updateOrchestralFlowAction(agentStructure, params.org_id, params.orchestralId)
             : createNewOrchestralFlowAction(agentStructure, params.org_id)
         ).then((response) => response.data.id);
+        
+        // Set status to 'publish' after successful save and reset variable flag
+        if (orchestralData) {
+          orchestralData.status = 'publish';
+        }
         setIsVariableModified(false);
+        
         if (id && !metadata.createdFlow) router.push(`/org/${params.org_id}/orchestratal_model/${id}`);
       } catch (error) {
         console.error('Error saving agent structure:', error);
@@ -1203,7 +1189,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         name={name}
         description={description}
         createdFlow={createdFlow}
-        isModified={isModified}
+        isModified={isDrafted}
         setIsLoading={setIsLoading}
         params={params}
         isVariableModified={isVariableModified}
@@ -1299,7 +1285,14 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 }
 
 /* ========================= Wrapper ========================= */
-const AgentToAgentConnection = ({ params, orchestralData = [], name, description, createdFlow = false, setIsLoading, isDrafted = false, discardedData, isEmbedUser }) => {
+const AgentToAgentConnection = ({ params, orchestralData = [], name, description, createdFlow = false, setIsLoading, discardedData, isEmbedUser }) => {
+  const orchestralFlowData = useCustomSelector((state) =>
+    state.orchestralFlowReducer.orchetralFlowData[params.org_id].find((item) => item._id === params.orchestralId)?.status || []
+  );
+  const [isDrafted, setIsDrafted] = useState(false);
+  useEffect(() => {
+    setIsDrafted(orchestralFlowData === 'draft');
+  }, [orchestralFlowData]);
   return (
     <ReactFlowProvider>
       <Flow
