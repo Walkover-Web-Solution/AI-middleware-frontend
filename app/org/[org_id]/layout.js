@@ -204,9 +204,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data?.length === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
-          openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)
-        }
         setLoading(false);
       }))
       dispatch(getAllFunctions())

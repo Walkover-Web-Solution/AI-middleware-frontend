@@ -7,9 +7,10 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction} from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, formatDateTimeToDisplay, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { BookIcon, InfoIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
+import { BookIcon, InfoIcon, SquarePenIcon, TrashIcon, FilterSliderIcon } from '@/components/Icons';
+import { Funnel } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
@@ -28,10 +29,55 @@ const Page = () => {
     descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
+  const [lastUsedFilter, setLastUsedFilter] = useState(''); // '', 'all', '24h', '7d', '30d'
 
   useEffect(() => {
     setFilterApiKeys(apikeyData);
   }, [apikeyData]);
+
+  // Filter data based on Last Used At time period
+  const applyLastUsedFilter = useCallback((apiKeys, filterValue) => {
+    if (filterValue === 'all' || filterValue === '') return apiKeys;
+    
+    const now = new Date();
+    let filterDate;
+    
+    switch (filterValue) {
+      case '24h':
+        filterDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        filterDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        filterDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return apiKeys;
+    }
+    
+    return apiKeys.filter(apiKey => {
+      const lastUsedValue = apiKey.last_used;
+      
+      // Skip filtering for special values
+      if (!lastUsedValue || 
+          lastUsedValue === "No records found" || 
+          lastUsedValue === "Not used" || 
+          lastUsedValue === "Never" ||
+          lastUsedValue === "-") {
+        return false; // Don't show these when filtering by time
+      }
+      
+      // Parse the ISO date string
+      const lastUsedDate = new Date(lastUsedValue);
+      return lastUsedDate >= filterDate;
+    });
+  }, []);
+
+  // Handle filter change for Last Used At
+  const handleLastUsedFilterChange = useCallback((filterValue) => {
+    setLastUsedFilter(filterValue);
+  }, []);
 
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -72,7 +118,12 @@ const Page = () => {
     openModal(MODAL_TYPE.CONNECTED_AGENTS_MODAL);
   }, []);
 
-  const dataWithIcons = filterApiKeys.map((item) => ({
+  // Apply last used filter to the API keys
+  const lastUsedFilteredApiKeys = useMemo(() => {
+    return applyLastUsedFilter(filterApiKeys, lastUsedFilter);
+  }, [filterApiKeys, lastUsedFilter, applyLastUsedFilter]);
+
+  const dataWithIcons = lastUsedFilteredApiKeys.map((item) => ({
     ...item,
     actualName: item.name,
     service: (
@@ -125,23 +176,37 @@ const Page = () => {
         
         </div>
       </MainLayout>
-      <div className="flex flex-row gap-4 justify-between ">
-
-      {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>}
-      <div className={`${apikeyData?.length<=5 ? 'ml-auto ' : ''} flex-shrink-0 flex gap-4 mr-2`}>
-            <button 
-              className="btn" 
-              onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
-            >
-             <BookIcon />  APIKey Guide
-            </button>
-            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
-              + Add New ApiKey
-            </button>
+      <div className="flex flex-row gap-4 justify-between">
+          {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>}
+        <div className="flex-shrink-0 flex gap-4 items-center mr-2">
+          {/* Last Used At Filter */}
+          <div className="relative">
+            <Funnel size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/70 pointer-events-none z-10" />
+            <select 
+              value={lastUsedFilter} 
+              onChange={(e) => handleLastUsedFilterChange(e.target.value)}
+              className="select select-sm select-bordered w-auto min-w-fit pl-10"
+            > 
+              <option disabled value="">Last used at</option>
+              <option value="all">All Time</option>
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+            </select>
           </div>
+          <button 
+            className="btn" 
+            onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
+          >
+           <BookIcon />  APIKey Guide
+          </button>
+          <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
+            + Add New ApiKey
+          </button>
+        </div>
       </div>
       </div>
-      {filterApiKeys.length > 0 ? (
+      {lastUsedFilteredApiKeys.length > 0 ? (
         Object.entries(
           dataWithIcons.reduce((acc, item) => {
             const service = item.service.props.children[1].props.children;

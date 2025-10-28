@@ -14,14 +14,14 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { formatDateTimeToDisplay } from "@/utils/utility";
 
-import { ClockIcon, EllipsisIcon } from "@/components/Icons";
+import { ClockIcon, EllipsisIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
 import AgentEmptyState from "@/components/AgentEmptyState";
-import { Archive, ArchiveRestore, Pause, Play } from "lucide-react";
+import { Archive, ArchiveRestore, Funnel, Pause, Play } from "lucide-react";
 
 export const runtime = 'edge';
 
@@ -49,6 +49,7 @@ function Home({ params, isEmbedUser }) {
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
   const [loadingAgentId, setLoadingAgentId] = useState(null);
+  const [lastUsedFilter, setLastUsedFilter] = useState(''); // '', 'all', '24h', '7d', '30d'
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
@@ -57,6 +58,50 @@ function Home({ params, isEmbedUser }) {
   useEffect(() => {
     setFilterBridges(allBridges)
   }, [allBridges]);
+
+  // Filter data based on Last Used At time period
+  const applyLastUsedFilter = useCallback((bridges, filterValue) => {
+    if (filterValue === 'all' || filterValue === '' || !filterValue) return bridges;
+    
+    const now = new Date();
+    let filterDate;
+    
+    switch (filterValue) {
+      case '24h':
+        filterDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        filterDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        filterDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return bridges;
+    }
+    
+    return bridges.filter(bridge => {
+      const lastUsedValue = bridge.last_used;
+      
+      // Skip filtering for special values
+      if (!lastUsedValue || 
+          lastUsedValue === "No records found" || 
+          lastUsedValue === "Not used" || 
+          lastUsedValue === "Never" ||
+          lastUsedValue === "-") {
+        return false; // Don't show these when filtering by time
+      }
+      
+      // Parse the ISO date string
+      const lastUsedDate = new Date(lastUsedValue);
+      return lastUsedDate >= filterDate;
+    });
+  }, []);
+
+  // Handle filter change for Last Used At
+  const handleLastUsedFilterChange = useCallback((filterValue) => {
+    setLastUsedFilter(filterValue);
+  }, []);
 
   // Reset loading state when component unmounts or navigation completes
   useEffect(() => {
@@ -73,8 +118,13 @@ function Home({ params, isEmbedUser }) {
   }, []);
 
   
-  const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0);
-  const filteredUnArchivedBridges = filterBridges?.filter((item) => item.status === 1 || item.status === undefined);
+  // Apply last used filter to the bridges
+  const lastUsedFilteredBridges = useMemo(() => {
+    return applyLastUsedFilter(filterBridges, lastUsedFilter);
+  }, [filterBridges, lastUsedFilter, applyLastUsedFilter]);
+  
+  const filteredArchivedBridges = lastUsedFilteredBridges?.filter((item) => item.status === 0);
+  const filteredUnArchivedBridges = lastUsedFilteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
 
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
@@ -301,15 +351,34 @@ function Home({ params, isEmbedUser }) {
                   </MainLayout>
                   
                   <div className="flex flex-row gap-4 justify-between ">
-                    {allBridges.length > 5 && (
-                      <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
-                    )}
-                    <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-auto mr-2'}`}>
-                        <button className="btn btn-primary " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                      {allBridges.length > 5 && (
+                        <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
+                      )}
+                    <div className="flex gap-4 items-center mr-2">
+                      {/* Last Used At Filter */}
+                      <div className="relative">
+                        <Funnel size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/70 pointer-events-none z-10" />
+                        <select 
+                          value={lastUsedFilter} 
+                          onChange={(e) => handleLastUsedFilterChange(e.target.value)}
+                          className="select select-sm select-bordered w-auto min-w-fit pl-10"
+                        >
+                          <option disabled value="">Last used at</option>
+                          <option value="all">All Time</option>
+                          <option value="24h">Last 24 Hours</option>
+                          <option value="7d">Last 7 Days</option>
+                          <option value="30d">Last 30 Days</option>
+                        </select>
                       </div>
+                      <button className="btn btn-primary " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                    </div>
                   </div>
                 </div>
-                
+                    {filteredUnArchivedBridges?.length === 0 && filteredArchivedBridges?.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 text-lg">No agents entries found</p>
+                      </div>
+                    ) : (
                 <CustomTable 
                   data={UnArchivedBridges} 
                   columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
@@ -320,6 +389,7 @@ function Home({ params, isEmbedUser }) {
                   keysToWrap={['name', 'model']} 
                   endComponent={EndComponent} 
                 />
+                )}
                 
                 {filteredArchivedBridges?.length > 0 && (
                   <div className="">
@@ -333,9 +403,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60">
                       <CustomTable 
                         data={ArchivedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                         keysToExtractOnRowClick={['_id', 'versionId']} 
                         keysToWrap={['name', 'prompt', 'model']} 
