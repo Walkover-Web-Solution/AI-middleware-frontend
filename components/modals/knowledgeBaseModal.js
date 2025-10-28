@@ -15,6 +15,10 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
   const [chunkingType, setChunkingType] = useState('');
   const [file, setFile] = useState(null); // State to hold the uploaded file
   const [isUpload, setIsUpload] = useState(false); // State to toggle between link and upload
+  const [ischanged, setischanged] = useState({
+    isAdd: false,
+    isUpdate: false
+  });
 
   const resetModal = useCallback(() => {
     setSelectedSectionType('default');
@@ -23,7 +27,68 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsUpload(false);
     setIsLoading(false);
     setSelectedKnowledgeBase(null);
+    setischanged({
+      isAdd: false,
+      isUpdate: false
+    });
   }, [selectedKnowledgeBase]);
+
+  // Reset ischanged state when modal opens/closes
+  useEffect(() => {
+    setischanged({
+      isAdd: false,
+      isUpdate: false
+    });
+  }, [selectedKnowledgeBase]);
+
+  // Handle form input changes
+  const handleFormChange = useCallback((event) => {
+    const form = event.target.form;
+    const formData = new FormData(form);
+    
+    const currentData = {
+      name: formData.get('name') || '',
+      description: formData.get('description') || '',
+      url: formData.get('url') || '',
+      chunk_size: formData.get('chunk_size') || '',
+      chunk_overlap: formData.get('chunk_overlap') || ''
+    };
+
+    // Check if all required fields are filled for Add mode
+    const requiredFields = ['name', 'description'];
+    let allRequiredFilled = requiredFields.every(field => 
+      currentData[field] && currentData[field].trim().length > 0
+    );
+
+    // Additional validation for add mode
+    if (!selectedKnowledgeBase) {
+      if (!isUpload) {
+        // Link mode: URL is required
+        allRequiredFilled = allRequiredFilled && currentData.url && currentData.url.trim().length > 0;
+      } else {
+        // Upload mode: file is required
+        allRequiredFilled = allRequiredFilled && file !== null;
+      }
+    }
+
+    if (selectedKnowledgeBase) {
+      // For update mode: check if any field has changed
+      const hasChanges = 
+        currentData.name !== (selectedKnowledgeBase.name || '') ||
+        currentData.description !== (selectedKnowledgeBase.description || '');
+      
+      setischanged(prev => ({
+        ...prev,
+        isUpdate: hasChanges
+      }));
+    } else {
+      // For add mode: check if all required fields are filled
+      setischanged(prev => ({
+        ...prev,
+        isAdd: allRequiredFilled
+      }));
+    }
+  }, [selectedKnowledgeBase, isUpload, file]);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -123,6 +188,8 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
     if (selectedFile && validFileTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
+      // Trigger form validation after file selection
+      setTimeout(() => handleFormChange(event), 0);
     } else {
       alert('Please upload a valid file (PDF, Word, or CSV).');
       setFile(null);
@@ -160,6 +227,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   disabled={isLoading}
                   key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.name || ''}
+                  onChange={handleFormChange}
                 />
               </div>
 
@@ -175,6 +243,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   disabled={isLoading}
                   key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.description || ''}
+                  onChange={handleFormChange}
                 />
               </div>
 
@@ -220,6 +289,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                     required={!selectedKnowledgeBase}
                     disabled={isLoading || selectedKnowledgeBase}
                     defaultValue={selectedKnowledgeBase?.source?.data?.url || ''}
+                    onChange={handleFormChange}
                   />
                 </div>
               ) : (
@@ -330,8 +400,12 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             </button>
             <button
               type="submit"
-              className="btn btn-primary hover:bg-primary-focus"
-              disabled={isLoading}
+              className={`btn btn-primary hover:bg-primary-focus ${
+                (selectedKnowledgeBase && !ischanged.isUpdate) || (!selectedKnowledgeBase && !ischanged.isAdd) 
+                  ? 'btn-disabled' 
+                  : ''
+              }`}
+              disabled={isLoading || (selectedKnowledgeBase && !ischanged.isUpdate) || (!selectedKnowledgeBase && !ischanged.isAdd)}
             >
               {isLoading ? (selectedKnowledgeBase ? 'Updating...' : 'Creating...') : (selectedKnowledgeBase ? 'Update' : 'Create') + ' Knowledge Base'}
             </button>

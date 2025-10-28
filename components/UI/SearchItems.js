@@ -35,7 +35,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
         <input
           type="text"
           aria-label={`Search ${item} by Name, SlugName, Service, or ID`}
-          placeholder="Search..."
+          placeholder="Search"
           className={`${style ? style : 'input w-full mb-1 border border-base-content/50 pr-10'}`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

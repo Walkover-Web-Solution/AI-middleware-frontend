@@ -211,8 +211,9 @@ const maskAuthKey = (authkey) => {
                   }
                 }
               }}
-              placeholder="Insert Auth Name"
+              placeholder="Enter Auth Key Name"
               required
+              maxLength={25}
             />
           </label>
           <div className="modal-action">
