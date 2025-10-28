@@ -4,7 +4,7 @@ import { Save, Upload } from 'lucide-react'
 import { closeModal } from '@/utils/utility'
 import { MODAL_TYPE } from '@/utils/enums'
 
-const CreateNewOrchestralFlowModal = ({ handleCreateNewFlow, createdFlow, saveData, setSaveData }) => {
+const CreateNewOrchestralFlowModal = ({ handleCreateNewFlow, createdFlow, saveData, setSaveData, resetSaveData }) => {
     const handleChange = (e) => {
         setSaveData({ ...saveData, [e.target.name]: e.target.value })
     }
@@ -49,7 +49,7 @@ const CreateNewOrchestralFlowModal = ({ handleCreateNewFlow, createdFlow, saveDa
                     </div>
 
                     <div className="card-actions justify-end mt-4">
-                        <button className="btn btn-ghost" onClick={() => { closeModal(MODAL_TYPE.CREATE_ORCHESTRAL_FLOW_MODAL); setSaveData({ ...saveData, name: '', description: '' }) }}>Cancel</button>
+                        <button className="btn btn-ghost" onClick={() => { closeModal(MODAL_TYPE.CREATE_ORCHESTRAL_FLOW_MODAL); resetSaveData?.(); }}>Cancel</button>
                         <button className="btn btn-primary" onClick={handleCreateNewFlow}>
                             {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
                             {createdFlow ? 'Update Flow' : 'Create Flow'}

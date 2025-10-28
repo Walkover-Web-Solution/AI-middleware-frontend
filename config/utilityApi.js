@@ -5,9 +5,9 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 
 // Utility and Helper APIs
-export const uploadImage = async (formData) => {
+export const uploadImage = async (formData, isVedioOrPdf) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/image/processing/`, formData, {
+    const response = await axios.post(`${PYTHON_URL}/image/processing/${isVedioOrPdf ? 'upload' : ''}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -16,7 +16,7 @@ export const uploadImage = async (formData) => {
   } catch (error) {
     console.error('Error uploading image:', error);
     // Extract error message if available
-    const errorMessage = error.response?.data?.message || error.message || 'File upload failed.';
+    const errorMessage = error.response?.data?.message || error.response?.data?.detail?.error || error.message || 'File upload failed.';
     throw new Error(errorMessage);
   }
 };

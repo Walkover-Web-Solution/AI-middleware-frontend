@@ -541,7 +541,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           </InfiniteScroll>
         )}
       </div>
-      <div className="fixed bottom-2 left-12">
+      {/* <div className="fixed bottom-2 left-12">
         {!isThreadSelectable && historyData?.length > 0 && (
           <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm ml-20">
             Generate Fine tuning file
@@ -561,7 +561,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             </button>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 });

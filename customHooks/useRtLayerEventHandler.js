@@ -128,7 +128,7 @@ function useRtLayerEventHandler() {
         } catch (error) {
             console.error("Error parsing message data:", error);
         }
-    }, [dispatch]);
+    }, [dispatch,pathName]);
     
     // WebSocket client initialization with retry logic
     const initializeWebSocketClient = useCallback(async () => {

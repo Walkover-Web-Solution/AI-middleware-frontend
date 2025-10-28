@@ -299,12 +299,13 @@ export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dis
   }
 }
 
-export const uploadImageAction = (formData) => async (dispatch) => {
+export const uploadImageAction = (formData, isVedioOrPdf) => async (dispatch) => {
   try {
-    const response = await uploadImage(formData);
+    const response = await uploadImage(formData, isVedioOrPdf);
     return response;
   } catch (error) {
     console.error('Error uploading image:', error);
+    throw error;
   }
 }
 

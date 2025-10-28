@@ -434,7 +434,6 @@ function FunctionParameterModal({
   }, [toolData, tool_name, isToolNameManuallyChanged]);
 
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
-  console.log("properties", properties);
   const isDataAvailable = useMemo(() => Object.keys(properties).length > 0, [properties]);
 
   const [isModified, setIsModified] = useState(false);
@@ -1076,45 +1075,17 @@ function FunctionParameterModal({
           <div className="flex justify-between w-full items-center">
           <h2 className="text-lg font-semibold">Config {name}</h2>
           <div className="flex justify-end gap-2 mt-1">
-            <div className="dropdown">
-              <div 
-                tabIndex={0} 
-                role="button" 
-                className="btn btn-xs btn-outline flex items-center justify-between gap-2 min-w-20 text-xs"
-              >
-                <span className="text-xs">{isTextareaVisible ? 'Advanced' : 'Simple'}</span>
-                <ChevronsUpDown size={14} />
-              </div>
-              <ul 
-                tabIndex={0} 
-                className="dropdown-content menu bg-base-100 rounded-box z-[1] w-20 p-1 shadow border border-base-300 text-xs"
-              >
-                <li>
-                  <a 
-                    onClick={() => {
-                      if (isTextareaVisible) {
-                        handleToggleChange({ target: { checked: false } });
-                      }
-                    }}
-                    className={`text-xs py-1 px-2 ${!isTextareaVisible ? 'active' : ''}`}
-                  >
-                    Simple
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    onClick={() => {
-                      if (!isTextareaVisible) {
-                        handleToggleChange({ target: { checked: true } });
-                      }
-                    }}
-                    className={`text-xs py-1 px-2 ${isTextareaVisible ? 'active' : ''}`}
-                  >
-                    Advanced
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <select 
+              className="select select-xs select-bordered text-xs min-w-20"
+              value={isTextareaVisible ? 'advanced' : 'simple'}
+              onChange={(e) => {
+                const isAdvanced = e.target.value === 'advanced';
+                handleToggleChange({ target: { checked: isAdvanced } });
+              }}
+            >
+              <option value="simple">Simple</option>
+              <option value="advanced">Advanced</option>
+            </select>
             {isTextareaVisible && (
               <div className="flex items-center text-xs gap-2">
                 <CopyIcon
@@ -1330,7 +1301,7 @@ function FunctionParameterModal({
                   />
                 ))
               ) : (
-                <div className="flex items-center justify-center h-full min-h-[200px]">
+                <div className="flex items-center justify-center h-full min-h-[100px]">
                   <div className="text-xs opacity-60 text-gray-500 text-center">
                     No parameters defined yet. Click the "+ Parameter" button above to add your first parameter.
                   </div>

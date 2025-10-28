@@ -59,7 +59,7 @@ const CommandPalette = ({isEmbedUser}) => {
           const published = a?.published_version_id ? [a.published_version_id] : [];
           const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
           // Filter candidates that contain the query (case-insensitive)
-          const matches = candidates.filter((v) => v.toLowerCase().includes(q));
+          const matches = candidates.filter((v) => v.toLowerCase() === q.toLowerCase());
           // De-duplicate matches
           const unique = Array.from(new Set(matches));
           return unique.map((v) => ({
@@ -115,8 +115,8 @@ const CommandPalette = ({isEmbedUser}) => {
 
     return {
       // Combine normal agent matches with version-id based matches
-      agents: [...agentsGroup, ...agentsVersionMatches],
-      flows: orchestralFlowGroup,
+      agents: [...new Set([...agentsGroup, ...agentsVersionMatches])],
+      flows:orchestralFlowGroup,
       apikeys: apikeysGroup,
       docs: kbGroup,
       // functions: functionsGroup,
@@ -161,7 +161,7 @@ const CommandPalette = ({isEmbedUser}) => {
 
   useEffect(() => {
     const handler = (e) => {
-      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser)) {
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org"))) {
         e.preventDefault();
         openPalette();
       }
@@ -171,7 +171,7 @@ const CommandPalette = ({isEmbedUser}) => {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [openPalette]);
+  }, [openPalette, pathname]);
 
   const navigateTo = useCallback((item) => {
     if (!orgId) {

@@ -166,7 +166,7 @@ const maskAuthKey = (authkey) => {
           <div className="flex justify-center items-center h-64">
             <LoadingSpinner />
           </div>
-        ) : (
+        ) : filterPauthKeys.length > 0 ? (
           <div>
             <CustomTable
               data={filterPauthKeys.map(item => ({
@@ -182,6 +182,10 @@ const maskAuthKey = (authkey) => {
               endComponent={EndComponent}
             />
             {isCreating && <LoadingSpinner />}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500 text-lg">No auth keys entries found</p>
           </div>
         )}
       </div>
@@ -207,8 +211,9 @@ const maskAuthKey = (authkey) => {
                   }
                 }
               }}
-              placeholder="Insert Auth Name"
+              placeholder="Enter Auth Key Name"
               required
+              maxLength={25}
             />
           </label>
           <div className="modal-action">

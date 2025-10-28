@@ -39,6 +39,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const testCaseResultRef = useRef(null);
 
   const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
 
@@ -48,6 +49,22 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
   }, [messages]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // Check if click is outside test case result and not on a toggle button
+      const isToggleButton = event.target.closest('button[class*="absolute -bottom-8"]');
+      if (testCaseResultRef.current && 
+          !testCaseResultRef.current.contains(event.target) && 
+          !isToggleButton) {
+        setShowTestCaseResults({});
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleResetChat = () => {
     setTestCaseId(null);
@@ -163,9 +180,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     setErrorMessage("");
     inputRef.current.value = "";
     setLoading(true);
+    const timestamp = Date.now();
+    const tempAssistantId = `assistant_${timestamp}`;
     try {
       // Generate unique IDs using timestamp to avoid conflicts
-      const timestamp = Date.now();
       const newChat = {
         id: `user_${timestamp}`,
         sender: "user",
@@ -185,7 +203,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       setMessages(prevMessages => [...prevMessages, newChat]);
 
       // Insert a temporary assistant "typing" message
-      const tempAssistantId = `assistant_${timestamp}`;
       const loadingAssistant = {
         id: tempAssistantId,
         sender: "assistant",
@@ -239,7 +256,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         modelName: assistConversation?.model,
         finish_reason: assistConversation?.finish_reason
       };
-
       // Replace the temporary loading message with the actual response
       setMessages(prevMessages => {
         const updatedMessages = prevMessages.map(m => m.id === tempAssistantId ? newChatAssist : m);
@@ -248,8 +264,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     } catch (error) {
       console.log(error);
       setErrorMessage("Something went wrong. Please try again.");
-      // Remove the temporary loading assistant message on error
-      setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
+      // Restore the user message to the input field
+      if (inputRef.current) {
+        inputRef.current.value = newMessage;
+      }
+      // Remove both the temporary loading assistant message and the user message on error
+      const userMessageId = `user_${timestamp}`;
+      setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== userMessageId));
     } finally {
       setLoading(false);
       setUploadedImages([]);
@@ -280,6 +301,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         testCaseResult: data?.results?.[0]
       }
       setMessages(updatedMessages)
+      
+      // Automatically show the test case results card after running the test
+      const nextMessageId = updatedMessages[index + 1].id;
+      setShowTestCaseResults(prev => ({
+        ...prev,
+        [nextMessageId]: true
+      }));
     } finally {
       setIsRunningTestCase(false)
       setCurrentRunIndex(null)
@@ -463,40 +491,90 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                         )}
                     </div>
 
-                    {(message?.images?.length > 0 || message?.files?.length > 0) && (
+                    {(message?.images?.length > 0 || message?.files?.length > 0 || message?.video_data || message?.youtube_url) && (
                       <div className="mt-2">
                         {message?.images?.length > 0 && (
                           <div className="flex flex-wrap items-end justify-end">
-                            {message.images.map((url, imgIndex) => (
-                              <Image
-                                key={imgIndex}
-                                src={url}
-                                alt={`Message Image ${imgIndex + 1}`}
-                                width={80}
-                                height={80}
-                                className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
-                                onClick={() => window.open(url, "_blank")}
+                            {message.images.map((url, imgIndex) => {
+                              // Safety check to ensure url is defined and is a string
+                              if (!url || typeof url !== 'string') {
+                                return null;
+                              }
+                              return (
+                                <Image
+                                  key={imgIndex}
+                                  src={url}
+                                  alt={`Message Image ${imgIndex + 1}`}
+                                  width={80}
+                                  height={80}
+                                  className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
+                                  onClick={() => window.open(url, "_blank")}
+                                />
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {message?.video_data && (
+                          <div className="flex flex-wrap items-end justify-end">
+                            <div className="relative m-1">
+                              <video
+                                src={message.video_data?.uri}
+                                width={160}
+                                height={120}
+                                className="w-40 h-30 object-cover rounded-lg cursor-pointer"
+                                controls
+                                preload="metadata"
+                                onClick={() => window.open(message.video_data?.uri, "_blank")}
                               />
-                            ))}
+                              <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                Video
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {message?.youtube_url && (
+                          <div className="flex flex-wrap items-end justify-end">
+                            <div className="m-1 bg-base-200 p-3 rounded-lg border border-base-content/30">
+                              <div className="flex items-center gap-2 mb-2">
+                                <PlayIcon size={16} className="text-red-500" />
+                                <span className="text-sm font-medium">YouTube Video</span>
+                              </div>
+                              <a
+                                href={message.youtube_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-500 hover:underline block truncate max-w-[200px]"
+                              >
+                                {message.youtube_url}
+                              </a>
+                            </div>
                           </div>
                         )}
 
                         {message?.files?.length > 0 && (
                           <div className="flex flex-wrap items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
-                            {message.files.map((url, fileIndex) => (
-                              <a
-                                key={fileIndex}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center space-x-1 hover:underline"
-                              >
-                                <PdfIcon height={20} width={20} />
-                                <span className="text-sm overflow-hidden truncate max-w-[10rem]">
-                                  {truncate(url.split("/").pop(), 20)}
-                                </span>
-                              </a>
-                            ))}
+                            {message.files.map((url, fileIndex) => {
+                              // Safety check to ensure url is defined and is a string
+                              if (!url || typeof url !== 'string') {
+                                return null;
+                              }
+                              return (
+                                <a
+                                  key={fileIndex}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center space-x-1 hover:underline"
+                                >
+                                  <PdfIcon height={20} width={20} />
+                                  <span className="text-sm overflow-hidden truncate max-w-[10rem]">
+                                    {truncate(url.split("/").pop(), 20)}
+                                  </span>
+                                </a>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -551,9 +629,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
                           {/* Show either assistant message or test case result */}
                           {message?.testCaseResult && showTestCaseResults[message.id] ? (
-                            /* Test Case Result Display */
-                            <div className="chat-bubble gap-0 relative min-w-full">
-                              <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
+                            <div ref={testCaseResultRef}>
+                              {/* Test Case Result Display */}
+                              <div className="chat-bubble gap-0 relative min-w-full">
+                                <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
                                 {/* Header */}
                                 <div className="flex items-center gap-2 mb-4">
                                   <Target className="h-4 w-4" />
@@ -606,6 +685,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                 </div>
                               </div>
                             </div>
+                          </div>
                           ) : (
                             /* Regular Assistant/User/Expected Message - Show model answer if testcase was run */
                             <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
@@ -703,10 +783,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                           {/* Absolute Toggle Button for Test Case Results */}
                           {message?.testCaseResult && (
                             <button
-                              onClick={() => setShowTestCaseResults(prev => ({
-                                ...prev,
-                                [message.id]: !prev[message.id]
-                              }))}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowTestCaseResults(prev => ({
+                                  ...prev,
+                                  [message.id]: !prev[message.id]
+                                }));
+                              }}
                               className="absolute -bottom-8 left-4 flex items-center gap-2 text-xs text-base-content/70 hover:text-base-content transition-colors px-2 py-1 rounded-full bg-base-100 border border-base-content/20 shadow-sm hover:bg-base-200/50"
                             >
                               {showTestCaseResults[message.id] ? (

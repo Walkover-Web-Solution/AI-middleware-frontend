@@ -815,6 +815,25 @@ export function FlowControlPanel({
     description: description || '',
     status: 'publish',
   });
+
+  // Sync saveData with props when they change
+  useEffect(() => {
+    setSaveData(prev => ({
+      ...prev,
+      name: name || '',
+      description: description || '',
+    }));
+  }, [name, description]);
+
+  // Reset function to restore original values
+  const resetSaveData = useCallback(() => {
+    setSaveData({
+      name: name || '',
+      description: description || '',
+      status: 'publish',
+    });
+  }, [name, description]);
+  
   const handlePublish = () => {
     if (!saveData.name.trim()) {
       alert('Please enter a flow name');
@@ -831,18 +850,15 @@ export function FlowControlPanel({
     closeModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL);
   };
 
-  const handleDiscard = () => {
+  const handleDiscard = async () => {
     if (typeof onDiscard === 'function') {
-      onDiscard();
+      await onDiscard();
       return;
     }
 
+    // If no custom discard handler, just reset local state
     setIsChatOpen(false);
-    setSaveData({
-      name: name || '',
-      description: description || '',
-      status: 'publish',
-    });
+    resetSaveData();
   };
 
   const handleQuickTestKeyDown = (e) => {
@@ -924,7 +940,13 @@ export function FlowControlPanel({
         </div>
       )}
 
-      <CreateNewOrchestralFlowModal handleCreateNewFlow={handlePublish} createdFlow={createdFlow} saveData={saveData} setSaveData={setSaveData} />
+      <CreateNewOrchestralFlowModal 
+        handleCreateNewFlow={handlePublish} 
+        createdFlow={createdFlow} 
+        saveData={saveData} 
+        setSaveData={setSaveData}
+        resetSaveData={resetSaveData}
+      />
 
       {/* Chat SlideOver */}
       <SlideOver
@@ -1069,7 +1091,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
         <div className="card-body space-y-2">
           <Section title="Step 1" caption={
             <span className="text-base-content">
-              Create <code className="px-1 py-0.5 rounded bg-base-100">pauthkey</code>
+              Create <code className="px-1 py-0.5 rounded bg-base-100">Auth key</code>
             </span>
           } />
           <p className="text-sm">
@@ -1080,7 +1102,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
             target="_blank"
             className="link link-primary text-sm"
           >
-            Create pauthkey
+            Create Auth key
           </Link>
         </div>
       </div>

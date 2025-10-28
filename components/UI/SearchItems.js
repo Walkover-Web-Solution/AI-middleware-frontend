@@ -21,7 +21,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
     if (item === 'Agents') {
       return 'Search Agents by Name, SlugName, Service, or ID';
     } else if (item === 'ApiKeys') {
-      return 'Search ApiKeys by Name, ID, or Service';
+      return 'Search ApiKeys by Name or Service';
     } else if (item === 'Organizations') {
       return 'Search Organizations by Name or ID';
     } else {
@@ -35,7 +35,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
         <input
           type="text"
           aria-label={`Search ${item} by Name, SlugName, Service, or ID`}
-          placeholder="Search..."
+          placeholder="Search"
           className={`${style ? style : 'input w-full mb-1 border border-base-content/50 pr-10'}`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

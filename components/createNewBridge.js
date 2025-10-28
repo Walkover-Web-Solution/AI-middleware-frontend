@@ -3,7 +3,7 @@ import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bri
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { closeModal, sendDataToParent } from "@/utils/utility";
-import { MODAL_TYPE } from "@/utils/enums";
+import { DEFAULT_PROMPT, MODAL_TYPE } from "@/utils/enums";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -132,6 +132,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
         slugName: slugname,
         bridgeType: shouldHideAgentType ? "api" : state.selectedBridgeTypeCard || state.bridgeType,
         type: state.selectedType,
+        prompt:DEFAULT_PROMPT
       };
 
       dispatch(createBridgeAction({ dataToSend, orgid }, (data) => {
