@@ -416,6 +416,14 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 
       await dispatch(updateIntegrationDataAction(data?.org_id, dataToSend));
       
+      // Clear API keys from local state after successful save if addDefaultApiKeys is false
+      if (!configuration.addDefaultApiKeys) {
+        setConfiguration(prev => ({
+          ...prev,
+          apikey_object_id: {}
+        }));
+      }
+      
     } catch (error) {
       console.error('Failed to save configuration:', error);
     } finally {
