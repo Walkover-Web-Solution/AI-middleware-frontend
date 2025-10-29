@@ -42,7 +42,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
   }, [selectedKnowledgeBase]);
 
   // Handle form input changes
-  const handleFormChange = useCallback((event) => {
+  const handleFormChange = useCallback((event, selectedFile = null) => {
     const form = event.target.form;
     const formData = new FormData(form);
     
@@ -60,14 +60,17 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
       currentData[field] && currentData[field].trim().length > 0
     );
 
+    // Use selectedFile parameter if provided, otherwise use state
+    const currentFile = selectedFile || file;
+
     // Additional validation for add mode
     if (!selectedKnowledgeBase) {
-      if (!isUpload) {
-        // Link mode: URL is required
+      if (!isUpload || !currentFile) {
+        // Link mode or invalid upload mode: URL is required
         allRequiredFilled = allRequiredFilled && currentData.url && currentData.url.trim().length > 0;
       } else {
-        // Upload mode: file is required
-        allRequiredFilled = allRequiredFilled && file !== null;
+        // Valid upload mode: file is required
+        allRequiredFilled = allRequiredFilled && currentFile !== null && currentFile.size > 0;
       }
     }
 
@@ -188,11 +191,13 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
     if (selectedFile && validFileTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
-      // Trigger form validation after file selection
-      setTimeout(() => handleFormChange(event), 0);
+      // Pass the selected file directly to validation to avoid state timing issues
+      handleFormChange(event, selectedFile);
     } else {
       alert('Please upload a valid file (PDF, Word, or CSV).');
       setFile(null);
+      // Trigger validation with null file
+      handleFormChange(event, null);
     }
   };
 
