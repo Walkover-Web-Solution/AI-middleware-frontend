@@ -25,6 +25,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { useThemeDetection } from '@/customHooks/useThemeDetection';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import { clearCookie, getFromCookies, openModal, toggleSidebar, setInCookies } from '@/utils/utility';
 import OrgSlider from './orgSlider';
@@ -44,7 +45,6 @@ function MainSlider({ isEmbedUser }) {
   /* --------------------------- Router & selectors ------------------------- */
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const pathParts = pathname.split('?')[0].split('/');
   const orgId = pathParts[2];
@@ -70,7 +70,8 @@ function MainSlider({ isEmbedUser }) {
   const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
   const [showContent, setShowContent] = useState(isSideBySideMode); // Control content visibility with delay
   
-  // Theme state
+  // Theme detection using existing hook
+  const currentTheme = useThemeDetection();
   const [theme, setTheme] = useState("system");
 
   // Effect to detect mobile screen size
@@ -112,62 +113,11 @@ function MainSlider({ isEmbedUser }) {
     }
   }, [isSideBySideMode, pathParts.length, isMobile]);
 
-  // Theme utility functions
-  const getSystemTheme = () => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  };
-
-  const applyTheme = (themeToApply) => {
-    if (typeof window !== 'undefined') {
-      const root = document.documentElement;
-      root.setAttribute('data-theme', themeToApply);
-      if (themeToApply === 'dark') {
-        root.classList.add('dark');
-        root.classList.remove('light');
-      } else {
-        root.classList.add('light');
-        root.classList.remove('dark');
-      }
-      root.style.setProperty('--theme', themeToApply);
-    }
-  };
-
-  // Initialize theme
+  // Initialize theme from cookies
   useEffect(() => {
     const savedTheme = getFromCookies("theme") || "system";
-    const systemTheme = getSystemTheme();
-    
     setTheme(savedTheme);
-    
-    let themeToApply;
-    if (savedTheme === "system") {
-      themeToApply = systemTheme;
-    } else {
-      themeToApply = savedTheme;
-    }
-    
-    applyTheme(themeToApply);
   }, []);
-
-  // Listen for system theme changes
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      
-      if (theme === "system") {
-        applyTheme(newSystemTheme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
-  }, [theme]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -178,19 +128,18 @@ function MainSlider({ isEmbedUser }) {
     };
   }, [orgDropdownTimeout]);
 
+  // Simplified theme change handler
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
     setInCookies("theme", newTheme);
-
-    let themeToApply;
-    if (newTheme === "system") {
-      const systemTheme = getSystemTheme();
-      themeToApply = systemTheme;
-    } else {
-      themeToApply = newTheme;
-    }
     
-    applyTheme(themeToApply);
+    // Apply theme immediately
+    const root = document.documentElement;
+    root.setAttribute('data-theme', newTheme === 'system' 
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : newTheme
+    );
+    document.dispatchEvent(new CustomEvent('themeChange'));
   };
 
   /** Logout handler */
