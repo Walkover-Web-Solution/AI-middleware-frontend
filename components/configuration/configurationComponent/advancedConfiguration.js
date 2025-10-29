@@ -173,7 +173,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
         fall_back: {
           ...(fallbackModel || {}),
           is_enable: enableNext,
-          service: group || fallbackService || null,
+          service: fallbackService || null,
           model: model || null,
         },
       },
