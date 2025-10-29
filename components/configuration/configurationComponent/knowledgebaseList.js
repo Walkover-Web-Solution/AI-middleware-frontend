@@ -137,7 +137,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (
                         <>
-                            <InfoTooltip  tooltipContent="A Knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                            <InfoTooltip  tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
                                 <p className="label-text mb-2 whitespace-nowrap font-medium info">KnowledgeBase</p>
                             </InfoTooltip>
                             <button
@@ -150,14 +150,14 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </button>
                         </>
                     ) : (
-                        <InfoTooltip tooltipContent="A Knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                        <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
                             <button
                                 tabIndex={0}
                                 className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
                                 disabled={!shouldToolsShow}
                                 >
                                 <AddIcon className="w-2 h-2" />
-                                <span className="text-sm font-medium">KnowledgeBase</span>
+                                <span className="text-sm font-medium">Knowledge Base</span>
                             </button>     
                        </InfoTooltip>
                         
@@ -175,10 +175,10 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                 {!tutorialState?.showTutorial && (
            <div className="dropdown dropdown-left mt-8">
            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
-                            <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
+                            <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
                             <input
                                 type='text'
-                                placeholder='Search Knowledgebase'
+                                placeholder='Search Knowledge Base'
                                 value={searchQuery}
                                 onChange={handleInputChange}
                                 className='input input-bordered w-full input-sm'
@@ -207,7 +207,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             }
                             <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
                                 <div>
-                                    <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
+                                    <AddIcon size={16} /><p className='font-semibold'>Add new Knowledge Base</p>
                                 </div>
                             </li>
                         </div>

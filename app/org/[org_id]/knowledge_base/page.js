@@ -95,7 +95,7 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
           <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full gap-2">
             <PageHeader
               title="Knowledge Base"
-              description={descriptions?.['Knowledge Base'] || "A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}
+              description={descriptions?.['Knowledge Base'] || "A knowledge Base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}
               docLink="https://gtwy.ai/blogs/features/knowledgebase"
             />
             

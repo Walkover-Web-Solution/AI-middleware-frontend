@@ -226,7 +226,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   type="text"
                   name="name"
                   className="input input-bordered input-md focus:ring-1 ring-primary/40"
-                  placeholder="Enter knowledge base name"
+                  placeholder="Enter knowledge Base name"
                   required
                   maxLength={50}
                   disabled={isLoading}
@@ -243,7 +243,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                 <textarea
                   name="description"
                   className="textarea textarea-bordered h-14 focus:ring-1 ring-primary/40"
-                  placeholder="Describe the purpose and content of this knowledge base..."
+                  placeholder="Describe the purpose and content of this Knowledge Base"
                   required
                   disabled={isLoading}
                   key={selectedKnowledgeBase?._id}
