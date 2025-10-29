@@ -113,7 +113,36 @@ export const dryRun = async ({ localDataToSend, bridge_id, orchestrator_id}) => 
     return { success: true, data: dryRun.data }
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);
-    toast.error(error?.response?.data?.error || error?.response?.data?.detail?.error || "Something went wrong.");
+    
+    // Get the error message
+    const errorMessage = error?.response?.data?.error || error?.response?.data?.detail?.error || "Something went wrong.";
+    
+    // Check if error contains both Initial Error and Fallback Error
+    if (errorMessage.includes("Initial Error:") && errorMessage.includes("Fallback Error:")) {
+      // Parse and show both errors separately
+      const initialErrorMatch = errorMessage.match(/Initial Error: (.+?) \(Type:/);
+      const fallbackErrorMatch = errorMessage.match(/Fallback Error: (.+?) \(Type:/);
+      
+      if (initialErrorMatch && fallbackErrorMatch) {
+        const initialError = initialErrorMatch[1].trim();
+        const fallbackError = fallbackErrorMatch[1].trim();
+        
+        // Show initial error first
+        toast.error(`Initial Error: ${initialError}`);
+        
+        // Show fallback error after a short delay
+        setTimeout(() => {
+          toast.error(`Fallback Error: ${fallbackError}`);
+        }, 1000);
+      } else {
+        // Fallback to showing the full error if parsing fails
+        toast.error(errorMessage);
+      }
+    } else {
+      // Show single error message
+      toast.error(errorMessage);
+    }
+    
     throw error
   }
 }
