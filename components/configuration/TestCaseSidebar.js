@@ -75,7 +75,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
 
   const handleTestCaseClick = (testCase) => {
     if (onTestCaseClick && testCase.conversation) {
-      onTestCaseClick(testCase.conversation, testCase.expected);
+      onTestCaseClick(testCase.conversation, testCase.expected, testCase._id, testCase.matching_type);
     }
   };
 

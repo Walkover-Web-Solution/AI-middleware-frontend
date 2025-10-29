@@ -88,6 +88,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
             return;
         }
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
+
+        if(newMessage?.trim() === "") {
+            setErrorMessage("Message is required");
+            return;
+        }
         const images = uploadedImages?.length > 0 ? uploadedImages.filter(img => img !== null && img !== undefined) : [];
         const files = uploadedFiles?.length > 0 ? uploadedFiles.filter(file => file !== null && file !== undefined) : [];
         const videos = uploadedVideos ? uploadedVideos : null;
