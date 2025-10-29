@@ -387,13 +387,13 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   return (
     <div
       ref={containerRef} // Add ref to the main container
-      className={`w-full h-screen transition-all duration-700 ease-in-out overflow-x-hidden ${!isFocus ? '' : ' overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row overflow-x-hidden overflow-y-hidden' : 'overflow-y-auto'}`}
+      className={`w-full h-full transition-all duration-700 ease-in-out overflow-x-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ' overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row overflow-x-hidden overflow-y-hidden' : 'overflow-y-auto'}`}
     >
       {/* Configuration Panel */}
       <div
         className={`
-          ${uiState.isDesktop ? 'h-full flex flex-col' : 'h-auto border-b border-base-300'} 
-          bg-base-100 transition-all duration-700 ease-in-out transform overflow-y-hidden
+          ${uiState.isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-base-300'} 
+          bg-base-100 transition-all duration-700 ease-in-out transform
         `}
         style={uiState.isDesktop ? { width: `${isFocus ? `${configurationWidth}%` : `${uiState.leftWidth}%`}` } : {}}
       >
@@ -424,7 +424,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       {/* Chat Panel (Right Side) */}
       <div
         className={`
-          ${uiState.isDesktop ? 'h-full flex flex-col' : 'h-auto'} 
+          ${uiState.isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
           relative transition-all duration-700 ease-in-out transform
         `}
         id="parentChatbot"
