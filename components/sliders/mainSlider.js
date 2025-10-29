@@ -72,7 +72,6 @@ function MainSlider({ isEmbedUser }) {
   
   // Theme state
   const [theme, setTheme] = useState("system");
-  const [actualTheme, setActualTheme] = useState("light");
 
   // Effect to detect mobile screen size
   useEffect(() => {
@@ -146,10 +145,8 @@ function MainSlider({ isEmbedUser }) {
     let themeToApply;
     if (savedTheme === "system") {
       themeToApply = systemTheme;
-      setActualTheme(systemTheme);
     } else {
       themeToApply = savedTheme;
-      setActualTheme(savedTheme);
     }
     
     applyTheme(themeToApply);
@@ -164,7 +161,6 @@ function MainSlider({ isEmbedUser }) {
       const newSystemTheme = e.matches ? 'dark' : 'light';
       
       if (theme === "system") {
-        setActualTheme(newSystemTheme);
         applyTheme(newSystemTheme);
       }
     };
@@ -190,10 +186,8 @@ function MainSlider({ isEmbedUser }) {
     if (newTheme === "system") {
       const systemTheme = getSystemTheme();
       themeToApply = systemTheme;
-      setActualTheme(systemTheme);
     } else {
       themeToApply = newTheme;
-      setActualTheme(newTheme);
     }
     
     applyTheme(themeToApply);
