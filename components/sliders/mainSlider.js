@@ -16,14 +16,17 @@ import {
   MessageSquareMoreIcon,
   User,
   AlignJustify,
-  FileText
+  FileText,
+  MoonIcon,
+  SunIcon,
+  MonitorIcon
 } from 'lucide-react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { clearCookie, getFromCookies, openModal, toggleSidebar } from '@/utils/utility';
+import { clearCookie, getFromCookies, openModal, toggleSidebar, setInCookies } from '@/utils/utility';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
@@ -31,7 +34,6 @@ import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { AddIcon, KeyIcon } from '../Icons';
-import ThemeToggle from '../UI/ThemeUi';
 import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
 
 /* -------------------------------------------------------------------------- */
@@ -62,9 +64,15 @@ function MainSlider({ isEmbedUser }) {
   const [hovered, setHovered] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
+  const [orgDropdownTimeout, setOrgDropdownTimeout] = useState(null);
+  const [isOrgDropdownExpanded, setIsOrgDropdownExpanded] = useState(false);
   const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
   const [showContent, setShowContent] = useState(isSideBySideMode); // Control content visibility with delay
+  
+  // Theme state
+  const [theme, setTheme] = useState("system");
+  const [actualTheme, setActualTheme] = useState("light");
 
   // Effect to detect mobile screen size
   useEffect(() => {
@@ -104,6 +112,92 @@ function MainSlider({ isEmbedUser }) {
       setIsMobileVisible(false);
     }
   }, [isSideBySideMode, pathParts.length, isMobile]);
+
+  // Theme utility functions
+  const getSystemTheme = () => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  };
+
+  const applyTheme = (themeToApply) => {
+    if (typeof window !== 'undefined') {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', themeToApply);
+      if (themeToApply === 'dark') {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      } else {
+        root.classList.add('light');
+        root.classList.remove('dark');
+      }
+      root.style.setProperty('--theme', themeToApply);
+    }
+  };
+
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = getFromCookies("theme") || "system";
+    const systemTheme = getSystemTheme();
+    
+    setTheme(savedTheme);
+    
+    let themeToApply;
+    if (savedTheme === "system") {
+      themeToApply = systemTheme;
+      setActualTheme(systemTheme);
+    } else {
+      themeToApply = savedTheme;
+      setActualTheme(savedTheme);
+    }
+    
+    applyTheme(themeToApply);
+  }, []);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e) => {
+      const newSystemTheme = e.matches ? 'dark' : 'light';
+      
+      if (theme === "system") {
+        setActualTheme(newSystemTheme);
+        applyTheme(newSystemTheme);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+  }, [theme]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (orgDropdownTimeout) {
+        clearTimeout(orgDropdownTimeout);
+      }
+    };
+  }, [orgDropdownTimeout]);
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    setInCookies("theme", newTheme);
+
+    let themeToApply;
+    if (newTheme === "system") {
+      const systemTheme = getSystemTheme();
+      themeToApply = systemTheme;
+      setActualTheme(systemTheme);
+    } else {
+      themeToApply = newTheme;
+      setActualTheme(newTheme);
+    }
+    
+    applyTheme(themeToApply);
+  };
 
   /** Logout handler */
   const handleLogout = useCallback(async () => {
@@ -160,11 +254,19 @@ function MainSlider({ isEmbedUser }) {
           });
         }
       }
+      
+      // Close org dropdown on outside click
+      if (isOrgDropdownExpanded) {
+        const orgDropdown = e.target.closest('.org-dropdown-container');
+        if (!orgDropdown) {
+          setIsOrgDropdownExpanded(false);
+        }
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, isMobileVisible, pathParts.length, isMobile]);
+  }, [isOpen, isMobileVisible, pathParts.length, isMobile, isOrgDropdownExpanded]);
 
   /** Hover handlers – active only when collapsed (desktop) */
   const onItemEnter = (key, e) => {
@@ -216,24 +318,102 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
-  // Settings toggler - modified for mobile
-  const handleSettingsClick = () => {
-    if (isMobile) {
-      if (!isMobileVisible) {
-        setIsMobileVisible(true);
-        setIsSettingsOpen(true);
-      } else {
-        setIsSettingsOpen(prev => !prev);
-      }
-    } else {
-      if (!isOpen) {
-        setIsOpen(true);
-        setIsSettingsOpen(true);
-      } else {
-        setIsSettingsOpen(prev => !prev);
-      }
+  // Org dropdown handlers
+  const handleOrgClick = () => {
+    if (showSidebarContent) {
+      setIsOrgDropdownExpanded(prev => !prev);
     }
   };
+
+  const handleSwitchOrg = () => {
+    router.push('/org?redirection=false');
+    if (isMobile) setIsMobileVisible(false);
+    setIsOrgDropdownExpanded(false);
+  };
+
+  const handleOrgHover = () => {
+    if (!showSidebarContent) {
+      // Clear any existing timeout
+      if (orgDropdownTimeout) {
+        clearTimeout(orgDropdownTimeout);
+        setOrgDropdownTimeout(null);
+      }
+      
+      // Show dropdown with slight delay
+      const timeout = setTimeout(() => {
+        setIsOrgDropdownOpen(true);
+      }, 150);
+      setOrgDropdownTimeout(timeout);
+    }
+  };
+
+  const handleOrgLeave = () => {
+    if (!showSidebarContent) {
+      // Clear any existing timeout
+      if (orgDropdownTimeout) {
+        clearTimeout(orgDropdownTimeout);
+        setOrgDropdownTimeout(null);
+      }
+      
+      // Hide dropdown with delay
+      const timeout = setTimeout(() => {
+        setIsOrgDropdownOpen(false);
+      }, 200);
+      setOrgDropdownTimeout(timeout);
+    }
+  };
+
+  // Get settings menu items for dropdown
+  const settingsMenuItems = useMemo(() => [
+    {
+      id: 'userDetails',
+      label: 'User Details',
+      icon: <Cog size={14} />,
+      onClick: () => {
+        router.push(`/org/${orgId}/userDetails`);
+        if (isMobile) setIsMobileVisible(false);
+        setIsOrgDropdownExpanded(false);
+      }
+    },
+    {
+      id: 'workspace',
+      label: 'Workspace',
+      icon: <Settings2 size={14} />,
+      onClick: () => {
+        router.push(`/org/${orgId}/workspaceSetting`);
+        if (isMobile) setIsMobileVisible(false);
+        setIsOrgDropdownExpanded(false);
+      }
+    },
+    {
+      id: 'auth',
+      label: 'Auth 2.0',
+      icon: <KeyIcon size={14} />,
+      onClick: () => {
+        router.push(`/org/${orgId}/auth_route`);
+        setIsOrgDropdownExpanded(false);
+      }
+    },
+    {
+      id: 'addModel',
+      label: 'Add new Model',
+      icon: <AddIcon size={14} />,
+      onClick: () => {
+        router.push(`/org/${orgId}/addNewModel`);
+        setIsOrgDropdownExpanded(false);
+      }
+    },
+    {
+      id: 'prebuiltPrompts',
+      label: 'Prebuilt Prompts',
+      icon: <FileText size={14} />,
+      onClick: () => {
+        router.push(`/org/${orgId}/prebuilt-prompts`);
+        if (isMobile) setIsMobileVisible(false);
+        setIsOrgDropdownExpanded(false);
+      }
+    }
+  ], [router, orgId, isMobile]);
 
   // Mobile menu toggle handler
   const handleMobileMenuToggle = useCallback((e) => {
@@ -284,7 +464,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border ${isMobile ? 'overflow-hidden' : ''} border-base-content/30 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
             transform: isMobile ? (isMobileVisible ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
@@ -307,7 +487,7 @@ function MainSlider({ isEmbedUser }) {
           {!isMobile && (
             <button
               onClick={handleToggle}
-              className="absolute -right-3 top-8 w-7 h-7 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
+              className="absolute -right-3 top-[50px] w-7 h-7 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
             >
               {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
             </button>
@@ -316,26 +496,230 @@ function MainSlider({ isEmbedUser }) {
           {/* -------------------------- NAVIGATION -------------------------- */}
           <div className="flex flex-col h-full">
             {/* Header section */}
-            <div className="p-2 border-b border-base-300">
+            <div className="p-2 border-b border-base-300 relative">
               {/* Organization */}
               {pathParts.length >= 4 && (
-                <button
-                  onClick={() => {
-                    pathParts.length > 4 ? toggleSidebar('default-org-sidebar') : router.push('/org?redirection=false');
-                    if (isMobile) setIsMobileVisible(false);
-                  }}
-                  onMouseEnter={e => onItemEnter('org', e)}
-                  onMouseLeave={onItemLeave}
-                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors"
+                <div 
+                  className="relative org-dropdown-container"
+                  onMouseEnter={handleOrgHover}
+                  onMouseLeave={handleOrgLeave}
                 >
-                  <Building2 size={20} className="shrink-0" />
-                  {showSidebarContent && (
-                    <div className="flex-1 text-left overflow-hidden">
-                      <div className="font-semibold text-sm truncate">{truncate(orgName, 20)}</div>
-                      <div className="text-xs text-base-content/60">Organization</div>
+                  <button
+                    onClick={handleOrgClick}
+                    className="w-full flex items-center gap-3 py-2 rounded-lg hover:bg-base-200 transition-colors"
+                  >
+                    {/* First letter avatar */}
+                    <div className="shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                      <span className="text-primary-content font-semibold text-sm">
+                        {orgName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    {showSidebarContent && (
+                      <>
+                        <div className="flex-1 text-left overflow-hidden">
+                          <div className="font-semibold text-sm truncate">{truncate(orgName, 20)}</div>
+                          <div className="text-xs text-base-content/60">Organization</div>
+                        </div>
+                        <ChevronDown size={16} className={`shrink-0 transition-transform ${isOrgDropdownExpanded ? 'rotate-180' : ''}`} />
+                      </>
+                    )}
+                  </button>
+
+                  {/* Dropdown for collapsed sidebar */}
+                  {isOrgDropdownOpen && !showSidebarContent && (
+                    <div 
+                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 min-w-[250px] z-50 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-left-2"
+                      onMouseEnter={() => {
+                        // Clear timeout when hovering over dropdown
+                        if (orgDropdownTimeout) {
+                          clearTimeout(orgDropdownTimeout);
+                          setOrgDropdownTimeout(null);
+                        }
+                      }}
+                      onMouseLeave={handleOrgLeave}
+                    >
+                      {/* Organization header */}
+                      <div className="flex items-center gap-3 p-2 border-b border-base-300 pb-2 mb-2">
+                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-primary-content font-semibold text-sm">
+                            {orgName.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-sm">{orgName}</div>
+                          <div className="text-xs text-base-content/60">Organization</div>
+                        </div>
+                      </div>
+
+                      {/* User email info */}
+                      <div className="flex items-center gap-3 p-2 text-sm text-base-content/70 border-b border-base-300 pb-2 mb-2">
+                        <Mail size={14} className="shrink-0" />
+                        <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
+                      </div>
+
+                      {/* Settings menu items */}
+                      <div className="space-y-1">
+                        {settingsMenuItems.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={item.onClick}
+                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors text-sm"
+                          >
+                            <span className="shrink-0">{item.icon}</span>
+                            <span className="truncate text-xs">{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Theme Section */}
+                      <div className="border-t border-base-300 pt-2 mt-2">
+                        <div className="flex items-center justify-between mb-2 px-2">
+                          <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Theme</span>
+                        </div>
+                        <div className="flex bg-base-200 rounded-lg p-1">
+                          <button
+                            onClick={() => handleThemeChange('light')}
+                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                              theme === 'light' 
+                                ? 'bg-base-100 text-base-content shadow-sm' 
+                                : 'text-base-content/60 hover:text-base-content'
+                            }`}
+                          >
+                            <SunIcon size={12} className="mx-auto" />
+                          </button>
+                          <button
+                            onClick={() => handleThemeChange('dark')}
+                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                              theme === 'dark' 
+                                ? 'bg-base-100 text-base-content shadow-sm' 
+                                : 'text-base-content/60 hover:text-base-content'
+                            }`}
+                          >
+                            <MoonIcon size={12} className="mx-auto" />
+                          </button>
+                          <button
+                            onClick={() => handleThemeChange('system')}
+                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                              theme === 'system' 
+                                ? 'bg-base-100 text-base-content shadow-sm' 
+                                : 'text-base-content/60 hover:text-base-content'
+                            }`}
+                          >
+                            <MonitorIcon size={12} className="mx-auto" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Switch Organization and Logout buttons */}
+                      <div className="border-t border-base-300 pt-2 mt-2 space-y-1">
+                        <button
+                          onClick={handleSwitchOrg}
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-primary text-xs font-medium"
+                        >
+                          <Building2 size={14} />
+                          Switch Organization
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setIsOrgDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-error/10 transition-colors text-error text-xs font-medium"
+                        >
+                          <LogOut size={14} />
+                          Logout
+                        </button>
+                      </div>
                     </div>
                   )}
-                </button>
+
+                  {/* Expanded dropdown for full sidebar */}
+                  {isOrgDropdownExpanded && showSidebarContent && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 space-y-1 z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
+                      {/* User email info */}
+                      <div className="flex items-center gap-3 p-2 text-sm text-base-content/70 border-b border-base-300 pb-2 mb-2">
+                        <Mail size={14} className="shrink-0" />
+                        <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
+                      </div>
+
+                      {/* Settings menu items */}
+                      <div className="space-y-1">
+                        {settingsMenuItems.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={item.onClick}
+                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-300 transition-colors text-sm"
+                          >
+                            <span className="shrink-0">{item.icon}</span>
+                            <span className="truncate text-xs">{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Theme Section */}
+                      <div className="border-t border-base-300 pt-2 mt-2">
+                        <div className="flex items-center justify-between mb-2 px-2">
+                          <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Theme</span>
+                        </div>
+                        <div className="flex bg-base-300 rounded-lg p-1">
+                          <button
+                            onClick={() => handleThemeChange('light')}
+                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                              theme === 'light' 
+                                ? 'bg-base-100 text-base-content shadow-sm' 
+                                : 'text-base-content/60 hover:text-base-content'
+                            }`}
+                          >
+                            <SunIcon size={12} className="mx-auto" />
+                          </button>
+                          <button
+                            onClick={() => handleThemeChange('dark')}
+                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                              theme === 'dark' 
+                                ? 'bg-base-100 text-base-content shadow-sm' 
+                                : 'text-base-content/60 hover:text-base-content'
+                            }`}
+                          >
+                            <MoonIcon size={12} className="mx-auto" />
+                          </button>
+                          <button
+                            onClick={() => handleThemeChange('system')}
+                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                              theme === 'system' 
+                                ? 'bg-base-100 text-base-content shadow-sm' 
+                                : 'text-base-content/60 hover:text-base-content'
+                            }`}
+                          >
+                            <MonitorIcon size={12} className="mx-auto" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Switch Organization and Logout buttons */}
+                      <div className="border-t border-base-300 pt-2 mt-2 space-y-1">
+                        <button
+                          onClick={handleSwitchOrg}
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-300 transition-colors text-primary text-xs font-medium"
+                        >
+                          <Building2 size={14} />
+                          Switch Organization
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setIsOrgDropdownExpanded(false);
+                          }}
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-error/10 transition-colors text-error text-xs font-medium"
+                        >
+                          <LogOut size={14} />
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -429,112 +813,15 @@ function MainSlider({ isEmbedUser }) {
               </div>
             </div>
 
-            {/* User & Settings Section */}
+            {/* GTWY Label Section */}
             <div className="border-t border-base-300 p-2">
-              <button
-                onClick={handleSettingsClick}
-                onMouseEnter={e => onItemEnter('settings', e)}
-                onMouseLeave={onItemLeave}
-                className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
-              >
-                <div className="shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <User size={16} className="text-primary-content" />
-                </div>
-                {showSidebarContent && (
-                  <div className="flex-1 text-left overflow-hidden">
-                    <div className="font-medium text-sm truncate">
-                      {userdetails?.email?.split('@')[0] || 'User'}
-                    </div>
-                    <div className="text-xs text-base-content/60">Settings</div>
-                  </div>
-                )}
-                {showSidebarContent && (
-                  <ChevronDown size={16} className={`shrink-0 transition-transform ${isSettingsOpen ? 'rotate-180' : ''}`} />
-                )}
-              </button>
-
-              {showSidebarContent && isSettingsOpen && (
-                <div className="mt-2 space-y-1 bg-base-200 rounded-lg p-2">
-                  <div className="flex items-center gap-3 p-2 text-sm text-base-content/70">
-                    <Mail size={14} className="shrink-0" />
-                    <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      router.push(`/org/${orgId}/userDetails`);
-                      if (isMobile) setIsMobileVisible(false);
-                    }}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                  >
-                    <Cog size={14} className="shrink-0" />
-                    <span className="truncate text-xs">User Details</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      router.push(`/org/${orgId}/workspaceSetting`);
-                      if (isMobile) setIsMobileVisible(false);
-                    }}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                  >
-                    <Settings2 size={14} className="shrink-0" />
-                    <span className="truncate text-xs">Workspace</span>
-                  </button>
-
-                  <button
-                    onClick={()=>{
-                      router.push(`/org/${orgId}/auth_route`);
-                    }}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                  >
-                    <KeyIcon size={14} className="shrink-0" />
-                    <span className="truncate text-xs">Auth 2.0</span>
-                  </button>
-
-                  <button
-                    onClick={()=>{
-                      router.push(`/org/${orgId}/addNewModel`);
-                    }}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                  >
-                    <AddIcon size={14} className="shrink-0" />
-                    <span className="truncate text-xs">Add new Model</span>
-                  </button>
-
-                  <button
-                    onClick={()=>{
-                      router.push(`/org/${orgId}/prebuilt-prompts`);
-                      if (isMobile) setIsMobileVisible(false);
-                    }}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                  >
-                    <FileText size={14} className="shrink-0" />
-                    <span className="truncate text-xs">Prebuilt Prompts</span>
-                  </button>
-
-                  <ThemeToggle/>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm text-error"
-                  >
-                    <LogOut size={14} className="shrink-0" />
-                    <span className="truncate text-xs">Logout</span>
-                  </button>
-
-                </div>
-              )}
-
-              {/* GTWY Label */}
-              <div className="mt-2 text-center">
+              <div className="text-center">
                 {showSidebarContent ? (
                   <span className="text-sm text-base-content/70">GTWY.AI</span>
                 ) : (
                   <span className="text-xs text-base-content/50">GTWY</span>
                 )}
               </div>
-
             </div>
           </div>
         </div>
