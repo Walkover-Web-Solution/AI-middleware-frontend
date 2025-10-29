@@ -18,19 +18,25 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "../protected";
 import ReactMarkdown from "../LazyMarkdown";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { 
+  initializeChatChannel,
+  sendUserMessage,
+  addLoadingAssistantMessage,
+  updateAssistantMessageWithResponse,
+  editChatMessage,
+  setChatLoading,
+  setChatError,
+  clearChatMessages,
+  loadTestCaseIntoChat,
+  setChatUploadedFiles,
+  setChatUploadedImages
+} from "@/store/action/chatAction";
 
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
   const messagesContainerRef = useRef(null);
-  const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
-  const [errorMessage, setErrorMessage] = useState("");
   const inputRef = useRef(null);
-  const [uploadedImages, setUploadedImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [testCaseConversation, setTestCaseConversation] = useState([]);
-  const [conversation, setConversation] = useState([]);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showTestCases, setShowTestCases] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState('exact');
   const [testCaseId, setTestCaseId] = useState(null);
@@ -40,13 +46,41 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const [testCaseConversation, setTestCaseConversation] = useState([]);
 
   const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
 
   const channelIdentifier = useMemo(() => {
     if (!bridgeType) return null;
-    return (params?.id + searchParams?.version).replace(/ /g, "_");
+    return (params.org_id + '_'+ params?.id + '_'+ searchParams?.version).replace(/ /g, "_");
   }, [bridgeType]);
+
+  // Redux selectors for chat state
+  const messages = useCustomSelector((state) => 
+    state?.chatReducer?.messagesByChannel?.[channelIdentifier] || []
+  );
+  const conversation = useCustomSelector((state) => 
+    state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || []
+  );
+  const loading = useCustomSelector((state) => 
+    state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false
+  );
+  const errorMessage = useCustomSelector((state) => 
+    state?.chatReducer?.errorsByChannel?.[channelIdentifier] || ""
+  );
+  const uploadedFiles = useCustomSelector((state) => 
+    state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || []
+  );
+  const uploadedImages = useCustomSelector((state) => 
+    state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || []
+  );
+  
+  // Initialize channel and RT layer
+  useEffect(() => {
+    if (channelIdentifier) {
+      dispatch(initializeChatChannel(channelIdentifier));
+    }
+  }, [channelIdentifier, dispatch]);
   
   useRtLayerEventHandler(channelIdentifier);
   useEffect(() => {
@@ -58,8 +92,9 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
   const handleResetChat = () => {
     setTestCaseId(null);
-    setMessages([]);
-    setConversation([]);
+    if (channelIdentifier) {
+      dispatch(clearChatMessages(channelIdentifier));
+    }
     setEditingMessage(null);
     setEditContent('');
     
@@ -77,27 +112,9 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   };
   
   const handleSaveEdit = (messageId) => {
-    const updatedMessages = messages.map(msg =>
-      msg.id === messageId ? { ...msg, content: editContent, isEdited: true } : msg
-    );
-    setMessages(updatedMessages);
-
-    // Also update the conversation array for backend
-    const editedMessage = messages.find(msg => msg.id === messageId);
-    if (editedMessage && editedMessage.sender !== 'expected') {
-      // Create updated conversation from current messages
-      const updatedConversation = [];
-      updatedMessages.forEach(msg => {
-        if (msg.sender === 'user' || msg.sender === 'assistant') {
-          updatedConversation.push({
-            role: msg.sender === 'user' ? 'user' : msg?.testCaseResult ? 'Model Answer' : 'assistant',
-            content: msg.content
-          });
-        }
-      });
-      setConversation(updatedConversation);
+    if (channelIdentifier) {
+      dispatch(editChatMessage(channelIdentifier, messageId, editContent));
     }
-
     setEditingMessage(null);
     setEditContent('');
   };
@@ -113,46 +130,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     try {
       // Add a small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500));
-      // Convert testcase conversation to chat messages format
-      const convertedMessages = [];
-      const baseTimestamp = Date.now();
-
-      testCaseConversation.forEach((msg, index) => {
-        const chatMessage = {
-          id: `testcase_${msg.role}_${baseTimestamp}_${index}`,
-          sender: msg.role === 'user' ? 'user' : 'assistant',
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
-        };
-        convertedMessages.push(chatMessage);
-      });
-
-      if (expected?.response) {
-        const expectedMessage = {
-          id: `testcase_expected_${baseTimestamp}`,
-          sender: 'expected',
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          content: expected.response,
-          isExpected: true,
-        };
-        convertedMessages.push(expectedMessage);
+      
+      if (channelIdentifier) {
+        dispatch(loadTestCaseIntoChat(channelIdentifier, testCaseConversation, expected, testCaseId));
       }
-
-      // Set the messages and conversation
-      setMessages(convertedMessages);
-
-      // Convert to conversation format for the backend
-      const backendConversation = testCaseConversation.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-      setConversation(backendConversation);
 
       // Close testcase sidebar
       setShowTestCases(false);
@@ -746,26 +727,15 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               <div className="relative flex flex-col gap-4 w-full">
                 <div className="flex flex-row gap-2">
                   <ChatTextInput
-                    setErrorMessage={setErrorMessage}
-                    setMessages={setMessages}
-                    message={messages}
+                    channelIdentifier={channelIdentifier}
                     params={params}
-                    searchParams={searchParams}
-                    uploadedImages={uploadedImages}
-                    setUploadedImages={setUploadedImages}
-                    conversation={conversation}
-                    setConversation={setConversation}
-                    isOrchestralModel={isOrchestralModel}
                     handleSendMessageForOrchestralModel={handleSendMessageForOrchestralModel}
+                    isOrchestralModel={isOrchestralModel}
                     inputRef={inputRef}
-                    loading={loading}
-                    setLoading={setLoading}
-                    uploadedFiles={uploadedFiles}
-                    setUploadedFiles={setUploadedFiles}
+                    searchParams={searchParams}
                     setTestCaseId={setTestCaseId}
                     testCaseId={testCaseId}
                     selectedStrategy={selectedStrategy}
-                    setSelectedStrategy={setSelectedStrategy}
                   />
                 </div>
               </div>

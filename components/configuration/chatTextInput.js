@@ -1,6 +1,16 @@
 import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
+import { 
+  sendUserMessage,
+  addLoadingAssistantMessage,
+  updateAssistantMessageWithResponse,
+  setChatLoading,
+  setChatError,
+  setChatUploadedFiles,
+  setChatUploadedImages,
+  sendMessageWithRtLayer
+} from '@/store/action/chatAction';
 import cloneDeep from 'lodash/cloneDeep';
 import omit from 'lodash/omit';
 import Image from 'next/image';
@@ -10,7 +20,7 @@ import { toast } from 'react-toastify';
 import { CloseCircleIcon, SendHorizontalIcon, UploadIcon } from '@/components/Icons';
 import { PdfIcon } from '@/icons/pdfIcon';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
+function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
@@ -25,6 +35,23 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         modelInfo: state?.modelReducer?.serviceModels,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
     }));
+
+    // Redux selectors for chat state
+    const messages = useCustomSelector((state) => 
+        state?.chatReducer?.messagesByChannel?.[channelIdentifier] || []
+    );
+    const conversation = useCustomSelector((state) => 
+        state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || []
+    );
+    const loading = useCustomSelector((state) => 
+        state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false
+    );
+    const uploadedFiles = useCustomSelector((state) => 
+        state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || []
+    );
+    const uploadedImages = useCustomSelector((state) => 
+        state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || []
+    );
     const dataToSend = {
         configuration: {
             model: modelName,
@@ -68,19 +95,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             inputRef.current.style.height = '40px'; // Set initial height
         }
         if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
-            setErrorMessage("Prompt is required");
+            dispatch(setChatError(channelIdentifier, "Prompt is required"));
             return;
         }
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
 
         if (uploadedFiles?.length > 0 && newMessage?.trim() === "") {
-            setErrorMessage("A message is required when uploading a PDF.");
+            dispatch(setChatError(channelIdentifier, "A message is required when uploading a PDF."));
             return;
         }
 
         if (modelType !== 'completion' && modelType !== 'embedding') {
             if (newMessage?.trim() === "" && uploadedImages?.length === 0 && uploadedFiles?.length === 0) {
-                setErrorMessage("Message cannot be empty");
+                dispatch(setChatError(channelIdentifier, "Message cannot be empty"));
                 return;
             }
         }
@@ -88,23 +115,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             matching_type: selectedStrategy,
         }
         testCaseId ? testcase_data.testcase_id = testCaseId : testcase_data = null
-        setErrorMessage("");
+        dispatch(setChatError(channelIdentifier, ""));
         if (modelType !== "completion") inputRef.current.value = "";
-        setLoading(true);
+        
         try {
             // Generate unique IDs using timestamp to avoid conflicts
             const timestamp = Date.now();
-            const newChat = {
-                id: `user_${timestamp}`,
-                sender: "user",
-                time: new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }),
-                content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
-                images: uploadedImages, // Store images in the user role
-                files: uploadedFiles,
-            };           
             let response, responseData;
             let data;
             if (modelType !== 'completion' && modelType !== 'embedding') {
@@ -114,41 +130,40 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     images: uploadedImages, // Include images in the data
                     files: uploadedFiles,
                 };
-                setMessages(prevMessages => [...prevMessages, newChat]);
-                // Insert temporary assistant typing message
-                const tempAssistantId = `assistant_${timestamp}`;
-                const loadingAssistant = {
-                    id: tempAssistantId,
-                    sender: "assistant",
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    content: "",
-                    isLoading: true,
-                };
-                setMessages(prev => [...prev, loadingAssistant]);
-                responseData = await dryRun({
-                    localDataToSend: {
-                        version_id: versionId,
-                        testcase_data,
-                        configuration: {
-                            conversation: conversation,
-                            type: modelType
+                
+                // Use RT layer action for non-orchestral models
+                const apiCall = async () => {
+                    return await dryRun({
+                        localDataToSend: {
+                            version_id: versionId,
+                            testcase_data,
+                            configuration: {
+                                conversation: conversation,
+                                type: modelType
+                            },
+                            user: data.content,
+                            images: uploadedImages,
+                            files: uploadedFiles,
+                            variables
                         },
-                        user: data.content,
-                        images: uploadedImages,
-                        files: uploadedFiles,
-                        variables
-                    },
-                    bridge_id: params?.id,
-                });
-                // Handle unsuccessful response: rollback loading placeholder and user message
+                        bridge_id: params?.id,
+                    });
+                };
+                
+                // Send message with RT layer handling (loading will persist until RT response)
+                const result = await dispatch(sendMessageWithRtLayer(
+                    channelIdentifier, 
+                    newMessage, 
+                    apiCall, 
+                    isOrchestralModel
+                ));
+                
+                responseData = result.response;
+                
+                // Handle unsuccessful response: rollback via Redux
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
-                    // remove loading placeholder and the user message we just added
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== `user_${timestamp}`));
-                    setLoading(false);
+                    dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             } else if (modelType === "embedding") {
@@ -156,72 +171,71 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     role: "user",
                     content: newMessage
                 };
-                setMessages(prevMessages => [...prevMessages, newChat]);
-                // Insert temporary assistant typing message for embedding as well
-                const tempAssistantId = `assistant_${timestamp}`;
-                const loadingAssistant = {
-                    id: tempAssistantId,
-                    sender: "assistant",
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    content: "",
-                    isLoading: true,
-                };
-                setMessages(prev => [...prev, loadingAssistant]);
-                responseData = await dryRun({
-                    localDataToSend: {
-                        version_id: versionId,
-                        testcase_data,
-                        configuration: {
-                            conversation: conversation,
-                            type: modelType
+                
+                // Use RT layer action for embedding models too
+                const apiCall = async () => {
+                    return await dryRun({
+                        localDataToSend: {
+                            version_id: versionId,
+                            testcase_data,
+                            configuration: {
+                                conversation: conversation,
+                                type: modelType
+                            },
+                            text: newMessage
                         },
-                        text: newMessage
-                    },
-                    bridge_id: params?.id
-                });
+                        bridge_id: params?.id
+                    });
+                };
+                
+                // Send message with RT layer handling (loading will persist until RT response)
+                const result = await dispatch(sendMessageWithRtLayer(
+                    channelIdentifier, 
+                    newMessage, 
+                    apiCall, 
+                    isOrchestralModel
+                ));
+                
+                responseData = result.response;
+                
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
-                    // remove loading placeholder and the user message we just added
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== `user_${timestamp}`));
-                    setLoading(false);
+                    dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             } else if (modelType !== "image") {
                 if(testCaseId){
                     testcase_data.testcase_id = testCaseId;
                 }
-                // Insert temporary assistant typing message for completion path as well
-                const tempAssistantId = `assistant_${timestamp}`;
-                const loadingAssistant = {
-                    id: tempAssistantId,
-                    sender: "assistant",
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    content: "",
-                    isLoading: true,
-                };
-                setMessages(prev => [...prev, loadingAssistant]);
-                responseData = await dryRun({
-                    localDataToSend: {
-                        ...localDataToSend,
-                        version_id: versionId,
-                        testcase_data,
-                        configuration: {
-                            ...localDataToSend.configuration
+                
+                // Use RT layer action for completion models too
+                const apiCall = async () => {
+                    return await dryRun({
+                        localDataToSend: {
+                            ...localDataToSend,
+                            version_id: versionId,
+                            testcase_data,
+                            configuration: {
+                                ...localDataToSend.configuration
+                            },
+                            input: bridge?.inputConfig?.input?.input
                         },
-                        input: bridge?.inputConfig?.input?.input
-                    },
-                    bridge_id: params?.id
-                });
+                        bridge_id: params?.id
+                    });
+                };
+                
+                // Send message with RT layer handling (loading will persist until RT response)
+                const result = await dispatch(sendMessageWithRtLayer(
+                    channelIdentifier, 
+                    bridge?.inputConfig?.input?.input || "", 
+                    apiCall, 
+                    isOrchestralModel
+                ));
+                
+                responseData = result.response;
+                
                 if (!responseData || !responseData.success) {
-                    // remove loading placeholder if present
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
-                    setLoading(false);
+                    dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             }
@@ -238,62 +252,13 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             //     }
             //     setMessages(prevMessages => [...prevMessages, toolData]);
             // }
-            // success is ensured in branches above for non-completion and embedding
-            if (!responseData || !responseData.success) {
-                setLoading(false);
-                return;
-            }
-            response = modelType === 'embedding' ? responseData.data?.response.data.embedding : responseData.response?.data;
+            // Store testcase_id if present
             if(responseData?.response?.testcase_id){
                 setTestCaseId(responseData?.response?.testcase_id);
             }
-            const content = modelType === 'embedding' ? response : response?.content || "";
-            const assistConversation = {
-                role: response?.role || "assistant",
-                content: content,
-                fallback : response?.fallback ? response?.fallback : response?.fall_back,
-                finish_reason: response?.finish_reason || "no_reason",
-                firstAttemptError: response?.firstAttemptError,
-                image_urls: response?.image_urls || [],
-                model: response?.model
-            };
-
-            // Replace the temporary loading message with the actual response first
-            const tempAssistantIdFinal = `assistant_${timestamp}`;
-            const newChatAssist = {
-                id: tempAssistantIdFinal,
-                sender: "assistant",
-                time: new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }),
-                content: Array.isArray(content) ? content.join(", ") : content.toString(),
-                image_urls: assistConversation.image_urls,
-                fallback : assistConversation?.fallback,
-                finish_reason: assistConversation?.finish_reason,
-                firstAttemptError: response?.firstAttemptError,
-                modelName : assistConversation?.model
-            };
-
-            // Update conversation and messages together to maintain synchronization
-            if (modelType !== 'completion' && modelType !== 'embedding') {
-                const updatedConversation = [...conversation, cloneDeep(omit(data, 'files')), assistConversation].slice(-6);
-                setConversation(updatedConversation);
-                setMessages(prevMessages => {
-                    const updatedMessages = prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m);
-                    return updatedMessages;
-                });
-            } else if (modelType === 'embedding') {
-                const updatedConversation = [...conversation, cloneDeep(data), assistConversation].slice(-6);
-                setConversation(updatedConversation);
-                setMessages(prevMessages => {
-                    const updatedMessages = prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m); 
-                    return updatedMessages;
-                });
-            } else {
-                // For completion models, just replace the loading message
-                setMessages(prevMessages => prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m));
-            }
+            
+            // For orchestral models or non-RT responses, the response is already handled
+            // For RT layer responses, the message will be updated when RT layer sends the response
             //         pauseOnHover: true,
             //         draggable: true,
             //         progress: undefined,
@@ -301,16 +266,14 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             //     });
              
         } catch (error) {
-            setErrorMessage("Something went wrong. Please try again.");
-            setMessages(prev => prev.filter(m => 
-                m.id !== `assistant_${timestamp}` && m.id !== `user_${timestamp}`
-            ));
-        } finally {
-            setLoading(false);
-            // Remove the redundant append of newChatAssist since we already replace the loading placeholder with it.
-            // setMessages(prevMessages => [...prevMessages, newChatAssist]);
-            setUploadedFiles([]);
+            dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
+            dispatch(setChatLoading(channelIdentifier, false)); // Clear loading on error
         }
+        // Note: Loading is cleared by RT layer when response is received, not in finally block
+        
+        // Clear uploaded files after successful send
+        dispatch(setChatUploadedFiles(channelIdentifier, []));
+        dispatch(setChatUploadedImages(channelIdentifier, []));
     };
 
     const handleKeyDown = useCallback(
@@ -363,9 +326,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     
                 if (result.success) {
                     if (file.type === 'application/pdf') {
-                        setUploadedFiles(prev => [...prev, result.image_url]);
+                        dispatch(setChatUploadedFiles(channelIdentifier, [...uploadedFiles, result.image_url]));
                     } else {
-                        setUploadedImages(prev => [...prev, result.image_url]);
+                        dispatch(setChatUploadedImages(channelIdentifier, [...uploadedImages, result.image_url]));
                     }
                 }
             }
@@ -398,7 +361,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                                 className="absolute -top-2 -right-2 text-white rounded-full"
                                 onClick={() => {
                                     const newImages = uploadedImages.filter((_, i) => i !== index);
-                                    setUploadedImages(newImages);
+                                    dispatch(setChatUploadedImages(channelIdentifier, newImages));
                                 }}
                             >
                                 <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
@@ -416,7 +379,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                                 className="absolute -top-2 -right-2 text-white rounded-full"
                                 onClick={() => {
                                     const newFiles = uploadedFiles.filter((_, i) => i !== index);
-                                    setUploadedFiles(newFiles);
+                                    dispatch(setChatUploadedFiles(channelIdentifier, newFiles));
                                 }}
                             >
                                 <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />

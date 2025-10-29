@@ -1,6 +1,7 @@
 // hooks/useRtLayerEventHandler.js
 'use client';
 import { addThreadNMessageUsingRtLayer, addThreadUsingRtLayer } from "@/store/reducer/historyReducer";
+import { handleRtLayerMessage, handleRtLayerStreamingUpdate } from "@/store/action/chatAction";
 import { useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
@@ -109,30 +110,100 @@ function useRtLayerEventHandler(channelIdentifier="") {
         return;
       }
 
-          if (!Thread) {
-        console.error("Missing Thread or Message data");
-          }
-          if (!Messages) {
-        console.error("Missing Message")
-          }
-          Object.keys(Messages).forEach(key => {
-            Messages[key].fromRTLayer = true;
-          });
-          // Clean the data to reduce serialization overhead
-          const cleanThread = {
-            thread_id: Thread.thread_id,
-            sub_thread_id: Thread.sub_thread_id,
-            bridge_id: Thread.bridge_id
+      // Handle chat messages for dry run (non-orchestral)
+      if (type === 'chat_message' || type === 'dry_run_response' || response.data) {
+        const channelId = channelIdentifier;
+        
+        console.log('RT Layer: Processing chat message', { 
+          type, 
+          channelId, 
+          hasResponseData: !!response.data,
+          responseData: response.data,
+          hasChannelId: !!channelId
+        });
+        
+        if (response.data) {
+          // Process the response data structure you provided
+          const messageData = {
+            id: response.data.id || response.data.message_id,
+            content: response.data.content,
+            role: response.data.role || 'assistant',
+            model: response.data.model,
+            finish_reason: response.data.finish_reason,
+            fallback: response.data.fall_back,
+            firstAttemptError: response.data.firstAttemptError,
+            image_urls: response.data.images || [],
+            tools_data: response.data.tools_data || {},
+            annotations: response.data.annotations,
+            fromRTLayer: true,
+            usage: parsedData.response?.usage // Include usage data if available
           };
-
-            // Dispatch actions to Redux store
-            dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
-            dispatch(addThreadNMessageUsingRtLayer({thread_id:cleanThread.thread_id, sub_thread_id:cleanThread.sub_thread_id, Messages}))
-            
-        } catch (error) {
-            console.error("Error parsing message data:", error);
+          
+          console.log('RT Layer: Dispatching message to Redux', { channelId, messageData });
+          
+          if (channelId) {
+            // Dispatch to chat reducer - this will clear loading
+            dispatch(handleRtLayerMessage(channelId, messageData));
+          } else {
+            console.warn('RT Layer: No channelId available, cannot dispatch message');
+          }
+        } else if (Messages && Array.isArray(Messages)) {
+          // Fallback for old message format
+          console.log('RT Layer: Using fallback message format', { channelId, Messages });
+          if (channelId) {
+            Messages.forEach(msg => {
+              msg.fromRTLayer = true;
+              dispatch(handleRtLayerMessage(channelId, msg));
+            });
+          } else {
+            console.warn('RT Layer: No channelId available for fallback messages');
+          }
+        } else {
+          console.warn('RT Layer: No response.data or Messages found', { response, Messages });
         }
-    }, [dispatch]);
+        return;
+      }
+
+      // Handle streaming updates
+      if (type === 'streaming_update') {
+        const channelId = channelIdentifier;
+        if (channelId && response.messageId && response.content !== undefined) {
+          dispatch(handleRtLayerStreamingUpdate(
+            channelId, 
+            response.messageId, 
+            response.content, 
+            response.isComplete || false
+          ));
+        }
+        return;
+      }
+
+      // Handle history data (existing functionality)
+      if (!Thread) {
+        console.error("Missing Thread or Message data");
+      }
+      if (!Messages) {
+        console.error("Missing Message")
+      }
+      Object.keys(Messages).forEach(key => {
+        Messages[key].fromRTLayer = true;
+      });
+      
+      // Clean the data to reduce serialization overhead
+      const cleanThread = {
+        thread_id: Thread.thread_id,
+        sub_thread_id: Thread.sub_thread_id,
+        bridge_id: Thread.bridge_id
+      };
+
+      // Dispatch actions to Redux store (existing history functionality)
+      dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
+      dispatch(addThreadNMessageUsingRtLayer({thread_id:cleanThread.thread_id, sub_thread_id:cleanThread.sub_thread_id, Messages}))
+            
+    } catch (error) {
+      console.error("Error parsing message data:", error);
+    }
+  }, [dispatch, channelIdentifier, pathName, showAgentUpdatedToast]);
     
     // WebSocket client initialization with retry logic
     const initializeWebSocketClient = useCallback(async () => {
