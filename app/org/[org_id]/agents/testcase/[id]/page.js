@@ -88,7 +88,20 @@ function TestCases({ params }) {
   };
 
   return (
-    <div className="p-6 bg-base-100 rounded-lg shadow-sm">
+    <div className="p-6 bg-base-100 rounded-lg shadow-sm relative">
+      {/* Loading Overlay */}
+      {isloading && (
+        <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-50">
+          <div className="flex items-center gap-3 bg-base-100 p-6 rounded-lg shadow-lg border border-base-content/20">
+            <span className="loading loading-spinner loading-lg text-primary"></span>
+            <div className="flex flex-col">
+              <span className="text-lg font-medium text-base-content">Running Test Cases</span>
+              <span className="text-sm text-base-content/60">Please wait while we process your test cases...</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="">
           <h1 className="text-2xl font-semibold text-base-content mb-2">Test Cases</h1>
             <p className="text-base-content text-sm leading-relaxed ">
@@ -183,7 +196,7 @@ function TestCases({ params }) {
                           const versionScore = versionArray?.[versionArray?.length - 1]?.score;
                           return (
                             <td key={versionIndex} className="p-3 truncate max-w-20">
-                              {versionScore ? `${(versionScore * 100).toFixed(2)}%` : 'N/A'}
+                              {versionScore ? `${(versionScore * 100).toFixed(2)}%` : '0'}
                             </td>
                           );
                         })}
