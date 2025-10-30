@@ -471,7 +471,7 @@ function MainSlider({ isEmbedUser }) {
                   {/* Dropdown for collapsed sidebar */}
                   {isOrgDropdownOpen && !showSidebarContent && (
                     <div 
-                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 min-w-[250px] z-50 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-left-2"
+                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 min-w-[250px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-left-2"
                       onMouseEnter={() => {
                         // Clear timeout when hovering over dropdown
                         if (orgDropdownTimeout) {
@@ -501,7 +501,7 @@ function MainSlider({ isEmbedUser }) {
                       </div>
 
                       {/* Settings menu items */}
-                      <div className="space-y-1">
+                      <div className="">
                         {settingsMenuItems.map((item) => (
                           <button
                             key={item.id}
@@ -522,7 +522,7 @@ function MainSlider({ isEmbedUser }) {
                         <div className="flex bg-base-200 rounded-lg p-1">
                           <button
                             onClick={() => handleThemeChange('light')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                            className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
                               theme === 'light' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
                                 : 'text-base-content/60 hover:text-base-content'
@@ -532,7 +532,7 @@ function MainSlider({ isEmbedUser }) {
                           </button>
                           <button
                             onClick={() => handleThemeChange('dark')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                            className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
                               theme === 'dark' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
                                 : 'text-base-content/60 hover:text-base-content'
@@ -542,7 +542,7 @@ function MainSlider({ isEmbedUser }) {
                           </button>
                           <button
                             onClick={() => handleThemeChange('system')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
+                            className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
                               theme === 'system' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
                                 : 'text-base-content/60 hover:text-base-content'
@@ -554,7 +554,7 @@ function MainSlider({ isEmbedUser }) {
                       </div>
                       
                       {/* Switch Organization and Logout buttons */}
-                      <div className="border-t border-base-300 pt-2 mt-2 space-y-1">
+                      <div className="border-t border-base-300 pt-2 mt-2">
                         <button
                           onClick={handleSwitchOrg}
                           className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-primary text-xs font-medium"
@@ -579,7 +579,7 @@ function MainSlider({ isEmbedUser }) {
 
                   {/* Expanded dropdown for full sidebar */}
                   {isOrgDropdownExpanded && showSidebarContent && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 space-y-1 z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
                       {/* User email info */}
                       <div className="flex items-center gap-3 p-2 text-sm text-base-content/70 border-b border-base-300 pb-2 mb-2">
                         <Mail size={14} className="shrink-0" />
@@ -587,7 +587,7 @@ function MainSlider({ isEmbedUser }) {
                       </div>
 
                       {/* Settings menu items */}
-                      <div className="space-y-1">
+                      <div className="">
                         {settingsMenuItems.map((item) => (
                           <button
                             key={item.id}
@@ -668,15 +668,15 @@ function MainSlider({ isEmbedUser }) {
 
             {/* Main navigation - scrollable */}
             <div className={`flex-1  scrollbar-hide overflow-x-hidden scroll-smooth p-2`}>
-              <div className="space-y-6">
+              <div className="">
                 {NAV_SECTIONS.map(({ title, items }, idx) => (
-                  <div key={idx} className="space-y-1">
+                  <div key={idx} className="">
                     {showSidebarContent && title && (
-                      <h3 className="mb-3 text-xs font-semibold text-base-content/50 uppercase tracking-wider px-2">
+                      <h3 className="my-2 text-xs font-semibold text-base-content/50 uppercase tracking-wider px-2">
                         {title}
                       </h3>
                     )}
-                    <div className="space-y-1">
+                    <div className="">
                       {items.map(key => (
                         <button
                           key={key}
@@ -699,7 +699,7 @@ function MainSlider({ isEmbedUser }) {
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {showSidebarContent && (
                            <div className='flex items-center gap-2 justify-center'>
-                             <span className="font-medium text-sm capitalize truncate">{DISPLAY_NAMES(key)}</span> 
+                             <span className="text-sm capitalize truncate">{DISPLAY_NAMES(key)}</span> 
                              <span>{key === 'orchestratal_model' && <BetaBadge/>}</span>
                            </div>
                           )}
@@ -713,8 +713,8 @@ function MainSlider({ isEmbedUser }) {
             </div>
 
             {/* Tutorial & Help Section */}
-            <div className="border-t border-base-300 p-2">
-              <div className="space-y-1">
+            <div className="border-t border-base-content p-2 rounded-t-lg ">
+              <div className="">
                 <button
                   onClick={() => {
                     openModal(MODAL_TYPE.TUTORIAL_MODAL);
@@ -725,7 +725,7 @@ function MainSlider({ isEmbedUser }) {
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
                   <MonitorPlayIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="font-medium text-sm truncate">Tutorial</span>}
+                  {showSidebarContent && <span className="text-sm truncate">Tutorial</span>}
                 </button>
 
                 <button
@@ -738,7 +738,7 @@ function MainSlider({ isEmbedUser }) {
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
                   <MessageCircleMoreIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="font-medium text-sm truncate">Speak to Us</span>}
+                  {showSidebarContent && <span className="text-sm truncate">Speak to Us</span>}
                 </button>
 
                 <a
@@ -751,7 +751,7 @@ function MainSlider({ isEmbedUser }) {
                   onClick={() => isMobile && setIsMobileVisible(false)}
                 >
                   <MessageSquareMoreIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="font-medium text-sm truncate">Feedback</span>}
+                  {showSidebarContent && <span className="text-sm truncate">Feedback</span>}
                 </a>
               </div>
             </div>
