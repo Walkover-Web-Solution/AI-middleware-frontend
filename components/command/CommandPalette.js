@@ -109,8 +109,8 @@ const CommandPalette = ({isEmbedUser}) => {
     const authGroup = filterBy(authData, ["name", "service", "_id"]).map((d) => ({
       id: d._id,
       title: d.name || d._id,
-      subtitle: "Pauth Key",
-      type: "Pauths",
+      subtitle: "Auth Key",
+      type: "Auths",
     }));
 
     return {
@@ -132,7 +132,7 @@ const CommandPalette = ({isEmbedUser}) => {
       ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
       // ...items.functions.map((it) => ({ group: "Functions", ...it })),
       ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
-      ...items.auths.map((it) => ({ group: "Pauth Keys", ...it })),
+      ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
   }, [items]);
@@ -199,7 +199,7 @@ const CommandPalette = ({isEmbedUser}) => {
       case "integrations":
         router.push(`/org/${orgId}/integration`);
         break;
-      case "Pauths":
+      case "Auths":
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case "flows":
@@ -232,7 +232,7 @@ const CommandPalette = ({isEmbedUser}) => {
       case 'integrations':
         router.push(`/org/${orgId}/integration`);
         break;
-      case 'Pauths':
+      case 'Auths':
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case 'flows':
@@ -316,7 +316,7 @@ const CommandPalette = ({isEmbedUser}) => {
                   { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
                   { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
                   { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
-                  { key: 'Pauths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
+                  { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
                   { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
                   // { key: 'functions', label: 'Functions', desc: 'Tools and endpoints' },
                   { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },

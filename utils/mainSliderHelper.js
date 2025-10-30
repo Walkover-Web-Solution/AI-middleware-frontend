@@ -51,7 +51,9 @@ export const DISPLAY_NAMES = (key) => {
     case 'invite':
       return 'Members';
     case 'pauthkey':
-      return 'AuthKey';
+      return 'Auth Key';
+    case 'apikeys':
+      return 'API Keys';
     default:
       return key;
   }
