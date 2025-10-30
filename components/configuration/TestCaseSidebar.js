@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Clock, AlertCircle, Eye, EyeOff, History, ChevronDown, ChevronRight, TrashIcon } from 'lucide-react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
-import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction } from '@/store/action/testCasesAction';
+import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, generateAdditionalTestCasesAction } from '@/store/action/testCasesAction';
 
 
 const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
@@ -10,6 +10,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [expandedVersions, setExpandedVersions] = useState({});
   const [selectedVersion, setSelectedVersion] = useState('');
+  const [generatingTestCases, setGeneratingTestCases] = useState(false);
   const dispatch = useDispatch();
 
   const { testCases, isFirstTestcase, versions } = useCustomSelector((state) => ({
@@ -43,6 +44,21 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
     await dispatch(runTestCaseAction({ versionId: resolvedParams?.version, bridgeId: params?.id }));
     await dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
     setRunningTests(new Set());
+  }
+
+  const generateMoreTestCases = async () => {
+    setGeneratingTestCases(true);
+    try {
+      await dispatch(generateAdditionalTestCasesAction({ 
+        bridgeId: params?.id, 
+        versionId: resolvedParams?.version 
+      }));
+      await dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+    } catch (error) {
+      console.error('Error generating additional test cases:', error);
+    } finally {
+      setGeneratingTestCases(false);
+    }
   }
 
   const handleDeleteTestCase = async (testId) => {
@@ -316,7 +332,19 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
       </div>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-base-content/20 mt-auto">
+      <div className="p-4 border-t border-base-content/20 mt-auto space-y-3">
+        <button
+          className="w-full bg-blue-500 text-base-100 py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
+          onClick={generateMoreTestCases}
+          disabled={generatingTestCases}
+        >
+          {generatingTestCases ? (
+            <div className="flex items-center justify-center">
+              <Clock className="w-4 h-4 mr-2 animate-spin" />
+              <span>Generating Test Cases...</span>
+            </div>
+          ) : 'Generate More Test Cases'}
+        </button>
         <button
           className="w-full bg-blue-500 text-base-100 py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
           onClick={runAllTests}
