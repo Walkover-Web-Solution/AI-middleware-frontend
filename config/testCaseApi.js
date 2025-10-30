@@ -57,3 +57,16 @@ export const runTestCaseApi = async ({ versionId, testcase_id, testCaseData, bri
     return error;
   }
 }
+
+export const generateAdditionalTestCasesApi = async ({ bridgeId, versionId }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/${bridgeId}/generateAdditionalTestCases`, { 
+      "version_id": versionId 
+    });
+    return response.data;
+  } catch (error) {
+    toast.error(error?.response?.data?.detail?.error ? error?.response?.data?.detail?.error : "Error while generating additional test cases")
+    console.error(error);
+    return error;
+  }
+}
