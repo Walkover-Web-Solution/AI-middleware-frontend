@@ -99,7 +99,7 @@ function useRtLayerEventHandler() {
         } else {
           const isConfigPage = typeof pathName === 'string' && pathName.includes('/configure/');
           if (isConfigPage) {
-            showAgentUpdatedToast();
+            // showAgentUpdatedToast();
           }
         }
         return;
