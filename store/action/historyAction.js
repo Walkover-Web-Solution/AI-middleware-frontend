@@ -1,5 +1,5 @@
-import { getHistory, getSingleThreadData, getSubThreadIds, updateHistoryMessage, userFeedbackCount } from "@/config";
-import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
+import { getHistory, getOrchestralHistory, getSingleThreadData, getSubThreadIds, updateHistoryMessage, userFeedbackCount } from "@/config";
+import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer, fetchOrchestralHistoryReducer } from "../reducer/historyReducer";
 
 export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback, isErrorTrue, selectedVersion) => async (dispatch) => {
   try {
@@ -41,7 +41,16 @@ export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(disp
     console.error(error)
   }
 }
-
+export const getOrchestralHistoryAction = (orchestrator_id, page = 1, pageSize = 10, org_id) => async (dispatch) => {
+  try {
+    const data = await getOrchestralHistory(orchestrator_id, page, pageSize, org_id);
+    if (data) {
+      dispatch(fetchOrchestralHistoryReducer({ data: data, page }));
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
 export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) => async (dispatch) =>{
   try {
     const data = await getSubThreadIds({thread_id, error, bridge_id, version_id});

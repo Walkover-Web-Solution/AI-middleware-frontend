@@ -69,7 +69,22 @@ export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id 
     return error
   }
 }
-
+export const getOrchestralHistory = async (orchestrator_id, page = 1,pageSize = 10,org_id ) => {
+  try {
+    const getOrchestralHistory = await axios.get(`${URL}/orchestrator/History/${orchestrator_id}`, {
+      params: {
+        page,
+        pageSize,
+      },
+      org_id
+    });
+    console.log(getOrchestralHistory.data.data,"orchestralHistory")
+    return getOrchestralHistory.data?.data
+  } catch (error) {
+    console.error(error);
+    return error
+  }
+};
 export const updateHistoryMessage = async ({ id, bridge_id, message }) => {
   const response = await axios.put(`${URL}/api/v1/config/gethistory/${bridge_id}`, { id: id, message: message })
   return response?.data;

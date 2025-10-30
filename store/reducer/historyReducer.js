@@ -4,6 +4,7 @@ const initialState = {
   history: [],
   versionHistory: [],
   thread: [],
+  orchestralHistory: [],
   selectedVersion : 'all',
   loading: false,
   success: false
@@ -73,6 +74,18 @@ export const historyReducer = createSlice({
         })
       } 
     },
+    fetchOrchestralHistoryReducer: (state, action) => {
+      const { data, page } = action.payload;
+      if (page === 1) {
+        state.orchestralHistory = data;
+      } else {
+        state.orchestralHistory = [...state.orchestralHistory, ...data];
+      }
+      state.success = true;
+    },
+    clearOrchestralHistoryData: (state) => {
+      state.orchestralHistory = [];
+    },
   },
 });
 
@@ -88,6 +101,8 @@ export const {
   setSelectedVersion,
   clearHistoryData,
   addThreadUsingRtLayer,
-  addThreadNMessageUsingRtLayer
+  addThreadNMessageUsingRtLayer,
+  fetchOrchestralHistoryReducer,
+  clearOrchestralHistoryData
 } = historyReducer.actions;
 export default historyReducer.reducer;
