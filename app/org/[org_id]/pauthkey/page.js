@@ -196,7 +196,7 @@ const maskAuthKey = (authkey) => {
         <div className="modal-box">
           <h3 className="font-bold text-lg mb-2">Create New Auth Key</h3>
           <label className="input input-bordered flex items-center gap-2">
-            Name{RequiredItem()} :
+            <span>Name{RequiredItem()} :</span>
             <input
               type="text"
               className="grow"
