@@ -1095,7 +1095,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
             </span>
           } />
           <p className="text-sm">
-            Follow the on-screen instructions to create a new API key. Ignore if already created.
+            Follow the on-screen instructions to create a new Auth key. Ignore if already created.
           </p>
           <Link
             href={`/org/${params?.org_id}/pauthkey`}
