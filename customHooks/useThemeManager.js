@@ -18,6 +18,7 @@ export const useThemeManager = () => {
     return 'light';
   };
 
+
   // Apply theme to document
   const applyTheme = (themeToApply) => {
     if (typeof window !== 'undefined') {
@@ -27,6 +28,10 @@ export const useThemeManager = () => {
       root.classList.add(themeToApply);
     }
   };
+
+  useEffect(() => {
+    applyTheme('system')
+  }, [])
 
   // Change theme (manual selection)
   const changeTheme = useCallback((newTheme) => {
