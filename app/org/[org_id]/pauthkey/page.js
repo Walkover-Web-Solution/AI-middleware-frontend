@@ -6,9 +6,10 @@ import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
+import useTutorialVideos from '@/hooks/useTutorialVideos'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
@@ -21,6 +22,9 @@ import { use } from 'react';
 export const runtime = 'edge';
 
 function Page({ params }) {
+  // Use the tutorial videos hook
+  const { getPauthKeyVideo } = useTutorialVideos();
+  
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const { authData, isFirstPauthCreation, descriptions } = useCustomSelector((state) => {
@@ -137,7 +141,7 @@ const maskAuthKey = (authkey) => {
         {tutorialState?.showTutorial && (
           <OnBoarding
             setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-            video={ONBOARDING_VIDEOS.PauthKey}
+            video={getPauthKeyVideo()}
             params={resolvedParams}
             flagKey="PauthKey"
           />

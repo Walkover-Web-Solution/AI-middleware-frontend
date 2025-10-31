@@ -501,15 +501,6 @@ export const FEATURE_DATA = [
     icon: "/live.svg"
   },
 ]
-export const ONBOARDING_VIDEOS = {
-  bridgeCreation: "https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2",
-  FunctionCreation: "https://app.supademo.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1",
-  knowledgeBase: "https://app.supademo.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
-  Addvariables: "https://app.supademo.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
-  AdvanceParameter: "https://app.supademo.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
-  PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2",
-  TestCases: "https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2"
-}
 
 export const AGENT_SETUP_GUIDE_STEPS = [
   {
@@ -556,38 +547,38 @@ export const TUTORIALS = [
   {
     title: 'Agent Creation',
     description: 'Learn how to create and manage agents in GTWY.ai platform',
-    videoUrl: ONBOARDING_VIDEOS?.bridgeCreation,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: BotIcon
   },
   {
     title: 'Pauth Key Setup',
     description: 'Configure authentication keys for secure access',
-    videoUrl: ONBOARDING_VIDEOS?.PauthKey,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: KeyIcon
   },
   {
     title: 'Tool Configuration',
     description: 'Set up and configure tools for your workflow',
-    videoUrl: ONBOARDING_VIDEOS?.FunctionCreation,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: WrenchIcon
 
   },
   {
     title: 'Variable Management',
     description: 'Add and manage variables in your environment',
-    videoUrl: ONBOARDING_VIDEOS?.Addvariables,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: SettingsIcon
   },
   {
     title: 'KnowledgeBase Configuration',
     description: 'Set up and manage your knowledge base for intelligent responses',
-    videoUrl: ONBOARDING_VIDEOS?.knowledgeBase,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: BookIcon
   },
   {
     title: 'Advanced Parameters',
     description: 'Set up and update advanced parameters for your workflow',
-    videoUrl: ONBOARDING_VIDEOS?.AdvanceParameter,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: BookIcon
   },
   {
