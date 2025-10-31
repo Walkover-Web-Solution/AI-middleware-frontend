@@ -110,7 +110,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                         <li className="text-sm font-semibold disabled">Suggested Tools</li>
                         <input
                             type='text'
-                            placeholder='Search Function'
+                            placeholder='Search Tools'
                             value={searchQuery}
                             onChange={handleInputChange} // Update search query on input change
                             className='input input-bordered w-full input-sm'
