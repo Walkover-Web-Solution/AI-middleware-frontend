@@ -25,7 +25,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { useThemeDetection } from '@/customHooks/useThemeDetection';
+import { useThemeManager } from '@/customHooks/useThemeManager';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import { clearCookie, getFromCookies, openModal, toggleSidebar, setInCookies } from '@/utils/utility';
 import OrgSlider from './orgSlider';
@@ -70,9 +70,8 @@ function MainSlider({ isEmbedUser }) {
   const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
   const [showContent, setShowContent] = useState(isSideBySideMode); // Control content visibility with delay
   
-  // Theme detection using existing hook
-  const currentTheme = useThemeDetection();
-  const [theme, setTheme] = useState("system");
+  // Theme detection using unified theme manager
+  const { theme, actualTheme, changeTheme } = useThemeManager();
 
   // Effect to detect mobile screen size
   useEffect(() => {
@@ -113,12 +112,6 @@ function MainSlider({ isEmbedUser }) {
     }
   }, [isSideBySideMode, pathParts.length, isMobile]);
 
-  // Initialize theme from cookies
-  useEffect(() => {
-    const savedTheme = getFromCookies("theme") || "system";
-    setTheme(savedTheme);
-  }, []);
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -127,20 +120,6 @@ function MainSlider({ isEmbedUser }) {
       }
     };
   }, [orgDropdownTimeout]);
-
-  // Simplified theme change handler
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    setInCookies("theme", newTheme);
-    
-    // Apply theme immediately
-    const root = document.documentElement;
-    root.setAttribute('data-theme', newTheme === 'system' 
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : newTheme
-    );
-    document.dispatchEvent(new CustomEvent('themeChange'));
-  };
 
   /** Logout handler */
   const handleLogout = useCallback(async () => {
@@ -407,7 +386,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar bg-base-300 border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
             transform: isMobile ? (isMobileVisible ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
@@ -515,13 +494,13 @@ function MainSlider({ isEmbedUser }) {
                       </div>
 
                       {/* Theme Section */}
-                      <div className="border-t border-base-300 pt-2 mt-2">
+                      {/* <div className="border-t border-base-300 pt-2 mt-2">
                         <div className="flex items-center justify-between mb-2 px-2">
                           <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Theme</span>
                         </div>
                         <div className="flex bg-base-200 rounded-lg p-1">
                           <button
-                            onClick={() => handleThemeChange('light')}
+                            onClick={() => changeTheme('light')}
                             className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
                               theme === 'light' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
@@ -531,7 +510,7 @@ function MainSlider({ isEmbedUser }) {
                             <SunIcon size={12} className="mx-auto" />
                           </button>
                           <button
-                            onClick={() => handleThemeChange('dark')}
+                            onClick={() => changeTheme('dark')}
                             className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
                               theme === 'dark' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
@@ -541,7 +520,7 @@ function MainSlider({ isEmbedUser }) {
                             <MoonIcon size={12} className="mx-auto" />
                           </button>
                           <button
-                            onClick={() => handleThemeChange('system')}
+                            onClick={() => changeTheme('system')}
                             className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
                               theme === 'system' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
@@ -551,13 +530,13 @@ function MainSlider({ isEmbedUser }) {
                             <MonitorIcon size={12} className="mx-auto" />
                           </button>
                         </div>
-                      </div>
+                      </div> */}
                       
                       {/* Switch Organization and Logout buttons */}
                       <div className="border-t border-base-300 pt-2 mt-2">
                         <button
                           onClick={handleSwitchOrg}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-primary text-xs font-medium"
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-blue-500 text-xs font-medium"
                         >
                           <Building2 size={14} />
                           Switch Organization
@@ -601,13 +580,13 @@ function MainSlider({ isEmbedUser }) {
                       </div>
 
                       {/* Theme Section */}
-                      <div className="border-t border-base-300 pt-2 mt-2">
+                      {/* <div className="border-t border-base-300 pt-2 mt-2">
                         <div className="flex items-center justify-between mb-2 px-2">
                           <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Theme</span>
                         </div>
                         <div className="flex bg-base-300 rounded-lg p-1">
                           <button
-                            onClick={() => handleThemeChange('light')}
+                            onClick={() => changeTheme('light')}
                             className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
                               theme === 'light' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
@@ -617,7 +596,7 @@ function MainSlider({ isEmbedUser }) {
                             <SunIcon size={12} className="mx-auto" />
                           </button>
                           <button
-                            onClick={() => handleThemeChange('dark')}
+                            onClick={() => changeTheme('dark')}
                             className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
                               theme === 'dark' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
@@ -627,7 +606,7 @@ function MainSlider({ isEmbedUser }) {
                             <MoonIcon size={12} className="mx-auto" />
                           </button>
                           <button
-                            onClick={() => handleThemeChange('system')}
+                            onClick={() => changeTheme('system')}
                             className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
                               theme === 'system' 
                                 ? 'bg-base-100 text-base-content shadow-sm' 
@@ -637,13 +616,13 @@ function MainSlider({ isEmbedUser }) {
                             <MonitorIcon size={12} className="mx-auto" />
                           </button>
                         </div>
-                      </div>
+                      </div> */}
                       
                       {/* Switch Organization and Logout buttons */}
                       <div className="border-t border-base-300 pt-2 mt-2 space-y-1">
                         <button
                           onClick={handleSwitchOrg}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-300 transition-colors text-primary text-xs font-medium"
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-300 transition-colors text-blue-500 text-xs font-medium"
                         >
                           <Building2 size={14} />
                           Switch Organization
@@ -672,11 +651,11 @@ function MainSlider({ isEmbedUser }) {
                 {NAV_SECTIONS.map(({ title, items }, idx) => (
                   <div key={idx} className="">
                     {showSidebarContent && title && (
-                      <h3 className="my-2 text-xs font-semibold text-base-content/50 uppercase tracking-wider px-2">
+                      <h3 className="my-2 text-[10px] text-base-content/50 uppercase tracking-wider px-2">
                         {title}
                       </h3>
                     )}
-                    <div className="">
+                    <div className="space-y-1">
                       {items.map(key => (
                         <button
                           key={key}
@@ -690,7 +669,7 @@ function MainSlider({ isEmbedUser }) {
                           }}
                           onMouseEnter={e => onItemEnter(key, e)}
                           onMouseLeave={onItemLeave}
-                          className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-all duration-200 ${
+                          className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 ${
                             activeKey === key 
                               ? 'bg-primary text-primary-content shadow-sm' 
                               : 'hover:bg-base-200 text-base-content'
@@ -713,7 +692,7 @@ function MainSlider({ isEmbedUser }) {
             </div>
 
             {/* Tutorial & Help Section */}
-            <div className="border-t border-base-content p-2 rounded-t-lg ">
+            <div className="border-t border-base-content/20 p-2 rounded-t-lg ">
               <div className="">
                 <button
                   onClick={() => {

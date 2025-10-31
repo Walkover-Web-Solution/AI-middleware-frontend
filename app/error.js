@@ -39,8 +39,8 @@ export default function Error({ error, reset }) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <button className="btn btn-primary" onClick={handleTryAgain}>Try again</button>
-              <button className="btn" onClick={handleGoHome}>Go Home</button>
+              <button className="btn btn-sm  btn-primary" onClick={handleTryAgain}>Try again</button>
+              <button className="btn btn-sm" onClick={handleGoHome}>Go Home</button>
             </div>
           </div>
         </div>

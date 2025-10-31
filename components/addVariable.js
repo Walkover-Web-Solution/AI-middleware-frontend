@@ -267,7 +267,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   return (
     <div className="text-base-content " tabIndex={0}>
       <div
-        className={`info mt-4 p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
           handleTutorial();
           toggleAccordion();
@@ -303,7 +303,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                   </div>
                   <button
                     onClick={() => setEditMode('bulk')}
-                    className="btn btn-xs btn-outline text-xs font-medium"
+                    className="btn btn-sm btn-outline text-xs font-medium"
                   >
                     Bulk Edit
                   </button>
@@ -318,7 +318,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                   </div>
                   <button
                     onClick={() => setEditMode('key-value')}
-                    className="btn btn-xs btn-outline text-xs font-medium"
+                    className="btn btn-sm btn-outline text-xs font-medium"
                   >
                     Key-Value Edit
                   </button>
@@ -391,7 +391,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                 /* Bulk Edit */
                 <div>
                   <textarea
-                    className="textarea textarea-bordered w-full h-64 font-mono text-sm resize-none focus:border-primary"
+                    className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-64 font-mono text-sm resize-none focus:border-primary"
                     placeholder={`key1: value1\nkey2: value2\nkey3: value3`}
                     onBlur={(e) => onBlurHandler(e.target.value)}
                     defaultValue={formatPairsForTextarea()}

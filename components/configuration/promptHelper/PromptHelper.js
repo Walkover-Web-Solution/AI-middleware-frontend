@@ -252,7 +252,7 @@ const PromptHelper = ({
                     <button 
                       onClick={handleApplyOptimizedPrompt}
                       disabled={!optimizedPrompt}
-                      className={`btn btn-xs ${optimizedPrompt ? 'btn-primary' : 'btn-disabled'}`}
+                      className={`btn btn-sm ${optimizedPrompt ? 'btn-primary' : 'btn-disabled'}`}
                     >
                       Apply
                     </button>

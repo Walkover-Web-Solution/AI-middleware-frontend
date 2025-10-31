@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { getSingleMessage, switchOrg } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
@@ -27,6 +27,7 @@ import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { getAllAuthData } from "@/store/action/authkeyAction";
+import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 
 const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
 const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
@@ -130,49 +131,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
 
-  // Theme initialization with full system theme support
-  useEffect(() => {
-    const getSystemTheme = () => {
-      if (typeof window !== 'undefined') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      return 'light';
-    };
-
-    const applyTheme = (themeToApply) => {
-      if (typeof window !== 'undefined') {
-        document.documentElement.setAttribute('data-theme', themeToApply);
-        setInCookies("theme", themeToApply);
-      }
-    };
-
-    const savedTheme = getFromCookies("theme") || "system";
-    const systemTheme = getSystemTheme();
-    
-    if (savedTheme === "system") {
-      applyTheme(systemTheme);
-    } else {
-      applyTheme(savedTheme);
-    }
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      const currentSavedTheme = getFromCookies("theme") || "system";
-      
-      // Only update if currently using system theme
-      if (currentSavedTheme === "system") {
-        applyTheme(newSystemTheme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
-  }, []);
   
   useEffect(() => {
     const validateOrg = async () => {
@@ -409,6 +367,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
+        <ThemeManager />
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="flex flex-col h-full z-high">
@@ -445,6 +404,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   else {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
+        <ThemeManager />
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}

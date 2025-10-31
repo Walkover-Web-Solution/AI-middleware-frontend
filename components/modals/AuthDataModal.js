@@ -136,7 +136,7 @@ const AuthDataModal = ({ data}) => {
         <div className="modal-action">
           <button
             onClick={()=>{closeModal(MODAL_TYPE?.AUTH_DATA_MODAL)}}
-            className="btn"
+            className="btn btn-sm"
           >
             Close
           </button>

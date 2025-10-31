@@ -136,7 +136,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                             <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
                                                 <textarea
                                                     defaultValue={JSON.stringify(item, null, 2)}
-                                                    className="textarea w-full font-mono text-sm p-2 bg-transparent focus:outline-none min-h-20 h-auto max-h-72 overflow-y-auto"
+                                                    className="textarea bg-white dark:bg-black/15 w-full font-mono text-sm p-2 bg-transparent focus:outline-none min-h-20 h-auto max-h-72 overflow-y-auto"
                                                     onBlur={(e) => handleChange(e.target.value, index, idx)}
                                                     rows={4}
                                                 />
@@ -154,7 +154,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                 ) : (
                                     <textarea 
                                         defaultValue={message.content}
-                                        className="textarea w-full text-sm p-3 focus:outline-none bg-base-100 rounded-lg shadow-sm min-h-20 h-auto max-h-72"
+                                        className="textarea bg-white dark:bg-black/15 w-full text-sm p-3 focus:outline-none rounded-lg shadow-sm min-h-20 h-auto max-h-72"
                                         onBlur={(e) => handleChange(e.target.value, index, null)}
                                         rows={3}
                                     />

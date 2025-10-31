@@ -263,7 +263,7 @@ const ParameterCard = ({
           </select>
           <button
             onClick={() => onDelete(currentPath)}
-            className="btn btn-xs btn-ghost text-error text-xs"
+            className="btn btn-sm btn-ghost text-error text-xs"
             title="Delete parameter"
           >
             <TrashIcon size={14} />
@@ -357,7 +357,7 @@ const ParameterCard = ({
             </button>
             <button
               onClick={() => onAddChild(currentPath)}
-              className="btn btn-xs btn-ghost text-primary gap-1"
+              className="btn btn-sm btn-ghost text-primary gap-1"
               title="Add property"
             >
               <PlusCircleIcon size={10} />
@@ -1253,7 +1253,7 @@ function FunctionParameterModal({
                       Description
                     </label>
                     <textarea
-                      className="textarea textarea-sm textarea-bordered w-full resize-y"
+                      className="textarea bg-white dark:bg-black/15 textarea-sm textarea-bordered w-full resize-y"
                       rows={2}
                       value={toolData?.description || ""}
                       onChange={(e) => {
@@ -1314,7 +1314,7 @@ function FunctionParameterModal({
             <textarea
               type="input"
               value={objectFieldValue}
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 resize-y"
+              className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
               onChange={(e) => setObjectFieldValue(e.target.value)}
               onBlur={handleTextFieldChange}
               placeholder="Enter valid JSON object here..."
@@ -1327,7 +1327,7 @@ function FunctionParameterModal({
                     ? JSON.stringify(toolData["old_fields"], undefined, 4)
                     : ""
                 }
-                className="textarea textarea-bordered border border-base-300 w-full min-h-96 resize-y"
+                className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
               />
             )}
           </div>

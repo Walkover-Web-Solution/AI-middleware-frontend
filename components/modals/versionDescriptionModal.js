@@ -16,8 +16,8 @@ const VersionDescriptionModal = ({ versionDescriptionRef, handleCreateNewVersion
         />
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn" onClick={() => { closeModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL); versionDescriptionRef.current.value = ''; }}>Close</button>
-            <button className="btn btn-primary ml-2" onClick={handleCreateNewVersion}>Create</button>
+            <button className="btn btn-sm" onClick={() => { closeModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL); versionDescriptionRef.current.value = ''; }}>Close</button>
+            <button className="btn btn-sm btn-primary ml-2" onClick={handleCreateNewVersion}>Create</button>
           </form>
         </div>
       </div>

@@ -43,7 +43,7 @@ const ChatBotList = ({ params }) => {
 
                 <div className="flex items-center justify-between ">
                     <h1 className='text-xl font-medium flex items-center gap-2 text-base-content'><BotIcon /> Chat Bot list</h1>
-                    <button className="btn btn-outline btn-circle btn-xs" onClick={handleAddChatbotClick}><CloseIcon size={16} /></button>
+                    <button className="btn btn-outline btn-circle btn-sm" onClick={handleAddChatbotClick}><CloseIcon size={16} /></button>
                 </div>
 
                 <div className="mt-6 flex flex-1 flex-col justify-between">

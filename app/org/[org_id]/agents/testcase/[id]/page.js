@@ -137,7 +137,7 @@ function TestCases({ params }) {
                       <div className="flex items-center gap-2">
                         <div className="tooltip tooltip-left" data-tip="Run Test Case">
                           <button
-                            className="btn btn-xs btn-circle bg-base-100 border border-base-300 hover:bg-primary hover:border-primary hover:text-base-content disabled:bg-base-100 disabled:border-base-300 disabled:text-base-content"
+                            className="btn btn-sm btn-circle bg-base-100 border border-base-300 hover:bg-primary hover:border-primary hover:text-base-content disabled:bg-base-100 disabled:border-base-300 disabled:text-base-content"
                             onClick={() => handleRunTestCase(version)}
                             disabled={!resolvedParams?.id || isloading}
                           >
@@ -211,7 +211,7 @@ function TestCases({ params }) {
                                   <textarea
                                     value={editUserInput}
                                     onChange={(e) => setEditUserInput(e.target.value)}
-                                    className="textarea textarea-bordered w-full bg-base-100 min-h-20"
+                                    className="textarea bg-white dark:bg-black/15/10 textarea-bordered w-full min-h-20"
                                   />
                                 ) : (
                                   <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content overflow-auto max-h-40">
@@ -225,7 +225,7 @@ function TestCases({ params }) {
                                   <textarea
                                     value={editExpectedOutput}
                                     onChange={(e) => setEditExpectedOutput(e.target.value)}
-                                    className="textarea textarea-bordered w-full bg-base-100 min-h-20"
+                                    className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-20"
                                   />
                                 ) : (
                                   <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content whitespace-pre-wrap overflow-auto max-h-40">

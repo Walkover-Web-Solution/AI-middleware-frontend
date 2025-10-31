@@ -1,15 +1,15 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import React from 'react';
-
+import React from 'react';  
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import ConfigurationHeader from "./ConfigurationHeader";
-import ConfigurationNavigation from "./ConfigurationNavigation";
 import SetupView from "./SetupView";
-import ChatbotConfigView from "./ChatbotConfigView";
 import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 import Protected from "../protected";
+import { toggleSidebar } from '@/utils/utility';
+import { FilterSliderIcon } from '../Icons';
+import VersionDescriptionInput from './configurationComponent/VersionDescriptionInput';
 
 const ConfigurationPage = ({ 
     params, 
@@ -93,7 +93,13 @@ const ConfigurationPage = ({
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
+            <div className="flex flex-col gap-3 relative mt-2 bg-base-100">
+                <BridgeVersionDropdown params={params} searchParams={searchParams} />
+                <VersionDescriptionInput 
+                    params={params}
+                    searchParams={searchParams} 
+                    isEmbedUser={isEmbedUser} 
+                  />
                 <ConfigurationHeader 
                     params={params} 
                     searchParams={searchParams} 
@@ -101,22 +107,30 @@ const ConfigurationPage = ({
                     showConfigType={configState.showConfigType} 
                 />
                 <div className="absolute right-0 top-0">
-                    <div className="flex items-center">
-                        <BridgeVersionDropdown params={params} searchParams={searchParams} />
-                        <ConfigurationNavigation 
+                    <div className="flex items-center gap-2">
+                        {!isEmbedUser && (
+                            <button
+                                className="btn btn-sm p-2 tooltip flex tooltip-left"
+                                data-tip="Integration Guide"
+                                onClick={() => toggleSidebar("integration-guide-slider", "right")}
+                            >
+                                <FilterSliderIcon size={16}/> <span className="font-normal">Guide</span>
+                            </button>
+                        )}
+                        {/* <ConfigurationNavigation 
                             bridgeType={bridgeType} 
                             currentView={currentView} 
                             handleNavigation={handleNavigation} 
                             isEmbedUser={isEmbedUser} 
                             showConfigType={configState.showConfigType} 
-                        />
+                        /> */}
                     </div>
                 </div>
-                {currentView === 'chatbot-config' ? (
+                {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
                     <ChatbotConfigView params={params} searchParams={searchParams} />
-                ) : (
+                ) : ( */}
                     <SetupView />
-                )}
+                {/* )} */}
                 {renderNeedHelp()}
             </div>
         </ConfigurationProvider>

@@ -151,7 +151,7 @@ function Canvas({
       <div className="flex  items-center pb-1 mb-1 pl-2" style={{justifyContent:"flex-end"}}>
         {messages.length > 0 && (
           <button 
-            className="btn btn-xs  btn-outline btn-error hover:btn-error"
+            className="btn btn-sm  btn-outline btn-error hover:btn-error"
             onMouseDown={handleResetChat}
           >
             <RotateCcw size={14}/>
@@ -224,7 +224,7 @@ function Canvas({
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleApply(message)}
                           >
                             <MousePointerClick size={14}/>
@@ -239,7 +239,7 @@ function Canvas({
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleCopy(message.id, message.optimized)}
                           >
                             <CopyIconComponent size={14} />

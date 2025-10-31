@@ -4,6 +4,30 @@ import InfoTooltip from '../InfoTooltip';
 
 const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Detect platform for keyboard shortcut display
+  const isMac = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    }
+    return false;
+  }, []);
+  
+  const shortcutText = isMac ? '⌘K' : 'Ctrl+K';
+  
+  // Function to open command palette (only for non-Organizations)
+  const openCommandPalette = () => {
+    if (item === 'Organizations') return; // Don't open command palette for Organizations
+    
+    // Dispatch a custom event to trigger the command palette
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      metaKey: true, // Cmd on Mac
+      ctrlKey: true, // Ctrl on Windows/Linux
+      bubbles: true
+    });
+    window.dispatchEvent(event);
+  };
 
   useEffect(() => {
     const filtered = data?.filter(item =>
@@ -30,21 +54,25 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
   };
 
   return (
-    <div className={`flex-1 ${item !== 'Organizations' ? 'max-w-md' : ''} ml-2`}>
+    <div className={`${item === 'Organizations' ? 'w-full' : 'max-w-xs'} ml-2`}>
       <div className="relative">
         <input
           type="text"
           aria-label={`Search ${item} by Name, SlugName, Service, or ID`}
           placeholder="Search"
-          className={`${style ? style : 'input w-full mb-1 border border-base-content/50 pr-10'}`}
           value={searchTerm}
+          className={`${style ? style : 'input input-sm w-full border bg-white dark:bg-base-200 border-base-content/50 pr-16'}`}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onClick={item !== 'Organizations' ? openCommandPalette : undefined}
+          readOnly={item !== 'Organizations'}
         />
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <InfoTooltip tooltipContent={getTooltipContent()}>
-            <InfoIcon className='w-4 h-4 cursor-help text-base-content/60 hover:text-base-content' />
-          </InfoTooltip>
-        </div>
+        {item !== 'Organizations' && (
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <kbd className={`kbd kbd-xs bg-base-200 text-base-content/70 border border-base-content/20 ${isMac ? 'px-1.5' : 'px-1'}`}>
+              {shortcutText}
+            </kbd>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -380,7 +380,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       </div>
       
 
-      <div className="flex mt-4 h-[83vh] overflow-hidden relative">
+      <div className="flex mt-4 h-[86vh] overflow-hidden relative">
         {/* Overlay Test Cases Sidebar */}
         {uiState.showTestCases && (
           <div className="absolute inset-0 z-low flex">
@@ -622,7 +622,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                         <div className={`flex gap-2 show-on-hover justify-start max-w-[700px] items-center relative ${uiState.editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
                             <button
-                              className="btn btn-xs btn-outline hover:btn-primary see-on-hover flex mt-2"
+                              className="btn btn-sm btn-outline hover:btn-primary see-on-hover flex mt-2"
                               onClick={() => handleRunTestCase(index)}
                               disabled={testState.isRunningTestCase}
                             >
@@ -709,20 +709,20 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                   <textarea
                                     value={uiState.editContent}
                                     onChange={(e) => setUiState(prev => ({ ...prev, editContent: e.target.value }))}
-                                    className="textarea textarea-bordered w-full min-h-[100px] resize-y text-base-content bg-base-100"
+                                    className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-[100px] resize-y text-base-content bg-base-100"
                                     placeholder="Edit message content..."
                                   />
                                   <div className="flex gap-2 mt-2">
                                     <button
                                       onClick={() => handleSaveEdit(message.id)}
-                                      className="btn btn-xs btn-success"
+                                      className="btn btn-sm btn-success"
                                     >
                                       <Save className="h-3 w-3" />
                                       Save
                                     </button>
                                     <button
                                       onClick={handleCancelEdit}
-                                      className="btn btn-xs btn-error"
+                                      className="btn btn-sm btn-error"
                                     >
                                       <X className="h-3 w-3" />
                                       Cancel
@@ -736,7 +736,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                   {message.sender === "assistant" && !message.isLoading && (
                                     <button
                                       onClick={() => handleEditMessage(message.id, message.content)}
-                                      className="absolute -top-2 -right-5 opacity-0 group-hover:opacity-100 transition-opacity btn btn-xs btn-circle btn-ghost"
+                                      className="absolute -top-2 -right-5 opacity-0 group-hover:opacity-100 transition-opacity btn btn-sm btn-circle btn-ghost"
                                       title="Edit message"
                                     >
                                       <Edit2 className="h-4 w-4" />
@@ -825,7 +825,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               })}
             </div>
 
-            <div className="border-t-2 border-base-content/30 px-4 pt-4 mb-2 sm:mb-0 w-full">
+            <div className=" border-base-content/30 px-4 pt-4 mb-2 sm:mb-0 w-full">
               <div className="relative flex flex-col gap-4 w-full">
                 <div className="flex flex-row gap-2">
                   <ChatTextInput

@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 // Custom hooks
 import { useMetricsData } from '@/customHooks/useMetricsData';
 import { useMetricsURL } from '@/customHooks/useMetricsURL';
-import { useThemeDetection } from '@/customHooks/useThemeDetection';
+import { useThemeManager } from '@/customHooks/useThemeManager';
 
 // Components
 import DateRangePicker from '@/components/metrics/DateRangePicker';
@@ -47,7 +47,7 @@ function Page({ params }) {
 
   const { rawData, loading, fetchMetricsData } = useMetricsData(orgId, allBridges, apikeyData);
   const { updateURLParams, getDisplayRangeText } = useMetricsURL(searchParams);
-  const currentTheme = useThemeDetection();
+  const { actualTheme } = useThemeManager();
 
   // Effects
   useEffect(() => {
@@ -140,7 +140,7 @@ function Page({ params }) {
         <div className="h-96">
           <MetricsChart 
             rawData={rawData}
-            currentTheme={currentTheme}
+            currentTheme={actualTheme}
             factor={factor}
           />
         </div>

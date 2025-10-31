@@ -44,7 +44,7 @@ const CreateNewOrchestralFlowModal = ({ handleCreateNewFlow, createdFlow, saveDa
                             onChange={handleChange}
                             rows={3}
                             placeholder="Enter flow description..."
-                            className="textarea textarea-bordered w-full resize-none"
+                            className="textarea bg-white dark:bg-black/15 textarea-bordered w-full resize-none"
                         />
                     </div>
 

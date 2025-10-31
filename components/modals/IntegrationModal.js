@@ -43,7 +43,7 @@ const IntegrationModal = ({ params }) => {
         <input
           type="text"
           placeholder="Enter integration name"
-          className="input input-bordered input-md w-full mb-2 placeholder-opacity-50"
+          className="input input-bordered input-sm w-full mb-2 placeholder-opacity-50"
           maxLength={50}
           ref={integrationNameRef}
           onKeyDown={(e) => {
@@ -55,8 +55,8 @@ const IntegrationModal = ({ params }) => {
         />
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn" onClick={() => { closeModal(MODAL_TYPE.INTEGRATION_MODAL); integrationNameRef.current.value = ''; }}>Close</button>
-            <button className="btn btn-primary ml-2" onClick={handleCreateNewIntegration}>Create</button>
+            <button className="btn btn-sm" onClick={() => { closeModal(MODAL_TYPE.INTEGRATION_MODAL); integrationNameRef.current.value = ''; }}>Close</button>
+            <button className="btn btn-sm btn-primary ml-2" onClick={handleCreateNewIntegration}>Create</button>
           </form>
         </div>
       </div>
