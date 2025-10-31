@@ -27,6 +27,18 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         });
     }, [selectedApiKey, isEditing]);
 
+    //Manage focus behavior - remove focus from inputs when editing
+    useEffect(() => {
+        if (isEditing) {
+            // Remove focus from any focused input when in edit mode
+            setTimeout(() => {
+                if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                    document.activeElement.blur();
+                }
+            }, 0);
+        }
+    }, [isEditing]);
+
     // Handle form input changes
     const handleFormChange = useCallback((event) => {
         const form = event.target.form;
@@ -69,6 +81,10 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
     const handleClose = useCallback(() => {
         setSelectedApiKey(null);
         setIsEditing(false);
+        setischanged({
+            isAdd: false,
+            isUpdate: false
+        });
         closeModal(MODAL_TYPE.API_KEY_MODAL)
     }, [setSelectedApiKey, setIsEditing]);
 
@@ -118,7 +134,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         <Modal MODAL_ID={MODAL_TYPE?.API_KEY_MODAL}>
             <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
                 <h3 className="font-bold text-lg">
-                    {isEditing ? 'Update API Key' : 'Add New API Key'}
+                    {isEditing ? 'Update API Keyyyyyyyyyy' : 'Add New API Key'}
                 </h3>
                 {API_KEY_MODAL_INPUT.map((field) => (
                     <div key={field} className="flex flex-col gap-2">
@@ -135,6 +151,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
                             onChange={handleFormChange}
                             {...(field !== 'apikey' && { maxLength: 50 })}
+                            autoFocus={false}
                         />
                     </div>
                 ))}
