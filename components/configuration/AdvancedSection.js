@@ -19,6 +19,7 @@ const AdvancedSection = memo(() => {
     return (
         <>
             <AddVariable params={params} searchParams={searchParams} />
+            <GptMemory params={params} searchParams={searchParams} />
             <AdvancedParameters
                 params={params}
                 searchParams={searchParams}
@@ -33,7 +34,6 @@ const AdvancedSection = memo(() => {
                     modelType={modelType}
                 />
             )}
-            <GptMemory params={params} searchParams={searchParams} />
         </>
     );
 });

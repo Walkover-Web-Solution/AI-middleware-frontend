@@ -129,7 +129,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                             id={field}
                             required = {field !== "comment"}
                             type={field === 'apikey' && isEditing ? 'password' : 'text'}
-                            className="input input-bordered"
+                            className="input input-bordered input-sm"
                             name={field}
                             placeholder={`Enter ${field}`}
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
@@ -145,7 +145,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                     <select
                         id="service"
                         name="service"
-                        className="select select-bordered"
+                        className="select select-sm select-bordered"
                         key={selectedApiKey?.service || service}
                         defaultValue={service || (selectedApiKey ? selectedApiKey.service : '')}
                         disabled={service || (selectedApiKey && selectedApiKey.service)}
@@ -158,10 +158,11 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                     </select>
                 </div>
                 <div className="modal-action">
-                    <button type="reset" className="btn" onClick={handleClose}>Cancel</button>
+                    <button type="reset" className="btn btn-sm" onClick={handleClose}>Cancel</button>
+                    <button type="reset" className="btn btn-sm" onClick={handleClose}>Cancel</button>
                     <button 
                         type="submit" 
-                        className={`btn btn-primary ${
+                        className={`btn btn-sm btn-primary ${
                             (isEditing && !ischanged.isUpdate) || (!isEditing && !ischanged.isAdd) 
                                 ? 'btn-disabled' 
                                 : ''

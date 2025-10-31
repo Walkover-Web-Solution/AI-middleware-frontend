@@ -1,6 +1,6 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
-import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -90,6 +90,19 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     }
     console.error(error);
     throw error
+  }
+};
+
+export const deleteBridgeVersionAction = ({ versionId, bridgeId, org_id }) => async (dispatch) => {
+  try {
+    const response = await deleteBridgeVersionApi({ versionId });
+    dispatch(deleteBridgeVersionReducer({ versionId, bridgeId, org_id }));
+    toast.success("Version Deleted Successfully")
+    return response;
+  } catch (error) {
+    toast.error(error?.response?.data?.detail || "Error While Deleting Version")
+    console.error(error?.response?.data?.detail);
+    throw error;
   }
 };
 

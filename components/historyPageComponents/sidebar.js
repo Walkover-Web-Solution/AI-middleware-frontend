@@ -2,7 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
-import { openModal } from "@/utils/utility.js";
+import { formatRelativeTime, openModal } from "@/utils/utility.js";
 import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -242,7 +242,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     <div className="pl-4 p-2">
       {[...Array(count)].map((_, i) => (
         <div key={i} className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded-md mb-2"></div>
+          <div className="h-6 bg-base-300 rounded-md mb-2"></div>
         </div>
       ))}
     </div>
@@ -287,49 +287,50 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }
 
   return (
-    <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r border-base-300 relative" id="sidebar">
+    <div className="drawer-side justify-items-stretch text-xs bg-base-200 min-w-[280px] max-w-[280px] border-r border-base-300 relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
-      <div className="p-4 gap-3 flex flex-col">
-        <div className="collapse collapse-arrow join-item border border-base-300">
+      <div className="p-2 gap-2 flex flex-col">
+        <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg min-h-0">
           <input type="checkbox" className="peer" />
-          <div className="collapse-title text-md font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
-            Advance Filter
+          <div className="collapse-title font-semibold min-h-0 py-3 flex items-center">
+            <span className="text-xs">Advance Filter</span>
           </div>
-          <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue}/>
-            <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
-              <p className="text-center m-2 font-semibold">Filter Response</p>
-              <div className="flex items-center justify-center mb-2 gap-4">
-                {USER_FEEDBACK_FILTER_OPTIONS?.map((value, index) => (
-                  <label key={index} className="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="filterOption"
-                      value={value}
-                      checked={filterOption === value}
-                      onChange={() => handleFilterChange(value)}
-                      className={`radio ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
-                    />
-                    {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUpIcon size={16} /> : <ThumbsDownIcon size={16} />}
-                  </label>
-                ))}
-              </div>
-              <p className="text-xs text-base-content">
-                {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the agent is ${userFeedbackCount}`}
-              </p>
+          <div className="collapse-content px-3">
+            <div className="space-y-2">
+              <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue}/>
+              
+              <div className="p-2 bg-base-200 rounded-lg">
+                <p className="text-center mb-2 text-xs font-medium">Filter Response</p>
+                <div className="flex items-center justify-center mb-2 gap-2">
+                  {USER_FEEDBACK_FILTER_OPTIONS?.map((value, index) => (
+                    <label key={index} className="flex items-center gap-1 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="filterOption"
+                        value={value}
+                        checked={filterOption === value}
+                        onChange={() => handleFilterChange(value)}
+                        className={`radio radio-xs ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
+                      />
+                      {value === "all" ? <span className="text-xs">All</span> : value === "1" ? <ThumbsUpIcon size={12} /> : <ThumbsDownIcon size={12} />}
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-base-content mb-2 text-center">
+                  {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the agent is ${userFeedbackCount}`}
+                </p>
 
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <span className="text-sm">
-                  Show Error Chat History
-                </span>
-                <input type="checkbox" className="toggle" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-xs">Show Error Chat History</span>
+                  <input type="checkbox" className="toggle toggle-xs" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
+                </div>
               </div>
             </div>
           </div>
         </div>
         <div className='flex items-center'>
           <select
-            className="select select-bordered w-full max-w-xs"
+            className="select select-bordered select-sm w-full text-xs"
             value={selectedVersion}
             onChange={handleVersionChange}
           >
@@ -350,18 +351,18 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             ref={searchRef}
             placeholder="Search..."
             onChange={handleChange}
-            className="border border-base-300 rounded p-2 w-full pr-10"
+            className="input input-bordered input-sm w-full pr-6 text-xs"
           />
           {searchQuery && (
             <svg
               fill="#000000"
-              width="20px"
-              height="20px"
+              width="16px"
+              height="16px"
               viewBox="0 0 24 24"
               id="cross"
               data-name="Flat Line"
               xmlns="http://www.w3.org/2000/svg"
-              className="absolute right-3 top-3 cursor-pointer"
+              className="absolute right-1.5 top-1.5 cursor-pointer"
               onClick={clearInput}
               style={{ fill: "none", stroke: "rgb(0, 0, 0)", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2 }}
             >
@@ -389,15 +390,15 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             loader={<h4></h4>}
             scrollableTarget="sidebar"
           >
-            <div className="slider-container min-w-[40%] overflow-x-auto pb-40">
-              <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
+            <div className="slider-container min-w-[40%] w-full overflow-x-auto pb-20">
+              <ul className="menu min-h-full text-base-content flex flex-col space-y-1">
                 {historyData?.map((item) => (
                   <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
                     {isThreadSelectable && (
                       <div onClick={(e) => e?.stopPropagation()}>
                         <input
                           type="checkbox"
-                          className="checkbox checkbox-lg mr-2 bg-base-100"
+                          className="checkbox checkbox-sm mr-1.5 bg-base-100"
                           checked={selectedThreadIds?.includes(item?.thread_id)}
                           onChange={() => handleThreadIds(item?.thread_id)}
                         />
@@ -408,13 +409,27 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                         className={`${decodeURIComponent(searchParams?.thread_id) === item?.thread_id
                           ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
                           : ""
-                          } flex-grow cursor-pointer`}
-                        onClick={() => threadHandler(item?.thread_id)}
+                          } flex-grow cursor-pointer group`}
+                        onClick={() => {
+                          const isCurrentlySelected = decodeURIComponent(searchParams?.thread_id) === item?.thread_id;
+                          
+                          if (isCurrentlySelected && !searchQuery) {
+                            // If thread is already selected and no search query, toggle dropdown
+                            handleToggleThread(item?.thread_id);
+                          } else {
+                            // Otherwise, select the thread
+                            threadHandler(item?.thread_id);
+                          }
+                        }}
                       >
-                        <a className="w-full h-full flex items-center justify-between relative group">
-                          <span className="truncate flex-1 mr-3 w-[160px] pr-2">{truncate(item?.thread_id, 35)}</span>
+                        <a className="w-full h-full flex items-center justify-between relative">
+                          <span className="truncate flex-1 mr-1.5 text-xs">{truncate(item?.thread_id, 30)}</span>
+                          <span className="text-xs whitespace-nowrap flex-shrink-0 mr-2 transition-opacity duration-200">
+                            {formatRelativeTime(item?.updatedAt)}
+                          </span>
+                          {/* Tooltip for full thread ID on hover */}
                           {item?.thread_id?.length > 35 && (
-                            <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-low max-w-[300px] break-words shadow-lg pointer-events-none">
+                            <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-low max-w-[260px] break-words shadow-lg pointer-events-none">
                               {item?.thread_id}
                             </div>
                           )}
@@ -425,12 +440,12 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                 e?.stopPropagation();
                                 handleToggleThread(item?.thread_id);
                               }}
-                              className="absolute right-4 cursor-pointer"
+                              className="absolute right-2 cursor-pointer"
                             >
                               {expandedThreads?.includes(item?.thread_id) ? (
-                                <ChevronUpIcon size={16} />
+                                <ChevronUpIcon size={14} />
                               ) : (
-                                <ChevronDownIcon size={16} />
+                                <ChevronDownIcon size={14} />
                               )}
                             </div>
                           )}
@@ -442,10 +457,10 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           {loadingSubThreads ? (
                             <Skeleton />
                           ) : (
-                            <div className="pl-10 p-2 text-base-content text-sm rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
+                            <div className="pl-4 p-1.5 text-base-content text-xs rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                               <ul>
                                 {subThreads?.length === 0 ? (
-                                  <li>No sub thread available</li>
+                                  <li className="text-xs p-1">No sub thread available</li>
                                 ) : (
                                   subThreads?.map((subThreadId, index) => (
                                     <li
@@ -453,13 +468,13 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                       className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
                                         ? "hover:bg-base-primary hover:text-base-100"
                                         : "hover:bg-base-300 hover:text-base-content"
-                                        } p-2 rounded-md transition-all duration-200 ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                        } p-1.5 rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
                                           ? "bg-primary text-base-100"
                                           : ""
                                         }`}
                                       onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, searchParams?.thread_id)}
                                     >
-                                      {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 35)}
+                                      {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 28)}
                                     </li>
                                   ))
                                 )}
@@ -468,41 +483,41 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           )}
                         </>
                       )}
-                      {decodeURIComponent(searchParams?.thread_id) === item?.thread_id && <div className="space-y-6">
+                      {decodeURIComponent(searchParams?.thread_id) === item?.thread_id && <div className="space-y-3">
                         <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                           {item?.sub_thread && item.sub_thread?.length > 0 && (
                             <div className="bg-base-100">
-                              <div className="p-4">
-                                <div className="space-y-2">
+                              <div className="p-2">
+                                <div className="space-y-1.5">
                                   {item?.sub_thread?.map((subThread, index) => (
-                                    <div key={index} className="ml-4">
+                                    <div key={index} className="ml-2">
                                       <div
                                         onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
-                                        className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
+                                        className={`cursor-pointer p-2 rounded-lg transition-all duration-200 border ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
                                           ? 'bg-base-200 border-primary text-base-content'
                                           : 'bg-base-100 border-base-200 hover:bg-base-200 hover:border-base-300 text-base-content'
                                           }`}
                                       >
-                                        <div className="flex items-center gap-2">
-                                          <MessageCircleIcon className={`w-4 h-4 ${searchParams?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-base-content'
+                                        <div className="flex items-center gap-1.5">
+                                          <MessageCircleIcon className={`w-3 h-3 ${searchParams?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-base-content'
                                             }`} />
                                           <span
-                                            className="font-medium text-sm"
+                                            className="font-medium text-xs"
                                           >
-                                            {truncate(subThread?.display_name || subThread?.sub_thread_id, 35)}
+                                            {truncate(subThread?.display_name || subThread?.sub_thread_id, 25)}
                                           </span>
                                         </div>
                                       </div>
-                                      {subThread?.messages?.length > 0 && (<div className="mt-2 ml-6 space-y-1">
+                                      {subThread?.messages?.length > 0 && (<div className="mt-1.5 ml-4 space-y-1">
                                         {subThread?.messages?.map((msg, msgIndex) => (
                                           <div
                                             key={msgIndex}
                                             onClick={() => handleSetMessageId(msg?.message_id)}
-                                            className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-4 border-transparent hover:border-base-300`}
+                                            className={`cursor-pointer p-1.5 rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-2 border-transparent hover:border-base-300`}
                                           >
-                                            <div className="flex items-start gap-2">
-                                              <UserIcon className="w-3 h-3 mt-0.5 text-base-content" />
-                                              <span>{truncate(msg?.message, 45)}</span>
+                                            <div className="flex items-start gap-1.5">
+                                              <UserIcon className="w-2.5 h-2.5 mt-0.5 text-base-content" />
+                                              <span>{truncate(msg?.message, 35)}</span>
                                             </div>
                                           </div>
                                         ))}
@@ -515,17 +530,17 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                             </div>
                           )}
                           {item?.message && item?.message?.length > 0 && (
-                            <div className="p-4">
-                              <div className="space-y-2 ml-4">
+                            <div className="p-2">
+                              <div className="space-y-1.5 ml-2">
                                 {item?.message?.map((msg, index) => (
                                   <div
                                     key={index}
                                     onClick={() => handleSetMessageId(msg?.message_id)}
-                                    className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-4 border-transparent hover:border-base-300`}
+                                    className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-2 border-transparent hover:border-base-300`}
                                   >
-                                    <div className="flex items-start gap-2">
-                                      <UserIcon className="w-3 h-3 mt-0.5 text-base-content" />
-                                      <span>{truncate(msg?.message, 45)}</span>
+                                    <div className="flex items-start gap-1.5">
+                                      <UserIcon className="w-2.5 h-2.5 mt-0.5 text-base-content" />
+                                      <span>{truncate(msg?.message, 32)}</span>
                                     </div>
                                   </div>))}
                               </div>

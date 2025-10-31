@@ -3,20 +3,26 @@ const PublishBridgeVersionModal = dynamic(() => import('@/components/modals/publ
 import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
 import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
+import { createBridgeVersionAction, deleteBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { ChevronDown, ChevronLeft, ChevronUp, Plus, X } from 'lucide-react';
+import { TrashIcon } from '@/components/Icons';
+import DeleteModal from '@/components/UI/DeleteModal';
 
-function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
+function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
     const router = useRouter();
     const dispatch = useDispatch();
     const versionDescriptionRef = useRef('');
     const hasInitialized = useRef(false);
     const lastFetchedVersion = useRef(null);
     const isProcessing = useRef(false);
+    const [showAllVersions, setShowAllVersions] = useState(false);
+    const [maxVisibleVersions, setMaxVisibleVersions] = useState(4);
+    const [selectedDataToDelete, setselectedDataToDelete] = useState();
     
     const { bridgeVersionsArray, publishedVersion, bridgeName, versionDescription} = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
@@ -24,6 +30,22 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
     }));
+
+    // Calculate responsive max visible versions based on screen width
+    useEffect(() => {
+        const updateMaxVersions = () => {
+            const width = window.innerWidth;
+            if (width < 640) setMaxVisibleVersions(2);      // Mobile
+            else if (width < 768) setMaxVisibleVersions(3);  // Small tablet
+            else if (width < 1024) setMaxVisibleVersions(4); // Tablet
+            else if (width < 1280) setMaxVisibleVersions(5); // Small desktop
+            else setMaxVisibleVersions(6);                   // Large desktop
+        };
+
+        updateMaxVersions();
+        window.addEventListener('resize', updateMaxVersions);
+        return () => window.removeEventListener('resize', updateMaxVersions);
+    }, []);
 
     // Memoized function to fetch version data only when needed
     const fetchVersionData = useCallback((versionId) => {
@@ -88,45 +110,171 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
         }))
         versionDescriptionRef.current.value = ''
     }
-    return (
-        <div className='flex items-center gap-2'>
-        {publishedVersion?.length > 0 && (
-            <div className="dropdown dropdown-bottom dropdown-end mr-2">
-                <div tabIndex={0} role="button" className={`btn ${searchParams?.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
-                    <span className={`${searchParams?.version === publishedVersion ? 'text-black' : 'text-base-content'}`}>V{bridgeVersionsArray.indexOf(searchParams?.version) + 1 || 'Select'}</span>
-                    {searchParams?.version === publishedVersion &&
-                        <span className="relative inline-flex items-center ml-2">
-                            <span className="text-green-600 ml-1">●</span>
-                        </span>
-                    }
-                </div>
-                <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-52 p-2 shadow bg-base-100">
-                    {bridgeVersionsArray?.map((version, index) => (
-                        <li key={version} onClick={() => handleVersionChange(version)} >
-                            <a className={`flex justify-between ${searchParams?.version === version ? 'active' : ''}`}>
-                                Version {index + 1}
-                                {version === publishedVersion && <span className="text-green-600 ml-1">●</span>}
-                            </a>
-                        </li>
-                    ))}
-                    {/* Only show Create New Version button if first version is published */}
-                    
-                        <li>
-                            <button
-                                className="btn mt-3 w-full text-left"
-                                onClick={()=>openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
-                            >
-                                Create New Version <span className='ml-1'>&rarr;</span>
-                            </button>
-                        </li>
-                  
-                </ul>
+
+    const handleDeleteVersion = useCallback(async () => {
+        if (bridgeVersionsArray.length <= 1) {
+            alert("Cannot delete the only remaining version");
+            return;
+        }
+        if (selectedDataToDelete?.version === publishedVersion) {
+            alert("Cannot delete the published version");
+            return;
+        }
+        try {
+            await dispatch(deleteBridgeVersionAction({ versionId:selectedDataToDelete?.version, bridgeId: params.id, org_id: params.org_id }));
+            if (searchParams?.version === selectedDataToDelete?.version) {
+                const remainingVersions = bridgeVersionsArray.filter(v => v !== selectedDataToDelete?.version);
+                const nextVersion = publishedVersion && publishedVersion !== selectedDataToDelete?.version 
+                    ? publishedVersion 
+                    : remainingVersions[0];
+                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${nextVersion}`);
+            }
+        } catch (error) {
+            console.error("Error deleting version:", error)
+        }
+        finally{
+            setselectedDataToDelete(null);
+            closeModal(MODAL_TYPE.DELETE_VERSION_MODAL)
+        }
+    }, [bridgeVersionsArray, publishedVersion, searchParams?.version, params, router, selectedDataToDelete]);
+
+    // Determine which versions to show with smart visibility around active version
+    const getVersionsToShow = () => {
+        if (showAllVersions) {
+            return bridgeVersionsArray;
+        }
+        
+        if (bridgeVersionsArray.length <= maxVisibleVersions) {
+            return bridgeVersionsArray;
+        }
+        
+        // Find the index of the currently active version
+        const activeIndex = bridgeVersionsArray.findIndex(version => version === searchParams?.version);
+        
+        if (activeIndex === -1) {
+            // If no active version found, show first versions
+            return bridgeVersionsArray.slice(0, maxVisibleVersions);
+        }
+        
+        // Calculate how many versions to show on each side of the active version
+        const sideCount = Math.floor((maxVisibleVersions - 1) / 2);
+        
+        // Calculate start and end indices
+        let startIndex = Math.max(0, activeIndex - sideCount);
+        let endIndex = Math.min(bridgeVersionsArray.length, activeIndex + sideCount + 1);
+        
+        // Adjust if we're near the beginning or end
+        if (endIndex - startIndex < maxVisibleVersions) {
+            if (startIndex === 0) {
+                endIndex = Math.min(bridgeVersionsArray.length, maxVisibleVersions);
+            } else if (endIndex === bridgeVersionsArray.length) {
+                startIndex = Math.max(0, bridgeVersionsArray.length - maxVisibleVersions);
+            }
+        }
+        
+        return bridgeVersionsArray.slice(startIndex, endIndex);
+    };
+    
+    const versionsToShow = getVersionsToShow();
+    const hasMoreVersions = bridgeVersionsArray.length > maxVisibleVersions;
+
+    if (!bridgeVersionsArray.length) {
+        return (
+            <div className='flex items-center gap-2'>
+                <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription}/>
+                <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
             </div>
-        )}
-            <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName}  agent_description = {versionDescription}/>
+        );
+    }
+
+    return (
+        <div className='flex items-center gap-2 w-full'>
+            {/* Version Tabs Container */}
+            <div className="flex items-center overflow-hidden">
+                {/* Version Tabs Group */}
+                <div className="tabs tabs-boxed bg-base-200 p-0 gap-0 h-8 flex-nowrap overflow-x-auto scrollbar-hide mr-24">
+                    {versionsToShow.map((version, index) => {
+                        const isActive = searchParams?.version === version;
+                        const isPublished = version === publishedVersion;
+                        const canDelete = bridgeVersionsArray.length > 1 && !isPublished;
+                        
+                        return (
+                            <button
+                                key={version}
+                                onClick={() => handleVersionChange(version)}
+                                className={`
+                                    tab tab-sm h-full px-3 text-xs font-medium transition-all duration-200 border-0 relative group
+                                    ${canDelete ? 'hover:pr-8' : ''}
+                                    ${isActive 
+                                        ? isPublished 
+                                            ? 'tab-active bg-green-100 text-green-800' 
+                                            : 'tab-active bg-primary text-primary-content'
+                                        : 'hover:bg-base-300 text-base-content'
+                                    }
+                                `}
+                            >
+                                <span className="flex items-center gap-1">
+                                    V{bridgeVersionsArray.indexOf(version) + 1}
+                                    {isPublished && (
+                                        <span className="w-2 h-2 bg-green-500 rounded-full" title="Published Version"></span>
+                                    )}
+                                </span>
+                                
+                                {/* Delete Button - appears on hover */}
+                                {canDelete && (
+                                    <span
+                                        onClick={(e) => {e.stopPropagation(); setselectedDataToDelete({version, index:bridgeVersionsArray.indexOf(version) + 1}); openModal(MODAL_TYPE?.DELETE_VERSION_MODAL)}}
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 
+                                                 transition-opacity duration-200 hover:bg-red-100 rounded p-0.5 z-10 cursor-pointer"
+                                        title={`Delete Version ${bridgeVersionsArray.indexOf(version) + 1}`}
+                                    >
+                                        <TrashIcon size={12} className="text-red-500 hover:text-red-700" />
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
+                    
+                    {/* More/Less Button */}
+                    {hasMoreVersions && (
+                        <button
+                            onClick={() => setShowAllVersions(!showAllVersions)}
+                            className="tab tab-sm h-full px-2 text-xs hover:bg-base-300 text-base-content flex-shrink-0"
+                            title={showAllVersions ? "Show Less" : `Show More (${bridgeVersionsArray.length - versionsToShow.length} hidden)`}
+                        >
+                            {showAllVersions ? (
+                                <>
+                                    <ChevronLeft className="w-3 h-3" />
+                                    <span className="hidden sm:inline ml-1">Less</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronDown className="w-3 h-3" />
+                                    <span className="badge badge-xs badge-primary ml-1">
+                                        +{bridgeVersionsArray.length - versionsToShow.length}
+                                    </span>
+                                </>
+                            )}
+                        </button>
+                    )}
+                    
+                    {/* Create New Version Button */}
+                    <button
+                        onClick={() => openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
+                        className="tab tab-sm h-full px-2 text-xs hover:bg-base-300 text-base-content flex-shrink-0"
+                        title="Create New Version"
+                    >
+                        <Plus className="w-3 h-3" />
+                        <span className="hidden sm:inline ml-1">New</span>
+                    </button>
+                </div>
+            </div>
+
+            <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription}/>
             <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
+            <DeleteModal modalType={MODAL_TYPE.DELETE_VERSION_MODAL} onConfirm={handleDeleteVersion} item={selectedDataToDelete} description={`Are you sure you want to delete the Version "${selectedDataToDelete?.index}"? This action cannot be undone.`} title='Delete Version'/>
         </div>
     );
 }
 
-export default Protected(BridgeVersionDropdown)
+export default Protected(BridgeVersionTabs)

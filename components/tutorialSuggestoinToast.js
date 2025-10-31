@@ -121,7 +121,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
           <div className="flex items-center gap-2 mb-2"> 
             <button
               onClick={() => handleTutorialAction('start')}
-              className="btn btn-primary btn-xs flex-1 gap-1" 
+              className="btn btn-primary btn-sm flex-1 gap-1" 
               aria-label="Start tutorial"
             >
               <PlayIcon className="h-3 w-3" fill="currentColor" />
@@ -129,7 +129,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
             </button>
             <button
               onClick={() => handleTutorialAction('skip')}
-              className="btn btn-ghost btn-xs"
+              className="btn btn-ghost btn-sm"
               aria-label="Skip tutorial"
             >
               Skip

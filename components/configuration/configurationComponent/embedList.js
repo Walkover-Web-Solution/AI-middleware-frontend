@@ -291,7 +291,7 @@ const EmbedList = ({ params, searchParams }) => {
                               e.stopPropagation();
                               handleOpenDeletePrebuiltModal(item)
                             }}
-                            className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                            className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
                           >
                             <TrashIcon size={16} />

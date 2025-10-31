@@ -31,7 +31,7 @@ const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpd
               <span className="label-text">Previous Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
+              className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
               key={previousPrompt}
               defaultValue={previousPrompt}
               readOnly
@@ -42,7 +42,7 @@ const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpd
               <span className="label-text">Updated Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
+              className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
               key={promotToUpdate}
               defaultValue={promotToUpdate}
               readOnly
@@ -51,8 +51,8 @@ const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpd
         </div>
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn" onClick={handleClose}>Cancel</button>
-            <button className="btn btn-primary ml-2" onClick={handleSave}>Save</button>
+            <button className="btn btn-sm" onClick={handleClose}>Cancel</button>
+            <button className="btn btn-sm btn-primary ml-2" onClick={handleSave}>Save</button>
           </form>
         </div>
       </div>

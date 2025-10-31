@@ -78,8 +78,8 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
                 <div className="modal-action">
                     <form method="dialog">
                         {/* if there is a button in form, it will close the modal */}
-                        <button className="btn" onClick={handleCloseModal}>Close</button>
-                        <button className="btn btn-primary ml-2" onClick={CreateVariable}>Create</button>
+                        <button className="btn btn-sm" onClick={handleCloseModal}>Close</button>
+                        <button className="btn btn-sm btn-primary ml-2" onClick={CreateVariable}>Create</button>
                     </form>
                 </div>
                 {/* </form> */}

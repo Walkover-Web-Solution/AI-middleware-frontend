@@ -7,7 +7,7 @@ const OrganizationHeader = () => {
             <h2 className="text-2xl font-semibold text-base-content">Existing Organizations</h2>
             <button
                 onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
             >
                 + Create New Organization
             </button>

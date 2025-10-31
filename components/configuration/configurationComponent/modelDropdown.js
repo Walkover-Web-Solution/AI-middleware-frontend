@@ -192,7 +192,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                     showGroupHeaders
                     placeholder="Select a Model"
                     size="sm"
-                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem]"
+                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem] rounded-sm"
                     menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
                     maxLabelLength={20}
                 />

@@ -8,7 +8,8 @@ const ConfigurationNavigation = ({
     isEmbedUser, 
     showConfigType 
 }) => {
-    if (!((isEmbedUser && showConfigType) || !isEmbedUser) || bridgeType !== 'chatbot') {
+    // Hide navigation tabs for chatbot bridge type since chatbot config is now integrated as accordion
+    if (!((isEmbedUser && showConfigType) || !isEmbedUser) || bridgeType === 'chatbot') {
         return null;
     }
 
@@ -16,7 +17,7 @@ const ConfigurationNavigation = ({
         <div className="join group flex">
             <button
                 onClick={() => handleNavigation('config')}
-                className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
+                className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn btn-sm join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
             >
                 <SettingsIcon size={16} className="shrink-0" />
                 <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>
@@ -25,7 +26,7 @@ const ConfigurationNavigation = ({
             </button>
             <button
                 onClick={() => handleNavigation('chatbot-config')}
-                className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
+                className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn btn-sm join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
             >
                 <BotIcon size={16} className="shrink-0" />
                 <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>

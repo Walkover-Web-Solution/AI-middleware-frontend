@@ -113,6 +113,16 @@ export const createBridgeVersionApi = async (dataToSend) => {
   }
 }
 
+export const deleteBridgeVersionApi = async ({ versionId }) => {
+  try {
+    const response = await axios.delete(`${PYTHON_URL}/bridge/versions/${versionId}`);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   try {
     const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend);

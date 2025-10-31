@@ -59,7 +59,7 @@ const Footer = () => {
 
             <button
               role="button"
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
               onClick={handleSubscribe}
               disabled={loading}
             >

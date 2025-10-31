@@ -86,7 +86,7 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
         <h3 className="font-bold text-lg">Improve JSON Schema</h3>
           <button
             onClick={handleCloseModal}
-            className="btn"
+            className="btn btn-sm"
             type="button"
           >
             Close

@@ -3,6 +3,7 @@ import InputSection from "./InputSection";
 import ToolsSection from "./ToolsSection";
 import CommonConfigComponents from "./CommonConfigComponents";
 import AdvancedSection from "./AdvancedSection";
+import ChatbotConfigSection from "./ChatbotConfigSection";
 import { useConfigurationContext } from './ConfigurationContext';
 
 const NonImageModelConfig = memo(() => {
@@ -33,6 +34,7 @@ const NonImageModelConfig = memo(() => {
                 showDefaultApikeys={showDefaultApikeys}
                 isEmbedUser={isEmbedUser}
             />
+            <ChatbotConfigSection />
             <AdvancedSection />
         </>
     );

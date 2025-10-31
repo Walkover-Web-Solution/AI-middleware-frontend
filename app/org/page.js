@@ -4,7 +4,7 @@ import Protected from '@/components/protected';
 import OrganizationHeader from '@/components/organization/OrganizationHeader';
 import OrganizationSearch from '@/components/organization/OrganizationSearch';
 import OrganizationGrid from '@/components/organization/OrganizationGrid';
-import ThemeManager from '@/components/organization/ThemeManager';
+import { ThemeManager } from '@/customHooks/useThemeManager';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
 import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -13,7 +13,6 @@ import { filterOrganizations, setInCookies } from '@/utils/utility';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
-import SearchItems from '@/components/UI/SearchItems';
 
 /**
  * The organizations page that displays all the organizations

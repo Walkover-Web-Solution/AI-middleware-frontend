@@ -106,7 +106,7 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
                     <label className="form-control mb-4">
                         <span className="text-sm block mb-2">Headers (JSON format)</span>
                         <textarea
-                            className="textarea textarea-bordered h-24 w-full"
+                            className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full"
                             id="headers"
                             defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
                             onBlur={handleChangeHeaders}

@@ -82,6 +82,12 @@ export const bridgeReducer = createSlice({
       const bridgeIndex = state.org[orgId].orgs.findIndex(org => org._id === bridgeId);
       state.org[orgId].orgs[bridgeIndex].versions.push(newVersionId);
     },
+    deleteBridgeVersionReducer: (state, action) => {
+      const { versionId, bridgeId, org_id } = action.payload;
+      delete state.bridgeVersionMapping[bridgeId][versionId];
+      const bridgeIndex = state.org[org_id].orgs.findIndex(org => org._id === bridgeId);
+      state.org[org_id].orgs[bridgeIndex].versions = state.org[org_id].orgs[bridgeIndex].versions.filter(version => version !== versionId);
+    },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
       const { _id, configuration, ...extraData } = bridges;
@@ -299,6 +305,7 @@ export const {
   fetchSingleBridgeReducer,
   fetchSingleBridgeVersionReducer,
   createBridgeVersionReducer,
+  deleteBridgeVersionReducer,
   createBridgeReducer,
   updateBridgeReducer,
   updateBridgeVersionReducer,

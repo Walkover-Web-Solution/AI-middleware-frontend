@@ -108,7 +108,7 @@ const Header = () => {
           {isLoggedIn ? (
             <button
               onClick={() => router.push("/login")}
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
             >
               Go to App
             </button>
@@ -123,7 +123,7 @@ const Header = () => {
               <button
                 onClick={() => router.push("/login")}
                 role="button"
-                className="btn btn-primary"
+                className="btn btn-primary "
               >
                 Start for free
               </button>

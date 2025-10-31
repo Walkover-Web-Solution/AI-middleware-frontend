@@ -1,4 +1,4 @@
-import { getSingleMessage } from "@/config";
+ import { getSingleMessage } from "@/config";
 import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon, FileTextIcon, AlertIcon } from "@/components/Icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import CodeBlock from "../codeBlock/codeBlock";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { openModal } from "@/utils/utility";
+import { formatRelativeTime, openModal } from "@/utils/utility";
 import { MODAL_TYPE, FINISH_REASON_DESCRIPTIONS } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink } from "lucide-react";
@@ -101,7 +101,7 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={() => window.open(src, '_blank')}
-            className="btn btn-xs btn-circle btn-ghost bg-base-100/80 hover:bg-base-100"
+            className="btn btn-sm btn-circle btn-ghost bg-base-100/80 hover:bg-base-100"
             title="Open in new tab"
           >
             <ExternalLink size={14} className="text-base-primary" />
@@ -259,7 +259,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         }
       })}
         className="cursor-pointer flex items-center justify-center py-4 pl-2">
-        <div className="font-semibold text-center">
+        <div className="text-center">
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
         </div>
       </div>
@@ -339,19 +339,19 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   };
 
   return (
-    <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
+    <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="text-sm">
       {item?.role === "tools_call" ? (
-        <div className="mb-2 flex flex-col justify-center items-center show-on-hover">
+        <div className="mb-2 text-sm flex flex-col justify-center items-center show-on-hover">
           <h1 className="p-1">
-            <span className="flex justify-center items-center gap-2 font-semibold"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
+            <span className="flex justify-center items-center gap-2"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
           </h1>
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
             {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
             <button
-              className="btn btn-xs see-on-hover"
+              className="btn text-xs font-normal btn-sm see-on-hover"
               onClick={() => handleAddTestCase(item, index)}
             >
-              <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+              <div className="flex items-center gap-1 text-xs font-normal px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
                 <AddIcon className="h-3 w-3" />
                 <span>Test Case</span>
               </div>
@@ -360,9 +360,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         </div>
       ) : (
         <div className="show-on-hover" >
-          <div className={`chat ${item.role === "assistant" ? "chat-start" : "chat-end"}`}>
+          <div className={`chat group ${item.role === "assistant" ? "chat-start" : "chat-end"}`}>
             <div className="chat-image avatar flex justify-center items-center">
-              <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors mb-7">
+              <div className={`w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors ${item.role === "assistant" ? "mb-7" : ""}`}>
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "assistant" ? (
                     <div>
@@ -560,7 +560,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
                   <div className="tooltip absolute top-2 right-2 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" data-tip="Edit response">
                     <button
-                      className="btn btn-xs btn-circle btn-ghost hover:btn-primary text-base-content"
+                      className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
                       onClick={handleEdit}
                     >
                       <PencilIcon
@@ -574,14 +574,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 {item?.role === 'assistant' && (
                   <div className="absolute bottom-[-35px] left-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      className="btn btn-xs btn-outline hover:btn-primary see-on-hover"
+                      className="btn btn-sm text-xs font-normal btn-outline hover:btn-primary see-on-hover"
                       onClick={() => handleAddTestCase(item, index)}
                     >
                       <AddIcon className="h-3 w-3" />
                       <span>Test Case</span>
                     </button>
                     <button
-                      className="btn btn-xs btn-outline hover:btn-primary see-on-hover"
+                      className="btn btn-sm text-xs font-normal btn-outline hover:btn-primary see-on-hover"
                       onClick={() => handleAskAi(item)}
                     >
                       <BotMessageIcon className="h-3 w-3" />
@@ -595,33 +595,38 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             {/* User message footer with timestamp and actions */}
             {item?.role === "user" && (
               <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
-                <time className="text-xs opacity-50 chat-end">
-                  {formatDateAndTime(item.createdAt)}
+                <time className="text-xs opacity-50 chat-end relative">
+                  <span className="group-hover:hidden">
+                    {formatRelativeTime(item.createdAt)}
+                  </span>
+                  <span className="hidden group-hover:inline">
+                    {formatDateAndTime(item.createdAt)}
+                  </span>
                 </time>
                 <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity">
                   <button
-                    className="btn btn-xs hover:btn-primary see-on-hover"
+                    className="btn text-xs font-normal btn-sm hover:btn-primary see-on-hover"
                     onClick={() => handleUserButtonClick("AiConfig")}
                   >
                     <SquareFunctionIcon className="h-3 w-3" />
                     <span>AI Config</span>
                   </button>
                   <button
-                    className="btn btn-xs hover:btn-primary see-on-hover"
+                    className="btn text-xs font-normal btn-sm hover:btn-primary see-on-hover"
                     onClick={() => handleUserButtonClick("variables")}
                   >
                     <ParenthesesIcon className="h-3 w-3" />
                     <span>Variables</span>
                   </button>
                   <button
-                    className="btn btn-xs  hover:btn-primary see-on-hover"
+                    className="btn text-xs font-normal btn-sm  hover:btn-primary see-on-hover"
                     onClick={() => handleUserButtonClick("system Prompt")}
                   >
                     <FileClockIcon className="h-3 w-3" />
                     <span>System Prompt</span>
                   </button>
                   <button
-                    className="btn btn-xs hover:btn-primary see-on-hover"
+                    className="btn text-xs font-normal btn-sm hover:btn-primary see-on-hover"
                     onClick={() => handleUserButtonClick("more")}
                   >
                     <AddIcon className="h-3 w-3" />

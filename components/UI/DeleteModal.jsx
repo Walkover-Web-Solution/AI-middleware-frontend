@@ -45,7 +45,7 @@ const handleClose=()=>{
           <button
             type="button"
             onClick={handleClose}
-            className="btn"
+            className="btn btn-sm"
           >
             Cancel
           </button>
@@ -54,7 +54,7 @@ const handleClose=()=>{
             onClick={()=>{
                 onConfirm(item,name)
             }}
-            className="btn btn-error text-white"
+            className="btn btn-error text-white btn-sm"
           >
             {buttonTitle ? <ClipboardXIcon size={14} className='text-white'/> :  <Trash2 className="mr-1 h-4 w-4 text-white" />}
             {buttonTitle}

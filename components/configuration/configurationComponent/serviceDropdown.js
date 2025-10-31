@@ -194,7 +194,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             onChange={handleServiceChange}
             placeholder="Select a Service"
             size="sm"
-            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full font-normal justify-between ${isDisabled ? 'btn-disabled' : ''}`}
+            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full font-normal rounded-sm justify-between ${isDisabled ? 'btn-disabled' : ''}`}
             menuClassName="w-full max-w-xs"
           />
     );

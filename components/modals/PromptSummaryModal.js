@@ -91,7 +91,7 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
                 ref={textareaRef}
                 value={summary}
                 onChange={(e)=>setSummary(e.target.value)}
-                className="textarea textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-base-content p-2"
+                className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-base-content p-2"
             />
             <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); setSummary(bridge_summary) }}>
                 Cancel
@@ -136,9 +136,9 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
                 </div>
                 <div className="modal-action">
                     <div className="flex gap-2">
-                        <button className="btn" onClick={() => {handleClose()}}>Close</button>
+                        <button className="btn btn-sm" onClick={() => {handleClose()}}>Close</button>
                         <button
-                            className="btn btn-primary"
+                            className="btn btn-primary btn-sm"
                             disabled={isGeneratingSummary || bridge_summary === summary}
                             onClick={handleSaveSummary}
                         >

@@ -153,12 +153,12 @@ const maskAuthKey = (authkey) => {
            
           </div>
         </MainLayout>
-        <div className="flex flex-row gap-4 justify-between ">
+        <div className="flex flex-row gap-4">
       {authData?.length>5 && (
         <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Auth Key"/>
       )}
-        <div className={`flex-shrink-0 ${authData?.length > 5 ? 'mr-2' : 'ml-auto mr-2'}`}>
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Auth Key</button>
+        <div className={`flex-shrink-0 ${authData?.length > 5 ? 'mr-2' : 'ml-2'}`}>
+              <button className="btn btn-primary btn-sm" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Auth Key</button>
             </div>
             </div>
          </div>
@@ -195,11 +195,11 @@ const maskAuthKey = (authkey) => {
       >
         <div className="modal-box">
           <h3 className="font-bold text-lg mb-2">Create New Auth Key</h3>
-          <label className="input input-bordered flex items-center gap-2">
+          <label className="input input-sm input-bordered flex items-center gap-2">
             <span>Name{RequiredItem()} :</span>
             <input
               type="text"
-              className="grow"
+              className="grow input input-sm border-none"
               id="authNameInput"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -219,10 +219,10 @@ const maskAuthKey = (authkey) => {
           <div className="modal-action">
             <form method="dialog">
               <div className='flex gap-2'>
-                <button className="btn">Cancel</button>
+                <button className="btn btn-sm">Cancel</button>
               </div>
             </form>
-            <button className="btn btn-primary" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
+            <button className="btn btn-primary btn-sm" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
           </div>
         </div>
       </dialog>

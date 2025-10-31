@@ -683,7 +683,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
                 <textarea
                     ref={inputRef}
                     placeholder="Type here"
-                    className="textarea textarea-bordered w-full focus:border-primary max-h-[200px] resize-none overflow-y-auto h-auto"
+                    className="textarea bg-white dark:bg-black/15 textarea-bordered w-full focus:border-primary max-h-[200px] resize-none overflow-y-auto h-auto"
                     onKeyDown={handleKeyDown}
                     rows={1}
                     onInput={(e) => {

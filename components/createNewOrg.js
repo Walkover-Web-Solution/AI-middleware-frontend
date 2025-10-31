@@ -156,8 +156,8 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                         </div>
 
                         <div className="modal-action">
-                            <button type="button" onClick={() => closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">Close</button>
-                            <button type="submit" className="btn btn-primary">Create</button>
+                            <button type="button" onClick={() => closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn btn-sm">Close</button>
+                            <button type="submit" className="btn btn-sm btn-primary">Create</button>
                         </div>
                     </form>
                 </div>
