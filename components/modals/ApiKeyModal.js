@@ -159,7 +159,6 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                 </div>
                 <div className="modal-action">
                     <button type="reset" className="btn btn-sm" onClick={handleClose}>Cancel</button>
-                    <button type="reset" className="btn btn-sm" onClick={handleClose}>Cancel</button>
                     <button 
                         type="submit" 
                         className={`btn btn-sm btn-primary ${

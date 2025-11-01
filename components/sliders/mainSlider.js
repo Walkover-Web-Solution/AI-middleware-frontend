@@ -767,10 +767,10 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {hovered && !showSidebarContent && (isMobileVisible || (!isMobile && !isOpen)) && (
           <div
-            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
+            className="fixed capitalize bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0 border-base-300" />
+            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 capitalize -left-1 border-r-0 border-b-0 border-base-300" />
             {DISPLAY_NAMES(hovered)}
           </div>
         )}
