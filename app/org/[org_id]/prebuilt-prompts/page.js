@@ -168,9 +168,6 @@ export default function PrebuiltPromptsPage() {
                 <p className="text-sm text-base-content/60 mt-1">
 Configure AI assistants such as the Prompt Builder, JSON Creator, and other intelligent tools to operate precisely according to your workflow and requirements.                </p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-base-content/60">
-                <span>{Object.keys(processedPrompts).length} platform tools</span>
-              </div>
             </div>
           </div>
 

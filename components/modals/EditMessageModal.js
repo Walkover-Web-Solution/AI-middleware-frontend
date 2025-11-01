@@ -55,11 +55,6 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
           /* First time - show Better Prompt button */
           <button 
             className="btn btn-primary btn-sm gap-2"
-            disabled={
-              modalInput?.content?.trim() === '' || 
-              isImprovingPrompt || 
-              modalInput?.content === modalInput?.originalContent
-            }
             onClick={handleImprovePrompt}
           >
             {isImprovingPrompt ? (

@@ -289,32 +289,36 @@ function MainSlider({ isEmbedUser }) {
   // Get settings menu items for dropdown
   const settingsMenuItems = useMemo(() => [
     {
-      id: 'userDetails',
-      label: 'User Details',
-      icon: <Cog size={14} />,
-      onClick: () => {
-        router.push(`/org/${orgId}/userDetails`);
-        if (isMobile) setIsMobileVisible(false);
-        setIsOrgDropdownExpanded(false);
-      }
-    },
-    {
       id: 'workspace',
       label: 'Workspace',
       icon: <Settings2 size={14} />,
       onClick: () => {
-        router.push(`/org/${orgId}/workspaceSetting`);
-        if (isMobile) setIsMobileVisible(false);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/workspaceSetting`);
       }
     },
+    {
+      id: 'userDetails',
+      label: 'User Details',
+      icon: <Cog size={14} />,
+      onClick: () => {
+        setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/userDetails`);
+      }
+    },
+    
     {
       id: 'auth',
       label: 'Auth 2.0',
       icon: <KeyIcon size={14} />,
       onClick: () => {
-        router.push(`/org/${orgId}/auth_route`);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        router.push(`/org/${orgId}/auth_route`);
       }
     },
     {
@@ -322,8 +326,9 @@ function MainSlider({ isEmbedUser }) {
       label: 'Add new Model',
       icon: <AddIcon size={14} />,
       onClick: () => {
-        router.push(`/org/${orgId}/addNewModel`);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        router.push(`/org/${orgId}/addNewModel`);
       }
     },
     {
@@ -331,9 +336,10 @@ function MainSlider({ isEmbedUser }) {
       label: 'AI Assistant Tools',
       icon: <Bot size={14} />,
       onClick: () => {
-        router.push(`/org/${orgId}/prebuilt-prompts`);
-        if (isMobile) setIsMobileVisible(false);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/prebuilt-prompts`);
       }
     }
   ], [router, orgId, isMobile]);
@@ -480,9 +486,37 @@ function MainSlider({ isEmbedUser }) {
                         <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
                       </div>
 
-                      {/* Settings menu items */}
+                      {/* Switch Organization button */}
+                      <div className="border-b border-base-300 pb-2 mb-2">
+                        <button
+                          onClick={handleSwitchOrg}
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-blue-500 text-xs font-medium"
+                        >
+                          <Building2 size={14} />
+                          Switch Organization
+                        </button>
+                      </div>
+
+                      {/* Basic Settings menu items */}
                       <div className="">
-                        {settingsMenuItems.map((item) => (
+                        {settingsMenuItems.slice(0, 2).map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={item.onClick}
+                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors text-sm"
+                          >
+                            <span className="shrink-0">{item.icon}</span>
+                            <span className="truncate text-xs">{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Advanced Configuration Section */}
+                      <div className="border-t border-base-300 pt-2 mt-2">
+                        <div className="px-2 mb-2">
+                          <span className="text-[10px] font-medium text-base-content/50 uppercase tracking-wider">Advance Configuration</span>
+                        </div>
+                        {settingsMenuItems.slice(2).map((item) => (
                           <button
                             key={item.id}
                             onClick={item.onClick}
@@ -533,16 +567,8 @@ function MainSlider({ isEmbedUser }) {
                         </div>
                       </div> */}
                       
-                      {/* Switch Organization and Logout buttons */}
+                      {/* Logout button */}
                       <div className="border-t border-base-300 pt-2 mt-2">
-                        <button
-                          onClick={handleSwitchOrg}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-blue-500 text-xs font-medium"
-                        >
-                          <Building2 size={14} />
-                          Switch Organization
-                        </button>
-                        
                         <button
                           onClick={() => {
                             handleLogout();
@@ -566,9 +592,37 @@ function MainSlider({ isEmbedUser }) {
                         <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
                       </div>
 
-                      {/* Settings menu items */}
+                      {/* Switch Organization button */}
+                      <div className="border-b border-base-300 pb-2 mb-2">
+                        <button
+                          onClick={handleSwitchOrg}
+                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-300 transition-colors text-blue-500 text-xs font-medium"
+                        >
+                          <Building2 size={14} />
+                          Switch Organization
+                        </button>
+                      </div>
+
+                      {/* Basic Settings menu items */}
                       <div className="">
-                        {settingsMenuItems.map((item) => (
+                        {settingsMenuItems.slice(0, 2).map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={item.onClick}
+                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-300 transition-colors text-sm"
+                          >
+                            <span className="shrink-0">{item.icon}</span>
+                            <span className="truncate text-xs">{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Advanced Configuration Section */}
+                      <div className="border-t border-base-300 pt-2 mt-2">
+                        <div className="px-2 mb-2">
+                          <span className="text-[10px] font-small text-base-content/50 uppercase tracking-wider">Advance Configurations</span>
+                        </div>
+                        {settingsMenuItems.slice(2).map((item) => (
                           <button
                             key={item.id}
                             onClick={item.onClick}
@@ -619,16 +673,8 @@ function MainSlider({ isEmbedUser }) {
                         </div>
                       </div> */}
                       
-                      {/* Switch Organization and Logout buttons */}
-                      <div className="border-t border-base-300 pt-2 mt-2 space-y-1">
-                        <button
-                          onClick={handleSwitchOrg}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-300 transition-colors text-blue-500 text-xs font-medium"
-                        >
-                          <Building2 size={14} />
-                          Switch Organization
-                        </button>
-                        
+                      {/* Logout button */}
+                      <div className="border-t border-base-300 pt-2 mt-2">
                         <button
                           onClick={() => {
                             handleLogout();
