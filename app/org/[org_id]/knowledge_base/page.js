@@ -4,6 +4,7 @@ import { truncate } from "@/components/historyPageComponents/assistFile";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
 import PageHeader from "@/components/Pageheader";
+import InfoTooltip from "@/components/InfoTooltip";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
@@ -29,6 +30,36 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
   useEffect(() => {
     setFilterKnowledgeBase(knowledgeBaseData)
   }, [knowledgeBaseData]); 
+
+  // Smart tooltip component for table descriptions
+  const SmartTooltip = ({ content, children }) => {
+    const [position, setPosition] = React.useState('tooltip-top');
+    
+    const handleMouseEnter = (e) => {
+      const rect = e.target.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const elementTop = rect.top;
+      
+      // If element is in the top half of viewport, show tooltip below
+      // If element is in the bottom half, show tooltip above
+      if (elementTop < viewportHeight / 2) {
+        setPosition('tooltip-bottom');
+      } else {
+        setPosition('tooltip-top');
+      }
+    };
+
+    return (
+      <div 
+        className={`tooltip ${position}`} 
+        data-tip={content}
+        onMouseEnter={handleMouseEnter}
+      >
+        {children}
+      </div>
+    );
+  };
+
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     actualName: item?.name,
@@ -40,7 +71,9 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
         {item.name}
       </div>
     </div>,
-    description: <div className="tooltip" data-tip={item.description}>{truncate(item.description, 30)}</div>,
+    description: <SmartTooltip content={item.description}>
+      <span>{truncate(item.description, 30)}</span>
+    </SmartTooltip>,
     actual_name: item?.name,
   }));
   const handleUpdateKnowledgeBase = (item) => {
