@@ -19,7 +19,8 @@ import {
   FileText,
   MoonIcon,
   SunIcon,
-  MonitorIcon
+  MonitorIcon,
+  Bot
 } from 'lucide-react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -327,8 +328,8 @@ function MainSlider({ isEmbedUser }) {
     },
     {
       id: 'prebuiltPrompts',
-      label: 'Prebuilt Prompts',
-      icon: <FileText size={14} />,
+      label: 'AI Assistant Tools',
+      icon: <Bot size={14} />,
       onClick: () => {
         router.push(`/org/${orgId}/prebuilt-prompts`);
         if (isMobile) setIsMobileVisible(false);
@@ -651,7 +652,7 @@ function MainSlider({ isEmbedUser }) {
                 {NAV_SECTIONS.map(({ title, items }, idx) => (
                   <div key={idx} className="">
                     {showSidebarContent && title && (
-                      <h3 className="my-2 text-[10px] text-base-content/50 uppercase tracking-wider px-2">
+                      <h3 className="my-1 text-[9px] text-base-content/50 uppercase tracking-wider px-2">
                         {title}
                       </h3>
                     )}
@@ -678,7 +679,7 @@ function MainSlider({ isEmbedUser }) {
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {showSidebarContent && (
                            <div className='flex items-center gap-2 justify-center'>
-                             <span className="text-sm capitalize truncate">{DISPLAY_NAMES(key)}</span> 
+                             <span className="text-xs capitalize truncate">{DISPLAY_NAMES(key)}</span> 
                              <span>{key === 'orchestratal_model' && <BetaBadge/>}</span>
                            </div>
                           )}
@@ -703,8 +704,8 @@ function MainSlider({ isEmbedUser }) {
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <MonitorPlayIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="text-sm truncate">Tutorial</span>}
+                  <MonitorPlayIcon size={14} className="shrink-0" />
+                  {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
                 </button>
 
                 <button
@@ -716,8 +717,8 @@ function MainSlider({ isEmbedUser }) {
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <MessageCircleMoreIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="text-sm truncate">Speak to Us</span>}
+                  <MessageCircleMoreIcon size={12} className="shrink-0" />
+                  {showSidebarContent && <span className="text-xs truncate">Speak to Us</span>}
                 </button>
 
                 <a
@@ -729,8 +730,8 @@ function MainSlider({ isEmbedUser }) {
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                   onClick={() => isMobile && setIsMobileVisible(false)}
                 >
-                  <MessageSquareMoreIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="text-sm truncate">Feedback</span>}
+                  <MessageSquareMoreIcon size={12} className="shrink-0" />
+                  {showSidebarContent && <span className="text-xs truncate">Feedback</span>}
                 </a>
               </div>
             </div>

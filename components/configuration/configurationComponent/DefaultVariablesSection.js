@@ -4,7 +4,7 @@ import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 // Optimized default variables section
 const DefaultVariablesSection = memo(() => {
     return (
-        <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
+        <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-content/20 rounded-t-none">
             <input type="checkbox" className="min-h-[0.75rem]" />
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
                 <div className="flex items-center gap-2 ">
