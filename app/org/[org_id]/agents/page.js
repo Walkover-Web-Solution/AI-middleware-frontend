@@ -10,7 +10,8 @@ import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
+import { MODAL_TYPE } from "@/utils/enums";
+import useTutorialVideos from "@/hooks/useTutorialVideos";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,9 @@ const BRIDGE_STATUS = {
   PAUSED: 0
 };
 function Home({ params, isEmbedUser }) {
+  // Use the tutorial videos hook
+  const { getBridgeCreationVideo } = useTutorialVideos();
+  
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
@@ -266,7 +270,7 @@ function Home({ params, isEmbedUser }) {
         {tutorialState?.showTutorial && (
           <OnBoarding
             setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-            video={ONBOARDING_VIDEOS.bridgeCreation}
+            video={getBridgeCreationVideo()}
             flagKey={"bridgeCreation"}
 
           />

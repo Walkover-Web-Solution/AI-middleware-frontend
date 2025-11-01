@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { closeModal, GetFileTypeIcon, openModal } from '@/utils/utility';
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
@@ -13,8 +13,12 @@ import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useTutorialVideos from '@/hooks/useTutorialVideos';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
+    // Use the tutorial videos hook
+    const { getKnowledgeBaseVideo } = useTutorialVideos();
+    
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -170,7 +174,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
                 )}
                 {tutorialState?.showTutorial && (
-                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
+                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
            <div className="dropdown dropdown-left mt-8">

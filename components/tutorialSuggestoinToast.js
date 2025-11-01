@@ -3,6 +3,7 @@ import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { TUTORIALS } from "@/utils/enums";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
+import { createPortal } from "react-dom";
 import { ClockIcon, PlayIcon } from "./Icons";
 
 const TIMER_DURATION = 10;
@@ -82,7 +83,12 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
     return null;
   }
 
-  return (
+  // Check if we're in the browser environment
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const toastContent = (
     <div className="fixed top-1 right-1 z-very-high">
       <div className="card w-80 bg-base-100 shadow-xl border border-base-300 animate-in slide-in-from-top-2 duration-300">
         {/* Progress indicator */}
@@ -154,6 +160,8 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
       </div>
     </div>
   );
+
+  return createPortal(toastContent, document.body);
 };
 
 export default TutorialSuggestionToast;

@@ -7,12 +7,15 @@ import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/component
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
-import { ONBOARDING_VIDEOS } from "@/utils/enums";
+import useTutorialVideos from "@/hooks/useTutorialVideos";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 import InfoTooltip from "./InfoTooltip";
 import Protected from "./protected";
 
 const AddVariable = ({ params, isEmbedUser, searchParams }) => {
+  // Use the tutorial videos hook
+  const { getAddVariablesVideo } = useTutorialVideos();
+  
   const versionId = searchParams?.version;
   const { variablesKeyValue, prompt, isFirstVariable, bridgeName } = useCustomSelector((state) => ({
     variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
@@ -282,7 +285,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
       </div>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
       {tutorialState?.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAddVariablesVideo()} flagKey={"Addvariables"} />
       )}
 
       {/* Variables Section */}

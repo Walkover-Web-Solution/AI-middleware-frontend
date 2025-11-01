@@ -7,11 +7,14 @@ import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction,
 import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@/components/Icons';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
-import { ONBOARDING_VIDEOS } from '@/utils/enums';
+import useTutorialVideos from '@/hooks/useTutorialVideos';
 
 export const runtime = 'edge';
 
 function TestCases({ params }) {
+  // Use the tutorial videos hook
+  const { getTestCasesVideo } = useTutorialVideos();
+  
   const resolvedParams = use(params);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -118,7 +121,7 @@ function TestCases({ params }) {
       {tutorialState?.showTutorial && (
         <OnBoarding
           setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-          video={ONBOARDING_VIDEOS.TestCases}
+          video={getTestCasesVideo()}
           flagKey={"TestCasesSetup"}
         />
       )}

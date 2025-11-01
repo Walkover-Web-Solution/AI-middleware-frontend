@@ -1,7 +1,7 @@
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { ONBOARDING_VIDEOS } from '@/utils/enums';
+import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { getStatusClass } from '@/utils/utility';
 import { current } from '@reduxjs/toolkit';
 import { InfoIcon, AddIcon } from '@/components/Icons';
@@ -9,12 +9,11 @@ import React, { useMemo, useState } from 'react';
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 
-function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => { }, connectedFunctions = [], shouldToolsShow, modelName, prebuiltToolsData, toolsVersionData, showInbuiltTools = {} }) {
-    const [tutorialState, setTutorialState] = useState({
-        showTutorial: false,
-        showSuggestion: false
-    });
-    const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
+function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => { }, connectedFunctions = [], shouldToolsShow, modelName, prebuiltToolsData, toolsVersionData, showInbuiltTools = {}, tutorialState, setTutorialState }) {
+    // Use the tutorial videos hook
+    const { getFunctionCreationVideo } = useTutorialVideos();
+     
+    const { integrationData, function_data, embedToken } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
         const currentUser = state.userDetailsReducer.userDetails
@@ -23,15 +22,9 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
             integrationData: orgData.integrationData,
             function_data: orgData.functionData,
             embedToken: orgData.embed_token,
-            isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
         };
     });
-    const handleTutorial = () => {
-        setTutorialState(prev => ({
-            ...prev,
-            showSuggestion: isFirstFunction
-        }));
-    };
+    
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -102,7 +95,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                 <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"} />
             )}
             {tutorialState?.showTutorial && (
-                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation} flagKey={"FunctionCreation"} />
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getFunctionCreationVideo()} flagKey={"FunctionCreation"} />
             )}
             {!tutorialState?.showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0">
