@@ -166,7 +166,7 @@ export default function PrebuiltPromptsPage() {
               <div>
                 <h1 className="text-2xl font-bold">AI Assistant Tools</h1>
                 <p className="text-sm text-base-content/60 mt-1">
-Configure AI assistants such as the Prompt Builder, JSON Creator, and other intelligent tools to operate precisely according to your workflow and requirements.                </p>
+Configure AI assistants such as the Prompt Builder, JSON Creator, and other intelligent tools to operate precisely according to your workflow and requirementssss.                </p>
               </div>
             </div>
           </div>
@@ -177,7 +177,7 @@ Configure AI assistants such as the Prompt Builder, JSON Creator, and other inte
               {Object.entries(processedPrompts).map(([key, agent]) => (
                 <button
                   key={key}
-                  className={`px-3 py-2 btn btn-sm rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  className={`px-3 btn btn-sm rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     selectedAgent === key 
                       ? 'bg-primary text-primary-content hover:text-primary-content hover:bg-primary' 
                       : 'bg-base-100 hover:bg-base-300 border border-base-300'
