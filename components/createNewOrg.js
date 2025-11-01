@@ -63,11 +63,11 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             dispatch(createOrgAction(dataToSend, (data) => {
                 dispatch(userDetails());
                 handleSwitchOrg(data.id, data.name);
-                toast.success('Organization created successfully');
+                toast.success('Workspace created successfully');
                 route.push(`/org/${data.id}/agents`);
             }));
         } catch (error) {
-            toast.error('Failed to create organization');
+            toast.error('Failed to create workspace');
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -81,14 +81,14 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             <dialog id={MODAL_TYPE.CREATE_ORG_MODAL} className="modal">
                 <div className="flex items-center justify-center min-h-screen">
                     <form className="modal-box relative p-5 bg-base-100 rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
-                        <h3 className="font-bold text-lg mb-2">Create Organization</h3>
-                        <label className='label-text mb-1'>Name *</label>
+                        <h3 className="font-bold text-lg mb-2">Create Workspace</h3>
+                        <label className='label-text mb-1'>Workspace Name *</label>
                         <input
                             type="text"
                             name="name"
                             value={orgDetails.name}
                             onChange={handleChange}
-                            placeholder="Organization Name"
+                            placeholder="Workspace Name"
                             className="input input-bordered w-full mb-4"
                             minLength={3}
                             maxLength={40}
@@ -101,7 +101,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             rows="4"
                             value={orgDetails.about}
                             onChange={handleChange}
-                            placeholder="About your Organization"
+                            placeholder="About your Workspace"
                             className="p-2.5 w-full text-sm textarea textarea-bordered"
                             minLength={10}
                             maxLength={400}

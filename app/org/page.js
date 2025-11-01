@@ -24,6 +24,7 @@ function Page() {
   const route = useRouter();
   const searchParams = useSearchParams();
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
+  const currentUserId = useCustomSelector(state => state.userDetailsReducer.userDetails?.id);
   const [displayedOrganizations, setDisplayedOrganizations] = useState([]);
 
   const handleSwitchOrg = useCallback(async (id, name) => {
@@ -75,7 +76,8 @@ function Page() {
         />
         <OrganizationGrid 
           displayedOrganizations={displayedOrganizations} 
-          handleSwitchOrg={handleSwitchOrg} 
+          handleSwitchOrg={handleSwitchOrg}
+          currentUserId={currentUserId}
         />
         <CreateOrg handleSwitchOrg={handleSwitchOrg} />
       </div>
