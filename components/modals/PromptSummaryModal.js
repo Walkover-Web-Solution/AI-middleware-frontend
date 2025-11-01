@@ -103,7 +103,7 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
         <Modal MODAL_ID={modalType}>
             <div className="modal-box w-11/12 max-w-5xl">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-lg">Prompt Summary</h3>
+                    <h3 className="font-bold text-lg">Agent Summary</h3>
                     {!autoGenerateSummary && (
                     <button
                         className={`btn btn-ghost btn-sm ${isGeneratingSummary ? 'opacity-50 cursor-not-allowed' : ''}`}

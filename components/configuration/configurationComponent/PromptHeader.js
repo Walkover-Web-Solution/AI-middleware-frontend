@@ -33,7 +33,7 @@ const PromptHeader = memo(({
                     <button onClick={handleOpenPromptSummary}>
                         <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent's prompt and applies to all versions of the agent, not just one."}>
                             <span className='label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>
-                                Prompt Summary
+                                Agent Summary
                             </span>
                         </InfoTooltip>
                     </button>
