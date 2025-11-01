@@ -42,7 +42,7 @@ function Home({ params, isEmbedUser }) {
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
       descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
       bridgeStatus: state.bridgeReducer.allBridgesMap,
-      showHistory:  state.userDetailsReducer?.userDetails?.showHistory||false,
+      showHistory:  state.appInfoReducer.embedUserDetails?.showHistory||false,
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);

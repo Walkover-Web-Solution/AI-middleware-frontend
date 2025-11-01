@@ -12,7 +12,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     const serviceName = versionData?.service;
     const modelTypeName = versionData?.configuration?.type?.toLowerCase();
     const modelName = versionData?.configuration?.model;
-    const showDefaultApikeys = state.userDetailsReducer.userDetails.addDefaultApiKeys;
+    const showDefaultApikeys = state.appInfoReducer.embedUserDetails.addDefaultApiKeys;
     return {
       bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",

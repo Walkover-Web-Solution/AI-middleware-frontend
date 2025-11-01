@@ -24,6 +24,7 @@ import orchestralFlowReducer from "./reducer/orchestralFlowReducer";
 import prebuiltPromptReducer from "./reducer/prebuiltPromptReducer";
 import apiKeysReducer from "./reducer/apiKeysReducer";
 import variableReducer from "./reducer/variableReducer";
+import appInfoReducer from "./reducer/appInfoReducer";
 const createNoopStorage = () => {
     return {
         getItem(_key) {
@@ -58,6 +59,7 @@ const persistConfig = {
         'apiKeysReducer',
         'variableReducer',
         'orchestralFlowReducer',
+        'appInfoReducer',
         // Add/remove more slice keys as needed
     ],
 };
@@ -83,7 +85,8 @@ const rootReducer = combineReducers({
     orchestralFlowReducer,
     prebuiltPromptReducer,
     apiKeysReducer,
-    variableReducer
+    variableReducer,
+    appInfoReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
