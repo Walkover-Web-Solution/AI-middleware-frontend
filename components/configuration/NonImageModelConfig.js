@@ -5,6 +5,8 @@ import CommonConfigComponents from "./CommonConfigComponents";
 import AdvancedSection from "./AdvancedSection";
 import ChatbotConfigSection from "./ChatbotConfigSection";
 import { useConfigurationContext } from './ConfigurationContext';
+import AdvancedParameters from './configurationComponent/advancedParamenter';
+import GptMemory from './configurationComponent/gptmemory';
 
 const NonImageModelConfig = memo(() => {
     const { 
@@ -16,7 +18,8 @@ const NonImageModelConfig = memo(() => {
         shouldPromptShow, 
         service, 
         showDefaultApikeys, 
-        isEmbedUser 
+        isEmbedUser,
+        hideAdvancedParameters 
     } = useConfigurationContext();
 
     return (
@@ -34,6 +37,13 @@ const NonImageModelConfig = memo(() => {
                 showDefaultApikeys={showDefaultApikeys}
                 isEmbedUser={isEmbedUser}
             />
+            <AdvancedParameters
+                params={params}
+                searchParams={searchParams}
+                isEmbedUser={isEmbedUser}
+                hideAdvancedParameters={hideAdvancedParameters}
+            />
+            <GptMemory params={params} searchParams={searchParams} />
             <ChatbotConfigSection />
             <AdvancedSection />
         </>

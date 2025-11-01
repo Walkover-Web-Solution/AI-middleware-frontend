@@ -20,7 +20,7 @@ const ChatbotConfigSection = () => {
     }
 
     return (
-        <div className="z-very-low my-4 text-base-content w-full cursor-pointer" tabIndex={0}>
+        <div className="z-very-low mb-4 text-base-content w-full cursor-pointer" tabIndex={0}>
             <div className={`info p-2 ${isChatbotAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={toggleChatbotAccordion}>
                 <InfoTooltip tooltipContent="Configure chatbot-specific settings including user references, starter questions, and action lists." className="cursor-pointer mr-2">
                     <div className="cursor-pointer label-text inline-block ml-1">
