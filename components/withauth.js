@@ -70,23 +70,14 @@ const WithAuth = (Children) => {
         setLoading(true);
         setInCookies('proxy_token', proxyAuthToken);
 
-        const userId = searchParams.get('user_ref_id');
-        const orgId = searchParams.get('company_ref_id');
-
-        if (userId && orgId) {
-          try {
-            const localToken = await loginUser({
-              userId,
-              orgId,
-              userName: '',
-              orgName: ''
-            });
-            if (localToken?.token) {
-              setInCookies('local_token', localToken.token);
-            }
-          } catch (error) {
-            console.error('Failed to fetch local token', error);
-          }
+        if (process.env.NEXT_PUBLIC_ENV === 'local') {
+          const localToken = await loginUser({
+            userId: searchParams.get('user_ref_id'),
+            orgId: searchParams.get('company_ref_id'),
+            userName: '',
+            orgName: ''
+          });
+          setInCookies('local_token', localToken.token);
         }
 
         if(getFromCookies("previous_url")) {
@@ -136,3 +127,4 @@ const WithAuth = (Children) => {
 };
 
 export default WithAuth;
+

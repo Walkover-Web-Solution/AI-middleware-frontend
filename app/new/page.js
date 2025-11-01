@@ -94,12 +94,12 @@ function Page() {
             updateFormState({ isLoading: true });
             const response = await switchOrg(selectedOrg.id);
 
-            const localToken = await switchUser({
-                orgId: selectedOrg.id,
-                orgName: selectedOrg.name
-            });
-            if (localToken?.token) {
-                setInCookies('local_token', localToken.token);
+            if (process.env.NEXT_PUBLIC_ENV === 'local') {
+                const { token } = await switchUser({
+                    orgId: selectedOrg.id,
+                    orgName: selectedOrg.name
+                });
+                setInCookies('local_token', token);
             }
 
             await dispatch(setCurrentOrgIdAction(selectedOrg.id));
