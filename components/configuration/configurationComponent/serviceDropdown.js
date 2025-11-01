@@ -20,8 +20,8 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
         const modelName = versionData?.configuration?.model;
-        const apiKeyObjectIdData = state.userDetailsReducer?.userDetails?.apikey_object_id || {}
-        const showDefaultApikeys = state.userDetailsReducer?.userDetails?.addDefaultApiKeys;
+        const apiKeyObjectIdData = state.appInfoReducer.embedUserDetails?.apikey_object_id || {}
+        const showDefaultApikeys = state.appInfoReducer.embedUserDetails?.addDefaultApiKeys;
         return {
             SERVICES: state?.serviceReducer?.services,
             DEFAULT_MODEL: state?.serviceReducer?.default_model,

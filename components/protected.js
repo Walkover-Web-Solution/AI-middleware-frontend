@@ -8,12 +8,13 @@ import React, { useEffect } from 'react';
 const Protected = (WrappedComponent) => {
   const ProtectedComponent = (props) => {
     const router = useRouter();
-    const { isEmbedUser, isFocus } = useCustomSelector(state => ({
-      isEmbedUser: state.userDetailsReducer.userDetails.isEmbedUser,
-      isFocus: state?.bridgeReducer?.isFocus || false
+    const { isEmbedUser, isFocus, isEmbedUserFromUserDetails } = useCustomSelector(state => ({
+      isEmbedUser: state.appInfoReducer.embedUserDetails.isEmbedUser,
+      isFocus: state?.bridgeReducer?.isFocus || false,
+      isEmbedUserFromUserDetails: state?.userDetailsReducer?.userDetails?.meta?.type === 'embed'
     }));
     useEffect(() => {
-      if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && !isEmbedUser) {
+      if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && !isEmbedUser && !isEmbedUserFromUserDetails) {
         if (window.location.href !== '/login') {
           setInCookies("previous_url", window.location.href);
         }
@@ -21,7 +22,7 @@ const Protected = (WrappedComponent) => {
       }
     }, [router]);
 
-    return <WrappedComponent {...props} isEmbedUser={!!(isEmbedUser && sessionStorage.getItem("proxy_token"))} isFocus={isFocus} />;
+    return <WrappedComponent {...props} isEmbedUser={!!(isEmbedUser && sessionStorage.getItem("proxy_token") && isEmbedUserFromUserDetails)} isFocus={isFocus} />;
   };
   return ProtectedComponent;
 };

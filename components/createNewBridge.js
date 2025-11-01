@@ -33,8 +33,8 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   const { modelsList, SERVICES, showAgentType, hideCreateManuallyButton } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
     modelsList: state?.modelReducer?.serviceModels[state.selectedService],
-    showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent,
-    hideCreateManuallyButton: state?.userDetailsReducer?.userDetails?.hideCreateManuallyButton
+    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent,
+    hideCreateManuallyButton: state.appInfoReducer.embedUserDetails?.hideCreateManuallyButton
   }));
 
   // Memoized calculations

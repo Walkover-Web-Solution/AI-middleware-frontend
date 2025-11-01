@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
-import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
+import { setEmbedUserDetailsAction } from '@/store/action/appInfoAction';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
@@ -121,7 +121,7 @@ const Layout = ({ children }) => {
         setIsLoading(true);
 
         if (urlParamsObj.token) {
-          dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
+          dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
           sessionStorage.setItem('proxy_token', urlParamsObj.token);
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
@@ -132,7 +132,7 @@ const Layout = ({ children }) => {
         if (urlParamsObj.config) {
           Object.entries(urlParamsObj.config).forEach(([key, value]) => {
             if (value !== undefined) {
-             key === "apikey_object_id" ? dispatch(updateUserDetialsForEmbedUser({ [key]: value })) : dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value)}));
+             key === "apikey_object_id" ? dispatch(setEmbedUserDetailsAction({ [key]: value })) : dispatch(setEmbedUserDetailsAction({ [key]: toBoolean(value)}));
             }
           });
         }
@@ -218,7 +218,7 @@ const Layout = ({ children }) => {
       if (messageData?.showConfigType !== undefined) uiUpdates.showConfigType = messageData.showConfigType;
 
       if (Object.keys(uiUpdates).length > 0) {
-        dispatch(updateUserDetialsForEmbedUser(uiUpdates));
+        dispatch(setEmbedUserDetailsAction(uiUpdates));
       }
     };
 
