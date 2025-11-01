@@ -27,6 +27,18 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         });
     }, [selectedApiKey, isEditing]);
 
+    //Manage focus behavior - remove focus from inputs when editing
+    useEffect(() => {
+        if (isEditing) {
+            // Remove focus from any focused input when in edit mode
+            setTimeout(() => {
+                if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                    document.activeElement.blur();
+                }
+            }, 0);
+        }
+    }, [isEditing]);
+
     // Handle form input changes
     const handleFormChange = useCallback((event) => {
         const form = event.target.form;
@@ -69,6 +81,10 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
     const handleClose = useCallback(() => {
         setSelectedApiKey(null);
         setIsEditing(false);
+        setischanged({
+            isAdd: false,
+            isUpdate: false
+        });
         closeModal(MODAL_TYPE.API_KEY_MODAL)
     }, [setSelectedApiKey, setIsEditing]);
 
@@ -135,6 +151,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
                             onChange={handleFormChange}
                             {...(field !== 'apikey' && { maxLength: 50 })}
+                            autoFocus={false}
                         />
                     </div>
                 ))}

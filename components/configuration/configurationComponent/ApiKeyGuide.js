@@ -29,8 +29,8 @@ const StepCard = ({ stepNumber, title, children }) => (
 const CodeBlock = ({ children }) => (
   <div className="bg-base-200 rounded-lg p-4 mt-3 mb-3 font-mono text-sm overflow-x-auto">
     <div className="flex items-center">
-      <span className="text-green-400 mr-2">$</span>
-      <code className="text-yellow-300">{children}</code>
+      <span className="text-primary mr-2">$</span>
+      <code className="text-primary">{children}</code>
     </div>
   </div>
 );
