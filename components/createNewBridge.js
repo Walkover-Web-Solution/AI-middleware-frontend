@@ -33,8 +33,8 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   const { modelsList, SERVICES, showAgentType, hideCreateManuallyButton } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
     modelsList: state?.modelReducer?.serviceModels[state.selectedService],
-    showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent,
-    hideCreateManuallyButton: state?.userDetailsReducer?.userDetails?.hideCreateManuallyButton
+    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent,
+    hideCreateManuallyButton: state.appInfoReducer.embedUserDetails?.hideCreateManuallyButton
   }));
 
   // Memoized calculations
@@ -281,7 +281,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
             <>
             <div className="w-full md:w-auto">
               <button
-                className="btn btn-primary text-sm md:text-base w-full"
+                className="btn btn-sm btn-primary text-sm md:text-base w-full"
                 onClick={createBridgeHandler}
                 disabled={state.isLoading}
               >
@@ -303,14 +303,14 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
             )}
             <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
               <button
-                className="btn text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                className="btn btn-sm text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                 onClick={handleCloseModal}
               >
                 Cancel
               </button>
               
               <button
-                className="btn btn-primary text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                className="btn btn-primary btn-sm text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                 onClick={handleCreateBridgeUsingAI}
                 disabled={state.isAiLoading || state.isLoading}
               >

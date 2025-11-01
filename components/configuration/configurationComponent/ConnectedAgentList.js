@@ -229,7 +229,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 e.stopPropagation();
                                 handleOpenAgentVariable(name, item);
                             }}
-                            className="btn btn-ghost btn-xs p-1 hover:bg-base-300"
+                            className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                             title="Config"
                         >
                             <SettingsIcon size={16} />
@@ -239,7 +239,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 e.stopPropagation();
                                 handleOpenDeleteModal(name,item);
                             }}
-                            className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                            className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
                         >
                             <TrashIcon size={16} />

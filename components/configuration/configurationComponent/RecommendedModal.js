@@ -1,6 +1,5 @@
 import { modelSuggestionApi } from '@/config';
 import React, { useState, useCallback } from 'react'
-import { useDispatch } from 'react-redux';
 
 const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);

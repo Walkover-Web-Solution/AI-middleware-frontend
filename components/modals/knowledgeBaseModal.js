@@ -225,8 +225,8 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                 <input
                   type="text"
                   name="name"
-                  className="input input-bordered input-md focus:ring-1 ring-primary/40"
-                  placeholder="Enter knowledge base name"
+                  className="input input-bordered input-sm focus:ring-1 ring-primary/40"
+                  placeholder="Enter knowledge Base name"
                   required
                   maxLength={50}
                   disabled={isLoading}
@@ -242,8 +242,8 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                 </label>
                 <textarea
                   name="description"
-                  className="textarea textarea-bordered h-14 focus:ring-1 ring-primary/40"
-                  placeholder="Describe the purpose and content of this knowledge base..."
+                  className="textarea bg-white dark:bg-black/15 textarea-bordered h-14 focus:ring-1 ring-primary/40"
+                  placeholder="Describe the purpose and content of this Knowledge Base"
                   required
                   disabled={isLoading}
                   key={selectedKnowledgeBase?._id}
@@ -288,7 +288,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   <input
                     type="url"
                     name="url"
-                    className="input input-bordered input-md focus:ring-1 ring-primary/40"
+                    className="input input-bordered input-sm focus:ring-1 ring-primary/40"
                     placeholder="https://example.com/documentation"
                     key={selectedKnowledgeBase?._id}
                     required={!selectedKnowledgeBase}
@@ -325,7 +325,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   <select
                     name="sectionType"
                     value={selectedSectionType}
-                    className="select select-bordered select-md focus:ring-1 ring-primary/40"
+                    className="select select-bordered select-sm focus:ring-1 ring-primary/40"
                     required={!selectedKnowledgeBase}
                     disabled={isLoading || selectedKnowledgeBase}
                     onChange={(e) => setSelectedSectionType(e.target.value)}
@@ -343,7 +343,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                     </label>
                     <select
                       name="chunking_type"
-                      className="select select-bordered select-md focus:ring-1 ring-primary/40"
+                      className="select select-bordered select-sm focus:ring-1 ring-primary/40"
                       required={selectedSectionType === 'custom' && !selectedKnowledgeBase}
                       disabled={isLoading || selectedKnowledgeBase}
                       value={chunkingType}
@@ -367,7 +367,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                     <input
                       type="number"
                       name="chunk_size"
-                      className="input input-bordered input-md focus:ring-1 ring-primary/40"
+                      className="input input-bordered input-sm focus:ring-1 ring-primary/40"
                       required={selectedSectionType === 'custom' && !selectedKnowledgeBase}
                       min="100"
                       disabled={isLoading || selectedKnowledgeBase}
@@ -382,7 +382,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                     <input
                       type="number"
                       name="chunk_overlap"
-                      className="input input-bordered input-md focus:ring-1 ring-primary/40"
+                      className="input input-bordered input-sm focus:ring-1 ring-primary/40"
                       required={selectedSectionType === 'custom' && !selectedKnowledgeBase}
                       min="0"
                       disabled={isLoading || selectedKnowledgeBase}
@@ -397,7 +397,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              className="btn hover:text-base-content"
+              className="btn btn-sm hover:text-base-content"
               onClick={handleClose}
               disabled={isLoading}
             >
@@ -405,7 +405,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             </button>
             <button
               type="submit"
-              className={`btn btn-primary hover:bg-primary-focus ${
+              className={`btn btn-sm btn-primary hover:bg-primary-focus ${
                 (selectedKnowledgeBase && !ischanged.isUpdate) || (!selectedKnowledgeBase && !ischanged.isAdd) 
                   ? 'btn-disabled' 
                   : ''

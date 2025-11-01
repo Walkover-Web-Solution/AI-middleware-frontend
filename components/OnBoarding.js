@@ -2,6 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateUserMetaOnboarding } from '@/store/action/orgAction';
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux';
+import { createPortal } from 'react-dom';
 
 const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
   const { currentUser } = useCustomSelector((state) => ({
@@ -29,7 +30,12 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
   };
 
 
-  return (
+  // Check if we're in the browser environment
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const modalContent = (
     <div className="fixed inset-0 z-very-high  bg-black bg-opacity-70 flex items-center justify-center">
       <button
         onClick={() => handleVideoEnd()}
@@ -39,7 +45,7 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
         &times;
       </button>
 
-      <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+      <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '76vh', width: '160vh', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
         <iframe
           src={video}
           loading="lazy"
@@ -61,7 +67,9 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
 
       </div>
     </div>
-  )
+  );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default OnBoarding

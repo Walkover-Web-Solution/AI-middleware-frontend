@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { closeModal, GetFileTypeIcon, openModal } from '@/utils/utility';
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
@@ -13,8 +13,12 @@ import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useTutorialVideos from '@/hooks/useTutorialVideos';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
+    // Use the tutorial videos hook
+    const { getKnowledgeBaseVideo } = useTutorialVideos();
+    
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -121,7 +125,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 e.stopPropagation();
                                handleOpenDeleteModal(item);
                             }}
-                            className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                            className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
                         >
                             <TrashIcon size={16} />
@@ -137,7 +141,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (
                         <>
-                            <InfoTooltip  tooltipContent="A Knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                            <InfoTooltip  tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
                                 <p className="label-text mb-2 whitespace-nowrap font-medium info">KnowledgeBase</p>
                             </InfoTooltip>
                             <button
@@ -150,14 +154,14 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </button>
                         </>
                     ) : (
-                        <InfoTooltip tooltipContent="A Knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                        <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
                             <button
                                 tabIndex={0}
                                 className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
                                 disabled={!shouldToolsShow}
                                 >
                                 <AddIcon className="w-2 h-2" />
-                                <span className="text-sm font-medium">KnowledgeBase</span>
+                                <span className="text-sm font-medium">Knowledge Base</span>
                             </button>     
                        </InfoTooltip>
                         
@@ -170,15 +174,15 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
                 )}
                 {tutorialState?.showTutorial && (
-                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
+                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
            <div className="dropdown dropdown-left mt-8">
            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
-                            <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
+                            <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
                             <input
                                 type='text'
-                                placeholder='Search Knowledgebase'
+                                placeholder='Search Knowledge Base'
                                 value={searchQuery}
                                 onChange={handleInputChange}
                                 className='input input-bordered w-full input-sm'
@@ -207,7 +211,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             }
                             <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
                                 <div>
-                                    <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
+                                    <AddIcon size={16} /><p className='font-semibold'>Add new Knowledge Base</p>
                                 </div>
                             </li>
                         </div>

@@ -18,6 +18,7 @@ const CommandPalette = ({isEmbedUser}) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
   const orgId = useMemo(() => getOrgIdFromPath(pathname), [pathname]);
 
@@ -109,8 +110,8 @@ const CommandPalette = ({isEmbedUser}) => {
     const authGroup = filterBy(authData, ["name", "service", "_id"]).map((d) => ({
       id: d._id,
       title: d.name || d._id,
-      subtitle: "Pauth Key",
-      type: "Pauths",
+      subtitle: "Auth Key",
+      type: "Auths",
     }));
 
     return {
@@ -132,7 +133,7 @@ const CommandPalette = ({isEmbedUser}) => {
       ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
       // ...items.functions.map((it) => ({ group: "Functions", ...it })),
       ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
-      ...items.auths.map((it) => ({ group: "Pauth Keys", ...it })),
+      ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
   }, [items]);
@@ -156,22 +157,19 @@ const CommandPalette = ({isEmbedUser}) => {
     setOpen(true);
     setQuery("");
     setActiveIndex(0);
+    setActiveCategoryIndex(0);
   }, []);
   const closePalette = useCallback(() => setOpen(false), []);
 
-  useEffect(() => {
-    const handler = (e) => {
-      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org"))) {
-        e.preventDefault();
-        openPalette();
-      }
-      if (e.key === "Escape") {
-        setOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [openPalette, pathname]);
+  // Categories array for navigation
+  const categories = useMemo(() => [
+    { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
+    { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
+    { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
+    { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
+    { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
+    { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
+  ], []);
 
   const navigateTo = useCallback((item) => {
     if (!orgId) {
@@ -199,7 +197,7 @@ const CommandPalette = ({isEmbedUser}) => {
       case "integrations":
         router.push(`/org/${orgId}/integration`);
         break;
-      case "Pauths":
+      case "Auths":
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case "flows":
@@ -232,7 +230,7 @@ const CommandPalette = ({isEmbedUser}) => {
       case 'integrations':
         router.push(`/org/${orgId}/integration`);
         break;
-      case 'Pauths':
+      case 'Auths':
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case 'flows':
@@ -244,54 +242,79 @@ const CommandPalette = ({isEmbedUser}) => {
     closePalette();
   }, [orgId, router, closePalette]);
 
-  const onKeyNav = useCallback((e) => {
-    if (!open) return;
-    const results = flatResults;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((i) => {
-        const newIndex = Math.min(i + 1, Math.max(0, results.length - 1));
-        // Scroll the active item into view
-        setTimeout(() => {
-          const activeElement = document.querySelector(`[data-result-index="${newIndex}"]`);
-          if (activeElement) {
-            activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        }, 0);
-        return newIndex;
-      });
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => {
-        const newIndex = Math.max(0, i - 1);
-        // Scroll the active item into view
-        setTimeout(() => {
-          const activeElement = document.querySelector(`[data-result-index="${newIndex}"]`);
-          if (activeElement) {
-            activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        }, 0);
-        return newIndex;
-      });
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const sel = results[activeIndex];
-      if (sel) navigateTo(sel);
-    }
-  }, [open, flatResults, activeIndex, navigateTo]);
-
   useEffect(() => {
-    if (!open) return;
-    const handler = (e) => onKeyNav(e);
+    const handler = (e) => {
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org"))) {
+        e.preventDefault();
+        openPalette();
+      }
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+      
+      // Handle keyboard navigation when palette is open
+      if (open) {
+        if (query === "") {
+          // Navigate categories when no search query
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveCategoryIndex(prev => 
+              prev < categories.length - 1 ? prev + 1 : 0
+            );
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveCategoryIndex(prev => 
+              prev > 0 ? prev - 1 : categories.length - 1
+            );
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            navigateCategory(categories[activeCategoryIndex].key);
+          }
+        } else {
+          // Navigate search results when there's a query
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveIndex(prev => 
+              prev < flatResults.length - 1 ? prev + 1 : 0
+            );
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveIndex(prev => 
+              prev > 0 ? prev - 1 : flatResults.length - 1
+            );
+          } else if (e.key === "Enter" && flatResults[activeIndex]) {
+            e.preventDefault();
+            navigateTo(flatResults[activeIndex]);
+          }
+        }
+      }
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, onKeyNav]);
+  }, [open, query, activeCategoryIndex, activeIndex, categories, flatResults, navigateCategory, navigateTo, openPalette, pathname]);
+
+  // Scroll active item into view when activeIndex changes
+  useEffect(() => {
+    if (!open || query.trim() === "" || flatResults.length === 0) return;
+    
+    // Use setTimeout to ensure DOM has updated
+    setTimeout(() => {
+      const activeElement = document.querySelector(`[data-result-index="${activeIndex}"]`);
+      if (activeElement) {
+        activeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
+    }, 0);
+  }, [activeIndex, open, query, flatResults.length]);
 
   const showLanding = open && query.trim() === "";
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 flex items-start justify-center bg-black/40 p-4" onClick={closePalette} style={{zIndex: 999999}}>
+    <div className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closePalette} style={{zIndex: 999999}}>
       <div className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 border-b border-base-300 p-3">
           <Search className="w-4 h-4 opacity-70" />
@@ -302,34 +325,25 @@ const CommandPalette = ({isEmbedUser}) => {
             placeholder="Search agents, bridges, API keys, docs, functions..."
             className="flex-1 bg-transparent outline-none"
           />
-          <button className="btn btn-xs" onClick={closePalette}><X className="w-4 h-4" /></button>
+          <button className="btn btn-sm" onClick={closePalette}><X className="w-4 h-4" /></button>
         </div>
         <div className="max-h-[60vh] overflow-auto p-2">
           {showLanding ? (
-            <div className="p-4">
-              <div className="px-2 py-3">
-                <h3 className="text-base font-semibold">Search everything</h3>
-                <p className="text-sm opacity-70">Type to find Agents, API Keys, Knowledge Base, and Functions. Or pick a category to jump in.</p>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-2">
-                {[
-                  { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
-                  { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
-                  { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
-                  { key: 'Pauths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
-                  { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
-                  // { key: 'functions', label: 'Functions', desc: 'Tools and endpoints' },
-                  { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-                ].map((c) => (
+            <div className="">
+
+              <div className="space-y-1 p-2">
+                {categories.map((c, index) => (
                   <button
                     key={c.key}
                     onClick={() => navigateCategory(c.key)}
-                    className="text-left card bg-base-200 hover:bg-base-300 transition-colors"
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex flex-col ${
+                      index === activeCategoryIndex 
+                        ? 'bg-primary text-primary-content' 
+                        : 'bg-base-200 hover:bg-base-300'
+                    }`}
                   >
-                    <div className="card-body p-3">
-                      <div className="font-medium">{c.label}</div>
-                      <div className="text-xs opacity-70">{c.desc}</div>
-                    </div>
+                    <div className="font-medium">{c.label}</div>
+                    <div className="text-xs opacity-70">{c.desc}</div>
                   </button>
                 ))}
               </div>
@@ -351,7 +365,9 @@ const CommandPalette = ({isEmbedUser}) => {
                             key={`${row.type}-${row.id}`}
                             data-result-index={globalIdx}
                             onClick={() => navigateTo(row)}
-                            className={`cursor-pointer rounded px-3 py-2 ${active ? "bg-base-200" : "hover:bg-base-200"}`}
+                            className={`cursor-pointer rounded px-3 py-2 ${
+                              active ? "bg-primary text-primary-content" : "hover:bg-base-200"
+                            }`}
                           >
                             <div className="text-sm font-medium">{row.title}</div>
                             <div className="text-xs opacity-70">{row.subtitle}</div>

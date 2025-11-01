@@ -4,12 +4,12 @@ import { openModal } from '@/utils/utility';
 const OrganizationHeader = () => {
     return (
         <div className='flex flex-row justify-between items-center'>
-            <h2 className="text-2xl font-semibold text-base-content">Existing Organizations</h2>
+            <h2 className="text-2xl font-semibold text-base-content">Existing Workspaces</h2>
             <button
                 onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
             >
-                + Create New Organization
+                + Create New Workspace
             </button>
         </div>
     );

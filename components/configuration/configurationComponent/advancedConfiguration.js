@@ -191,8 +191,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
         fall_back: {
           ...(fallbackModel || {}),
           is_enable: next,
-          service: fallbackService || null,
-          model: next ? (fallbackModelName || null) : null,
+
         },
       },
     }));
@@ -200,7 +199,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
   const computedModelsList = serviceModels?.[fallbackService] || {};
   return (
-    <div className="z-very-low text-base-content w-full cursor-pointer" tabIndex={0}>
+    <div className="z-very-low text-base-content mt-4 w-full cursor-pointer" tabIndex={0}>
 
       <div
         className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}

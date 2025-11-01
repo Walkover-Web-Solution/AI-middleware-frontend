@@ -202,7 +202,7 @@ const PromptHelper = ({
           
           <button
             onClick={onClose}
-            className="btn btn-ghost btn-xs"
+            className="btn btn-ghost btn-sm"
           >
             <CloseIcon size={14} />
           </button>

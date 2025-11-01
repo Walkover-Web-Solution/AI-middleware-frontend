@@ -1,7 +1,8 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
+import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { generateRandomID, openModal } from '@/utils/utility';
 import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
@@ -14,6 +15,9 @@ import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters}) => {
+  // Use the tutorial videos hook
+  const { getAdvanceParameterVideo } = useTutorialVideos();
+  
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
@@ -454,7 +458,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
 
         {field === 'slider' && configuration?.[key] !== 'default' && (
           <div className="flex items-center gap-2">
-            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('min', key)}>Min</button>
+            <button type="button" className="btn btn-sm" onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
@@ -473,7 +477,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               className="range range-accent range-sm h-3 range-extra-small-thumb"
               name={key}
             />
-            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('max', key)}>Max</button>
+            <button type="button" className="btn btn-sm" onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
         {field === 'text' && configuration?.[key] !== 'default' && (
@@ -558,7 +562,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                       4
                     )
                   }
-                  className="textarea border border-base-content/20 w-full min-h-96 resize-y"
+                  className="textarea bg-white dark:bg-black/15 border border-base-content/20 w-full min-h-96 resize-y"
                   onBlur={(e) =>
                     handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                   }
@@ -612,7 +616,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       )}
       {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
       {tutorialState.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
       )}
       {(level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters)))&& (
         <div className={`w-full gap-3 cursor-default flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>

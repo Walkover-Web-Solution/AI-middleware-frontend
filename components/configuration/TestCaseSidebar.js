@@ -75,7 +75,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
 
   const handleTestCaseClick = (testCase) => {
     if (onTestCaseClick && testCase.conversation) {
-      onTestCaseClick(testCase.conversation, testCase.expected);
+      onTestCaseClick(testCase.conversation, testCase.expected, testCase._id, testCase.matching_type);
     }
   };
 
@@ -107,16 +107,24 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   const testCaseArray = Array.isArray(testCases) ? testCases : [];
   return (
     <div className="bg-base-100 h-full overflow-y-auto border-r border-base-content/20">
-      <div className="p-4 border-b border-base-content/20">
+      <div className="p-4 border-b border-base-content/20 flex flex-row justify-between">
         <h2 className="text-lg font-semibold text-base-content">Test Cases</h2>
-        <p className="text-sm text-base-content mt-1">
-          Manage and execute test batches ({testCaseArray.length} tests)
-        </p>
-        {isFirstTestcase && (
-          <div className="mt-2 p-2 bg-base-200 border border-base-content/20 rounded-md">
-            <p className="text-xs text-base-primary">Welcome! This is your first test case setup.</p>
-          </div>
-        )}
+        <button
+          className="btn btn-sm text-base-content bg-blue-500   rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
+          onClick={runAllTests}
+          disabled={testCaseArray.length === 0 || runningTests.size > 0}
+        >
+          {runningTests.size > 0 ? (
+            <div className="flex items-center justify-center">
+              <Clock className="w-4 h-4 mr-2 animate-spin" />
+              <span>Running {runningTests.size}/{testCaseArray.length} Tests...</span>
+            </div>
+          ) : testCaseArray.length === 1 ? `Run Test Case` : `Run ${testCaseArray.length} Test Cases`}
+        </button>
+       
+        
+        {/* Run All Button */}
+        
       </div>
 
       <div className="p-4 space-y-3">
@@ -131,7 +139,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
             return (
               <div
                 key={testCase._id}
-                className={`border rounded-lg p-3 transition-all duration-200 cursor-pointer hover:bg-base-200/50 hover:border-primary/50 ${getStatusColor(testCase._id)}`}
+                className={`group border rounded-lg p-3 transition-all duration-200 cursor-pointer hover:bg-base-200/50 hover:border-primary/50 ${getStatusColor(testCase._id)}`}
                 onClick={() => handleTestCaseClick(testCase)}
                 title="Click to load this test case conversation into chat"
               >
@@ -146,7 +154,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                     }}>
                       <span className="font-medium">Input:</span> {testCase.conversation?.[0]?.content || 'No input'}
                     </span>
-                    <span className="text-xs text-primary/70 ml-2">Click to load</span>
+                    <span className="text-xs text-primary/70 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Click to load</span>
 
                     {/* Current version score display */}
                     {!runningTests.has(testCase._id) && (
@@ -315,21 +323,6 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
         )}
       </div>
 
-      {/* Footer Actions */}
-      <div className="p-4 border-t border-base-content/20 mt-auto">
-        <button
-          className="w-full bg-blue-500 text-base-100 py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
-          onClick={runAllTests}
-          disabled={testCaseArray.length === 0 || runningTests.size > 0}
-        >
-          {runningTests.size > 0 ? (
-            <div className="flex items-center justify-center">
-              <Clock className="w-4 h-4 mr-2 animate-spin" />
-              <span>Running {runningTests.size}/{testCaseArray.length} Tests...</span>
-            </div>
-          ) : 'Run All Test Cases'}
-        </button>
-      </div>
     </div>
   );
 };

@@ -669,7 +669,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 <AlertTriangle className="h-5 w-5 mt-0.5" />
                 <div className="flex-1">
                   <h4 className="font-medium">Summary required</h4>
-                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing.</p>
+                  <p className="text-sm opacity-80">You need to add a agent summary for this agent before publishing.</p>
                 </div>
                 <button
                   className="btn btn-sm bg-base-200 flex justify-end btn-outline"
@@ -678,7 +678,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
                   }}
                 >
-                  Generate Prompt Summary
+                  Generate Agent Summary
                 </button>
               </div>
             </div>
@@ -882,7 +882,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     <textarea
                       name="description"
                       placeholder="Enter a description"
-                      className="textarea textarea-bordered w-full h-20"
+                      className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-20"
                       value={formData.description}
                       onChange={handleChange}
                     />
@@ -954,7 +954,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                         />
                         <button
                           type="button"
-                          className="btn join-item"
+                          className="btn btn-sm join-item"
                           onClick={handleAddEmail}
                           disabled={!formData.newEmail || !formData.newEmail.includes('@')}
                         >
@@ -971,14 +971,14 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
             <button
-              className="btn"
+              className="btn btn-sm"
               onClick={handleCloseModal}
               disabled={isLoading}
             >
               Cancel
             </button>
             <button
-              className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+              className={`btn btn-primary btn-sm ${isLoading ? 'loading' : ''}`}
               onClick={handlePublishBridge}
               disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim())}
             >

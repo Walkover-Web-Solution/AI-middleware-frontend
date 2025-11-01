@@ -17,7 +17,7 @@ const CommonConfigComponents = ({
 }) => {
     return (
         <>
-            <RecommendedModal 
+            {!isEmbedUser && <RecommendedModal 
                 params={params} 
                 searchParams={searchParams} 
                 apiKeySectionRef={apiKeySectionRef} 
@@ -26,7 +26,7 @@ const CommonConfigComponents = ({
                 shouldPromptShow={shouldPromptShow} 
                 service={service} 
                 deafultApiKeys={showDefaultApikeys}
-            />
+            />}
             <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 items-start">
                 <div className="w-full min-w-0 md:order-1">
                     <ServiceDropdown

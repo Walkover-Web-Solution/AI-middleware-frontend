@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon } from '@/components/Icons';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -9,7 +9,9 @@ const RenderEmbed = ({
   embedToken,
   params,
   handleRemoveEmbed,
-  handleOpenDeleteModal
+  handleOpenDeleteModal,
+  handleChangePreTool,
+  name
 }) => {
   const renderEmbed = useMemo(() => {
     return bridgeFunctions?.slice()
@@ -72,17 +74,29 @@ const RenderEmbed = ({
                   e.stopPropagation();
                   handleOpenModal(value?._id);
                 }}
-                className="btn btn-ghost btn-xs p-1 hover:bg-base-300"
+                className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                 title="Config"
               >
                 <SettingsIcon size={16} />
               </button>
+              {name === "preFunction" && handleChangePreTool && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleChangePreTool();
+                  }}
+                  className="btn btn-ghost btn-sm p-1 hover:text-primary"
+                  title="Change Pre Tool"
+                >
+                  <RefreshIcon size={16} />
+                </button>
+              )}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenDeleteModal(value?._id, value?.function_name);
                 }}
-                className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
               >
                 <TrashIcon size={16} />
@@ -91,7 +105,7 @@ const RenderEmbed = ({
           </div>
         );
       });
-  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed]);
+  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name]);
 
   return <>{renderEmbed}</>;
 };

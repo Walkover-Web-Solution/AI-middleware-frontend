@@ -128,7 +128,7 @@ const Page = ({params}) => {
 
               <button 
                 onClick={handleSubmit}
-                className="btn btn-primary w-full"
+                className="btn btn-sm btn-primary w-full"
                 disabled={!name || !url || urlError}
               >
                 Add OAuth Route

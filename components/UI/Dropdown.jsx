@@ -193,7 +193,7 @@ const Dropdown = ({
   const placementCls = placement === 'bottom-end' ? 'dropdown-end' : '';
 
   return (
-    <div className={cx('dropdown w-full', placementCls, open ? 'dropdown-open' : '')}>
+    <div className={cx('dropdown rounded-md border-base-content/10 w-full', placementCls, open ? 'dropdown-open' : '')}>
       {TriggerWrapper}
 
       <div

@@ -52,6 +52,7 @@ module.exports = {
           "base-100": "oklch(99% 0.005 95)",  // canvas (very soft gray)
           "base-200": "oklch(98% 0 0)",       // cards/panels (white-ish)
           "base-300": "oklch(93.5% 0 0)",     // borders/dividers
+          "base-400": "oklch(100% 0 0)",
           "base-content": "oklch(26% 0 0)",   // soft dark gray text
 
           /* Neutral brand (no color cast) */
@@ -73,11 +74,11 @@ module.exports = {
           "error": "oklch(55% 0.12 30)",
           "error-content": "oklch(16% 0.06 30)",
 
-          "--rounded-box": "0.6rem",
-          "--rounded-btn": "0.6rem",
-          "--rounded-badge": "0.6rem",
-          "--border-btn": "0.5px",
-          "--tab-radius": "0.6rem",
+          "--rounded-box": "0.3rem",
+          "--rounded-btn": "0.3rem",
+          "--rounded-badge": "0.3rem",
+          "--border-btn": "0.3px",
+          "--tab-radius": "0.3rem",
           "--btn-text-case": "none",
         },
       },
@@ -89,7 +90,8 @@ module.exports = {
           "base-100": "oklch(25% 0 0)",   // lighter dark (canvas, main background)
           "base-200": "oklch(22% 0 0)",   // slightly darker (cards, panels)
           "base-300": "oklch(18% 0 0)",   // darkest (borders, separators)
-          "base-content": "oklch(96% 0 0)", // white text
+          "base-400": "oklch(16% 0 0)",
+          "base-content": "oklch(85% 0 0)", // dull white text
       
           /* Brand neutrals */
           "primary": "oklch(78% 0 0)",   // light gray for highlights
@@ -112,13 +114,13 @@ module.exports = {
           "error-content": "oklch(12% 0.06 30)",
       
           /* Shape/borders */
-          "--rounded-box": "0.5rem",
-          "--rounded-btn": "0.5rem",
-          "--rounded-badge": "0.5rem",
+          "--rounded-box": "0.3rem",
+          "--rounded-btn": "0.3rem",
+          "--rounded-badge": "0.3rem",
           "--border-btn": "0.3px",
-          "--tab-radius": "0.5rem",
+          "--tab-radius": "0.3rem",
           "--btn-text-case": "none",
-          "--border-select": "0.5px",
+          "--border-select": "0.3px",
         }
       }
     ],

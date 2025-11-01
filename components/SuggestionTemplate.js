@@ -24,7 +24,7 @@ const SuggestionTemplates = () => {
         </p>
         <div>
           <Link href="/login">
-            <button role="button" className="btn btn-primary mt-3">
+            <button role="button" className="btn btn-primary btn-sm mt-3">
               Start Building
             </button>
           </Link>

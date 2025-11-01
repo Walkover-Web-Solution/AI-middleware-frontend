@@ -7,8 +7,8 @@ const OrganizationSearch = ({ organizationsArray, setDisplayedOrganizations }) =
             <SearchItems
               data={organizationsArray}
               setFilterItems={setDisplayedOrganizations}
-              item="Organizations"
-              style="border border-base-300 input input-bordered outline-none  rounded-md w-full pr-10"
+              item="Workspaces"
+              style="input input-bordered w-full h-12 border-base-300 bg-base-200/80 text-base-content placeholder-base-content/60 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none px-4 transition-all duration-150 shadow-sm rounded-lg"
             />
             
           )}</>

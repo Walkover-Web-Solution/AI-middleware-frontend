@@ -10,7 +10,8 @@ import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
+import { MODAL_TYPE } from "@/utils/enums";
+import useTutorialVideos from "@/hooks/useTutorialVideos";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,9 @@ const BRIDGE_STATUS = {
   PAUSED: 0
 };
 function Home({ params, isEmbedUser }) {
+  // Use the tutorial videos hook
+  const { getBridgeCreationVideo } = useTutorialVideos();
+  
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
@@ -42,7 +46,7 @@ function Home({ params, isEmbedUser }) {
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
       descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
       bridgeStatus: state.bridgeReducer.allBridgesMap,
-      showHistory:  state.userDetailsReducer?.userDetails?.showHistory||false,
+      showHistory:  state.appInfoReducer.embedUserDetails?.showHistory||false,
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
@@ -82,7 +86,7 @@ function Home({ params, isEmbedUser }) {
         {loadingAgentId === item._id ? (
           <div className="loading loading-spinner loading-sm"></div>
         ) : (
-          getIconOfService(item.service, 30, 30)
+          getIconOfService(item.service, 20, 20)
         )}
       </div>
       <div className="flex-col" title={item.name}>
@@ -120,7 +124,7 @@ function Home({ params, isEmbedUser }) {
         {loadingAgentId === item._id ? (
           <div className="loading loading-spinner loading-sm"></div>
         ) : (
-          getIconOfService(item.service, 30, 30)
+          getIconOfService(item.service, 20, 20)
         )}
       </div>
       <div className="flex-col">
@@ -199,28 +203,26 @@ function Home({ params, isEmbedUser }) {
 
   const EndComponent = ({ row }) => {
     return (
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
-          <div className="flex items-center gap-2">
-      <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
-      }}>
-        History
-      </button>
-    </div> 
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
+            }}>
+              History
+            </button>
+          </div> 
         ) : null}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        </div>
         <div className="dropdown dropdown-left bg-transparent">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
+          <ul tabIndex={0} className="dropdown-content border border-base-content/10 menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className="mr-2 text-green-600" />Un-archive Agent</> : <><Archive size={14} className="mr-2 text-red-600" />Archive Agent</>}</a></li>
+            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</a></li>
             <li> <button
               onClick={(e) =>{
                 e.preventDefault();
@@ -268,7 +270,7 @@ function Home({ params, isEmbedUser }) {
         {tutorialState?.showTutorial && (
           <OnBoarding
             setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-            video={ONBOARDING_VIDEOS.bridgeCreation}
+            video={getBridgeCreationVideo()}
             flagKey={"bridgeCreation"}
 
           />
@@ -296,12 +298,12 @@ function Home({ params, isEmbedUser }) {
                     </div>
                   </MainLayout>
                   
-                  <div className="flex flex-row gap-4 justify-between ">
+                  <div className="flex flex-row gap-4">
                     {allBridges.length > 5 && (
                       <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
                     )}
-                    <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-auto mr-2'}`}>
-                        <button className="btn btn-primary " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                    <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
+                        <button className="btn btn-primary btn-sm " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                       </div>
                   </div>
                 </div>

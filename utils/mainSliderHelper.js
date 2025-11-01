@@ -47,11 +47,13 @@ export const DISPLAY_NAMES = (key) => {
     case 'settings':
       return 'Settings';
     case 'RAG_embed':
-      return 'RAG as Embed';
+      return 'RAG as Service';
     case 'invite':
       return 'Members';
     case 'pauthkey':
-      return 'AuthKey';
+      return 'Auth Key';
+    case 'apikeys':
+      return 'API Keys';
     default:
       return key;
   }
@@ -74,5 +76,5 @@ export const HRCollapsed = React.memo(() => (
 ));
 
 export const BetaBadge = React.memo(() => (
-  <span className="badge badge-success mb-1 text-base-100 text-xs">Beta</span>
+  <span className="badge badge-success rounded-md mb-1 text-base-100 text-xs">Beta</span>
 ));

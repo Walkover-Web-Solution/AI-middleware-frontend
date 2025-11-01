@@ -1,12 +1,13 @@
 
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
+import useTutorialVideos from '@/hooks/useTutorialVideos';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 import { closeModal, openModal } from '@/utils/utility';
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/InfoTooltip';
@@ -38,13 +39,14 @@ const EmbedList = ({ params, searchParams }) => {
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
   const dispatch = useDispatch();
-  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools } = useCustomSelector((state) => {
+  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
     const serviceName = versionData?.service;
     const modelTypeName = versionData?.configuration?.type?.toLowerCase();
     const modelName = versionData?.configuration?.model;
+    const currentUser = state.userDetailsReducer.userDetails;
     return {
       integrationData: orgData?.integrationData || {},
       function_data: orgData?.functionData || {},
@@ -57,9 +59,22 @@ const EmbedList = ({ params, searchParams }) => {
       variables_path: versionData?.variables_path || {},
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
       toolsVersionData: versionData?.built_in_tools,
+      isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
     };
   });
 
+  // Use the tutorial videos hook
+  const { getFunctionCreationVideo, tutorialData } = useTutorialVideos();
+     const [tutorialState, setTutorialState] = useState({
+          showTutorial: false,
+          showSuggestion: false
+      });
+  const handleTutorial = () => {
+          setTutorialState(prev => ({
+              ...prev,
+              showSuggestion: isFirstFunction
+          }));
+      };
   const handleOpenModal = (functionId) => {
     setFunctionId(functionId);
     const fn = function_data?.[functionId];
@@ -208,7 +223,7 @@ const EmbedList = ({ params, searchParams }) => {
             <div className="dropdown dropdown-right w-full flex items-center">
               {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? (
                 <>
-                  <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                  <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                     <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
                   </InfoTooltip>
                   <button
@@ -221,12 +236,13 @@ const EmbedList = ({ params, searchParams }) => {
                   </button>
                 </>
               ) : (
-                <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
 
 
                   <button
                     tabIndex={0}
                     className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                    onClick={handleTutorial}
                   >
                     <AddIcon className="w-2 h-2" />
                     <p className="label-text text-sm whitespace-nowrap">Tool</p>
@@ -246,6 +262,8 @@ const EmbedList = ({ params, searchParams }) => {
                 prebuiltToolsData={prebuiltToolsData}
                 toolsVersionData={toolsVersionData}
                 showInbuiltTools={showInbuiltTools}
+                tutorialState={tutorialState}
+                setTutorialState={setTutorialState}
               />
             </div>
             <div className="flex flex-col gap-2 w-full">
@@ -291,7 +309,7 @@ const EmbedList = ({ params, searchParams }) => {
                               e.stopPropagation();
                               handleOpenDeletePrebuiltModal(item)
                             }}
-                            className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                            className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
                           >
                             <TrashIcon size={16} />

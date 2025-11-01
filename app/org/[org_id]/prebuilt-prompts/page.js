@@ -181,7 +181,7 @@ export default function PrebuiltPromptsPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleCopy(selectedAgent)}
-                  className="btn btn-xs btn-ghost"
+                  className="btn btn-sm btn-ghost"
                   title="Copy prompt"
                 >
                   <CopyIcon size={14} />
@@ -189,14 +189,14 @@ export default function PrebuiltPromptsPage() {
                 </button>
                 <button
                   onClick={() => handleReset(selectedAgent)}
-                  className="btn btn-xs btn-ghost"
+                  className="btn btn-sm btn-ghost"
                 >
                   <RefreshIcon size={14} />
                   <span className="ml-1">Reset</span>
                 </button>
                 <button
                   onClick={() => handleSave(selectedAgent)}
-                  className="btn btn-xs btn-primary"
+                  className="btn btn-sm btn-primary"
                   disabled={!savebtnEnabled || isLoading}
                 >
                   {isLoading && <span className="loading loading-spinner loading-xs mr-1"></span>}
@@ -218,7 +218,7 @@ export default function PrebuiltPromptsPage() {
               </div>
               
               <textarea
-                className="textarea textarea-bordered flex-1 w-full font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                className="textarea bg-white dark:bg-black/15 textarea-bordered flex-1 w-full font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                 value={prompts[selectedAgent] || ''}
                 onChange={(e) => handlePromptChange(selectedAgent, e.target.value)}
                 placeholder="Enter your agent prompt configuration here..."

@@ -106,7 +106,7 @@ const Page = ({params}) => {
                     <div className="flex-shrink-0 mt-4 sm:mt-0">
                         <button 
                             onClick={() => openModal(MODAL_TYPE.ADD_NEW_MODEL_MODAL)}
-                            className="btn btn-primary"
+                            className="btn btn-sm btn-primary"
                         >
                             + Add New Model
                         </button>

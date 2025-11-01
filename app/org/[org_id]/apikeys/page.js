@@ -117,25 +117,25 @@ const Page = () => {
       <MainLayout>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4 ">
           <PageHeader
-            title="ApiKeys"
+            title="API Keys"
             description={descriptions?.['Provider Keys'] || "Add your model-specific API keys to enable and use different AI models in your chat."}
             docLink="https://techdoc.walkover.in/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
           />
         
         </div>
       </MainLayout>
-      <div className="flex flex-row gap-4 justify-between ">
+      <div className="flex flex-row gap-4">
 
-      {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>}
-      <div className={`${apikeyData?.length<=5 ? 'ml-auto ' : ''} flex-shrink-0 flex gap-4 mr-2`}>
+      {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="API Keys"/>}
+      <div className={`${apikeyData?.length<=5 ? ' ' : ''} flex-shrink-0 flex gap-4 ml-2`}>
             <button 
-              className="btn" 
+              className="btn btn-sm" 
               onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
             >
-             <BookIcon />  APIKey Guide
+             <BookIcon />  API Key Guide
             </button>
-            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
-              + Add New ApiKey
+            <button className="btn btn-sm btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
+              + Add New API Key
             </button>
           </div>
       </div>

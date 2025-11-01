@@ -95,18 +95,18 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
           <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full gap-2">
             <PageHeader
               title="Knowledge Base"
-              description={descriptions?.['Knowledge Base'] || "A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}
+              description={descriptions?.['Knowledge Base'] || "A knowledge Base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}
               docLink="https://gtwy.ai/blogs/features/knowledgebase"
             />
             
           </div>
         </MainLayout>
-        <div className="flex flex-row gap-4 justify-between ">
+        <div className="flex flex-row gap-4">
           {knowledgeBaseData?.length>5 && (
             <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
           )}
-          <div className={`flex-shrink-0 ${knowledgeBaseData?.length>5 ? 'mr-2' : 'ml-auto mr-2'}`}>
-              <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ Create Knowledge Base</button>
+          <div className={`flex-shrink-0 ${knowledgeBaseData?.length>5 ? 'mr-2' : 'ml-2'}`}>
+              <button className="btn btn-primary btn-sm" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ Create Knowledge Base</button>
             </div>
         </div>
       </div>

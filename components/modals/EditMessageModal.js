@@ -53,12 +53,12 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
       </div>
 
       <div className="flex justify-end gap-2">
-        <button className="btn" onClick={handleClose}>
+        <button className="btn btn-sm" onClick={handleClose}>
           Cancel
         </button>
         <button 
         disabled={modalInput?.content?.trim() === ''}
-        className="btn btn-primary" onClick={handleSave}>
+        className="btn btn-sm btn-primary" onClick={handleSave}>
           Update Response
         </button>
       </div>

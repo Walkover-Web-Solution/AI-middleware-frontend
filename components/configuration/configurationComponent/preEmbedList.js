@@ -72,6 +72,59 @@ const PreEmbedList = ({ params, searchParams }) => {
         }))
         closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
     }
+
+    const handleChangePreTool = () => {
+        // Focus on the pre-tool dropdown to allow user to select a different pre-tool
+        setTimeout(() => {
+            // Look for the EmbedListSuggestionDropdownMenu dropdown
+            const dropdown = document.querySelector('.dropdown-right .dropdown-left');
+            if (dropdown) {
+                // Find the dropdown content with tabIndex
+                const dropdownContent = dropdown.querySelector('ul[tabindex="0"]');
+                if (dropdownContent) {
+                    dropdownContent.focus();
+                    // Trigger the dropdown to open by adding the 'dropdown-open' class
+                    dropdown.classList.add('dropdown-open');
+                    
+                    // Function to close dropdown and cleanup
+                    const closeDropdown = () => {
+                        dropdown.classList.remove('dropdown-open');
+                        document.removeEventListener('click', handleClickOutside);
+                        document.removeEventListener('click', handleDropdownItemClick);
+                    };
+
+                    // Add click outside handler to close dropdown
+                    const handleClickOutside = (event) => {
+                        if (!dropdown.contains(event.target)) {
+                            closeDropdown();
+                        }
+                    };
+
+                    // Add click handler for dropdown items (selection)
+                    const handleDropdownItemClick = (event) => {
+                        // Check if clicked element is a dropdown item (li or button inside dropdown)
+                        const clickedItem = event.target.closest('li');
+                        if (clickedItem && dropdown.contains(clickedItem)) {
+                            // Close dropdown after selection
+                            setTimeout(() => closeDropdown(), 100);
+                        }
+                    };
+                    
+                    // Add the event listeners after a small delay to avoid immediate closure
+                    setTimeout(() => {
+                        document.addEventListener('click', handleClickOutside);
+                        document.addEventListener('click', handleDropdownItemClick);
+                    }, 50);
+                    
+                    // Also focus on the search input for better UX
+                    const searchInput = dropdownContent.querySelector('input');
+                    if (searchInput) {
+                        setTimeout(() => searchInput.focus(), 100);
+                    }
+                }
+            }
+        }, 100);
+    }
     const handleSavePreFunctionData = () => {
         if (!isEqual(preToolData, preFunctionData)) {
             const { _id, ...dataToSend } = preToolData;
@@ -126,13 +179,8 @@ const PreEmbedList = ({ params, searchParams }) => {
                         {bridge_pre_tools.length > 0 ? (
                             <div className="flex items-center gap-1 flex-row mb-2">
                                 <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-
                                     <p className="label-text info font-medium whitespace-nowrap">Pre Tool</p>
                                 </InfoTooltip>
-                                <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4">
-                                    <AddIcon className="w-2 h-2" />
-                                    <span className="text-xs font-medium">{bridge_pre_tools.length > 0 ? "change" : "Add"}</span>
-                                </button>
                             </div>
                         ) : (
                             <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
@@ -169,6 +217,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                             name="preFunction"
                             handleRemoveEmbed={removePreFunction}
                             handleOpenDeleteModal={handleOpenDeleteModal}
+                            handleChangePreTool={handleChangePreTool}
                         />
                     </div>
 

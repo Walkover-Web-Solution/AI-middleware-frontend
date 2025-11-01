@@ -189,12 +189,12 @@ function InvitePage({ params }) {
             onChange={handleEmailChange}
             onKeyPress={handleKeyPress}
             placeholder="Enter email address"
-            className="input input-bordered w-full"
+            className="input input-bordered w-full input-sm"
           />
           <button
             onClick={handleInviteSubmit}
             disabled={isInviting}
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
           >
             {isInviting ? 'Sending...' : 'Send Invite'}
           </button>
@@ -214,7 +214,7 @@ function InvitePage({ params }) {
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search..."
-            className="input input-bordered w-96"
+            className="input input-bordered w-96 input-sm"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                       <InfoTooltip tooltipContent="Search Members by Name and Email">
