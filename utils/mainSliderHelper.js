@@ -12,20 +12,20 @@ import React from 'react';
 
 
 export const ITEM_ICONS = {
-  org: <Building2 size={16} />,
-  agents: <Bot size={16} />,
-  orchestratal_model: <Workflow size={16} />,
-  chatbotConfig: <FileSliders size={16} />,
-  chatbot: <MessageSquare size={16} />,
-  pauthkey: <Shield size={16} />,
-  apikeys: <Database size={16} />,
-  alerts: <AlertTriangle size={16} />,
-  invite: <UserPlus size={16} />,
-  metrics: <BarChart3 size={16} />,
-  knowledge_base: <BookOpen size={16} />,
-  feedback: <MessageSquareMore size={16} />,
-  RAG_embed: <Blocks size={16} />,
-  integration: <Blocks size={16} />
+  org: <Building2 size={12} />,
+  agents: <Bot size={12} />,
+  orchestratal_model: <Workflow size={12} />,
+  chatbotConfig: <FileSliders size={12} />,
+  chatbot: <MessageSquare size={12} />,
+  pauthkey: <Shield size={12} />,
+  apikeys: <Database size={12} />,
+  alerts: <AlertTriangle size={12} />,
+  invite: <UserPlus size={12} />,
+  metrics: <BarChart3 size={12} />,
+  knowledge_base: <BookOpen size={12} />,
+  feedback: <MessageSquareMore size={12} />,
+  RAG_embed: <Blocks size={12} />,
+  integration: <Blocks size={12} />
 };
 
 export const DISPLAY_NAMES = (key) => {

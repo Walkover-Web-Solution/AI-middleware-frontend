@@ -67,7 +67,7 @@ export const improvePrompt =  async (variables) =>{
   }
 }
 
-// Prebuilt Prompts APIs
+// AI Assistant Tools APIs
 export const getPrebuiltPrompts = async ()=>{
   try{
      const getPrebuiltPrompts = await axios.get(`${PYTHON_URL}/prebuilt_prompt`)

@@ -112,7 +112,7 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
   );
 };
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
+const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
@@ -126,6 +126,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
+
+  // Check if this is the last message of the same role (assistant, user, or tools_call)
+  const isLastMessage = () => {
+    if (!item?.role || (item.role !== 'assistant' && item.role !== 'user' && item.role !== 'tools_call')) return false;
+    
+    // Find all message indices of the same role
+    const sameRoleIndices = [];
+    thread?.forEach((msg, idx) => {
+      if (msg?.role === item.role) {
+        sameRoleIndices.push(idx);
+      }
+    });
+    
+    // Check if current index is the last index for this role
+    return sameRoleIndices.length > 0 && index === sameRoleIndices[sameRoleIndices.length - 1];
+  };
 
   const handleEdit = () => {
     setModalInput({
@@ -348,7 +364,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
             {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
             <button
-              className="btn text-xs font-normal btn-sm see-on-hover"
+              className={`btn text-xs font-normal btn-sm  ${isLastMessage() ? '' : 'see-on-hover'}`}
               onClick={() => handleAddTestCase(item, index)}
             >
               <div className="flex items-center gap-1 text-xs font-normal px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
@@ -558,7 +574,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 {/* Edit button for assistant messages */}
                 {item?.role === 'assistant' && item?.image_urls?.length === 0 && !item?.fromRTLayer && (
 
-                  <div className="tooltip absolute top-2 right-2 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" data-tip="Edit response">
+                  <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer  transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Improve your prompt">
                     <button
                       className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
                       onClick={handleEdit}
@@ -572,20 +588,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
                 {/* Action buttons for assistant messages */}
                 {item?.role === 'assistant' && (
-                  <div className="absolute bottom-[-35px] left-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className={`absolute bottom-[-30px] left-0  flex gap-2 transition-opacity z-10 ${
+                    isLastMessage() ? 'opacity-70' : 'opacity-0 group-hover:opacity-70'
+                  }`}>
                     <button
-                      className="btn btn-sm text-xs font-normal btn-outline hover:btn-primary see-on-hover"
+                      className="btn text-xs font-normal btn-sm hover:btn-primary "
                       onClick={() => handleAddTestCase(item, index)}
                     >
                       <AddIcon className="h-3 w-3" />
                       <span>Test Case</span>
                     </button>
                     <button
-                      className="btn btn-sm text-xs font-normal btn-outline hover:btn-primary see-on-hover"
+                      className="btn text-xs font-normal btn-sm hover:btn-primary"
                       onClick={() => handleAskAi(item)}
                     >
                       <BotMessageIcon className="h-3 w-3" />
-                      <span>Ask AI</span>
+                      <span>Debug Agent</span>
                     </button>
                   </div>
                 )}
@@ -596,37 +614,45 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             {item?.role === "user" && (
               <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
                 <time className="text-xs opacity-50 chat-end relative">
-                  <span className="group-hover:hidden">
+                  <span className={isLastMessage() ? 'hidden' : 'group-hover:hidden'}>
                     {formatRelativeTime(item.createdAt)}
                   </span>
-                  <span className="hidden group-hover:inline">
+                  <span className={isLastMessage() ? 'inline' : 'hidden group-hover:inline'}>
                     {formatDateAndTime(item.createdAt)}
                   </span>
                 </time>
                 <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity">
                   <button
-                    className="btn text-xs font-normal btn-sm hover:btn-primary see-on-hover"
+                    className={`btn text-xs font-normal btn-sm hover:btn-primary ${
+                      isLastMessage() ? '' : 'see-on-hover'
+                    }`}
                     onClick={() => handleUserButtonClick("AiConfig")}
                   >
                     <SquareFunctionIcon className="h-3 w-3" />
                     <span>AI Config</span>
                   </button>
                   <button
-                    className="btn text-xs font-normal btn-sm hover:btn-primary see-on-hover"
+                    className={`btn text-xs font-normal btn-sm hover:btn-primary ${
+                      isLastMessage() ? '' : 'see-on-hover'
+                    }`}
                     onClick={() => handleUserButtonClick("variables")}
                   >
                     <ParenthesesIcon className="h-3 w-3" />
                     <span>Variables</span>
                   </button>
                   <button
-                    className="btn text-xs font-normal btn-sm  hover:btn-primary see-on-hover"
+                    className={`btn text-xs font-normal btn-sm hover:btn-primary ${
+                      isLastMessage() ? '' : 'see-on-hover'
+                    }`}
                     onClick={() => handleUserButtonClick("system Prompt")}
                   >
                     <FileClockIcon className="h-3 w-3" />
                     <span>System Prompt</span>
                   </button>
                   <button
-                    className="btn text-xs font-normal btn-sm hover:btn-primary see-on-hover"
+                    className={`btn text-xs font-normal btn-sm hover:btn-primary ${
+                      isLastMessage() ? '' : 'see-on-hover'
+                    }`}
                     onClick={() => handleUserButtonClick("more")}
                   >
                     <AddIcon className="h-3 w-3" />
