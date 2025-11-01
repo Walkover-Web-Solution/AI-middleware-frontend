@@ -669,7 +669,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 <AlertTriangle className="h-5 w-5 mt-0.5" />
                 <div className="flex-1">
                   <h4 className="font-medium">Summary required</h4>
-                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing.</p>
+                  <p className="text-sm opacity-80">You need to add a agent summary for this agent before publishing.</p>
                 </div>
                 <button
                   className="btn btn-sm bg-base-200 flex justify-end btn-outline"
@@ -678,7 +678,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
                   }}
                 >
-                  Generate Prompt Summary
+                  Generate Agent Summary
                 </button>
               </div>
             </div>

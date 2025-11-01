@@ -404,9 +404,9 @@ const Navbar = ({ isEmbedUser }) => {
                 {BRIDGE_STATUS?.ACTIVE && <StatusIndicator status={bridgeStatus} />}
               </nav>}
 
-            {/* Navigation Tabs - centered in navbar */}
+            {/* Navigation Tabs - fixed position */}
             {(isEmbedUser && showHistory || !isEmbedUser) && (
-              <div className="flex items-center flex-1">
+              <div className="absolute left-1/2 transform -translate-x-1/2">
                 <div className="join group flex">
                   {TABS.map(tab => (
                     <button
