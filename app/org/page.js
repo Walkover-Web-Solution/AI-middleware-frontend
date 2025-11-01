@@ -30,8 +30,8 @@ function Page() {
   const handleSwitchOrg = useCallback(async (id, name) => {
     try {
       const response = await switchOrg(id);
-      if (process.env.NEXT_PUBLIC_ENV === 'local') {
-        const localToken = await switchUser({ orgId: id, orgName: name });
+      const localToken = await switchUser({ orgId: id, orgName: name });
+      if (localToken?.token) {
         setInCookies('local_token', localToken.token);
       }
       route.push(`/org/${id}/agents`);
