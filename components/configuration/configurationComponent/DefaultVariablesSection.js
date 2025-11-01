@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
+import InfoTooltip from '@/components/InfoTooltip';
 
 // Optimized default variables section
 const DefaultVariablesSection = memo(() => {
@@ -7,7 +8,7 @@ const DefaultVariablesSection = memo(() => {
         <div className="bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none p-2">
             <div className="flex items-center gap-2">
                 <span className="text-nowrap text-xs font-medium">Default Variables</span>
-                <p role="alert" className="label-text-alt alert p-2 bg-base-200">
+                <p role="alert" className="label-text-alt alert p-2 bg-base-200 inline-block">
                     &#123;&#123;current_time_and_date&#125;&#125;,
                     &#123;&#123;pre_function&#125;&#125;,
                     &#123;&#123;timezone&#125;&#125;
