@@ -11,6 +11,7 @@ import { openModal, toggleSidebar } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
 import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
 import SearchItems from "@/components/UI/SearchItems";
+import HoverClickIndicator from "@/components/UI/HoverClickIndicator";
 
 export const runtime = 'edge';
 
@@ -104,6 +105,7 @@ const Page = ({ params }) => {
             keysToWrap={['name', 'description']}
             handleRowClick={(data) => handleClickIntegration(data)}
             keysToExtractOnRowClick={['org_id', 'folder_id']}
+            endComponent={() => <HoverClickIndicator />}
           />
         </div>
       ) : (
