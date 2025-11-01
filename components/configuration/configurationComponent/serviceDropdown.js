@@ -36,9 +36,6 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     });
 
     const [selectedService, setSelectedService] = useState(service);
-    const [modelRecommendations, setModelRecommendations] = useState(null);
-    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
-    // Local state only for selected display and recommendations
     const dispatch = useDispatch();
 
     const resetBorder = (ref, selector) => {
@@ -138,54 +135,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         }));
     }, [dispatch, params.id, searchParams?.version, DEFAULT_MODEL]);
 
-    const handleGetRecommendations = async () => {
-        setIsLoadingRecommendations(true);
-        try {
-            if (bridgeApiKey && promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim() !== "") {
-                const response = await modelSuggestionApi({ versionId: searchParams?.version });
-                if (response?.success) {
-                    setModelRecommendations({
-                        available: {
-                            service: response.data.available.service,
-                            model: response.data.available.model
-                        },
-                        unavailable: {
-                            service: response.data.unavailable.service,
-                            model: response.data.unavailable.model
-                        }
-                    });
-                } else {
-                    setModelRecommendations({ error: 'Failed to get model recommendations.' });
-                }
-            }
-            else {
-                if (promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim() === "") {
-                    setModelRecommendations({ error: 'Prompt is missing. Please enter a prompt' });
-                    setErrorBorder(promptTextAreaRef, 'textarea', true);
-                }
-                else {
-                    setModelRecommendations({ error: 'API key is missing. Please add an API key' });
-                    setErrorBorder(apiKeySectionRef, 'select', true);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching recommended model:', error);
-            setModelRecommendations({ error: 'Error fetching recommended model' });
-        } finally {
-            setIsLoadingRecommendations(false);
-        }
-    };
-
     const isDisabled = bridgeType === 'batch' && service === 'openai';
-
-    // Get service display name
-    const getServiceDisplayName = (value) => {
-        if (Array.isArray(SERVICES)) {
-            const service = SERVICES.find(s => s.value === value);
-            return service ? service.displayName : value;
-        }
-        return value;
-    };
 
     const renderServiceDropdown = () => (
         <Dropdown
