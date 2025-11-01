@@ -207,7 +207,9 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
 export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => async (dispatch) => {
   try {
     const response = await deleteBridge(bridgeId, org_id, restore);
-    dispatch(deleteBridgeReducer({ bridgeId, orgId: org_id, restore }));
+    if (response?.data?.success) {
+      dispatch(deleteBridgeReducer({ bridgeId, orgId: org_id, restore }));
+    }
     return response;
   } catch (error) {
     console.error('Failed to delete bridge:', error);
