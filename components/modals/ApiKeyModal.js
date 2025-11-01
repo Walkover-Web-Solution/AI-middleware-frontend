@@ -134,7 +134,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         <Modal MODAL_ID={MODAL_TYPE?.API_KEY_MODAL}>
             <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
                 <h3 className="font-bold text-lg">
-                    {isEditing ? 'Update API Keyyyyyyyyyy' : 'Add New API Key'}
+                    {isEditing ? 'Update API Key' : 'Add New API Key'}
                 </h3>
                 {API_KEY_MODAL_INPUT.map((field) => (
                     <div key={field} className="flex flex-col gap-2">
