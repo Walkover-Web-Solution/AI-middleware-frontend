@@ -337,22 +337,34 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     const merged = config ? { ...defaults, ...config } : defaults;
 
     // Use root-level apikey_object_id if available, otherwise empty object
-    const apiKeyIds = integrationData?.apikey_object_id || {};
+    // Only include API keys if addDefaultApiKeys is enabled in the saved config
+    const apiKeyIds = (merged.addDefaultApiKeys && integrationData?.apikey_object_id) 
+      ? integrationData.apikey_object_id 
+      : {};
 
     return { ...merged, apikey_object_id: apiKeyIds };
   });
 
   useEffect(() => {
-    setConfiguration(() => {
+    setConfiguration((prevConfig) => {
       const defaults = generateInitialConfig();
       const merged = config ? { ...defaults, ...config } : defaults;
   
-      // Use root-level apikey_object_id if available, otherwise empty object
-      const apiKeyIds = integrationData?.apikey_object_id || {};
+      // Determine final API key IDs based on current and saved state
+      let finalApiKeyIds = {};
+      
+      if (merged.addDefaultApiKeys) {
+        // If addDefaultApiKeys is enabled in saved config, use saved API keys
+        finalApiKeyIds = integrationData?.apikey_object_id || {};
+      } else if (prevConfig?.addDefaultApiKeys) {
+        // If addDefaultApiKeys is currently enabled but not saved, preserve current selections
+        finalApiKeyIds = prevConfig.apikey_object_id || {};
+      }
+      // Otherwise, keep empty object (no API keys)
   
-      return { ...merged, apikey_object_id: apiKeyIds };
+      return { ...merged, apikey_object_id: finalApiKeyIds };
     })
-  }, [integrationData]);
+  }, [integrationData, config]);
 
   const gtwyAccessToken = useCustomSelector((state) =>
     state?.userDetailsReducer?.organizations?.[data?.org_id]?.meta?.gtwyAccessToken || ""
@@ -415,6 +427,14 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       // If addDefaultApiKeys is false, don't send apikey_object_id at all (will be removed from backend)
 
       await dispatch(updateIntegrationDataAction(data?.org_id, dataToSend));
+      
+      // Clear API keys from local state after successful save if addDefaultApiKeys is false
+      if (!configuration.addDefaultApiKeys) {
+        setConfiguration(prev => ({
+          ...prev,
+          apikey_object_id: {}
+        }));
+      }
       
     } catch (error) {
       console.error('Failed to save configuration:', error);
