@@ -256,7 +256,7 @@ const CustomTable = ({
                                     </div>
                                 </th>
                             ))}
-                            {endComponent && <th className="px-4 py-2 text-left">Action</th>}
+                            {endComponent && <th className="px-4 py-2 text-center"><div className="flex items-center justify-center">Actions</div></th>}
                         </tr>
                     </thead>
                     <tbody>
