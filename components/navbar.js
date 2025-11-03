@@ -225,27 +225,39 @@ const Navbar = ({ isEmbedUser }) => {
   const toggleIntegrationGuideSlider = useCallback(() => toggleSidebar("integration-guide-slider", "right"), []);
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
-  const breadcrumbItems = useMemo(() => ([
-    {
-      label: orgName,
-      icon: Building,
-      handleClick: toggleOrgSidebar,
-      isClickable: true
-    },
-    {
-      label: 'Agents',
-      icon: Bot,
-      handleClick: toggleBridgeSidebar,
-      isClickable: true
-    },
-    {
+  const breadcrumbItems = useMemo(() => {
+    const items = [];
+    
+    // Add org and agents breadcrumbs only for non-embed users
+    if (!isEmbedUser) {
+      items.push(
+        {
+          label: orgName,
+          icon: Building,
+          handleClick: toggleOrgSidebar,
+          isClickable: true
+        },
+        {
+          label: 'Agents',
+          icon: Bot,
+          handleClick: toggleBridgeSidebar,
+          isClickable: true
+        }
+      );
+    }
+    
+    // Always add the agent name (editable)
+    items.push({
       label: agentName,
       icon: null,
       handleClick: handleNameEdit,
       current: true,
       editable: true
-    }
-  ]), [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar, handleNameEdit]);
+    });
+    
+    return items;
+  }, [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar, handleNameEdit, isEmbedUser]);
+  
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
@@ -351,7 +363,7 @@ const Navbar = ({ isEmbedUser }) => {
                 <span className="hidden sm:inline text-xs sm:text-sm">Home</span>
               </button>
               }
-            {!isEmbedUser &&  <nav className="flex items-center ml-2 sm:ml-6 lg:ml-0 md:ml-0 xl:ml-0 gap-0.5 sm:gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
+            {<nav className="flex items-center ml-2 sm:ml-6 lg:ml-0 md:ml-0 xl:ml-0 gap-0.5 sm:gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
                 {breadcrumbItems.map((item, idx) => (
                   <React.Fragment key={idx}>
                     {idx > 0 && (
@@ -381,6 +393,7 @@ const Navbar = ({ isEmbedUser }) => {
                             onKeyDown={handleNameKeyDown}
                             className="bg-transparent border-none outline-none font-medium text-xs sm:text-sm max-w-[80px] sm:max-w-[120px] md:max-w-[200px]"
                             autoFocus
+                            maxLength={50}
                           />
                         )}
                       </div>
