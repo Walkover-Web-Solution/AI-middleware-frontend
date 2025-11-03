@@ -15,6 +15,7 @@ import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
 import ConnectedAgentsModal from '@/components/modals/ConnectedAgentsModal';
+import HoverClickIndicator from "@/components/UI/HoverClickIndicator";
 
 export const runtime = 'edge';
 
@@ -86,6 +87,7 @@ const Page = () => {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center" onClick={(e) => e.stopPropagation()}>
+        
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
@@ -107,6 +109,8 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
+        <HoverClickIndicator />
+
       </div>
     );
   };
