@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { InfoIcon } from '../Icons';
-import InfoTooltip from '../InfoTooltip';
+import Protected from '../protected';
 
-const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
+const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const isWorkspaceItem = item === 'Organizations' || item === 'Workspaces';
+  const isWorkspaceItem = item === 'Organizations' || item === 'Workspaces' || (item === 'Agents' && isEmbedUser);
   const itemLabel = item === 'Organizations' ? 'Workspaces' : item;
   
   // Detect platform for keyboard shortcut display
@@ -55,7 +54,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
     }
   };
 
-  const containerClasses = isWorkspaceItem ? 'w-full mt-2' : 'max-w-xs ml-2';
+  const containerClasses = (isWorkspaceItem ) ? `${item === 'org' ? 'w-full mt-2' : 'max-w-xs ml-2'}` : 'max-w-xs ml-2';
   const inputClasses = style
     ? style
     : 'input input-sm w-full border bg-white dark:bg-base-200 border-base-content/50 pr-16';
@@ -85,4 +84,4 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
   )
 }
 
-export default SearchItems
+export default Protected(SearchItems)
