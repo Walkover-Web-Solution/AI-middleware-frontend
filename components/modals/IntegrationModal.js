@@ -5,6 +5,7 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
 import { toast } from 'react-toastify'
+import { useEnterKeySubmit } from '@/customHooks/useEnterKeySubmit'
 
 const IntegrationModal = ({ params }) => {
   const integrationNameRef = React.useRef('');
@@ -36,6 +37,8 @@ const IntegrationModal = ({ params }) => {
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';
   }
+
+  const handleEnterKeyDown = useEnterKeySubmit(handleCreateNewIntegration, []);
   return (
     <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
       <div className='modal-box'>
@@ -46,12 +49,7 @@ const IntegrationModal = ({ params }) => {
           className="input input-bordered input-sm w-full mb-2 placeholder-opacity-50"
           maxLength={50}
           ref={integrationNameRef}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleCreateNewIntegration();
-            }
-          }}
+          onKeyDown={handleEnterKeyDown}
         />
         <div className="modal-action">
           <form method="dialog">

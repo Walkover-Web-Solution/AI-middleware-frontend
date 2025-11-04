@@ -18,6 +18,7 @@ import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
 import { use } from 'react';
+import { useEnterKeySubmit } from '@/customHooks/useEnterKeySubmit'
 
 export const runtime = 'edge';
 
@@ -101,6 +102,15 @@ const maskAuthKey = (authkey) => {
     closeModal(MODAL_TYPE.PAUTH_KEY_MODAL)
     document.getElementById('authNameInput').value = ''
   };
+
+  const handleEnterKeyDown = useEnterKeySubmit((e) => {
+    const authName = e.target.value.trim();
+    if (authName) {
+      createAuthKeyHandler(e, authName);
+    } else {
+      toast.error("Input field cannot be empty");
+    }
+  }, []);
 
   const DeleteAuth = (item) => {
     closeModal(MODAL_TYPE?.DELETE_MODAL);
@@ -205,16 +215,7 @@ const maskAuthKey = (authkey) => {
               type="text"
               className="grow input input-sm border-none"
               id="authNameInput"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const authName = e.target.value.trim();
-                  if (authName) {
-                    createAuthKeyHandler(e, authName);
-                  } else {
-                    toast.error("Input field cannot be empty");
-                  }
-                }
-              }}
+              onKeyDown={handleEnterKeyDown}
               placeholder="Enter Auth Key Name"
               required
               maxLength={25}
