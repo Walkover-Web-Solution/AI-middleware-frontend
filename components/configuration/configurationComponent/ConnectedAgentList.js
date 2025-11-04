@@ -206,7 +206,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 
                                 <span className="flex-1 min-w-0  text-[9px]  md:text-[12px] lg:text-[13px] font-bold truncate">
                                     <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                        <span>{ bridge?.name}</span>
+                                        <span>{name}</span>
                                         <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
                                     {(!bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
                                 </span>
@@ -300,7 +300,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             <DeleteModal
                 onConfirm={handleRemoveAgent}
                 item={selectedBridge}
-                name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
+                name={selectedBridge?.name}
                 title="Are you sure?"
                 description={"This action Remove the selected Agent from the Agent."}
                 buttonTitle="Remove Agent"
