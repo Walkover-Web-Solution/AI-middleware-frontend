@@ -789,11 +789,6 @@ function FunctionParameterModal({
     if (toolName.trim() === "") {
       toast.error("Agent name cannot be empty");
       return;
-    } else if (toolName.trim() !== tool_name.trim()) {
-      dispatch(updateBridgeAction({
-        bridgeId: functionId,
-        dataToSend: { name: toolName.trim() },
-      }));
     }
   }, [toolName, tool_name, dispatch, functionId]);
 
@@ -802,7 +797,7 @@ function FunctionParameterModal({
       handleUpdateFlow();
     }
 
-    if ((name === "Agent" && tool_name.trim() !== toolName.trim())) {
+    if ((tool_name.trim() !== toolName.trim())) {
       handleToolNameChange();
     }
     handleSave();
@@ -1228,7 +1223,7 @@ function FunctionParameterModal({
                     <label className="block text-xs font-medium mb-1">
                       Name
                     </label>
-                    {name === "Orchestral Agent" ? (
+                    {(name === "Orchestral Agent" || name === "Agent") ? (
                       <input
                         type="text"
                         className="input input-sm text-xs input-bordered w-full"
