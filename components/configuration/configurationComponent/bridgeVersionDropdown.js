@@ -261,7 +261,7 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                     {/* Create New Version Button */}
                     <button
                         onClick={() => openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
-                        className="tab tab-sm h-full px-2 text-xs hover:bg-base-300 text-base-content flex-shrink-0"
+                        className="tab tab-sm h-full px-2 text-xs hover:bg-base-300 text-base-content flex-shrink-0 focus:outline-none"
                         title="Create New Version"
                     >
                         <Plus className="w-3 h-3" />

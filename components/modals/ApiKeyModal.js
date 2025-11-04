@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import React, { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
+import { useEnterKeySubmit } from '@/customHooks/useEnterKeySubmit';
 
 const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id, selectedService }) => {
     const pathName = usePathname();
@@ -114,6 +115,13 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         closeModal(MODAL_TYPE.API_KEY_MODAL)
     }, [isEditing, selectedApiKey, service]);
 
+    const handleEnterKeyDown = useEnterKeySubmit(() => {
+        const form = document.querySelector(`#${MODAL_TYPE.API_KEY_MODAL} form`);
+        if (form && ((isEditing && ischanged.isUpdate) || (!isEditing && ischanged.isAdd))) {
+            form.requestSubmit();
+        }
+    }, [isEditing, ischanged.isUpdate, ischanged.isAdd]);
+
     return (
         <Modal MODAL_ID={MODAL_TYPE?.API_KEY_MODAL}>
             <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
@@ -134,6 +142,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                             placeholder={`Enter ${field}`}
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
                             onChange={handleFormChange}
+                            onKeyDown={handleEnterKeyDown}
                             {...(field !== 'apikey' && { maxLength: 50 })}
                         />
                     </div>
