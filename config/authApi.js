@@ -1,5 +1,4 @@
 import axios from "@/utils/interceptor";
-import { setInCookies } from "@/utils/utility";
 import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;

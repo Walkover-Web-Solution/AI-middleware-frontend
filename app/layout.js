@@ -1,11 +1,8 @@
-import { Syne } from "next/font/google";
 import "./globals.css";
 import "../styles/performance-optimizations.css";
 import Wrapper from "@/wrapper/Wrapper";
 import Head from "next/head";
 import Script from "next/script";
-
-const inter = Syne({ subsets: ["latin"] });
 
 export const metadata = {
   title: "GTWY AI | Connect 5000+ apps in just 1 click",

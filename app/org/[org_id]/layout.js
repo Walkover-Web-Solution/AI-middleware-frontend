@@ -13,7 +13,7 @@ import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { getFromCookies, openModal, setInCookies } from "@/utils/utility";
+import { getFromCookies, openModal } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -155,7 +155,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   useEffect(() => {
     if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-      dispatch(getServiceAction({ orgid: resolvedParams.orgid }))
+      dispatch(getServiceAction())
     }
   }, [SERVICES]);
 
