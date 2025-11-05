@@ -171,7 +171,6 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = async (event) => {
-
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
       let bridges = allBridges;
        allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
@@ -185,9 +184,14 @@ const Layout = ({ children }) => {
       } else if (messageData?.agent_id && orgId) {
         // setIsLoading(true);
         const bridgeData = bridges.find((bridge) => bridge._id === messageData.agent_id)
+        const history = messageData?.history;
         if(!bridgeData){
-          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+          router.push(`/org/${orgId}/agents`);
           return
+        }
+        if(history){
+          router.push(`/org/${orgId}/agents/history/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}&message_id=${history.message_id}`);
+          return;
         }
         router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
       }

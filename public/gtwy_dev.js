@@ -192,14 +192,13 @@
             container.classList.add(`slide-${slideType}`);
             this.addStyles();
         }
-
-        openGtwy(agent_id = null, meta = {}, agent_name = null, agent_purpose = null) {
+        openGtwy(agent_id = null, meta = {}, agent_name = null, agent_purpose = null,history=null) {
             if (!this.state.isInitialized) {
                 this.initializeGtwyEmbed().then(() => this.openGtwy());
                 return;
             }
 
-            [agent_id, { agent_id, meta }, { agent_name }, { agent_purpose }]
+            [agent_id, {agent_id,history}, { agent_id, meta }, { agent_name }, { agent_purpose }]
                 .filter(data => data && Object.values(data).some(v => v))
                 .forEach(data => SendDataToGtwyEmbed(data));
 
@@ -531,8 +530,8 @@
     };
 
     // Global API
-    window.openGtwy = ({ agent_id = "", meta = {}, agent_name = "", agent_purpose = "" } = {}) => {
-        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name, agent_purpose);
+    window.openGtwy = ({ agent_id = "", meta = {}, agent_name = "", agent_purpose = "", history = null } = {}) => {
+        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name, agent_purpose, history);
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
 
