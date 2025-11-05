@@ -48,9 +48,9 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   }
 }
 
-export const deleteBridge = async (bridgeId) => {
+export const deleteBridge = async (bridgeId,org_id,restore=false) => {
   try {
-    const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
+    const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`,{data:{org_id,restore}});
     return response;
   } catch (error) {
     console.error(error);

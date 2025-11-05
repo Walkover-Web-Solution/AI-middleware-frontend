@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import TriggersList from "./configurationComponent/TriggersList";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
+import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
 import { useConfigurationContext } from './ConfigurationContext';
@@ -38,13 +39,16 @@ const SetupView = memo(() => {
                         service={service}
                         showDefaultApikeys={showDefaultApikeys}
                         isEmbedUser={isEmbedUser}
+                        hideAdvancedParameters={hideAdvancedParameters}
                     />
                     <AdvancedParameters 
                         params={params} 
                         searchParams={searchParams} 
                         isEmbedUser={isEmbedUser} 
                         hideAdvancedParameters={hideAdvancedParameters}
+                        level={2}
                     />
+                    <ConfigurationSettingsAccordion />
                 </>
             ) : (
                 <NonImageModelConfig />

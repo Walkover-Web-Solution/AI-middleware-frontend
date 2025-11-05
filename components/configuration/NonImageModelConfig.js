@@ -2,11 +2,12 @@ import { memo } from 'react';
 import InputSection from "./InputSection";
 import ToolsSection from "./ToolsSection";
 import CommonConfigComponents from "./CommonConfigComponents";
-import AdvancedSection from "./AdvancedSection";
 import ChatbotConfigSection from "./ChatbotConfigSection";
 import { useConfigurationContext } from './ConfigurationContext';
 import AdvancedParameters from './configurationComponent/advancedParamenter';
 import GptMemory from './configurationComponent/gptmemory';
+import AddVariable from '../addVariable';
+import ConfigurationSettingsAccordion from './configurationComponent/ConfigurationSettingsAccordion';
 
 const NonImageModelConfig = memo(() => {
     const { 
@@ -36,16 +37,20 @@ const NonImageModelConfig = memo(() => {
                 service={service}
                 showDefaultApikeys={showDefaultApikeys}
                 isEmbedUser={isEmbedUser}
+                hideAdvancedParameters={hideAdvancedParameters}
             />
             <AdvancedParameters
                 params={params}
                 searchParams={searchParams}
                 isEmbedUser={isEmbedUser}
                 hideAdvancedParameters={hideAdvancedParameters}
+                level={2}
             />
+  
             <GptMemory params={params} searchParams={searchParams} />
+            <AddVariable params={params} searchParams={searchParams} />
             <ChatbotConfigSection />
-            <AdvancedSection />
+            <ConfigurationSettingsAccordion />
         </>
     );
 });

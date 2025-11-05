@@ -195,35 +195,24 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
                 >
                     <div
-                        className="p-2 w-full h-full flex flex-col justify-between"
+                        className="p-2 flex-1 flex items-center"
                         onClick={() => handleAgentClicked(item)}
                     >
-                        <div>
-                            <div className="flex items-center gap-2">
-                                
-                                <span className="flex-1 min-w-0  text-[9px]  md:text-[12px] lg:text-[13px] font-bold truncate">
-                                    <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                        <span>{ bridge?.name}</span>
-                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                        <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                            <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
+                                <span className="text-sm font-normal">{name}</span>
+                                {/* <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
                                     {(!bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
-                                </span>
-                                    </div>
-                                </span>
+                                </span> */}
                             </div>
-                            <div className="w-full flex justify-between flex-row">
-                                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                                    {bridge?.connected_agent_details?.description || item.description ||  "A description is required for proper functionality."}
-                                </p>
-                                
-                            </div>
-                        </div>
+                        </span>
                     </div>
                     
                     {/* Action buttons that appear on hover */}
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -300,7 +289,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             <DeleteModal
                 onConfirm={handleRemoveAgent}
                 item={selectedBridge}
-                name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
+                name={selectedBridge?.name}
                 title="Are you sure?"
                 description={"This action Remove the selected Agent from the Agent."}
                 buttonTitle="Remove Agent"

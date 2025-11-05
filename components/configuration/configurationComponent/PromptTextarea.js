@@ -21,11 +21,10 @@ const PromptTextarea = memo(({
             lastExternalValueRef.current = initialValue;
         }
     }, [initialValue]);
-
     // Memoized textarea class to prevent recalculation
     const textareaClass = useMemo(() => {
         return `textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-            ? "h-[calc(100vh-60px)] w-[700px] border-primary shadow-md"
+            ? "min-h-[calc(100vh-60px)] w-[700px] border-primary shadow-md"
             : "min-h-96"
         } ${className}`;
     }, [isPromptHelperOpen, className]);
