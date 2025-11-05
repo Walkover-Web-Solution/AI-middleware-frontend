@@ -423,7 +423,7 @@ const Navbar = ({ isEmbedUser }) => {
               </nav>}
 
             {/* Navigation Tabs - fixed position */}
-            {(isEmbedUser && showHistory || !isEmbedUser) && (
+            {/* {(isEmbedUser && showHistory || !isEmbedUser) && (
               <div className="absolute left-1/2 transform -translate-x-1/2">
                 <div className="join group flex">
                   {TABS.map(tab => (
@@ -440,7 +440,7 @@ const Navbar = ({ isEmbedUser }) => {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
             
             {/* Version Controls - show on configure tab for non-embed users */}
             
