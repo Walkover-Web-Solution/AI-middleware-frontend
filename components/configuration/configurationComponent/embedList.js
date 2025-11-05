@@ -262,8 +262,6 @@ const EmbedList = ({ params, searchParams }) => {
                 </>
               ) : (
                 <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-
-
                   <button
                     tabIndex={0}
                     className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
@@ -309,37 +307,26 @@ const EmbedList = ({ params, searchParams }) => {
                     return (
                       <div
                         key={item?.value}
-                        className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
                       >
-                        
-                        <div className="p-2 w-full h-full flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              {GetPreBuiltToolTypeIcon(item?.value, 16, 16)}
+                        <div className="p-2 flex-1 flex items-center gap-2">
+                          {GetPreBuiltToolTypeIcon(item?.value, 14, 14)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center">
                               <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
                                 <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
-                                  <span>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
-                                  <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${
-                                    isNotSupported 
-                                      ? 'bg-orange-100 text-orange-700 border-orange-200' 
-                                      : missingDesc 
-                                        ? 'bg-red-100 text-red-700 border-red-200' 
-                                        : 'bg-green-100 text-green-700 border-green-200'
-                                  }`}>
-                                    {isNotSupported ? 'Not Supported' : missingDesc ? 'Description Required' : 'Active'}
-                                  </span>
+                                  <span className='text-md font-normal'>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
                                 </div>
                               </span>
                             </div>
-                            <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                              {isNotSupported 
-                                ? `Model doesn't support ${item?.name} tool` 
-                                : item?.description || 'A description is required for proper functionality.'
-                              }
-                            </p>
+                            {isNotSupported && (
+                              <p className="text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
+                                Model doesn't support {item?.name} tool
+                              </p>
+                            )}
                           </div>
                         </div>
-                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
                           {item?.value === "web_search" && (
                             <button
                               onClick={(e) => {

@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AlertIcon, InfoIcon } from "@/components/Icons";
+import { AlertIcon, ChevronDownIcon } from "@/components/Icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
@@ -144,13 +144,39 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             onChange={handleServiceChange}
             placeholder="Select a Service"
             size="sm"
-            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full font-normal rounded-sm justify-between ${isDisabled ? 'btn-disabled' : ''}`}
-            menuClassName="w-full max-w-xs"
+            className={`btn btn-sm border border-base-content/20 bg-base-100 font-normal rounded-sm px-2 w-auto ${isDisabled ? 'btn-disabled' : ''}`}
+            menuClassName="w-full min-w-[200px]"
+            fullWidth={false}
+            renderTriggerContent={({ selectedOption }) => {
+              const currentValue = selectedService || selectedOption?.value;
+
+              if (!currentValue) {
+                return (
+                  <span className="flex items-center gap-2 text-base-content/60">
+                    <span>Select a Service</span>
+                  </span>
+                );
+              }
+
+              return (
+                <span className="flex items-center gap-2">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-md bg-base-200"
+                    title={Array.isArray(SERVICES) 
+                        ? SERVICES.find((svc) => svc?.value === currentValue)?.displayName || currentValue
+                        : currentValue
+                    }
+                  >
+                    {getIconOfService(currentValue, 18, 18)}
+                  </span>
+                </span>
+              );
+            }}
           />
     );
 
     return (
-        <div className="space-y-4 w-full">
+        <div className="space-y-4">
             <div className="form-control">
                 <div className="flex items-center gap-2 z-auto">
                 {isDisabled && (

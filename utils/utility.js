@@ -4,6 +4,7 @@ import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
+import Grok from "@/icons/Grok";
 import GroqIcon from "@/icons/GroqIcon";
 import MistralIcon from "@/icons/MistralIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
@@ -194,7 +195,9 @@ export const getIconOfService = (service, height, width) => {
         case 'ai_ml':
             return <AIMLIcon height={height} width={width} />;
         case 'mistral':
-            return <MistralIcon height={height} width={width} />;    
+            return <MistralIcon height={height} width={width} />;
+        case 'grok':
+            return <Grok height={height} width={width} />;    
         default:
             return <OpenAiIcon height={height} width={width} />;
     }

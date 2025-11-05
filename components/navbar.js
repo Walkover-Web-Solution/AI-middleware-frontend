@@ -62,9 +62,9 @@ const Navbar = ({ isEmbedUser }) => {
     const baseTabs = [
       { 
         id: 'configure', 
-        label: bridgeType === 'chatbot' ? 'Chatbot Config' : 'Agent Config', 
+        label: ' Agent Config', 
         icon: BotIcon, 
-        shortLabel: bridgeType === 'chatbot' ? 'Chatbot' : 'Agent'
+        shortLabel: 'Agent Config'
       },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
@@ -76,6 +76,11 @@ const Navbar = ({ isEmbedUser }) => {
 
   const agentName = useMemo(() => bridgeName || bridgeData?.name || 'Agent not Found', [bridgeName, bridgeData?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization not Found', [organizations, orgId]);
+
+  // Calculate active tab index for tab switcher animation
+  const activeTabIndex = useMemo(() => {
+    return TABS.findIndex(tab => tab.id === activeTab);
+  }, [TABS, activeTab]);
 
   // Create compatible searchParams object for prebuilt components
   const compatibleSearchParams = useMemo(() => ({
@@ -350,7 +355,7 @@ const Navbar = ({ isEmbedUser }) => {
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}
-        <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 h-12 sm:h-14">
+        <div className="flex w-full items-center gap-2 px-2 sm:px-4 py-2 sm:py-3 h-12 sm:h-14">
           {/* Left: Breadcrumb or Home */}
           <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-1">
             {(isEmbedUser && !hideHomeButton) && 
@@ -459,9 +464,49 @@ const Navbar = ({ isEmbedUser }) => {
             
             
           </div>
-
+          {(isEmbedUser && showHistory) || !isEmbedUser ? (
+            <div className="flex flex-1 justify-center px-1 sm:px-2">
+              <div className="relative flex w-full max-w-xs items-center overflow-hidden rounded-md border border-base-200 bg-base-200/60 p-0.5 shadow-inner sm:max-w-sm">
+                <span
+                  className="absolute inset-y-0.5 rounded-md bg-base-100 shadow transition-transform duration-300 ease-in-out"
+                  style={{
+                    width: `${100 / (TABS.length || 1)}%`,
+                    transform: `translateX(${activeTabIndex * 100}%)`,
+                  }}
+                />
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`relative z-10 flex-1 rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors duration-200 sm:px-2 sm:py-1.5 sm:text-xs ${
+                        isActive
+                          ? 'text-base-content'
+                          : 'text-base-content/70 hover:text-base-content'
+                      }`}
+                    >
+                      <span className="flex items-center justify-center gap-1.5">
+                        <tab.icon
+                          size={14}
+                          className={`hidden sm:block transition-opacity ${
+                            isActive ? 'opacity-100' : 'opacity-60'
+                          }`}
+                        />
+                        <span className="truncate">
+                          {isMobile ? tab.shortLabel : tab.label}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-1 justify-center" />
+          )}
           {/* Right: Action buttons */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
             {/* Desktop view - show buttons for both users */}
             <div className="hidden md:flex items-center gap-1 sm:gap-2">
               {!isEmbedUser && activeTab === 'configure' && <button className="btn btn-xs sm:btn-sm tooltip tooltip-left px-2 sm:px-3" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
@@ -490,37 +535,21 @@ const Navbar = ({ isEmbedUser }) => {
                   <span className="text-black text-xs sm:text-sm">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 </button>
               )}
+              {!isEmbedUser && activeTab === 'configure' && (
+                <button
+                  className="btn btn-xs sm:btn-sm tooltip tooltip-left px-2 sm:px-3 gap-1 sm:gap-2 flex items-center"
+                  data-tip="Integration Guide"
+                  onClick={toggleIntegrationGuideSlider}
+                >
+                  <FilterSliderIcon size={14} className="sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Guide</span>
+                </button>
+              )}
             </div>
 
-            {/* Mobile view - compact buttons for embed users */}
+            {/* Mobile view - compact buttons removed from header for embed users */}
             <div className="md:hidden flex items-center gap-1">
-              {isEmbedUser && activeTab === 'configure' && (
-                <>
-                  {/* Discard icon - only show if there are drafts */}
-                  {isDrafted && (
-                    <button
-                      className="btn btn-xs flex gap-1 bg-red-200 hover:bg-red-300 text-base-content px-2"
-                      onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
-                      disabled={isUpdatingBridge || isPublishing}
-                      title="Discard changes"
-                    >
-                      <ClipboardX size={12} className='text-black'/>
-                      <span className="text-black text-xs">Discard</span>
-                    </button>
-                  )}
-
-                  {/* Publish icon */}
-                  <button
-                    className={`btn btn-xs bg-green-200 hover:bg-green-300 flex gap-1 px-2 ${isPublishing ? 'loading' : ''}`}
-                    onClick={handlePublish}
-                    disabled={!isDrafted || isPublishing}
-                    title={isPublishing ? 'Publishing...' : 'Publish'}
-                  >
-                    {!isPublishing && <BookCheck size={12} className='text-black'/>}
-                    <span className="text-black text-xs">{isPublishing ? 'Pub...' : 'Publish'}</span>
-                  </button>
-                </>
-              )}
+              {/* Embed user buttons moved to bottom section */}
             </div>
             {/* Ellipsis menu - only for normal users */}
             {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
@@ -551,11 +580,11 @@ const Navbar = ({ isEmbedUser }) => {
 
       </div>
 
-      {/* Mobile action buttons - only for normal users on configure tab */}
-      {isMobile && activeTab === 'configure' && !isEmbedUser && (
+      {/* Mobile action buttons - for both normal and embed users on configure tab */}
+      {isMobile && activeTab === 'configure' && (
         <div className="bg-base-100 border-b border-base-200 p-2">
           <div className="flex gap-1 sm:gap-2">
-            {!isEmbedUser && activeTab === 'configure' && <button className="btn btn-xs tooltip tooltip-left px-2" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+            {!isEmbedUser && <button className="btn btn-xs tooltip tooltip-left px-2" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
               <HistoryIcon size={14} />
             </button>}
 
@@ -580,6 +609,16 @@ const Navbar = ({ isEmbedUser }) => {
               {!isPublishing && <BookCheck size={12} className='text-black' />}
               <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Publish'}</span>
             </button>
+            {!isEmbedUser && (
+              <button
+                className="btn btn-xs flex-1 gap-1 tooltip tooltip-top flex items-center justify-center"
+                data-tip="Integration Guide"
+                onClick={toggleIntegrationGuideSlider}
+              >
+                <FilterSliderIcon size={14} />
+                <span className="text-xs font-medium whitespace-nowrap">Guide</span>
+              </button>
+            )}
           </div>
         </div>
       )}
