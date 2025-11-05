@@ -18,9 +18,9 @@ export const getSingleBridge = async (bridgeId) => {
   }
 }
 
-export const getAllBridges = async (org_id) => {
+export const getAllBridges = async () => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`, org_id)
+    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`)
     return data;
   } catch (error) {
     console.error(error)

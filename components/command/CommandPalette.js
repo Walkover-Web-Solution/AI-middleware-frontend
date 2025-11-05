@@ -124,7 +124,7 @@ const CommandPalette = ({isEmbedUser}) => {
       integrations: integrationGroup,
       auths: authGroup,
     };
-  }, [query, agentList, apikeys, knowledgeBase, functions]);
+  }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData, orchestralFlowData]);
 
   const flatResults = useMemo(() => {
     return [
@@ -136,7 +136,7 @@ const CommandPalette = ({isEmbedUser}) => {
       ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
-  }, [items]);
+  }, [items, orchestralFlowData, integrationData, authData]);
 
   const groupedResults = useMemo(() => {
     const groups = {};

@@ -99,9 +99,9 @@ export const resetPrebuiltPrompt = async (dataToSend) => {
 }
 
 // Functions Management APIs
-export const getAllFunctionsApi = async (org_id) => {
+export const getAllFunctionsApi = async () => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/functions/all`, org_id)
+    const data = await axios.get(`${PYTHON_URL}/functions/all`)
     return data;
   } catch (error) {
     console.error(error)
@@ -162,9 +162,9 @@ export const updateWebhookAlert = async ({ data, id }) => {
   }
 };
 
-export const getAllWebhookAlert = async (org_id) => {
+export const getAllWebhookAlert = async () => {
   try {
-    const response = await axios.get(`${URL}/alerting`, org_id);
+    const response = await axios.get(`${URL}/alerting`);
     return response.data;
   } catch (error) {
     console.error(error);
