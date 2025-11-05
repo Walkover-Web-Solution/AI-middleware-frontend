@@ -11,9 +11,10 @@ import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/InfoTooltip';
-import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, TrashIcon } from '@/components/Icons';
+import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, TrashIcon, SettingsIcon } from '@/components/Icons';
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import DeleteModal from '@/components/UI/DeleteModal';
+import PrebuiltToolsConfigModal from '@/components/modals/prebuiltToolsConfigModal';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -39,7 +40,7 @@ const EmbedList = ({ params, searchParams }) => {
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
   const dispatch = useDispatch();
-  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction } = useCustomSelector((state) => {
+  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
@@ -60,9 +61,10 @@ const EmbedList = ({ params, searchParams }) => {
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
       toolsVersionData: versionData?.built_in_tools,
       isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
+      prebuiltToolsFilters: versionData?.web_search_filters || [],
     };
   });
-
+   console.log(showInbuiltTools,"showInbuiltTools")
   // Use the tutorial videos hook
   const { getFunctionCreationVideo, tutorialData } = useTutorialVideos();
      const [tutorialState, setTutorialState] = useState({
@@ -176,6 +178,29 @@ const EmbedList = ({ params, searchParams }) => {
     closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
   };
 
+  // Handle opening prebuilt tools configuration modal
+  const handleOpenPrebuiltConfig = () => {
+    openModal(MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL);
+  };
+
+  // Handle saving prebuilt tools configuration
+  const handleSavePrebuiltConfig = async (domains) => {
+    try {
+      await dispatch(updateBridgeVersionAction({
+        bridgeId: params?.id,
+        versionId: searchParams?.version,
+        dataToSend: {
+          
+            web_search_filters: domains
+        
+        }
+      }));
+    } catch (error) {
+      console.error('Error saving prebuilt tools configuration:', error);
+      throw error;
+    }
+  };
+
   // Compute selected prebuilt tools (to render cards)
   const selectedPrebuiltTools = useMemo(() => {
     const byId = new Map((prebuiltToolsData || []).map(t => [t.value, t]));
@@ -278,11 +303,15 @@ const EmbedList = ({ params, searchParams }) => {
                 <div className="flex flex-col gap-2 w-full">
                   {selectedPrebuiltTools.map((item) => {
                     const missingDesc = !item?.description;
+                    const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
+                    const hasIssue = missingDesc || isNotSupported;
+                    
                     return (
                       <div
                         key={item?.value}
-                        className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${missingDesc ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                        className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
                       >
+                        
                         <div className="p-2 w-full h-full flex flex-col justify-between">
                           <div>
                             <div className="flex items-center gap-2">
@@ -290,20 +319,39 @@ const EmbedList = ({ params, searchParams }) => {
                               <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
                                 <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
                                   <span>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
-                                  <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${missingDesc ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {missingDesc ? 'Description Required' : 'Active'}
+                                  <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${
+                                    isNotSupported 
+                                      ? 'bg-orange-100 text-orange-700 border-orange-200' 
+                                      : missingDesc 
+                                        ? 'bg-red-100 text-red-700 border-red-200' 
+                                        : 'bg-green-100 text-green-700 border-green-200'
+                                  }`}>
+                                    {isNotSupported ? 'Not Supported' : missingDesc ? 'Description Required' : 'Active'}
                                   </span>
                                 </div>
                               </span>
-                              {missingDesc && <CircleAlertIcon color='red' size={16} />}
                             </div>
                             <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                              {item?.description || 'A description is required for proper functionality.'}
+                              {isNotSupported 
+                                ? `Model doesn't support ${item?.name} tool` 
+                                : item?.description || 'A description is required for proper functionality.'
+                              }
                             </p>
                           </div>
                         </div>
-                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-
+                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                          {item?.value === "web_search" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenPrebuiltConfig();
+                              }}
+                              className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
+                              title="Config"
+                            >
+                              <SettingsIcon size={16} />
+                            </button>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -315,7 +363,6 @@ const EmbedList = ({ params, searchParams }) => {
                             <TrashIcon size={16} />
                           </button>
                         </div>
-
                       </div>
                     );
                   })}
@@ -325,6 +372,12 @@ const EmbedList = ({ params, searchParams }) => {
           </>
         )}
       </div>
+
+      {/* Prebuilt Tools Configuration Modal */}
+      <PrebuiltToolsConfigModal
+        initialDomains={prebuiltToolsFilters}
+        onSave={handleSavePrebuiltConfig}
+      />
     </div>
   );
 };
