@@ -33,10 +33,10 @@ const RenderEmbed = ({
           <div
             key={value?._id}
             id={value?._id}
-            className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+            className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
           >
             <div
-              className="p-2 w-full h-full flex flex-col justify-between"
+              className="p-2 flex-1 flex items-center"
               onClick={() => openViasocket(functionName, {
                 embedToken,
                 meta: {
@@ -45,30 +45,15 @@ const RenderEmbed = ({
                 },
               })}
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                    <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
-                      <span>{ title}</span>
-                      <span
-                        className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!(value?.description || value?.api_description || value?.short_description)
-                          ? 'bg-red-100 text-red-700 border-red-200'
-                          : 'bg-green-100 text-green-700 border-green-200'}`}
-                      >
-                        {!(value?.description || value?.api_description || value?.short_description) ? 'Description Required' : 'Active'}
-                      </span>
-                    </div>
-                  </span>
-                  {value?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
+              <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
+                  <span className="text-sm font-normal">{title}</span>
                 </div>
-                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                  {value?.description || value?.api_description || value?.short_description || 'A description is required for proper functionality.'}
-                </p>
-              </div>
+              </span>
             </div>
 
             {/* Action buttons that appear on hover */}
-            <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation();

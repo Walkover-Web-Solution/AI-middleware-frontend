@@ -332,7 +332,6 @@ export const genrateSummaryAction = ({ bridgeId, versionId, orgId }) => async (d
     return response;
   } catch (error) {
     dispatch(isError());
-    toast.error('Failed to update summary');
     console.error("Failed to update summary: ", error);
   }
 }
