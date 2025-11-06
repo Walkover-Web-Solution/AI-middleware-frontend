@@ -3,15 +3,16 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false }) => {
     const dispatch = useDispatch();
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
-        const apikeys = state?.bridgeReducer?.apikeys || {};
+        const apikeys = state?.apiKeysReducer?.apikeys || {};
 
         return {
             bridge: bridgeMap,
@@ -28,14 +29,13 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
         );
     }, [apikeydata, bridge?.service]);
 
-    const handleDropdownChange = useCallback((e) => {
-        const selectedApiKeyId = e.target.value;
+    const handleDropdownChange = useCallback((selectedApiKeyId) => {
         if (selectedApiKeyId === 'add_new') {
             openModal(MODAL_TYPE.API_KEY_MODAL);
-        } 
+        }
         else if (selectedApiKeyId !== 'AI_ML_DEFAULT_KEY') {
             const service = bridge?.service;
-            const updated = {...bridgeApikey_object_id, [service]: selectedApiKeyId };
+            const updated = { ...bridgeApikey_object_id, [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
         }
     }, [params.id, searchParams?.version, bridge?.service, bridgeApikey_object_id]);
@@ -49,54 +49,43 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
         return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey?._id;
     }, [apikeydata, bridgeApikey_object_id, bridge?.service]);
 
-    const truncateText = (text, maxLength) => {
-        return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-    };
-    const maxChar = 20;
+    // Build dropdown options
+    const dropdownOptions = useMemo(() => {
+        const opts = [];
+        if (bridge.service === 'ai_ml') {
+            opts.push({ value: 'AI_ML_DEFAULT_KEY', label: 'AI ML Default Key' });
+        }
+        if (filteredApiKeys.length > 0) {
+            filteredApiKeys.forEach((apiKey) => {
+                opts.push({ value: apiKey._id, label: apiKey.name });
+            });
+        } else {
+            // Disabled informational option pattern can be represented by not adding an option here; placeholder will handle it
+        }
+        // Add new key action
+        opts.push({ value: 'add_new', label: '+  Add new API Key' });
+        return opts;
+    }, [filteredApiKeys, bridge.service]);
+
 
     return (
-        <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef}>
-            <div className="label">
-                <span className="label-text font-medium">Service's API Key</span>
-            </div>
-            <div className=''>
-                <div className='relative'>
-                    <select
-                        className="select select-sm w-full border-base-content/20"
-                        onChange={handleDropdownChange}
-                        maxLength="10"
-                        value={selectedValue ? selectedValue : ''}
-                    >
-                        <option value="" disabled>Select API key</option>
-                        {
-                            bridge.service === 'ai_ml' && (
-                                <option
-                                    maxLength="10"
-                                    value={"AI_ML_DEFAULT_KEY"}>
-                                    AI ML Default Key
-                                </option>
-                            )
-                        }
-                        {filteredApiKeys.length > 0 ? (
-                            filteredApiKeys.map(apiKey => (
-                                <option
-                                    maxLength="10"
-                                    key={apiKey._id} value={apiKey._id}>
-                                    {apiKey.name}
-                                </option>
-                            ))
-                        ) : (
-                            <option value="" disabled>
-                                No API keys available for this service
-                            </option>
-                        )}
-                        <option value="add_new" className="add-new-option">+  Add new API Key </option>
-                    </select>
-                </div>
-            </div>
+        <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
+            <Dropdown
+                options={dropdownOptions}
+                value={selectedValue || ''}
+                onChange={(val) => handleDropdownChange(val)}
+                placeholder={filteredApiKeys.length === 0 ? 'No API keys for this service' : 'Select API key'}
+                showSearch
+                searchPlaceholder="Search API keys..."
+                size="sm"
+                className="btn btn-sm border-base-content/20 bg-base-100 w-auto justify-between font-normal px-3 min-w-[150px]"
+                maxLabelLength={20}
+                menuClassName="w-full min-w-[200px]"
+            />
+
             <ApiKeyModal params={params} searchParams={searchParams} service={currentService} bridgeApikey_object_id={bridgeApikey_object_id} />
         </div>
     );
 };
 
-export default ApiKeyInput;
+export default React.memo(ApiKeyInput);

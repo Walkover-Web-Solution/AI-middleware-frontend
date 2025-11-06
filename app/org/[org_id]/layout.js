@@ -1,33 +1,38 @@
 "use client";
+import dynamic from "next/dynamic";
 import ErrorPage from "@/app/not-found";
-import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import LoadingSpinner from "@/components/loadingSpinner";
-import Navbar from "@/components/navbar";
 import Protected from "@/components/protected";
-import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage, switchOrg } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
-import { getAllKnowBaseDataAction, getKnowledgeBaseTokenAction } from "@/store/action/knowledgeBaseAction";
+import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { getFromCookies, openModal, setInCookies } from "@/utils/utility";
+import { getFromCookies, openModal } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
+import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
+import { getAllAuthData } from "@/store/action/authkeyAction";
+import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+
+const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
+const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
+const ChatDetails = dynamic(() => import("@/components/historyPageComponents/chatDetails"), {loading: () => <LoadingSpinner />});
+
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -52,10 +57,13 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
   }));
   useEffect(() => {
+    dispatch(getTutorialDataAction());
+    if(pathName.endsWith("agents")){
+    dispatch(getFinishReasonsAction()); }
     if (pathName.endsWith("agents") && !isEmbedUser) {
-      dispatch(getTutorialDataAction()); 
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
+      dispatch(getDescriptionsAction());
     }
     if (pathName.endsWith("apikeys")&& !isEmbedUser) {
       dispatch(getApiKeyGuideAction()); 
@@ -125,49 +133,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
 
-  // Theme initialization with full system theme support
-  useEffect(() => {
-    const getSystemTheme = () => {
-      if (typeof window !== 'undefined') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      return 'light';
-    };
-
-    const applyTheme = (themeToApply) => {
-      if (typeof window !== 'undefined') {
-        document.documentElement.setAttribute('data-theme', themeToApply);
-        setInCookies("theme", themeToApply);
-      }
-    };
-
-    const savedTheme = getFromCookies("theme") || "system";
-    const systemTheme = getSystemTheme();
-    
-    if (savedTheme === "system") {
-      applyTheme(systemTheme);
-    } else {
-      applyTheme(savedTheme);
-    }
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      const currentSavedTheme = getFromCookies("theme") || "system";
-      
-      // Only update if currently using system theme
-      if (currentSavedTheme === "system") {
-        applyTheme(newSystemTheme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
-  }, []);
   
   useEffect(() => {
     const validateOrg = async () => {
@@ -192,40 +157,31 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   useEffect(() => {
     if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-      dispatch(getServiceAction({ orgid: resolvedParams.orgid }))
+      dispatch(getServiceAction())
     }
   }, [SERVICES]);
 
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data?.length === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
-          openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)
-        }
+  
         setLoading(false);
       }))
       dispatch(getAllFunctions())
     }
   }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
 
-  useEffect(() => {
-    if (isValidOrg) {
-      Array?.isArray(SERVICES) && SERVICES?.map((service) => {
-        dispatch(getModelAction({ service: service?.value }));
-        return null; // to satisfy map's return
-      });
-    }
-  }, [isValidOrg]);
-
 
   useEffect(() => {
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
+      dispatch(getPrebuiltPromptsAction())
       dispatch(getPrebuiltToolsAction())
       dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
+      dispatch(getAllAuthData())
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
@@ -260,7 +216,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         if (!pathName.includes('/history')) {
           const existingScript = document.getElementById(scriptId);
           if (existingScript) {
-            document.head.removeChild(existingScript);
+            // document.head.removeChild(existingScript);
           }
         }
       };
@@ -310,14 +266,14 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     if (existingScript) {
       document.head.removeChild(existingScript);
     }
-    if (doctstar_embed_token) {
+    if (doctstar_embed_token && !isEmbedUser) {
       const script = document.createElement("script");
       script.setAttribute("embedToken", doctstar_embed_token);
       script.id = docstarScriptId;
       script.src = docstarScriptSrc;
       document.head.appendChild(script);
     }
-  }, [doctstar_embed_token]);
+  }, [doctstar_embed_token, isEmbedUser]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -326,7 +282,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         window.removeEventListener("message", handleMessage);
       };
     }
-  }, [isValidOrg, resolvedParams.id, versionData, searchParams?.version, path]);
+  }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
 
   async function handleMessage(e) {
     if (e.data?.metadata?.type !== 'tool') return;
@@ -345,7 +301,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           if (selectedVersionData) {
             await dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
-              versionId: version_id,
+              versionId: resolvedSearchParams?.get('version'),
               dataToSend: {
                 functionData: {
                   function_id: selectedVersionData._id,
@@ -373,13 +329,13 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
                   pre_tools: [data?._id],
-                  version_id: version_id
+                  version_id: resolvedSearchParams?.get('version')
                 }))
               )
                 : (
                   dispatch(updateBridgeVersionAction({
                     bridgeId: path[5],
-                    versionId: version_id,
+                    versionId: resolvedSearchParams?.get('version'),
                     dataToSend: {
                       functionData: {
                         function_id: data?._id,
@@ -411,6 +367,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
+        <ThemeManager />
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="flex flex-col h-full z-high">
@@ -418,8 +375,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           </div>
 
           {/* Main Content Area */}
-          <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
-            {/* Sticky Navbar */}
+          <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               {!isFocus && <Navbar resolvedParams={resolvedParams} />}
             </div>
@@ -448,6 +404,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   else {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
+        <ThemeManager />
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}

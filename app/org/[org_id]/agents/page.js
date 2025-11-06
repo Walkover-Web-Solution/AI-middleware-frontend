@@ -9,27 +9,38 @@ import Protected from "@/components/protected";
 import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
-import { archiveBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal, closeModal } from "@/utils/utility";
+import { archiveBridgeAction, updateBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
+import { MODAL_TYPE } from "@/utils/enums";
+import useTutorialVideos from "@/hooks/useTutorialVideos";
+import { filterBridges, getIconOfService, openModal, closeModal closeModal, formatRelativeTime } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyLimitModal from "@/components/modals/ApiKeyLimitModal";
 import { ArchiveIcon, ClockFading, ScaleIcon } from "lucide-react";
+import AgentEmptyState from "@/components/AgentEmptyState";
+import { Archive, ArchiveRestore, Pause, Play, Trash2, Undo2 } from "lucide-react";
+import DeleteModal from "@/components/UI/DeleteModal";
 
 export const runtime = 'edge';
 
+const BRIDGE_STATUS = {
+  ACTIVE: 1,
+  PAUSED: 0
+};
 function Home({ params, isEmbedUser }) {
+  // Use the tutorial videos hook
+  const { getBridgeCreationVideo } = useTutorialVideos();
+  
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
@@ -37,9 +48,14 @@ function Home({ params, isEmbedUser }) {
       averageResponseTime: orgData.average_response_time || [],
       isLoading: state.bridgeReducer.loading,
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
+      descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
+      bridgeStatus: state.bridgeReducer.allBridgesMap,
+      showHistory:  state.appInfoReducer.embedUserDetails?.showHistory||false,
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
+  const [loadingAgentId, setLoadingAgentId] = useState(null);
+  const [itemToDelete, setItemToDelete] = useState(null);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
@@ -57,23 +73,42 @@ function Home({ params, isEmbedUser }) {
 
   useEffect(() => {
     setFilterBridges(allBridges)
+  }, [allBridges]);
+
+  // Reset loading state when component unmounts or navigation completes
+  useEffect(() => {
+    return () => {
+      setLoadingAgentId(null);
+    };
+  }, [allBridges]);
+
+  // Reset loading state when component unmounts or navigation completes
+  useEffect(() => {
+    return () => {
+      setLoadingAgentId(null);
+    };
   }, []);
 
   
-  const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0);
-  const filteredUnArchivedBridges = filterBridges?.filter((item) => item.status === 1 || item.status === undefined);
+  const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0 && !item.deletedAt);
+  const filteredUnArchivedBridges = filterBridges?.filter((item) => (item.status === 1 || item.status === undefined) && !item.deletedAt);
+  const filteredDeletedBridges = filterBridges?.filter((item) => item.deletedAt);
 
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
-    name: <div className="flex gap-3">
+    name: <div className="flex gap-3 items-center">
       <div className="flex gap-2 items-center">
-        {getIconOfService(item.service, 30, 30)}
+        {loadingAgentId === item._id ? (
+          <div className="loading loading-spinner loading-sm"></div>
+        ) : (
+          getIconOfService(item.service, 20, 20)
+        )}
       </div>
       <div className="flex-col" title={item.name}>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
+            { item.name}
             {item.bridge_status === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
                   <ClockIcon size={12}/>
@@ -81,11 +116,7 @@ function Home({ params, isEmbedUser }) {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs" title={item.slugName}>
-              {item?.slugName || ""}
-            </p>
-          </div>
+          
         </div>
       </div>
     </div>,
@@ -98,7 +129,8 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
-    bridge_quota: item?.bridge_quota
+    bridge_quota: item?.bridge_quota,
+    isLoading: loadingAgentId === item._id
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -106,12 +138,21 @@ function Home({ params, isEmbedUser }) {
     model: item.configuration?.model || "",
     name: <div className="flex gap-3">
       <div className="flex gap-2 items-center">
-        {getIconOfService(item.service, 30, 30)}
+        {loadingAgentId === item._id ? (
+          <div className="loading loading-spinner loading-sm"></div>
+        ) : (
+          getIconOfService(item.service, 20, 20)
+        )}
       </div>
       <div className="flex-col">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            {item.name}
+            <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
+              {item.name}
+            </span>
+            {loadingAgentId === item._id && (
+              <span className="text-xs text-primary opacity-70">Loading...</span>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <p className="opacity-60 text-xs">
@@ -136,13 +177,89 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    bridge_quota: item?.bridge_quota
+    bridge_quota: item?.bridge_quota,
+    isLoading: loadingAgentId === item._id
+  }));
+
+  // Helper function to calculate days remaining for deletion (30 days from deletedAt)
+  const getDaysRemaining = (deletedAt) => {
+    if (!deletedAt) return 0;
+    const deletedDate = new Date(deletedAt);
+    const expiryDate = new Date(deletedDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days from deletion
+    const now = new Date();
+    const diffTime = expiryDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  const DeletedBridges = filteredDeletedBridges?.map((item) => ({
+    _id: item._id,
+    model: item.configuration?.model || "",
+    name: <div className="flex gap-3">
+      <div className="flex gap-2 items-center">
+        {loadingAgentId === item._id ? (
+          <div className="loading loading-spinner loading-sm"></div>
+        ) : (
+          getIconOfService(item.service, 20, 20)
+        )}
+      </div>
+      <div className="flex-col">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
+              {item.name}
+            </span>
+            {loadingAgentId === item._id && (
+              <span className="text-xs text-primary opacity-70">Loading...</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="opacity-60 text-xs">
+              {item?.slugName || ""}
+            </p>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            Deleted {formatRelativeTime(item.deletedAt)}
+          </div>
+        </div>
+      </div>
+    </div>,
+    actualName: item?.name || "",
+    slugName: item?.slugName || "",
+    service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
+    bridgeType: item.bridgeType,
+    status: item.status,
+    deletedAt: item.deletedAt,
+    daysRemaining: getDaysRemaining(item.deletedAt),
+    versionId: item?.published_version_id || item?.versions?.[0],
+    totalTokens: item?.total_tokens,
+    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
+    isLoading: loadingAgentId === item._id
   }));
 
   const onClickConfigure = (id, versionId) => {
+    // Prevent multiple clicks while loading
+    if (loadingAgentId) return;
+    
+    setLoadingAgentId(id);
     router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
   };
-
+  const handlePauseBridge = async (bridgeId) => {
+      const newStatus = bridgeStatus[bridgeId]?.bridge_status === BRIDGE_STATUS.PAUSED
+        ? BRIDGE_STATUS.ACTIVE
+        : BRIDGE_STATUS.PAUSED;
+  
+      try {
+        await dispatch(updateBridgeAction({
+          bridgeId,
+          dataToSend: { bridge_status: newStatus }
+        }));
+        toast.success(`Agent ${newStatus === BRIDGE_STATUS.ACTIVE ? 'resumed' : 'paused'} successfully`);
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to update agent status');
+      }
+    };
   const archiveBridge = (bridgeId, newStatus = 0) => {
     try {
       dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
@@ -237,6 +354,37 @@ function Home({ params, isEmbedUser }) {
     setHoverTimeout(timeout);
   };
 
+  const deleteBridge = async (item, name) => {
+    try {
+      const bridgeId = item._id;
+      const response = await dispatch(deleteBridgeAction({bridgeId, org_id: resolvedParams.org_id}));
+      toast.success(response?.data?.message || response?.message || response || 'Agent deleted successfully');
+      
+      // Close modal and clear state after successful deletion
+      setItemToDelete(null);
+      closeModal(MODAL_TYPE.DELETE_MODAL);
+    } catch (error) {
+      console.error('Failed to delete agent', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete agent';
+      toast.error(errorMessage);
+      
+      // Close modal even on error
+      setItemToDelete(null);
+      closeModal(MODAL_TYPE.DELETE_MODAL);
+    }
+  }
+
+  const restoreBridge = async (bridgeId) => {
+    try {
+      const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id, restore: true }));
+      toast.success(response?.data?.message || response?.message || response || 'Agent restored successfully');
+    } catch (error) {
+      console.error('Failed to restore agent', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to restore agent';
+      toast.error(errorMessage);
+    }
+  }
+
   const EndComponent = ({ row }) => {
     const handleDropdownClick = (e) => {
       e.preventDefault();
@@ -271,27 +419,82 @@ function Home({ params, isEmbedUser }) {
     };
 
     return (
-      <div className="flex items-center mr-4 text-sm">
+      <div className="flex items-center gap-2">
+        {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
+            }}>
+              History
+            </button>
+          </div> 
+        ) : null}
+        <div className="dropdown dropdown-left bg-transparent">
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
+          <ul tabIndex={0} className="dropdown-content border border-base-content/10 menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
+            <li><a onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
+            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</a></li>
+            <li> <button
+              onClick={(e) =>{
+                e.preventDefault();
+                e.stopPropagation();
+                handlePauseBridge(row._id)
+              }}
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
+            >
+              {bridgeStatus[row._id]?.bridge_status === BRIDGE_STATUS.PAUSED ? (
+                <>
+                  <Play size={14} className="text-green-600" />
+                  Resume Agent
+                </>
+              ) : (
+                <>
+                  <Pause size={14} className="text-red-600" />
+                  Pause Agent
+                </>
+              )}
+            </button></li>
+            <li><button onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setItemToDelete(row);
+              // Small delay to ensure state is set before opening modal
+              setTimeout(() => {
+                openModal(MODAL_TYPE.DELETE_MODAL);
+              }, 10);
+            }}>
+              <Trash2 size={14} className="text-red-600" />
+              Delete Agent
+            </button></li> 
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  const DeletedEndComponent = ({ row }) => {
+    return (
+      <div className="flex items-center gap-2">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {!isEmbedUser && <button
-            className="btn btn-outline btn-ghost btn-sm"
+          <button 
+            className="btn btn-outline btn-primary btn-sm" 
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/org/${resolvedParams.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
+              restoreBridge(row._id)
             }}
           >
-            Test Case
-          </button>}
+            <Undo2 size={14} />
+            Undo
+          </button>
         </div>
-        <div className="bg-transparent">
-          <div 
-            role="button" 
-            className="hover:bg-base-200 rounded-lg p-3 cursor-pointer" 
-            onClick={handleDropdownClick}
-          >
-            <EllipsisIcon className="rotate-90" size={16} />
-          </div>
+        <div className="text-xs text-error font-medium">
+          {row.daysRemaining} days left
         </div>
       </div>
     )
@@ -306,7 +509,6 @@ function Home({ params, isEmbedUser }) {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
@@ -346,54 +548,50 @@ function Home({ params, isEmbedUser }) {
   }, [hoverTimeout]);
 
   return (
-    <div className="w-full overflow-x-hidden">
-      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
-      {tutorialState?.showTutorial && (
-        <OnBoarding
-          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-          video={ONBOARDING_VIDEOS.bridgeCreation}
-          flagKey={"bridgeCreation"}
+    <div className="w-full overflow-x-hidden flex justify-start">
+      <div className="w-full max-w-full">
+        {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
+        {tutorialState?.showTutorial && (
+          <OnBoarding
+            setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
+            video={getBridgeCreationVideo()}
+            flagKey={"bridgeCreation"}
 
-        />
-      )}
-      <CreateNewBridge orgid={resolvedParams.org_id}/>
-      {!allBridges.length && isLoading && <LoadingSpinner />}
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-start justify-start">
-        <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
-          <div className="w-full">
+          />
+        )}
+        <CreateNewBridge orgid={resolvedParams.org_id}/>
+        {!allBridges.length && isLoading && <LoadingSpinner />}
+        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+        <div className="drawer-content flex flex-col items-start justify-start">
+          <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
+            <div className="w-full">
             {allBridges.length === 0 ? (
-              <div className="text-center w-full h-screen flex justify-center items-center py-10">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-primary">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <p className="text-lg font-semibold text-base-content">Create Your First Agent</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
-                </div>
-              </div>
+              <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser}/>
             ) : (
               <div className="flex flex-col lg:mx-0">
                 <div className="px-2 pt-4">
                   <MainLayout>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
                       <PageHeader
                         title="Agents"
-                        description="Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."
+                        description={descriptions?.Agents || "Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."}
                         docLink="https://gtwy.ai/blogs/features/bridge"
                         isEmbedUser={isEmbedUser}
                       />
-                      <div className="flex-shrink-0 mt-4 sm:mt-0">
-                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
-                      </div>
+                      
                     </div>
                   </MainLayout>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
-                    <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
+                  <div className="flex flex-row gap-4">
+                    {allBridges.length > 5 && (
+                      <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
+                    )}
+                    <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
+                        <button className="btn btn-primary btn-sm " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                      </div>
                   </div>
                 </div>
-
+                
                 <CustomTable 
                   data={UnArchivedBridges} 
                   columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
@@ -428,10 +626,45 @@ function Home({ params, isEmbedUser }) {
                     </div>
                   </div>
                 )}
+                
+                {filteredDeletedBridges?.length > 0 && (
+                  <div className="">
+                    <div className="flex justify-center items-center my-4">
+                      <p className="border-t border-base-300 w-full"></p>
+                      <p className="bg-error text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                        Deleted Agents
+                      </p>
+                      <p className="border-t border-base-300 w-full"></p>
+                    </div>
+                    <div className="opacity-60">
+                      <CustomTable 
+                        data={DeletedBridges} 
+                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        sorting 
+                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        keysToWrap={['name', 'model']} 
+                        endComponent={DeletedEndComponent} 
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
+            </div>
           </div>
         </div>
+        
+        {/* Single DeleteModal for all delete operations */}
+        <DeleteModal 
+          onConfirm={deleteBridge} 
+          item={itemToDelete} 
+          title="Delete Agent" 
+          description={itemToDelete ? `Are you sure you want to delete the Agent "${itemToDelete.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.` : ""}
+          onCancel={() => {
+            setItemToDelete(null);
+            closeModal(MODAL_TYPE.DELETE_MODAL);
+          }}
+        />
       </div>
       <ApiKeyLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeApiKeyLimit} />
       

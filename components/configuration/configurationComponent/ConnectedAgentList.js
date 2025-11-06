@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -11,6 +11,7 @@ import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 const ConnectedAgentList = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -20,8 +21,8 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
-        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
+    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
+        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
@@ -33,28 +34,38 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: versionData?.variables_path || {},
+            bridges: state?.bridgeReducer?.allBridgesMap
+
         };
     });
-    const handleSaveAgent = () => {
+    const handleSaveAgent = (overrideBridge = null, bridgeData) => {
         try {
-            if (!description && !selectedBridge?.description) {
+            const sb = overrideBridge ? overrideBridge : selectedBridge
+            if ((!description && !sb?.bridge_summary && !sb?.connected_agent_details?.description)) {
                 toast?.error("Description Required")
                 return;
             }
+            const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === sb?._id) { return bridge } });
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
-                            [selectedBridge?.name]: {
-                                "description": description ? description : selectedBridge?.description,
-                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                            [sb?.name]: {
+                                "bridge_id": sb?._id || sb?.bridge_id
                             }
                         },
                         agent_status: "1"
+                    }
+                }
+            }))
+            dispatch(updateBridgeAction({
+                bridgeId: sb?._id || sb?.bridge_id,
+                dataToSend: {
+                    connected_agent_details: {
+                        ...bridgeItem?.connected_agent_details,
+                        description: description ? description : sb?.bridge_summary ? sb?.bridge_summary : sb?.connected_agent_details?.description
                     }
                 }
             }))
@@ -67,25 +78,30 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             console.error(error)
         }
     }
-    const handleSelectAgents = (bridge) => {
+    const handleSelectAgents = (bridge, bridgeData) => {
         setSelectedBridge(bridge)
-        openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
+        if (!bridge?.connected_agent_details?.description && !bridge?.bridge_summary) {
+            openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
+            return;
+        }
+        handleSaveAgent(bridge, bridgeData)
     }
-
-    const handleOpenAgentVariable = useCallback((name, item) => {
+    const handleOpenDeleteModal = (name, item) => {
         setSelectedBridge({ name: name, ...item })
-        const { fields, required_params } = (item?.variables && Object.keys(item?.variables)?.length > 0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
-        const threadId = item?.thread_id ? item?.thread_id : false;
-        const versionId = item?.version_id || '';
-        // Ensure function_details (currentVariable) and toolData (agentTools) have the same shape
-        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
-        // Initialize variablesPath for this agent to avoid false diffs in modal
-        setVariablesPath(variables_path[item?.bridge_id] || {})
+        openModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
+    }
+    const handleOpenAgentVariable = useCallback((name, item) => {
+        const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === item?.bridge_id) { return bridge } });
+        setSelectedBridge({ name: name, ...item });
+        const agent_variables = bridgeItem?.connected_agent_details?.agent_variables || {};
+        const description = bridgeItem?.connected_agent_details?.description || item?.description || "";
+        const { fields, required_params } = agent_variables;
+        setCurrentVariable({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
+        setAgentTools({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
-    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
+    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools]);
 
-    const handleRemoveAgent = (name, item) => {
+    const handleRemoveAgent = (item,name) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -94,17 +110,14 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     agents: {
                         connected_agents: {
                             [name]: {
-                                "description": item?.description,
-                                "bridge_id": item?.bridge_id,
-                                "agent_variables": item?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                                "bridge_id": item?.bridge_id
                             }
                         }
                     }
                 }
             })
         ).then(() => {
-            closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
+            closeModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
             setCurrentVariable(null)
             setSelectedBridge(null)
         })
@@ -112,22 +125,35 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     const handleSaveAgentVariable = () => {
         try {
+            const dataToSend = {
+                agents: {
+                    connected_agents: {
+                        [selectedBridge?.name]: {
+                            "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
+                            "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
+                        }
+                    },
+                    agent_status: "1"
+                }
+            }
+            if(agentTools?.version_id){
+                dataToSend.agents.connected_agents[selectedBridge?.name].version_id = agentTools?.version_id
+            }
+            // on Save the bridge and thread id in version only
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
+                dataToSend
+            }))
+            dispatch(updateBridgeAction({
+                bridgeId: selectedBridge?._id || selectedBridge?.bridge_id,
                 dataToSend: {
-                    agents: {
-                        connected_agents: {
-                            [selectedBridge?.name]: {
-                                "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
-                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
-                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
-                                "version_id": agentTools?.version_id ? agentTools?.version_id : ""
-                            }
+                    connected_agent_details:{
+                        agent_variables : {
+                            fields: agentTools?.fields,
+                            required_params: agentTools?.required_params
                         },
-                        agent_status: "1"
+                        description: agentTools?.description
                     }
                 }
             }))
@@ -150,70 +176,63 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }
 
     const handleAgentClicked = (item) => {
-        const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
+        const bridge = bridgeData?.find((bd) => bd?._id === item?.bridge_id)
         if (bridge) {
             const isCmdOrCtrlClicked = (window.event && (window.event.ctrlKey || window.event.metaKey));
             if (isCmdOrCtrlClicked) {
                 window.open(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`, "_blank");
             } else {
-                router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
-            }
+            router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
         }
+    }
     }
 
 
     const renderEmbed = useMemo(() => (
         connect_agents && Object.entries(connect_agents).map(([name, item]) => {
+            const bridge = bridgeData?.find((bd) => bd?._id === item?.bridge_id)
             return (
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`flex w-full mt-2 flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
                 >
                     <div
-                        className="p-2 w-full h-full flex flex-col justify-between"
+                        className="p-2 flex-1 flex items-center"
                         onClick={() => handleAgentClicked(item)}
                     >
-                        <div>
-                            <div className="flex items-center gap-2">
-                                
-                                <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
-                                    <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                        <span>{bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name?.length > 24 ? `${bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name.slice(0, 24)}...` : bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name}</span>
-                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {!item?.description ? "Description Required" : "Active"}
-                                    
-                                </span>
-                                    </div>
-                                </span>
-                                {item?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
+                        <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                            <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
+                                <span className="text-sm font-normal">{name}</span>
+                                {/* <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                                    {(!bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
+                                </span> */}
                             </div>
-                            <div className="w-full flex justify-between flex-row">
-                                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                                    {item?.description || "A description is required for proper functionality."}
-                                </p>
-                                
-                            </div>
-                        </div>
+                        </span>
                     </div>
-                    <div className="dropdown dropdown-end absolute right-1 top-1">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
-                            <EllipsisVerticalIcon size={16} />
-                        </div>
-                        <ul tabIndex={0} className="dropdown-content z-medium menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
-                            <li>
-                                <a onClick={() => handleOpenAgentVariable(name, item)} className="text-sm">
-                                    <SettingsIcon size={16} />
-                                    Config
-                                </a>
-                            </li>
-                            <li>
-                                <a onClick={() => handleRemoveAgent(name, item)} className="text-sm text-error">
-                                    <TrashIcon size={16} />
-                                    Remove
-                                </a>
-                            </li>
-                        </ul>
+                    
+                    {/* Action buttons that appear on hover */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenAgentVariable(name, item);
+                            }}
+                            className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
+                            title="Config"
+                        >
+                            <SettingsIcon size={16} />
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDeleteModal(name,item);
+                            }}
+                            className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
+                            title="Remove"
+                        >
+                            <TrashIcon size={16} />
+                        </button>
                     </div>
                 </div>
             );
@@ -225,17 +244,31 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             <div className="label p-0 flex-col items-start mb-0">
              
                     <>
-                        <div className="dropdown dropdown-bottom-start w-full flex items-center">
+                        <div className="dropdown dropdown-right w-full flex items-center">
+                            {Object?.entries(connect_agents)?.length > 0 ? (
+                         <>
                             <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
                                 <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
                             </InfoTooltip>
                             <button
                                 tabIndex={0}
-                                className="ml-auto flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
+                                className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
                             >
                                 <AddIcon className="w-2 h-2" />
                                 <span className="text-xs">Add</span>
                             </button>
+                        </>
+                            ):(
+                                <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                <button
+                                    tabIndex={0}
+                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                                >
+                                    <AddIcon className="w-2 h-2" />
+                                    <p className="label-text text-sm whitespace-nowrap">Agent</p>
+                                </button>
+                                </InfoTooltip>
+                            )}
                             <ConnectedAgentListSuggestion 
                                 params={params} 
                                 handleSelectAgents={handleSelectAgents} 
@@ -243,16 +276,25 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 shouldToolsShow={shouldToolsShow} 
                                 modelName={model} 
                                 bridges={bridgeData} 
+                                bridgeData={bridgeData}
                             />
                         </div>
-                        <div className="w-full ">
+                        <div className="flex flex-col gap-2 w-full ">
                             {renderEmbed}
                         </div>
                     </>
                
             </div>
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
-
+            <DeleteModal
+                onConfirm={handleRemoveAgent}
+                item={selectedBridge}
+                name={selectedBridge?.name}
+                title="Are you sure?"
+                description={"This action Remove the selected Agent from the Agent."}
+                buttonTitle="Remove Agent"
+                modalType={`${MODAL_TYPE.DELETE_AGENT_MODAL}`}
+            />
             <FunctionParameterModal
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}

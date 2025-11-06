@@ -6,6 +6,7 @@ import {
   shift,
   autoUpdate,
 } from '@floating-ui/react';
+import { createPortal } from 'react-dom';
 import Tutorial from './tutorial';
 import { ExternalLinkIcon } from './Icons';
 import SmartLink from './smartLink';
@@ -52,7 +53,7 @@ const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
         ref={refs.setReference}
         onMouseEnter={handleOpenWithDelay}
         onMouseLeave={handleClose}
-        className="inline-block relative"
+        className="inline-block"
       >
         {children}
 
@@ -92,8 +93,9 @@ const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
         )}
       </div>
 
-      {showTutorial && (
-        <Tutorial video={video} setShowTutorial={setShowTutorial} />
+      {showTutorial && typeof window !== 'undefined' && createPortal(
+        <Tutorial video={video} setShowTutorial={setShowTutorial} />,
+        document.body
       )}
     </>
   );

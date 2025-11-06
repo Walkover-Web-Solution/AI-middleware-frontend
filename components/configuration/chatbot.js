@@ -9,7 +9,7 @@ const Chatbot = ({ params, searchParams }) => {
     bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     chatbot_token: state?.ChatBot?.chatbot_token || '',
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
+    variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
     service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
   }));
@@ -73,51 +73,32 @@ const Chatbot = ({ params, searchParams }) => {
 
   // Initialize chatbot when all required data is available
   useEffect(() => {
-    if (!bridgeName || !bridgeSlugName || !bridgeType || !searchParams?.version) {
+    if (!bridgeName || !bridgeSlugName || !searchParams?.version) {
       return;
     }
 
     const intervalId = setInterval(() => {
-      if (window?.SendDataToChatbot && window.openChatbot) {
+      if (window?.SendDataToChatbot) {
         // Send all configuration data
         window.SendDataToChatbot({
           "bridgeName": bridgeSlugName,
           "threadId": bridgeName?.replaceAll(" ", "_"),
           "parentId": 'parentChatbot',
           "fullScreen": true,
-          "hideCloseButton": true,
+          "hideCloseButton": false,
           "hideIcon": true,
           "version_id": searchParams?.version,
           "variables": variables || {}
         });
-
-        setTimeout(() => {
-          if (bridgeType === 'chatbot' && !sessionStorage.getItem('orchestralUser')) {
-            if (window.openChatbot()) {
-              setIsLoading(false);
-            }
-          }
-        }, 500);
-
         clearInterval(intervalId);
       }
     }, 300);
 
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [chatbot_token]);
+  }, [chatbot_token, searchParams?.version, bridgeSlugName, bridgeName, variables]);
 
   return (
     <>
-      {isLoading ? (
-        <div
-          id="chatbot-loader"
-          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-base-100 text-base-content"
-        >
-          <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
-        </div>
-      ) : null}
+      
     </>
   );
 };

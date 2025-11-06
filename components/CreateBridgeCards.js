@@ -82,7 +82,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                             customizable and easy to deploy.
                         </p>
                     </div>
-                </div>}
+                </div>} 
 
                 {/* Batch API Card */}
                 {!isModal && <div

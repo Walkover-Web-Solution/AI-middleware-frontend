@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
+import Protected from "../protected";
 
 function getOrgIdFromPath(pathname) {
   const parts = (pathname || "").split("/").filter(Boolean);
@@ -11,18 +12,19 @@ function getOrgIdFromPath(pathname) {
   return null;
 }
 
-const CommandPalette = () => {
+const CommandPalette = ({isEmbedUser}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
   const orgId = useMemo(() => getOrgIdFromPath(pathname), [pathname]);
 
   const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData, orchestralFlowData } = useCustomSelector((state) => ({
     agentList: state?.bridgeReducer?.org?.[orgId]?.orgs || [],
-    apikeys: state?.bridgeReducer?.apikeys?.[orgId] || [],
+    apikeys: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     knowledgeBase: state?.knowledgeBaseReducer?.knowledgeBaseData?.[orgId] || [],
     functionData: state?.bridgeReducer?.org?.[orgId]?.functionData || {},
     integrationData: state?.integrationReducer?.integrationData?.[orgId] || [],
@@ -40,11 +42,41 @@ const CommandPalette = () => {
         fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
       );
     };
-    const agentsGroup = filterBy(agentList, ["name", "slugName", "service"]).map((a) => ({
+    const agentsGroup = filterBy(agentList, ["name", "slugName", "service", "_id"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
       subtitle: `${a.service || ""}${a.configuration?.model ? " · " + a.configuration?.model : ""}`,
       type: "agents",
+      published_version_id: a.published_version_id,
+      versions: a.versions
+    }));
+
+    // Also support searching by version_id: include results when the query matches
+    // any entry of the agent's versions array or its published_version_id.
+    const agentsVersionMatches = !q
+      ? []
+      : (agentList || []).flatMap((a) => {
+          const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
+          const published = a?.published_version_id ? [a.published_version_id] : [];
+          const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
+          // Filter candidates that contain the query (case-insensitive)
+          const matches = candidates.filter((v) => v.toLowerCase() === q.toLowerCase());
+          // De-duplicate matches
+          const unique = Array.from(new Set(matches));
+          return unique.map((v) => ({
+            id: a._id,
+            title: a.name || a.slugName || a._id,
+            subtitle: `Version ${v}`,
+            type: "agents",
+            versionId: v,
+          }));
+        });
+
+      const orchestralFlowGroup = filterBy(orchestralFlowData, ["flow_name", "_id"]).map((d) => ({
+      id: d._id,
+      title: d.flow_name || d._id,
+      subtitle: "Orchestral Flow",
+      type: "flows",
     }));
 
     const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
@@ -61,12 +93,12 @@ const CommandPalette = () => {
       type: "docs",
     }));
 
-    const functionsGroup = filterBy(functions, ["endpoint_name", "_id"]).map((fn) => ({
-      id: fn._id,
-      title: fn.endpoint_name || fn._id,
-      subtitle: "Function",
-      type: "functions",
-    }));
+    // const functionsGroup = filterBy(functions, ["endpoint_name", "_id"]).map((fn) => ({
+    //   id: fn._id,
+    //   title: fn.endpoint_name || fn._id,
+    //   subtitle: "Function",
+    //   type: "functions",
+    // }));
 
     const integrationGroup = filterBy(integrationData, ["name", "service", "_id"]).map((d) => ({
       id: d._id,
@@ -79,38 +111,32 @@ const CommandPalette = () => {
       id: d._id,
       title: d.name || d._id,
       subtitle: "Auth Key",
-      type: "auths",
-    }));
-
-    const orchestralFlowGroup = filterBy(orchestralFlowData, ["name", "_id"]).map((d) => ({
-      id: d._id,
-      title: d.name || d._id,
-      subtitle: "Orchestral Flow",
-      type: "flows",
+      type: "Auths",
     }));
 
     return {
-      agents: agentsGroup,
+      // Combine normal agent matches with version-id based matches
+      agents: [...new Set([...agentsGroup, ...agentsVersionMatches])],
+      flows:orchestralFlowGroup,
       apikeys: apikeysGroup,
       docs: kbGroup,
-      functions: functionsGroup,
+      // functions: functionsGroup,
       integrations: integrationGroup,
       auths: authGroup,
-      flows: orchestralFlowGroup,
     };
-  }, [query, agentList, apikeys, knowledgeBase, functions]);
+  }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData, orchestralFlowData]);
 
   const flatResults = useMemo(() => {
     return [
       ...items.agents.map((it) => ({ group: "Agents", ...it })),
       ...items.apikeys.map((it) => ({ group: "API Keys", ...it })),
       ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
-      ...items.functions.map((it) => ({ group: "Functions", ...it })),
+      // ...items.functions.map((it) => ({ group: "Functions", ...it })),
       ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
       ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
-  }, [items]);
+  }, [items, orchestralFlowData, integrationData, authData]);
 
   const groupedResults = useMemo(() => {
     const groups = {};
@@ -122,29 +148,28 @@ const CommandPalette = () => {
   }, [flatResults]);
 
   const openPalette = useCallback(() => {
+    // Check if any DaisyUI modal is currently open
+    const openModals = document.querySelectorAll('.modal-open, dialog[open]');
+    if (openModals.length > 0) {
+      return; // Don't open if any modal is already open
+    }
+    
     setOpen(true);
     setQuery("");
     setActiveIndex(0);
+    setActiveCategoryIndex(0);
   }, []);
   const closePalette = useCallback(() => setOpen(false), []);
 
-  useEffect(() => {
-    const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        openPalette();
-      }
-      if (e.shiftKey && e.key === "?") {
-        e.preventDefault();
-        openPalette();
-      }
-      if (e.key === "Escape") {
-        setOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [openPalette]);
+  // Categories array for navigation
+  const categories = useMemo(() => [
+    { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
+    { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
+    { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
+    { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
+    { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
+    { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
+  ], []);
 
   const navigateTo = useCallback((item) => {
     if (!orgId) {
@@ -153,7 +178,12 @@ const CommandPalette = () => {
     }
     switch (item.type) {
       case "agents":
-        router.push(`/org/${orgId}/agents/configure/${item.id}`);
+        // If a specific version was matched in search, deep-link to that version
+        if (item.versionId) {
+          router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.versionId}`);
+        } else {
+          router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.published_version_id || item.versions?.[0]}`);
+        }
         break;
       case "apikeys":
         router.push(`/org/${orgId}/apikeys`);
@@ -162,12 +192,12 @@ const CommandPalette = () => {
         router.push(`/org/${orgId}/knowledge_base`);
         break;
       case "functions":
-        router.push(`/org/${orgId}/agents/configure`);
+        router.push(`/org/${orgId}/agents`);
         break;
       case "integrations":
         router.push(`/org/${orgId}/integration`);
         break;
-      case "auths":
+      case "Auths":
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case "flows":
@@ -200,7 +230,7 @@ const CommandPalette = () => {
       case 'integrations':
         router.push(`/org/${orgId}/integration`);
         break;
-      case 'auths':
+      case 'Auths':
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case 'flows':
@@ -212,34 +242,79 @@ const CommandPalette = () => {
     closePalette();
   }, [orgId, router, closePalette]);
 
-  const onKeyNav = useCallback((e) => {
-    if (!open) return;
-    const results = flatResults;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, Math.max(0, results.length - 1)));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => Math.max(0, i - 1));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const sel = results[activeIndex];
-      if (sel) navigateTo(sel);
-    }
-  }, [open, flatResults, activeIndex, navigateTo]);
-
   useEffect(() => {
-    if (!open) return;
-    const handler = (e) => onKeyNav(e);
+    const handler = (e) => {
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org"))) {
+        e.preventDefault();
+        openPalette();
+      }
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+      
+      // Handle keyboard navigation when palette is open
+      if (open) {
+        if (query === "") {
+          // Navigate categories when no search query
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveCategoryIndex(prev => 
+              prev < categories.length - 1 ? prev + 1 : 0
+            );
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveCategoryIndex(prev => 
+              prev > 0 ? prev - 1 : categories.length - 1
+            );
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            navigateCategory(categories[activeCategoryIndex].key);
+          }
+        } else {
+          // Navigate search results when there's a query
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveIndex(prev => 
+              prev < flatResults.length - 1 ? prev + 1 : 0
+            );
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveIndex(prev => 
+              prev > 0 ? prev - 1 : flatResults.length - 1
+            );
+          } else if (e.key === "Enter" && flatResults[activeIndex]) {
+            e.preventDefault();
+            navigateTo(flatResults[activeIndex]);
+          }
+        }
+      }
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, onKeyNav]);
+  }, [open, query, activeCategoryIndex, activeIndex, categories, flatResults, navigateCategory, navigateTo, openPalette, pathname]);
+
+  // Scroll active item into view when activeIndex changes
+  useEffect(() => {
+    if (!open || query.trim() === "" || flatResults.length === 0) return;
+    
+    // Use setTimeout to ensure DOM has updated
+    setTimeout(() => {
+      const activeElement = document.querySelector(`[data-result-index="${activeIndex}"]`);
+      if (activeElement) {
+        activeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
+    }, 0);
+  }, [activeIndex, open, query, flatResults.length]);
 
   const showLanding = open && query.trim() === "";
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-start justify-center bg-black/40 p-4" onClick={closePalette}>
+    <div className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closePalette} style={{zIndex: 999999}}>
       <div className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 border-b border-base-300 p-3">
           <Search className="w-4 h-4 opacity-70" />
@@ -250,42 +325,27 @@ const CommandPalette = () => {
             placeholder="Search agents, bridges, API keys, docs, functions..."
             className="flex-1 bg-transparent outline-none"
           />
-          <button className="btn btn-xs" onClick={closePalette}><X className="w-4 h-4" /></button>
+          <button className="btn btn-sm" onClick={closePalette}><X className="w-4 h-4" /></button>
         </div>
         <div className="max-h-[60vh] overflow-auto p-2">
           {showLanding ? (
-            <div className="p-4">
-              <div className="px-2 py-3">
-                <h3 className="text-base font-semibold">Search everything</h3>
-                <p className="text-sm opacity-70">Type to find Agents, API Keys, Knowledge Base, and Functions. Or pick a category to jump in.</p>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-2">
-                {[
-                  { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
-                  { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
-                  { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
-                  { key: 'functions', label: 'Functions', desc: 'Tools and endpoints' },
-                  { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-                  { key: 'auths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
-                  { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
-                ].map((c) => (
+            <div className="">
+
+              <div className="space-y-1 p-2">
+                {categories.map((c, index) => (
                   <button
                     key={c.key}
                     onClick={() => navigateCategory(c.key)}
-                    className="text-left card bg-base-200 hover:bg-base-300 transition-colors"
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex flex-col ${
+                      index === activeCategoryIndex 
+                        ? 'bg-primary text-primary-content' 
+                        : 'bg-base-200 hover:bg-base-300'
+                    }`}
                   >
-                    <div className="card-body p-3">
-                      <div className="font-medium">{c.label}</div>
-                      <div className="text-xs opacity-70">{c.desc}</div>
-                    </div>
+                    <div className="font-medium">{c.label}</div>
+                    <div className="text-xs opacity-70">{c.desc}</div>
                   </button>
                 ))}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2 px-2 text-xs opacity-70">
-                <span className="badge">Cmd/Ctrl + K</span>
-                <span className="badge">Shift + ?</span>
-                <span className="badge">Enter to open</span>
-                <span className="badge">Esc to close</span>
               </div>
             </div>
           ) : (
@@ -303,8 +363,11 @@ const CommandPalette = () => {
                         return (
                           <li
                             key={`${row.type}-${row.id}`}
+                            data-result-index={globalIdx}
                             onClick={() => navigateTo(row)}
-                            className={`cursor-pointer rounded px-3 py-2 ${active ? "bg-base-200" : "hover:bg-base-200"}`}
+                            className={`cursor-pointer rounded px-3 py-2 ${
+                              active ? "bg-primary text-primary-content" : "hover:bg-base-200"
+                            }`}
                           >
                             <div className="text-sm font-medium">{row.title}</div>
                             <div className="text-xs opacity-70">{row.subtitle}</div>
@@ -320,11 +383,11 @@ const CommandPalette = () => {
         </div>
         <div className="flex items-center justify-between border-t border-base-300 p-2 text-xs opacity-70">
           <div>Navigate with ↑ ↓ · Enter to open · Esc to close</div>
-          <div>Cmd/Ctrl + K · Shift + ?</div>
+          <div>Cmd/Ctrl + K</div>
         </div>
       </div>
     </div>
   );
 };
 
-export default CommandPalette;
+export default Protected(CommandPalette);

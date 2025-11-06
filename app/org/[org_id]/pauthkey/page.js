@@ -6,10 +6,11 @@ import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
+import useTutorialVideos from '@/hooks/useTutorialVideos'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
-import { closeModal, openModal, RequiredItem } from '@/utils/utility'
+import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { closeModal, formatDate, formatRelativeTime, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -21,13 +22,17 @@ import { use } from 'react';
 export const runtime = 'edge';
 
 function Page({ params }) {
+  // Use the tutorial videos hook
+  const { getPauthKeyVideo } = useTutorialVideos();
+  
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
+  const { authData, isFirstPauthCreation, descriptions } = useCustomSelector((state) => {
     const user = state.userDetailsReducer.userDetails || [];
     return {
       authData: state?.authDataReducer?.authData || [],
       isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
+      descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
     };
   });
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
@@ -39,9 +44,8 @@ function Page({ params }) {
   });
 
   useEffect(() => {
-    dispatch(getAllAuthData())
     setFilterPauthKeys(authData)
-  }, []); // Removed authData from dependencies to avoid infinite loop
+  }, [authData]);
 
 const maskAuthKey = (authkey) => {
   if (!authkey) return '';
@@ -137,30 +141,36 @@ const maskAuthKey = (authkey) => {
         {tutorialState?.showTutorial && (
           <OnBoarding
             setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-            video={ONBOARDING_VIDEOS.PauthKey}
+            video={getPauthKeyVideo()}
             params={resolvedParams}
             flagKey="PauthKey"
           />
         )}
+        <div className="px-2">
         <MainLayout>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4">
             <PageHeader
-              title="PauthKey"
-              description="A unique key used to validate API requests for sending and receiving messages securely."
+              title="Auth Key"
+              description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
               docLink="https://gtwy.ai/blogs/features/pauthkey"
             />
-            <div className="flex-shrink-0 mt-4 sm:mt-0">
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Pauth Key</button>
-            </div>
+           
           </div>
         </MainLayout>
-        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Pauth keys"/>
-
+        <div className="flex flex-row gap-4">
+      {authData?.length>5 && (
+        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Auth Key"/>
+      )}
+        <div className={`flex-shrink-0 ${authData?.length > 5 ? 'mr-2' : 'ml-2'}`}>
+              <button className="btn btn-primary btn-sm" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Auth Key</button>
+            </div>
+            </div>
+         </div>
         {isCreating ? (
           <div className="flex justify-center items-center h-64">
             <LoadingSpinner />
           </div>
-        ) : (
+        ) : filterPauthKeys.length > 0 ? (
           <div>
             <CustomTable
               data={filterPauthKeys.map(item => ({
@@ -168,6 +178,16 @@ const maskAuthKey = (authkey) => {
                 actualName: item?.name || 'Unnamed Key',
                 originalAuthkey: item?.authkey,
                 authkey: maskAuthKey(item?.authkey), 
+                created_at: (
+                  <div className="group cursor-help">
+                    <span className="group-hover:hidden">
+                      {formatRelativeTime(item?.created_at)}
+                    </span>
+                    <span className="hidden group-hover:inline">
+                      {formatDate(item?.created_at)}
+                    </span>
+                  </div>
+                ),
               }))}
               columnsToShow={PAUTH_KEY_COLUMNS}
               sorting
@@ -177,6 +197,10 @@ const maskAuthKey = (authkey) => {
             />
             {isCreating && <LoadingSpinner />}
           </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500 text-lg">No auth keys entries found</p>
+          </div>
         )}
       </div>
       <dialog
@@ -184,12 +208,12 @@ const maskAuthKey = (authkey) => {
         className="modal modal-bottom sm:modal-middle"
       >
         <div className="modal-box">
-          <h3 className="font-bold text-lg mb-2">Create New Auth</h3>
-          <label className="input input-bordered flex items-center gap-2">
-            Name{RequiredItem()} :
+          <h3 className="font-bold text-lg mb-2">Create New Auth Key</h3>
+          <label className="input input-sm input-bordered flex items-center gap-2">
+            <span>Name{RequiredItem()} :</span>
             <input
               type="text"
-              className="grow"
+              className="grow input input-sm border-none"
               id="authNameInput"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -201,22 +225,23 @@ const maskAuthKey = (authkey) => {
                   }
                 }
               }}
-              placeholder="Insert Auth Name"
+              placeholder="Enter Auth Key Name"
               required
+              maxLength={25}
             />
           </label>
           <div className="modal-action">
             <form method="dialog">
               <div className='flex gap-2'>
-                <button className="btn">Cancel</button>
+                <button className="btn btn-sm">Cancel</button>
               </div>
             </form>
-            <button className="btn btn-primary" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
+            <button className="btn btn-primary btn-sm" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
           </div>
         </div>
       </dialog>
 
-      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Pauth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete API Key' />
+      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Auth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete Auth Key' />
     </div>
   );
 }

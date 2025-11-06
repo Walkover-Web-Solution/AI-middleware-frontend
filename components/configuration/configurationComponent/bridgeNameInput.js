@@ -29,12 +29,19 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
   useEffect(() => {
     setOriginalValue(bridgeName);
     setDisplayValue(
-      bridgeName.length > 20 ? bridgeName.slice(0, 17) + "..." : bridgeName
+      bridgeName.length > 40 ? bridgeName.slice(0, 40) + "..." : bridgeName
     );
   }, [bridgeName]);
 
   const handleChange = (e) => {
-    const input = e.target.value.slice(0, 30);
+    const input = e.target.value.slice(0, 50);
+    
+    // Check if the input contains % character
+    if (input.includes('%')) {
+      toast.error("Agent name cannot contain % character");
+      return; // Don't update the value
+    }
+    
     setOriginalValue(input);
     setDisplayValue(input);
   };
@@ -57,7 +64,7 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
     if (trimmed === "") {
       toast.error("Agent name cannot be empty");
       setDisplayValue(
-        bridgeName.length > 20 ? bridgeName.slice(0, 17) + "..." : bridgeName
+        bridgeName.length > 40 ? bridgeName.slice(0, 40) + "..." : bridgeName
       );
       return;
     }
@@ -70,7 +77,7 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
     }
     isEmbedUser && sendDataToParent("updated", {name:trimmed , agent_id: params?.id}, "Agent Name Updated")
     setDisplayValue(
-      trimmed.length > 20 ? trimmed.slice(0, 17) + "..." : trimmed
+      trimmed.length > 40 ? trimmed.slice(0, 40) + "..." : trimmed
     );
   }, [originalValue, bridgeName, dispatch, params.id]);
 
@@ -88,14 +95,14 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
         <textarea
           className="font-bold min-h-[25px] text-xl outline-none resize-none leading-tight bg-transparent"
           style={{
-            width: "20ch",
+            width: "40ch",
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
             overflowWrap: "break-word",
           }}
           ref={textareaRef}
           rows={1}
-          maxLength={30}
+          maxLength={50}
           value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}

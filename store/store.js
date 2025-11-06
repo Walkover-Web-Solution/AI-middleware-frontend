@@ -21,7 +21,10 @@ import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
 import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
 import orchestralFlowReducer from "./reducer/orchestralFlowReducer";
-
+import prebuiltPromptReducer from "./reducer/prebuiltPromptReducer";
+import apiKeysReducer from "./reducer/apiKeysReducer";
+import variableReducer from "./reducer/variableReducer";
+import appInfoReducer from "./reducer/appInfoReducer";
 const createNoopStorage = () => {
     return {
         getItem(_key) {
@@ -38,7 +41,28 @@ const createNoopStorage = () => {
 
 const storage = typeof window !== "undefined" ? createWebStorage("local") : createNoopStorage();
 
-const persistConfig = { key: 'root', storage, version: 1 };
+// Persist ONLY API Keys slice. Do not persist bridge or any other slices.
+// Note: whitelist keys refer to the keys used in combineReducers below.
+const persistConfig = {
+    key: 'root',
+    storage,
+    // Add the reducer keys you actually want to persist here.
+    // IMPORTANT: These must match the keys defined in combineReducers below.
+    whitelist: [
+        'authDataReducer',
+        'bridgeReducer',
+        'orgReducer',
+        'userDetailsReducer',
+        'serviceReducer',
+        'modelReducer',
+        'flowDataReducer',
+        'apiKeysReducer',
+        'variableReducer',
+        'orchestralFlowReducer',
+        'appInfoReducer',
+        // Add/remove more slice keys as needed
+    ],
+};
 
 const rootReducer = combineReducers({
     bridgeReducer,
@@ -58,7 +82,11 @@ const rootReducer = combineReducers({
     flowDataReducer,
     integrationReducer,
     authReducer,
-    orchestralFlowReducer
+    orchestralFlowReducer,
+    prebuiltPromptReducer,
+    apiKeysReducer,
+    variableReducer,
+    appInfoReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -68,7 +96,7 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: {
-                ignoredActions: ['persist/PERSIST'],
+                ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'persist/REGISTER'],
                 ignoredPaths: ['register'], // Adjust the paths as necessary
             },
         }),

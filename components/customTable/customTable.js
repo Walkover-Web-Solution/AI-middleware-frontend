@@ -53,7 +53,7 @@ const CustomTable = ({
                     return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
                 }
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
-                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
                 }
                 
                 if (typeof valueA === 'number' && typeof valueB === 'number') {
@@ -150,7 +150,9 @@ const CustomTable = ({
                         sortedData.map((row, index) => (
                             <div 
                                 key={row.id || row?._id || index}
-                                className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all relative z-40"
+                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all group ${
+                                    row.isLoading ? 'opacity-60 cursor-wait' : ''
+                                }`}
                                 onClick={() => handleRowClick(
                                     keysToExtractOnRowClick.reduce((acc, key) => {
                                         acc[key] = row[key];
@@ -195,14 +197,14 @@ const CustomTable = ({
                                 
                                 {/* Card Actions */}
                                 {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50">
+                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         {endComponent({row: row})}
                                     </div>
                                 )}
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-6 bg-base-100 rounded-lg shadow-sm">
+                        <div className="text-left py-6 bg-base-100 shadow-sm">
                             <p className="text-base-content/70">No data available</p>
                         </div>
                     )}
@@ -216,12 +218,12 @@ const CustomTable = ({
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
         
         return (
-            <div className="overflow-visible relative z-50">
-                <table className={`table ${tableClass} min-w-full bg-base-100 shadow-md rounded-lg overflow-visible relative z-50`}>
+            <div className="overflow-visible relative z-50 border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
+                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-visible relative z-50 border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
-                                <th className="w-10">
+                                <th className="px-4 py-2 text-left">
                                     <input
                                         type="checkbox"
                                         className="h-4 w-4 cursor-pointer"
@@ -233,28 +235,28 @@ const CustomTable = ({
                             {visibleColumns.map((column) => (
                                 <th
                                     key={column}
-                                    className="capitalize"
+                                    className="px-4 py-2 text-left whitespace-nowrap capitalize"
                                 >
-                                    <div className="flex items-center">
+                                    <div className={`flex items-center justify-start`}>
                                         {sorting && sortableColumns.includes(column) && (
                                             <MoveDownIcon
-                                                className={`w-4 h-4 cursor-pointer ${activeColumn === column
+                                                className={`w-4 h-4 cursor-pointer mr-1 ${activeColumn === column
                                                     ? "text-black"
                                                     : "text-[#BCBDBE] group-hover:text-black"
-                                                    } ${ascending ? "rotate-180" : "rotate-0"}`}
+                                                } ${ascending ? "rotate-180" : "rotate-0"}`}
                                                 onClick={() => sortByColumn(column)}
                                             />
                                         )}
                                         <span
-                                            className="cursor-pointer pl-1"
+                                            className="cursor-pointer"
                                             onClick={() => sortByColumn(column)}
                                         >
-                                            {column}
+                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column}
                                         </span>
                                     </div>
                                 </th>
                             ))}
-                            {endComponent && <th></th>}
+                            {endComponent && <th className="px-4 py-2 text-center"><div className="flex items-center justify-center">Actions</div></th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -262,7 +264,9 @@ const CustomTable = ({
                             sortedData?.map((row, index) => (
                                 <tr 
                                     key={row.id || row?._id || index} 
-                                    className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group relative z-40"
+                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors z-40 cursor-pointer group ${
+                                        row.isLoading ? 'opacity-60 cursor-wait' : ''
+                                    }`}
                                     onClick={() =>
                                         handleRowClick(
                                             keysToExtractOnRowClick.reduce((acc, key) => {
@@ -273,7 +277,7 @@ const CustomTable = ({
                                     }
                                 >
                                     {showRowSelection &&
-                                        <td className="w-10 text-center">
+                                        <td className="px-4 py-2 text-left">
                                             <input
                                                 type="checkbox"
                                                 className="h-4 w-4 cursor-pointer"
@@ -288,13 +292,14 @@ const CustomTable = ({
                                     {visibleColumns?.map((column) => (
                                         <td
                                             key={column}
+                                            className="px-4 py-2 text-left whitespace-nowrap"
                                         >
                                             {getDisplayValue(row, column)}
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td className="relative">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity relative z-50">
+                                        <td className="px-4 py-2 text-left relative">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative z-50">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
@@ -305,7 +310,7 @@ const CustomTable = ({
                             <tr>
                                 <td
                                     colSpan={visibleColumns.length + (showRowSelection ? 1 : 0) + (endComponent ? 1 : 0)}
-                                    className="py-4 text-center"
+                                    className="px-4 py-4 text-left"
                                 >
                                     No data available
                                 </td>
@@ -318,7 +323,7 @@ const CustomTable = ({
     };
 
     return (
-        <div className="bg-base-100 rounded-lg p-2 md:p-4">
+        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto">
             {/* Responsive view switching */}
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>

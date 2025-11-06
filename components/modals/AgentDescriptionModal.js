@@ -13,7 +13,7 @@ const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description, i
                         <span className="label-text">Description</span>
                     </label>
                     <textarea
-                        className="textarea textarea-bordered w-full h-32"
+                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-32"
                         placeholder="Enter description for the agent..."
                         defaultValue={description}
                         key={description}
@@ -22,8 +22,8 @@ const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description, i
                     ></textarea>
                 </div>
                 <div className="modal-action">
-                    <button className="btn" onClick={() => closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)}>Cancel</button>
-                    <button className="btn btn-primary" onClick={() => handleSaveAgent()}>{isAgentToAgentConnect ? 'Save' : 'Add Agent'}</button>
+                    <button className="btn btn-sm" onClick={() => closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)}>Cancel</button>
+                    <button className="btn btn-sm btn-primary" onClick={() => handleSaveAgent()}>{isAgentToAgentConnect ? 'Save' : 'Add Agent'}</button>
                 </div>
             </div>
             <form method="dialog" className="modal-backdrop">

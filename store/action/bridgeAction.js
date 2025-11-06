@@ -1,11 +1,12 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
-import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getState) => {
   try {
+    dispatch(clearPreviousBridgeDataReducer())
     dispatch(isPending())
     const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
@@ -31,6 +32,7 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
 
 export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
   try {
+    dispatch(clearPreviousBridgeDataReducer())
     const response = await createBridge(dataToSend.dataToSend);
     // Extract only the necessary serializable data from the response
     const serializableData = {
@@ -53,6 +55,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
 
 export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => async (dispatch, getState) => {
   try {
+    dispatch(clearPreviousBridgeDataReducer())
     const data = await createBridge(dataToSend)
     dispatch(createBridgeReducer({data, orgId: orgId}));
     return data;
@@ -87,6 +90,19 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     }
     console.error(error);
     throw error
+  }
+};
+
+export const deleteBridgeVersionAction = ({ versionId, bridgeId, org_id }) => async (dispatch) => {
+  try {
+    const response = await deleteBridgeVersionApi({ versionId });
+    dispatch(deleteBridgeVersionReducer({ versionId, bridgeId, org_id }));
+    toast.success("Version Deleted Successfully")
+    return response;
+  } catch (error) {
+    toast.error(error?.response?.data?.detail || "Error While Deleting Version")
+    console.error(error?.response?.data?.detail);
+    throw error;
   }
 };
 
@@ -188,12 +204,16 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
 
 
 
-export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {
+export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => async (dispatch) => {
   try {
-    await deleteBridge(bridgeId);
-    dispatch(deleteBridgeReducer({ bridgeId, orgId }));
+    const response = await deleteBridge(bridgeId, org_id, restore);
+    if (response?.data?.success) {
+      dispatch(deleteBridgeReducer({ bridgeId, orgId: org_id, restore }));
+    }
+    return response;
   } catch (error) {
     console.error('Failed to delete bridge:', error);
+    throw error;
   }
 };
 
@@ -221,6 +241,7 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
 
 export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
+    markUpdateInitiatedByCurrentTab(dataFromEmbed?.version_id);
     const data = await updateapi(bridge_id, dataFromEmbed);
     // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
     dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
@@ -295,12 +316,13 @@ export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dis
   }
 }
 
-export const uploadImageAction = (formData) => async (dispatch) => {
+export const uploadImageAction = (formData, isVedioOrPdf) => async (dispatch) => {
   try {
-    const response = await uploadImage(formData);
+    const response = await uploadImage(formData, isVedioOrPdf);
     return response;
   } catch (error) {
     console.error('Error uploading image:', error);
+    throw error;
   }
 }
 
@@ -310,7 +332,6 @@ export const genrateSummaryAction = ({ bridgeId, versionId, orgId }) => async (d
     return response;
   } catch (error) {
     dispatch(isError());
-    toast.error('Failed to update summary');
     console.error("Failed to update summary: ", error);
   }
 }

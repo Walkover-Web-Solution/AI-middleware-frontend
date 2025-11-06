@@ -1,3 +1,4 @@
+import { formatDate } from '@/utils/utility';
 import React from 'react';
 
 function Table({ data }) {
@@ -6,24 +7,6 @@ function Table({ data }) {
   }
 
   const columnNames = Object.keys(data[0]);
-
-  // Function to format the date
-  const formatDate = (dateString) => {
-    if (isNaN(Date.parse(dateString))) {
-      return dateString; // Return original string if it's not a valid date
-    }
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
-    }).format(date);
-  };
-
   return (
     
       <table className="table">
@@ -38,7 +21,7 @@ function Table({ data }) {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={index} className="hover-row hover">
+            <tr key={index} className="hover cursor-pointer">
               {columnNames.map((columnName) => (
                 <td key={columnName} className="py-4 px-6">
                   {columnName === 'created_at' ? formatDate(item[columnName]) : item[columnName]}

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon } from '@/components/Icons';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -9,6 +9,9 @@ const RenderEmbed = ({
   embedToken,
   params,
   handleRemoveEmbed,
+  handleOpenDeleteModal,
+  handleChangePreTool,
+  name
 }) => {
   const renderEmbed = useMemo(() => {
     return bridgeFunctions?.slice()
@@ -30,10 +33,10 @@ const RenderEmbed = ({
           <div
             key={value?._id}
             id={value?._id}
-            className={`flex w-full  flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+            className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
           >
             <div
-              className="p-2 w-full h-full flex flex-col justify-between"
+              className="p-2 flex-1 flex items-center"
               onClick={() => openViasocket(functionName, {
                 embedToken,
                 meta: {
@@ -42,50 +45,52 @@ const RenderEmbed = ({
                 },
               })}
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
-                    <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
-                      <span>{title?.length > 24 ? `${title.slice(0, 24)}...` : title}</span>
-                      <span
-                        className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!(value?.description || value?.api_description || value?.short_description)
-                          ? 'bg-red-100 text-red-700 border-red-200'
-                          : 'bg-green-100 text-green-700 border-green-200'}`}
-                      >
-                        {!(value?.description || value?.api_description || value?.short_description) ? 'Description Required' : 'Active'}
-                      </span>
-                    </div>
-                  </span>
-                  {value?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
+              <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
+                  <span className="text-sm font-normal">{title}</span>
                 </div>
-                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                  {value?.description || value?.api_description || value?.short_description || 'A description is required for proper functionality.'}
-                </p>
-              </div>
+              </span>
             </div>
-            <div className="dropdown dropdown-end absolute right-1 top-1">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
-                <EllipsisVerticalIcon size={16} />
-              </div>
-              <ul tabIndex={0} className="dropdown-content z-medium menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
-                <li>
-                  <a onClick={() => handleOpenModal(value?._id)} className="text-sm">
-                    <SettingsIcon size={16} />
-                    Config
-                  </a>
-                </li>
-                <li>
-                  <a onClick={() => handleRemoveEmbed(value?._id, value?.function_name)} className="text-sm text-error">
-                    <TrashIcon size={16} />
-                    Remove
-                  </a>
-                </li>
-              </ul>
+
+            {/* Action buttons that appear on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenModal(value?._id);
+                }}
+                className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
+                title="Config"
+              >
+                <SettingsIcon size={16} />
+              </button>
+              {name === "preFunction" && handleChangePreTool && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleChangePreTool();
+                  }}
+                  className="btn btn-ghost btn-sm p-1 hover:text-primary"
+                  title="Change Pre Tool"
+                >
+                  <RefreshIcon size={16} />
+                </button>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenDeleteModal(value?._id, value?.function_name);
+                }}
+                className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
+                title="Remove"
+              >
+                <TrashIcon size={16} />
+              </button>
             </div>
           </div>
         );
       });
-  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params]);
+  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name]);
 
   return <>{renderEmbed}</>;
 };

@@ -4,8 +4,6 @@ const initialState = {
   allBridgesMap: {},
   bridgeVersionMapping: {},
   org: {},
-  apikeys: {},
-  apikeysBackup: {},
   loading: false,
   isFocus: false,
 };
@@ -84,6 +82,21 @@ export const bridgeReducer = createSlice({
       const bridgeIndex = state.org[orgId].orgs.findIndex(org => org._id === bridgeId);
       state.org[orgId].orgs[bridgeIndex].versions.push(newVersionId);
     },
+    deleteBridgeVersionReducer: (state, action) => {
+      const { versionId, bridgeId, org_id } = action.payload;
+      delete state.bridgeVersionMapping[bridgeId][versionId];
+      
+      // Update allBridgesMap versions array (used by dropdown component)
+      if (state.allBridgesMap[bridgeId]) {
+        state.allBridgesMap[bridgeId].versions = state.allBridgesMap[bridgeId].versions.filter(version => version !== versionId);
+      }
+      
+      // Update org versions array
+      const bridgeIndex = state.org[org_id].orgs.findIndex(org => org._id === bridgeId);
+      if (bridgeIndex !== -1) {
+        state.org[org_id].orgs[bridgeIndex].versions = state.org[org_id].orgs[bridgeIndex].versions.filter(version => version !== versionId);
+      }
+    },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
       const { _id, configuration, ...extraData } = bridges;
@@ -117,6 +130,22 @@ export const bridgeReducer = createSlice({
         } else {
           // Create a new array without the removed bridge_id
           state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
+        }
+      }
+
+      if(bridges?.connected_agent_details)
+      {
+        const allData = state.org[bridges.org_id]?.orgs;
+        if (allData) {
+          // Find the index of the bridge to update
+          const index = allData.findIndex(bridge => bridge._id === _id);
+          if (index !== -1) {
+            // Update the specific bridge object within the array immutably
+          state.org[bridges.org_id].orgs[index] = {
+            ...state.org[bridges.org_id].orgs[index],
+            ...bridges
+          };
+          }
         }
       }
       if(bridges?.name)
@@ -169,9 +198,17 @@ export const bridgeReducer = createSlice({
     },
 
     deleteBridgeReducer: (state, action) => {
-      const { bridgeId, orgId } = action.payload;
-      delete state.allBridgesMap[bridgeId];
-      state.org[orgId].orgs = state.org[orgId]?.orgs?.filter(bridge => bridge._id !== bridgeId);
+      const { bridgeId, orgId, restore } = action.payload;
+      const bridge = state.org[orgId]?.orgs?.find(bridge => bridge._id === bridgeId);
+      if (bridge) {
+        if (restore) {
+          // Remove deletedAt to restore the bridge
+          delete bridge.deletedAt;
+        } else {
+          // Add deletedAt to mark as deleted
+          bridge.deletedAt = new Date().toISOString();
+        }
+      }
     },
     integrationReducer: (state, action) => {
       const { dataToSend, orgId } = action.payload;
@@ -192,13 +229,15 @@ export const bridgeReducer = createSlice({
         delete state.org[orgId].functionData[functionId];
       }
     },
-    updateVariables: (state, action) => {
-      const { data, bridgeId, versionId = "" } = action.payload;
-      if (versionId) {
-        state.bridgeVersionMapping[bridgeId][versionId].variables = data;
-      } else {
-        state.allBridgesMap[bridgeId].variables = data;
+    setThreadIdForVersionReducer: (state, action) => {
+      const { bridgeId, versionId, thread_id } = action.payload;
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
       }
+      if (!state.bridgeVersionMapping[bridgeId][versionId]) {
+        state.bridgeVersionMapping[bridgeId][versionId] = {};
+      }
+      state.bridgeVersionMapping[bridgeId][versionId].thread_id = thread_id;
     },
     publishBrigeVersionReducer: (state, action) => {
       const { bridgeId = null, versionId = null, orgId = null } = action.payload;
@@ -227,78 +266,6 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.result.org_id].orgs.push(action.payload.result);
       state.loading = false;
     },
-    apikeyDataReducer: (state, action) => {
-      const { org_id, data } = action.payload;
-      if (!state.apikeys) {
-        state.apikeys = {};
-      }
-
-      if (!state.apikeys[org_id]) {
-        state.apikeys[org_id] = [];
-      }
-      state.apikeys[org_id] = data;
-    },
-    createApiKeyReducer: (state, action) => {
-      const { org_id, data } = action.payload;
-      if (state.apikeys[org_id]) {
-        state.apikeys[org_id].push(data);
-      } else {
-        state.apikeys[org_id] = [data];
-      }
-    },
-    
-    // Create a backup of the API keys before any updates
-    backupApiKeysReducer: (state, action) => {
-      const { org_id } = action.payload;
-      
-      // Make sure apikeysBackup exists
-      if (!state.apikeysBackup) {
-        state.apikeysBackup = {};
-      }
-      
-      // Only make a backup if the keys exist
-      if (state.apikeys && state.apikeys[org_id]) {
-        // Use deep cloning to avoid reference issues
-        state.apikeysBackup[org_id] = state.apikeys[org_id];
-      } else {
-        state.apikeysBackup[org_id] = [];
-      }
-    },
-    
-    // Restore from backup when an API call fails
-    apikeyRollBackReducer: (state, action) => { 
-      const { org_id } = action.payload;
-      
-      // Only restore if we have a backup
-      if (state.apikeysBackup && state.apikeysBackup[org_id]) {
-        // Restore the backup
-        state.apikeys[org_id] = [...state.apikeysBackup[org_id]];
-      }
-    },
-    
-    // Update an API key (optimistically or with server data)
-    apikeyUpdateReducer: (state, action) => {
-      const { org_id, id, data, name, comment, apikey_quota } = action.payload;
-      
-      if (state.apikeys && state.apikeys[org_id]) {
-        const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
-        if (index !== -1) {
-          // Update the target with new values
-          const target = state.apikeys[org_id][index];
-          if (name !== undefined) target.name = name;
-          if (data !== undefined) target.apikey = data;
-          if (comment !== undefined) target.comment = comment;
-          if (apikey_quota !== undefined) target.apikey_quota = apikey_quota;
-        }
-      }
-    },
-    
-    apikeyDeleteReducer: (state, action) => {
-      const { org_id, name } = action.payload;
-      if (state.apikeys[org_id]) {
-        state.apikeys[org_id] = state.apikeys[org_id].filter(apiKey => apiKey.name !== name);
-      }
-    },
     optimizePromptReducer: (state, action) => {
       const { bridgeId, prompt = "No optimized prompt" } = action.payload;
       state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
@@ -316,6 +283,34 @@ export const bridgeReducer = createSlice({
       const { tools } = action.payload;
       state.prebuiltTools = tools;
     },
+    
+    // Clear previous bridge and version data before fetching new data
+    clearPreviousBridgeDataReducer: (state, action) => {
+      const { bridgeId, versionId } = action.payload || {};
+      if (!bridgeId && !versionId) {
+        state.allBridgesMap = {};
+        state.bridgeVersionMapping = {};
+        state.loading = false;
+        state.isFocus = false;
+        return;
+      }
+      
+      if (bridgeId && state.allBridgesMap[bridgeId]) {
+        delete state.allBridgesMap[bridgeId];
+      }
+      
+      if (bridgeId && state.bridgeVersionMapping[bridgeId]) {
+        if (versionId && state.bridgeVersionMapping[bridgeId][versionId]) {
+          // Clear specific version
+          delete state.bridgeVersionMapping[bridgeId][versionId];
+        } else {
+          // Clear all versions for the bridge
+          delete state.bridgeVersionMapping[bridgeId];
+        }
+      }
+      state.loading = false;
+      state.isFocus = false;
+    },
   },
 });
 
@@ -327,6 +322,7 @@ export const {
   fetchSingleBridgeReducer,
   fetchSingleBridgeVersionReducer,
   createBridgeVersionReducer,
+  deleteBridgeVersionReducer,
   createBridgeReducer,
   updateBridgeReducer,
   updateBridgeVersionReducer,
@@ -334,12 +330,7 @@ export const {
   updateBridgeToolsReducer,
   deleteBridgeReducer,
   integrationReducer,
-  updateVariables,
   duplicateBridgeReducer,
-  apikeyDataReducer,
-  apikeyUpdateReducer,
-  createApiKeyReducer,
-  apikeyDeleteReducer,
   updateBridgeActionReducer,
   updateFunctionReducer,
   optimizePromptReducer,
@@ -348,9 +339,9 @@ export const {
   webhookURLForBatchAPIReducer,
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
+  setThreadIdForVersionReducer,
   setIsFocusReducer,
-  apikeyRollBackReducer,
-  backupApiKeysReducer
+  clearPreviousBridgeDataReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

@@ -32,7 +32,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
             dataToSend: { ...updatedDataToSend }
         }));
     };
-    
+   
    useEffect(() => {
     if (!service || !bridgeType) return; 
     if (service !== 'openai' && bridgeType === 'batch') {

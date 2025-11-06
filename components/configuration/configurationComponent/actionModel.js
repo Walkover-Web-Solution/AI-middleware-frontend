@@ -157,7 +157,7 @@ const ActionDescription = ({ descriptionRef, handleInputChange }) => (
             <span className="label-text text-lg">Description</span>
         </div>
         <textarea
-            className="textarea textarea-bordered h-24"
+            className="textarea bg-white dark:bg-black/15 textarea-bordered h-24"
             placeholder="Enter a brief bio"
             ref={descriptionRef}
             onChange={handleInputChange}
@@ -174,7 +174,7 @@ const ActionDataInput = ({ dataRef, handleInputChange }) => (
             <span className="label-text text-lg">Data Structure for Frontend</span>
         </div>
         <textarea
-            className="textarea textarea-bordered h-24"
+            className="textarea bg-white dark:bg-black/15 textarea-bordered h-24"
             placeholder="Enter data structure format"
             ref={dataRef}
             onChange={handleInputChange}

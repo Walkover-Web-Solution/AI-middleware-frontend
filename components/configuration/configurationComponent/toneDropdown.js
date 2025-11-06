@@ -87,34 +87,43 @@ const ToneDropdown = ({ params, searchParams }) => {
 
     if (toneValue !== reduxTone?.value) {
       setSelectedTone(toneValue);
-      const tone = TONES.find((tone) => tone.value === toneValue) || {};
-      if (tone) {
+      
+      // Handle "None" option - send empty string
+      if (toneValue === "") {
         dispatch(
           updateBridgeVersionAction({
             versionId: searchParams?.version,
             dataToSend: {
               configuration: {
-                tone: {
-                  value: tone.value,
-                  prompt: tone.prompt,
-                },
+                tone: "",
               },
             },
           })
         );
+      } else {
+        const tone = TONES.find((tone) => tone.value === toneValue) || {};
+        if (tone) {
+          dispatch(
+            updateBridgeVersionAction({
+              versionId: searchParams?.version,
+              dataToSend: {
+                configuration: {
+                  tone: {
+                    value: tone.value,
+                    prompt: tone.prompt,
+                  },
+                },
+              },
+            })
+          );
+        }
       }
     }
   };
 
   return (
     <label className="form-control w-full">
-      <div className="flex items-center pb-1">
         <InfoTooltip tooltipContent={"Select your response tone (optional)."}>
-        <div className="label-text info">
-          Tone
-        </div>
-        </InfoTooltip>
-      </div>
       <div className="flex items-center gap-2">
         <select
           value={selectedTone}
@@ -124,6 +133,9 @@ const ToneDropdown = ({ params, searchParams }) => {
           <option value="" disabled>
             Select a tone
           </option>
+          <option value="">
+            None
+          </option>
           {TONES.map((tone) => (
             <option key={tone.value} value={tone.value}>
               {tone.value}
@@ -131,6 +143,7 @@ const ToneDropdown = ({ params, searchParams }) => {
           ))}
         </select>
       </div>
+      </InfoTooltip>
     </label>
   );
 };

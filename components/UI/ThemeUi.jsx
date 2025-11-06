@@ -1,87 +1,20 @@
 import { MoonIcon, SunIcon, MonitorIcon, ChevronDownIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import LoadingSpinner from "../loadingSpinner";
-import { useCustomSelector } from "@/customHooks/customSelector";
-import { getFromCookies, setInCookies } from "@/utils/utility";
+import { useThemeManager } from "@/customHooks/useThemeManager";
 
 export default function ThemeToggle() {
-  const [actualTheme, setActualTheme] = useState("light");
-  const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const userTheme = useCustomSelector(state => state.userDetailsReducer.userDetails?.meta?.theme);
-  const [theme, setTheme] = useState(userTheme || "system");
-
-  // Get system theme preference
-  const getSystemTheme = () => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  };
-
-  // Apply theme to document - updated to handle multiple methods
-  const applyTheme = (themeToApply) => {
-    if (typeof window !== 'undefined') {
-      const root = document.documentElement;
-      
-      // Method 1: Set data-theme attribute (for DaisyUI and similar frameworks)
-      root.setAttribute('data-theme', themeToApply);
-      
-      // Method 2: Add/remove dark class (for Tailwind and similar frameworks)
-      if (themeToApply === 'dark') {
-        root.classList.add('dark');
-        root.classList.remove('light');
-      } else {
-        root.classList.add('light');
-        root.classList.remove('dark');
-      }
-      
-      // Method 3: Set CSS custom property (for custom CSS variables)
-      root.style.setProperty('--theme', themeToApply);
-    }
-  };
-
-  // Initialize component state from cookies
-  useEffect(() => {
-    const savedTheme = getFromCookies("theme") || "system";
-    const systemTheme = getSystemTheme();
-    
-    setTheme(savedTheme);
-    
-    let themeToApply;
-    if (savedTheme === "system") {
-      themeToApply = systemTheme;
-      setActualTheme(systemTheme);
-    } else {
-      themeToApply = savedTheme;
-      setActualTheme(savedTheme);
-    }
-    
-    // Apply the theme immediately
-    applyTheme(themeToApply);
-  }, []);
-
-  // Listen for system theme changes to update display
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      
-      // Only update display if currently using system theme
-      if (theme === "system") {
-        setActualTheme(newSystemTheme);
-        applyTheme(newSystemTheme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
-  }, [theme]);
+  const { 
+    theme, 
+    actualTheme, 
+    loading, 
+    changeTheme, 
+    getThemeLabel,
+    isSystemTheme,
+    isDarkTheme,
+    isLightTheme 
+  } = useThemeManager();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -99,33 +32,8 @@ export default function ThemeToggle() {
   }, [isDropdownOpen]);
 
   const handleThemeChange = (newTheme) => {
-    setLoading(true);
     setIsDropdownOpen(false);
-
-    setTheme(newTheme);
-    setInCookies("theme", newTheme);
-
-    // Apply the theme
-    let themeToApply;
-    if (newTheme === "system") {
-      const systemTheme = getSystemTheme();
-      themeToApply = systemTheme;
-      setActualTheme(systemTheme);
-    } else {
-      themeToApply = newTheme;
-      setActualTheme(newTheme);
-    }
-    
-    applyTheme(themeToApply);
-
-    setTimeout(() => setLoading(false), 500);
-  };
-
-  const getThemeLabel = () => {
-    if (theme === "system") {
-      return `System (${actualTheme === "dark" ? "Dark" : "Light"})`;
-    }
-    return theme === "light" ? "Light Theme" : "Dark Theme";
+    changeTheme(newTheme);
   };
 
   const getThemeIcon = () => {

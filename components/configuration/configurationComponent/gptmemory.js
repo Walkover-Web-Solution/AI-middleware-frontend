@@ -34,7 +34,7 @@ const   GptMemory = ({ params, searchParams }) => {
     }, [gpt_memory_context]);
 
     return (
-        <div className="bg-base-100 border border-base-content/20 rounded-md mt-4">
+        <div className="bg-base-100 border border-base-content/20 rounded-md mb-4">
             {/* Header Section */}
             <div className="p-2">
                 <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ const   GptMemory = ({ params, searchParams }) => {
                             </p>
                         </div>
                         <textarea
-                            className="textarea textarea-bordered w-full min-h-[7rem] resize-y bg-base-100 border-base-300 focus:border-base-content/30 focus:outline-none transition-colors text-sm leading-relaxed placeholder:text-base-content/40"
+                            className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-[7rem] resize-y border-base-300 focus:border-base-content/30 focus:outline-none transition-colors text-sm leading-relaxed placeholder:text-base-content/40"
                            defaultValue={gpt_memory_context}
                            onBlur={handleUserReferenceChange}
                            key={gpt_memory_context}

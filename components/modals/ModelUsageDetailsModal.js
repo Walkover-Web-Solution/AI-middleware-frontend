@@ -70,7 +70,7 @@ const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
             <button
               type="button"
               onClick={handleClose}
-              className="btn"
+              className="btn btn-sm"
             >
               Close
             </button>

@@ -54,18 +54,6 @@ export const userDetailsReducer = createSlice({
         }
       }
     },
-    updateUserDetialsForEmbedUser: (state, action) => {
-      const validUpdates = Object.entries(action.payload).reduce((acc, [key, value]) => {
-        if (value !== null && value !== undefined) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
-      state.userDetails = {
-        ...state.userDetails,
-        ...validUpdates
-      };
-    },
 
   }
 }
@@ -76,7 +64,6 @@ export const {
   updateUserDetails,
   updateToken,
   updateGtwyAccessToken,
-  updateUserMeta,
-  updateUserDetialsForEmbedUser
+  updateUserMeta
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

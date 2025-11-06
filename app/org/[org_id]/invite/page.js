@@ -3,17 +3,21 @@ import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
 import { useCallback, useEffect, useState, useMemo} from 'react';
 import { toast } from 'react-toastify';
-import { TrashIcon, UserCircleIcon } from '@/components/Icons';
+import { InfoIcon, TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import DeleteModal from '@/components/UI/DeleteModal';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
+import InfoTooltip from '@/components/InfoTooltip';
 
 export const runtime = 'edge';
 
 function InvitePage({ params }) {
-  const userEmailData = useCustomSelector((state) => state?.userDetailsReducer?.userDetails?.email)
+  const {userEmailData, descriptions} = useCustomSelector((state) => ({
+    userEmailData: state?.userDetailsReducer?.userDetails?.email,
+    descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+  }))
   const [email, setEmail] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -159,7 +163,7 @@ function InvitePage({ params }) {
         if(response)
         {
           setInvitedMembers([]);
-          fetchInvitedMembers();
+          fetchInvitedMembers(1,true);
         }
     } catch (error) {
       toast.error('An error occurred while deleting member.');
@@ -173,7 +177,7 @@ function InvitePage({ params }) {
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-3xl font-bold mb-2">Invite Team Members</h1>
-        <p className="text-base-content/70">Add new team members to your Organization</p>
+        <p className="text-base-content/70"> {descriptions?.['Members'] || "Add new team members to your Organization"}</p>
       </div>
 
       {/* Invite Form */}
@@ -185,12 +189,12 @@ function InvitePage({ params }) {
             onChange={handleEmailChange}
             onKeyPress={handleKeyPress}
             placeholder="Enter email address"
-            className="input input-bordered w-full"
+            className="input input-bordered w-full input-sm"
           />
           <button
             onClick={handleInviteSubmit}
             disabled={isInviting}
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
           >
             {isInviting ? 'Sending...' : 'Send Invite'}
           </button>
@@ -203,14 +207,23 @@ function InvitePage({ params }) {
           <h2 className="text-md font-semibold">
             Team Members ({totalMembers})
           </h2>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Search members..."
-            className="input input-bordered w-96"
+          
+            <div className='relative'>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search..."
+            className="input input-bordered w-96 input-sm"
           />
-        </div>
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <InfoTooltip tooltipContent="Search Members by Name and Email">
+                        <InfoIcon className='w-4 h-4 cursor-help text-base-content/60 hover:text-base-content' />
+                      </InfoTooltip>
+                    </div>
+            </div>
+        
+          </div>
 
         {/* Members List - Scrollable Container */}
         <div id="scrollableDiv" className="h-[65vh] overflow-y-auto">
@@ -241,12 +254,12 @@ function InvitePage({ params }) {
                       </div>
                     </div>
                     <div>
-                    {userEmailData !==member?.email && <button
+                    <button
                       onClick={() => {setMemberToDelete(member); openModal(MODAL_TYPE.DELETE_MODAL)}}
                       className="btn-sm text-error"
                     >
                       <TrashIcon size={20}/>
-                    </button>}
+                    </button>
                     </div>
                   </div>
                 ))

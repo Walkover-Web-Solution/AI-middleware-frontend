@@ -16,7 +16,7 @@ const Tutorial = ({video,setShowTutorial}) => {
             &times;
           </button>
 
-          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '76vh', width: '160vh', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
              <iframe
                 src={video}
                 loading="lazy"

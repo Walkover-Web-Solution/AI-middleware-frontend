@@ -18,7 +18,12 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     stream: { name: 'Stream', description: 'Sends the response in real-time as it\'s being generated.' },
     stop: { name: 'Stop', description: 'This parameter tells the model to stop generating text when it reaches any of the specified sequences (like a word or punctuation)' },
     top_p : {name:'Top_p', description: 'Anthropic Claude computes the cumulative distribution over all the options for each subsequent token in decreasing probability order and cuts it off once it reaches a particular probability specified by top_p. You should alter either temperature or top_p, but not both.'},
-    top_k: {name:'Top_k', description: 'Use top_k to remove long tail low probability responses.'}
+    top_k: {name:'Top_k', description: 'Use top_k to remove long tail low probability responses.'},
+    parallel_tool_calls: {name:'Parallel Tool Calls', description: 'Enables parallel execution of tools, allowing multiple tools to run simultaneously.'},
+    reasoning: {
+        name: 'Reasoning',
+        description: 'Controls the level of reasoning used by the model.'
+    },
 };
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream', 'vision'];
@@ -51,7 +56,8 @@ export const KEYS_TO_COMPARE = [
     "user_reference",
     "doc_ids",
     "guardrails",
-    'gpt_memory_context'
+    'gpt_memory_context',
+    'fall_back'
   ]
 
 export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {
@@ -71,6 +77,7 @@ export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {
         case 'user_reference': return 'Rich Text context';
         case 'is_rich_text': return 'Rich Text';
         case 'actions': return 'Actions';
+        case 'fall_back': return 'Fallback Model';
         default: return key;
       }
     };

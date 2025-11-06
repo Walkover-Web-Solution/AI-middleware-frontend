@@ -4,6 +4,7 @@ import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
+import Grok from "@/icons/Grok";
 import GroqIcon from "@/icons/GroqIcon";
 import MistralIcon from "@/icons/MistralIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
@@ -11,6 +12,7 @@ import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
 import { cloneDeep } from "lodash";
+import { Image } from "lucide-react";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
     // Deep clone obj1 to avoid mutating the original object
@@ -147,7 +149,7 @@ export const toggleSidebar = (sidebarId, direction = "left") => {
     };
 
     const handleEscPress = (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' || (event.key === 'k' && event.ctrlKey)) {
             if (direction === "left") {
                 sidebar.classList.add('-translate-x-full');
             } else {
@@ -193,7 +195,9 @@ export const getIconOfService = (service, height, width) => {
         case 'ai_ml':
             return <AIMLIcon height={height} width={width} />;
         case 'mistral':
-            return <MistralIcon height={height} width={width} />;    
+            return <MistralIcon height={height} width={width} />;
+        case 'grok':
+            return <Grok height={height} width={width} />;    
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
@@ -325,6 +329,8 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
     switch (preBuiltTools) {
         case 'web_search':
             return <WebSearchIcon height={height} width={width} />;
+        case 'image_generation':
+            return <Image height={height} width={width} />;
         default:
             return null;
     }
@@ -662,10 +668,13 @@ export function markUpdateInitiatedByCurrentTab(agentId) {
   
   try {
     sessionStorage.setItem('initiated_update_' + agentId, 'true');
-    sessionStorage.setItem('last_initiated_update', JSON.stringify({
-      agentId: String(agentId),
-      timestamp: Date.now()
-    }));
+    const timestamp = new Date().getTime();
+    let agentIds = JSON.parse(sessionStorage.getItem('last_initiated_update') || '[]');
+    if (agentIds === null) {
+      agentIds = [];
+    }
+    agentIds.push({ id: String(agentId), timestamp });
+    sessionStorage.setItem('last_initiated_update', JSON.stringify(agentIds));
   } catch (error) {
     console.error('Error marking update initiation:', error);
   }
@@ -678,10 +687,24 @@ export function didCurrentTabInitiateUpdate(agentId) {
   if (typeof window === 'undefined') return false;
   
   try {
-    const initiated = sessionStorage.getItem('initiated_update_' + agentId);
-    if (initiated === 'true') {
-      sessionStorage.removeItem('initiated_update_' + agentId);
+    const lastInitiated = sessionStorage.getItem('last_initiated_update');
+    if (!lastInitiated) return false;
+    
+    const agentIds = JSON.parse(lastInitiated);
+    const now = Date.now();
+    const timeWindow = 5000; // 5 seconds window for multiple events
+    
+    // Check if this agent was recently updated by current tab and within time window
+    if (agentIds.some(agent => agent.id === String(agentId) && (now - agent.timestamp) < timeWindow)) {
       return true;
+    }
+    
+    // Clean up expired entries
+    if ((now - agentIds[agentIds.length - 1].timestamp) >= timeWindow) {
+      sessionStorage.removeItem('last_initiated_update');
+    agentIds.forEach(agent => {
+      sessionStorage.removeItem('initiated_update_' + agent.id);
+    });
     }
     
     return false;
@@ -690,3 +713,75 @@ export function didCurrentTabInitiateUpdate(agentId) {
     return false;
   }
 }
+  export const createConversationForTestCase = (conversationData) => {
+    let conversation = [];
+    let expected_response = null;
+    
+    const conversationMessages = conversationData.slice(0, conversationData.length - 1);
+
+    conversation = conversationMessages.map(message => ({
+      role: message.sender === "assistant" ? "assistant" : "user",
+      content: message.content
+    }));
+    
+    const lastMessage = conversationData[conversationData.length - 1];
+    expected_response = {
+      response: lastMessage.content
+    };
+    
+    return { conversation, expected: expected_response };
+  }
+
+export const generateKeyValuePairs = (obj) => {
+    const result = {};
+    
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'string') {
+        result[key] = value; // Keep exact string value
+      } else if (typeof value === 'number') {
+        result[key] = value; // Keep exact number value
+      } else if (typeof value === 'boolean') {
+        result[key] = value; // Keep exact boolean value
+      } else if (Array.isArray(value)) {
+        result[key] = value; // Keep exact array with all elements
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = value; // Keep exact object with all properties
+      } else {
+        result[key] = value; // Keep any other value as-is
+      }
+    }
+    
+    return result;
+  };
+
+
+ export const formatRelativeTime = (dateString) => {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+  return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+};
+
+export const formatDate = (dateString) => {
+    if (isNaN(Date.parse(dateString))) {
+      return dateString; // Return original string if it's not a valid date
+    }
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
+    }).format(date);
+  };

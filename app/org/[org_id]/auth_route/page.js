@@ -70,6 +70,7 @@ const Page = ({params}) => {
           <PageHeader
             title="Authentication"
             description="Add authentication routes to enable OAuth 2.0 flows for your application."
+            docLink="https://gtwy.ai/blogs/features/-oauth2.o-1"
           />
         </div>
       </MainLayout>
@@ -127,7 +128,7 @@ const Page = ({params}) => {
 
               <button 
                 onClick={handleSubmit}
-                className="btn btn-primary w-full"
+                className="btn btn-sm btn-primary w-full"
                 disabled={!name || !url || urlError}
               >
                 Add OAuth Route

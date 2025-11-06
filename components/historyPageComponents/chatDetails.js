@@ -1,9 +1,10 @@
 'use client';
 import { MODAL_TYPE } from "@/utils/enums";
-import { allowedAttributes, openModal } from "@/utils/utility";
+import { allowedAttributes, generateKeyValuePairs, openModal } from "@/utils/utility";
 import { CloseCircleIcon, CopyIcon } from "@/components/Icons";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
+import { ChevronDown } from "lucide-react";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
 import { truncate, useCloseSliderOnEsc } from "./assistFile";
 
@@ -43,17 +44,18 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
   useCloseSliderOnEsc(setIsSliderOpen);
 
-  const copyToClipboard = (content) => {
+  const copyToClipboard = (content, message = "Copied to clipboard") => {
     navigator.clipboard
-      .writeText(JSON.stringify(content))
+      .writeText(typeof content === 'string' ? content : JSON.stringify(content))
       .then(() => {
-        toast.success(`Copied to clipboard`);
+        toast.success(message);
       })
       .catch((error) => {
         toast.error(`Error while copying to clipboard`);
         console.log(error);
       });
   };
+
 
   const replaceVariablesInPrompt = (prompt) => {
     return prompt.replace(/{{(.*?)}}/g, (_, variableName) => {
@@ -66,7 +68,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
   };
 
   const handleObjectClick = useCallback((key, displayValue) => {
-      setModalContent(key === 'variables' ? {"variable":displayValue} : displayValue);
+      setModalContent(displayValue);
       openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL);
   }, []);
 
@@ -141,12 +143,51 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                 {truncate(JSON.stringify(displayValue, null, 2), 210)}
                               </pre>
                               {key === "variables" && displayValue && (
-                                <div
-                                  className={`absolute top-2 right-2 tooltip tooltip-primary tooltip-left hover:bg-base-300 p-2 rounded-full cursor-pointer transition-colors duration-200`}
-                                  onClick={(e) => copyToClipboard(displayValue)}
-                                  data-tip="Copy variables"
-                                >
-                                  <CopyIcon size={18} className="text-base-content" />
+                                <div className="absolute top-2 right-2">
+                                  <div className="dropdown dropdown-end">
+                                    <div 
+                                      tabIndex={0} 
+                                      role="button" 
+                                      className="btn btn-sm btn-ghost tooltip tooltip-primary tooltip-left hover:bg-base-300 transition-colors duration-200"
+                                      data-tip="Copy options"
+                                    >
+                                      <CopyIcon size={16} className="text-base-content" />
+                                      <ChevronDown size={12} className="text-base-content" />
+                                    </div>
+                                    <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-64 p-2 shadow bg-base-100 border border-base-300">
+                                      <li>
+                                        <a 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            copyToClipboard(displayValue, "Current values copied to clipboard");
+                                          }}
+                                          className="flex items-center gap-2 text-sm"
+                                        >
+                                          <CopyIcon size={14} />
+                                          <div>
+                                            <div className="font-medium">Copy Current Values</div>
+                                            <div className="text-xs opacity-70">Copy actual runtime values</div>
+                                          </div>
+                                        </a>
+                                      </li>
+                                      <li>
+                                        <a 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const keyValuePairs = generateKeyValuePairs(displayValue);
+                                            copyToClipboard(JSON.stringify(keyValuePairs, null, 2), "Key-value pairs copied to clipboard");
+                                          }}
+                                          className="flex items-center gap-2 text-sm"
+                                        >
+                                          <CopyIcon size={14} />
+                                          <div>
+                                            <div className="font-medium">Copy Key-Value Pairs</div>
+                                            <div className="text-xs opacity-70">Copy structure with data types</div>
+                                          </div>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </div>
                                 </div>
                               )}
                             </div>

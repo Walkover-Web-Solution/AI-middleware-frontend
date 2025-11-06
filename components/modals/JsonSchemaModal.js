@@ -11,7 +11,7 @@ import Canvas from "../Canvas";
 import Modal from "../UI/Modal";
 import { closeModal } from "@/utils/utility";
 
-function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_id}) {
+function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_id, onResetThreadId=()=>{}}) {
   const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState("");
   const { json_schema } = useCustomSelector((state) => ({
@@ -86,7 +86,7 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
         <h3 className="font-bold text-lg">Improve JSON Schema</h3>
           <button
             onClick={handleCloseModal}
-            className="btn"
+            className="btn btn-sm"
             type="button"
           >
             Close
@@ -100,6 +100,7 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
           label="Schema"
           width="100%"
           height="92%"
+          onResetThreadId={onResetThreadId}
         />
       </div>
     </Modal>

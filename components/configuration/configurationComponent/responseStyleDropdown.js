@@ -53,39 +53,44 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
 
     if (styleValue !== reduxResponseStyle?.value) {
       setSelectedStyle(styleValue);
-      const style =
-        RESPONSE_STYLES.find((style) => style.value === styleValue) || {};
-      if (style) {
+      
+      // Handle "None" option - send empty string
+      if (styleValue === "") {
         dispatch(
           updateBridgeVersionAction({
             versionId: searchParams?.version,
             dataToSend: {
               configuration: {
-                responseStyle: {
-                  value: style.value,
-                  prompt: style.prompt,
-                },
+                responseStyle: "",
               },
             },
           })
         );
+      } else {
+        const style =
+          RESPONSE_STYLES.find((style) => style.value === styleValue) || {};
+        if (style) {
+          dispatch(
+            updateBridgeVersionAction({
+              versionId: searchParams?.version,
+              dataToSend: {
+                configuration: {
+                  responseStyle: {
+                    value: style.value,
+                    prompt: style.prompt,
+                  },
+                },
+              },
+            })
+          );
+        }
       }
     }
   };
 
   return (
     <label className="form-control w-full">
-      <div className="flex items-center pb-1">
         <InfoTooltip tooltipContent={"Select the depth of response (optional)."} >
-          <div
-            className="label-text info"
-          >
-            Response Style
-          </div>
-        </InfoTooltip>
-      </div>
-
-
       <div className="flex items-center gap-2">
         <select
           value={selectedStyle}
@@ -95,6 +100,9 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
           <option value="" disabled>
             Select a Response Style
           </option>
+          <option value="">
+            None
+          </option>
           {RESPONSE_STYLES.map((style) => (
             <option key={style.value} value={style.value}>
               {style.value}
@@ -102,6 +110,7 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
           ))}
         </select>
       </div>
+      </InfoTooltip>
     </label>
   );
 };

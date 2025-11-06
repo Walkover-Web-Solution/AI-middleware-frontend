@@ -13,7 +13,7 @@ const FeatureRequests = () => {
           us know, and we’ll work on making GTWY AI even better for you.
         </p>
         <Link target="_blank" href="https://gtwy.featurebase.app/">
-          <button role="button" className="btn btn-primary mt-3">
+          <button role="button" className="btn btn-sm btn-primary mt-3">
             Submit Your Idea
           </button>
         </Link>

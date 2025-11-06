@@ -633,7 +633,7 @@ export default function AddNewModelModal() {
                                                     <textarea value={config.validationConfig.specification.description}
                                                         onChange={e => handleSpecificationChange('description', e.target.value)}
                                                         onBlur={e => handleSpecificationChange('description', e.target.value.trim())}
-                                                        className="textarea textarea-bordered w-full" rows={3}
+                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full" rows={3}
                                                         placeholder={PLACEHOLDERS[config.service]?.description}></textarea>
                                                 </div>
                                                 <div className="form-control">
@@ -649,7 +649,7 @@ export default function AddNewModelModal() {
                                                     <textarea value={(config.validationConfig.specification.usecase || []).join('\n')}
                                                         onChange={e => handleSpecificationChange('usecase', e.target.value.split('\n').filter(Boolean))}
                                                         onBlur={e => handleSpecificationChange('usecase', e.target.value.trim().split('\n'))}
-                                                        className="textarea textarea-bordered w-full"
+                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full"
                                                         rows={3}
                                                         placeholder={PLACEHOLDERS[config.service]?.usecase} />
                                                 </div>
@@ -710,12 +710,12 @@ export default function AddNewModelModal() {
                                         </div>
                                     </div>
                                 )}
-                                    <button type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn">
+                                    <button type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn btn-sm">
                                         Close
                                     </button>
                                     <button type="button"
                                         onClick={handleAddModel}
-                                        className="btn btn-primary"
+                                        className="btn btn-sm btn-primary"
                                         disabled={isFormInvalid}>
                                         Save Model
                                     </button>

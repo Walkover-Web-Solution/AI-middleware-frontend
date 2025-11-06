@@ -3,7 +3,7 @@ import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bri
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { closeModal, sendDataToParent } from "@/utils/utility";
-import { MODAL_TYPE } from "@/utils/enums";
+import { DEFAULT_PROMPT, MODAL_TYPE } from "@/utils/enums";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -30,11 +30,11 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { allBridgeList, modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
+  const { modelsList, SERVICES, showAgentType, hideCreateManuallyButton } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
-    allBridgeList: state.bridgeReducer.org[orgid]?.orgs || [],
     modelsList: state?.modelReducer?.serviceModels[state.selectedService],
-    showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent
+    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent,
+    hideCreateManuallyButton: state.appInfoReducer.embedUserDetails?.hideCreateManuallyButton
   }));
 
   // Memoized calculations
@@ -51,19 +51,10 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   );
 
   // Generate unique names
-  const generateUniqueName = useCallback((isSlugName = false) => {
-    const baseName = isEmbedUser ? 'untitled_agent' : 'Untitled';
-    const pattern = isEmbedUser 
-      ? /^untitled_agent_(?:\d+)$/
-      : /^Untitled(?:(\d+))?$/;
-    
-    const existingNames = allBridgeList
-      ?.filter(bridge => (isSlugName ? bridge?.slugName : bridge?.name)?.match(pattern))
-      ?.length || 0;
-    
-    const newCount = existingNames + 1;
-    return isEmbedUser ? `${baseName}_${newCount}` : `${baseName}${newCount}`;
-  }, [allBridgeList, isEmbedUser]);
+  const generateUniqueName = useCallback(() => {
+    const baseName = 'untitled_agent_';
+    return `${baseName}`;
+  }, []);
 
   // State update helper
   const updateState = useCallback((updates) => {
@@ -96,7 +87,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   useEffect(() => {
     if (state.selectedService && !modelsList) {
-      dispatch(getModelAction({ service: state.selectedService }));
+      // dispatch(getModelAction({ service: state.selectedService }));
     }
   }, [state.selectedService, modelsList, dispatch]);
 
@@ -129,7 +120,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
     }
 
     const name = generateUniqueName();
-    const slugname = generateUniqueName(true);
+    const slugname = generateUniqueName();
 
     if (name.length > 0 && state.selectedModel && state.selectedBridgeTypeCard) {
       updateState({ isLoading: true });
@@ -141,6 +132,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
         slugName: slugname,
         bridgeType: shouldHideAgentType ? "api" : state.selectedBridgeTypeCard || state.bridgeType,
         type: state.selectedType,
+        prompt:DEFAULT_PROMPT
       };
 
       dispatch(createBridgeAction({ dataToSend, orgid }, (data) => {
@@ -231,21 +223,21 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           <h3 className="font-bold text-xl md:text-xl text-base-content">
             Create Agent
           </h3>
-
           {/* Global Error Message */}
           {state.globalError && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-center font-medium">
               {state.globalError}
             </div>
           )}
-
+          {((isEmbedUser && showAgentType )||!isEmbedUser) && (
           <CreateBridgeCards
-            selectedBridgeTypeCard={state.selectedBridgeTypeCard}
-            handleBridgeTypeSelection={handleBridgeTypeSelection}
-            validationErrors={state.validationErrors}
-            isEmbedUser={isEmbedUser}
-          />
+          selectedBridgeTypeCard={state.selectedBridgeTypeCard}
+          handleBridgeTypeSelection={handleBridgeTypeSelection}
+          validationErrors={state.validationErrors}
+          isEmbedUser={isEmbedUser}
 
+        />
+      )}
           {/* Agent Purpose Section */}
           <div className="mt-4 md:mt-4">
             <div className="form-control">
@@ -285,9 +277,11 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
           {/* Modal Actions */}
           <div className="modal-action mb-4 flex flex-col-reverse md:flex-row justify-between gap-4">
+            {((!hideCreateManuallyButton&&isEmbedUser)||!isEmbedUser) && (
+            <>
             <div className="w-full md:w-auto">
               <button
-                className="btn btn-primary text-sm md:text-base w-full"
+                className="btn btn-sm btn-primary text-sm md:text-base w-full"
                 onClick={createBridgeHandler}
                 disabled={state.isLoading}
               >
@@ -305,16 +299,18 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
               <hr className="flex-1 border-t-2 border-base-content/20 md:w-8" />
             </div>
 
+              </>
+            )}
             <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
               <button
-                className="btn text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                className="btn btn-sm text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                 onClick={handleCloseModal}
               >
                 Cancel
               </button>
               
               <button
-                className="btn btn-primary text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                className="btn btn-primary btn-sm text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                 onClick={handleCreateBridgeUsingAI}
                 disabled={state.isAiLoading || state.isLoading}
               >

@@ -227,7 +227,7 @@ function OptimiseBaseModal({
               </div>
               <div className="relative">
                 <textarea
-                  className="textarea textarea-bordered border focus:border-primary caret-base-content p-2 w-full resize-none flex-grow min-h-[60vh]"
+                  className="textarea bg-white dark:bg-black/15 textarea-bordered border focus:border-primary caret-base-content p-2 w-full resize-none flex-grow min-h-[60vh]"
                   value={textareaContent}
                   onChange={(e) => handleContentChange(e.target.value)}
                   readOnly={isStreaming}
@@ -252,7 +252,7 @@ function OptimiseBaseModal({
         <div className="border-t border-base-content/20 mb-2 bg-base-100 pt-1 flex justify-end gap-3">
           <button
             onClick={handleCloseModal}
-            className="btn mt-2"
+            className="btn btn-sm mt-2"
             disabled={isStreaming}
             type="button"
           >
@@ -260,7 +260,7 @@ function OptimiseBaseModal({
           </button>
           <button
             onClick={handleApply}
-            className="btn btn-primary mt-2"
+            className="btn btn-sm btn-primary mt-2"
             disabled={loading || isStreaming || !displayContent}
             type="button"
           >

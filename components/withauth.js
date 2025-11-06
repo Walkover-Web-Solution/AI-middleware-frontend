@@ -38,7 +38,8 @@ const WithAuth = (Children) => {
     // If the user has logged in, it will redirect the user to the bridges page
     // If the user has not logged in, it will redirect the user to the login page
 
-    const isEmbedUser = useCustomSelector((state) => state.userDetailsReducer.userDetails.isEmbedUser);
+    const isEmbedUser = useCustomSelector((state) => state.appInfoReducer.embedUserDetails.isEmbedUser);
+    
     useLayoutEffect(() => {
 
       const runEffect = async (isEmbedUser) => {

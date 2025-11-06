@@ -4,8 +4,9 @@ import { closeModal } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '../UI/Modal'
+import { RotateCcw } from 'lucide-react'
 
-const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpdate, onSave }) => {
+const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpdate, onSave, handleRegenerate, isRegenerating, onPromptSaved }) => {
   const dispatch  = useDispatch();
 
   const handleClose = () => {
@@ -18,20 +19,47 @@ const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpd
     if (newValue !== previousPrompt) {
         dispatch(updateBridgeVersionAction({ versionId: searchParams?.version, dataToSend: { configuration: { prompt: newValue } } }));
     }
+    
+    // Clear the generated prompt state when saved
+    if (onPromptSaved) {
+      onPromptSaved();
+    }
+
     handleClose()
   }
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL}>
       <div className="modal-box w-11/12 max-w-7xl bg-base-100">
+      <div className='flex justify-between items-center'>
         <h3 className="font-bold text-lg mb-4">Update Prompt</h3>
+         {handleRegenerate && (
+              <button 
+                className="btn btn-xs btn-primary ml-2 gap-2" 
+                onClick={handleRegenerate}
+                disabled={isRegenerating}
+              >
+                {isRegenerating ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs"></span>
+                    Regenerating...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="h-4 w-4" />
+                    Regenerate
+                  </>
+                )}
+              </button>
+            )}
+        </div>
         <div className='flex gap-3 w-full'>
           <div className='w-full'>
             <div className="label">
               <span className="label-text">Previous Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
+              className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
               key={previousPrompt}
               defaultValue={previousPrompt}
               readOnly
@@ -40,9 +68,10 @@ const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpd
           <div className='w-full'>
             <div className="label">
               <span className="label-text">Updated Prompt</span>
+              
             </div>
             <textarea
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
+              className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
               key={promotToUpdate}
               defaultValue={promotToUpdate}
               readOnly
@@ -51,8 +80,9 @@ const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpd
         </div>
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn" onClick={handleClose}>Cancel</button>
-            <button className="btn btn-primary ml-2" onClick={handleSave}>Save</button>
+            <button className="btn btn-sm" onClick={handleClose}>Cancel</button>
+           
+            <button className="btn btn-sm btn-primary ml-2" onClick={handleSave}>Save</button>
           </form>
         </div>
       </div>

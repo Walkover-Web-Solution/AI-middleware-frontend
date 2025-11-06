@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useParams, usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 
@@ -17,6 +17,7 @@ import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal
 import { ChatLoadingSkeleton } from './ChatLayoutLoader';
 import { clearThreadData } from '@/store/reducer/historyReducer';
 import EditMessageModal from '../modals/EditMessageModal';
+import { improvePrompt } from '@/config';
 
 // ------------------------------------
 // Constants
@@ -24,7 +25,7 @@ import EditMessageModal from '../modals/EditMessageModal';
 const PAGE_SIZE = 40;
 const SCROLL_BOTTOM_THRESHOLD = 16; // px
 
-const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId,
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId,
   pathName: pathNameProp, search, historyData, threadHandler, setLoading, threadPage, setThreadPage,
   hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue,
 }) => {
@@ -58,6 +59,8 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
   const [loadingData, setLoadingData] = useState(false);
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
+  const [isImprovingPrompt, setIsImprovingPrompt] = useState(false);
+  const [generatedPrompts, setGeneratedPrompts] = useState({}); // Store generated prompts by message ID
 
   const formatDateAndTime = useCallback((created_at) => {
     const date = new Date(created_at);
@@ -80,9 +83,17 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
 
     for (let i = index; i >= 0; i--) {
       if (thread[i].role === 'user') {
-        conversation.push(...(thread[i]?.AiConfig?.messages || []));
+        // Use AiConfig.input or AiConfig.messages (both exist in different scenarios)
+        const aiConfigConversation = thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages || [];
+        conversation.push(...aiConfigConversation);
         AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
-        if (thread[i].id === item.id) break;
+        if (thread[i + 1]?.role === 'tools_call') {
+          conversation.push(thread[i + 1])
+        }
+        // Break after processing the first user message with AiConfig (either input or messages)
+        if (thread[i]?.AiConfig && (thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages)) {
+          break;
+        }
       }
     }
 
@@ -97,7 +108,7 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
       alert('Message cannot be empty.');
       return;
     }
-    dispatch(
+    const result = dispatch(
       updateContentHistory({
         id: modalInput?.Id,
         bridge_id: bridgeId ?? orgId, // prefer explicit bridgeId, fallback to orgId if needed
@@ -107,12 +118,82 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
     );
     setModalInput('');
     closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
-  }, [modalInput, dispatch, bridgeId, orgId]);
+  }, [modalInput, dispatch, bridgeId, orgId, thread]);
+
+  const handleImprovePrompt = async () => {
+    setIsImprovingPrompt(true);
+    try {
+      let prevConv;
+      const variables = {};
+      thread.forEach((item) => {
+        if (item.Id === modalInput?.Id) {
+          const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
+          const filteredConversation = conversation.filter((value) => {
+            if (value.role === 'developer') {
+              variables['prompt'] = value.content;
+            }
+            return value.role !== 'developer';
+          })
+          filteredConversation.push({
+            role: 'assistant',
+            content: modalInput.originalContent
+          })
+          variables["conversation_history"] = filteredConversation;
+        }
+        item.role === 'user' ? prevConv = item : null
+      })
+      variables["updated_response"] = modalInput.content;
+      let data;
+      try {
+        data = await improvePrompt(variables)
+      } catch (error) {
+        console.error(error)
+      }
+      if (data) {
+        setPromptToUpdate(data?.updated_prompt)
+        // Store the generated prompt for this message
+        setGeneratedPrompts(prev => ({
+          ...prev,
+          [modalInput?.Id]: data?.updated_prompt
+        }));
+        openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
+      }
+    } finally {
+      setIsImprovingPrompt(false);
+    }
+  }
 
   const handleClose = useCallback(() => {
     setModalInput('');
     closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   }, []);
+
+  const handleShowGeneratedPrompt = useCallback(() => {
+    if (modalInput?.Id && generatedPrompts[modalInput.Id]) {
+      setPromptToUpdate(generatedPrompts[modalInput.Id]);
+      closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+      openModal(MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL);
+    }
+  }, [modalInput, generatedPrompts]);
+
+  const handleRegenerateFromModal = useCallback(async () => {
+    if (!modalInput?.Id) return;
+    // Trigger regeneration
+    setTimeout(() => {
+      handleImprovePrompt();
+    }, 100);
+  }, [modalInput, handleImprovePrompt]);
+
+  const handlePromptSaved = useCallback(() => {
+    if (modalInput?.Id) {
+      // Clear the generated prompt for this message when saved
+      setGeneratedPrompts(prev => {
+        const updated = { ...prev };
+        delete updated[modalInput.Id];
+        return updated;
+      });
+    }
+  }, [modalInput]);
 
   const calcFlexDirection = useCallback(() => {
     if (historyRef.current && contentRef.current) {
@@ -128,9 +209,20 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
     const container = historyRef.current;
     if (!container) return;
     const { scrollTop, clientHeight, scrollHeight } = container;
-    const nearBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_BOTTOM_THRESHOLD;
+    
+    let nearBottom;
+    
+    if (flexDirection === 'column-reverse') {
+      // In reverse mode, scrollTop = 0 means at bottom, negative values are bounce
+      nearBottom = scrollTop <= SCROLL_BOTTOM_THRESHOLD && scrollTop >= -50;
+    } else {
+      // Normal mode: check distance from bottom
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+      nearBottom = distanceFromBottom <= SCROLL_BOTTOM_THRESHOLD;
+    }
+    
     setShowScrollToBottom(!nearBottom);
-  }, []);
+  }, [flexDirection]);
 
   // ------------------------------------
   // Effects: mount / cleanup
@@ -387,6 +479,7 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
                       params={{ org_id: orgId, id: bridgeId }}
                       index={index}
                       item={item}
+                      thread={thread}
                       threadHandler={threadHandler}
                       formatDateAndTime={formatDateAndTime}
                       integrationData={integrationData}
@@ -423,6 +516,9 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
         searchParams={Object.fromEntries(searchParamsHook.entries())}
         promotToUpdate={promotToUpdate}
         previousPrompt={previousPrompt}
+        handleRegenerate={modalInput?.Id && generatedPrompts[modalInput?.Id] ? handleRegenerateFromModal : null}
+        isRegenerating={isImprovingPrompt}
+        onPromptSaved={handlePromptSaved}
       />
 
       <EditMessageModal
@@ -430,6 +526,10 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
         handleClose={handleClose}
         handleSave={handleSave}
         modalInput={modalInput}
+        handleImprovePrompt={handleImprovePrompt}
+        isImprovingPrompt={isImprovingPrompt}
+        hasGeneratedPrompt={modalInput?.Id && generatedPrompts[modalInput?.Id]}
+        handleShowGeneratedPrompt={handleShowGeneratedPrompt}
       />
     </div>
   );

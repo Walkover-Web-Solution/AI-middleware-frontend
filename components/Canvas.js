@@ -11,32 +11,43 @@ function Canvas({
   messages, 
   setMessages, 
   handleApplyOptimizedPrompt = () => {} ,
-  label = "prompt"
+  label = "prompt",
+  onResetThreadId = () => {}
 }) {
+  const safeMessages = Array.isArray(messages) ? messages : [];
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [instruction, setInstruction] = useState("");
   const [loading, setLoading] = useState(false);
-  const [appliedMessages, setAppliedMessages] = useState(new Set());
+  const [appliedMessages, setAppliedMessages] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
   }, [messages]);
 
   const handleResetChat = () => {
     setMessages([]);
     setInstruction("");
-    setAppliedMessages(new Set());
+    setAppliedMessages("");
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
+    // Notify parent to reset thread id used by backend session
+    onResetThreadId();
   };
 
   const handleApply = (message) => {
-    handleApplyOptimizedPrompt(message.optimized);
-    setAppliedMessages(prev => new Set(prev).add(message.id));
+    // Call the apply function with the optimized content
+    if (typeof handleApplyOptimizedPrompt === 'function') {
+      handleApplyOptimizedPrompt(message.optimized);
+    }
+    setAppliedMessages(message.id);
   };
 
   // Helper function to check if content is JSON and format it
@@ -58,14 +69,26 @@ function Canvas({
     }
   };
 
-  // Handle copy to clipboard
   const handleCopy = (messageId, content) => {
-    navigator.clipboard.writeText(content || '');
-    setCopiedMessageId(messageId);
+    let textToCopy = content || '';
     
-    setTimeout(() => {
-      setCopiedMessageId(null);
-    }, 2000);
+    // If content is an object, stringify it
+    if (typeof content === 'object' && content !== null) {
+      try {
+        textToCopy = JSON.stringify(content, null, 2);
+      } catch (e) {
+        textToCopy = String(content);
+      }
+    }
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    }).catch((err) => {
+      console.error(err);
+    });
   };
 
   const handleSend = async () => {
@@ -77,15 +100,13 @@ function Canvas({
     const userMessage = {
       id: Date.now(),
       sender: "user",
-      content: instruction.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInstruction("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      content: instruction,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
+    setMessages(prev => {
+      return [...prev, userMessage];
+    });
+    setInstruction("");
     setErrorMessage("");
     setLoading(true);
 
@@ -110,7 +131,9 @@ function Canvas({
         optimized: result.updated, // Keep the original format for functionality
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => {
+        return [...prev, assistantMessage];
+      });
     } catch (err) {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
@@ -128,7 +151,7 @@ function Canvas({
       <div className="flex  items-center pb-1 mb-1 pl-2" style={{justifyContent:"flex-end"}}>
         {messages.length > 0 && (
           <button 
-            className="btn btn-xs  btn-outline btn-error hover:btn-error"
+            className="btn btn-sm  btn-outline btn-error hover:btn-error"
             onMouseDown={handleResetChat}
           >
             <RotateCcw size={14}/>
@@ -144,7 +167,7 @@ function Canvas({
           id="messages" 
           className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 py-4 space-y-4"
         >
-          {messages.length === 0 && !loading && (
+          {safeMessages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                <Lightbulb />
@@ -153,13 +176,13 @@ function Canvas({
             </div>
           )}
 
-          {messages.map((message, index) => {
+          {safeMessages.map((message, index) => {
             const { isJson, formatted } = formatMessageContent(message.content);
             
             return (
               <div
                 key={message.id || index}
-                ref={index === messages.length - 1 ? messagesEndRef : null}
+                ref={index === safeMessages.length - 1 ? messagesEndRef : null}
                 className={`chat group ${message.sender === "user" ? "chat-end" : "chat-start"}`}
               >
                 {/* Chat Header with Apply Button */}
@@ -194,14 +217,14 @@ function Canvas({
                   {message.sender === "assistant" && message.optimized && (
                     <div className="mt-4 flex justify-start">
                       <div className="flex items-center gap-2">
-                        {appliedMessages.has(message.id) ? (
+                        {appliedMessages === message.id ? (
                           <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
                             <CheckIconComponent size={14}/>
                             Applied
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleApply(message)}
                           >
                             <MousePointerClick size={14}/>
@@ -216,7 +239,7 @@ function Canvas({
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleCopy(message.id, message.optimized)}
                           >
                             <CopyIconComponent size={14} />
@@ -261,8 +284,8 @@ function Canvas({
             <div className="flex-1 relative mt-1">
               <textarea
                 ref={textareaRef}
-                className="w-full px-4 py-3 text-sm bg-base-100 border border-base-content/40 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none transition-all duration-200 shadow-sm hover:shadow-md min-h-[44px] max-h-32 placeholder-gray-400"
-                placeholder={`Describe how you'd like to improve your ${label}...`}
+                className="w-full textarea textarea-bordered"
+                placeholder={` how you'd like to improve your ${label}...`}
                 value={instruction}
                 rows={1}
                 onChange={(e) => {
@@ -287,14 +310,17 @@ function Canvas({
             </div>
             
             <button 
-              className="h-11 w-11 bg-gradient-to-r from-base-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-base-content bg-base-100 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 shadow-lg hover:shadow-xl disabled:shadow-sm group" 
-              disabled={loading || !instruction.trim()} 
+className={`btn btn-circle transition-all duration-200 ${
+                        loading 
+                            ? 'btn-disabled'
+                            : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                    }`}              disabled={loading || !instruction.trim()} 
               onClick={handleSend}
             >
               {loading ? (
-                <div className="loader ease-linear rounded-full border-8 border-t-8 border-base-200"></div>
+                        <span className="loading loading-dots loading-md"></span>
               ) : (
-                <SendHorizontalIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                        <SendHorizontalIcon size={18} />
               )}
             </button>
           </div>

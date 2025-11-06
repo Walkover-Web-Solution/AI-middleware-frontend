@@ -199,7 +199,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         <span className="text-sm font-medium">Available Guards</span>
                                         <button
                                             onClick={handleToggleOptions}
-                                            className="btn btn-ghost btn-xs btn-circle"
+                                            className="btn btn-ghost btn-sm btn-circle"
                                         >
                                             <CloseCircleIcon size={16} />
                                         </button>
@@ -241,7 +241,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                                 <div className="mt-2">
                                                     <textarea
                                                         placeholder="Write your custom guardrail prompt here..."
-                                                        className="textarea textarea-bordered w-full h-24 text-sm"
+                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
                                                         onBlur={handleCustomPromptChange}
                                                         onChange={(e) => setCustomPrompt(e.target.value)}
                                                         value={customPrompt}

@@ -9,7 +9,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
     // Get all bridges/agents from the store
     const { bridges, apikeyData } = useCustomSelector((state) => ({
         bridges: state?.bridgeReducer?.org?.[orgId]?.orgs || {},
-        apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
+        apikeyData: state?.apiKeysReducer?.apikeys?.[orgId] || []
     }));
 
     // Find bridges/agents that use this API key

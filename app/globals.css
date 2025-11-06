@@ -1,15 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global Input and Textarea Styles - Pure White/Black Backgrounds */
+@layer components {
+  .input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input[type="tel"],
+  textarea {
+    @apply bg-white dark:bg-black/15;
+  }
+  
+  /* Override DaisyUI input classes specifically */
+  .input-bordered,
+  .input-sm,
+  .textarea,
+  .textarea-bordered {
+    @apply bg-white dark:bg-black/15;
+  }
+}
 body {
   @apply font-sans;
 }
-:root::-webkit-scrollbar {
-  display: none;
-}
-body {
-  font-family: sans-serif;
-}
+
 /* global.css or index.css */
 .info {
   @apply font-medium text-gray-500 cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
@@ -45,23 +63,6 @@ body {
 /* Show the button container when the row is hovered */
 .hover-row:hover .button-container {
   visibility: visible;
-}
-
-/* Style for the buttons (customize as needed) */
-.table-button {
-  margin-left: 5px;
-  /* Space between buttons */
-  /* Add more styling here */
-}
-
-/* Ensure the row has a cursor pointer to indicate it's interactive */
-.hover-row {
-  cursor: pointer;
-}
-
-body {
-  /* overflow: visible !important; */
-  overflow-x: hidden;
 }
 
 .line-clamp-5 {
@@ -143,7 +144,6 @@ html {
   z-index: 1;
 }
 
-
 .z-very-low {
   z-index: 0;
 }
@@ -191,4 +191,19 @@ html {
   html, body {
     font-size: 81.25%; /* Reduces to 13px if base is 16px */
   }
+}
+/* Slide In Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
 }

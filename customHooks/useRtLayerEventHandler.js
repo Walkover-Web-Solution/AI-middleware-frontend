@@ -47,12 +47,12 @@ function useRtLayerEventHandler() {
           window.location.reload();
         };
         return (
-          <div className="mt-2 flex justify-end">
+          <div className="mt-2 flex justify-center">
             <button
               onClick={handleRefresh}
               className="btn btn-primary btn-sm"
             >
-              <RefreshIcon />
+              <RefreshIcon size={16}/>
               Refresh Page
             </button>
           </div>
@@ -99,7 +99,7 @@ function useRtLayerEventHandler() {
         } else {
           const isConfigPage = typeof pathName === 'string' && pathName.includes('/configure/');
           if (isConfigPage) {
-            showAgentUpdatedToast();
+            // showAgentUpdatedToast();
           }
         }
         return;
@@ -128,7 +128,7 @@ function useRtLayerEventHandler() {
         } catch (error) {
             console.error("Error parsing message data:", error);
         }
-    }, [dispatch]);
+    }, [dispatch,pathName]);
     
     // WebSocket client initialization with retry logic
     const initializeWebSocketClient = useCallback(async () => {

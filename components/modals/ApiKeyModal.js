@@ -4,27 +4,79 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, RequiredItem } from '@/utils/utility';
 import { usePathname } from 'next/navigation';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
 
 const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id, selectedService }) => {
     const pathName = usePathname();
+    const [ischanged, setischanged] = useState({
+       isAdd: false,
+       isUpdate: false
+    });
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
     const dispatch = useDispatch();
     const { SERVICES } = useCustomSelector((state) => ({ SERVICES: state?.serviceReducer?.services }));
+    
+    // Reset ischanged state when modal opens/closes
+    useEffect(() => {
+        setischanged({
+            isAdd: false,
+            isUpdate: false
+        });
+    }, [selectedApiKey, isEditing]);
+
+    // Handle form input changes
+    const handleFormChange = useCallback((event) => {
+        const form = event.target.form;
+        const formData = new FormData(form);
+        
+        const currentData = {
+            name: formData.get('name') || '',
+            apikey: formData.get('apikey') || '',
+            comment: formData.get('comment') || '',
+            service: service || formData.get('service') || ''
+        };
+
+        // Check if all required fields are filled for Add mode
+        const requiredFields = ['name', 'apikey', 'service'];
+        const allRequiredFilled = requiredFields.every(field => 
+            currentData[field] && currentData[field].trim().length > 0
+        );
+
+        if (isEditing && selectedApiKey) {
+            // For update mode: check if any field has changed
+            const hasChanges = 
+                currentData.name !== (selectedApiKey.name || '') ||
+                currentData.apikey !== (selectedApiKey.apikey || '') ||
+                currentData.comment !== (selectedApiKey.comment || '') ||
+                currentData.service !== (selectedApiKey.service || service || '');
+            
+            setischanged(prev => ({
+                ...prev,
+                isUpdate: hasChanges
+            }));
+        } else {
+            // For add mode: check if all required fields are filled
+            setischanged(prev => ({
+                ...prev,
+                isAdd: allRequiredFilled
+            }));
+        }
+    }, [isEditing, selectedApiKey, service]);
+
     const handleClose = useCallback(() => {
-        closeModal(MODAL_TYPE.API_KEY_MODAL)
         setSelectedApiKey(null);
         setIsEditing(false);
+        closeModal(MODAL_TYPE.API_KEY_MODAL)
     }, [setSelectedApiKey, setIsEditing]);
 
     const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
         const data = {
-            name: formData.get('name').trim().replace(/\s+/g, ''),
+            name: formData.get('name'),
             service: service || formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
@@ -84,11 +136,13 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                           id={field}
                           required={isRequired}
                           type={(field === 'apikey' && isEditing && 'password') || (field === 'apikey_quota' && 'number') || 'text'}
-                          className="input input-bordered"
+                          className="input input-bordered input-sm"
                           name={field}
                           key={field}
                           placeholder={`Enter ${displayLabel}`}
                           defaultValue={field === 'apikey_quota' ? (selectedApiKey ? selectedApiKey.apikey_quota?.limit : '') : selectedApiKey ? selectedApiKey[field] : ''}
+                            onChange={handleFormChange}
+                            {...(field !== 'apikey' && { maxLength: 50 })}
                         />
                       </div>
                     );
@@ -100,10 +154,11 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                     <select
                         id="service"
                         name="service"
-                        className="select select-bordered"
+                        className="select select-sm select-bordered"
                         key={selectedApiKey?.service || service}
                         defaultValue={service || (selectedApiKey ? selectedApiKey.service : '')}
                         disabled={service || (selectedApiKey && selectedApiKey.service)}
+                        onChange={handleFormChange}
                         required
                     >
                         {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
@@ -112,8 +167,18 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                     </select>
                 </div>
                 <div className="modal-action">
-                    <button type="reset" className="btn" onClick={handleClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update' : 'Add'}</button>
+                    <button type="reset" className="btn btn-sm" onClick={handleClose}>Cancel</button>
+                    <button 
+                        type="submit" 
+                        className={`btn btn-sm btn-primary ${
+                            (isEditing && !ischanged.isUpdate) || (!isEditing && !ischanged.isAdd) 
+                                ? 'btn-disabled' 
+                                : ''
+                        }`}
+                        disabled={(isEditing && !ischanged.isUpdate) || (!isEditing && !ischanged.isAdd)}
+                    >
+                        {isEditing ? 'Update' : 'Add'}
+                    </button>
                 </div>
             </form>
         </Modal>

@@ -1,69 +1,33 @@
-import { useCustomSelector } from "@/customHooks/customSelector";
-import { BotIcon, SettingsIcon, FilterSliderIcon, AlertIcon } from "@/components/Icons";
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
-import ApiGuide from './configurationComponent/ApiGuide';
-import ActionList from "./configurationComponent/actionList";
-import AdvancedParameters from "./configurationComponent/advancedParamenter";
-import ApiKeyInput from "./configurationComponent/apiKeyInput";
-import BridgeNameInput from "./configurationComponent/bridgeNameInput";
-import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import React from 'react';  
+import { useConfigurationState } from "@/customHooks/useConfigurationState";
+import { ConfigurationProvider } from "./ConfigurationContext";
+import SetupView from "./SetupView";
 import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
-import EmbedList from "./configurationComponent/embedList";
-import InputConfigComponent from "./configurationComponent/inputConfigComponent";
-import ModelDropdown from "./configurationComponent/modelDropdown";
-import PreEmbedList from "./configurationComponent/preEmbedList";
-import ServiceDropdown from "./configurationComponent/serviceDropdown";
-import SlugNameInput from "./configurationComponent/slugNameInput";
-import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
-import GptMemory from "./configurationComponent/gptmemory";
-import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
-import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
-import BatchApiGuide from "./configurationComponent/BatchApiGuide";
-import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
-import TriggersList from "./configurationComponent/TriggersList";
-import AddVariable from "../addVariable";
-import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
-import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
-import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
-import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
-import RecommendedModal from "./configurationComponent/RecommendedModal";
+import VersionDescriptionInput from './configurationComponent/VersionDescriptionInput';
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
+const ConfigurationPage = ({ 
+    params, 
+    isEmbedUser, 
+    apiKeySectionRef, 
+    promptTextAreaRef, 
+    searchParams,
+    uiState,
+    updateUiState,
+    promptState,
+    setPromptState,
+    handleCloseTextAreaFocus,
+    savePrompt,
+    isMobileView
+}) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
-
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hidePromptGuard, hideAdvancedParameters, hideAdvancedConfigurations } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-        const service = versionData?.service;
-        const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
-        return {
-            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
-            reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
-            modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
-            showConfigType: state.userDetailsReducer.userDetails.showConfigType,
-            showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
-            shouldToolsShow: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.tools,
-            bridgeApiKey: versionData?.apikey_object_id?.[
-                service === 'openai_response' ? 'openai' : service
-            ],
-            prompt: versionData?.configuration?.prompt || "",
-            shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
-            bridge_functions: versionData?.function_ids || [],
-            connect_agents: versionData?.connected_agents || {},
-            knowbaseVersionData: versionData?.doc_ids || [],
-            hidePromptGuard: state.userDetailsReducer.userDetails.hidePromptGuard,
-            hideAdvancedParameters: state.userDetailsReducer.userDetails.hideAdvancedParameters,
-            hideAdvancedConfigurations: state.userDetailsReducer.userDetails.hideAdvancedConfigurations
-        };
-    });
+    
+    const configState = useConfigurationState(params, searchParams);
+    const { bridgeType } = configState;
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -71,32 +35,18 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
             }
         }
-    }, [bridgeType])
+    }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
-    useEffect(() => {
-        const shouldScrollAndFocus = (bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') && reduxPrompt?.trim() === "";
-        if (!shouldScrollAndFocus) return;
-        const timeoutId = setTimeout(() => {
-            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
-            if (textareaElement) {
-                promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
-                setTimeout(() => {
-                    textareaElement.focus();
-                }, 500);
-            }
-        }, 1000);
-        return () => clearTimeout(timeoutId);
-    }, [bridgeType, reduxPrompt]);
-    const handleNavigation = (target) => {
+    const handleNavigation = useCallback((target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
-    };
+    }, [params.org_id, params.id, searchParams?.version, router]);
 
-    const renderNeedHelp = () => {
+    const renderNeedHelp = useMemo(() => () => {
         return (
             <div className="mb-4 mt-4">
                 {!isEmbedUser && <a
-                    href="/faq/how-to-use-gtwy-ai"
+                    href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -105,140 +55,57 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 </a>}
             </div>
         );
-    };
+    }, [isEmbedUser]);
 
-    const renderSetupView = useMemo(() => () => (
-        <>
-            {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
-            {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
-                <>
-                    <PreEmbedList params={params} searchParams={searchParams} />
-                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} hidePromptGuard={hidePromptGuard} />
-                    {/* <NewInputConfigComponent params={params} /> */}
-                    {shouldToolsShow ? (
-                        <>
-                            <EmbedList params={params} searchParams={searchParams} />
-                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                            <ConnectedAgentList params={params} searchParams={searchParams} />
-                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                            <KnowledgebaseList params={params} searchParams={searchParams} />
-                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                        </>
-                    ) : (
-                        <div className="flex items-center gap-2 mt-3 mb-3">
-                          <AlertIcon size={18} className="text-warning" /> 
-                           <h2 className="text-center">This model does not support tools</h2>
-                        </div>
-                    )}
-                    <PrebuiltToolsList params={params} searchParams={searchParams} />
-                </>
-            )}
-            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow} />
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
-                <div className="w-full min-w-0 md:order-2">
-                    <ServiceDropdown
-                        params={params}
-                        apiKeySectionRef={apiKeySectionRef}
-                        promptTextAreaRef={promptTextAreaRef}
-                        searchParams={searchParams}
-                    />
-                </div>
-                <div className="w-full min-w-0 md:order-1">
-                    <ModelDropdown params={params} searchParams={searchParams} />
-                </div>
-                <div className="w-full min-w-0 md:order-3">
-                    <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
-                </div>
-            </div>
-            {((isEmbedUser && !hideAdvancedParameters) || !isEmbedUser )&& (
-                <>
-                <AdvancedParameters params={params} searchParams={searchParams} />
-                </>
-            )}
-            {modelType !== "image" && modelType !== 'embedding' && (
-                <>
-                    <AddVariable params={params} searchParams={searchParams} />
-                    {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
-                        <>
-                        <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
-                        </>
-                    )}
-                    <GptMemory params={params} searchParams={searchParams} />
-                </>
-            )}
-        </>
-    ), [bridgeType, modelType, params, modelName]);
-    const renderChatbotConfigView = useMemo(() => () => (
-        <>
-
-            <UserRefernceForRichText params={params} searchParams={searchParams} />
-            <StarterQuestionToggle params={params} searchParams={searchParams} />
-            <ActionList params={params} searchParams={searchParams} />
-        </>
-    ), [bridgeType, modelType, params, modelName]);
-
-    const renderGuideView = useMemo(() => () => {
-        const guideComponents = {
-            api: <ApiGuide params={params} searchParams={searchParams} modelType={modelType} />,
-            batch: <BatchApiGuide params={params} searchParams={searchParams} />,
-            chatbot: <ChatbotGuide params={params} searchParams={searchParams} />,
-        };
-
-        return (
-            <div className="flex flex-col w-100 overflow-auto gap-3">
-                {bridgeType === 'chatbot' && <SlugNameInput params={params} searchParams={searchParams} />}
-                <h1 className="text-xl font-semibold">
-                    {bridgeType === 'api' ? 'API Configuration' :
-                        bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
-                </h1>
-                <div className="flex flex-col gap-4">
-                    {guideComponents[bridgeType]}
-                </div>
-            </div>
-        );
-    }, [bridgeType, params, modelType]);
+    // Create context value with consolidated state - significantly reduced dependencies
+    const contextValue = useMemo(() => ({
+        ...configState,
+        params,
+        searchParams,
+        isEmbedUser,
+        apiKeySectionRef,
+        promptTextAreaRef,
+        uiState,
+        updateUiState,
+        promptState,
+        setPromptState,
+        handleCloseTextAreaFocus,
+        savePrompt,
+        isMobileView
+    }), [
+        configState,
+        params,
+        searchParams,
+        isEmbedUser,
+        apiKeySectionRef,
+        promptTextAreaRef,
+        uiState,
+        updateUiState,
+        promptState,
+        setPromptState,
+        handleCloseTextAreaFocus,
+        savePrompt,
+        isMobileView
+    ]);
 
     return (
-        <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
-            <div>
-                <BridgeNameInput params={params} searchParams={searchParams} />
-                <VersionDescriptionInput params={params} searchParams={searchParams} />
+        <ConfigurationProvider value={contextValue}>
+            <div className="flex flex-col gap-1 relative mt-2 bg-base-100">
+                <BridgeVersionDropdown params={params} searchParams={searchParams} />
+                <VersionDescriptionInput 
+                    params={params}
+                    searchParams={searchParams} 
+                    isEmbedUser={isEmbedUser} 
+                  />
+                {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
+                    <ChatbotConfigView params={params} searchParams={searchParams} />
+                ) : ( */}
+                    <SetupView />
+                {/* )} */}
+                {renderNeedHelp()}
             </div>
-            {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} searchParams={searchParams} />}
-            {<div className="absolute right-0 top-0">
-                <div className="flex items-center">
-                    <BridgeVersionDropdown params={params} searchParams={searchParams} />
-                    {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        {bridgeType === 'chatbot' && <button
-                            onClick={() => handleNavigation('config')}
-                            className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                        >
-                            <SettingsIcon size={16} className="shrink-0" />
-                            <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
-                        </button>}
-                        {bridgeType === 'chatbot' &&
-                            <button
-                                onClick={() => handleNavigation('chatbot-config')}
-                                className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                            >
-                                <BotIcon size={16} className="shrink-0" />
-                                <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
-                            </button>
-                        }
-                        {/* {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
-                            onClick={() => handleNavigation('guide')}
-                            className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                        >
-                            <FilterSliderIcon size={16} className="shrink-0" />
-                            <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
-                        </button>} */}
-                    </div>}
-                </div>
-            </div>}
-            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : currentView === 'guide' && currentView !== 'trigger' ? renderGuideView() : renderSetupView()}
-            {renderNeedHelp()}
-        </div>
+        </ConfigurationProvider>
     );
-}
+};
 
-export default Protected(ConfigurationPage);
+export default Protected(React.memo(ConfigurationPage));
