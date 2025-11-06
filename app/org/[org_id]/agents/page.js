@@ -9,10 +9,10 @@ import Protected from "@/components/protected";
 import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
-import { archiveBridgeAction, updateBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
+import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { filterBridges, getIconOfService, openModal, closeModal closeModal, formatRelativeTime } from "@/utils/utility";
+import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from "react";
@@ -20,11 +20,11 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import SearchItems from "@/components/UI/SearchItems";
-import ApiKeyLimitModal from "@/components/modals/ApiKeyLimitModal";
-import { ArchiveIcon, ClockFading, ScaleIcon } from "lucide-react";
+import { ClockFading } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
 import { Archive, ArchiveRestore, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import DeleteModal from "@/components/UI/DeleteModal";
+import UsageLimitModal from "@/components/modals/UsageLimitModal";
 
 export const runtime = 'edge';
 
@@ -333,6 +333,50 @@ function Home({ params, isEmbedUser }) {
     }
   };
 
+  const handlePortalCloseImmediate = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    if (portalTriggerElement) {
+      portalTriggerElement.classList.remove('portal-active');
+    }
+    setShowPortal(false);
+    setPortalContent(null);
+    setPortalTriggerElement(null);
+    setIsHoveringPortal(false);
+  };
+
+  // Use utility function for outside click handling
+  const { handleClickOutside, handleKeyDown, handleScroll } = useOutsideClick(
+    portalRef,
+    { current: portalTriggerElement },
+    handlePortalCloseImmediate,
+    showPortal
+  );
+
+  // Add event listeners for dropdown auto-close
+  useEffect(() => {
+    if (showPortal) {
+      // Add scroll listeners to window and any scrollable containers
+      window.addEventListener('scroll', handleScroll, true);
+      document.addEventListener('scroll', handleScroll, true);
+      
+      // Add click outside listener
+      document.addEventListener('mousedown', handleClickOutside);
+      
+      // Add keyboard listener for Escape key
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showPortal, handleClickOutside, handleKeyDown, handleScroll]);
+
   const handlePortalMouseEnter = () => {
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
@@ -395,54 +439,27 @@ function Home({ params, isEmbedUser }) {
           <li><a onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            handlePortalClose();
-            archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-          }}><ArchiveIcon className="mr-2" size={16} />{(row?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
-          <li><a onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handlePortalClose();
+            handlePortalCloseImmediate();
             handleSetBridgeApiKeyLimit(row);
-          }}><ClockFading className="mr-2" size={16} />Set Agent Usage Limit</a></li>
+          }}><ClockFading className="" size={16} />Usage Limit</a></li>
           {row?.bridge_quota && (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handlePortalClose();
+              handlePortalCloseImmediate();
               resetUsage(row);
             }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
           )}
-        </ul>
-      );
-      
-      handlePortalOpen(e.currentTarget, dropdownContent);
-    };
-
-    return (
-      <div className="flex items-center gap-2">
-        {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
-            }}>
-              History
-            </button>
-          </div> 
-        ) : null}
-        <div className="dropdown dropdown-left bg-transparent">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content border border-base-content/10 menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
-            <li><a onClick={(e) => {
+          <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</a></li>
+            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</button></li>
             <li> <button
               onClick={(e) =>{
                 e.preventDefault();
                 e.stopPropagation();
+                handlePortalCloseImmediate();
                 handlePauseBridge(row._id)
               }}
               className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
@@ -462,6 +479,7 @@ function Home({ params, isEmbedUser }) {
             <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handlePortalCloseImmediate();
               setItemToDelete(row);
               // Small delay to ensure state is set before opening modal
               setTimeout(() => {
@@ -471,8 +489,38 @@ function Home({ params, isEmbedUser }) {
               <Trash2 size={14} className="text-red-600" />
               Delete Agent
             </button></li> 
-          </ul>
+        </ul>
+      );
+      
+      handlePortalOpen(e.currentTarget, dropdownContent);
+    };
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center mr-4 text-sm">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
+            }}>
+              History
+            </button>
+          </div> 
+        ) : null}
         </div>
+        <div className="bg-transparent">
+          <div 
+            role="button" 
+            className="hover:bg-base-200 rounded-lg p-3 cursor-pointer" 
+            onClick={handleDropdownClick}
+          >
+            <EllipsisIcon className="rotate-90" size={16} />
+          </div>
+        </div>
+      </div>
       </div>
     )
   }
@@ -666,7 +714,7 @@ function Home({ params, isEmbedUser }) {
           }}
         />
       </div>
-      <ApiKeyLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeApiKeyLimit} />
+      <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeApiKeyLimit} />
       
       {/* Global styles for portal priority */}
       <style jsx global>{`

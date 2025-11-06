@@ -4,7 +4,7 @@ import Modal from '@/components/UI/Modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 
-const ApiKeyLimitModal = ({ data, onConfirm }) => {
+const UsageLimitModal = ({ data, onConfirm }) => {
   const [limit, setLimit] = useState(data?.bridge_quota?.limit);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -49,24 +49,21 @@ const ApiKeyLimitModal = ({ data, onConfirm }) => {
           className="min-w-[25rem] max-w-[50rem] bg-base-100 border border-base-300 rounded-lg p-6 mx-4"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex flex-col space-y-1 text-center sm:text-left">
+          <div className="flex flex-col space-y-2 text-center sm:text-left">
             <h2 className="text-lg font-semibold text-base-content">
               Set Usage Limit
             </h2>
             <p className="text-sm text-base-content flex items-center gap-2">
-              Set a usage limit for the: {data?.name}
+             Agent Name: {data?.actualName}
             </p>
           </div>
           
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="mt-4">
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Limit in $</span>
-              </label>
               <input
                 type="number"
-                placeholder="Enter limit"
-                className="input input-bordered w-full"
+                placeholder="Enter limit in $"
+                className="input input-bordered w-full input-sm"
                 value={limit || ''}
                 onChange={(e) => setLimit(e.target.value)}
                 min="0"
@@ -78,14 +75,14 @@ const ApiKeyLimitModal = ({ data, onConfirm }) => {
               <button
                 type="button"
                 onClick={handleClose}
-                className="btn mt-3 sm:mt-0"
+                className="btn btn-sm"
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
                 disabled={isLoading}
               >
                 {isLoading ? 'Saving...' : 'Save Limit'}
@@ -98,4 +95,4 @@ const ApiKeyLimitModal = ({ data, onConfirm }) => {
   );
 };
 
-export default ApiKeyLimitModal;
+export default UsageLimitModal;
