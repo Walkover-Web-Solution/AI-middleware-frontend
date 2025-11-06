@@ -7,7 +7,6 @@ import { dryRun } from "@/config";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/assistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
-import { FINISH_REASON_DESCRIPTIONS } from '@/utils/enums';
 import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
@@ -57,8 +56,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     uploadedFiles: []
   });
 
-  const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
-
+  const { finishReasonDescription, bridgeType } = useCustomSelector((state) => ({
+    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+  }));
   useEffect(() => {
     const el = messagesContainerRef.current;
     if (el) {
@@ -474,14 +475,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                   />
                                   <span className="text-xs text-base-content/80 leading-tight">
                                     {
-                                      FINISH_REASON_DESCRIPTIONS[
+                                      finishReasonDescription[
                                       message.finish_reason
                                       ]
                                     }
                                   </span>
                                 </div>
                                 <a
-                                  href="https://gtwy.ai/blogs/finish-reasons?source=single"
+                                  href="https://gtwy.ai/blogs/finish-reasons?source=public"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-warning/70 hover:text-warning transition-colors flex-shrink-0 ml-2"

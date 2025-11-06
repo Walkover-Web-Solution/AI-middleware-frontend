@@ -19,7 +19,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
@@ -57,7 +57,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
   }));
   useEffect(() => {
-    dispatch(getTutorialDataAction()); 
+    dispatch(getTutorialDataAction());
+    if(pathName.endsWith("agents")){
+    dispatch(getFinishReasonsAction()); }
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
