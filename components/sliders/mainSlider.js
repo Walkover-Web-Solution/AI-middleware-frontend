@@ -41,7 +41,7 @@ import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { AddIcon, KeyIcon } from '../Icons';
 import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
-import InviteUserModal from '../modals/InviteUserModal';
+import InviteUserModal from '../modals/InviteuserModal';
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
