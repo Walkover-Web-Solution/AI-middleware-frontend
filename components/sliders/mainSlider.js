@@ -9,12 +9,8 @@ import React, {
 import { useDispatch } from 'react-redux';
 import {
   Building2, ChevronDown,
-  Cog, LogOut, Mail,
-  Settings2,
+  LogOut, Mail,
   ChevronRight, ChevronLeft,
-  MonitorPlayIcon,
-  MessageCircleMoreIcon,
-  MessageSquareMoreIcon,
   User,
   AlignJustify,
   FileText,
@@ -22,8 +18,7 @@ import {
   SunIcon,
   MonitorIcon,
   Plus,
-  ArrowLeft,
-  Bot
+  ArrowLeft
 } from 'lucide-react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -39,7 +34,6 @@ import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
-import { AddIcon, KeyIcon } from '../Icons';
 import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
 import InviteUserModal from '../modals/InviteuserModal';
 
@@ -328,7 +322,7 @@ function MainSlider({ isEmbedUser }) {
     {
       id: 'workspace',
       label: 'Workspace',
-      icon: <Settings2 size={14} />,
+      icon: ITEM_ICONS.workspace,
       onClick: () => {
         setIsOrgDropdownExpanded(false);
         setIsOrgDropdownOpen(false);
@@ -339,7 +333,7 @@ function MainSlider({ isEmbedUser }) {
     {
       id: 'userDetails',
       label: 'User Details',
-      icon: <Cog size={14} />,
+      icon: ITEM_ICONS.userDetails,
       onClick: () => {
         setIsOrgDropdownExpanded(false);
         setIsOrgDropdownOpen(false);
@@ -351,7 +345,7 @@ function MainSlider({ isEmbedUser }) {
     {
       id: 'auth',
       label: 'Auth 2.0',
-      icon: <KeyIcon size={14} />,
+      icon: ITEM_ICONS.auth,
       onClick: () => {
         setIsOrgDropdownExpanded(false);
         setIsOrgDropdownOpen(false);
@@ -361,7 +355,7 @@ function MainSlider({ isEmbedUser }) {
     {
       id: 'addModel',
       label: 'Add new Model',
-      icon: <AddIcon size={14} />,
+      icon: ITEM_ICONS.addModel,
       onClick: () => {
         setIsOrgDropdownExpanded(false);
         setIsOrgDropdownOpen(false);
@@ -371,7 +365,7 @@ function MainSlider({ isEmbedUser }) {
     {
       id: 'prebuiltPrompts',
       label: 'GTWY Tools',
-      icon: <Bot size={14} />,
+      icon: ITEM_ICONS.prebuiltPrompts,
       onClick: () => {
         setIsOrgDropdownExpanded(false);
         setIsOrgDropdownOpen(false);
@@ -710,7 +704,7 @@ function MainSlider({ isEmbedUser }) {
                     }}
                   >
                     {showSidebarContent && (
-                      <h3 className="my-2 text-[10px] text-base-content/50 uppercase tracking-wider px-2">
+                      <h3 className="my-2 text-xs text-base-content/50 uppercase tracking-wider px-2">
                         Admin Settings
                       </h3>
                     )}
@@ -753,9 +747,9 @@ function MainSlider({ isEmbedUser }) {
                       : 'hover:bg-base-200 text-base-content'
                   } ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <Settings2 size={16} className="shrink-0" />
+                  {ITEM_ICONS.adminSettings}
                   {showSidebarContent && (
-                    <span className="text-sm truncate">
+                    <span className="text-xs truncate">
                       {isAdminMode ? 'Back to Main' : 'Admin Settings'}
                     </span>
                   )}
@@ -769,7 +763,7 @@ function MainSlider({ isEmbedUser }) {
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <MonitorPlayIcon size={14} className="shrink-0" />
+                  {ITEM_ICONS.tutorial}
                   {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
                 </button>
 
@@ -782,7 +776,7 @@ function MainSlider({ isEmbedUser }) {
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <MessageCircleMoreIcon size={12} className="shrink-0" />
+                  {ITEM_ICONS.speakToUs}
                   {showSidebarContent && <span className="text-xs truncate">Speak to Us</span>}
                 </button>
 
@@ -795,7 +789,7 @@ function MainSlider({ isEmbedUser }) {
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                   onClick={() => isMobile && setIsMobileVisible(false)}
                 >
-                  <MessageSquareMoreIcon size={12} className="shrink-0" />
+                  {ITEM_ICONS.feedbackAdmin}
                   {showSidebarContent && <span className="text-xs truncate">Feedback</span>}
                 </a>
 
