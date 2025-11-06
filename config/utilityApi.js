@@ -316,3 +316,13 @@ export const getAllAgentsApi = async () => {
     throw new Error(error);
   }
 }
+
+export const getFinishReasons = async () => {
+  try {
+    const response = await axios.get("https://flow.sokt.io/func/scritxGh53At");
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}

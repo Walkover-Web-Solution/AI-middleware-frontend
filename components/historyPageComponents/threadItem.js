@@ -9,7 +9,7 @@ import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { formatRelativeTime, openModal } from "@/utils/utility";
-import { MODAL_TYPE, FINISH_REASON_DESCRIPTIONS } from "@/utils/enums";
+import { MODAL_TYPE } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink } from "lucide-react";
 
@@ -116,8 +116,9 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const { embedToken } = useCustomSelector((state) => ({
+  const { embedToken, finishReasonDescription } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const dropupRef = useRef(null);
@@ -541,11 +542,11 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                         <div className="flex items-center gap-2">
                           <AlertIcon className="w-3.5 h-3.5 text-warning flex-shrink-0" />
                           <span className="text-xs font-medium text-base-content/80 leading-tight">
-                            {FINISH_REASON_DESCRIPTIONS[item.finish_reason] || FINISH_REASON_DESCRIPTIONS["other"]}
+                            {finishReasonDescription[item.finish_reason] || finishReasonDescription["other"]}
                           </span>
                         </div>
                         <a
-                          href="https://gtwy.ai/blogs/finish-reasons?source=single"
+                          href="https://gtwy.ai/blogs/finish-reasons?source=public"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-warning/70 hover:text-warning transition-colors flex-shrink-0 ml-2"
