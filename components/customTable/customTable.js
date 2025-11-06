@@ -150,7 +150,7 @@ const CustomTable = ({
                         sortedData.map((row, index) => (
                             <div 
                                 key={row.id || row?._id || index}
-                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all ${
+                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all group ${
                                     row.isLoading ? 'opacity-60 cursor-wait' : ''
                                 }`}
                                 onClick={() => handleRowClick(
@@ -197,7 +197,7 @@ const CustomTable = ({
                                 
                                 {/* Card Actions */}
                                 {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3">
+                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         {endComponent({row: row})}
                                     </div>
                                 )}
@@ -299,7 +299,7 @@ const CustomTable = ({
                                     ))}
                                     {endComponent && (
                                         <td className="px-4 py-2 text-left">
-                                            <div className="">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
