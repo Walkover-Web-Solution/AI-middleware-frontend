@@ -12,7 +12,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { filterBridges, getIconOfService, openModal, formatRelativeTime } from "@/utils/utility";
+import { filterBridges, getIconOfService, openModal, closeModal, formatRelativeTime } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from "react";
@@ -52,6 +52,7 @@ function Home({ params, isEmbedUser }) {
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
   const [loadingAgentId, setLoadingAgentId] = useState(null);
+  const [itemToDelete, setItemToDelete] = useState(null);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
@@ -264,10 +265,18 @@ function Home({ params, isEmbedUser }) {
       const bridgeId = item._id;
       const response = await dispatch(deleteBridgeAction({bridgeId, org_id: resolvedParams.org_id}));
       toast.success(response?.data?.message || response?.message || response || 'Agent deleted successfully');
+      
+      // Close modal and clear state after successful deletion
+      setItemToDelete(null);
+      closeModal(MODAL_TYPE.DELETE_MODAL);
     } catch (error) {
       console.error('Failed to delete agent', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete agent';
       toast.error(errorMessage);
+      
+      // Close modal even on error
+      setItemToDelete(null);
+      closeModal(MODAL_TYPE.DELETE_MODAL);
     }
   }
 
@@ -327,16 +336,17 @@ function Home({ params, isEmbedUser }) {
             <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-             openModal(MODAL_TYPE.DELETE_MODAL);
-              
+              setItemToDelete(row);
+              // Small delay to ensure state is set before opening modal
+              setTimeout(() => {
+                openModal(MODAL_TYPE.DELETE_MODAL);
+              }, 10);
             }}>
               <Trash2 size={14} className="text-red-600" />
               Delete Agent
             </button></li> 
           </ul>
         </div>
-        <DeleteModal onConfirm={deleteBridge} item={row} title="Delete Agent" description={`Are you sure you want to delete the Agent "${row.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.`}/>
-
       </div>
     )
   }
@@ -484,6 +494,18 @@ function Home({ params, isEmbedUser }) {
             </div>
           </div>
         </div>
+        
+        {/* Single DeleteModal for all delete operations */}
+        <DeleteModal 
+          onConfirm={deleteBridge} 
+          item={itemToDelete} 
+          title="Delete Agent" 
+          description={itemToDelete ? `Are you sure you want to delete the Agent "${itemToDelete.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.` : ""}
+          onCancel={() => {
+            setItemToDelete(null);
+            closeModal(MODAL_TYPE.DELETE_MODAL);
+          }}
+        />
       </div>
     </div>
   );
