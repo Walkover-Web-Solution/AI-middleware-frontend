@@ -111,7 +111,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       updatedMessages.forEach(msg => {
         if (msg.sender === 'user' || msg.sender === 'assistant') {
           updatedConversation.push({
-            role: msg.sender === 'user' ? 'user' : msg?.testCaseResult ? 'Model Answer' : 'assistant',
+            role: msg.sender === 'user' ? 'user' : 'assistant',
             content: msg.content
           });
         }
