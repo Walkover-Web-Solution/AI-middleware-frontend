@@ -43,18 +43,6 @@ export default function FlowsPage({ params, isEmbedUser }) {
     return Object.keys(agents || {}).length;
   };
 
-  // Helper function to format date
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-
-
   // Helper function to get bridge type display
   const getBridgeTypeDisplay = (bridgeType) => {
     switch (bridgeType) {
