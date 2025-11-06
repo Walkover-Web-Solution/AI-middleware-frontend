@@ -10,7 +10,7 @@ import useTutorialVideos from '@/hooks/useTutorialVideos'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
-import { closeModal, openModal, RequiredItem } from '@/utils/utility'
+import { closeModal, formatDate, formatRelativeTime, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -178,6 +178,16 @@ const maskAuthKey = (authkey) => {
                 actualName: item?.name || 'Unnamed Key',
                 originalAuthkey: item?.authkey,
                 authkey: maskAuthKey(item?.authkey), 
+                created_at: (
+                  <div className="group cursor-help">
+                    <span className="group-hover:hidden">
+                      {formatRelativeTime(item?.created_at)}
+                    </span>
+                    <span className="hidden group-hover:inline">
+                      {formatDate(item?.created_at)}
+                    </span>
+                  </div>
+                ),
               }))}
               columnsToShow={PAUTH_KEY_COLUMNS}
               sorting
