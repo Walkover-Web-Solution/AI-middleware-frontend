@@ -41,6 +41,7 @@ import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { AddIcon, KeyIcon } from '../Icons';
 import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
+import InviteUserModal from '../modals/InviteUserModal';
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
@@ -403,10 +404,32 @@ function MainSlider({ isEmbedUser }) {
 
         {/* Organizations List */}
         <div className="space-y-1">
-          <div className="text-xs font-medium text-base-content/50 uppercase tracking-wider px-3 mb-2">
-            Organizations
+          <div className="flex items-center justify-between px-3 mb-2">
+            <div className="text-xs font-medium text-base-content/50 uppercase tracking-wider">
+              Organizations
+            </div>
+            <button 
+              onClick={() => {
+                setIsOrgDropdownExpanded(false);
+                setIsOrgDropdownOpen(false);
+                openModal(MODAL_TYPE.INVITE_USER);
+              }}
+              className="text-xs text-blue-400 hover:text-blue-600 transition-colors font-medium"
+            >
+              + Invite User
+            </button>
           </div>
           
+          {/* Current Organization - shown as selected */}
+          {organizations?.[orgId] && (
+            <div className="w-full flex items-center cursor-pointer gap-3 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm text-primary truncate">{organizations[orgId].name}</div>
+              </div>
+            </div>
+          )}
+          
+          {/* Other Organizations */}
           {Object.entries(organizations || {})
             .filter(([id]) => id !== orgId) // Exclude current org
             .slice(0, 2) // Show only first 2
@@ -416,7 +439,6 @@ function MainSlider({ isEmbedUser }) {
                 onClick={() => handleSwitchOrg(id, org.name)}
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left"
               >
-                <Building2 size={14} className="text-base-content/60 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm text-base-content truncate">{org.name}</div>
                 </div>
@@ -427,10 +449,9 @@ function MainSlider({ isEmbedUser }) {
             onClick={() => handleSwitchOrg()}
             className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left text-primary"
           >
-            <Building2 size={14} className="text-blue-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="font-medium text-blue-400 text-sm truncate">
-                View All Organizations {Object.keys(organizations || {}).filter(id => id !== orgId).length > 2 && 
+                more {Object.keys(organizations || {}).filter(id => id !== orgId).length > 2 && 
                   `(+${Object.keys(organizations || {}).filter(id => id !== orgId).length - 2})`
                 }
               </div>
@@ -585,7 +606,7 @@ function MainSlider({ isEmbedUser }) {
                   {/* Dropdown for collapsed sidebar */}
                   {isOrgDropdownOpen && !showSidebarContent && (
                     <div 
-                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 min-w-[250px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-left-2"
+                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2"
                       onMouseEnter={() => {
                         // Clear timeout when hovering over dropdown
                         if (orgDropdownTimeout) {
@@ -599,9 +620,9 @@ function MainSlider({ isEmbedUser }) {
                     </div>
                   )}
 
-                  {/* Expanded dropdown for full sidebar */}
+                  {/* Expanded dropdown for full sidebar - positioned from left edge */}
                   {isOrgDropdownExpanded && showSidebarContent && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
+                    <div className="absolute top-0 left-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
                       {renderOrganizationDropdown()}
                     </div>
                   )}
@@ -829,6 +850,7 @@ function MainSlider({ isEmbedUser }) {
         <BridgeSlider />
         <TutorialModal />
         <DemoModal speakToUs />
+        <InviteUserModal />
       </div>
     </>
   );
