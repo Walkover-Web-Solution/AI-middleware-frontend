@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Plus, Trash2, Edit, Check, X } from 'lucide-react';
 import Modal from '../UI/Modal';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -9,9 +9,13 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   const [newDomain, setNewDomain] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
-  const [editValidationError, setEditValidationError] = useState('');
   const [editingIndex, setEditingIndex] = useState(-1);
-  const [editingValue, setEditingValue] = useState('');
+  
+  // Use ref instead of state for editing value to avoid unnecessary re-renders
+  const editingValueRef = useRef('');
+
+  // Derived state
+  const isEditing = editingIndex !== -1;
 
   // Initialize domains when modal opens
   useEffect(() => {
@@ -104,8 +108,8 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     // Cancel edit if the domain being edited is removed
     if (editingIndex === index) {
       setEditingIndex(-1);
-      setEditingValue('');
-      setEditValidationError('');
+      editingValueRef.current = '';
+      setValidationError('');
     }
     
     // Save immediately to API
@@ -125,28 +129,28 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   // Start editing a domain
   const handleEditDomain = (index) => {
     setEditingIndex(index);
-    setEditingValue(domains[index]);
-    setEditValidationError(''); // Clear any existing edit validation errors
+    editingValueRef.current = domains[index];
+    setValidationError(''); // Clear any existing validation errors
   };
 
   // Cancel editing
   const handleCancelEdit = () => {
     setEditingIndex(-1);
-    setEditingValue('');
-    setEditValidationError('');
+    editingValueRef.current = '';
+    setValidationError('');
   };
 
   // Save edited domain
   const handleSaveEdit = async () => {
-    const trimmedValue = editingValue.trim();
+    const trimmedValue = editingValueRef.current.trim();
     
     if (!trimmedValue) {
-      setEditValidationError('Please enter a URL or domain');
+      setValidationError('Please enter a URL or domain');
       return;
     }
     
     if (!isValidUrlOrDomain(trimmedValue)) {
-      setEditValidationError('Please enter a valid URL or domain');
+      setValidationError('Please enter a valid URL or domain');
       return;
     }
     
@@ -156,7 +160,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     );
     
     if (existingIndex !== -1) {
-      setEditValidationError('This URL/domain already exists');
+      setValidationError('This URL/domain already exists');
       return;
     }
     
@@ -168,8 +172,8 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     
     // Reset edit state
     setEditingIndex(-1);
-    setEditingValue('');
-    setEditValidationError('');
+    editingValueRef.current = '';
+    setValidationError('');
     
     // Save immediately to API
     setIsLoading(true);
@@ -179,23 +183,23 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
       console.error('Error updating domain:', error);
       // Revert the change if API call fails
       setDomains(originalDomains);
-      setEditValidationError('Failed to update domain. Please try again.');
+      setValidationError('Failed to update domain. Please try again.');
       // Re-enter edit mode
       setEditingIndex(editingIndex);
-      setEditingValue(trimmedValue);
+      editingValueRef.current = trimmedValue;
     } finally {
       setIsLoading(false);
     }
   };
 
   // Handle edit input change
-  const handleEditInputChange = (e) => {
-    setEditingValue(e.target.value);
-    // Clear edit validation error when user starts typing
-    if (editValidationError) {
-      setEditValidationError('');
+  const handleEditInputChange = useCallback((e) => {
+    editingValueRef.current = e.target.value;
+    // Clear validation error when user starts typing (only if editing)
+    if (isEditing && validationError) {
+      setValidationError('');
     }
-  };
+  }, [isEditing, validationError]);
 
   // Handle Enter key press in edit input
   const handleEditKeyPress = (e) => {
@@ -212,10 +216,10 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   // Handle close
   const handleClose = () => {
     // Cancel any ongoing edit before closing
-    if (editingIndex !== -1) {
+    if (isEditing) {
       setEditingIndex(-1);
-      setEditingValue('');
-      setEditValidationError('');
+      editingValueRef.current = '';
+      setValidationError('');
     }
     closeModal(MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL);
   };
@@ -254,7 +258,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                   onKeyPress={handleKeyPress}
                   placeholder="Enter domain (example.com)"
                   className={`input input-bordered input-sm flex-1 focus:ring-1 ring-primary/40 ${
-                    validationError ? 'input-error border-error' : ''
+                    !isEditing && validationError ? 'input-error border-error' : ''
                   }`}
                   disabled={isLoading}
                 />
@@ -269,7 +273,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                   Add
                 </button>
               </div>
-              {validationError && (
+              {!isEditing && validationError && (
                 <div className="label">
                   <span className="label-text-alt text-error">{validationError}</span>
                 </div>
@@ -286,14 +290,14 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                   <div key={index} className="space-y-1">
                     <div className="group flex items-center gap-2 bg-base-200 rounded-lg p-3 border border-base-300 hover:bg-base-300 transition-colors duration-200">
                       <div className="flex-1">
-                        {editingIndex === index ? (
+                        {isEditing && editingIndex === index ? (
                           <input
                             type="text"
-                            value={editingValue}
+                            defaultValue={editingValueRef.current}
                             onChange={handleEditInputChange}
                             onKeyPress={handleEditKeyPress}
                             className={`input input-bordered input-sm w-full focus:ring-1 ring-primary/40 ${
-                              editValidationError ? 'input-error border-error' : ''
+                              isEditing && validationError ? 'input-error border-error' : ''
                             }`}
                             placeholder="Enter domain (example.com)"
                             autoFocus
@@ -304,7 +308,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        {editingIndex === index ? (
+                        {isEditing && editingIndex === index ? (
                           <>
                             <button
                               type="button"
@@ -332,7 +336,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                               onClick={() => handleEditDomain(index)}
                               className="btn btn-ghost btn-xs p-1 hover:bg-blue-100 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200 tooltip"
                               data-tip="Edit"
-                              disabled={isLoading || editingIndex !== -1}
+                              disabled={isLoading || isEditing}
                             >
                               <Edit size={14} />
                             </button>
@@ -341,7 +345,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                               onClick={() => handleRemoveDomain(index)}
                               className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error opacity-0 group-hover:opacity-100 transition-opacity duration-200 tooltip"
                               data-tip="Remove"
-                              disabled={isLoading || editingIndex !== -1}
+                              disabled={isLoading || isEditing}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -350,9 +354,9 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                       </div>
                     </div>
                     {/* Show validation error directly below this specific domain when editing */}
-                    {editingIndex === index && editValidationError && (
+                    {isEditing && editingIndex === index && validationError && (
                       <div className="px-3">
-                        <span className="text-xs text-error">{editValidationError}</span>
+                        <span className="text-xs text-error">{validationError}</span>
                       </div>
                     )}
                   </div>
