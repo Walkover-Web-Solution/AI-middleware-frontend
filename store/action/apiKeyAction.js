@@ -26,7 +26,8 @@ export const updateApikeyAction = (dataToSend) => async (dispatch) => {
     name: dataToSend.name, 
     data: dataToSend.apikey, 
     comment: dataToSend.comment,
-    apikey_quota: dataToSend.apikey_quota 
+    apikey_limit: dataToSend.apikey_limit,
+    apikey_usage: dataToSend.apikey_usage 
   }));
   
   try {
@@ -39,8 +40,10 @@ export const updateApikeyAction = (dataToSend) => async (dispatch) => {
         name: dataToSend.name, 
         data: response.data.apikey, 
         comment: dataToSend.comment,
-        apikey_quota: dataToSend.apikey_quota 
+        apikey_limit: dataToSend.apikey_limit,
+        apikey_usage: dataToSend.apikey_usage 
       }));
+      return response.data.success;
     }
     else{
       toast.error('Failed to update API key');

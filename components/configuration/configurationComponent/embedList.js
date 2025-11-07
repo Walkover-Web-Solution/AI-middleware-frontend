@@ -64,7 +64,6 @@ const EmbedList = ({ params, searchParams }) => {
       prebuiltToolsFilters: versionData?.web_search_filters || [],
     };
   });
-   console.log(showInbuiltTools,"showInbuiltTools")
   // Use the tutorial videos hook
   const { getFunctionCreationVideo, tutorialData } = useTutorialVideos();
      const [tutorialState, setTutorialState] = useState({

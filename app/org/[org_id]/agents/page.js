@@ -129,7 +129,8 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
-    bridge_quota: item?.bridge_quota,
+    bridge_limit: item?.bridge_limit,
+    bridge_usage: item?.bridge_usage,
     isLoading: loadingAgentId === item._id
   }));
 
@@ -177,7 +178,6 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    bridge_quota: item?.bridge_quota,
     isLoading: loadingAgentId === item._id
   }));
 
@@ -275,25 +275,22 @@ function Home({ params, isEmbedUser }) {
     }
   }
   
-  const handleSetBridgeApiKeyLimit = (item) => {
+  const handleSetBridgeLimit = (item) => {
     setSelectedBridgeForLimit(item);
     openModal(MODAL_TYPE.API_KEY_LIMIT_MODAL);
   };
 
-  const handleUpdateBridgeApiKeyLimit = async  (bridge, limit) => {
+  const handleUpdateBridgeLimit = async  (bridge, limit) => {
     closeModal(MODAL_TYPE?.API_KEY_LIMIT_MODAL);
     const dataToSend = {
-      'bridge_quota': {
-        limit: limit || 1,
-        used: bridge?.used || 0
-      }
+      "bridge_limit": limit
     }
     const res = await dispatch(updateBridgeAction({ bridgeId: bridge._id, dataToSend }));
     if (res?.success) toast.success('Agent Usage Limit Updated Successfully');
   };
 
   const resetUsage = async (bridge) => {
-    const dataToSend = { 'bridge_quota': { limit: bridge?.bridge_quota?.limit ? bridge?.bridge_quota?.limit : 1, used: 0 } }
+    const dataToSend = { "bridge_usage": 0 }
     const res = await dispatch(updateBridgeAction({ bridgeId: bridge._id, dataToSend }));
     if (res?.success) toast.success('Agent Usage Reset Successfully');
   }
@@ -440,9 +437,9 @@ function Home({ params, isEmbedUser }) {
             e.preventDefault();
             e.stopPropagation();
             handlePortalCloseImmediate();
-            handleSetBridgeApiKeyLimit(row);
+            handleSetBridgeLimit(row);
           }}><ClockFading className="" size={16} />Usage Limit</a></li>
-          {row?.bridge_quota && (
+          {(row?.bridge_limit && row?.bridge_usage !== 0) && (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -714,7 +711,7 @@ function Home({ params, isEmbedUser }) {
           }}
         />
       </div>
-      <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeApiKeyLimit} />
+      <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} />
       
       {/* Global styles for portal priority */}
       <style jsx global>{`

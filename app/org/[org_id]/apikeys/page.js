@@ -16,6 +16,7 @@ import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
 import ConnectedAgentsModal from '@/components/modals/ConnectedAgentsModal';
 import { EllipsisIcon } from "lucide-react";
+import { toast } from "react-toastify";
 
 export const runtime = 'edge';
 
@@ -84,18 +85,22 @@ const Page = () => {
     ),
   }));
 
-  const resetUsage = useCallback((item) => {
+  const resetUsage = useCallback(async(item) => {
     const dataToSend = {
       name: item.name,
       apikey_object_id: item._id,
       service: apikeyData?.find(api => api._id === item._id)?.service,
       apikey: item.apikey,
       comment: item.comment,
-      apikey_quota: {limit: item?.apikey_quota?.limit || 1, used: 0},
+      apikey_limit: item?.apikey_limit || 1,
+      apikey_usage: 0,
       org_id: item.org_id,
     }
-    dispatch(updateApikeyAction(dataToSend));
-  }, []);
+    const response = await dispatch(updateApikeyAction(dataToSend));
+    if(response){
+      toast.success('API key reset successfully');
+    }
+  }, [apikeyData, dispatch]);
 
   const EndComponent = ({ row }) => {
     return (
@@ -121,18 +126,16 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
-        {row?.apikey_quota && (
-          <div className="dropdown dropdown-left bg-transparent">
-            <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow">
-              <li><a onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                resetUsage(row);
-              }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
-            </ul>
-          </div>
-        )}
+        {(row?.apikey_limit && row?.apikey_usage && Number(row?.apikey_usage) > 0) ? <div
+          className="tooltip tooltip-primary"
+          data-tip="Reset Usage"
+          onClick={(e) => {
+            e.stopPropagation();
+            resetUsage(row);
+          }}
+        >
+          <RefreshIcon size={16} />
+        </div> : null}
       </div>
     );
   };

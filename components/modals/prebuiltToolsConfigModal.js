@@ -26,23 +26,16 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   // Validate URL or Domain
   const isValidUrlOrDomain = (input) => {
     const trimmedInput = input.trim();
-    
     // Reject if input is too short or contains spaces
     if (trimmedInput.length < 3 || trimmedInput.includes(' ')) {
       return false;
     }
-    
     // URL regex pattern (starts with http:// or https://)
     const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
-    
     // Domain regex pattern (without protocol) - must have at least one dot and valid TLD
     const domainPattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
-    
     const isUrl = urlPattern.test(trimmedInput);
     const isDomain = domainPattern.test(trimmedInput);
-    
-    console.log('Validating:', trimmedInput, 'URL:', isUrl, 'Domain:', isDomain);
-    
     return isUrl || isDomain;
   };
 

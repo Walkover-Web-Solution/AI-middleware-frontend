@@ -368,7 +368,7 @@ export const MODAL_TYPE = {
   PREBUILT_TOOLS_CONFIG_MODAL: 'PREBUILT_TOOLS_CONFIG_MODAL'
 };
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment', 'apikey_quota'];
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment', 'apikey_limit'];
 
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 
