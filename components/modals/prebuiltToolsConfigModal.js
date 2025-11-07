@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit, Check, X } from 'lucide-react';
 import Modal from '../UI/Modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
@@ -9,19 +9,14 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   const [newDomain, setNewDomain] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
-  const [hasChanges, setHasChanges] = useState(false);
+  const [editValidationError, setEditValidationError] = useState('');
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editingValue, setEditingValue] = useState('');
 
   // Initialize domains when modal opens
   useEffect(() => {
     setDomains(initialDomains.length > 0 ? [...initialDomains] : []);
-    setHasChanges(false); // Reset changes when modal opens
   }, [initialDomains]);
-
-  // Check for changes whenever domains array changes
-  useEffect(() => {
-    const domainsChanged = JSON.stringify(domains.sort()) !== JSON.stringify([...initialDomains].sort());
-    setHasChanges(domainsChanged);
-  }, [domains, initialDomains]);
 
   // Validate URL or Domain
   const isValidUrlOrDomain = (input) => {
@@ -41,13 +36,12 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     const isUrl = urlPattern.test(trimmedInput);
     const isDomain = domainPattern.test(trimmedInput);
     
-    console.log('Validating:', trimmedInput, 'URL:', isUrl, 'Domain:', isDomain);
     
     return isUrl || isDomain;
   };
 
   // Add new domain
-  const handleAddDomain = () => {
+  const handleAddDomain = async () => {
     const trimmedDomain = newDomain.trim();
     
     if (!trimmedDomain) {
@@ -65,9 +59,23 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
       return;
     }
     
-    setDomains([...domains, trimmedDomain]);
+    const updatedDomains = [...domains, trimmedDomain];
+    setDomains(updatedDomains);
     setNewDomain('');
     setValidationError(''); // Clear error on success
+    
+    // Save immediately to API
+    setIsLoading(true);
+    try {
+      await onSave(updatedDomains);
+    } catch (error) {
+      console.error('Error saving domain:', error);
+      // Revert the change if API call fails
+      setDomains(domains);
+      setValidationError('Failed to save domain. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle input change
@@ -88,29 +96,127 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   };
 
   // Remove domain at specific index
-  const handleRemoveDomain = (index) => {
+  const handleRemoveDomain = async (index) => {
     const updatedDomains = domains.filter((_, i) => i !== index);
+    const removedDomain = domains[index];
     setDomains(updatedDomains);
-  };
-
-  // Handle save
-  const handleSave = async (e) => {
-    e.preventDefault();
+    
+    // Cancel edit if the domain being edited is removed
+    if (editingIndex === index) {
+      setEditingIndex(-1);
+      setEditingValue('');
+      setEditValidationError('');
+    }
+    
+    // Save immediately to API
     setIsLoading(true);
     try {
-      // Filter out empty domains
-      const filteredDomains = domains.filter(domain => domain.trim() !== '');
-      await onSave(filteredDomains);
-      closeModal(MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL);
+      await onSave(updatedDomains);
     } catch (error) {
-      console.error('Error saving prebuilt tools configuration:', error);
+      console.error('Error removing domain:', error);
+      // Revert the change if API call fails
+      setDomains(domains);
+      setValidationError('Failed to remove domain. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Start editing a domain
+  const handleEditDomain = (index) => {
+    setEditingIndex(index);
+    setEditingValue(domains[index]);
+    setEditValidationError(''); // Clear any existing edit validation errors
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingIndex(-1);
+    setEditingValue('');
+    setEditValidationError('');
+  };
+
+  // Save edited domain
+  const handleSaveEdit = async () => {
+    const trimmedValue = editingValue.trim();
+    
+    if (!trimmedValue) {
+      setEditValidationError('Please enter a URL or domain');
+      return;
+    }
+    
+    if (!isValidUrlOrDomain(trimmedValue)) {
+      setEditValidationError('Please enter a valid URL or domain');
+      return;
+    }
+    
+    // Check if the edited domain already exists (excluding the current one)
+    const existingIndex = domains.findIndex((domain, index) => 
+      domain === trimmedValue && index !== editingIndex
+    );
+    
+    if (existingIndex !== -1) {
+      setEditValidationError('This URL/domain already exists');
+      return;
+    }
+    
+    // Update the domain
+    const originalDomains = [...domains];
+    const updatedDomains = [...domains];
+    updatedDomains[editingIndex] = trimmedValue;
+    setDomains(updatedDomains);
+    
+    // Reset edit state
+    setEditingIndex(-1);
+    setEditingValue('');
+    setEditValidationError('');
+    
+    // Save immediately to API
+    setIsLoading(true);
+    try {
+      await onSave(updatedDomains);
+    } catch (error) {
+      console.error('Error updating domain:', error);
+      // Revert the change if API call fails
+      setDomains(originalDomains);
+      setEditValidationError('Failed to update domain. Please try again.');
+      // Re-enter edit mode
+      setEditingIndex(editingIndex);
+      setEditingValue(trimmedValue);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle edit input change
+  const handleEditInputChange = (e) => {
+    setEditingValue(e.target.value);
+    // Clear edit validation error when user starts typing
+    if (editValidationError) {
+      setEditValidationError('');
+    }
+  };
+
+  // Handle Enter key press in edit input
+  const handleEditKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
+  };
+
+
   // Handle close
   const handleClose = () => {
+    // Cancel any ongoing edit before closing
+    if (editingIndex !== -1) {
+      setEditingIndex(-1);
+      setEditingValue('');
+      setEditValidationError('');
+    }
     closeModal(MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL);
   };
 
@@ -123,7 +229,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
           <h3 className="font-bold text-xl mb-4">Configure Web Search</h3>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-2">
             <div className="form-control">
               <label className="label !px-0">
@@ -177,18 +283,78 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                   <span className="label-text text-sm font-medium">Current Domains ({domains.length})</span>
                 </label>
                 {domains.map((domain, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-base-200 rounded-lg p-3 border border-base-300">
-                    <div className="flex-1">
-                      <span className="text-sm text-base-content font-medium">{domain}</span>
+                  <div key={index} className="space-y-1">
+                    <div className="group flex items-center gap-2 bg-base-200 rounded-lg p-3 border border-base-300 hover:bg-base-300 transition-colors duration-200">
+                      <div className="flex-1">
+                        {editingIndex === index ? (
+                          <input
+                            type="text"
+                            value={editingValue}
+                            onChange={handleEditInputChange}
+                            onKeyPress={handleEditKeyPress}
+                            className={`input input-bordered input-sm w-full focus:ring-1 ring-primary/40 ${
+                              editValidationError ? 'input-error border-error' : ''
+                            }`}
+                            placeholder="Enter domain (example.com)"
+                            autoFocus
+                            disabled={isLoading}
+                          />
+                        ) : (
+                          <span className="text-sm text-base-content font-medium">{domain}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {editingIndex === index ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleSaveEdit}
+                              className="btn btn-ghost btn-xs p-1 hover:bg-green-100 hover:text-success"
+                              title="Save changes"
+                              disabled={isLoading}
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              className="btn btn-ghost btn-xs p-1 hover:bg-gray-100 hover:text-base-content"
+                              title="Cancel editing"
+                              disabled={isLoading}
+                            >
+                              <X size={14} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEditDomain(index)}
+                              className="btn btn-ghost btn-xs p-1 hover:bg-blue-100 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200 tooltip"
+                              data-tip="Edit"
+                              disabled={isLoading || editingIndex !== -1}
+                            >
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDomain(index)}
+                              className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error opacity-0 group-hover:opacity-100 transition-opacity duration-200 tooltip"
+                              data-tip="Remove"
+                              disabled={isLoading || editingIndex !== -1}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveDomain(index)}
-                      className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
-                      title="Remove domain"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {/* Show validation error directly below this specific domain when editing */}
+                    {editingIndex === index && editValidationError && (
+                      <div className="px-3">
+                        <span className="text-xs text-error">{editValidationError}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -205,15 +371,8 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
             >
               Close
             </button>
-            <button
-              type="submit"
-              className="btn btn-sm btn-primary hover:bg-primary-focus"
-              disabled={isLoading || !hasChanges}
-            >
-              {isLoading ? 'Saving...' : 'Save Configuration'}
-            </button>
           </div>
-        </form>
+        </div>
         </div>
       </div>
     </Modal>
