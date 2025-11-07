@@ -164,7 +164,7 @@ function Page() {
     }
 
     return (
-        <div className="flex min-h-screen bg-gray-100 p-6 gap-6">
+        <div className="flex min-h-screen bg-base-100 p-6 gap-6">
             {/* Organizations List */}
             <div className="w-96 bg-base-100 rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
                 <h2 className="text-lg font-semibold mb-4 text-gray-800">Organizations</h2>

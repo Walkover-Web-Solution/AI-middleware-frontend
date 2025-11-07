@@ -16,7 +16,7 @@ const Protected = (WrappedComponent) => {
     useEffect(() => {
       if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && (!isEmbedUser || !isEmbedUserFromUserDetails)) {
         if (window.location.href !== '/login') {
-          setInCookies("previous_url", window.location.href);
+          // setInCookies("previous_url", window.location.href);
         }
         router.replace('/login');
       }

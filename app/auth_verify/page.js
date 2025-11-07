@@ -6,8 +6,9 @@ import Protected from '@/components/protected';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { Search, Building2, Shield, CheckCircle, Lock, User, Database, Key, Link, AlertCircle, ArrowRight, XCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { getClientInfo, switchOrg, verifyAuth } from '@/config';
+import { getClientInfo, switchOrg, verifyAuth, switchUser } from '@/config';
 import { BuildingIcon } from '@/components/Icons';
+import { setInCookies } from '@/utils/utility';
 
 const Page = () => {
     const [formState, setFormState] = useState({
@@ -77,16 +78,18 @@ const Page = () => {
         updateFormState({ [field]: e.target.value });
     }, [updateFormState]);
 
-    const handleSwitchOrg = useCallback(async (id) => {
+    const handleSwitchOrg = useCallback(async (id,name) => {
         try {
           const response = await switchOrg(id);
+          const localToken = await switchUser({ orgId: id, orgName: name });
+          setInCookies('local_token', localToken.token);
         } catch (error) {
           console.error("Error switching workspace", error);
         }
       }, []);
 
     const handleSelectOrg = useCallback((orgId, orgName) => {
-        handleSwitchOrg(orgId)
+        handleSwitchOrg(orgId,orgName)
         updateFormState({ selectedOrg: { id: orgId, name: orgName } });
     }, [updateFormState]);
 
