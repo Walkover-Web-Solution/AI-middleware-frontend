@@ -1,6 +1,6 @@
 import { BookIcon, BotIcon, KeyIcon, SettingsIcon, TestTubeDiagonalIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
-export const API_KEY_COLUMNS = ["name", "apikey", "comment"];
+export const API_KEY_COLUMNS = ["name", "apikey", "comment", 'apikey_usage'];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
 export const ALERT_TYPE = ['Error', 'Variable'];
 export const DOCUMENT_SECTIONS = [

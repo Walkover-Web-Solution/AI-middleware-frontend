@@ -130,7 +130,7 @@ function Home({ params, isEmbedUser }) {
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
     bridge_limit: item?.bridge_limit,
-    bridge_usage: item?.bridge_usage,
+    agent_usage: item?.bridge_usage,
     isLoading: loadingAgentId === item._id
   }));
 
@@ -639,9 +639,9 @@ function Home({ params, isEmbedUser }) {
                 
                 <CustomTable 
                   data={UnArchivedBridges} 
-                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
                   sorting 
-                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
                   handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                   keysToExtractOnRowClick={['_id', 'versionId']} 
                   keysToWrap={['name', 'model']} 
