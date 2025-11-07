@@ -22,20 +22,25 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     setDomains(initialDomains.length > 0 ? [...initialDomains] : []);
   }, [initialDomains]);
 
-  // Validate URL or Domain
-  const isValidUrlOrDomain = (input) => {
+  // Validate Domain only (no HTTP/HTTPS URLs allowed)
+  const isValidDomain = (input) => {
     const trimmedInput = input.trim();
+    
     // Reject if input is too short or contains spaces
     if (trimmedInput.length < 3 || trimmedInput.includes(' ')) {
       return false;
     }
-    // URL regex pattern (starts with http:// or https://)
-    const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+    
+    // Reject if input starts with http:// or https://
+    if (trimmedInput.startsWith('http://') || trimmedInput.startsWith('https://')) {
+      return false;
+    }
+    
     // Domain regex pattern (without protocol) - must have at least one dot and valid TLD
+    // Allows domains like: example.com, www.example.com, subdomain.example.com
     const domainPattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
-    const isUrl = urlPattern.test(trimmedInput);
-    const isDomain = domainPattern.test(trimmedInput);
-    return isUrl || isDomain;
+    
+    return domainPattern.test(trimmedInput);
   };
 
   // Add new domain
@@ -43,17 +48,17 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     const trimmedDomain = newDomain.trim();
     
     if (!trimmedDomain) {
-      setValidationError('Please enter a URL or domain');
+      setValidationError('Please enter a domain');
       return;
     }
     
-    if (!isValidUrlOrDomain(trimmedDomain)) {
-      setValidationError('Please enter a valid URL or domain');
+    if (!isValidDomain(trimmedDomain)) {
+      setValidationError('Please enter a valid domain');
       return;
     }
     
     if (domains.includes(trimmedDomain)) {
-      setValidationError('This URL/domain already exists');
+      setValidationError('This domain already exists');
       return;
     }
     
@@ -139,12 +144,12 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     const trimmedValue = editingValueRef.current.trim();
     
     if (!trimmedValue) {
-      setValidationError('Please enter a URL or domain');
+      setValidationError('Please enter a domain');
       return;
     }
     
-    if (!isValidUrlOrDomain(trimmedValue)) {
-      setValidationError('Please enter a valid URL or domain');
+    if (!isValidDomain(trimmedValue)) {
+      setValidationError('Please enter a valid domain');
       return;
     }
     
@@ -154,7 +159,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     );
     
     if (existingIndex !== -1) {
-      setValidationError('This URL/domain already exists');
+      setValidationError('This domain already exists');
       return;
     }
     
@@ -250,7 +255,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                   value={newDomain}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter domain (example.com)"
+                  placeholder="Enter domain"
                   className={`input input-bordered input-sm flex-1 focus:ring-1 ring-primary/40 ${
                     !isEditing && validationError ? 'input-error border-error' : ''
                   }`}
@@ -261,7 +266,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                   onClick={handleAddDomain}
                   className="btn btn-primary btn-sm"
                   disabled={isLoading || !newDomain.trim()}
-                  title="Add URL or domain"
+                  title="Add domain"
                 >
                   <Plus size={16} />
                   Add
@@ -293,7 +298,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                             className={`input input-bordered input-sm w-full focus:ring-1 ring-primary/40 ${
                               isEditing && validationError ? 'input-error border-error' : ''
                             }`}
-                            placeholder="Enter domain (example.com)"
+                            placeholder="Enter domain"
                             autoFocus
                             disabled={isLoading}
                           />
