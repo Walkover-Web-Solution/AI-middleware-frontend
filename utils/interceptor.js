@@ -10,10 +10,22 @@ axios.interceptors.request.use(
             config.headers['proxy_auth_token'] = token;
         }
         else{
-            let token = sessionStorage.getItem("proxy_token") ? sessionStorage.getItem("proxy_token") : getFromCookies("proxy_token");
-            config.headers['proxy_auth_token'] = token;
-            if (process.env.NEXT_PUBLIC_ENV === 'local')
-                config.headers['Authorization'] = getFromCookies("local_token");
+            // Check if the request is going to PROXY_URL
+            const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
+            
+            if(config.url?.includes(PROXY_URL) || config.url?.includes('/api/c/')){
+                // For PROXY_URL APIs, use proxy_auth_token
+                let proxyToken = sessionStorage.getItem("proxy_token") ? sessionStorage.getItem("proxy_token") : getFromCookies("proxy_token");
+                config.headers['proxy_auth_token'] = proxyToken;
+            } else if(config.url?.includes('/localToken')){
+                // For local token generation APIs, use proxy_auth_token (since no local_token exists yet)
+                let proxyToken = sessionStorage.getItem("proxy_token") ? sessionStorage.getItem("proxy_token") : getFromCookies("proxy_token");
+                config.headers['proxy_auth_token'] = proxyToken;
+            } else {
+                // For other backend APIs, use local_token in Authorization header
+                let localToken = getFromCookies("local_token") || sessionStorage.getItem("local_token");
+                config.headers['Authorization'] = localToken;
+            }
         }
         return config;
     },

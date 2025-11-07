@@ -70,7 +70,7 @@ const WithAuth = (Children) => {
         setLoading(true);
         setInCookies('proxy_token', proxyAuthToken);
 
-        if (process.env.NEXT_PUBLIC_ENV === 'local') {
+      
           const localToken = await loginUser({
             userId: searchParams.get('user_ref_id'),
             orgId: searchParams.get('company_ref_id'),
@@ -78,7 +78,6 @@ const WithAuth = (Children) => {
             orgName: ''
           });
           setInCookies('local_token', localToken.token);
-        }
 
         if(getFromCookies("previous_url")) {
           await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch);
