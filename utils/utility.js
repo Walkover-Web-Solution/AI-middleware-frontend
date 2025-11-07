@@ -785,3 +785,37 @@ export const formatDate = (dateString) => {
       timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
     }).format(date);
   };
+
+/**
+ * Reusable outside click handler utility
+ * @param {React.RefObject} elementRef - Ref to the element that should not trigger close
+ * @param {React.RefObject} triggerRef - Ref to the trigger element that should not trigger close
+ * @param {Function} onOutsideClick - Callback function to execute on outside click
+ * @param {boolean} isActive - Whether the outside click handler should be active
+ */
+export const useOutsideClick = (elementRef, triggerRef, onOutsideClick, isActive = true) => {
+  const handleClickOutside = (event) => {
+    if (!isActive) return;
+    
+    const isClickInsideElement = elementRef.current && elementRef.current.contains(event.target);
+    const isClickInsideTrigger = triggerRef && triggerRef.current && triggerRef.current.contains(event.target);
+    
+    if (!isClickInsideElement && !isClickInsideTrigger) {
+      onOutsideClick();
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (isActive && event.key === 'Escape') {
+      onOutsideClick();
+    }
+  };
+
+  const handleScroll = () => {
+    if (isActive) {
+      onOutsideClick();
+    }
+  };
+
+  return { handleClickOutside, handleKeyDown, handleScroll };
+};
