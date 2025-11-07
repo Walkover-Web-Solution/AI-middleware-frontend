@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import ErrorPage from "@/app/not-found";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
-import { getSingleMessage, switchOrg } from "@/config";
+import { getSingleMessage, switchOrg, switchUser } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
@@ -28,6 +28,7 @@ import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { getAllAuthData } from "@/store/action/authkeyAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+import { setInCookies } from "@/utils/utility";
 
 const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
 const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
@@ -229,6 +230,10 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         const orgId = getFromCookies("current_org_id");
         if (orgId !== resolvedParams?.org_id) {
           await switchOrg(resolvedParams?.org_id);
+          const currentOrg = organizations[resolvedParams?.org_id];
+          const localToken = await switchUser({ orgId: resolvedParams?.org_id, orgName: currentOrg?.name });
+          setInCookies('local_token', localToken.token);
+
         }
       }
     };
