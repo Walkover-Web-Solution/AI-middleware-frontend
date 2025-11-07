@@ -111,10 +111,6 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
 
   // Handle close
   const handleClose = () => {
-    setDomains([]);
-    setNewDomain('');
-    setValidationError('');
-    setHasChanges(false);
     closeModal(MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL);
   };
 
