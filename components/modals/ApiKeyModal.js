@@ -80,18 +80,21 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
             service: service || formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
+            apikey_limit: Number(formData.get('apikey_limit')),
+            apikey_usage: selectedApiKey ? selectedApiKey.apikey_usage : 0,
             _id: selectedApiKey ? selectedApiKey._id : null
         };
         if (isEditing) {
-            const isIdChange = apikeyData.some(item => item.apikey === data.apikey);
-            const isNameChange = apikeyData.some(item => item.name === data.name);
-            const isCommentChange = apikeyData.some(item => item.comment === data.comment);
+            const isIdChange = apikeyData.some(item => item.apikey === data.apikey && item._id === data._id);
+            const isNameChange = apikeyData.some(item => item.name === data.name && item._id === data._id);
+            const isCommentChange = apikeyData.some(item => item.comment === data.comment && item._id === data._id);
+            const apikeyLimitChange = apikeyData.some(item => item.apikey_limit === data.apikey_limit && item._id === data._id);
             if (!isIdChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment,service:selectedService};
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment,service:selectedService,apikey_limit:data.apikey_limit,apikey_usage:data.apikey_usage};
                 dispatch(updateApikeyAction(dataToSend));
             }
-            if (!isNameChange || !isCommentChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment,service:selectedService};
+            if (!isNameChange || !isCommentChange || !apikeyLimitChange) {
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment,service:selectedService,apikey_limit:data.apikey_limit,apikey_usage:data.apikey_usage};
                 dispatch(updateApikeyAction(dataToSend));
             }
             
@@ -112,7 +115,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         setSelectedApiKey(null);
         setIsEditing(false);
         closeModal(MODAL_TYPE.API_KEY_MODAL)
-    }, [isEditing, selectedApiKey, service]);
+    }, [isEditing, selectedApiKey, service, apikeyData]);
 
     return (
         <Modal MODAL_ID={MODAL_TYPE?.API_KEY_MODAL}>
@@ -120,24 +123,31 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                 <h3 className="font-bold text-lg">
                     {isEditing ? 'Update API Key' : 'Add New API Key'}
                 </h3>
-                {API_KEY_MODAL_INPUT.map((field) => (
-                    <div key={field} className="flex flex-col gap-2">
+                {API_KEY_MODAL_INPUT.map((field) => {
+                    const displayLabel = field.includes("_")
+                      ? field.replace(/_/g, ' ').replace(/^\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+                      : field.charAt(0).toUpperCase() + field.slice(1);
+                    const isRequired = field !== 'comment' && field !== 'apikey_limit';
+                    return (
+                      <div key={field} className="flex flex-col gap-2">
                         <label htmlFor={field} className="label-text">
-                            {field.charAt(0).toUpperCase() + field.slice(1)}{field !=="comment" && RequiredItem()}
+                          {displayLabel}{isRequired && RequiredItem()} <span className='opacity-55'>{field === 'apikey_limit' && 'in $'}</span>
                         </label>
                         <input
-                            id={field}
-                            required = {field !== "comment"}
-                            type={field === 'apikey' && isEditing ? 'password' : 'text'}
-                            className="input input-bordered input-sm"
-                            name={field}
-                            placeholder={`Enter ${field}`}
-                            defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                          id={field}
+                          required={isRequired}
+                          type={(field === 'apikey' && isEditing && 'password') || (field === 'apikey_limit' && 'number') || 'text'}
+                          className="input input-bordered input-sm"
+                          name={field}
+                          key={field}
+                          placeholder={`Enter ${displayLabel}`}
+                          defaultValue={field === 'apikey_limit' ? (selectedApiKey ? selectedApiKey.apikey_limit : '') : selectedApiKey ? selectedApiKey[field] : ''}
                             onChange={handleFormChange}
                             {...(field !== 'apikey' && { maxLength: 50 })}
                         />
-                    </div>
-                ))}
+                      </div>
+                    );
+                })}
                 <div className="flex flex-col gap-2">
                     <label htmlFor="service" className="label-text">
                         Service{RequiredItem()}

@@ -62,7 +62,7 @@ export const apiKeysReducer = createSlice({
       
       // Update an API key (optimistically or with server data)
       apikeyUpdateReducer: (state, action) => {
-        const { org_id, id, data, name, comment } = action.payload;
+        const { org_id, id, data, name, comment,apikey_limit,apikey_usage } = action.payload;
         
         if (state.apikeys && state.apikeys[org_id]) {
           const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
@@ -72,6 +72,8 @@ export const apiKeysReducer = createSlice({
             if (name !== undefined) target.name = name;
             if (data !== undefined) target.apikey = data;
             if (comment !== undefined) target.comment = comment;
+            if (apikey_limit !== undefined) target.apikey_limit = apikey_limit;
+            if (apikey_usage !== undefined) target.apikey_usage = apikey_usage;
           }
         }
       },

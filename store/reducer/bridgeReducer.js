@@ -107,7 +107,7 @@ export const bridgeReducer = createSlice({
         configuration: { ...configuration }
       };
        
-      if (extraData?.bridgeType) {
+       if (extraData?.bridgeType || extraData?.bridge_quota) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update

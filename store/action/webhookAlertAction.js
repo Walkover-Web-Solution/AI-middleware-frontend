@@ -42,7 +42,6 @@ export const getAllWebhookAlertAction = (org_id) => async (dispatch) => {
     const response = await getAllWebhookAlert(org_id);
     dispatch(webhookDataReducer({ data: response.data }));
   } catch (error) {
-    console.log('error hai', error)
     toast.error(error)
     console.error(error);
   }

@@ -12,16 +12,19 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { filterBridges, getIconOfService, openModal, closeModal, formatRelativeTime } from "@/utils/utility";
-import { ClockIcon, EllipsisIcon } from "@/components/Icons";
+import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick } from "@/utils/utility";
+import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { createPortal } from "react-dom";
 import SearchItems from "@/components/UI/SearchItems";
+import { ClockFading } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
 import { Archive, ArchiveRestore, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import DeleteModal from "@/components/UI/DeleteModal";
+import UsageLimitModal from "@/components/modals/UsageLimitModal";
 
 export const runtime = 'edge';
 
@@ -57,6 +60,16 @@ function Home({ params, isEmbedUser }) {
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
   });
+  const [selectedBridgeForLimit, setSelectedBridgeForLimit] = useState(null);
+  
+  // Portal state for dropdown priority
+  const [portalPosition, setPortalPosition] = useState({ top: 0, left: 0 });
+  const [showPortal, setShowPortal] = useState(false);
+  const [portalContent, setPortalContent] = useState(null);
+  const [isHoveringPortal, setIsHoveringPortal] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+  const [portalTriggerElement, setPortalTriggerElement] = useState(null);
+  const portalRef = useRef(null);
 
   useEffect(() => {
     setFilterBridges(allBridges)
@@ -116,6 +129,8 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
+    bridge_limit: item?.bridge_limit,
+    agent_usage: item?.bridge_usage,
     isLoading: loadingAgentId === item._id
   }));
 
@@ -259,6 +274,126 @@ function Home({ params, isEmbedUser }) {
       console.error('Failed to archive/unarchive agents', error);
     }
   }
+  
+  const handleSetBridgeLimit = (item) => {
+    setSelectedBridgeForLimit(item);
+    openModal(MODAL_TYPE.API_KEY_LIMIT_MODAL);
+  };
+
+  const handleUpdateBridgeLimit = async  (bridge, limit) => {
+    closeModal(MODAL_TYPE?.API_KEY_LIMIT_MODAL);
+    const dataToSend = {
+      "bridge_limit": limit
+    }
+    const res = await dispatch(updateBridgeAction({ bridgeId: bridge._id, dataToSend }));
+    if (res?.success) toast.success('Agent Usage Limit Updated Successfully');
+  };
+
+  const resetUsage = async (bridge) => {
+    const dataToSend = { "bridge_usage": 0 }
+    const res = await dispatch(updateBridgeAction({ bridgeId: bridge._id, dataToSend }));
+    if (res?.success) toast.success('Agent Usage Reset Successfully');
+  }
+
+  // Portal handlers for dropdown priority
+  const handlePortalOpen = (triggerElement, content) => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    const rect = triggerElement.getBoundingClientRect();
+    setPortalPosition({
+      top: rect.bottom + window.scrollY + 5,
+      left: rect.left + window.scrollX - 150 // Offset to align properly
+    });
+    setPortalContent(content);
+    setPortalTriggerElement(triggerElement);
+    setShowPortal(true);
+    
+    // Add priority class to trigger element
+    if (triggerElement) {
+      triggerElement.classList.add('portal-active');
+    }
+  };
+
+  const handlePortalClose = () => {
+    if (!isHoveringPortal) {
+      const timeout = setTimeout(() => {
+        if (portalTriggerElement) {
+          portalTriggerElement.classList.remove('portal-active');
+        }
+        setShowPortal(false);
+        setPortalContent(null);
+        setPortalTriggerElement(null);
+      }, 100);
+      setHoverTimeout(timeout);
+    }
+  };
+
+  const handlePortalCloseImmediate = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    if (portalTriggerElement) {
+      portalTriggerElement.classList.remove('portal-active');
+    }
+    setShowPortal(false);
+    setPortalContent(null);
+    setPortalTriggerElement(null);
+    setIsHoveringPortal(false);
+  };
+
+  // Use utility function for outside click handling
+  const { handleClickOutside, handleKeyDown, handleScroll } = useOutsideClick(
+    portalRef,
+    { current: portalTriggerElement },
+    handlePortalCloseImmediate,
+    showPortal
+  );
+
+  // Add event listeners for dropdown auto-close
+  useEffect(() => {
+    if (showPortal) {
+      // Add scroll listeners to window and any scrollable containers
+      window.addEventListener('scroll', handleScroll, true);
+      document.addEventListener('scroll', handleScroll, true);
+      
+      // Add click outside listener
+      document.addEventListener('mousedown', handleClickOutside);
+      
+      // Add keyboard listener for Escape key
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showPortal, handleClickOutside, handleKeyDown, handleScroll]);
+
+  const handlePortalMouseEnter = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    setIsHoveringPortal(true);
+  };
+
+  const handlePortalMouseLeave = () => {
+    setIsHoveringPortal(false);
+    const timeout = setTimeout(() => {
+      if (portalTriggerElement) {
+        portalTriggerElement.classList.remove('portal-active');
+      }
+      setShowPortal(false);
+      setPortalContent(null);
+      setPortalTriggerElement(null);
+    }, 100);
+    setHoverTimeout(timeout);
+  };
 
   const deleteBridge = async (item, name) => {
     try {
@@ -292,31 +427,36 @@ function Home({ params, isEmbedUser }) {
   }
 
   const EndComponent = ({ row }) => {
-    return (
-      <div className="flex items-center gap-2">
-        {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
-            }}>
-              History
-            </button>
-          </div> 
-        ) : null}
-        <div className="dropdown dropdown-left bg-transparent">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content border border-base-content/10 menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
+    const handleDropdownClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const dropdownContent = (
+        <ul className="menu bg-base-100 rounded-box w-52 p-2 shadow">
+          <li><a onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handlePortalCloseImmediate();
+            handleSetBridgeLimit(row);
+          }}><ClockFading className="" size={16} />Usage Limit</a></li>
+          {(row?.bridge_limit && row?.bridge_usage !== 0) && (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handlePortalCloseImmediate();
+              resetUsage(row);
+            }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
+          )}
+          <li><button onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</a></li>
+            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</button></li>
             <li> <button
               onClick={(e) =>{
                 e.preventDefault();
                 e.stopPropagation();
+                handlePortalCloseImmediate();
                 handlePauseBridge(row._id)
               }}
               className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
@@ -336,6 +476,7 @@ function Home({ params, isEmbedUser }) {
             <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handlePortalCloseImmediate();
               setItemToDelete(row);
               // Small delay to ensure state is set before opening modal
               setTimeout(() => {
@@ -345,8 +486,38 @@ function Home({ params, isEmbedUser }) {
               <Trash2 size={14} className="text-red-600" />
               Delete Agent
             </button></li> 
-          </ul>
+        </ul>
+      );
+      
+      handlePortalOpen(e.currentTarget, dropdownContent);
+    };
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center mr-4 text-sm">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {(!isEmbedUser || (isEmbedUser && showHistory)) ? (
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
+            }}>
+              History
+            </button>
+          </div> 
+        ) : null}
         </div>
+        <div className="bg-transparent">
+          <div 
+            role="button" 
+            className="hover:bg-base-200 rounded-lg p-3 cursor-pointer" 
+            onClick={handleDropdownClick}
+          >
+            <EllipsisIcon className="rotate-90" size={16} />
+          </div>
+        </div>
+      </div>
       </div>
     )
   }
@@ -387,6 +558,39 @@ function Home({ params, isEmbedUser }) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  // Handle clicks outside portal to close it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (portalRef.current && !portalRef.current.contains(event.target)) {
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
+          setHoverTimeout(null);
+        }
+        if (portalTriggerElement) {
+          portalTriggerElement.classList.remove('portal-active');
+        }
+        setShowPortal(false);
+        setPortalContent(null);
+        setPortalTriggerElement(null);
+        setIsHoveringPortal(false);
+      }
+    };
+
+    if (showPortal) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showPortal, hoverTimeout, portalTriggerElement]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+    };
+  }, [hoverTimeout]);
 
   return (
     <div className="w-full overflow-x-hidden flex justify-start">
@@ -435,9 +639,9 @@ function Home({ params, isEmbedUser }) {
                 
                 <CustomTable 
                   data={UnArchivedBridges} 
-                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
                   sorting 
-                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
                   handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                   keysToExtractOnRowClick={['_id', 'versionId']} 
                   keysToWrap={['name', 'model']} 
@@ -507,6 +711,45 @@ function Home({ params, isEmbedUser }) {
           }}
         />
       </div>
+      <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} />
+      
+      {/* Global styles for portal priority */}
+      <style jsx global>{`
+        .portal-active {
+          opacity: 1 !important;
+          visibility: visible !important;
+          z-index: 9999 !important;
+        }
+        
+        .table-row:hover .portal-active {
+          opacity: 1 !important;
+        }
+        
+        .group:hover .portal-active {
+          opacity: 1 !important;
+        }
+        
+        .portal-active * {
+          pointer-events: auto !important;
+        }
+      `}</style>
+      
+      {/* Portal for dropdown */}
+      {showPortal && portalContent && typeof document !== 'undefined' && createPortal(
+        <div 
+          ref={portalRef}
+          className="fixed z-[9999999] bg-base-100 shadow-lg rounded-lg border border-base-300"
+          style={{
+            top: `${portalPosition.top}px`,
+            left: `${portalPosition.left}px`
+          }}
+          onMouseEnter={handlePortalMouseEnter}
+          onMouseLeave={handlePortalMouseLeave}
+        >
+          {portalContent}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

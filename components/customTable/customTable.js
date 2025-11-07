@@ -197,7 +197,7 @@ const CustomTable = ({
                                 
                                 {/* Card Actions */}
                                 {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         {endComponent({row: row})}
                                     </div>
                                 )}
@@ -218,8 +218,8 @@ const CustomTable = ({
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
         
         return (
-            <div className="overflow-x-auto border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
-                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-hidden border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
+            <div className="overflow-visible relative z-50 border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
+                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-visible relative z-50 border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
@@ -264,7 +264,7 @@ const CustomTable = ({
                             sortedData?.map((row, index) => (
                                 <tr 
                                     key={row.id || row?._id || index} 
-                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group ${
+                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors z-40 cursor-pointer group ${
                                         row.isLoading ? 'opacity-60 cursor-wait' : ''
                                     }`}
                                     onClick={() =>
@@ -298,8 +298,8 @@ const CustomTable = ({
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td className="px-4 py-2 text-left">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <td className="px-4 py-2 text-left relative">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative z-50">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
