@@ -83,7 +83,7 @@ export const NAV_SECTIONS = [
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'Developer', items: ['integration', 'RAG_embed'] },
-  { title: 'TEAM & COLLABORATION', items: ['invite'] }
+  // { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
 

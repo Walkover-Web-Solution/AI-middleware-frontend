@@ -341,7 +341,17 @@ function MainSlider({ isEmbedUser }) {
         router.push(`/org/${orgId}/userDetails`);
       }
     },
-    
+    {
+      id: 'Members',
+      label: 'Members',
+      icon: ITEM_ICONS.invite,
+      onClick: () => {
+        setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/invite`);
+      }
+    },
     {
       id: 'auth',
       label: 'Auth 2.0',
