@@ -127,7 +127,7 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
         )}
 
       <KnowledgeBaseModal params={resolvedParams} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
-      <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
+      <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete Knowledge Base " description={`Are you sure you want to delete the Knowledge Base "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
     </div>
   );
 };
