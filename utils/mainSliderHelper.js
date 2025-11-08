@@ -6,7 +6,13 @@ import {
   Workflow,
   FileSliders,
   MessageSquareMore,
+  Settings2,
+  MonitorPlayIcon,
+  MessageCircleMoreIcon,
+  MessageSquareMoreIcon,
+  Cog,
 } from 'lucide-react';
+import { AddIcon, KeyIcon } from '@/components/Icons';
 import React from 'react';
 
 
@@ -25,7 +31,18 @@ export const ITEM_ICONS = {
   knowledge_base: <BookOpen size={15} />,
   feedback: <MessageSquareMore size={15} />,
   RAG_embed: <Blocks size={15} />,
-  integration: <Blocks size={15} />
+  integration: <Blocks size={15} />,
+  // Admin section icons
+  adminSettings: <Settings2 size={15} />,
+  tutorial: <MonitorPlayIcon size={15} />,
+  speakToUs: <MessageCircleMoreIcon size={15} />,
+  feedbackAdmin: <MessageSquareMoreIcon size={15} />,
+  // Settings menu icons
+  workspace: <Settings2 size={15} />,
+  userDetails: <Cog size={15} />,
+  auth: <KeyIcon size={15} />,
+  addModel: <AddIcon size={15} />,
+  prebuiltPrompts: <Bot size={15} />
 };
 
 export const DISPLAY_NAMES = (key) => {
@@ -66,7 +83,7 @@ export const NAV_SECTIONS = [
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'Developer', items: ['integration', 'RAG_embed'] },
-  { title: 'TEAM & COLLABORATION', items: ['invite'] }
+  // { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
 
