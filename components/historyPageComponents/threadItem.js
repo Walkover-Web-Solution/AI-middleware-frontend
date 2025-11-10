@@ -207,35 +207,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-  const handleToolPrimaryClick = useCallback((event, tool) => {
-    if (tool?.bridge_id !== null) {
-      const bridgeId = tool?.bridge_id
-      const versionId = tool?.version_id
-
-      if (bridgeId) {
-        const targetUrl = `/org/${params?.org_id}/agents/configure/${bridgeId}${versionId ? `?version=${versionId}` : ''}`;
-
-        if ((event?.metaKey || event?.ctrlKey) && typeof window !== 'undefined') {
-          window.open(targetUrl, "_blank");
-        } else {
-          router.push(targetUrl);
-        }
-        return;
-      }
-    }
-
-    openViasocket(tool?.id, {
-      flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
-        type: 'tool',
-        bridge_id: params?.id,
-      }
-    });
-  }, [embedToken, params, router]);
+  
 
   const renderToolData = (toolData, index) => (
     Object.entries(toolData).map(([key, tool]) => (
       <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
-        <div onClick={(event) => handleToolPrimaryClick(event, tool)}
+        <div 
           className="cursor-pointer flex items-center justify-center py-4 pl-2">
           <div className="text-center">
             {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
@@ -244,12 +221,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
             <SquareFunctionIcon size={22}
-              onClick={() => openViasocket(tool.id, {
+              onClick={() => {tool.data.metadata.type==='agent' ? window.openGtwy({ agent_id: tool?.data?.metadata?.agent_id, history: {message_id: tool?.data?.metadata?.message_id}}): openViasocket(tool.id, {
                 flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
                   type: 'tool',
                   bridge_id: params?.id,
                 }
-              })}
+              })}}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, use } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { getFromCookies } from "@/utils/utility";
 
 export default function layoutHistoryPage({ children, params }) {
     const resolvedParams = use(params);
@@ -53,6 +54,31 @@ export default function layoutHistoryPage({ children, params }) {
       }, 150);
     };
   }, []);
+
+  useEffect(() => {
+      const existingScript = document.getElementById('gtwy-user-script');
+      if (existingScript) existingScript.remove();
+  
+      if (params?.org_id) {
+        const scriptId = 'gtwy-user-script';
+        const scriptURl =
+          process.env.NEXT_PUBLIC_ENV !== 'PROD'
+            ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
+            : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = scriptURl;
+        script.setAttribute('skipLoadGtwy', true);
+        script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
+        script.setAttribute('org_id', params?.org_id);
+        script.setAttribute('customIframeId', 'gtwyEmbedInterface');
+        script.setAttribute('gtwy_user', true);
+        script.setAttribute('slide','right');
+        // script.setAttribute('parentId', 'gtwy');
+        // script.setAttribute('hideHeader', true);
+        document.head.appendChild(script);
+      }
+    }, [params]);
 
   return (
     <>
