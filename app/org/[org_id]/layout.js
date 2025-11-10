@@ -260,7 +260,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   const docstarScriptId = "docstar-main-script";
   const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
-
   useEffect(() => {
     const existingScript = document.getElementById(docstarScriptId);
     if (existingScript) {
@@ -377,7 +376,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus && <Navbar resolvedParams={resolvedParams} />}
+              <Navbar resolvedParams={resolvedParams} />
             </div>
 
             {/* Scrollable Content */}
@@ -409,7 +408,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus ? <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/> : null}
+               <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/>
             </div>
 
             {/* Scrollable Content */}

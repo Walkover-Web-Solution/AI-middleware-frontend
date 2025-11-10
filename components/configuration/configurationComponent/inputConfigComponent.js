@@ -21,7 +21,8 @@ const InputConfigComponent = memo(({
     setPromptState,
     handleCloseTextAreaFocus,
     savePrompt,
-    isMobileView
+    isMobileView,
+    closeHelperButtonLocation
 }) => {
     // Optimized Redux selector with memoization and shallow comparison
     const { prompt: reduxPrompt } = usePromptSelector(params, searchParams);
@@ -92,6 +93,19 @@ const InputConfigComponent = memo(({
             }
         }
     }, [uiState.isPromptHelperOpen, updateUiState]);
+
+    const handleOpenPromptHelper = useCallback(() => {
+        if (!uiState.isPromptHelperOpen && window.innerWidth > 710) {
+            updateUiState({ isPromptHelperOpen: true });
+            if (typeof window.closeTechDoc === 'function') {
+                window.closeTechDoc();
+            }
+        }
+    }, [uiState.isPromptHelperOpen, updateUiState]);
+
+    const handleClosePromptHelper = useCallback(() => {
+        updateUiState({ isPromptHelperOpen: false });
+    }, [updateUiState]);
     
     // Memoized values to prevent recalculation
     const isDisabled = useMemo(() => 
@@ -124,7 +138,10 @@ const InputConfigComponent = memo(({
                 isPromptHelperOpen={uiState.isPromptHelperOpen}
                 isMobileView={isMobileView}
                 onOpenDiff={handleOpenDiffModal}
+                onOpenPromptHelper={handleOpenPromptHelper}
+                onClosePromptHelper={handleClosePromptHelper}
                 disabled={isDisabled}
+                handleCloseTextAreaFocus={handleCloseTextAreaFocus}
             />
             
             <div className="form-control h-full relative">
@@ -132,7 +149,6 @@ const InputConfigComponent = memo(({
                     textareaRef={textareaRef}
                     initialValue={reduxPrompt}
                     onChange={handlePromptChange}
-                    onFocus={handleTextareaFocus}
                     isPromptHelperOpen={uiState.isPromptHelperOpen}
                     onKeyDown={handleKeyDown}
                 />

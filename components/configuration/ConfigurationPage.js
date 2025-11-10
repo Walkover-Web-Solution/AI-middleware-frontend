@@ -20,7 +20,8 @@ const ConfigurationPage = ({
     setPromptState,
     handleCloseTextAreaFocus,
     savePrompt,
-    isMobileView
+    isMobileView,
+    closeHelperButtonLocation
 }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
@@ -71,7 +72,8 @@ const ConfigurationPage = ({
         setPromptState,
         handleCloseTextAreaFocus,
         savePrompt,
-        isMobileView
+        isMobileView,
+        closeHelperButtonLocation
     }), [
         configState,
         params,
@@ -85,7 +87,8 @@ const ConfigurationPage = ({
         setPromptState,
         handleCloseTextAreaFocus,
         savePrompt,
-        isMobileView
+        isMobileView,
+        closeHelperButtonLocation
     ]);
 
     return (
