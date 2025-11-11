@@ -1,25 +1,22 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, ChevronDown, BotIcon, Variable, Plus, Upload, Edit } from 'lucide-react';
+import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, BotIcon, Variable } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction, archiveBridgeAction, updateBridgeVersionAction, createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, dicardBridgeVersionAction, archiveBridgeAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
-// import { setActiveVariableGroup } from '@/store/reducer/variableReducer'; // Commented out - not needed with simple button
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal, toggleSidebar, sendDataToParent } from '@/utils/utility';
+import { openModal, toggleSidebar, sendDataToParent } from '@/utils/utility';
 import { toast } from 'react-toastify';
 const ChatBotSlider = dynamic(() => import('./sliders/chatBotSlider'), { ssr: false });
 const ConfigHistorySlider = dynamic(() => import('./sliders/configHistorySlider'), { ssr: false });
 import Protected from './protected';
 const GuideSlider = dynamic(() => import('./sliders/IntegrationGuideSlider'), { ssr: false });
 import { FilterSliderIcon } from './Icons';
-import { truncate } from './historyPageComponents/assistFile';
 const DeleteModal = dynamic(() => import('./UI/DeleteModal'), { ssr: false });
-const BridgeVersionDropdown = dynamic(() => import('./configuration/configurationComponent/bridgeVersionDropdown'), { ssr: false });
-const VersionDescriptionInput = dynamic(() => import('./configuration/configurationComponent/VersionDescriptionInput'), { ssr: false });
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 const VariableCollectionSlider = dynamic(() => import('./sliders/VariableCollectionSlider'), { ssr: false });
 
 const BRIDGE_STATUS = {
@@ -34,6 +31,7 @@ const Navbar = ({ isEmbedUser }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
   // const [defaultGroupName, setDefaultGroupName] = useState('Default Group'); // Commented out - not needed with simple button
+  const { isDeleting: isDiscardingWithHook, executeDelete } = useDeleteOperation();
   const ellipsisMenuRef = useRef(null);
 
   const router = useRouter();
@@ -48,7 +46,7 @@ const Navbar = ({ isEmbedUser }) => {
     const variableState = state?.variableReducer?.VariableMapping?.[bridgeId]?.[versionId] || {};
     return {
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId)||{},
+    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
     isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
@@ -58,8 +56,8 @@ const Navbar = ({ isEmbedUser }) => {
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
-    hideHomeButton:  state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
-    showHistory:  state.appInfoReducer?.embedUserDetails?.showHistory,
+    hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
+    showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
     versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.version_description || "",
     bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.versions || [],
@@ -70,10 +68,10 @@ const Navbar = ({ isEmbedUser }) => {
   // Define tabs based on user type
   const TABS = useMemo(() => {
     const baseTabs = [
-      { 
-        id: 'configure', 
-        label: ' Agent Config', 
-        icon: BotIcon, 
+      {
+        id: 'configure',
+        label: ' Agent Config',
+        icon: BotIcon,
         shortLabel: 'Agent Config'
       },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
@@ -165,7 +163,7 @@ const Navbar = ({ isEmbedUser }) => {
         dataToSend: { name: trimmed },
       }));
       isEmbedUser && sendDataToParent("updated", {
-        name: trimmed, 
+        name: trimmed,
         agent_id: bridgeId
       }, "Agent Name Updated");
     }
@@ -224,20 +222,14 @@ const Navbar = ({ isEmbedUser }) => {
   }, [dispatch, bridgeId, bridgeStatus]);
 
   const handleDiscardChanges = useCallback(async () => {
-    try {
+    await executeDelete(async () => {
       dispatch(updateBridgeVersionReducer({
         bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false }
       }));
       await dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
       toast.success('Changes discarded successfully');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to discard changes');
-    }
-    finally{
-      closeModal(MODAL_TYPE.DELETE_MODAL);
-    }
-  }, [dispatch, bridge, versionId, bridgeId]);
+    });
+  }, [executeDelete, dispatch, bridge, searchParams, bridgeId]);
 
   const handlePublish = useCallback(async () => {
     if (!isDrafted) {
@@ -265,7 +257,7 @@ const Navbar = ({ isEmbedUser }) => {
 
   const breadcrumbItems = useMemo(() => {
     const items = [];
-    
+
     // Add org and agents breadcrumbs only for non-embed users
     if (!isEmbedUser) {
       items.push(
@@ -283,7 +275,7 @@ const Navbar = ({ isEmbedUser }) => {
         }
       );
     }
-    
+
     // Always add the agent name (editable)
     items.push({
       label: agentName,
@@ -292,10 +284,10 @@ const Navbar = ({ isEmbedUser }) => {
       current: true,
       editable: true
     });
-    
+
     return items;
   }, [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar, handleNameEdit, isEmbedUser]);
-  
+
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
@@ -391,7 +383,7 @@ const Navbar = ({ isEmbedUser }) => {
         <div className="flex w-full items-center gap-2 px-2 sm:px-4 py-2 sm:py-3 h-12 sm:h-14">
           {/* Left: Breadcrumb or Home */}
           <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-1">
-            {(isEmbedUser && !hideHomeButton) && 
+            {(isEmbedUser && !hideHomeButton) &&
               <button
                 onClick={handleHomeClick}
                 className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 hover:bg-base-200 px-2 sm:px-3"
@@ -400,7 +392,7 @@ const Navbar = ({ isEmbedUser }) => {
                 <Home size={14} className="sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline text-xs sm:text-sm">Home</span>
               </button>
-              }
+            }
             {<nav className="flex items-center ml-2 sm:ml-6 lg:ml-0 md:ml-0 xl:ml-0 gap-0.5 sm:gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
                 {breadcrumbItems.map((item, idx) => (
                   <React.Fragment key={idx}>
@@ -474,9 +466,9 @@ const Navbar = ({ isEmbedUser }) => {
                 </div>
               </div>
             )} */}
-            
+
             {/* Version Controls - show on configure tab for non-embed users */}
-            
+
             {/* {activeTab === 'configure' && bridgeId && (
               <div className="hidden xl:flex items-center gap-1 sm:gap-2 mx-2 sm:mx-4">
                 <BridgeVersionDropdown 
@@ -493,9 +485,9 @@ const Navbar = ({ isEmbedUser }) => {
                 </div>
               </div>
             )} */}
-            
-            
-            
+
+
+
           </div>
           {(isEmbedUser && showHistory) || !isEmbedUser ? (
             <div className="flex flex-1 justify-center px-1 sm:px-2">
@@ -552,7 +544,7 @@ const Navbar = ({ isEmbedUser }) => {
                   onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                   disabled={isUpdatingBridge || isPublishing}
                 >
-                  <ClipboardX size={12} className='sm:w-3.5 sm:h-3.5 text-black'/>
+                  <ClipboardX size={12} className='sm:w-3.5 sm:h-3.5 text-black' />
                   <span className="text-black text-xs sm:text-sm">Discard</span>
                 </button>
               )}
@@ -817,7 +809,7 @@ const Navbar = ({ isEmbedUser }) => {
       )}
       
       {/* Modals */}
-      <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard"/>
+      <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard" loading={isDiscardingWithHook} isAsync={true} />
     </div>
   );
 };

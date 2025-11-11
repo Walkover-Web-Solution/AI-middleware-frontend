@@ -1,24 +1,24 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, EllipsisVerticalIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { closeModal, GetFileTypeIcon, openModal } from '@/utils/utility';
+import { GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
-import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
     // Use the tutorial videos hook
     const { getKnowledgeBaseVideo } = useTutorialVideos();
-    
+
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -35,6 +35,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         };
     });
     const [selectedKnowledgebase, setSelectedKnowledgebase] = useState(null);
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({
@@ -57,22 +58,17 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             }
         }, 0);
     };
-    const handleDeleteKnowledgebase = (item) => {
-        dispatch(updateBridgeVersionAction({
-            versionId: searchParams?.version,
-            dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
-        }));
-         closeModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
+    const handleDeleteKnowledgebase = async (item) => {
+        await executeDelete(async () => {
+            return dispatch(updateBridgeVersionAction({
+                versionId: searchParams?.version,
+                dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
+            }));
+        });
     };
     const handleOpenDeleteModal = (item) => {
         setSelectedKnowledgebase(item);
         openModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
-    };
-    const handleTutorial = () => {
-        setTutorialState(prev => ({
-            ...prev,
-            showSuggestion: isFirstKnowledgeBase
-        }))
     };
 
     useEffect(() => {
@@ -117,13 +113,13 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </p>
                         </div>
                     </div>
-                    
+
                     {/* Remove button that appears on hover */}
                     <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                               handleOpenDeleteModal(item);
+                                handleOpenDeleteModal(item);
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
@@ -141,7 +137,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (
                         <>
-                            <InfoTooltip  tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                            <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
                                 <p className="label-text mb-2 whitespace-nowrap font-medium info">KnowledgeBase</p>
                             </InfoTooltip>
                             <button
@@ -159,17 +155,14 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 tabIndex={0}
                                 className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
                                 disabled={!shouldToolsShow}
-                                >
+                            >
                                 <AddIcon className="w-2 h-2" />
                                 <span className="text-sm font-medium">Knowledge Base</span>
-                            </button>     
-                       </InfoTooltip>
-                        
+                            </button>
+                        </InfoTooltip>
+
                     )}
                 </div>
-
-
-
                 {tutorialState?.showSuggestion && (
                     <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
                 )}
@@ -177,8 +170,8 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
-           <div className="dropdown dropdown-left mt-8">
-           <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
+                    <div className="dropdown dropdown-left mt-8">
+                        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
                             <input
                                 type='text'
@@ -215,14 +208,14 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 </div>
                             </li>
                         </div>
-                    </ul>
+                        </ul>
                     </div>
                 )}
             </div>
             <div className="flex flex-col gap-2 w-full ">
-            {renderKnowledgebase}
+                {renderKnowledgebase}
             </div>
-            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} />
+            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
         </div>
     );

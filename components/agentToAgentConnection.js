@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo, useRef, use } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Handle, Position, ReactFlowProvider, Controls, Background, BackgroundVariant, } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Plus, PlusIcon, Settings, Bot, X, CircleArrowOutUpRight, RefreshCw } from 'lucide-react';
+import { Plus, PlusIcon, Settings, Bot, X, CircleArrowOutUpRight } from 'lucide-react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { usePathname, useRouter } from 'next/navigation';
 import { serializeAgentFlow, BRIDGE_TYPES, useAgentLookup, normalizeConnectedRefs, shallowEqual, AgentSidebar, FlowControlPanel, AgentConfigSidebar, IntegrationGuide, } from '@/components/flowDataManager';
@@ -15,8 +15,9 @@ import { useDispatch } from 'react-redux';
 import FunctionParameterModal from './configuration/configurationComponent/functionParameterModal';
 import { flushSync } from 'react-dom';
 import DeleteModal from './UI/DeleteModal';
-import { createNewOrchestralFlow, updateOrchestralFlow } from '@/config';
+import { createNewOrchestralFlow } from '@/config';
 import Protected from './protected';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 /* ========================= Helpers ========================= */
 function hydrateNodes(rawNodes, ctx) {
@@ -100,8 +101,8 @@ function BridgeNode({ data }) {
       <button
         onClick={handleBridgeClick}
         className={`text-white rounded-full w-20 h-20 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform nodrag relative overflow-hidden ${bridgeConfig
-            ? `bg-gradient-to-r ${bridgeConfig.color} hover:opacity-90`
-            : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
+          ? `bg-gradient-to-r ${bridgeConfig.color} hover:opacity-90`
+          : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
           }`}
         title={
           bridgeConfig
@@ -154,14 +155,14 @@ function AgentNode({ id, data }) {
 
   const handleDeleteData = useCallback((e) => {
     e?.preventDefault();
-    e?.stopPropagation();    
+    e?.stopPropagation();
     const selectedAgent = data.selectedAgent || { name: 'Unknown Agent' };
-    
+
     if (!data.onRequestDelete) {
       console.error('onRequestDelete function not available');
       return;
     }
-    
+
     // Call the delete request function
     data.onRequestDelete(id, selectedAgent);
   }, [id, data.selectedAgent, data.onRequestDelete]);
@@ -189,8 +190,8 @@ function AgentNode({ id, data }) {
 
           <div
             className={`relative border-2 rounded-full shadow-xl hover:shadow-2xl p-6 z-20 transition-all duration-300 group-hover:shadow-blue-100 cursor-pointer ${isMasterAgent
-                ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-400 hover:border-amber-500'
-                : 'bg-gradient-to-br from-white to-slate-50 border-slate-300 hover:border-blue-400'
+              ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-400 hover:border-amber-500'
+              : 'bg-gradient-to-br from-white to-slate-50 border-slate-300 hover:border-blue-400'
               }`}
             onClick={handleUpdateVariable}
           >
@@ -242,8 +243,8 @@ function AgentNode({ id, data }) {
           <div className="flex items-center justify-center gap-2">
             <div
               className={`px-4 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold cursor-pointer transition-all duration-300 rounded-xl shadow-sm hover:shadow-md border ${isMasterAgent
-                  ? 'text-amber-800 hover:text-amber-900 bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 hover:border-amber-300'
-                  : 'text-base-content hover:text-base-content '
+                ? 'text-amber-800 hover:text-amber-900 bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 hover:border-amber-300'
+                : 'text-base-content hover:text-base-content '
                 }`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -261,7 +262,7 @@ function AgentNode({ id, data }) {
                 <CircleArrowOutUpRight className="text-base-content" size={16} />
               </div>
             </div>
-            
+
             {/* Change Agent Button */}
             {/* <button
               onClick={(e) => {
@@ -399,6 +400,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   });
 
   const [pendingDelete, setPendingDelete] = useState(null);
+  const { isDeleting, executeDelete } = useDeleteOperation();
 
   const openConfigSidebar = useCallback(
     (nodeId) => {
@@ -412,11 +414,11 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     [nodes, agents, selectedAgent]
   );
 
-  const requestDelete = useCallback((nodeId, selectedAgent) => {    
+  const requestDelete = useCallback((nodeId, selectedAgent) => {
     // Check if this is a master agent (first agent in the flow)
     const nodeToDelete = nodes.find(n => n.id === nodeId);
     const isMasterAgent = nodeToDelete?.data?.isFirstAgent;
-    
+
     if (isMasterAgent) {
       // Prevent deletion of master agent - show error message instead
       console.warn('Cannot delete master agent');
@@ -424,17 +426,17 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       alert('Cannot remove the master agent. The master agent is required for the orchestral flow to function.');
       return;
     }
-    
+
     // Only allow deletion of non-master agents
     setPendingDelete({ id: nodeId, selectedAgent });
-    
+
     // Small delay to ensure state is set before opening modal
     setTimeout(() => {
       openModal(MODAL_TYPE.DELETE_MODAL);
     }, 0);
   }, [nodes]);
   const createFanoutSubgraphRef = useRef();
- 
+
 
 
   // Debounced save (stable)
@@ -470,12 +472,12 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             status: existingData.status || 'draft',
             data: currentFlowData,
             org_id: params.org_id,
-            master_agent: typeof(currentFlowData.master_agent) === 'string' ? currentFlowData.master_agent : "",
+            master_agent: typeof (currentFlowData.master_agent) === 'string' ? currentFlowData.master_agent : "",
             master_agent_name: name || 'Flow',
           };
 
           if (params.orchestralId) {
-             dispatch(updateOrchestralFlowAction(saveStructure, params.org_id, params.orchestralId));
+            dispatch(updateOrchestralFlowAction(saveStructure, params.org_id, params.orchestralId));
           } else {
             const response = await createNewOrchestralFlow(saveStructure);
             if (response.data?.data?.orchestrator_id && !params.orchestralId) {
@@ -583,7 +585,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     debouncedSave()
 
     setIsVariableModified(true);
-    
+
     // Always set status to 'draft' when flow is modified (nodes/edges change)
     if (orchestralData) {
       orchestralData.status = 'draft';
@@ -624,13 +626,13 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   // Centralized validation function for bridge connections
   const validateBridgeConnection = useCallback((sourceId, targetId, currentEdges) => {
     const bridgeNodeId = 'bridge-node-root';
-    
+
     // Check if trying to connect to/from bridge node
     if (sourceId === bridgeNodeId || targetId === bridgeNodeId) {
       // Check if bridge node already has connections
-      const existingConnections = currentEdges.filter(edge => 
+      const existingConnections = currentEdges.filter(edge =>
         edge.source === bridgeNodeId || edge.target === bridgeNodeId
-      );      
+      );
       if (existingConnections.length > 0) {
         alert('Cannot connect more than one agent to the bridge node');
         return false;
@@ -646,7 +648,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     if (!validateBridgeConnection(params.source, params.target, edges)) {
       return;
     }
-    
+
     // Allow the connection if validation passes
     setEdges((eds) => addEdge({ ...params, type: 'smoothstep', data: {} }, eds));
   }, [edges, validateBridgeConnection]);
@@ -675,20 +677,20 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       // Call the discard API for orchestral flow
       const orchestralId = params?.orchestralId;
       const orgId = params?.org_id;
-      
+
       if (orchestralId && orgId) {
         // Get the original nodes and edges from discarded data
         const originalNodes = discardedData?.nodes ?? [];
         const originalEdges = discardedData?.edges ?? [];
-        
+
         // Find master agent from original data
         const firstAgentNode = originalNodes.find((n) => n.type === 'agentNode' && n.data?.isFirstAgent && n.data?.selectedAgent);
         const masterAgentData = firstAgentNode?.data?.selectedAgent;
-        
+
         // Get bridge type from original data
         const bridgeNode = originalNodes.find((n) => n.type === 'bridgeNode');
         const originalBridgeType = bridgeNode?.data?.bridgeType || selectedBridgeType;
-        
+
         // Serialize the original data like we do in save
         const serializedOriginalData = serializeAgentFlow(originalNodes, originalEdges, {
           name: name || 'Draft Flow',
@@ -711,7 +713,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           master_agent: masterAgentData?._id || masterAgentData?.bridge_id || masterAgentData?.name,
           master_agent_name: masterAgentData?.name,
         };
-        
+
         // Use Redux action to discard changes with serialized data
         await dispatch(discardOrchestralFlowAction(discardStructure, orgId, orchestralId));
       }
@@ -744,22 +746,22 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       );
       // Filter edges to ensure only one bridge connection is loaded
       const bridgeNodeId = 'bridge-node-root';
-      const bridgeEdges = edgesToLoad.filter(edge => 
+      const bridgeEdges = edgesToLoad.filter(edge =>
         edge.source === bridgeNodeId || edge.target === bridgeNodeId
       );
-      const otherEdges = edgesToLoad.filter(edge => 
+      const otherEdges = edgesToLoad.filter(edge =>
         edge.source !== bridgeNodeId && edge.target !== bridgeNodeId
       );
-      
+
       // Only keep the first bridge connection if multiple exist
-      const validEdges = bridgeEdges.length > 1 
-        ? [bridgeEdges[0], ...otherEdges] 
+      const validEdges = bridgeEdges.length > 1
+        ? [bridgeEdges[0], ...otherEdges]
         : edgesToLoad;
-      
+
       if (bridgeEdges.length > 1) {
         console.warn(`Found ${bridgeEdges.length} bridge connections in saved data. Only keeping the first one.`);
       }
-      
+
       setEdges(validEdges);
       setShouldLayout(true);
     }
@@ -779,18 +781,18 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           thread_id: existingAgentData.thread_id || agent.thread_id || false,
           description: existingAgentData.description || agent.description || '',
         };
-        
-        return { 
-          ...n, 
-          data: { 
-            ...n.data, 
-            selectedAgent: updatedAgent 
-          } 
+
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            selectedAgent: updatedAgent
+          }
         };
       }
       return n;
     }));
-    
+
     // Auto-save when agent is changed
     setTimeout(() => {
       debouncedSave();
@@ -984,13 +986,13 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             ? updateOrchestralFlowAction(agentStructure, params.org_id, params.orchestralId)
             : createNewOrchestralFlowAction(agentStructure, params.org_id)
         ).then((response) => response.data.id);
-        
+
         // Set status to 'publish' after successful save and reset variable flag
         if (orchestralData) {
           orchestralData.status = 'publish';
         }
         setIsVariableModified(false);
-        
+
         if (id && !metadata.createdFlow) router.push(`/org/${params.org_id}/orchestratal_model/${id}`);
       } catch (error) {
         console.error('Error saving agent structure:', error);
@@ -1066,7 +1068,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
 
 
-   const createFanoutSubgraph = useCallback(
+  const createFanoutSubgraph = useCallback(
     (sourceNodeId, rootAgent, childRefs, isFirstAgent = false, visitedAgents = new Set()) => {
       const rootAgentKey = rootAgent?._id || rootAgent?.bridge_id || rootAgent?.name;
       if (!rootAgentKey || visitedAgents.has(rootAgentKey)) return;
@@ -1147,31 +1149,32 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     },
     [agents, openSidebar, resolveAgent, validateBridgeConnection, debouncedSave, requestDelete]
   );
- const confirmDelete = useCallback(() => {
+  const confirmDelete = useCallback(async () => {
     if (!pendingDelete?.id) {
       console.warn('No pending delete found');
-      closeModal(MODAL_TYPE.DELETE_MODAL);
       return;
     }
-    // Immediately delete the node
-    handleFlowChange({ action: 'DELETE_NODE', payload: { nodeId: pendingDelete.id } });
-    
-    // Clear pending delete and close modal
-    setPendingDelete(null);
-    closeModal(MODAL_TYPE.DELETE_MODAL);
-  }, [pendingDelete, handleFlowChange]);
+
+    await executeDelete(async () => {
+      // Delete the node
+      handleFlowChange({ action: 'DELETE_NODE', payload: { nodeId: pendingDelete.id } });
+
+      // Clear pending delete
+      setPendingDelete(null);
+    });
+  }, [pendingDelete, handleFlowChange, executeDelete, setPendingDelete]);
 
   const cancelDelete = useCallback(() => {
     setPendingDelete(null);
     closeModal(MODAL_TYPE.DELETE_MODAL);
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     createFanoutSubgraphRef.current = createFanoutSubgraph;
   }, [createFanoutSubgraph]);
-  const fitViewOptions = useMemo(() => ({ 
-    padding: 0.3, 
-    duration: 1000, 
+  const fitViewOptions = useMemo(() => ({
+    padding: 0.3,
+    duration: 1000,
     includeHiddenNodes: false,
     minZoom: 0.1,
     maxZoom: 1.5
@@ -1262,6 +1265,8 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         title="Remove Agent"
         description={`Are you sure you want to remove "${pendingDelete?.selectedAgent?.name || 'this agent'}"? It will also remove its child agents. This action cannot be undone.`}
         key={pendingDelete?.selectedAgent?._id || 'no-agent'}
+        loading={isDeleting}
+        isAsync={true}
       />
 
       <FunctionParameterModal

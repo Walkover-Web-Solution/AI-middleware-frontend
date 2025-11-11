@@ -39,6 +39,8 @@ const EmbedList = ({ params, searchParams }) => {
   const [toolData, setToolData] = useState({});
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
+  const [isRemovingTool, setIsRemovingTool] = useState(false);
+  const [isRemovingPrebuiltTool, setIsRemovingPrebuiltTool] = useState(false);
   const dispatch = useDispatch();
   const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
@@ -173,8 +175,9 @@ const EmbedList = ({ params, searchParams }) => {
     dispatch(updateBridgeVersionAction({
       versionId: searchParams?.version,
       dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
+    }).then(() => {
+      closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
     }));
-    closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
   };
 
   // Handle opening prebuilt tools configuration modal
@@ -217,6 +220,7 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Tool from the Agent."}
         buttonTitle="Remove Tool"
         modalType={MODAL_TYPE.DELETE_TOOL_MODAL}
+        loading={isRemovingTool}
       />
       <DeleteModal
         onConfirm={handleDeletePrebuiltTool}
@@ -226,6 +230,7 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Prebuilt Tool from the Agent."}
         buttonTitle="Remove Prebuilt Tool"
         modalType={MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL}
+        loading={isRemovingPrebuiltTool}
       />
       <FunctionParameterModal
         name="Tool"
