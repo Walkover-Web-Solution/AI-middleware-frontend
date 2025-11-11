@@ -4,21 +4,51 @@ import LoadingSpinner from "@/components/loadingSpinner";
 
 const Chatbot = ({ params, searchParams }) => {
   const [isLoading, setIsLoading] = useState(true); 
-  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => ({
-    bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
-    bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    chatbot_token: state?.ChatBot?.chatbot_token || '',
-    variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
-    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
-    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
-  }));
+  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => {
+    const versionState = state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version] || {};
+    return {
+      bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
+      bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+      bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+      chatbot_token: state?.ChatBot?.chatbot_token || '',
+      variablesKeyValue: versionState?.variables || [],
+      configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
+      service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
+    };
+  });
 
   // Convert variables array to object
   const variables = useMemo(() => {
+    const coerceValue = (rawValue, fallback, type) => {
+      const candidate = rawValue ?? fallback ?? "";
+      const trimmed = typeof candidate === "string" ? candidate.trim() : candidate;
+      if (type === "number") {
+        const parsed = Number(trimmed);
+        return Number.isNaN(parsed) ? trimmed : parsed;
+      }
+      if (type === "boolean") {
+        if (typeof trimmed === "boolean") return trimmed;
+        return String(trimmed).toLowerCase() === "true";
+      }
+      if (type === "object" || type === "array") {
+        try {
+          const parsed = typeof trimmed === "string" ? JSON.parse(trimmed) : trimmed;
+          return parsed;
+        } catch (err) {
+          return trimmed;
+        }
+      }
+      return candidate;
+    };
+
     return variablesKeyValue.reduce((acc, pair) => {
-      if (pair.key && pair.value) {
-        acc[pair.key] = pair.value;
+      if (!pair?.key) {
+        return acc;
+      }
+      const resolved =
+        pair.value && String(pair.value).length > 0 ? pair.value : pair.defaultValue;
+      if (resolved !== undefined) {
+        acc[pair.key] = coerceValue(pair.value, pair.defaultValue, pair.type || "string");
       }
       return acc;
     }, {});

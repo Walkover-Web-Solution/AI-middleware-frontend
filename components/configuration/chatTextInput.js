@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon } from '@/components/Icons';
 import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
+import { toggleSidebar } from '@/utils/utility';
 
 function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
     const [uploading, setUploading] = useState(false);
@@ -17,20 +18,30 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [urlInput, setUrlInput] = useState('');
+    const [showRunAnyway, setShowRunAnyway] = useState(false);
+    const [validationError, setValidationError] = useState(null);
+    const [runAnywayUsed, setRunAnywayUsed] = useState(false);
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = searchParams?.version;
-    const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId],
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model?.toLowerCase(),
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type?.toLowerCase(),
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt,
-        variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
-        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration,
-        modelInfo: state?.modelReducer?.serviceModels,
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
-    }));
-    const dataToSend = {
+    const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => {
+        const versionState = state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId] || {};
+        const activeGroupId = versionState?.activeGroupId;
+        const groups = versionState?.groups || [];
+        const activeGroup = groups.find(group => group.id === activeGroupId) || groups[0];
+        
+        return {
+            bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId],
+            modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model?.toLowerCase(),
+            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type?.toLowerCase(),
+            prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt,
+            variablesKeyValue: activeGroup?.variables || versionState?.variables || [],
+            configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration,
+            modelInfo: state?.modelReducer?.serviceModels,
+            service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
+        };
+    });
+    const dataToSend = useMemo(() => ({
         configuration: {
             model: modelName,
             type: modelType
@@ -42,7 +53,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
         response_format: {
             type: 'default'
         }
-    };
+    }), [modelName, modelType, bridge]);
     
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
     
@@ -57,16 +68,93 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
 
     useEffect(() => {
         setLocalDataToSend(dataToSend);
-    }, [bridge]);
+    }, [dataToSend]);
 
     const variables = useMemo(() => {
+        const coerceValue = (rawValue, fallback, type) => {
+            const candidate = rawValue ?? fallback ?? "";
+            const trimmed = typeof candidate === "string" ? candidate.trim() : candidate;
+            if (trimmed === "") {
+                return undefined;
+            }
+            if (type === "number") {
+                const parsed = Number(trimmed);
+                return Number.isNaN(parsed) ? undefined : parsed;
+            }
+            if (type === "boolean") {
+                if (typeof trimmed === "boolean") return trimmed;
+                if (String(trimmed).toLowerCase() === "true") return true;
+                if (String(trimmed).toLowerCase() === "false") return false;
+                return undefined;
+            }
+            if (type === "object" || type === "array") {
+                try {
+                    const parsed = typeof candidate === "string" ? JSON.parse(candidate) : candidate;
+                    return parsed;
+                } catch (err) {
+                    return undefined;
+                }
+            }
+            return candidate;
+        };
+
         return variablesKeyValue.reduce((acc, pair) => {
-            if (pair?.key && pair?.value) {
-                acc[pair.key] = pair.value;
+            if (!pair?.key) {
+                return acc;
+            }
+            const resolved =
+                pair.value && String(pair.value).length > 0
+                    ? pair.value
+                    : pair.defaultValue;
+
+            if (
+                resolved === undefined ||
+                (typeof resolved === "string" && resolved.trim() === "")
+            ) {
+                return acc;
+            }
+
+            const coerced = coerceValue(pair.value, pair.defaultValue, pair.type || "string");
+            if (coerced !== undefined) {
+                acc[pair.key] = coerced;
             }
             return acc;
         }, {});
     }, [variablesKeyValue]);
+
+    // Validate missing variables in prompt
+    const validatePromptVariables = useCallback(() => {
+        if (!prompt) return { isValid: true, missingVariables: [] };
+        
+        // Extract variables from prompt using regex
+        const regex = /{{(.*?)}}/g;
+        const matches = [...prompt.matchAll(regex)];
+        const promptVariables = [...new Set(matches.map(match => match[1].trim()))];
+        
+        if (!promptVariables.length) return { isValid: true, missingVariables: [] };
+        
+        // Check which variables are missing values
+        const missingVariables = promptVariables.filter(varName => {
+            const variable = variablesKeyValue.find(v => v.key === varName);
+            if (!variable) {
+                return true; // Variable not defined at all
+            }
+            
+            // Skip validation for optional variables
+            if (!variable.required) {
+                return false;
+            }
+            
+            const hasValue = variable.value !== undefined && variable.value !== null && String(variable.value).trim() !== '';
+            const hasDefault = variable.defaultValue !== undefined && variable.defaultValue !== null && String(variable.defaultValue).trim() !== '';
+            return !hasValue && !hasDefault; // Missing both value and default
+        });
+        
+        return {
+            isValid: missingVariables.length === 0,
+            missingVariables
+        };
+    }, [prompt, variablesKeyValue]);
 
     const clearState = () => {
         setUploadedImages([]);
@@ -77,7 +165,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
             setUrlInput('');
     }
 
-    const handleSendMessage = async (e) => {
+    const handleSendMessage = async (e, forceRun = false) => {
         const timestamp = Date.now();
         
         if (inputRef.current) {
@@ -87,6 +175,41 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
             setErrorMessage("Prompt is required");
             return;
         }
+
+        // Validate variables in prompt (skip if forceRun is true OR if runAnywayUsed is true)
+        if (!forceRun && !runAnywayUsed) {
+            const validation = validatePromptVariables();
+            
+            if (!validation.isValid) {
+                const missingVars = validation.missingVariables.join(', ');
+                const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
+                
+                setErrorMessage(errorMsg);
+                setValidationError(errorMsg);
+                setShowRunAnyway(true);
+                
+                // Open the variable collection slider
+                toggleSidebar("variable-collection-slider", "right");
+                
+                // Store missing variables in sessionStorage for the slider to highlight
+                sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
+                
+                return;
+            } else {
+                // Clear validation states if validation passes
+                setValidationError(null);
+                setShowRunAnyway(false);
+                sessionStorage.removeItem('missingVariables');
+            }
+        } else if (forceRun) {
+            // Clear validation states when running anyway
+            setValidationError(null);
+            setShowRunAnyway(false);
+            setErrorMessage("");
+            setRunAnywayUsed(true); // Mark Run Anyway as used
+            sessionStorage.removeItem('missingVariables');
+        }
+
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
 
         if(newMessage?.trim() === "") {
@@ -370,7 +493,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
                 }
             }
         },
-        [loading, uploading, conversation, prompt, isOrchestralModel, selectedStrategy, inputRef, testCaseId]
+        [loading, uploading, conversation, prompt, isOrchestralModel, selectedStrategy, inputRef, testCaseId, variables]
     );
     const handleFileChange = async (e) => {
         const files = Array.from(e.target.files);
@@ -677,13 +800,58 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
                 </div>
             )}
 
+            {/* Validation Error Display */}
+            {validationError && (
+                <div className="mb-2 p-3 bg-error/10 border border-error/30 rounded-lg">
+                    <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                            <svg className="w-5 h-5 text-error" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-error mb-1">Variable Validation Error</h4>
+                            <p className="text-sm text-error/80 mb-3">{validationError}</p>
+                            {showRunAnyway && (
+                                <div className="flex gap-2">
+                                    <button
+                                        className="btn btn-error btn-sm"
+                                        onClick={() => handleSendMessage(null, true)}
+                                        disabled={loading || uploading}
+                                    >
+                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Run Anyway
+                                    </button>
+                                    <button
+                                        className="btn btn-ghost btn-sm"
+                                        onClick={() => {
+                                            setValidationError(null);
+                                            setShowRunAnyway(false);
+                                            setErrorMessage("");
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Input Group */}
             <div className="input-group flex justify-end items-end gap-2 w-full relative">
                 {(modelType !== "completion") && (modelType !== 'image') && (
                 <textarea
                     ref={inputRef}
                     placeholder="Type here"
-                    className="textarea bg-white dark:bg-black/15 textarea-bordered w-full focus:border-primary max-h-[200px] resize-none overflow-y-auto h-auto"
+                    className={`textarea bg-white dark:bg-black/15 textarea-bordered w-full max-h-[200px] resize-none overflow-y-auto h-auto ${
+                        validationError 
+                            ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
+                            : 'focus:border-primary'
+                    }`}
                     onKeyDown={handleKeyDown}
                     rows={1}
                     onInput={(e) => {

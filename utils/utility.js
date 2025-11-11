@@ -136,8 +136,15 @@ export const toggleSidebar = (sidebarId, direction = "left") => {
     const handleClickOutside = (event) => {
         const sidebar = document.getElementById(sidebarId);
         const button = event.target.closest('button');
+        const withinSidebar = (() => {
+            if (!sidebar) return false;
+            if (typeof event.composedPath === "function") {
+                return event.composedPath().includes(sidebar);
+            }
+            return sidebar.contains(event.target);
+        })();
 
-        if (sidebar && !sidebar.contains(event.target) && !button) {
+        if (sidebar && !withinSidebar && !button) {
             if (direction === "left") {
                 sidebar.classList.add('-translate-x-full');
             } else {
