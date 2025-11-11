@@ -254,12 +254,12 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
               <div className="relative">
                 <textarea
                   id="agent-purpose"
-                  placeholder="Describe the purpose of this agent..."
+                  placeholder="Describe the purpose of this agent... (optional)"
                   ref={textAreaPurposeRef}
                   onChange={handlePurposeInput}
                   className={`textarea textarea-bordered w-full ${
                     shouldHideAgentType ? "min-h-[100px]" : "min-h-[50px] md:min-h-[50px]"
-                  } bg-base-100 transition-all duration-300 placeholder-base-content text-sm md:text-base ${
+                  } bg-base-100 transition-all duration-300 text-xs ${
                     state.validationErrors.purpose
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                       : "border-base-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
@@ -268,39 +268,11 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
                   aria-label="Agent purpose description"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1 md:mt-2 italic">
-                A clear purpose helps AI to understand your agent's
-                functionality and improves discoverability.
-              </p>
             </div>
           </div>
 
           {/* Modal Actions */}
-          <div className="modal-action mb-4 flex flex-col-reverse md:flex-row justify-between gap-4">
-            {((!hideCreateManuallyButton&&isEmbedUser)||!isEmbedUser) && (
-            <>
-            <div className="w-full md:w-auto">
-              <button
-                className="btn btn-sm btn-primary text-sm md:text-base w-full"
-                onClick={createBridgeHandler}
-                disabled={state.isLoading}
-              >
-                {state.isLoading ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  "Create Manually"
-                )}
-              </button>
-            </div>
-
-            <div className="flex items-center justify-center gap-2 mb-2 w-full my-2 md:my-0 md:w-auto">
-              <hr className="flex-1 border-t-2 border-base-content/20 md:w-8" />
-              <span className="text-base-content text-xs sm:text-sm mx-2">or</span>
-              <hr className="flex-1 border-t-2 border-base-content/20 md:w-8" />
-            </div>
-
-              </>
-            )}
+          <div className="modal-action mb-4 flex flex-col-reverse md:flex-row justify-end gap-4">
             <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
               <button
                 className="btn btn-sm text-sm md:text-base w-full sm:w-1/2 md:w-auto"
@@ -311,10 +283,17 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
               
               <button
                 className="btn btn-primary btn-sm text-sm md:text-base w-full sm:w-1/2 md:w-auto"
-                onClick={handleCreateBridgeUsingAI}
+                onClick={() => {
+                  const purpose = textAreaPurposeRef?.current?.value?.trim();
+                  if (purpose) {
+                    handleCreateBridgeUsingAI();
+                  } else {
+                    createBridgeHandler();
+                  }
+                }}
                 disabled={state.isAiLoading || state.isLoading}
               >
-                {state.isAiLoading ? (
+                {state.isAiLoading || state.isLoading ? (
                   <span className="loading loading-spinner loading-sm" />
                 ) : (
                   "Create Agent"
