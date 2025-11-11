@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import cloneDeep from 'lodash/cloneDeep';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
@@ -16,56 +16,71 @@ import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "../protected";
 import ReactMarkdown from "../LazyMarkdown";
+import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { 
+  initializeChatChannel,
+  sendUserMessage,
+  addLoadingAssistantMessage,
+  updateAssistantMessageWithResponse,
+  editChatMessage,
+  setChatLoading,
+  setChatError,
+  clearChatMessages,
+  loadTestCaseIntoChat,
+  setChatUploadedFiles,
+  setChatUploadedImages,
+  clearChatTestCaseId
+} from "@/store/action/chatAction";
+import { addUserMessage } from "@/store/reducer/chatReducer";
 
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
   const messagesContainerRef = useRef(null);
-  const inputRef = useRef(null);
   const testCaseResultRef = useRef(null);
   const dispatch = useDispatch();
+  const inputRef = useRef(null);
+  const [showTestCases, setShowTestCases] = useState(false);
+  const [selectedStrategy, setSelectedStrategy] = useState('exact');
+  const [testCaseId, setTestCaseId] = useState(null);
+  const [currentRunIndex, setCurrentRunIndex] = useState(null);
+  const [isRunningTestCase, setIsRunningTestCase] = useState(false);
+  const [showTestCaseResults, setShowTestCaseResults] = useState({});
+  const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editContent, setEditContent] = useState('');
+  const [testCaseConversation, setTestCaseConversation] = useState([]);
 
-  // Consolidated chat state - all message and conversation related data
-  const [chatState, setChatState] = useState({
-    messages: [],
-    conversation: [],
-    errorMessage: ""
-  });
+  const channelIdentifier = useMemo(() => {
+    return (params.org_id + '_'+ params?.id + '_'+ searchParams?.version).replace(/ /g, "_");
+  }, [params, searchParams]);
 
-  // Consolidated UI state - all UI interaction states
-  const [uiState, setUiState] = useState({
-    loading: false,
-    showTestCases: false,
-    showTestCaseResults: {},
-    isLoadingTestCase: false,
-    editingMessage: null,
-    editContent: ''
-  });
+  // Redux selectors for chat state
+  const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType } = useCustomSelector((state) => 
+    {
+      conversation = state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
+      messages = state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
+      loading = state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
+      errorMessage = state?.chatReducer?.errorsByChannel?.[channelIdentifier] || "",
+      uploadedFiles = state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
+      uploadedImages = state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
+      bridgeType = state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
+    }
+  );
 
-  // Consolidated test state - all test case related data
-  const [testState, setTestState] = useState({
-    testCaseConversation: [],
-    selectedStrategy: 'exact',
-    testCaseId: null,
-    currentRunIndex: null,
-    isRunningTestCase: false
-  });
-
-  // Consolidated upload state - all file upload data
-  const [uploadState, setUploadState] = useState({
-    uploadedImages: [],
-    uploadedFiles: []
-  });
-
-  const { finishReasonDescription, bridgeType } = useCustomSelector((state) => ({
-    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-  }));
+  // Initialize channel and RT layer
+  useEffect(() => {
+    if (channelIdentifier) {
+      dispatch(initializeChatChannel(channelIdentifier));
+    }
+  }, [channelIdentifier, dispatch]);
+  
+  useRtLayerEventHandler(channelIdentifier);
   useEffect(() => {
     const el = messagesContainerRef.current;
     if (el) {
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
-  }, [chatState.messages]);
+  }, [messages]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -74,7 +89,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       if (testCaseResultRef.current && 
           !testCaseResultRef.current.contains(event.target) && 
           !isToggleButton) {
-        setUiState(prev => ({ ...prev, showTestCaseResults: {} }));
+        setShowTestCaseResults({});
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -84,9 +99,16 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, []);
 
   const handleResetChat = () => {
-    setChatState(prev => ({ ...prev, messages: [], conversation: [] }));
-    setUiState(prev => ({ ...prev, editingMessage: null, editContent: '' }));
-    setTestState(prev => ({ ...prev, testCaseId: null }));
+    setTestCaseId(null);
+    if (channelIdentifier) {
+      dispatch(clearChatMessages(channelIdentifier));
+      // Clear loading state from send button
+      dispatch(setChatLoading(channelIdentifier, false));
+      // Clear testcase_id from Redux
+      dispatch(clearChatTestCaseId(channelIdentifier));
+    }
+    setEditingMessage(null);
+    setEditContent('');
     
     // Focus on input field after reset
     setTimeout(() => {
@@ -97,87 +119,38 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }
 
   const handleEditMessage = (messageId, currentContent) => {
-    setUiState(prev => ({ ...prev, editingMessage: messageId, editContent: currentContent }));
+    setEditingMessage(messageId);
+    setEditContent(currentContent);
   };
-
+  
   const handleSaveEdit = (messageId) => {
-    const updatedMessages = chatState.messages.map(msg =>
-      msg.id === messageId ? { ...msg, content: uiState.editContent, isEdited: true } : msg
-    );
-
-    // Also update the conversation array for backend
-    const editedMessage = chatState.messages.find(msg => msg.id === messageId);
-    if (editedMessage && editedMessage.sender !== 'expected') {
-      const updatedConversation = [];
-      updatedMessages.forEach(msg => {
-        if (msg.sender === 'user' || msg.sender === 'assistant') {
-          updatedConversation.push({
-            role: msg.sender === 'user' ? 'user' : 'assistant',
-            content: msg.content
-          });
-        }
-      });
-      setChatState(prev => ({ ...prev, messages: updatedMessages, conversation: updatedConversation }));
-    } else {
-      setChatState(prev => ({ ...prev, messages: updatedMessages }));
+    if (channelIdentifier) {
+      dispatch(editChatMessage(channelIdentifier, messageId, editContent));
     }
-
-    setUiState(prev => ({ ...prev, editingMessage: null, editContent: '' }));
+    setEditingMessage(null);
+    setEditContent('');
   };
 
   const handleCancelEdit = () => {
-    setUiState(prev => ({ ...prev, editingMessage: null, editContent: '' }));
+    setEditingMessage(null);
+    setEditContent('');
   };
 
   const handleTestCaseClick = async (testCaseConversation, expected, testcase_id, matching_type) => {
-    setUiState(prev => ({ ...prev, isLoadingTestCase: true }));
+    setIsLoadingTestCase(true);
 
     try {
       // Add a small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500));
-      // Convert testcase conversation to chat messages format
-      const convertedMessages = [];
-      const baseTimestamp = Date.now();
-
-      testCaseConversation.forEach((msg, index) => {
-        const chatMessage = {
-          id: `testcase_${msg.role}_${baseTimestamp}_${index}`,
-          sender: msg.role === 'user' ? 'user' : 'assistant',
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
-        };
-        convertedMessages.push(chatMessage);
-      });
-
-      if (expected?.response) {
-        const expectedMessage = {
-          id: `testcase_expected_${baseTimestamp}`,
-          sender: 'expected',
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          content: expected.response,
-          isExpected: true,
-        };
-        convertedMessages.push(expectedMessage);
+      
+      if (channelIdentifier) {
+        dispatch(loadTestCaseIntoChat(channelIdentifier, testCaseConversation, expected, testCaseId));
       }
 
-      // Convert to conversation format for the backend
-      const backendConversation = testCaseConversation.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-
-      // Update chat state and close sidebar
-      setChatState(prev => ({ ...prev, messages: convertedMessages, conversation: backendConversation }));
-      setUiState(prev => ({ ...prev, showTestCases: false }));
-      setTestState(prev => ({ ...prev, testCaseId: testcase_id, selectedStrategy: matching_type }));
+      // Close testcase sidebar
+      setShowTestCases(false);
     } finally {
-      setUiState(prev => ({ ...prev, isLoadingTestCase: false }));
+      setIsLoadingTestCase(false);
     }
   }
 
@@ -187,9 +160,9 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     if (inputRef.current) {
       inputRef.current.style.height = '40px'; // Set initial height
     }
-    setChatState(prev => ({ ...prev, errorMessage: "" }));
+    dispatch(setChatError(channelIdentifier, ""));
     inputRef.current.value = "";
-    setUiState(prev => ({ ...prev, loading: true }));
+    dispatch(setChatLoading(channelIdentifier, true));
     const timestamp = Date.now();
     const tempAssistantId = `assistant_${timestamp}`;
     try {
@@ -203,16 +176,22 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
           minute: "2-digit",
         }),
         content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
+        image_urls: uploadedImages || [], // Include uploaded images in user message
+        files: uploadedFiles || [], // Include uploaded files in user message
       };
       let response, responseData;
       let data;
       data = {
         role: "user",
         content: newMessage,
+        images: uploadedImages || [], // Include uploaded images in API call
+        files: uploadedFiles || [], // Include uploaded files in API call
       };
-      setChatState(prev => ({ ...prev, messages: [...prev.messages, newChat] }));
 
-      // Insert a temporary assistant "typing" message
+      dispatch(addUserMessage({ channelId: channelIdentifier, message: newChat }));
+      dispatch(setChatUploadedImages(channelIdentifier, []));
+      dispatch(setChatUploadedFiles(channelIdentifier, []));
+
       const loadingAssistant = {
         id: tempAssistantId,
         sender: "assistant",
@@ -223,12 +202,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         content: "",
         isLoading: true,
       };
-      setChatState(prev => ({ ...prev, messages: [...prev.messages, loadingAssistant] }));
+      dispatch(addLoadingAssistantMessage(channelIdentifier, tempAssistantId));
       responseData = await dryRun({
         localDataToSend: {
 
           configuration: {
-            conversation: chatState.conversation,
+            conversation: conversation,
           },
           user: data.content,
           orchestrator_id: params.orchestralId
@@ -236,54 +215,41 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         orchestrator_id: params.orchestralId
       });
 
-      response = responseData.response?.data;
+      response = responseData.response?.data;      
       const content = response?.content || "";
       const assistConversation = {
         role: response?.role || "assistant",
         content: content,
         fallback: response?.fallback,
         firstAttemptError: response?.firstAttemptError,
-        image_urls: response?.image_urls || [],
+        image_urls: response?.images || [], // Map images to image_urls like RT layer does
         model: response?.model,
         finish_reason: response?.finish_reason
       };
 
-      // Update conversation and keep only last 6 messages
-      const updatedConversation = [...chatState.conversation, cloneDeep(data), assistConversation].slice(-6);
-
-      const newChatAssist = {
-        id: tempAssistantId,
-        sender: "assistant",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+      const responseDataForUpdate = {
         content: Array.isArray(content) ? content.join(", ") : content.toString(),
-        image_urls: assistConversation.image_urls,
-        fallback: assistConversation?.fallback,
+        image_urls: response?.images || [], // Use images field like RT layer does
+        fallback: response?.fallback,
         firstAttemptError: response?.firstAttemptError,
-        modelName: assistConversation?.model,
+        model: assistConversation?.model,
         finish_reason: assistConversation?.finish_reason
       };
-      // Replace the temporary loading message with the actual response
-      setChatState(prev => ({
-        ...prev,
-        messages: prev.messages.map(m => m.id === tempAssistantId ? newChatAssist : m),
-        conversation: updatedConversation
-      }));
+      
+      dispatch(updateAssistantMessageWithResponse(channelIdentifier, tempAssistantId, responseDataForUpdate));
     } catch (error) {
       console.error(error);
-      setChatState(prev => ({ ...prev, errorMessage: "Something went wrong. Please try again." }));
+      dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
       // Restore the user message to the input field
       if (inputRef.current) {
         inputRef.current.value = newMessage;
       }
       // Remove both the temporary loading assistant message and the user message on error
       const userMessageId = `user_${timestamp}`;
-      setChatState(prev => ({ ...prev, messages: prev.messages.filter(m => m.id !== tempAssistantId && m.id !== userMessageId) }));
+      // Remove temporary messages on error
+      dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
     } finally {
-      setUiState(prev => ({ ...prev, loading: false }));
-      setUploadState(prev => ({ ...prev, uploadedImages: [] }));
+      dispatch(setChatLoading(channelIdentifier, false));
     }
 
   }
@@ -293,18 +259,19 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [userMessage]);
 
   const handleRunTestCase = async (index) => {
-    const conversationForTestCase = chatState.messages.slice(-6, index + 1)
-    conversationForTestCase.push(chatState.messages[index + 1])
+    const conversationForTestCase = messages.slice(-6, index + 1)
+    conversationForTestCase.push(messages[index + 1])
     const { conversation, expected } = createConversationForTestCase(conversationForTestCase)
-    setTestState(prev => ({ ...prev, currentRunIndex: index, isRunningTestCase: true }));
+    setCurrentRunIndex(index);
+    setIsRunningTestCase(true);
     const testCaseData = {
       conversation,
       expected,
-      matching_type: testState.selectedStrategy
+      matching_type: selectedStrategy
     }
     try {
       const data = await dispatch(runTestCaseAction({ versionId: searchParams.version, bridgeId: null, testcase_id: null, testCaseData }))
-      const updatedMessages = [...chatState.messages]
+      const updatedMessages = [...messages]
       updatedMessages[index + 1] = {
         ...updatedMessages[index + 1],
         testCaseResult: data?.results?.[0]
@@ -312,10 +279,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       
       // Automatically show the test case results card after running the test
       const nextMessageId = updatedMessages[index + 1].id;
-      setChatState(prev => ({ ...prev, messages: updatedMessages }));
-      setUiState(prev => ({ ...prev, showTestCaseResults: { ...prev.showTestCaseResults, [nextMessageId]: true } }));
+      dispatch(editChatMessage(channelIdentifier, index + 1, updatedMessages[index + 1]));
+      setShowTestCaseResults(prev => ({ ...prev, [nextMessageId]: true }));
     } finally {
-      setTestState(prev => ({ ...prev, isRunningTestCase: false, currentRunIndex: null }));
+      setIsRunningTestCase(false);
+      setCurrentRunIndex(null);
     }
   };
 
@@ -339,25 +307,25 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       <div className="w-full flex justify-between items-center px-2">
         <button
           className="btn btn-sm btn-square"
-          onClick={() => setUiState(prev => ({ ...prev, showTestCases: !prev.showTestCases }))}
+          onClick={() => setShowTestCases(prev => !prev)}
           title="Toggle Test Cases"
         >
           <div
             className="flex items-center gap-2 tooltip tooltip-right"
-            data-tip={uiState.showTestCases ? "Hide Test Cases" : "Show Test Cases"}
+            data-tip={showTestCases ? "Hide Test Cases" : "Show Test Cases"}
           >
-            {uiState.showTestCases ? <CloseCircleIcon /> : <Menu />}
+            {showTestCases ? <CloseCircleIcon /> : <Menu />}
           </div>
         </button>
         <span className="label-text">Experiments</span>
         <div className="flex items-center gap-2">
           
-          {chatState.messages?.length > 0 && (
+          {messages?.length > 0 && (
             <div className="flex items-center gap-2 justify-center">
               <select
                 className="select select-sm select-bordered"
-                value={testState.selectedStrategy}
-                onChange={(e) => setTestState(prev => ({ ...prev, selectedStrategy: e.target.value }))}
+                value={selectedStrategy}
+                onChange={(e) => setSelectedStrategy(e.target.value)}
               >
                 <option value="cosine">Cosine</option>
                 <option value="ai">AI</option>
@@ -379,16 +347,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         </div>
         
       </div>
-      
-
       <div className="flex mt-4 h-[86vh] overflow-hidden relative">
         {/* Overlay Test Cases Sidebar */}
-        {uiState.showTestCases && (
+        {showTestCases && (
           <div className="absolute inset-0 z-low flex">
             {/* Optional backdrop */}
             <div
               className="absolute inset-0 bg-black/30"
-              onClick={() => setUiState(prev => ({ ...prev, showTestCases: false }))}
+              onClick={() => setShowTestCases(false)}
             ></div>
 
             {/* Sidebar */}
@@ -401,7 +367,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         {/* Chat Section */}
         <div className="w-full flex-grow min-w-0 relative">
           {/* Loading overlay for testcase loading */}
-          {uiState.isLoadingTestCase && (
+          {isLoadingTestCase && (
             <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-md z-50">
               <div className="flex items-center gap-3 bg-base-100 p-4 rounded-lg shadow-lg border border-base-content/20">
                 <span className="loading loading-spinner loading-md text-primary"></span>
@@ -412,7 +378,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
           
           <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
             <div ref={messagesContainerRef} className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
-              {chatState.messages.map((message, index) => {
+              {messages.map((message, index) => {
+                
                 return (
                   <div
                     key={index}
@@ -496,12 +463,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                         )}
                     </div>
 
-                    {(message?.images?.length > 0 || message?.files?.length > 0 || message?.video_data || message?.youtube_url) && (
+                    {(message?.image_urls?.length > 0 || message?.files?.length > 0 || message?.video_data || message?.youtube_url) && (
                       <div className="mt-2">
-                        {message?.images?.length > 0 && (
+                        {message?.image_urls?.length > 0 && (
                           <div className="flex flex-wrap items-end justify-end">
-                            {message.images.map((url, imgIndex) => {
-                              // Safety check to ensure url is defined and is a string
+                            {message.image_urls.map((url, imgIndex) => {
                               if (!url || typeof url !== 'string') {
                                 return null;
                               }
@@ -620,12 +586,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                       message.sender === "assistant" ||
                       message.sender === "expected") &&
                       (message?.content || message?.isLoading) && (
-                        <div className={`flex gap-2 show-on-hover justify-start max-w-[700px] items-center relative ${uiState.editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
+                        <div className={`flex gap-2 show-on-hover justify-start max-w-[700px] items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
                             <button
                               className="btn btn-sm btn-outline hover:btn-primary see-on-hover flex mt-2"
                               onClick={() => handleRunTestCase(index)}
-                              disabled={testState.isRunningTestCase}
+                              disabled={isRunningTestCase}
                             >
                               <PlayIcon className="h-3 w-3" />
                               <span>Run</span>
@@ -633,7 +599,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                           )}
 
                           {/* Show either assistant message or test case result */}
-                          {message?.testCaseResult && uiState.showTestCaseResults[message.id] ? (
+                          {message?.testCaseResult && showTestCaseResults[message.id] ? (
                             <div ref={testCaseResultRef}>
                               {/* Test Case Result Display */}
                               <div className="chat-bubble gap-0 relative min-w-full">
@@ -695,7 +661,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                             /* Regular Assistant/User/Expected Message - Show model answer if testcase was run */
                             <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
                               {/* Show loader overlay if this is the message being tested */}
-                              {testState.isRunningTestCase && testState.currentRunIndex !== null && index === testState.currentRunIndex + 1 && (
+                              {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
                                 <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">
                                   <div className="flex items-center gap-2">
                                     <span className="loading loading-spinner loading-sm"></span>
@@ -705,11 +671,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                               )}
 
                               {/* Edit Mode */}
-                              {uiState.editingMessage === message.id ? (
+                              {editingMessage === message.id ? (
                                 <div className="w-full">
                                   <textarea
-                                    value={uiState.editContent}
-                                    onChange={(e) => setUiState(prev => ({ ...prev, editContent: e.target.value }))}
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
                                     className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-[100px] resize-y text-base-content bg-base-100"
                                     placeholder="Edit message content..."
                                   />
@@ -830,38 +796,31 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               <div className="relative flex flex-col gap-4 w-full">
                 <div className="flex flex-row gap-2">
                   <ChatTextInput
-                    setErrorMessage={(msg) => setChatState(prev => ({ ...prev, errorMessage: msg }))}
-                    setMessages={(msgs) => setChatState(prev => ({ ...prev, messages: typeof msgs === 'function' ? msgs(prev.messages) : msgs }))}
-                    message={chatState.messages}
+                    channelIdentifier={channelIdentifier}
                     params={params}
-                    searchParams={searchParams}
-                    uploadedImages={uploadState.uploadedImages}
-                    setUploadedImages={(imgs) => setUploadState(prev => ({ ...prev, uploadedImages: typeof imgs === 'function' ? imgs(prev.uploadedImages) : imgs }))}
-                    conversation={chatState.conversation}
-                    setConversation={(conv) => setChatState(prev => ({ ...prev, conversation: conv }))}
-                    isOrchestralModel={isOrchestralModel}
                     handleSendMessageForOrchestralModel={handleSendMessageForOrchestralModel}
+                    isOrchestralModel={isOrchestralModel}
                     inputRef={inputRef}
-                    loading={uiState.loading}
-                    setLoading={(loading) => setUiState(prev => ({ ...prev, loading }))}
-                    uploadedFiles={uploadState.uploadedFiles}
-                    setUploadedFiles={(files) => setUploadState(prev => ({ ...prev, uploadedFiles: typeof files === 'function' ? files(prev.uploadedFiles) : files }))}
-                    setTestCaseId={(id) => setTestState(prev => ({ ...prev, testCaseId: id }))}
-                    testCaseId={testState.testCaseId}
-                    selectedStrategy={testState.selectedStrategy}
-                    setSelectedStrategy={(strategy) => setTestState(prev => ({ ...prev, selectedStrategy: strategy }))}
+                    searchParams={searchParams}
+                    setTestCaseId={setTestCaseId}
+                    testCaseId={testCaseId}
+                    selectedStrategy={selectedStrategy}
                   />
                 </div>
               </div>
-              {chatState.errorMessage && (
-                <div className="text-red-500 mt-2">{chatState.errorMessage}</div>
+              {errorMessage && (
+                <div className="text-red-500 mt-2">{errorMessage}</div>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      <AddTestCaseModal testCaseConversation={testState.testCaseConversation} setTestCaseConversation={(conv) => setTestState(prev => ({ ...prev, testCaseConversation: conv }))} />
+      <AddTestCaseModal 
+        testCaseConversation={testCaseConversation} 
+        setTestCaseConversation={setTestCaseConversation}
+        channelIdentifier={channelIdentifier}
+      />
     </div>
   );
 }
