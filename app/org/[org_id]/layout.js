@@ -101,32 +101,33 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         currentUserMeta = data?.data?.data?.user?.meta;
       }
       }
-      // If reference_id exists but user has no reference_id in meta
-      if (utmSource && !currentUser?.meta?.utm_source) {
+      // Build UTM object with only present values from URL that are NOT already in user meta
+      const utmParams = {};
+      if (utmSource && !currentUser?.meta?.utm_source) utmParams.utm_source = utmSource;
+      if (utmMedium && !currentUser?.meta?.utm_medium) utmParams.utm_medium = utmMedium;
+      if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
+      if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
+      if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
+
+      // If any new UTM parameter exists that user doesn't have
+      if (Object.keys(utmParams).length > 0) {
         try {
           const data = await dispatch(
             storeMarketingRefUserAction({
-              utm_source: utmSource,
-              utm_medium: utmMedium,
-              utm_campaign: utmCampaign,
-              utm_term: utmTerm,
-              utm_content: utmContent,
+              ...utmParams,
               client_id: currentUser.id,
               client_email: currentUser.email,
               client_name: currentUser.name,
               created_at: currentUser.created_at,
             })
           );
+          
           if (data) {
             const updatedUser = {
               ...currentUser,
               meta: {
                 ...currentUserMeta,
-                utm_source: utmSource,
-                utm_medium: utmMedium,
-                utm_campaign: utmCampaign,
-                utm_term: utmTerm,
-                utm_content: utmContent,
+                ...utmParams,
               },
             };
             await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
