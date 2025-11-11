@@ -35,7 +35,6 @@ function Page() {
       route.push(`/org/${id}/agents`);
       dispatch(setCurrentOrgIdAction(id));
       if (response.status === 200) {
-        console.log("Organization switched successfully", response.data);
       } else {
         console.error("Failed to switch organization", response.data);
       }

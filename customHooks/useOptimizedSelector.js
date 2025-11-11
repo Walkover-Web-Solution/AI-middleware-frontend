@@ -1,35 +1,6 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback } from 'react';
 import { useCustomSelector } from './customSelector';
 import { shallowEqual } from 'react-redux';
-
-// Performance-optimized selector with memoization and shallow comparison
-export const useOptimizedSelector = (selector, dependencies = []) => {
-  const previousResultRef = useRef();
-  const selectorRef = useRef(selector);
-  
-  // Update selector ref when dependencies change
-  const dependenciesRef = useRef(dependencies);
-  const hasDependenciesChanged = !shallowEqual(dependenciesRef.current, dependencies);
-  
-  if (hasDependenciesChanged) {
-    selectorRef.current = selector;
-    dependenciesRef.current = dependencies;
-  }
-  
-  // Use the stable selector reference
-  const result = useCustomSelector(selectorRef.current, shallowEqual);
-  
-  // Additional memoization layer for complex objects
-  const memoizedResult = useMemo(() => {
-    if (previousResultRef.current && shallowEqual(previousResultRef.current, result)) {
-      return previousResultRef.current;
-    }
-    previousResultRef.current = result;
-    return result;
-  }, [result]);
-  
-  return memoizedResult;
-};
 
 // Specialized selector for configuration state
 export const useConfigurationSelector = (params, searchParams) => {
@@ -64,12 +35,14 @@ export const usePromptSelector = (params, searchParams) => {
   return useCustomSelector(
     useCallback((state) => {
       const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[paramsId]?.[version];
+      const variableState =
+        state?.variableReducer?.VariableMapping?.[paramsId]?.[version] || {};
       
       return {
         prompt: versionData?.configuration?.prompt || "",
         service: versionData?.service || "",
         serviceType: versionData?.configuration?.type || "",
-        variablesKeyValue: versionData?.variables || [],
+        variablesKeyValue: variableState?.variables || [],
         bridge: versionData || ""
       };
     }, [paramsId, version]),

@@ -6,7 +6,6 @@ import ChatbotConfigSection from "./ChatbotConfigSection";
 import { useConfigurationContext } from './ConfigurationContext';
 import AdvancedParameters from './configurationComponent/advancedParamenter';
 import GptMemory from './configurationComponent/gptmemory';
-import AddVariable from '../addVariable';
 import ConfigurationSettingsAccordion from './configurationComponent/ConfigurationSettingsAccordion';
 
 const NonImageModelConfig = memo(() => {
@@ -48,7 +47,6 @@ const NonImageModelConfig = memo(() => {
             />
   
             <GptMemory params={params} searchParams={searchParams} />
-            <AddVariable params={params} searchParams={searchParams} />
             <ChatbotConfigSection />
             <ConfigurationSettingsAccordion />
         </>
