@@ -218,7 +218,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
           </InfoTooltip>
           <input
             type="checkbox"
-            className="toggle"
+            className="toggle toggle-sm"
             checked={isFallbackEnabled}
             onChange={handleFallbackModelToggle}
           />

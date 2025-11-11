@@ -86,36 +86,34 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         };
     }, [params.org_id]);
 
-    const renderKnowledgebase = useMemo(() => (
-        (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
+    const renderKnowledgebase = useMemo(() => {
+        const knowledgebaseItems = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
                 <div
                     key={docId}
-                    className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${!item?.description ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${!item?.description ? 'border-red-600' : ''} hover:bg-base-300 transition-colors duration-200`}
                 >
-                    <div className="p-2 w-full h-full flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
-                                <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                                    <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
-                                        <span>{item?.name?.length > 50 ? `${item?.name.slice(0, 50)}...` : item?.name}</span>
-                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                            {!item?.description ? 'Description Required' : 'Active'}
-                                        </span>
-                                    </div>
+                    <div className="p-2 flex-1 flex items-center">
+                        <div className="flex items-center gap-2 w-full">
+                            {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
+                            {item?.name?.length > 24 ? (
+                                <div className="tooltip tooltip-top min-w-0" data-tip={item?.name}>
+                                    <span className="min-w-0 text-sm truncate">
+                                        <span className="text-sm font-normal block w-full">{item?.name}</span>
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="min-w-0 text-sm truncate">
+                                    <span className="text-sm font-normal block w-full">{item?.name}</span>
                                 </span>
-                                {!item?.description && <CircleAlertIcon color='red' size={16} />}
-                            </div>
-                            <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                                {item?.description || 'A description is required for proper functionality.'}
-                            </p>
+                            )}
+                            {!item?.description && <CircleAlertIcon color='red' size={16} />}
                         </div>
                     </div>
 
                     {/* Remove button that appears on hover */}
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -129,8 +127,18 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     </div>
                 </div>
             ) : null;
-        })
-    ), [knowbaseVersionData, knowledgeBaseData]);
+        }).filter(Boolean);
+
+        return (
+            <div className={`grid gap-2 w-full ${knowledgebaseItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
+                gridTemplateColumns: knowledgebaseItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
+            }}>
+                {knowledgebaseItems}
+                {/* Add empty div for spacing when only one item */}
+                {knowledgebaseItems.length === 1 && <div></div>}
+            </div>
+        );
+    }, [knowbaseVersionData, knowledgeBaseData]);
     return (
         <div className="label flex-col items-start w-full p-0">
             <div className="dropdown dropdown-right flex items-center">

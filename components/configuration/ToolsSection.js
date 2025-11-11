@@ -18,14 +18,11 @@ const ToolsSection = memo(() => {
     }
 
     return (
-        <>
+        <div className='flex mt-4 gap-4 flex-col'>
             <EmbedList params={params} searchParams={searchParams} />
-            <hr className="my-0 p-0 bg-base-200 border-base-300" />
             <ConnectedAgentList params={params} searchParams={searchParams} />
-            <hr className="my-0 p-0 bg-base-200 border-base-300" />
             <KnowledgebaseList params={params} searchParams={searchParams} />
-            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-        </>
+        </div>
     );
 });
 

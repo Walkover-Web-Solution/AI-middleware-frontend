@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon } from '@/components/Icons';
+import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon, SquareFunctionIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { truncate } from '@/components/historyPageComponents/assistFile';
+import useExpandableList from '@/customHooks/useExpandableList';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -11,9 +13,11 @@ const RenderEmbed = ({
   handleRemoveEmbed,
   handleOpenDeleteModal,
   handleChangePreTool,
-  name
+  name,
+  halfLength = 1
 }) => {
-  const renderEmbed = useMemo(() => {
+  // Sort functions first
+  const sortedFunctions = useMemo(() => {
     return bridgeFunctions?.slice()
       .sort((a, b) => {
         const aFnName = a?.function_name || a?.endpoint;
@@ -23,8 +27,14 @@ const RenderEmbed = ({
         if (!aTitle) return 1;
         if (!bTitle) return -1;
         return aTitle?.localeCompare(bTitle);
-      })
-      .map((value) => {
+      }) || [];
+  }, [bridgeFunctions, integrationData]);
+
+  // Use expandable list hook
+  const { displayItems, isExpanded, toggleExpanded, shouldShowToggle, hiddenItemsCount } = useExpandableList(sortedFunctions, halfLength);
+
+  const renderEmbed = useMemo(() => {
+    const embedItems = displayItems?.map((value) => {
         const functionName = value?.function_name || value?.endpoint;
         const title = value?.title || integrationData?.[functionName]?.title;
         const status = value?.status || integrationData?.[functionName]?.status;
@@ -33,7 +43,7 @@ const RenderEmbed = ({
           <div
             key={value?._id}
             id={value?._id}
-            className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+            className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
           >
             <div
               className="p-2 flex-1 flex items-center"
@@ -45,15 +55,24 @@ const RenderEmbed = ({
                 },
               })}
             >
-              <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
-                  <span className="text-sm font-normal">{title}</span>
-                </div>
-              </span>
+              <div className="flex items-center gap-2 w-full">
+                <SquareFunctionIcon size={16} className="shrink-0" />
+                {title?.length > 24 ? (
+                  <div className="tooltip tooltip-top min-w-0" data-tip={title}>
+                    <span className="min-w-0 text-sm truncate">
+                      <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                    </span>
+                  </div>
+                ) : (
+                  <span className="min-w-0 text-sm truncate">
+                    <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Action buttons that appear on hover */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -90,9 +109,43 @@ const RenderEmbed = ({
           </div>
         );
       });
-  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name]);
 
-  return <>{renderEmbed}</>;
+    return (
+      <div className="w-full">
+        <div className={`grid gap-2 w-full ${displayItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
+          gridTemplateColumns: displayItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
+        }}>
+          {embedItems}
+          {/* Add empty div for spacing when only one item */}
+          {displayItems.length === 1 && <div></div>}
+        </div>
+        
+        {/* Show/Hide toggle button */}
+        {shouldShowToggle && (
+          <div className="flex justify-center mt-3">
+            <button
+              onClick={toggleExpanded}
+              className="flex items-center gap-2 px-3 py-1 text-sm text-base-content/70 hover:text-base-content bg-base-100 hover:bg-base-200 rounded-lg border border-base-300 transition-all duration-200"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUpIcon size={16} />
+                  <span>Show Less</span>
+                </>
+              ) : (
+                <>
+                  <ChevronDownIcon size={16} />
+                  <span>Show {hiddenItemsCount} More</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }, [displayItems, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount]);
+
+  return renderEmbed;
 };
 
 export default RenderEmbed;

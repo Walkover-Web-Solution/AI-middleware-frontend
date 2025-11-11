@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
+import { AddIcon, SettingsIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { BotIcon } from 'lucide-react';
+import useExpandableList from '@/customHooks/useExpandableList';
 
 const ConnectedAgentList = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -191,31 +193,45 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }
 
 
-    const renderEmbed = useMemo(() => (
-        connect_agents && Object.entries(connect_agents).map(([name, item]) => {
+    // Convert connect_agents object to array for expandable list
+    const agentEntries = useMemo(() => {
+        return connect_agents ? Object.entries(connect_agents) : [];
+    }, [connect_agents]);
+
+    // Use expandable list hook
+    const { displayItems, isExpanded, toggleExpanded, shouldShowToggle, hiddenItemsCount } = useExpandableList(agentEntries, 1);
+
+    const renderEmbed = useMemo(() => {
+        const agentItems = displayItems.map(([name, item]) => {
             const bridge = bridgeData?.find((bd) => bd?._id === item?.bridge_id)
             return (
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
                 >
                     <div
                         className="p-2 flex-1 flex items-center"
                         onClick={() => handleAgentClicked(item)}
                     >
-                        <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                            <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                <span className="text-sm font-normal">{name}</span>
-                                {/* <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {(!bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
-                                </span> */}
-                            </div>
-                        </span>
+                        <div className="flex items-center gap-2 w-full">
+                            <BotIcon size={16} className="shrink-0" />
+                            {name?.length > 24 ? (
+                                <div className="tooltip tooltip-top min-w-0" data-tip={name}>
+                                    <span className="min-w-0 text-sm truncate">
+                                        <span className="text-sm font-normal block w-full">{name}</span>
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="min-w-0 text-sm truncate">
+                                    <span className="text-sm font-normal block w-full">{name}</span>
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Action buttons that appear on hover */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -239,8 +255,42 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     </div>
                 </div>
             );
-        })
-    ), [connect_agents, bridgeData]);
+        });
+
+        return (
+            <div className="w-full">
+                <div className={`grid gap-2 w-full ${displayItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
+                    gridTemplateColumns: displayItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
+                }}>
+                    {agentItems}
+                    {/* Add empty div for spacing when only one item */}
+                    {displayItems.length === 1 && <div></div>}
+                </div>
+                
+                {/* Show/Hide toggle button */}
+                {shouldShowToggle && (
+                    <div className="flex justify-center mt-3">
+                        <button
+                            onClick={toggleExpanded}
+                            className="flex items-center gap-2 px-3 py-1 text-sm text-base-content/70 hover:text-base-content bg-base-100 hover:bg-base-200 rounded-lg border border-base-300 transition-all duration-200"
+                        >
+                            {isExpanded ? (
+                                <>
+                                    <ChevronUpIcon size={16} />
+                                    <span>Show Less</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronDownIcon size={16} />
+                                    <span>Show {hiddenItemsCount} More</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            </div>
+        );
+    }, [displayItems, bridgeData, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount, handleAgentClicked, handleOpenAgentVariable, handleOpenDeleteModal]);
 
     return (
         <div>

@@ -218,6 +218,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                             handleRemoveEmbed={removePreFunction}
                             handleOpenDeleteModal={handleOpenDeleteModal}
                             handleChangePreTool={handleChangePreTool}
+                            halfLength={1}
                         />
                     </div>
 
