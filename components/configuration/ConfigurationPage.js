@@ -90,7 +90,7 @@ const ConfigurationPage = ({
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-1 relative bg-base-100">
+            <div className="flex flex-col gap-1 relative mt-2 bg-base-100">
                 <BridgeVersionDropdown params={params} searchParams={searchParams} />
                 <VersionDescriptionInput 
                     params={params}

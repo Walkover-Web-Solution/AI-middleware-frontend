@@ -40,19 +40,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
       (item?.id && item?.id?.toString()?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))
     ) || [];
     setFilterItems(filtered);
-  }, [data, searchTerm]);
-  // Generate tooltip content based on item type
-  const getTooltipContent = () => {
-    if (item === 'Agents') {
-      return 'Search Agents by Name, SlugName, Service, or ID';
-    } else if (item === 'ApiKeys') {
-      return 'Search API Keys by Name or Service';
-    } else if (isWorkspaceItem) {
-      return 'Search Workspaces by Name or ID';
-    } else {
-      return `Search ${itemLabel} by Name`;
-    }
-  };
+  }, []);
 
   const containerClasses = (isWorkspaceItem ) ? `${item === 'org' ? 'w-full mt-2' : 'max-w-xs ml-2'}` : 'max-w-xs ml-2';
   const inputClasses = style
