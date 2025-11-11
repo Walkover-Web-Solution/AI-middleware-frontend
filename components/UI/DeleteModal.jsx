@@ -52,7 +52,6 @@ const DeleteModal = ({
       }
     }
   };
-  console.log(item, name)
 
   return (
     <Modal MODAL_ID={modalType}>
