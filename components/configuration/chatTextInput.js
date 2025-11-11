@@ -7,7 +7,7 @@ import {
   setChatUploadedFiles,
   setChatUploadedImages,
   sendMessageWithRtLayer,
-  setChatTestCaseId
+  setChatTestCaseIdAction
 } from '@/store/action/chatAction';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -228,7 +228,11 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
         }
         // Use stored testcase_id from Redux if available, otherwise fall back to prop
         const activeTestCaseId = storedTestCaseId || testCaseId;
-        activeTestCaseId ? testcase_data.testcase_id = activeTestCaseId : testcase_data = null
+        if (activeTestCaseId) {
+            testcase_data.testcase_id = activeTestCaseId;
+        } else {
+            testcase_data = null;
+        }
         dispatch(setChatError(channelIdentifier, ""));
         if (modelType !== "completion") inputRef.current.value = "";
         
@@ -378,7 +382,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             // }
             // Store testcase_id if present in Redux
             if(responseData?.response?.testcase_id){
-                dispatch(setChatTestCaseId(channelIdentifier, responseData?.response?.testcase_id));
+                dispatch(setChatTestCaseIdAction(channelIdentifier, responseData?.response?.testcase_id));
                 // Also call the prop function for backward compatibility
                 if (setTestCaseId) {
                     setTestCaseId(responseData?.response?.testcase_id);

@@ -15,6 +15,8 @@ const initialState = {
   uploadedFilesByChannel: {},
   // Uploaded images by channel
   uploadedImagesByChannel: {},
+  // Test case IDs by channel (persisted until manual clear)
+  testCaseIdByChannel: {},
 };
 
 export const chatReducer = createSlice({
@@ -32,6 +34,7 @@ export const chatReducer = createSlice({
         state.testCasesByChannel[channelId] = {};
         state.uploadedFilesByChannel[channelId] = [];
         state.uploadedImagesByChannel[channelId] = [];
+        state.testCaseIdByChannel[channelId] = null;
       }
     },
 
@@ -282,6 +285,23 @@ export const chatReducer = createSlice({
       }
     },
 
+    // Set testcase_id for channel (persisted until manual clear)
+    setChatTestCaseId: (state, action) => {
+      const { channelId, testCaseId } = action.payload;
+      if (state.testCaseIdByChannel[channelId] !== undefined) {
+        state.testCaseIdByChannel[channelId] = testCaseId;
+      }
+    },
+
+    // Clear testcase_id for channel (manual clear only)
+    clearChatTestCaseId: (state, action) => {
+      const { channelId } = action.payload;
+      if (state.testCaseIdByChannel[channelId] !== undefined) {
+        state.testCaseIdByChannel[channelId] = null;
+      }
+    },
+
+
     // Clear all data for channel (when switching agents)
     clearChannelData: (state, action) => {
       const { channelId } = action.payload;
@@ -292,6 +312,7 @@ export const chatReducer = createSlice({
       delete state.testCasesByChannel[channelId];
       delete state.uploadedFilesByChannel[channelId];
       delete state.uploadedImagesByChannel[channelId];
+      delete state.testCaseIdByChannel[channelId];
     }
   },
 });
@@ -311,6 +332,8 @@ export const {
   addRtLayerMessage,
   addErrorMessage,
   updateRtLayerMessage,
+  setChatTestCaseId,
+  clearChatTestCaseId,
   clearChannelData
 } = chatReducer.actions;
 

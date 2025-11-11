@@ -29,7 +29,7 @@ import {
   loadTestCaseIntoChat,
   setChatUploadedFiles,
   setChatUploadedImages,
-  clearChatTestCaseId
+  clearChatTestCaseIdAction
 } from "@/store/action/chatAction";
 import { addUserMessage } from "@/store/reducer/chatReducer";
 
@@ -104,7 +104,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       // Clear loading state from send button
       dispatch(setChatLoading(channelIdentifier, false));
       // Clear testcase_id from Redux
-      dispatch(clearChatTestCaseId(channelIdentifier));
+      dispatch(clearChatTestCaseIdAction(channelIdentifier));
     }
     setEditingMessage(null);
     setEditContent('');

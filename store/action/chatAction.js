@@ -13,6 +13,8 @@ import {
   addRtLayerMessage,
   addErrorMessage,
   updateRtLayerMessage,
+  setChatTestCaseId,
+  clearChatTestCaseId,
   clearChannelData
 } from '../reducer/chatReducer';
 
@@ -246,4 +248,14 @@ export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrc
     throw error;
   }
   // Note: No finally block - loading cleared only when RT response received or on error
+};
+
+// Set testcase_id for channel (persisted until manual clear)
+export const setChatTestCaseIdAction = (channelId, testCaseId) => (dispatch) => {
+  dispatch(setChatTestCaseId({ channelId, testCaseId }));
+};
+
+// Clear testcase_id for channel (manual clear only)
+export const clearChatTestCaseIdAction = (channelId) => (dispatch) => {
+  dispatch(clearChatTestCaseId({ channelId }));
 };
