@@ -1,7 +1,7 @@
 // hooks/useRtLayerEventHandler.js
 'use client';
 import { addThreadNMessageUsingRtLayer, addThreadUsingRtLayer } from "@/store/reducer/historyReducer";
-import { handleRtLayerMessage, setChatTestCaseId } from "@/store/action/chatAction";
+import { handleRtLayerMessage, setChatError, addChatErrorMessage } from "@/store/action/chatAction";
 import { useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
@@ -88,14 +88,17 @@ function useRtLayerEventHandler(channelIdentifier="") {
   const processHistoryData = useCallback((message) => {
     try {
       const parsedData = typeof message === 'string' ? JSON.parse(message) : message;
-      const { response } = parsedData;
-      if (!response) {
+      const { response, error } = parsedData;
+      if (!response && !error) {
         console.error("No response found in data");
         return { success: false, error: "No response found" };
       }
-
+      if(error)
+      {
+        dispatch(addChatErrorMessage(channelIdentifier, error?.error));
+        return
+      }
       const { Thread, Messages, type } = response;
-      
       if (type === 'agent_updated') {
         const agentId = response.version_id || response.bridge_id;
         const currentTabInitiated = didCurrentTabInitiateUpdate(String(agentId));
@@ -109,7 +112,6 @@ function useRtLayerEventHandler(channelIdentifier="") {
         }
         return;
       }
-
       // Handle chat messages for dry run (non-orchestral)
       if (response.data) {
         const channelId = channelIdentifier;        
@@ -152,6 +154,7 @@ function useRtLayerEventHandler(channelIdentifier="") {
           dispatch(setChatTestCaseId(channelId, response.testcase_id));
         }
       }
+   
       // Handle history data (existing functionality)
       if (!Thread || !Messages) {
         return;

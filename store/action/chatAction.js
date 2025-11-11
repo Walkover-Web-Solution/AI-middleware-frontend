@@ -11,9 +11,8 @@ import {
   setUploadedFiles,
   setUploadedImages,
   addRtLayerMessage,
+  addErrorMessage,
   updateRtLayerMessage,
-  setTestCaseId,
-  clearTestCaseId,
   clearChannelData
 } from '../reducer/chatReducer';
 
@@ -156,6 +155,13 @@ export const setChatUploadedImages = (channelId, images) => (dispatch) => {
 
 // RT Layer Actions
 
+// Add error message as chat message (for RT layer errors only)
+export const addChatErrorMessage = (channelId, error) => (dispatch) => {
+  dispatch(addErrorMessage({ channelId, error }));
+  // Clear loading state when error occurs
+  dispatch(setChatLoading(channelId, false));
+};
+
 // Handle incoming RT layer message
 export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch) => {
   const timestamp = Date.now();
@@ -200,16 +206,6 @@ export const handleRtLayerStreamingUpdate = (channelId, messageId, content, isCo
   if (isComplete) {
     dispatch(setChatLoading(channelId, false));
   }
-};
-
-// Set testcase_id for channel (from RT layer response)
-export const setChatTestCaseId = (channelId, testCaseId) => (dispatch) => {
-  dispatch(setTestCaseId({ channelId, testCaseId }));
-};
-
-// Clear testcase_id for channel (on refresh or create new testcase)
-export const clearChatTestCaseId = (channelId) => (dispatch) => {
-  dispatch(clearTestCaseId({ channelId }));
 };
 
 // Clear all channel data (when switching agents)

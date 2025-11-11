@@ -7,7 +7,7 @@ import { dryRun } from "@/config";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/assistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
-import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot } from "lucide-react";
+import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot, AlertTriangle } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
@@ -55,14 +55,15 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [params, searchParams]);
 
   // Redux selectors for chat state
-  const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType } = useCustomSelector((state) => ({
+  const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({
     conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
     messages: state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
     loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
     errorMessage: state?.chatReducer?.errorsByChannel?.[channelIdentifier] || "",
     uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
     uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [], 
   }));
 
   // Initialize channel and RT layer
@@ -158,9 +159,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     if (inputRef.current) {
       inputRef.current.style.height = '40px'; // Set initial height
     }
-    dispatch(setChatError(channelIdentifier, ""));
     inputRef.current.value = "";
-    dispatch(setChatLoading(channelIdentifier, true));
     const timestamp = Date.now();
     const tempAssistantId = `assistant_${timestamp}`;
     try {
@@ -237,7 +236,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       dispatch(updateAssistantMessageWithResponse(channelIdentifier, tempAssistantId, responseDataForUpdate));
     } catch (error) {
       console.error(error);
-      dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
       // Restore the user message to the input field
       if (inputRef.current) {
         inputRef.current.value = newMessage;
@@ -388,7 +386,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                   >
                     <div className="chat-image avatar"></div>
                     <div className="chat-header">
-                      {message.sender === "expected" ? "Expected Response" : message.testCaseResult ? "Model Answer" : message.sender}
+                      {message.sender === "expected" ? "Expected Response" : 
+                       message.sender === "error" ? "Error" :
+                       message.testCaseResult ? "Model Answer" : 
+                       message.sender}
                       {message.isEdited && (
                         <span className="text-xs text-warning ml-2 font-medium">(edited)</span>
                       )}
@@ -582,7 +583,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
                     {(message.sender === "user" ||
                       message.sender === "assistant" ||
-                      message.sender === "expected") &&
+                      message.sender === "expected" ||
+                      message.sender === "error") &&
                       (message?.content || message?.isLoading) && (
                         <div className={`flex gap-2 show-on-hover justify-start max-w-[700px] items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
@@ -656,8 +658,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                             </div>
                           </div>
                           ) : (
-                            /* Regular Assistant/User/Expected Message - Show model answer if testcase was run */
-                            <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
+                            /* Regular Assistant/User/Expected/Error Message - Show model answer if testcase was run */
+                            <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${
+                              message.sender === "assistant" ? "mr-8" : 
+                              message.sender === "error" ? "bg-error/10 border border-error/30 text-error" : ""
+                            }`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
                                 <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">
@@ -716,6 +721,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                   ) : message.sender === "expected" ? (
                                     /* Expected Response - Plain text display with label */
                                     <div className="whitespace-pre-wrap">{message.content}</div>
+                                  ) : message.sender === "error" ? (
+                                    /* Error Message - Display with error styling and icon */
+                                    <div className="flex items-start gap-2">
+                                      <AlertTriangle className="h-4 w-4 text-error flex-shrink-0 mt-0.5" />
+                                      <div className="whitespace-pre-wrap text-error font-medium">{message.content}</div>
+                                    </div>
                                   ) : (
                                     /* Regular message with markdown */
                                     <ReactMarkdown
@@ -806,9 +817,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                   />
                 </div>
               </div>
-              {errorMessage && (
-                <div className="text-red-500 mt-2">{errorMessage}</div>
-              )}
             </div>
           </div>
         </div>

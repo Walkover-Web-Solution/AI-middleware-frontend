@@ -15,8 +15,6 @@ const initialState = {
   uploadedFilesByChannel: {},
   // Uploaded images by channel
   uploadedImagesByChannel: {},
-  // Active testcase_id by channel (persists until refresh or create new testcase)
-  testCaseIdByChannel: {},
 };
 
 export const chatReducer = createSlice({
@@ -34,7 +32,6 @@ export const chatReducer = createSlice({
         state.testCasesByChannel[channelId] = {};
         state.uploadedFilesByChannel[channelId] = [];
         state.uploadedImagesByChannel[channelId] = [];
-        state.testCaseIdByChannel[channelId] = null;
       }
     },
 
@@ -217,6 +214,50 @@ export const chatReducer = createSlice({
       }
     },
 
+    // Add error message as chat message (for RT layer errors only)
+    addErrorMessage: (state, action) => {
+      const { channelId, error } = action.payload;
+      const timestamp = Date.now();
+      
+      if (!state.messagesByChannel[channelId]) {
+        // Initialize channel if it doesn't exist
+        state.messagesByChannel[channelId] = [];
+        state.conversationsByChannel[channelId] = [];
+        state.loadingByChannel[channelId] = false;
+        state.errorsByChannel[channelId] = "";
+        state.testCasesByChannel[channelId] = {};
+        state.uploadedFilesByChannel[channelId] = [];
+        state.uploadedImagesByChannel[channelId] = [];
+      }
+
+      // Replace loading message if it exists with error message
+      const messages = state.messagesByChannel[channelId];
+      const loadingMessageIndex = messages.findIndex(msg => msg.isLoading && msg.sender === 'assistant');
+      
+      const errorMessage = {
+        id: `error_${timestamp}`,
+        sender: "error",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        content: error,
+        isError: true,
+        isLoading: false
+      };
+
+      if (loadingMessageIndex !== -1) {
+        // Replace loading message with error message
+        messages[loadingMessageIndex] = errorMessage;
+      } else {
+        // Add new error message
+        messages.push(errorMessage);
+      }
+      
+      // Also set the error in the error state
+      state.errorsByChannel[channelId] = error;
+    },
+
     // RT Layer: Update streaming message
     updateRtLayerMessage: (state, action) => {
       const { channelId, messageId, content, isComplete } = action.payload;
@@ -241,18 +282,6 @@ export const chatReducer = createSlice({
       }
     },
 
-    // Set testcase_id for channel (from RT layer response)
-    setTestCaseId: (state, action) => {
-      const { channelId, testCaseId } = action.payload;
-      state.testCaseIdByChannel[channelId] = testCaseId;
-    },
-
-    // Clear testcase_id for channel (on refresh or create new testcase)
-    clearTestCaseId: (state, action) => {
-      const { channelId } = action.payload;
-      state.testCaseIdByChannel[channelId] = null;
-    },
-
     // Clear all data for channel (when switching agents)
     clearChannelData: (state, action) => {
       const { channelId } = action.payload;
@@ -263,7 +292,6 @@ export const chatReducer = createSlice({
       delete state.testCasesByChannel[channelId];
       delete state.uploadedFilesByChannel[channelId];
       delete state.uploadedImagesByChannel[channelId];
-      delete state.testCaseIdByChannel[channelId];
     }
   },
 });
@@ -281,9 +309,8 @@ export const {
   setUploadedFiles,
   setUploadedImages,
   addRtLayerMessage,
+  addErrorMessage,
   updateRtLayerMessage,
-  setTestCaseId,
-  clearTestCaseId,
   clearChannelData
 } = chatReducer.actions;
 
