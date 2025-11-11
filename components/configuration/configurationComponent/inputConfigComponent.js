@@ -137,7 +137,7 @@ const InputConfigComponent = memo(({
                     onKeyDown={handleKeyDown}
                 />
                 
-                <DefaultVariablesSection />
+                <DefaultVariablesSection prompt={reduxPrompt}/>
             </div>
 
             <Diff_Modal oldContent={oldContentRef.current} newContent={promptState.newContent} />
