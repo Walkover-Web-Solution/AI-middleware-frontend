@@ -8,13 +8,32 @@ import { useSearchParams } from 'next/navigation';
 import { setInCookies } from '@/utils/utility';
 
 const LoginPage = ({loading}) => {
-  const urlParams = useSearchParams();
-  const ref = urlParams.get('ref');
-  useEffect(()=>{
-    if(ref){
-      setInCookies("reference_id", ref);
+  const urlParams = useSearchParams();  
+  // Extract UTM parameters
+  const utmSource = urlParams.get('utm_source');
+  const utmMedium = urlParams.get('utm_medium');
+  const utmCampaign = urlParams.get('utm_campaign');
+  const utmTerm = urlParams.get('utm_term');
+  const utmContent = urlParams.get('utm_content');
+  
+  useEffect(()=>{  
+    // Store UTM parameters in cookies
+    if(utmSource){
+      setInCookies("utm_source", utmSource);
     }
-  },[ref])
+    if(utmMedium){
+      setInCookies("utm_medium", utmMedium);
+    }
+    if(utmCampaign){
+      setInCookies("utm_campaign", utmCampaign);
+    }
+    if(utmTerm){
+      setInCookies("utm_term", utmTerm);
+    }
+    if(utmContent){
+      setInCookies("utm_content", utmContent);
+    }
+  },[utmSource, utmMedium, utmCampaign, utmTerm, utmContent])
   return (
     <div className="flex flex-col md:flex-row h-screen w-screen justify-between items-center px-4 md:px-8 lg:px-16">
     {/* Left Section */}

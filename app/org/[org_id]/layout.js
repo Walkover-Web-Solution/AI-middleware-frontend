@@ -73,7 +73,11 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
-      const reference_id = getFromCookies("reference_id");
+        const utmSource = getFromCookies("utm_source");
+        const utmMedium = getFromCookies("utm_medium");
+        const utmCampaign = getFromCookies("utm_campaign");
+        const utmTerm = getFromCookies("utm_term");
+        const utmContent = getFromCookies("utm_content");
         let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
@@ -97,26 +101,32 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         currentUserMeta = data?.data?.data?.user?.meta;
       }
       }
-  
       // If reference_id exists but user has no reference_id in meta
-      if (reference_id && !currentUser?.meta?.reference_id) {
+      if (utmSource && !currentUser?.meta?.utm_source) {
         try {
           const data = await dispatch(
             storeMarketingRefUserAction({
-              ref_id: reference_id,
+              utm_source: utmSource,
+              utm_medium: utmMedium,
+              utm_campaign: utmCampaign,
+              utm_term: utmTerm,
+              utm_content: utmContent,
               client_id: currentUser.id,
               client_email: currentUser.email,
               client_name: currentUser.name,
               created_at: currentUser.created_at,
             })
           );
-  
-          if (data?.status) {
+          if (data) {
             const updatedUser = {
               ...currentUser,
               meta: {
                 ...currentUserMeta,
-                reference_id: reference_id,
+                utm_source: utmSource,
+                utm_medium: utmMedium,
+                utm_campaign: utmCampaign,
+                utm_term: utmTerm,
+                utm_content: utmContent,
               },
             };
             await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
