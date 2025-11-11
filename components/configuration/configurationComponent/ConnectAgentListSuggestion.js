@@ -22,7 +22,8 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                 const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
                 const notSameBridge = bridge?._id !== params?.id
-                return isActive && matchesSearch && !isNotConnected && notSameBridge;
+                const isNotDeleted = !bridge?.deletedAt;
+                return isActive && matchesSearch && !isNotConnected && notSameBridge && isNotDeleted;
             })
             .slice()
             .sort((a, b) => {

@@ -156,9 +156,6 @@ function Home({ params, isEmbedUser }) {
             )}
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs">
-              {item?.slugName || ""}
-            </p>
             {item.bridge_status === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
                   <ClockIcon size={12}/>
@@ -212,14 +209,6 @@ function Home({ params, isEmbedUser }) {
             {loadingAgentId === item._id && (
               <span className="text-xs text-primary opacity-70">Loading...</span>
             )}
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs">
-              {item?.slugName || ""}
-            </p>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            Deleted {formatRelativeTime(item.deletedAt)}
           </div>
         </div>
       </div>
@@ -406,7 +395,7 @@ function Home({ params, isEmbedUser }) {
       closeModal(MODAL_TYPE.DELETE_MODAL);
     } catch (error) {
       console.error('Failed to delete agent', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete agent';
+      const errorMessage = error?.response?.data?.error || error?.message || 'Failed to delete agent';
       toast.error(errorMessage);
       
       // Close modal even on error
@@ -527,18 +516,24 @@ function Home({ params, isEmbedUser }) {
       <div className="flex items-center gap-2">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
-            className="btn btn-outline btn-primary btn-sm" 
+            className="btn btn-outline btn-ghost btn-xs whitespace-nowrap flex items-center gap-1" 
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               restoreBridge(row._id)
             }}
           >
-            <Undo2 size={14} />
-            Undo
+            <span className="flex items-center  gap-1">
+             <div className="flex text-xs items-center gap-1">
+             <Undo2 size={12} />
+             </div>
+             <div className="text-xs">
+             Undo
+             </div>
+            </span>
           </button>
         </div>
-        <div className="text-xs text-error font-medium">
+        <div className="text-error font-sm mt-2 text-xs whitespace-nowrap">
           {row.daysRemaining} days left
         </div>
       </div>
