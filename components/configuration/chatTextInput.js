@@ -43,14 +43,13 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
     }));
 
     // Redux selectors for chat state
-    const {conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId} = useCustomSelector((state) =>{ 
-      conversation = state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || []
-      loading = state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false
-      uploadedFiles = state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || []
-      uploadedImages = state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || []
-      storedTestCaseId = state?.chatReducer?.testCaseIdByChannel?.[channelIdentifier] || null
-      return {conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId}
-});
+    const {conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId} = useCustomSelector((state) => ({
+      conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
+      loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
+      uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
+      uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
+      storedTestCaseId: state?.chatReducer?.testCaseIdByChannel?.[channelIdentifier] || null
+    }));
     const dataToSend = useMemo(() => ({
         configuration: {
             model: modelName,

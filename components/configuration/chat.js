@@ -55,17 +55,15 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [params, searchParams]);
 
   // Redux selectors for chat state
-  const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType } = useCustomSelector((state) => 
-    {
-      conversation = state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
-      messages = state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
-      loading = state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
-      errorMessage = state?.chatReducer?.errorsByChannel?.[channelIdentifier] || "",
-      uploadedFiles = state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
-      uploadedImages = state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
-      bridgeType = state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
-    }
-  );
+  const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType } = useCustomSelector((state) => ({
+    conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
+    messages: state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
+    loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
+    errorMessage: state?.chatReducer?.errorsByChannel?.[channelIdentifier] || "",
+    uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
+    uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
+  }));
 
   // Initialize channel and RT layer
   useEffect(() => {
