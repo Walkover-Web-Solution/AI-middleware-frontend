@@ -155,7 +155,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                         type="checkbox" 
                         checked={guardrailsEnabled} 
                         onChange={handleToggleGuardrails}
-                        className="toggle"
+                        className="toggle toggle-sm"
                     />
                     
                 </label>
@@ -241,7 +241,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                                 <div className="mt-2">
                                                     <textarea
                                                         placeholder="Write your custom guardrail prompt here..."
-                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
+                                                        className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
                                                         onBlur={handleCustomPromptChange}
                                                         onChange={(e) => setCustomPrompt(e.target.value)}
                                                         value={customPrompt}

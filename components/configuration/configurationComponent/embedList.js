@@ -296,13 +296,26 @@ const EmbedList = ({ params, searchParams }) => {
             <div className="flex flex-col gap-2 w-full">
               {bridgeFunctions.length > 0 && (
                 <div className="flex flex-col gap-2 w-full">
-                  <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" handleRemoveEmbed={handleRemoveFunctionFromBridge} handleOpenDeleteModal={handleOpenDeleteModal} />
+                  <RenderEmbed 
+                    bridgeFunctions={bridgeFunctions} 
+                    integrationData={integrationData} 
+                    getStatusClass={getStatusClass} 
+                    handleOpenModal={handleOpenModal} 
+                    embedToken={embedToken} 
+                    params={params} 
+                    name="function" 
+                    handleRemoveEmbed={handleRemoveFunctionFromBridge} 
+                    handleOpenDeleteModal={handleOpenDeleteModal}
+                    halfLength={1}
+                  />
                 </div>
               )}
 
               {/* Render selected Prebuilt Tools below functions */}
               {selectedPrebuiltTools.length > 0 && (
-                <div className="flex flex-col gap-2 w-full">
+                <div className={`grid gap-2 w-full ${selectedPrebuiltTools.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
+                  gridTemplateColumns: selectedPrebuiltTools.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
+                }}>
                   {selectedPrebuiltTools.map((item) => {
                     const missingDesc = !item?.description;
                     const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
@@ -311,7 +324,7 @@ const EmbedList = ({ params, searchParams }) => {
                     return (
                       <div
                         key={item?.value}
-                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-300 transition-colors duration-200`}
                       >
                         <div className="p-2 flex-1 flex items-center gap-2">
                           {GetPreBuiltToolTypeIcon(item?.value, 14, 14)}
@@ -357,6 +370,8 @@ const EmbedList = ({ params, searchParams }) => {
                       </div>
                     );
                   })}
+                  {/* Add empty div for spacing when only one item */}
+                  {selectedPrebuiltTools.length === 1 && <div></div>}
                 </div>
               )}
             </div>

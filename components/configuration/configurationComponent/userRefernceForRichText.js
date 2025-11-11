@@ -62,7 +62,7 @@ const UserReferenceForRichText = ({ params, searchParams }) => {
                         type="checkbox"
                         checked={isRichText}
                         onChange={handleCheckboxChange}
-                        className="toggle"
+                        className="toggle toggle-xs"
                     />
                 </div>
 

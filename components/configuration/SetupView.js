@@ -46,6 +46,7 @@ const SetupView = memo(() => {
                         searchParams={searchParams} 
                         isEmbedUser={isEmbedUser} 
                         hideAdvancedParameters={hideAdvancedParameters}
+                        className="max-w-md"
                         level={2}
                     />
                     <ConfigurationSettingsAccordion />

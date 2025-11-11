@@ -29,7 +29,7 @@ const CommonConfigComponents = ({
                 service={service} 
                 deafultApiKeys={showDefaultApikeys}
             />}
-            <div className="flex flex-col sm:flex-row gap-2 items-start w-full">
+            <div className="flex flex-col sm:flex-row gap-2 items-start w-full max-w-md">
                 <div className="w-auto">
                     <ServiceDropdown
                         params={params}
@@ -38,26 +38,17 @@ const CommonConfigComponents = ({
                         searchParams={searchParams}
                     />
                 </div>
-                <div className="w-full max-w-xs min-w-xs">
-                    <ModelDropdown params={params} searchParams={searchParams} />
-                </div>
-                {((!showDefaultApikeys && isEmbedUser) || !isEmbedUser) && (
-                    <div className="flex items-center gap-2">
-                        <ApiKeyInput 
-                            apiKeySectionRef={apiKeySectionRef} 
-                            params={params} 
-                            searchParams={searchParams} 
-                            isEmbedUser={isEmbedUser}
-                            hideAdvancedParameters={hideAdvancedParameters}
-                        />
-                        <AdvancedSettingsButton
-                            params={params}
-                            searchParams={searchParams}
-                            isEmbedUser={isEmbedUser}
-                            hideAdvancedParameters={hideAdvancedParameters}
-                        />
+                <div className="flex items-center gap-2 w-full">
+                    <div className="w-full">
+                        <ModelDropdown params={params} searchParams={searchParams} />
                     </div>
-                )}
+                    <AdvancedSettingsButton
+                        params={params}
+                        searchParams={searchParams}
+                        isEmbedUser={isEmbedUser}
+                        hideAdvancedParameters={hideAdvancedParameters}
+                    />
+                </div>
             </div>
         </>
     );

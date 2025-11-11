@@ -11,6 +11,7 @@ import { getChatBotDetailsAction } from "@/store/action/chatBotAction";
 import { PencilIcon } from "@/components/Icons";
 import { useEffect, use } from "react";
 import { useDispatch } from "react-redux";
+import InfoTooltip from '@/components/InfoTooltip';
 
 export const runtime = 'edge';
 
@@ -42,7 +43,9 @@ function Page({ params }) {
             {bridgeData && <ChatbotSlider params={resolvedParams} />}
         </div>
         <div className="flex  flex-col w-1/2 overflow-auto p-4 gap-4 ">
-            <h1 className="text-2xl font-semibold">Chatbot Configuration</h1>
+            <InfoTooltip tooltipContent="Configure your chatbot's behavior, appearance, and functionality including user references, starter questions, and action lists.">
+                <h1 className="text-md font-semibold cursor-pointer">Chatbot Configuration</h1>
+            </InfoTooltip>
             <div className="flex flex-col gap-4">
                 <PrivateFormSection params={resolvedParams} />
                 <FormSection params={resolvedParams} />
