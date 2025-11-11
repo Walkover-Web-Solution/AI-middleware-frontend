@@ -16,8 +16,9 @@ function BridgeSlider() {
 
   
    const [filteredBridgesList, setFilteredBridgesList] = useState(bridgesList);
-    const filteredArchivedBridges = filteredBridgesList?.filter((item) => item.status === 0);
-    const filteredUnArchivedBridges = filteredBridgesList?.filter((item) => item.status === 1 || item.status === undefined);
+    // Filter out deleted agents (agents with deletedAt property)
+    const filteredArchivedBridges = filteredBridgesList?.filter((item) => item.status === 0 && !item.deletedAt);
+    const filteredUnArchivedBridges = filteredBridgesList?.filter((item) => (item.status === 1 || item.status === undefined) && !item.deletedAt);
 
     const handleNavigation = (id, versionId) => {
         router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
