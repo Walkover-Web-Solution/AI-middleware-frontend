@@ -13,6 +13,7 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
+import { CircleQuestionMark } from 'lucide-react';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, defaultExpanded = false, showAccordion = true, compact = false }) => {
   // Use the tutorial videos hook
@@ -256,7 +257,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     const buttonSizeClass = 'btn-xs';
     const rangeSizeClass = 'range-xs';
     const toggleSizeClass = 'toggle-xs';
-    const labelTextClass = 'text-sm font-medium capitalizen mb-2';
+    const labelTextClass = 'text-sm font-medium capitalizen';
     const sliderValueId = `sliderValue-${key} h-2`;
 
     let error = false;
@@ -301,13 +302,14 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 }
               }}
             />
-            {description ? (
-              <InfoTooltip tooltipContent={description}>
-                <span className={`${labelTextClass} info`}>{name || key}</span>
-              </InfoTooltip>
-            ) : (
+            <div className="flex items-center gap-1">
               <span className={labelTextClass}>{name || key}</span>
-            )}
+              {description && (
+                <InfoTooltip tooltipContent={description}>
+                  <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {sliderValueNode}
@@ -605,9 +607,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       <div className={`z-very-low mt-2 text-base-content w-full ${className}`} tabIndex={0}>
         {/* Level 2 Parameters - Displayed Outside Accordion */}
         {level2Parameters.length > 0 && (
-          <div className="w-full gap-2 flex flex-col px-2 py-2 border border-base-content/20 rounded-lg cursor-default">
+          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-center">
             {level2Parameters.map(([key, paramConfig]) => (
-              <div key={key} className="compact-parameter">
+              <div key={key} className="compact-parameter w-full max-w-md">
                 {renderParameterField(key, paramConfig)}
               </div>
             ))}
@@ -631,9 +633,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
         {tutorialState.showTutorial && (
           <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
         )}
-        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
+        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-center`}>
           {level1Parameters.map(([key, paramConfig]) => (
-            renderParameterField(key, paramConfig)
+            <div key={key} className="w-full max-w-md">
+              {renderParameterField(key, paramConfig)}
+            </div>
           ))}
         </div>
       </div>

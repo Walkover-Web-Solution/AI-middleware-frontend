@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 import { BotIcon } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
@@ -294,15 +295,18 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     return (
         <div>
-            <div className="label p-0 flex-col items-start mb-0">
+            <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
 
                 <>
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {Object?.entries(connect_agents)?.length > 0 ? (
                             <>
-                                <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                                    <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                                </InfoTooltip>
+                                <div className="flex items-center gap-1 mb-2">
+                                    <p className="font-medium whitespace-nowrap">Agents</p>
+                                    <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                                    </InfoTooltip>
+                                </div>
                                 <button
                                     tabIndex={0}
                                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"

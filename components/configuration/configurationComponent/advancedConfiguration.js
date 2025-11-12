@@ -8,6 +8,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import ToolCallCount from './toolCallCount';
 import GuardrailSelector from './guardrailSelector';
 import { getIconOfService } from '@/utils/utility';
+import { CircleQuestionMark } from 'lucide-react';
 
 const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, forceExpanded = false }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(forceExpanded);
@@ -206,23 +207,27 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
   const computedModelsList = serviceModels?.[fallbackService] || {};
 
   const renderContent = () => (
-    <div className="flex flex-col gap-4">
-      <div>
+    <div className="flex flex-col gap-6">
+      <div className="bg-base-100 rounded-lg">
         <GuardrailSelector params={params} searchParams={searchParams} />
       </div>
 
-      <div className="form-control w-full border border-base-content/20 rounded-md">
-        <div className="label">
-          <InfoTooltip tooltipContent="Enable and configure a fallback model and service to retry when the primary fails.">
-            <span className="label-text pl-2">Fallback Model</span>
-          </InfoTooltip>
-          <input
-            type="checkbox"
-            className="toggle toggle-sm"
-            checked={isFallbackEnabled}
-            onChange={handleFallbackModelToggle}
-          />
-        </div>
+      <div className="bg-base-100 rounded-lg">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1">
+              <span className="label-text font-medium">Fallback Model</span>
+              <InfoTooltip tooltipContent="Enable and configure a fallback model and service to retry when the primary fails.">
+                <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+              </InfoTooltip>
+            </div>
+            <input
+              type="checkbox"
+              className="toggle toggle-sm"
+              checked={isFallbackEnabled}
+              onChange={handleFallbackModelToggle}
+            />
+          </div>
 
         {isFallbackEnabled && (
           <div className="w-full p-2" ref={dropdownContainerRef}>
@@ -356,25 +361,29 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
             </details>
           </div>
         )}
+        </div>
       </div>
 
       {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
-        <div className="form-control w-full mt-2 border border-base-content/20 rounded-lg p-2">
+        <div className="bg-base-100 rounded-lg">
           <ResponseFormatSelector params={params} searchParams={searchParams} />
         </div>
       )}
 
-      <div className="form-control w-full">
-        <label className="label">
-          <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your agent">
-            <span className="label-text info">Multiple API Keys</span>
-          </InfoTooltip>
-        </label>
+      <div className="bg-base-100 rounded-lg">
+        <div className="flex flex-col gap-3 w-full">
+          {/* Multiple API Keys Label */}
+          <div className="flex items-center gap-1">
+            <span className="label-text font-medium">Multiple API Keys</span>
+            <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your agent for enhanced functionality and redundancy.">
+              <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+            </InfoTooltip>
+          </div>
 
         <div className="w-full">
           <div className="relative">
             <div
-              className={`flex items-center gap-2 input input-sm w-full border-base-content/20 min-h-[2.5rem] cursor-pointer ${showApiKeysToggle ? 'rounded-x-md rounded-b-none rounded-t-md' : 'rounded-md'}`}
+              className={`flex items-center gap-2 input input-sm w-full min-h-[2.5rem] cursor-pointer ${showApiKeysToggle ? 'rounded-x-md rounded-b-none rounded-t-md' : 'rounded-md'}`}
               onClick={toggleApiKeys}
             >
               <span className="text-base-content">
@@ -426,66 +435,18 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
             )}
           </div>
         </div>
+        </div>
       </div>
 
-      <ToolCallCount params={params} searchParams={searchParams}/>
+      <div className="bg-base-100 rounded-lg">
+        <ToolCallCount params={params} searchParams={searchParams}/>
+      </div>
     </div>
   );
 
-  if (forceExpanded) {
-    return (
-      <div className="z-very-low text-base-content mt-4 w-full" tabIndex={0}>
-        <div className="border border-base-content/20 rounded-lg p-3 bg-base-100 space-y-4">
-          <div className="flex items-start gap-2">
-            <InfoTooltip
-              tooltipContent="Advanced configuration options for customizing your agent setup"
-              className="cursor-pointer"
-            >
-              <div className="label-text">
-                <span className="label-text mr-1">Advanced Configuration</span>
-                <span className="text-base-content/50 text-xs">
-                  (Prompt guard, Fallback model, Add multiple API keys...)
-                </span>
-              </div>
-            </InfoTooltip>
-          </div>
-          {renderContent()}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="z-very-low text-base-content mt-4 w-full cursor-pointer" tabIndex={0}>
-
-      <div
-        className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
-        onClick={() => {
-          toggleAccordion();
-        }}
-      >
-        <InfoTooltip
-          tooltipContent="Advanced configuration options for customizing your agent setup"
-          className="cursor-pointer mr-2"
-        >
-          <div className="cursor-pointer label-text inline-block ml-1">
-            <span className="cursor-pointer label-text inline-block mr-1">Advanced Configuration</span>
-            <span className="text-base-content/50 text-xs">
-              (Prompt guard, Fallback model, Add multiple API keys...)
-            </span>
-          </div>
-        </InfoTooltip>
-
-        <span className="cursor-pointer">
-          {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-        </span>
-      </div>
-
-
-
-      <div className={`w-full gap-4 flex flex-col transition-all duration-300 ease-in-out ${isAccordionOpen ? 'px-3 py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg opacity-100' : 'max-h-0 opacity-0 overflow-hidden border border-base-content/20 rounded-lg p-0'}`}>
-        {renderContent()}
-      </div>
+    <div className="z-very-low text-base-content w-full" tabIndex={0}>
+      {renderContent()}
     </div>
   );
 };

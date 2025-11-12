@@ -14,6 +14,7 @@ import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
     // Use the tutorial videos hook
@@ -140,14 +141,17 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         );
     }, [knowbaseVersionData, knowledgeBaseData]);
     return (
-        <div className="label flex-col items-start w-full p-0">
+        <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
             <div className="dropdown dropdown-right flex items-center">
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (
                         <>
-                            <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                                <p className="label-text mb-2 whitespace-nowrap font-medium info">KnowledgeBase</p>
-                            </InfoTooltip>
+                            <div className="flex items-center gap-1 mb-2">
+                                <p className="whitespace-nowrap font-medium">KnowledgeBase</p>
+                                <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                                </InfoTooltip>
+                            </div>
                             <button
                                 tabIndex={0}
                                 className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
