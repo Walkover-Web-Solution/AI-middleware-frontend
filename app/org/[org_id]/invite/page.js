@@ -294,12 +294,13 @@
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Protected from '@/components/protected';
+import { getFromCookies } from '@/utils/utility';
 
 export const runtime = 'edge';
 
 function UserManagementPage({ params }) {
   // MSG91 Proxy Auth Token
-  const PROXY_AUTH_TOKEN = 'cGJUL1FDV080QlZnOGt5VVdBeWVOUk1YRU1LdFd4emtPNHVhcHQvRmdIZC9wRXpBNHlFNXRBem5GcFFsWUVFcU9CWW5md1NaMElvckZyTDhremIrSllUTkFwck1qWmM2R3lSbEtJa0M2a0lZOXpWQ1Y2VFBBaSsxZSszYkZua2taZWZhdUFTYXVTQ2h6NXVKMHQvVFpNMjJPVnJUUUppeFNwdk91a0xyNTJpcWVBQ2RyZUZlSlNOOGxyM2VLNzVvYW9XY255Z05oeHZRbzhRUmlvNW51UT09';
+  const PROXY_AUTH_TOKEN = getFromCookies('proxy _token');
 
   // Initialize MSG91 proxy auth configuration
   useEffect(() => {
