@@ -58,10 +58,10 @@ function Page() {
   // Auto-redirect if there's only one organization
   useEffect(() => {
     const allowRedirection = searchParams.get('redirection') !== 'false';
-    if (organizationsArray.length === 1 && allowRedirection) {
-      const singleOrg = organizationsArray[0];
-      handleSwitchOrg(singleOrg.id, singleOrg.name);
-    }
+    // if (organizationsArray.length === 1 && allowRedirection) {
+    //   const singleOrg = organizationsArray[0];
+    //   handleSwitchOrg(singleOrg.id, singleOrg.name);
+    // }
   }, [organizationsArray, handleSwitchOrg, searchParams]);
 
   return (
