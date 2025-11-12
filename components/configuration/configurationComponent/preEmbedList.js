@@ -11,6 +11,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -38,6 +39,10 @@ const PreEmbedList = ({ params, searchParams }) => {
         };
     });
     const dispatch = useDispatch();
+    
+    // Delete operation hook
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PRE_TOOL_MODAL);
+    
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
     const handleOpenModal = (functionId) => {
         setPreFunctionId(functionId);
@@ -65,12 +70,13 @@ const PreEmbedList = ({ params, searchParams }) => {
         }, 0);
     }
 
-    const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: searchParams?.version
-        }))
-        closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
+    const removePreFunction = async () => {
+        await executeDelete(async () => {
+            return dispatch(updateApiAction(params.id, {
+                pre_tools: [],
+                version_id: searchParams?.version
+            }));
+        });
     }
 
     const handleChangePreTool = () => {
@@ -171,7 +177,9 @@ const PreEmbedList = ({ params, searchParams }) => {
                     title="Are you sure?"
                     description={"This action Remove the selected Pre Tool from the Agent."}
                     buttonTitle="Remove Pre Tool"
-                    modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
+                    modalType={MODAL_TYPE.DELETE_PRE_TOOL_MODAL}
+                    loading={isDeleting}
+                    isAsync={true}
                 />
 
                 <div className="label flex-col items-start w-full">

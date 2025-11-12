@@ -15,6 +15,7 @@ import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, TrashIcon, SettingsIcon
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import DeleteModal from '@/components/UI/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/prebuiltToolsConfigModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -39,8 +40,6 @@ const EmbedList = ({ params, searchParams }) => {
   const [toolData, setToolData] = useState({});
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
-  const [isRemovingTool, setIsRemovingTool] = useState(false);
-  const [isRemovingPrebuiltTool, setIsRemovingPrebuiltTool] = useState(false);
   const dispatch = useDispatch();
   const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
@@ -90,6 +89,11 @@ const EmbedList = ({ params, searchParams }) => {
 
   }
   const [selectedPrebuiltTool, setSelectedPrebuiltTool] = useState(null);
+  
+  // Delete operation hooks
+  const { isDeleting: isDeletingTool, executeDelete: executeToolDelete } = useDeleteOperation(MODAL_TYPE.DELETE_TOOL_MODAL);
+  const { isDeleting: isDeletingPrebuiltTool, executeDelete: executePrebuiltToolDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
+  
   const handleOpenDeleteModal = (functionId, functionName) => {
     setFunctionId(functionId);
     setFunctionName(functionName);
@@ -115,20 +119,20 @@ const EmbedList = ({ params, searchParams }) => {
     }
   };
 
-  const handleRemoveFunctionFromBridge = (id, name) => {
-    dispatch(
-      updateBridgeVersionAction({
-        bridgeId: params.id,
-        versionId: searchParams?.version,
-        dataToSend: {
-          functionData: {
-            function_id: id,
-            function_name: name,
+  const handleRemoveFunctionFromBridge = async (id, name) => {
+    await executeToolDelete(async () => {
+      return dispatch(
+        updateBridgeVersionAction({
+          bridgeId: params.id,
+          versionId: searchParams?.version,
+          dataToSend: {
+            functionData: {
+              function_id: id,
+              function_name: name,
+            },
           },
-        },
-      })
-    ).then(() => {
-      closeModal(MODAL_TYPE.DELETE_TOOL_MODAL);
+        })
+      );
     });
   };
 
@@ -170,14 +174,14 @@ const EmbedList = ({ params, searchParams }) => {
   };
 
   // Handle removing a prebuilt tool from built_in_tools
-  const handleDeletePrebuiltTool = (item,name) => {
+  const handleDeletePrebuiltTool = async (item, name) => {
     if (!item?.value) return;
-    dispatch(updateBridgeVersionAction({
-      versionId: searchParams?.version,
-      dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
-    }).then(() => {
-      closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
-    }));
+    await executePrebuiltToolDelete(async () => {
+      return dispatch(updateBridgeVersionAction({
+        versionId: searchParams?.version,
+        dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
+      }));
+    });
   };
 
   // Handle opening prebuilt tools configuration modal
@@ -220,7 +224,8 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Tool from the Agent."}
         buttonTitle="Remove Tool"
         modalType={MODAL_TYPE.DELETE_TOOL_MODAL}
-        loading={isRemovingTool}
+        loading={isDeletingTool}
+        isAsync={true}
       />
       <DeleteModal
         onConfirm={handleDeletePrebuiltTool}
@@ -230,7 +235,8 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Prebuilt Tool from the Agent."}
         buttonTitle="Remove Prebuilt Tool"
         modalType={MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL}
-        loading={isRemovingPrebuiltTool}
+        loading={isDeletingPrebuiltTool}
+        isAsync={true}
       />
       <FunctionParameterModal
         name="Tool"
@@ -324,7 +330,7 @@ const EmbedList = ({ params, searchParams }) => {
                     return (
                       <div
                         key={item?.value}
-                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-300 transition-colors duration-200`}
+                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative ${hasIssue ? 'border-error' : ''} hover:bg-base-300 transition-colors duration-200`}
                       >
                         <div className="p-2 flex-1 flex items-center gap-2">
                           {GetPreBuiltToolTypeIcon(item?.value, 14, 14)}
