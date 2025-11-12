@@ -169,7 +169,7 @@ const Page = () => {
                                     <span>Authorization Request Details</span>
                                 </div>
                                 {!formState.isClientVerified && (
-                                    <div className="ml-2 flex items-center gap-2 text-sm text-red-800 mt-4">
+                                    <div className="ml-2 flex items-center gap-2 text-sm text-error mt-4">
                                         <AlertCircle size={16} />
                                         <span>Client verification failed. Please try Again</span>
                                     </div>
