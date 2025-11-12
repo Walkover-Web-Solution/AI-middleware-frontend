@@ -16,6 +16,7 @@ import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import DeleteModal from '@/components/UI/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/prebuiltToolsConfigModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -252,15 +253,18 @@ const EmbedList = ({ params, searchParams }) => {
         setVariablesPath={setVariablesPath}
         variablesPath={variablesPath}
       />
-      <div className="label flex-col items-start  w-full p-0">
+      <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
         {shouldToolsShow && (
           <>
             <div className="dropdown dropdown-right w-full flex items-center">
               {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? (
                 <>
-                  <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-                    <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
-                  </InfoTooltip>
+                  <div className="flex items-center gap-1 mb-2">
+                    <p className="font-medium whitespace-nowrap">Tools</p>
+                    <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
+                  </div>
                   <button
                     tabIndex={0}
                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"

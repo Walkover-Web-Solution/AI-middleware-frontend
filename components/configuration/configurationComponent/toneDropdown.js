@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import InfoTooltip from "@/components/InfoTooltip";
+import { CircleQuestionMark } from 'lucide-react';
 
 const TONES = [
   {
@@ -122,29 +123,34 @@ const ToneDropdown = ({ params, searchParams }) => {
   };
 
   return (
-    <label className="form-control w-full">
-        <InfoTooltip tooltipContent={"Select your response tone (optional)."}>
-      <div className="flex items-center gap-2">
-        <select
-          value={selectedTone}
-          onChange={handleToneChange}
-          className="select select-sm select-bordered capitalize w-full max-w-xs"
-        >
-          <option value="" disabled>
-            Select a tone
-          </option>
-          <option value="">
-            None
-          </option>
-          {TONES.map((tone) => (
-            <option key={tone.value} value={tone.value}>
-              {tone.value}
-            </option>
-          ))}
-        </select>
+    <div className="flex flex-col gap-3 w-full">
+      {/* Tone Label */}
+      <div className="flex items-center gap-1">
+        <span className="label-text font-medium">Tone</span>
+        <InfoTooltip tooltipContent="Select the tone of voice for your AI agent's responses. This affects how the agent communicates with users.">
+          <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+        </InfoTooltip>
       </div>
-      </InfoTooltip>
-    </label>
+      
+      {/* Tone Dropdown */}
+      <select
+        value={selectedTone}
+        onChange={handleToneChange}
+        className="select select-sm select-bordered capitalize w-full"
+      >
+        <option value="" disabled>
+          Select a tone
+        </option>
+        <option value="">
+          None
+        </option>
+        {TONES.map((tone) => (
+          <option key={tone.value} value={tone.value}>
+            {tone.value}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 

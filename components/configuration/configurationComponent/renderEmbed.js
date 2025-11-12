@@ -112,9 +112,7 @@ const RenderEmbed = ({
 
     return (
       <div className="w-full">
-        <div className={`grid gap-2 w-full ${displayItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
-          gridTemplateColumns: displayItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
-        }}>
+        <div className={`grid gap-2 w-full`}>
           {embedItems}
           {/* Add empty div for spacing when only one item */}
           {displayItems.length === 1 && <div></div>}
