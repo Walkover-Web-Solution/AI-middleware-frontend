@@ -1,7 +1,7 @@
 // hooks/useRtLayerEventHandler.js
 'use client';
 import { addThreadNMessageUsingRtLayer, addThreadUsingRtLayer } from "@/store/reducer/historyReducer";
-import { handleRtLayerMessage, handleRtLayerStreamingUpdate, setChatTestCaseIdAction } from "@/store/action/chatAction";
+import { handleRtLayerMessage, handleRtLayerStreamingUpdate, setChatTestCaseIdAction, addChatErrorMessage } from "@/store/action/chatAction";
 import { useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
@@ -95,6 +95,7 @@ function useRtLayerEventHandler(channelIdentifier="") {
       }
       if(error)
       {
+        debugger
         dispatch(addChatErrorMessage(channelIdentifier, error?.error));
         return
       }
