@@ -2,7 +2,7 @@
 import { loginUser } from "@/config";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useLayoutEffect, useState } from "react";
-import { switchOrg } from "@/config";
+import { switchOrg, switchUser } from "@/config";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -11,10 +11,13 @@ import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
 
 const handleUserDetailsAndSwitchOrg = async (url, dispatch) => {
-  await dispatch(userDetails());
+const userDetailsData = await dispatch(userDetails());
   const companyRefId = extractCompanyRefId(url); 
   if (companyRefId) {
-    await switchOrg(companyRefId); 
+    const company = userDetailsData?.c_companies?.find((company) => company.id == companyRefId)
+    await switchOrg(companyRefId);
+    const localToken = await switchUser({ orgId: companyRefId, orgName: company.name });
+    setInCookies('local_token', localToken.token);
   }
 };
 
@@ -38,14 +41,15 @@ const WithAuth = (Children) => {
     // If the user has logged in, it will redirect the user to the bridges page
     // If the user has not logged in, it will redirect the user to the login page
 
-    const isEmbedUser = useCustomSelector((state) => state.userDetailsReducer.userDetails.isEmbedUser);
+    const isEmbedUser = useCustomSelector((state) => state.appInfoReducer.embedUserDetails.isEmbedUser);
+    
     useLayoutEffect(() => {
 
       const runEffect = async (isEmbedUser) => {
       const proxyToken = getFromCookies('proxy_token');
       const proxyAuthToken = proxy_auth_token;
       let redirectionUrl = getFromCookies("previous_url") || "/org";
-      if(isEmbedUser)
+            if(isEmbedUser)
       {
         const proxy_auth_token = sessionStorage.getItem('proxy_token');
         const org_id = sessionStorage.getItem('gtwy_org_id');
@@ -69,27 +73,17 @@ const WithAuth = (Children) => {
         setLoading(true);
         setInCookies('proxy_token', proxyAuthToken);
 
-        const userId = searchParams.get('user_ref_id');
-        const orgId = searchParams.get('company_ref_id');
-
-        if (userId && orgId) {
-          try {
-            const localToken = await loginUser({
-              userId,
-              orgId,
-              userName: '',
-              orgName: ''
-            });
-            if (localToken?.token) {
-              setInCookies('local_token', localToken.token);
-            }
-          } catch (error) {
-            console.error('Failed to fetch local token', error);
-          }
-        }
+      
+          const localToken = await loginUser({
+            userId: searchParams.get('user_ref_id'),
+            orgId: searchParams.get('company_ref_id'),
+            userName: '',
+            orgName: ''
+          });
+          setInCookies('local_token', localToken.token);
 
         if(getFromCookies("previous_url")) {
-          await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch);
+          await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch, userDetails);
         }
         router.replace(redirectionUrl);
         removeCookie("previous_url");
@@ -135,3 +129,4 @@ const WithAuth = (Children) => {
 };
 
 export default WithAuth;
+

@@ -150,7 +150,7 @@ const CustomTable = ({
                         sortedData.map((row, index) => (
                             <div 
                                 key={row.id || row?._id || index}
-                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all ${
+                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all group ${
                                     row.isLoading ? 'opacity-60 cursor-wait' : ''
                                 }`}
                                 onClick={() => handleRowClick(
@@ -197,7 +197,7 @@ const CustomTable = ({
                                 
                                 {/* Card Actions */}
                                 {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3">
+                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         {endComponent({row: row})}
                                     </div>
                                 )}
@@ -218,23 +218,12 @@ const CustomTable = ({
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
         
         return (
-            <div className="overflow-x-auto">
-                <table className={`table ${tableClass} w-full bg-base-100 shadow-md overflow-hidden`} style={{tableLayout: 'auto'}}>
-                    <colgroup>
-                        {showRowSelection && <col style={{width: '40px'}} />}
-                        {visibleColumns.map((column, idx) => {
-                            if (column.toLowerCase() === 'name') {
-                                return <col key={column} style={{width: 'auto'}} />;
-                            }
-                            // Right side columns - minimal width based on content
-                            return <col key={column} style={{width: '1px'}} />;
-                        })}
-                        {endComponent && <col style={{width: '80px'}} />}
-                    </colgroup>
+            <div className="overflow-visible relative z-50 border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
+                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-visible relative z-50 border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
-                                <th className=" py-2 text-left">
+                                <th className="px-4 py-2 text-left">
                                     <input
                                         type="checkbox"
                                         className="h-4 w-4 cursor-pointer"
@@ -246,7 +235,7 @@ const CustomTable = ({
                             {visibleColumns.map((column) => (
                                 <th
                                     key={column}
-                                    className={`py-2 text-left whitespace-nowrap capitalize`}
+                                    className="px-4 py-2 text-left whitespace-nowrap capitalize"
                                 >
                                     <div className={`flex items-center justify-start`}>
                                         {sorting && sortableColumns.includes(column) && (
@@ -267,7 +256,7 @@ const CustomTable = ({
                                     </div>
                                 </th>
                             ))}
-                            {endComponent && <th className=" py-2 text-left">Action</th>}
+                            {endComponent && <th className="px-4 py-2 text-center"><div className="flex items-center justify-center">Actions</div></th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -275,7 +264,7 @@ const CustomTable = ({
                             sortedData?.map((row, index) => (
                                 <tr 
                                     key={row.id || row?._id || index} 
-                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group ${
+                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors z-40 cursor-pointer group ${
                                         row.isLoading ? 'opacity-60 cursor-wait' : ''
                                     }`}
                                     onClick={() =>
@@ -288,7 +277,7 @@ const CustomTable = ({
                                     }
                                 >
                                     {showRowSelection &&
-                                        <td className=" py-2 text-left">
+                                        <td className="px-4 py-2 text-left">
                                             <input
                                                 type="checkbox"
                                                 className="h-4 w-4 cursor-pointer"
@@ -303,14 +292,14 @@ const CustomTable = ({
                                     {visibleColumns?.map((column) => (
                                         <td
                                             key={column}
-                                            className="py-2 text-left whitespace-nowrap"
+                                            className="px-4 py-2 text-left whitespace-nowrap"
                                         >
                                             {getDisplayValue(row, column)}
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td className=" py-2 text-left">
-                                            <div className="">
+                                        <td className="px-4 py-2 text-left relative">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative z-50">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
@@ -321,7 +310,7 @@ const CustomTable = ({
                             <tr>
                                 <td
                                     colSpan={visibleColumns.length + (showRowSelection ? 1 : 0) + (endComponent ? 1 : 0)}
-                                    className="py-4 text-left"
+                                    className="px-4 py-4 text-left"
                                 >
                                     No data available
                                 </td>
@@ -334,7 +323,7 @@ const CustomTable = ({
     };
 
     return (
-        <div className="bg-base-100 p-2 md:p-4">
+        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto">
             {/* Responsive view switching */}
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>

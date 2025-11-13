@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { clearCookie, filterOrganizations, getFromCookies, openModal, setInCookies, toggleSidebar } from '@/utils/utility';
+import { clearCookie, filterOrganizations, getFromCookies, openModal, toggleSidebar } from '@/utils/utility';
 import { KeyRoundIcon, LogoutIcon, MailIcon, CloseIcon, SettingsIcon, SettingsAltIcon, BuildingIcon, ChevronDownIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
@@ -42,9 +42,7 @@ function OrgSlider() {
                 orgId: id,
                 orgName: name
             })
-            if (localToken?.token) {
-                setInCookies('local_token', localToken.token);
-            }
+            setInCookies('local_token', localToken.token);
             router.push(`/org/${id}/agents`);
             dispatch(setCurrentOrgIdAction(id));
             if (response.status !== 200) {

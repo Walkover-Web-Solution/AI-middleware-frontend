@@ -6,10 +6,11 @@ import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
+import useTutorialVideos from '@/hooks/useTutorialVideos'
 import { useCustomSelector } from '@/customHooks/customSelector'
-import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
-import { closeModal, openModal, RequiredItem } from '@/utils/utility'
+import { createNewAuthData, deleteAuthData } from '@/store/action/authkeyAction'
+import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { closeModal, formatDate, formatRelativeTime, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -17,10 +18,14 @@ import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
 import { use } from 'react';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';
 
 function Page({ params }) {
+  // Use the tutorial videos hook
+  const { getPauthKeyVideo } = useTutorialVideos();
+
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const { authData, isFirstPauthCreation, descriptions } = useCustomSelector((state) => {
@@ -34,6 +39,7 @@ function Page({ params }) {
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const { isDeleting, executeDelete } = useDeleteOperation();
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstPauthCreation
@@ -43,10 +49,10 @@ function Page({ params }) {
     setFilterPauthKeys(authData)
   }, [authData]);
 
-const maskAuthKey = (authkey) => {
-  if (!authkey) return '';
-  return authkey.substring(0, 3) + '*'.repeat(9) + authkey.substring(authkey.length - 3);
-};
+  const maskAuthKey = (authkey) => {
+    if (!authkey) return '';
+    return authkey.substring(0, 3) + '*'.repeat(9) + authkey.substring(authkey.length - 3);
+  };
 
   /**
    * Copies given content to clipboard
@@ -98,10 +104,10 @@ const maskAuthKey = (authkey) => {
     document.getElementById('authNameInput').value = ''
   };
 
-  const DeleteAuth = (item) => {
-    closeModal(MODAL_TYPE?.DELETE_MODAL);
-    dispatch(deleteAuthData(item)).then(() => {
-      toast.success("Auth Key Deleted Successfully")
+  const DeleteAuth = async (item) => {
+    await executeDelete(async () => {
+      await dispatch(deleteAuthData(item));
+      toast.success("Auth Key Deleted Successfully");
     });
   };
 
@@ -137,31 +143,31 @@ const maskAuthKey = (authkey) => {
         {tutorialState?.showTutorial && (
           <OnBoarding
             setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-            video={ONBOARDING_VIDEOS.PauthKey}
+            video={getPauthKeyVideo()}
             params={resolvedParams}
             flagKey="PauthKey"
           />
         )}
         <div className="px-2">
-        <MainLayout>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4">
-            <PageHeader
-              title="Auth Key"
-              description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
-              docLink="https://gtwy.ai/blogs/features/pauthkey"
-            />
-           
+          <MainLayout>
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4">
+              <PageHeader
+                title="Auth Key"
+                description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
+                docLink="https://gtwy.ai/blogs/features/pauthkey"
+              />
+
+            </div>
+          </MainLayout>
+          <div className="flex flex-row gap-4">
+            {authData?.length > 5 && (
+              <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Auth Key" />
+            )}
+            <div className={`flex-shrink-0 ${authData?.length > 5 ? 'mr-2' : 'ml-2'}`}>
+              <button className="btn btn-primary btn-sm" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Auth Key</button>
+            </div>
           </div>
-        </MainLayout>
-        <div className="flex flex-row gap-4 justify-between ">
-      {authData?.length>5 && (
-        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Auth Key"/>
-      )}
-        <div className={`flex-shrink-0 ${authData?.length > 5 ? 'mr-2' : 'ml-auto mr-2'}`}>
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Auth Key</button>
-            </div>
-            </div>
-         </div>
+        </div>
         {isCreating ? (
           <div className="flex justify-center items-center h-64">
             <LoadingSpinner />
@@ -173,7 +179,17 @@ const maskAuthKey = (authkey) => {
                 ...item,
                 actualName: item?.name || 'Unnamed Key',
                 originalAuthkey: item?.authkey,
-                authkey: maskAuthKey(item?.authkey), 
+                authkey: maskAuthKey(item?.authkey),
+                created_at: (
+                  <div className="group cursor-help">
+                    <span className="group-hover:hidden">
+                      {formatRelativeTime(item?.created_at)}
+                    </span>
+                    <span className="hidden group-hover:inline">
+                      {formatDate(item?.created_at)}
+                    </span>
+                  </div>
+                ),
               }))}
               columnsToShow={PAUTH_KEY_COLUMNS}
               sorting
@@ -195,11 +211,11 @@ const maskAuthKey = (authkey) => {
       >
         <div className="modal-box">
           <h3 className="font-bold text-lg mb-2">Create New Auth Key</h3>
-          <label className="input input-bordered flex items-center gap-2">
+          <label className="input input-sm input-bordered flex items-center gap-2">
             <span>Name{RequiredItem()} :</span>
             <input
               type="text"
-              className="grow"
+              className="grow input input-sm border-none"
               id="authNameInput"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -219,15 +235,15 @@ const maskAuthKey = (authkey) => {
           <div className="modal-action">
             <form method="dialog">
               <div className='flex gap-2'>
-                <button className="btn">Cancel</button>
+                <button className="btn btn-sm">Cancel</button>
               </div>
             </form>
-            <button className="btn btn-primary" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
+            <button className="btn btn-primary btn-sm" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
           </div>
         </div>
       </dialog>
 
-      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Auth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete Auth Key' />
+      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Auth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete Auth Key' loading={isDeleting} isAsync={true} />
     </div>
   );
 }

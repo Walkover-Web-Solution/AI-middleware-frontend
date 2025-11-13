@@ -6,36 +6,36 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Building2, ChevronDown,
-  Cog, LogOut, Mail,
-  Settings2,
+  LogOut, Mail,
   ChevronRight, ChevronLeft,
-  MonitorPlayIcon,
-  MessageCircleMoreIcon,
-  MessageSquareMoreIcon,
   User,
   AlignJustify,
   FileText,
   MoonIcon,
   SunIcon,
-  MonitorIcon
+  MonitorIcon,
+  Plus,
+  ArrowLeft
 } from 'lucide-react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { logoutUserFromMsg91 } from '@/config';
+import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { useThemeDetection } from '@/customHooks/useThemeDetection';
+import { useThemeManager } from '@/customHooks/useThemeManager';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import { clearCookie, getFromCookies, openModal, toggleSidebar, setInCookies } from '@/utils/utility';
+import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
-import { AddIcon, KeyIcon } from '../Icons';
 import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
+import InviteUserModal from '../modals/InviteuserModal';
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
@@ -45,6 +45,7 @@ function MainSlider({ isEmbedUser }) {
   /* --------------------------- Router & selectors ------------------------- */
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const pathParts = pathname.split('?')[0].split('/');
   const orgId = pathParts[2];
@@ -53,7 +54,6 @@ function MainSlider({ isEmbedUser }) {
     userdetails: state.userDetailsReducer.userDetails,
     organizations: state.userDetailsReducer.organizations
   }));
-
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization', [organizations, orgId]);
 
   // Check if we're in side-by-side mode
@@ -69,10 +69,10 @@ function MainSlider({ isEmbedUser }) {
   const [isOrgDropdownExpanded, setIsOrgDropdownExpanded] = useState(false);
   const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
   const [showContent, setShowContent] = useState(isSideBySideMode); // Control content visibility with delay
+  const [isAdminMode, setIsAdminMode] = useState(false); // New state for admin settings mode
   
-  // Theme detection using existing hook
-  const currentTheme = useThemeDetection();
-  const [theme, setTheme] = useState("system");
+  // Theme detection using unified theme manager
+  const { theme, actualTheme, changeTheme } = useThemeManager();
 
   // Effect to detect mobile screen size
   useEffect(() => {
@@ -113,12 +113,6 @@ function MainSlider({ isEmbedUser }) {
     }
   }, [isSideBySideMode, pathParts.length, isMobile]);
 
-  // Initialize theme from cookies
-  useEffect(() => {
-    const savedTheme = getFromCookies("theme") || "system";
-    setTheme(savedTheme);
-  }, []);
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -127,20 +121,6 @@ function MainSlider({ isEmbedUser }) {
       }
     };
   }, [orgDropdownTimeout]);
-
-  // Simplified theme change handler
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    setInCookies("theme", newTheme);
-    
-    // Apply theme immediately
-    const root = document.documentElement;
-    root.setAttribute('data-theme', newTheme === 'system' 
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : newTheme
-    );
-    document.dispatchEvent(new CustomEvent('themeChange'));
-  };
 
   /** Logout handler */
   const handleLogout = useCallback(async () => {
@@ -268,11 +248,36 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
-  const handleSwitchOrg = () => {
-    router.push('/org?redirection=false');
-    if (isMobile) setIsMobileVisible(false);
-    setIsOrgDropdownExpanded(false);
-  };
+  const handleSwitchOrg = useCallback(async (id, name) => {
+    if (!id || !name) {
+      // If no id/name provided, go to org selection page
+      router.push('/org?redirection=false');
+      if (isMobile) setIsMobileVisible(false);
+      setIsOrgDropdownExpanded(false);
+      setIsOrgDropdownOpen(false);
+      return;
+    }
+
+    try {
+      const response = await switchOrg(id);
+      const localToken = await switchUser({ orgId: id, orgName: name });
+      setInCookies('local_token', localToken.token);
+      
+      router.push(`/org/${id}/agents`);
+      dispatch(setCurrentOrgIdAction(id));
+      if (isMobile) setIsMobileVisible(false);
+      setIsOrgDropdownExpanded(false);
+      setIsOrgDropdownOpen(false);
+      
+      if (response.status === 200) {
+        console.log("Organization switched successfully", response.data);
+      } else {
+        console.error("Failed to switch organization", response.data);
+      }
+    } catch (error) {
+      console.error("Error switching organization", error);
+    }
+  }, [dispatch, router, isMobile]);
 
   const handleOrgHover = () => {
     if (!showSidebarContent) {
@@ -306,54 +311,75 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
-  // Get settings menu items for dropdown
+  // Admin settings toggle handler
+  const handleAdminToggle = useCallback(() => {
+    setIsAdminMode(prev => !prev);
+  }, []);
+
+  // Get settings menu items for sidebar
   const settingsMenuItems = useMemo(() => [
-    {
-      id: 'userDetails',
-      label: 'User Details',
-      icon: <Cog size={14} />,
-      onClick: () => {
-        router.push(`/org/${orgId}/userDetails`);
-        if (isMobile) setIsMobileVisible(false);
-        setIsOrgDropdownExpanded(false);
-      }
-    },
     {
       id: 'workspace',
       label: 'Workspace',
-      icon: <Settings2 size={14} />,
+      icon: ITEM_ICONS.workspace,
       onClick: () => {
-        router.push(`/org/${orgId}/workspaceSetting`);
-        if (isMobile) setIsMobileVisible(false);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/workspaceSetting`);
+      }
+    },
+    {
+      id: 'userDetails',
+      label: 'User Details',
+      icon: ITEM_ICONS.userDetails,
+      onClick: () => {
+        setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/userDetails`);
+      }
+    },
+    {
+      id: 'Members',
+      label: 'Members',
+      icon: ITEM_ICONS.invite,
+      onClick: () => {
+        setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/invite`);
       }
     },
     {
       id: 'auth',
       label: 'Auth 2.0',
-      icon: <KeyIcon size={14} />,
+      icon: ITEM_ICONS.auth,
       onClick: () => {
-        router.push(`/org/${orgId}/auth_route`);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        router.push(`/org/${orgId}/auth_route`);
       }
     },
     {
       id: 'addModel',
       label: 'Add new Model',
-      icon: <AddIcon size={14} />,
+      icon: ITEM_ICONS.addModel,
       onClick: () => {
-        router.push(`/org/${orgId}/addNewModel`);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        router.push(`/org/${orgId}/addNewModel`);
       }
     },
     {
       id: 'prebuiltPrompts',
-      label: 'Prebuilt Prompts',
-      icon: <FileText size={14} />,
+      label: 'GTWY Tools',
+      icon: ITEM_ICONS.prebuiltPrompts,
       onClick: () => {
-        router.push(`/org/${orgId}/prebuilt-prompts`);
-        if (isMobile) setIsMobileVisible(false);
         setIsOrgDropdownExpanded(false);
+        setIsOrgDropdownOpen(false);
+        if (isMobile) setIsMobileVisible(false);
+        router.push(`/org/${orgId}/prebuilt-prompts`);
       }
     }
   ], [router, orgId, isMobile]);
@@ -365,6 +391,93 @@ function MainSlider({ isEmbedUser }) {
     setHovered(null);
     setIsMobileVisible(prev => !prev);
   }, []);
+
+  // Reusable function for rendering organization dropdown content
+  const renderOrganizationDropdown = useCallback(() => {
+    return (
+      <>
+        {/* User info */}
+        <div className="flex items-start gap-3 p-3 border-b border-base-300 mb-3">
+          <User size={16} className="text-base-content/60 mt-3  flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-sm text-base-content truncate">{userdetails?.name}</div>
+            <div className="text-xs text-base-content/60 truncate mt-0.5">{userdetails?.email ?? 'user@email.com'}</div>
+          </div>
+        </div>
+
+        {/* Organizations List */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between px-3 mb-2">
+            <div className="text-xs font-medium text-base-content/50 uppercase tracking-wider">
+              Organizations
+            </div>
+            <button 
+              onClick={() => {
+                setIsOrgDropdownExpanded(false);
+                setIsOrgDropdownOpen(false);
+                openModal(MODAL_TYPE.INVITE_USER);
+              }}
+              className="text-xs text-blue-400 hover:text-blue-600 transition-colors font-medium"
+            >
+              + Invite User
+            </button>
+          </div>
+          
+          {/* Current Organization - shown as selected */}
+          {organizations?.[orgId] && (
+            <div className="w-full flex items-center cursor-pointer gap-3 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm text-primary truncate">{organizations[orgId].name}</div>
+              </div>
+            </div>
+          )}
+          
+          {/* Other Organizations */}
+          {Object.entries(organizations || {})
+            .filter(([id]) => id !== orgId) // Exclude current org
+            .slice(0, 2) // Show only first 2
+            .map(([id, org]) => (
+              <button
+                key={id}
+                onClick={() => handleSwitchOrg(id, org.name)}
+                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm text-base-content truncate">{org.name}</div>
+                </div>
+              </button>
+            ))}
+          
+          <button
+            onClick={() => handleSwitchOrg()}
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left text-primary"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-blue-400 text-sm truncate">
+                more {Object.keys(organizations || {}).filter(id => id !== orgId).length > 2 && 
+                  `(+${Object.keys(organizations || {}).filter(id => id !== orgId).length - 2})`
+                }
+              </div>
+            </div>
+          </button>
+          
+          <hr className="border-base-300 my-2" />
+          
+          <button
+            onClick={() => {
+              handleLogout();
+              setIsOrgDropdownOpen(false);
+              setIsOrgDropdownExpanded(false);
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-error/10 transition-colors text-left text-error"
+          >
+            <LogOut size={14} className="flex-shrink-0" />
+            <div className="font-medium text-sm">Logout</div>
+          </button>
+        </div>
+      </>
+    );
+  }, [userdetails, organizations, orgId, handleSwitchOrg, handleLogout]);
 
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
@@ -384,6 +497,31 @@ function MainSlider({ isEmbedUser }) {
 
   return (
     <>
+      {/* Custom Keyframes for Smooth Animations */}
+      <style jsx>{`
+        @keyframes slideInLeft {
+          0% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideInRight {
+          0% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+
       {/* Mobile backdrop */}
       {isMobile && isMobileVisible && (
         <div
@@ -407,7 +545,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar bg-base-300 border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
             transform: isMobile ? (isMobileVisible ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
@@ -471,7 +609,7 @@ function MainSlider({ isEmbedUser }) {
                   {/* Dropdown for collapsed sidebar */}
                   {isOrgDropdownOpen && !showSidebarContent && (
                     <div 
-                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 min-w-[250px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-left-2"
+                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2"
                       onMouseEnter={() => {
                         // Clear timeout when hovering over dropdown
                         if (orgDropdownTimeout) {
@@ -481,185 +619,14 @@ function MainSlider({ isEmbedUser }) {
                       }}
                       onMouseLeave={handleOrgLeave}
                     >
-                      {/* Organization header */}
-                      <div className="flex items-center gap-3 p-2 border-b border-base-300 pb-2 mb-2">
-                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-primary-content font-semibold text-sm">
-                            {orgName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="font-semibold text-sm">{orgName}</div>
-                          <div className="text-xs text-base-content/60">Organization</div>
-                        </div>
-                      </div>
-
-                      {/* User email info */}
-                      <div className="flex items-center gap-3 p-2 text-sm text-base-content/70 border-b border-base-300 pb-2 mb-2">
-                        <Mail size={14} className="shrink-0" />
-                        <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
-                      </div>
-
-                      {/* Settings menu items */}
-                      <div className="">
-                        {settingsMenuItems.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={item.onClick}
-                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors text-sm"
-                          >
-                            <span className="shrink-0">{item.icon}</span>
-                            <span className="truncate text-xs">{item.label}</span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Theme Section */}
-                      <div className="border-t border-base-300 pt-2 mt-2">
-                        <div className="flex items-center justify-between mb-2 px-2">
-                          <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Theme</span>
-                        </div>
-                        <div className="flex bg-base-200 rounded-lg p-1">
-                          <button
-                            onClick={() => handleThemeChange('light')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
-                              theme === 'light' 
-                                ? 'bg-base-100 text-base-content shadow-sm' 
-                                : 'text-base-content/60 hover:text-base-content'
-                            }`}
-                          >
-                            <SunIcon size={12} className="mx-auto" />
-                          </button>
-                          <button
-                            onClick={() => handleThemeChange('dark')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
-                              theme === 'dark' 
-                                ? 'bg-base-100 text-base-content shadow-sm' 
-                                : 'text-base-content/60 hover:text-base-content'
-                            }`}
-                          >
-                            <MoonIcon size={12} className="mx-auto" />
-                          </button>
-                          <button
-                            onClick={() => handleThemeChange('system')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs transition-all ${
-                              theme === 'system' 
-                                ? 'bg-base-100 text-base-content shadow-sm' 
-                                : 'text-base-content/60 hover:text-base-content'
-                            }`}
-                          >
-                            <MonitorIcon size={12} className="mx-auto" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Switch Organization and Logout buttons */}
-                      <div className="border-t border-base-300 pt-2 mt-2">
-                        <button
-                          onClick={handleSwitchOrg}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 transition-colors text-primary text-xs font-medium"
-                        >
-                          <Building2 size={14} />
-                          Switch Organization
-                        </button>
-                        
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setIsOrgDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-error/10 transition-colors text-error text-xs font-medium"
-                        >
-                          <LogOut size={14} />
-                          Logout
-                        </button>
-                      </div>
+                      {renderOrganizationDropdown()}
                     </div>
                   )}
 
-                  {/* Expanded dropdown for full sidebar */}
+                  {/* Expanded dropdown for full sidebar - positioned from left edge */}
                   {isOrgDropdownExpanded && showSidebarContent && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
-                      {/* User email info */}
-                      <div className="flex items-center gap-3 p-2 text-sm text-base-content/70 border-b border-base-300 pb-2 mb-2">
-                        <Mail size={14} className="shrink-0" />
-                        <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
-                      </div>
-
-                      {/* Settings menu items */}
-                      <div className="">
-                        {settingsMenuItems.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={item.onClick}
-                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-300 transition-colors text-sm"
-                          >
-                            <span className="shrink-0">{item.icon}</span>
-                            <span className="truncate text-xs">{item.label}</span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Theme Section */}
-                      <div className="border-t border-base-300 pt-2 mt-2">
-                        <div className="flex items-center justify-between mb-2 px-2">
-                          <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Theme</span>
-                        </div>
-                        <div className="flex bg-base-300 rounded-lg p-1">
-                          <button
-                            onClick={() => handleThemeChange('light')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
-                              theme === 'light' 
-                                ? 'bg-base-100 text-base-content shadow-sm' 
-                                : 'text-base-content/60 hover:text-base-content'
-                            }`}
-                          >
-                            <SunIcon size={12} className="mx-auto" />
-                          </button>
-                          <button
-                            onClick={() => handleThemeChange('dark')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
-                              theme === 'dark' 
-                                ? 'bg-base-100 text-base-content shadow-sm' 
-                                : 'text-base-content/60 hover:text-base-content'
-                            }`}
-                          >
-                            <MoonIcon size={12} className="mx-auto" />
-                          </button>
-                          <button
-                            onClick={() => handleThemeChange('system')}
-                            className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all ${
-                              theme === 'system' 
-                                ? 'bg-base-100 text-base-content shadow-sm' 
-                                : 'text-base-content/60 hover:text-base-content'
-                            }`}
-                          >
-                            <MonitorIcon size={12} className="mx-auto" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Switch Organization and Logout buttons */}
-                      <div className="border-t border-base-300 pt-2 mt-2 space-y-1">
-                        <button
-                          onClick={handleSwitchOrg}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-base-300 transition-colors text-primary text-xs font-medium"
-                        >
-                          <Building2 size={14} />
-                          Switch Organization
-                        </button>
-                        
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setIsOrgDropdownExpanded(false);
-                          }}
-                          className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-error/10 transition-colors text-error text-xs font-medium"
-                        >
-                          <LogOut size={14} />
-                          Logout
-                        </button>
-                      </div>
+                    <div className="absolute top-0 left-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
+                      {renderOrganizationDropdown()}
                     </div>
                   )}
                 </div>
@@ -669,52 +636,133 @@ function MainSlider({ isEmbedUser }) {
             {/* Main navigation - scrollable */}
             <div className={`flex-1  scrollbar-hide overflow-x-hidden scroll-smooth p-2`}>
               <div className="">
-                {NAV_SECTIONS.map(({ title, items }, idx) => (
-                  <div key={idx} className="">
-                    {showSidebarContent && title && (
-                      <h3 className="my-2 text-xs font-semibold text-base-content/50 uppercase tracking-wider px-2">
-                        {title}
+                {/* Main Menu Button - Show only in Admin Mode */}
+                {isAdminMode && (
+                  <div className="mb-4">
+                    <button
+                      onClick={handleAdminToggle}
+                      onMouseEnter={e => onItemEnter('main-menu', e)}
+                      onMouseLeave={onItemLeave}
+                      className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-base-200 text-base-content ${!showSidebarContent ? 'justify-center' : ''}`}
+                    >
+                      <div className="shrink-0">
+                        <ArrowLeft size={16} />
+                      </div>
+                      {showSidebarContent && (
+                        <span className="text-sm truncate">Main Menu</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {!isAdminMode ? (
+                  // Normal Navigation with slide from left animation
+                  <div 
+                    key="main-nav"
+                    style={{
+                      animation: 'slideInLeft 0.3s ease-out both'
+                    }}
+                  >
+                    {NAV_SECTIONS.map(({ title, items }, idx) => (
+                      <div key={idx} className="">
+                        {showSidebarContent && title && (
+                          <h3 className="my-2 text-[10px] text-base-content/50 uppercase tracking-wider px-2">
+                            {title}
+                          </h3>
+                        )}
+                        <div className="space-y-1">
+                          {items.map(key => (
+                            <button
+                              key={key}
+                              onClick={() => {
+                                if(key === 'agents' &&  pathParts.length >  4){
+                                  toggleSidebar(`default-agent-sidebar`)
+                                }else{
+                                  router.push(`/org/${orgId}/${key}`);
+                                }
+                                if (isMobile) setIsMobileVisible(false);
+                              }}
+                              onMouseEnter={e => onItemEnter(key, e)}
+                              onMouseLeave={onItemLeave}
+                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 ${
+                                activeKey === key 
+                                  ? 'bg-primary text-primary-content shadow-sm' 
+                                  : 'hover:bg-base-200 text-base-content'
+                              } ${!showSidebarContent ? 'justify-center' : ''}`}
+                            >
+                              <div className="shrink-0">{ITEM_ICONS[key]}</div>
+                              {showSidebarContent && (
+                               <div className='flex items-center gap-2 justify-center'>
+                                 <span className="text-sm capitalize truncate">{DISPLAY_NAMES(key)}</span> 
+                                 <span>{key === 'orchestratal_model' && <BetaBadge/>}</span>
+                               </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                        {!showSidebarContent && idx !== NAV_SECTIONS.length - 1 && <HRCollapsed />}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // Admin Settings Navigation with slide from right animation
+                  <div 
+                    key="admin-nav"
+                    style={{
+                      animation: 'slideInRight 0.3s ease-out both'
+                    }}
+                  >
+                    {showSidebarContent && (
+                      <h3 className="my-2 text-xs text-base-content/50 uppercase tracking-wider px-2">
+                        Admin Settings
                       </h3>
                     )}
-                    <div className="">
-                      {items.map(key => (
+                    <div className="space-y-1">
+                      {settingsMenuItems.map(item => (
                         <button
-                          key={key}
+                          key={item.id}
                           onClick={() => {
-                            if(key === 'agents' &&  pathParts.length >  4){
-                              toggleSidebar(`default-agent-sidebar`)
-                            }else{
-                              router.push(`/org/${orgId}/${key}`);
-                            }
+                            item.onClick();
                             if (isMobile) setIsMobileVisible(false);
                           }}
-                          onMouseEnter={e => onItemEnter(key, e)}
+                          onMouseEnter={e => onItemEnter(item.id, e)}
                           onMouseLeave={onItemLeave}
-                          className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-all duration-200 ${
-                            activeKey === key 
-                              ? 'bg-primary text-primary-content shadow-sm' 
-                              : 'hover:bg-base-200 text-base-content'
-                          } ${!showSidebarContent ? 'justify-center' : ''}`}
+                          className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-base-200 text-base-content ${!showSidebarContent ? 'justify-center' : ''}`}
                         >
-                          <div className="shrink-0">{ITEM_ICONS[key]}</div>
+                          <div className="shrink-0">{item.icon}</div>
                           {showSidebarContent && (
-                           <div className='flex items-center gap-2 justify-center'>
-                             <span className="text-sm capitalize truncate">{DISPLAY_NAMES(key)}</span> 
-                             <span>{key === 'orchestratal_model' && <BetaBadge/>}</span>
-                           </div>
+                            <span className="text-sm truncate">{item.label}</span>
                           )}
                         </button>
                       ))}
                     </div>
-                    {!showSidebarContent && idx !== NAV_SECTIONS.length - 1 && <HRCollapsed />}
                   </div>
-                ))}
+                )}
+
               </div>
             </div>
 
             {/* Tutorial & Help Section */}
-            <div className="border-t border-base-content p-2 rounded-t-lg ">
+            <div className="border-t border-base-content/20 p-2 rounded-t-lg ">
               <div className="">
+                                {/* Admin Settings Button */}
+                <button
+                  onClick={handleAdminToggle}
+                  onMouseEnter={e => onItemEnter('admin-toggle', e)}
+                  onMouseLeave={onItemLeave}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                    isAdminMode 
+                      ? 'bg-primary text-primary-content shadow-sm' 
+                      : 'hover:bg-base-200 text-base-content'
+                  } ${!showSidebarContent ? 'justify-center' : ''}`}
+                >
+                  {ITEM_ICONS.adminSettings}
+                  {showSidebarContent && (
+                    <span className="text-xs truncate">
+                      {isAdminMode ? 'Back to Main' : 'Admin Settings'}
+                    </span>
+                  )}
+                </button>
                 <button
                   onClick={() => {
                     openModal(MODAL_TYPE.TUTORIAL_MODAL);
@@ -724,8 +772,8 @@ function MainSlider({ isEmbedUser }) {
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <MonitorPlayIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="text-sm truncate">Tutorial</span>}
+                  {ITEM_ICONS.tutorial}
+                  {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
                 </button>
 
                 <button
@@ -737,8 +785,8 @@ function MainSlider({ isEmbedUser }) {
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
-                  <MessageCircleMoreIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="text-sm truncate">Speak to Us</span>}
+                  {ITEM_ICONS.speakToUs}
+                  {showSidebarContent && <span className="text-xs truncate">Speak to Us</span>}
                 </button>
 
                 <a
@@ -750,9 +798,11 @@ function MainSlider({ isEmbedUser }) {
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                   onClick={() => isMobile && setIsMobileVisible(false)}
                 >
-                  <MessageSquareMoreIcon size={16} className="shrink-0" />
-                  {showSidebarContent && <span className="text-sm truncate">Feedback</span>}
+                  {ITEM_ICONS.feedbackAdmin}
+                  {showSidebarContent && <span className="text-xs truncate">Feedback</span>}
                 </a>
+
+
               </div>
             </div>
 
@@ -788,10 +838,10 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {hovered && !showSidebarContent && (isMobileVisible || (!isMobile && !isOpen)) && (
           <div
-            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
+            className="fixed capitalize bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0 border-base-300" />
+            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 capitalize -left-1 border-r-0 border-b-0 border-base-300" />
             {DISPLAY_NAMES(hovered)}
           </div>
         )}
@@ -803,6 +853,7 @@ function MainSlider({ isEmbedUser }) {
         <BridgeSlider />
         <TutorialModal />
         <DemoModal speakToUs />
+        <InviteUserModal />
       </div>
     </>
   );

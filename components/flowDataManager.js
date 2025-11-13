@@ -465,7 +465,8 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
         const key = a.bridge_id || a.name;
         const matchesSearch = (a?.name || '').toLowerCase().includes(q.toLowerCase());
         const notUsed = !usedAgentIds.has(key);
-        return matchesSearch && notUsed;
+        const isNotDeleted = !a.deletedAt;
+        return matchesSearch && notUsed && isNotDeleted;
       });
   }, [agents, q, usedAgentIds, agents, nodes]);
 
@@ -567,7 +568,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search agents..."
-                  className="input input-bordered input-primary flex-1 focus:outline-offset-0 w-full"
+                  className="input input-sm input-bordered input-primary flex-1 focus:outline-offset-0 w-full"
                 />
               </div>
             </div>
@@ -693,7 +694,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             <div
               tabIndex={0}
               role="button"
-              className="btn btn-primary w-full shadow-lg hover:shadow-xl transition-all duration-200"
+              className="btn btn-primary btn-sm w-full shadow-lg hover:shadow-xl transition-all duration-200"
               onClick={() => setIsCreateDropdownOpen(!isCreateDropdownOpen)}
             >
               <div className="avatar placeholder mr-2">
@@ -747,7 +748,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder="Describe what the agent should do..."
                         rows={2}
-                        className="textarea textarea-bordered textarea-primary w-full resize-none"
+                        className="textarea bg-white dark:bg-black/15 textarea-bordered textarea-primary w-full resize-none"
                       />
                     )}
                   </div>
@@ -888,7 +889,7 @@ export function FlowControlPanel({
         {/* Discard button: show only when createdFlow && isModified */}
 
         {createdFlow && !isEmbedUser && <button
-          className="btn btn-outline"
+          className="btn btn-sm btn-outline"
           onClick={openIntegrationGuide}
           title="Integration Guide"
         >
@@ -897,7 +898,7 @@ export function FlowControlPanel({
 
         {createdFlow && (isModified || isVariableModified) && (
           <button
-            className="btn btn-outline btn-error"
+            className="btn btn-sm btn-outline btn-error"
             onClick={handleDiscard}
             title="Discard unsaved changes"
           >
@@ -907,7 +908,7 @@ export function FlowControlPanel({
 
         {/* Publish/Update button */}
         <button
-          className="btn bg-green-200 hover:bg-green-300 shadow-lg text-base-content"
+          className="btn btn-sm bg-green-200 hover:bg-green-300 shadow-lg text-base-content"
           disabled={!isModified && !isVariableModified}
           title="Publish Flow"
           onClick={() => openModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL)}

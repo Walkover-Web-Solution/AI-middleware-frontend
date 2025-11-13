@@ -6,8 +6,9 @@ import Protected from '@/components/protected';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { Search, Building2, Shield, CheckCircle, Lock, User, Database, Key, Link, AlertCircle, ArrowRight, XCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { getClientInfo, switchOrg, verifyAuth } from '@/config';
+import { getClientInfo, switchOrg, verifyAuth, switchUser } from '@/config';
 import { BuildingIcon } from '@/components/Icons';
+import { setInCookies } from '@/utils/utility';
 
 const Page = () => {
     const [formState, setFormState] = useState({
@@ -77,16 +78,18 @@ const Page = () => {
         updateFormState({ [field]: e.target.value });
     }, [updateFormState]);
 
-    const handleSwitchOrg = useCallback(async (id) => {
+    const handleSwitchOrg = useCallback(async (id,name) => {
         try {
           const response = await switchOrg(id);
+          const localToken = await switchUser({ orgId: id, orgName: name });
+          setInCookies('local_token', localToken.token);
         } catch (error) {
-          console.error("Error switching organization", error);
+          console.error("Error switching workspace", error);
         }
       }, []);
 
     const handleSelectOrg = useCallback((orgId, orgName) => {
-        handleSwitchOrg(orgId)
+        handleSwitchOrg(orgId,orgName)
         updateFormState({ selectedOrg: { id: orgId, name: orgName } });
     }, [updateFormState]);
 
@@ -110,18 +113,18 @@ const Page = () => {
 
     return (
         <div className="flex min-h-screen bg-base-200 p-6 gap-6">
-            {/* Organizations List */}
+            {/* Workspaces List */}
             <div className="w-[35rem] bg-base-100 rounded-xl shadow-sm p-6 h-[calc(100vh-3rem)]">
                 <div className="flex items-center gap-2 mb-6">
                     <Building2 className="text-primary" size={24} />
-                    <h2 className="text-xl font-bold text-base-content">Organizations</h2>
+                    <h2 className="text-xl font-bold text-base-content">Workspaces</h2>
                 </div>
                 
                 <div className="mb-4">
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Search organizations by Name"
+                            placeholder="Search workspaces by name"
                             value={formState.searchQuery}
                             onChange={handleChange('searchQuery')}
                             className="input input-bordered w-full pl-10"
@@ -136,7 +139,7 @@ const Page = () => {
                     ) : (
                         <div className="text-center py-8 text-base-content/70">
                             <BuildingIcon size={48} className="mx-auto mb-2 opacity-50" />
-                            <p>No organizations found</p>
+                            <p>No workspaces found</p>
                         </div>
                     )}
                 </div>
@@ -166,7 +169,7 @@ const Page = () => {
                                     <span>Authorization Request Details</span>
                                 </div>
                                 {!formState.isClientVerified && (
-                                    <div className="ml-2 flex items-center gap-2 text-sm text-red-800 mt-4">
+                                    <div className="ml-2 flex items-center gap-2 text-sm text-error mt-4">
                                         <AlertCircle size={16} />
                                         <span>Client verification failed. Please try Again</span>
                                     </div>
@@ -175,7 +178,7 @@ const Page = () => {
                                 {formState.isClientVerified && (
                                     <div className="flex items-center gap-2 text-sm text-blue-800 mt-4">
                                         <User size={16} />
-                                        <span><strong>{formState.client_name}</strong> wants to access your Gateway organization</span>
+                                        <span><strong>{formState.client_name}</strong> wants to access your Gateway workspace</span>
                                     </div>
                                 )}
                             </div>
@@ -186,7 +189,7 @@ const Page = () => {
                                 <ul className="space-y-2 text-sm text-gray-600">
                                     <li className="flex items-center gap-2">
                                         <Database size={16} className="text-blue-600" />
-                                        <span>Access to organization data</span>
+                                        <span>Access to workspace data</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Lock size={16} className="text-blue-600" />
@@ -199,10 +202,10 @@ const Page = () => {
                                 </ul>
                             </div>
 
-                            {/* Organization Selection */}
+                            {/* Workspace Selection */}
                             <div className="text-center mb-6">
                                 <p className="text-sm text-gray-600">
-                                    Select an organization to grant access to
+                                    Select a workspace to grant access to
                                 </p>
                                 {formState.client_name && (
                                     <div className="mt-2 text-blue-600 font-medium">

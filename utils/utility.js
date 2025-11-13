@@ -4,6 +4,7 @@ import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
+import Grok from "@/icons/Grok";
 import GroqIcon from "@/icons/GroqIcon";
 import MistralIcon from "@/icons/MistralIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
@@ -135,8 +136,15 @@ export const toggleSidebar = (sidebarId, direction = "left") => {
     const handleClickOutside = (event) => {
         const sidebar = document.getElementById(sidebarId);
         const button = event.target.closest('button');
+        const withinSidebar = (() => {
+            if (!sidebar) return false;
+            if (typeof event.composedPath === "function") {
+                return event.composedPath().includes(sidebar);
+            }
+            return sidebar.contains(event.target);
+        })();
 
-        if (sidebar && !sidebar.contains(event.target) && !button) {
+        if (sidebar && !withinSidebar && !button) {
             if (direction === "left") {
                 sidebar.classList.add('-translate-x-full');
             } else {
@@ -194,7 +202,9 @@ export const getIconOfService = (service, height, width) => {
         case 'ai_ml':
             return <AIMLIcon height={height} width={width} />;
         case 'mistral':
-            return <MistralIcon height={height} width={width} />;    
+            return <MistralIcon height={height} width={width} />;
+        case 'grok':
+            return <Grok height={height} width={width} />;    
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
@@ -750,3 +760,69 @@ export const generateKeyValuePairs = (obj) => {
     
     return result;
   };
+
+
+ export const formatRelativeTime = (dateString) => {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+  return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+};
+
+export const formatDate = (dateString) => {
+    if (isNaN(Date.parse(dateString))) {
+      return dateString; // Return original string if it's not a valid date
+    }
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
+    }).format(date);
+  };
+
+/**
+ * Reusable outside click handler utility
+ * @param {React.RefObject} elementRef - Ref to the element that should not trigger close
+ * @param {React.RefObject} triggerRef - Ref to the trigger element that should not trigger close
+ * @param {Function} onOutsideClick - Callback function to execute on outside click
+ * @param {boolean} isActive - Whether the outside click handler should be active
+ */
+export const useOutsideClick = (elementRef, triggerRef, onOutsideClick, isActive = true) => {
+  const handleClickOutside = (event) => {
+    if (!isActive) return;
+    
+    const isClickInsideElement = elementRef.current && elementRef.current.contains(event.target);
+    const isClickInsideTrigger = triggerRef && triggerRef.current && triggerRef.current.contains(event.target);
+    
+    if (!isClickInsideElement && !isClickInsideTrigger) {
+      onOutsideClick();
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (isActive && event.key === 'Escape') {
+      onOutsideClick();
+    }
+  };
+
+  const handleScroll = () => {
+    if (isActive) {
+      onOutsideClick();
+    }
+  };
+
+  return { handleClickOutside, handleKeyDown, handleScroll };
+};

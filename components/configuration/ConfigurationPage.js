@@ -1,15 +1,12 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import React from 'react';
-
+import React from 'react';  
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
-import ConfigurationHeader from "./ConfigurationHeader";
-import ConfigurationNavigation from "./ConfigurationNavigation";
 import SetupView from "./SetupView";
-import ChatbotConfigView from "./ChatbotConfigView";
 import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 import Protected from "../protected";
+import VersionDescriptionInput from './configurationComponent/VersionDescriptionInput';
 
 const ConfigurationPage = ({ 
     params, 
@@ -93,30 +90,18 @@ const ConfigurationPage = ({
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
-                <ConfigurationHeader 
-                    params={params} 
+            <div className="flex flex-col gap-2 relative bg-base-100">
+                <BridgeVersionDropdown params={params} searchParams={searchParams} />
+                <VersionDescriptionInput 
+                    params={params}
                     searchParams={searchParams} 
                     isEmbedUser={isEmbedUser} 
-                    showConfigType={configState.showConfigType} 
-                />
-                <div className="absolute right-0 top-0">
-                    <div className="flex items-center">
-                        <BridgeVersionDropdown params={params} searchParams={searchParams} />
-                        <ConfigurationNavigation 
-                            bridgeType={bridgeType} 
-                            currentView={currentView} 
-                            handleNavigation={handleNavigation} 
-                            isEmbedUser={isEmbedUser} 
-                            showConfigType={configState.showConfigType} 
-                        />
-                    </div>
-                </div>
-                {currentView === 'chatbot-config' ? (
+                  />
+                {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
                     <ChatbotConfigView params={params} searchParams={searchParams} />
-                ) : (
+                ) : ( */}
                     <SetupView />
-                )}
+                {/* )} */}
                 {renderNeedHelp()}
             </div>
         </ConfigurationProvider>

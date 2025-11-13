@@ -3,9 +3,9 @@ import dynamic from "next/dynamic";
 import ErrorPage from "@/app/not-found";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
-import { getSingleMessage, switchOrg } from "@/config";
+import { getSingleMessage, switchOrg, switchUser } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
@@ -13,13 +13,13 @@ import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { getFromCookies, openModal, setInCookies } from "@/utils/utility";
+import { getFromCookies, openModal } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
@@ -27,6 +27,8 @@ import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { getAllAuthData } from "@/store/action/authkeyAction";
+import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+import { setInCookies } from "@/utils/utility";
 
 const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
 const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
@@ -56,7 +58,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
   }));
   useEffect(() => {
-    dispatch(getTutorialDataAction()); 
+    dispatch(getTutorialDataAction());
+    if(pathName.endsWith("agents")){
+    dispatch(getFinishReasonsAction()); }
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
@@ -69,7 +73,11 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
-      const reference_id = getFromCookies("reference_id");
+        const utmSource = getFromCookies("utm_source");
+        const utmMedium = getFromCookies("utm_medium");
+        const utmCampaign = getFromCookies("utm_campaign");
+        const utmTerm = getFromCookies("utm_term");
+        const utmContent = getFromCookies("utm_content");
         let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
@@ -93,26 +101,33 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         currentUserMeta = data?.data?.data?.user?.meta;
       }
       }
-  
-      // If reference_id exists but user has no reference_id in meta
-      if (reference_id && !currentUser?.meta?.reference_id) {
+      // Build UTM object with only present values from URL that are NOT already in user meta
+      const utmParams = {};
+      if (utmSource && !currentUser?.meta?.utm_source) utmParams.utm_source = utmSource;
+      if (utmMedium && !currentUser?.meta?.utm_medium) utmParams.utm_medium = utmMedium;
+      if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
+      if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
+      if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
+
+      // If any new UTM parameter exists that user doesn't have
+      if (Object.keys(utmParams).length > 0) {
         try {
           const data = await dispatch(
             storeMarketingRefUserAction({
-              ref_id: reference_id,
+              ...utmParams,
               client_id: currentUser.id,
               client_email: currentUser.email,
               client_name: currentUser.name,
               created_at: currentUser.created_at,
             })
           );
-  
-          if (data?.status) {
+          
+          if (data) {
             const updatedUser = {
               ...currentUser,
               meta: {
                 ...currentUserMeta,
-                reference_id: reference_id,
+                ...utmParams,
               },
             };
             await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
@@ -130,49 +145,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
 
-  // Theme initialization with full system theme support
-  useEffect(() => {
-    const getSystemTheme = () => {
-      if (typeof window !== 'undefined') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      return 'light';
-    };
-
-    const applyTheme = (themeToApply) => {
-      if (typeof window !== 'undefined') {
-        document.documentElement.setAttribute('data-theme', themeToApply);
-        setInCookies("theme", themeToApply);
-      }
-    };
-
-    const savedTheme = getFromCookies("theme") || "system";
-    const systemTheme = getSystemTheme();
-    
-    if (savedTheme === "system") {
-      applyTheme(systemTheme);
-    } else {
-      applyTheme(savedTheme);
-    }
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      const currentSavedTheme = getFromCookies("theme") || "system";
-      
-      // Only update if currently using system theme
-      if (currentSavedTheme === "system") {
-        applyTheme(newSystemTheme);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
-  }, []);
   
   useEffect(() => {
     const validateOrg = async () => {
@@ -197,16 +169,14 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   useEffect(() => {
     if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-      dispatch(getServiceAction({ orgid: resolvedParams.orgid }))
+      dispatch(getServiceAction())
     }
   }, [SERVICES]);
 
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data?.length === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
-          openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)
-        }
+  
         setLoading(false);
       }))
       dispatch(getAllFunctions())
@@ -271,6 +241,10 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         const orgId = getFromCookies("current_org_id");
         if (orgId !== resolvedParams?.org_id) {
           await switchOrg(resolvedParams?.org_id);
+          const currentOrg = organizations[resolvedParams?.org_id];
+          const localToken = await switchUser({ orgId: resolvedParams?.org_id, orgName: currentOrg?.name });
+          setInCookies('local_token', localToken.token);
+
         }
       }
     };
@@ -409,6 +383,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
+        <ThemeManager />
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="flex flex-col h-full z-high">
@@ -445,6 +420,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   else {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
+        <ThemeManager />
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}

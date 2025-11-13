@@ -16,8 +16,9 @@ function BridgeSlider() {
 
   
    const [filteredBridgesList, setFilteredBridgesList] = useState(bridgesList);
-    const filteredArchivedBridges = filteredBridgesList?.filter((item) => item.status === 0);
-    const filteredUnArchivedBridges = filteredBridgesList?.filter((item) => item.status === 1 || item.status === undefined);
+    // Filter out deleted agents (agents with deletedAt property)
+    const filteredArchivedBridges = filteredBridgesList?.filter((item) => item.status === 0 && !item.deletedAt);
+    const filteredUnArchivedBridges = filteredBridgesList?.filter((item) => (item.status === 1 || item.status === undefined) && !item.deletedAt);
 
     const handleNavigation = (id, versionId) => {
         router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
@@ -74,9 +75,9 @@ function BridgeSlider() {
                     data={bridgesList}
                     setFilterItems={setFilteredBridgesList}
                     item='agents'
-                    style='input input-bor0dered w-full mb-0 ml-0 border border-base-content/50'
+                    style='input input-sm input-bordered w-full mb-0 ml-0 border border-base-content/50'
                 />
-                <button className="btn" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
+                <button className="btn btn-sm" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
                     + Create New Agent
                 </button>
                 {filteredBridgesList.length === 0 ? (

@@ -1,21 +1,21 @@
 "use client";
 import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
-import { useCallback, useEffect, useState, useMemo} from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { InfoIcon, TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import DeleteModal from '@/components/UI/DeleteModal';
-import { closeModal, openModal } from '@/utils/utility';
+import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';
 
-function InvitePage({ params }) {
-  const {userEmailData, descriptions} = useCustomSelector((state) => ({
-    userEmailData: state?.userDetailsReducer?.userDetails?.email,
+function InvitePage({ }) {
+  const { descriptions } = useCustomSelector((state) => ({
     descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
   }))
   const [email, setEmail] = useState('');
@@ -26,6 +26,7 @@ function InvitePage({ params }) {
   const [isInviting, setIsInviting] = useState(false);
   const [totalMembers, setTotalMembers] = useState(0);
   const [memberToDelete, setMemberToDelete] = useState();
+  const { isDeleting, executeDelete } = useDeleteOperation();
   const ITEMS_PER_PAGE = 20;
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -86,7 +87,7 @@ function InvitePage({ params }) {
           });
           setPage(pageNum);
         }
-        
+
         const hasMoreData = newMembers.length === ITEMS_PER_PAGE;
         setHasMore(hasMoreData);
       } else {
@@ -113,7 +114,7 @@ function InvitePage({ params }) {
   };
 
   const handleInviteSubmit = async () => {
-    
+
     if (!isEmailValid(email)) {
       toast.error('Please enter a valid email address.');
       return;
@@ -124,7 +125,7 @@ function InvitePage({ params }) {
       return;
     }
     setIsInviting(true);
-    
+
     try {
       const response = await inviteUser({ user: { email: email } });
 
@@ -152,24 +153,20 @@ function InvitePage({ params }) {
   };
 
   const loadMoreMembers = () => {
-      const nextPage = page + 1;
-      fetchInvitedMembers(nextPage, false);
-    }
-  
+    const nextPage = page + 1;
+    fetchInvitedMembers(nextPage, false);
+  }
+
 
   const deleteUser = async (member) => {
-    try {
-      const response = await removeUsersFromOrg(member?.id)
-        if(response)
-        {
-          setInvitedMembers([]);
-          fetchInvitedMembers(1,true);
-        }
-    } catch (error) {
-      toast.error('An error occurred while deleting member.');
-    } finally {
-      closeModal(MODAL_TYPE.DELETE_MODAL)
-    }
+    await executeDelete(async () => {
+      const response = await removeUsersFromOrg(member?.id);
+      if (response) {
+        setInvitedMembers([]);
+        fetchInvitedMembers(1, true);
+        toast.success('Member removed successfully');
+      }
+    });
   };
 
   return (
@@ -189,12 +186,12 @@ function InvitePage({ params }) {
             onChange={handleEmailChange}
             onKeyPress={handleKeyPress}
             placeholder="Enter email address"
-            className="input input-bordered w-full"
+            className="input input-bordered w-full input-sm"
           />
           <button
             onClick={handleInviteSubmit}
             disabled={isInviting}
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
           >
             {isInviting ? 'Sending...' : 'Send Invite'}
           </button>
@@ -207,23 +204,23 @@ function InvitePage({ params }) {
           <h2 className="text-md font-semibold">
             Team Members ({totalMembers})
           </h2>
-          
-            <div className='relative'>
+
+          <div className='relative'>
             <input
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search..."
-            className="input input-bordered w-96"
-          />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <InfoTooltip tooltipContent="Search Members by Name and Email">
-                        <InfoIcon className='w-4 h-4 cursor-help text-base-content/60 hover:text-base-content' />
-                      </InfoTooltip>
-                    </div>
+              className="input input-bordered w-96 input-sm"
+            />
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <InfoTooltip tooltipContent="Search Members by Name and Email">
+                <InfoIcon className='w-4 h-4 cursor-help text-base-content/60 hover:text-base-content' />
+              </InfoTooltip>
             </div>
-        
           </div>
+
+        </div>
 
         {/* Members List - Scrollable Container */}
         <div id="scrollableDiv" className="h-[65vh] overflow-y-auto">
@@ -254,19 +251,19 @@ function InvitePage({ params }) {
                       </div>
                     </div>
                     <div>
-                    <button
-                      onClick={() => {setMemberToDelete(member); openModal(MODAL_TYPE.DELETE_MODAL)}}
-                      className="btn-sm text-error"
-                    >
-                      <TrashIcon size={20}/>
-                    </button>
+                      <button
+                        onClick={() => { setMemberToDelete(member); openModal(MODAL_TYPE.DELETE_MODAL) }}
+                        className="btn-sm text-error"
+                      >
+                        <TrashIcon size={20} />
+                      </button>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-8">
                   <UserCircleIcon size={48} className="text-base-content/30 mx-auto mb-4" />
-                  {invitedMembers.length === 0 && searchQuery===''? (
+                  {invitedMembers.length === 0 && searchQuery === '' ? (
                     <>
                       <h3 className="text-lg font-medium mb-2">No members yet</h3>
                       <p className="text-base-content/70">Invite your first team member to get started</p>
@@ -283,7 +280,7 @@ function InvitePage({ params }) {
           </InfiniteScroll>
         </div>
       </div>
-      <DeleteModal onConfirm={deleteUser} item={memberToDelete} description={`Are you sure you want to remove the "${memberToDelete?.name}" from your organization.`} title='Remove User From Organization' />
+      <DeleteModal onConfirm={deleteUser} item={memberToDelete} description={`Are you sure you want to remove the "${memberToDelete?.name}" from your organization.`} title='Remove User From Organization' buttonTitle='Remove User' loading={isDeleting} isAsync={true} />
     </div>
   );
 };

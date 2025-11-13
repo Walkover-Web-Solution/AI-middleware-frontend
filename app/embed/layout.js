@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
-import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
+import { setEmbedUserDetailsAction } from '@/store/action/appInfoAction';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
@@ -121,8 +121,8 @@ const Layout = ({ children }) => {
         setIsLoading(true);
 
         if (urlParamsObj.token) {
-          dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
-          sessionStorage.setItem('proxy_token', urlParamsObj.token);
+          dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
+          sessionStorage.setItem('local_token', urlParamsObj.token);
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
           urlParamsObj?.folder_id && sessionStorage.setItem('embedUser', true);
@@ -132,7 +132,7 @@ const Layout = ({ children }) => {
         if (urlParamsObj.config) {
           Object.entries(urlParamsObj.config).forEach(([key, value]) => {
             if (value !== undefined) {
-             key === "apikey_object_id" ? dispatch(updateUserDetialsForEmbedUser({ [key]: value })) : dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value)}));
+             key === "apikey_object_id" ? dispatch(setEmbedUserDetailsAction({ [key]: value })) : dispatch(setEmbedUserDetailsAction({ [key]: toBoolean(value)}));
             }
           });
         }
@@ -171,7 +171,6 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = async (event) => {
-
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
       let bridges = allBridges;
        allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
@@ -185,9 +184,14 @@ const Layout = ({ children }) => {
       } else if (messageData?.agent_id && orgId) {
         // setIsLoading(true);
         const bridgeData = bridges.find((bridge) => bridge._id === messageData.agent_id)
+        const history = messageData?.history;
         if(!bridgeData){
-          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+          router.push(`/org/${orgId}/agents`);
           return
+        }
+        if(history){
+          router.push(`/org/${orgId}/agents/history/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}&message_id=${history.message_id}`);
+          return;
         }
         router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
       }
@@ -218,7 +222,7 @@ const Layout = ({ children }) => {
       if (messageData?.showConfigType !== undefined) uiUpdates.showConfigType = messageData.showConfigType;
 
       if (Object.keys(uiUpdates).length > 0) {
-        dispatch(updateUserDetialsForEmbedUser(uiUpdates));
+        dispatch(setEmbedUserDetailsAction(uiUpdates));
       }
     };
 

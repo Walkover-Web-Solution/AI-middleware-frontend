@@ -1,6 +1,6 @@
 import { BookIcon, BotIcon, KeyIcon, SettingsIcon, TestTubeDiagonalIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
-export const API_KEY_COLUMNS = ["name", "apikey", "comment"];
+export const API_KEY_COLUMNS = ["name", "apikey", "comment", 'apikey_usage'];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
 export const ALERT_TYPE = ['Error', 'Variable'];
 export const DOCUMENT_SECTIONS = [
@@ -317,24 +317,6 @@ export const AVAILABLE_MODEL_TYPES = {
   REASONING: 'reasoning',
 };
 // Canonical descriptions for finish_reason values
-export const FINISH_REASON_DESCRIPTIONS = {
-  "completed": "Model completed naturally at a logical stopping point or due to a defined stop sequence.",
-  "truncated": "Response truncated because it exceeded the configured token limit.",
-  "tool_call": "Model stopped to invoke a function or external tool instead of continuing text.",
-  "safety_block": "Generation halted because content violated safety or policy filters.",
-  "no_reason": "No explicit finish reason provided (common for intermediate streaming chunks).",
-  "failure": "Generation failed due to an unexpected error (e.g., transient internal failure).",
-  "stop_sequence": "Model stopped after emitting a user-defined stop sequence.",
-  "timeout": "Processing time exceeded the allowed limit and was terminated.",
-  "end_of_context": "Model finished because the provided input context was fully processed.",
-  "recitation_block": "Generation halted because output closely matched training data to prevent regurgitation.",
-  "other": "Generation stopped for an unspecified or rare internal condition.",
-  "paused": "Operation paused for long-running external processing (e.g., search or tool).",
-  "eos": "Model emitted its end-of-sequence (EOS) token and ended naturally.",
-  "rate_limited": "Request halted due to service rate limits or quota being exceeded.",
-  "server_error": "Terminated due to a backend service error unrelated to the prompt.",
-  "cancelled": "Request was explicitly cancelled by the client or server."
-};
 
 export const MODAL_TYPE = {
   CREATE_VARIABLE: 'CREATE_VARIABLE',
@@ -380,10 +362,14 @@ export const MODAL_TYPE = {
   DIFF_PROMPT: "DIFF_PROMPT",
   ORCHESTRAL_AGENT_PARAMETER_MODAL: "ORCHESTRAL_AGENT_PARAMETER_MODAL",
   CREATE_ORCHESTRAL_FLOW_MODAL :"CREATE_ORCHESTRAL_FLOW_MODAL",
-  PROMPT_SUMMARY_PUBLISH: "PROMPT_SUMMARY_PUBLISH"
-}
+  API_KEY_LIMIT_MODAL: "API_KEY_LIMIT_MODAL",
+  PROMPT_SUMMARY_PUBLISH: "PROMPT_SUMMARY_PUBLISH",
+  DELETE_VERSION_MODAL: 'DELETE_VERSION_MODAL',
+  PREBUILT_TOOLS_CONFIG_MODAL: 'PREBUILT_TOOLS_CONFIG_MODAL',
+  INVITE_USER: 'INVITE_USER'
+};
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment', 'apikey_limit'];
 
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 
@@ -501,15 +487,6 @@ export const FEATURE_DATA = [
     icon: "/live.svg"
   },
 ]
-export const ONBOARDING_VIDEOS = {
-  bridgeCreation: "https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2",
-  FunctionCreation: "https://app.supademo.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1",
-  knowledgeBase: "https://app.supademo.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
-  Addvariables: "https://app.supademo.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
-  AdvanceParameter: "https://app.supademo.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
-  PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2",
-  TestCases: "https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2"
-}
 
 export const AGENT_SETUP_GUIDE_STEPS = [
   {
@@ -556,38 +533,38 @@ export const TUTORIALS = [
   {
     title: 'Agent Creation',
     description: 'Learn how to create and manage agents in GTWY.ai platform',
-    videoUrl: ONBOARDING_VIDEOS?.bridgeCreation,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: BotIcon
   },
   {
     title: 'Pauth Key Setup',
     description: 'Configure authentication keys for secure access',
-    videoUrl: ONBOARDING_VIDEOS?.PauthKey,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: KeyIcon
   },
   {
     title: 'Tool Configuration',
     description: 'Set up and configure tools for your workflow',
-    videoUrl: ONBOARDING_VIDEOS?.FunctionCreation,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: WrenchIcon
 
   },
   {
     title: 'Variable Management',
     description: 'Add and manage variables in your environment',
-    videoUrl: ONBOARDING_VIDEOS?.Addvariables,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: SettingsIcon
   },
   {
     title: 'KnowledgeBase Configuration',
     description: 'Set up and manage your knowledge base for intelligent responses',
-    videoUrl: ONBOARDING_VIDEOS?.knowledgeBase,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: BookIcon
   },
   {
     title: 'Advanced Parameters',
     description: 'Set up and update advanced parameters for your workflow',
-    videoUrl: ONBOARDING_VIDEOS?.AdvanceParameter,
+    videoUrl: null, // Will be populated dynamically from Redux
     icon: BookIcon
   },
   {

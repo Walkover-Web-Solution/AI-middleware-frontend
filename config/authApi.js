@@ -1,9 +1,9 @@
 import axios from "@/utils/interceptor";
-import { setInCookies } from "@/utils/utility";
 import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
+const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 
 // User Authentication APIs
 export const userdetails = async () => {
@@ -16,13 +16,6 @@ export const userdetails = async () => {
   }
 }
 
-export const logout = async () => {
-  try {
-    await axois.delete(`${PROXY_URL}/{featureId}/deleteCCompany/{cCompanyId}`)
-  } catch {
-    console.error("problem in logout ")
-  }
-}
 
 export const logoutUserFromMsg91 = async (headers) => {
   const User = await axios.delete(`${PROXY_URL}/api/c/logout`, headers)

@@ -1,6 +1,7 @@
 // hooks/useRtLayerEventHandler.js
 'use client';
 import { addThreadNMessageUsingRtLayer, addThreadUsingRtLayer } from "@/store/reducer/historyReducer";
+import { handleRtLayerMessage, handleRtLayerStreamingUpdate, setChatTestCaseIdAction, addChatErrorMessage } from "@/store/action/chatAction";
 import { useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
@@ -9,7 +10,7 @@ import { toast } from 'react-toastify';
 import { didCurrentTabInitiateUpdate } from '@/utils/utility';
 import { RefreshIcon } from "@/components/Icons";
 
-function useRtLayerEventHandler() {
+function useRtLayerEventHandler(channelIdentifier="") {
     const [client, setClient] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState(null);
@@ -34,9 +35,12 @@ function useRtLayerEventHandler() {
 
   // Memoize channel ID to prevent unnecessary recalculations
   const channelId = useMemo(() => {
+    if(channelIdentifier!=""){
+      return channelIdentifier;
+    }
     if (!bridgeId || !orgId) return null;
     return (orgId + bridgeId).replace(/ /g, "_");
-  }, [bridgeId, orgId]);
+  }, [bridgeId, orgId, channelIdentifier]);
 
   // Helper function to show toast notification
   const showAgentUpdatedToast = useCallback(() => {
@@ -84,12 +88,16 @@ function useRtLayerEventHandler() {
   const processHistoryData = useCallback((message) => {
     try {
       const parsedData = typeof message === 'string' ? JSON.parse(message) : message;
-      const { response } = parsedData;
-      if (!response) {
+      const { response, error } = parsedData;
+      if (!response && !error) {
         console.error("No response found in data");
         return { success: false, error: "No response found" };
       }
-
+      if(error)
+      {
+        dispatch(addChatErrorMessage(channelIdentifier, error?.error));
+        return
+      }
       const { Thread, Messages, type } = response;
       if (type === 'agent_updated') {
         const agentId = response.version_id || response.bridge_id;
@@ -104,31 +112,72 @@ function useRtLayerEventHandler() {
         }
         return;
       }
-
-          if (!Thread) {
-        console.error("Missing Thread or Message data");
-          }
-          if (!Messages) {
-        console.error("Missing Message")
-          }
-          Object.keys(Messages).forEach(key => {
-            Messages[key].fromRTLayer = true;
-          });
-          // Clean the data to reduce serialization overhead
-          const cleanThread = {
-            thread_id: Thread.thread_id,
-            sub_thread_id: Thread.sub_thread_id,
-            bridge_id: Thread.bridge_id
+      // Handle chat messages for dry run (non-orchestral)
+      if (response.data) {
+        const channelId = channelIdentifier;        
+        if (response.data) {
+          // Process the response data structure you provided
+          const messageData = {
+            id: response.data.id || response.data.message_id,
+            content: response.data.content,
+            role: response.data.role || 'assistant',
+            model: response.data.model,
+            finish_reason: response.data.finish_reason,
+            fallback: response.data.fall_back,
+            firstAttemptError: response.data.firstAttemptError,
+            image_urls: response.data.images || [],
+            tools_data: response.data.tools_data || {},
+            annotations: response.data.annotations,
+            fromRTLayer: true,
+            usage: parsedData.response?.usage // Include usage data if available
           };
-
-            // Dispatch actions to Redux store
-            dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
-            dispatch(addThreadNMessageUsingRtLayer({thread_id:cleanThread.thread_id, sub_thread_id:cleanThread.sub_thread_id, Messages}))
-            
-        } catch (error) {
-            console.error("Error parsing message data:", error);
+          if (channelId) {
+            // Dispatch to chat reducer - this will clear loading
+            dispatch(handleRtLayerMessage(channelId, messageData));
+          }
+        } else if (Messages && Array.isArray(Messages)) {
+          // Fallback for old message format
+          if (channelId) {
+            Messages.forEach(msg => {
+              msg.fromRTLayer = true;
+              dispatch(handleRtLayerMessage(channelId, msg));
+            });
+          }
         }
-    }, [dispatch,pathName]);
+        return;
+      }
+
+      // Handle testcase_id from RT layer response
+      if (response.testcase_id) {
+        const channelId = channelIdentifier;
+        if (channelId) {
+          dispatch(setChatTestCaseIdAction(channelId, response.testcase_id));
+        }
+      }
+   
+      // Handle history data (existing functionality)
+      if (!Thread || !Messages) {
+        return;
+      }
+      Object.keys(Messages).forEach(key => {
+        Messages[key].fromRTLayer = true;
+      });
+      
+      // Clean the data to reduce serialization overhead
+      const cleanThread = {
+        thread_id: Thread.thread_id,
+        sub_thread_id: Thread.sub_thread_id,
+        bridge_id: Thread.bridge_id
+      };
+
+      // Dispatch actions to Redux store (existing history functionality)
+      dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
+      dispatch(addThreadNMessageUsingRtLayer({thread_id:cleanThread.thread_id, sub_thread_id:cleanThread.sub_thread_id, Messages}))
+            
+    } catch (error) {
+      console.error("Error parsing message data:", error);
+    }
+  }, [dispatch, channelIdentifier, pathName, showAgentUpdatedToast]);
     
     // WebSocket client initialization with retry logic
     const initializeWebSocketClient = useCallback(async () => {

@@ -1,7 +1,7 @@
 'use client'
 import React, { use, useState } from 'react';
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal } from '@/utils/utility';
+import { openModal } from '@/utils/utility';
 import AddNewModelModal from '@/components/modals/AddNewModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import MainLayout from '@/components/layoutComponents/MainLayout';
@@ -12,15 +12,17 @@ import { deleteModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
 import ModelUsageDetailsModal from '@/components/modals/ModelUsageDetailsModal';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';
 
-const Page = ({params}) => {
+const Page = ({ params }) => {
     const resolvedParams = use(params);
     const dispatch = useDispatch()
     const [usageDetailsData, setUsageDetailsData] = useState();
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
-    const { modelInfo} = useCustomSelector((state) => ({
+    const { isDeleting, executeDelete } = useDeleteOperation();
+    const { modelInfo } = useCustomSelector((state) => ({
         modelInfo: state?.modelReducer?.serviceModels
     }));
 
@@ -64,21 +66,23 @@ const Page = ({params}) => {
 
     const columnsToShow = ['model', 'service', 'type', 'description', 'knowledge_cutoff', 'input_cost', 'output_cost'];
 
-    const handleDeleteModel = () =>{
+    const handleDeleteModel = async () => {
         const dataToSend = {
             model_name: selectedDataToDelete.model,
-            service:selectedDataToDelete.service,
-            type:selectedDataToDelete.type 
+            service: selectedDataToDelete.service,
+            type: selectedDataToDelete.type
         }
-        closeModal(MODAL_TYPE?.DELETE_MODAL)
-        dispatch(deleteModelAction(dataToSend))
-          .catch(error => {
-            if(error.response?.data?.usageDetails)
-            {
-                setUsageDetailsData(error.response?.data?.usageDetails)
-                openModal(MODAL_TYPE.USAGE_DETAILS_MODAL)
-            }
-          });
+
+        // Use executeDelete to handle loading state and modal closing
+        const result = await executeDelete(async () => {
+            return dispatch(deleteModelAction(dataToSend));
+        });
+
+        // Handle specific error cases after the modal is closed
+        if (!result.success && result.error?.response?.data?.usageDetails) {
+            setUsageDetailsData(result.error.response.data.usageDetails);
+            openModal(MODAL_TYPE.USAGE_DETAILS_MODAL);
+        }
     }
 
     const EndComponent = ({ row }) => {
@@ -87,7 +91,7 @@ const Page = ({params}) => {
                 <div
                     className="tooltip tooltip-primary"
                     data-tip="Delete"
-                    onClick={()=>{setselectedDataToDelete(row); openModal(MODAL_TYPE?.DELETE_MODAL)}}
+                    onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE?.DELETE_MODAL) }}
                 >
                     <TrashIcon strokeWidth={2} size={20} />
                 </div>
@@ -104,9 +108,9 @@ const Page = ({params}) => {
                         description="Add and configure AI models for different services and use cases."
                     />
                     <div className="flex-shrink-0 mt-4 sm:mt-0">
-                        <button 
+                        <button
                             onClick={() => openModal(MODAL_TYPE.ADD_NEW_MODEL_MODAL)}
-                            className="btn btn-primary"
+                            className="btn btn-sm btn-primary"
                         >
                             + Add New Model
                         </button>
@@ -119,8 +123,15 @@ const Page = ({params}) => {
                     endComponent={EndComponent}
                 />
                 <AddNewModelModal />
-                <ModelUsageDetailsModal usageDetailsData={usageDetailsData} params={resolvedParams}/>
-                <DeleteModal onConfirm={handleDeleteModel} item={selectedDataToDelete} description={`Are you sure you want to delete the Model "${selectedDataToDelete?.model}"? This action cannot be undone.`} title='Delete Model' />
+                <ModelUsageDetailsModal usageDetailsData={usageDetailsData} params={resolvedParams} />
+                <DeleteModal
+                    onConfirm={handleDeleteModel}
+                    item={selectedDataToDelete}
+                    description={`Are you sure you want to delete the Model "${selectedDataToDelete?.model}"? This action cannot be undone.`}
+                    title='Delete Model'
+                    loading={isDeleting}
+                    isAsync={true}
+                />
             </div>
         </MainLayout>
     );

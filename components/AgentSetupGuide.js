@@ -12,7 +12,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     const serviceName = versionData?.service;
     const modelTypeName = versionData?.configuration?.type?.toLowerCase();
     const modelName = versionData?.configuration?.model;
-    const showDefaultApikeys = state.userDetailsReducer.userDetails.addDefaultApiKeys;
+    const showDefaultApikeys = state.appInfoReducer.embedUserDetails.addDefaultApiKeys;
     return {
       bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
@@ -95,7 +95,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     if (!bridgeApiKey) {
       setShowError(true);
       setErrorType('apikey');
-      setErrorBorder(apiKeySectionRef, 'select', true);
+      setErrorBorder(apiKeySectionRef, 'button', true);
       return;
     }
     
@@ -114,7 +114,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">
-            <div className="btn btn-primary btn-circle mb-3">
+            <div className="btn btn-primary btn-sm btn-circle mb-3">
               <RocketIcon className="h-5 w-5" />
             </div>
             <h1 className="text-2xl font-bold text-base-content mb-2">

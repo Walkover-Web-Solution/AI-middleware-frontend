@@ -26,7 +26,7 @@ export default function ChatbotSlider({ params }) {
 
                 <div className="flex items-center justify-between ">
                     <h1 className='text-xl font-medium flex items-center gap-2'><BotIcon /> Bridge list</h1>
-                    <button className="btn btn-outline btn-circle btn-xs" onClick={SliderClickHandler}><XIcon size={16} /></button>
+                    <button className="btn btn-outline btn-circle btn-sm" onClick={SliderClickHandler}><XIcon size={16} /></button>
                 </div>
                 <div className="mt-6 flex flex-1 flex-col justify-between">
                     <nav className="-mx-3 space-y-6 ">

@@ -4,6 +4,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { CircleQuestionMark } from 'lucide-react';
 
 
 const GuardrailSelector = ({ params, searchParams }) => {  
@@ -142,12 +143,13 @@ const GuardrailSelector = ({ params, searchParams }) => {
     };
     
     return (
-        <div className="form-control border border-base-content/20 rounded-md w-full">
+        <div className="flex flex-col gap-3 w-full">
             {/* Always visible header with toggle */}
-            <div className="label flex items-center ml-2 justify-between">
-                <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                    <span className="label-text capitalize font-medium">Prompt Guards</span>
                     <InfoTooltip tooltipContent="Guardrails help ensure that the AI responses adhere to specific guidelines or restrictions.">
-                        <span className="label-text capitalize font-medium">Prompt Guards</span>
+                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                     </InfoTooltip>
                 </div>
                 <label className="swap">
@@ -155,7 +157,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                         type="checkbox" 
                         checked={guardrailsEnabled} 
                         onChange={handleToggleGuardrails}
-                        className="toggle"
+                        className="toggle toggle-sm"
                     />
                     
                 </label>
@@ -199,7 +201,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         <span className="text-sm font-medium">Available Guards</span>
                                         <button
                                             onClick={handleToggleOptions}
-                                            className="btn btn-ghost btn-xs btn-circle"
+                                            className="btn btn-ghost btn-sm btn-circle"
                                         >
                                             <CloseCircleIcon size={16} />
                                         </button>
@@ -241,7 +243,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                                 <div className="mt-2">
                                                     <textarea
                                                         placeholder="Write your custom guardrail prompt here..."
-                                                        className="textarea textarea-bordered w-full h-24 text-sm"
+                                                        className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
                                                         onBlur={handleCustomPromptChange}
                                                         onChange={(e) => setCustomPrompt(e.target.value)}
                                                         value={customPrompt}

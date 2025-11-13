@@ -82,6 +82,21 @@ export const bridgeReducer = createSlice({
       const bridgeIndex = state.org[orgId].orgs.findIndex(org => org._id === bridgeId);
       state.org[orgId].orgs[bridgeIndex].versions.push(newVersionId);
     },
+    deleteBridgeVersionReducer: (state, action) => {
+      const { versionId, bridgeId, org_id } = action.payload;
+      delete state.bridgeVersionMapping[bridgeId][versionId];
+      
+      // Update allBridgesMap versions array (used by dropdown component)
+      if (state.allBridgesMap[bridgeId]) {
+        state.allBridgesMap[bridgeId].versions = state.allBridgesMap[bridgeId].versions.filter(version => version !== versionId);
+      }
+      
+      // Update org versions array
+      const bridgeIndex = state.org[org_id].orgs.findIndex(org => org._id === bridgeId);
+      if (bridgeIndex !== -1) {
+        state.org[org_id].orgs[bridgeIndex].versions = state.org[org_id].orgs[bridgeIndex].versions.filter(version => version !== versionId);
+      }
+    },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
       const { _id, configuration, ...extraData } = bridges;
@@ -92,7 +107,7 @@ export const bridgeReducer = createSlice({
         configuration: { ...configuration }
       };
        
-      if (extraData?.bridgeType) {
+       if (extraData?.bridgeType || extraData?.bridge_quota) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update
@@ -183,9 +198,17 @@ export const bridgeReducer = createSlice({
     },
 
     deleteBridgeReducer: (state, action) => {
-      const { bridgeId, orgId } = action.payload;
-      delete state.allBridgesMap[bridgeId];
-      state.org[orgId].orgs = state.org[orgId]?.orgs?.filter(bridge => bridge._id !== bridgeId);
+      const { bridgeId, orgId, restore } = action.payload;
+      const bridge = state.org[orgId]?.orgs?.find(bridge => bridge._id === bridgeId);
+      if (bridge) {
+        if (restore) {
+          // Remove deletedAt to restore the bridge
+          delete bridge.deletedAt;
+        } else {
+          // Add deletedAt to mark as deleted
+          bridge.deletedAt = new Date().toISOString();
+        }
+      }
     },
     integrationReducer: (state, action) => {
       const { dataToSend, orgId } = action.payload;
@@ -299,6 +322,7 @@ export const {
   fetchSingleBridgeReducer,
   fetchSingleBridgeVersionReducer,
   createBridgeVersionReducer,
+  deleteBridgeVersionReducer,
   createBridgeReducer,
   updateBridgeReducer,
   updateBridgeVersionReducer,

@@ -3,8 +3,6 @@ import { usePromptSelector } from '@/customHooks/useOptimizedSelector';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
-import ToneDropdown from './toneDropdown';
-import ResponseStyleDropdown from './responseStyleDropdown';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 import PromptHeader from './PromptHeader';
 import PromptTextarea from './PromptTextarea';
@@ -140,11 +138,6 @@ const InputConfigComponent = memo(({
                 />
                 
                 <DefaultVariablesSection />
-            </div>
-
-            <div className='flex flex-row gap-2 mt-8'>
-                <ToneDropdown params={params} searchParams={searchParams} />
-                <ResponseStyleDropdown params={params} searchParams={searchParams} />
             </div>
 
             <Diff_Modal oldContent={oldContentRef.current} newContent={promptState.newContent} />

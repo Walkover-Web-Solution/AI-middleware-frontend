@@ -14,8 +14,8 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
     
     const previewStyle = {
         position: 'fixed',
-        top: Math.max(20, dropdownRect?.top-100),
-        left: dropdownRect?.left - 270, // Position to the left of dropdown
+        top: Math.max(20, dropdownRect?.top-50),
+        left: dropdownRect?.right + (-55), // Position to the right of dropdown
         zIndex: 99999,
         maxHeight: `${viewportHeight}px`,
         overflowY: 'auto'
@@ -183,7 +183,7 @@ const ModelDropdown = ({ params, searchParams }) => {
 
     return (
         <div className="flex flex-col items-start gap-4 relative">
-            <div className="w-full sm:max-w-xs" ref={dropdownRef}>
+            <div className="w-full" ref={dropdownRef}>
                 <Dropdown
                     options={modelOptions}
                     value={model || ''}
@@ -192,7 +192,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                     showGroupHeaders
                     placeholder="Select a Model"
                     size="sm"
-                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem]"
+                    className="btn btn-sm w-auto justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem] rounded-sm px-3"
                     menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
                     maxLabelLength={20}
                 />

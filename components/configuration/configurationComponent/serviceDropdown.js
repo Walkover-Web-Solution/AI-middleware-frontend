@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AlertIcon, InfoIcon } from "@/components/Icons";
+import { AlertIcon, ChevronDownIcon } from "@/components/Icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
@@ -20,8 +20,8 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
         const modelName = versionData?.configuration?.model;
-        const apiKeyObjectIdData = state.userDetailsReducer?.userDetails?.apikey_object_id || {}
-        const showDefaultApikeys = state.userDetailsReducer?.userDetails?.addDefaultApiKeys;
+        const apiKeyObjectIdData = state.appInfoReducer.embedUserDetails?.apikey_object_id || {}
+        const showDefaultApikeys = state.appInfoReducer.embedUserDetails?.addDefaultApiKeys;
         return {
             SERVICES: state?.serviceReducer?.services,
             DEFAULT_MODEL: state?.serviceReducer?.default_model,
@@ -36,9 +36,6 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     });
 
     const [selectedService, setSelectedService] = useState(service);
-    const [modelRecommendations, setModelRecommendations] = useState(null);
-    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
-    // Local state only for selected display and recommendations
     const dispatch = useDispatch();
 
     const resetBorder = (ref, selector) => {
@@ -138,54 +135,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         }));
     }, [dispatch, params.id, searchParams?.version, DEFAULT_MODEL]);
 
-    const handleGetRecommendations = async () => {
-        setIsLoadingRecommendations(true);
-        try {
-            if (bridgeApiKey && promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim() !== "") {
-                const response = await modelSuggestionApi({ versionId: searchParams?.version });
-                if (response?.success) {
-                    setModelRecommendations({
-                        available: {
-                            service: response.data.available.service,
-                            model: response.data.available.model
-                        },
-                        unavailable: {
-                            service: response.data.unavailable.service,
-                            model: response.data.unavailable.model
-                        }
-                    });
-                } else {
-                    setModelRecommendations({ error: 'Failed to get model recommendations.' });
-                }
-            }
-            else {
-                if (promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim() === "") {
-                    setModelRecommendations({ error: 'Prompt is missing. Please enter a prompt' });
-                    setErrorBorder(promptTextAreaRef, 'textarea', true);
-                }
-                else {
-                    setModelRecommendations({ error: 'API key is missing. Please add an API key' });
-                    setErrorBorder(apiKeySectionRef, 'select', true);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching recommended model:', error);
-            setModelRecommendations({ error: 'Error fetching recommended model' });
-        } finally {
-            setIsLoadingRecommendations(false);
-        }
-    };
-
     const isDisabled = bridgeType === 'batch' && service === 'openai';
-
-    // Get service display name
-    const getServiceDisplayName = (value) => {
-        if (Array.isArray(SERVICES)) {
-            const service = SERVICES.find(s => s.value === value);
-            return service ? service.displayName : value;
-        }
-        return value;
-    };
 
     const renderServiceDropdown = () => (
         <Dropdown
@@ -194,13 +144,39 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             onChange={handleServiceChange}
             placeholder="Select a Service"
             size="sm"
-            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full font-normal justify-between ${isDisabled ? 'btn-disabled' : ''}`}
-            menuClassName="w-full max-w-xs"
+            className={`btn btn-sm border border-base-content/20 bg-base-100 font-normal rounded-sm px-2 w-auto ${isDisabled ? 'btn-disabled' : ''}`}
+            menuClassName="w-full min-w-[200px]"
+            fullWidth={false}
+            renderTriggerContent={({ selectedOption }) => {
+              const currentValue = selectedService || selectedOption?.value;
+
+              if (!currentValue) {
+                return (
+                  <span className="flex items-center gap-2 text-base-content/60">
+                    <span>Select a Service</span>
+                  </span>
+                );
+              }
+
+              return (
+                <span className="flex items-center gap-2">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-md bg-base-200"
+                    title={Array.isArray(SERVICES) 
+                        ? SERVICES.find((svc) => svc?.value === currentValue)?.displayName || currentValue
+                        : currentValue
+                    }
+                  >
+                    {getIconOfService(currentValue, 18, 18)}
+                  </span>
+                </span>
+              );
+            }}
           />
     );
 
     return (
-        <div className="space-y-4 w-full">
+        <div className="space-y-4">
             <div className="form-control">
                 <div className="flex items-center gap-2 z-auto">
                 {isDisabled && (

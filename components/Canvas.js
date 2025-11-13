@@ -151,7 +151,7 @@ function Canvas({
       <div className="flex  items-center pb-1 mb-1 pl-2" style={{justifyContent:"flex-end"}}>
         {messages.length > 0 && (
           <button 
-            className="btn btn-xs  btn-outline btn-error hover:btn-error"
+            className="btn btn-sm  btn-outline btn-error hover:btn-error"
             onMouseDown={handleResetChat}
           >
             <RotateCcw size={14}/>
@@ -224,7 +224,7 @@ function Canvas({
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleApply(message)}
                           >
                             <MousePointerClick size={14}/>
@@ -239,7 +239,7 @@ function Canvas({
                           </div>
                         ) : (
                           <button 
-                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleCopy(message.id, message.optimized)}
                           >
                             <CopyIconComponent size={14} />
@@ -284,7 +284,7 @@ function Canvas({
             <div className="flex-1 relative mt-1">
               <textarea
                 ref={textareaRef}
-                className="w-full px-4 py-3 text-sm bg-base-100 border border-base-content/40 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none transition-all duration-200 shadow-sm hover:shadow-md min-h-[44px] max-h-32 placeholder-gray-400"
+                className="w-full textarea textarea-bordered"
                 placeholder={` how you'd like to improve your ${label}...`}
                 value={instruction}
                 rows={1}
@@ -310,14 +310,17 @@ function Canvas({
             </div>
             
             <button 
-              className="h-11 w-11 bg-gradient-to-r from-base-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-base-content bg-base-100 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 shadow-lg hover:shadow-xl disabled:shadow-sm group" 
-              disabled={loading || !instruction.trim()} 
+className={`btn btn-circle transition-all duration-200 ${
+                        loading 
+                            ? 'btn-disabled'
+                            : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                    }`}              disabled={loading || !instruction.trim()} 
               onClick={handleSend}
             >
               {loading ? (
-                <div className="loader ease-linear rounded-full border-8 border-t-8 border-base-200"></div>
+                        <span className="loading loading-dots loading-md"></span>
               ) : (
-                <SendHorizontalIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                        <SendHorizontalIcon size={18} />
               )}
             </button>
           </div>

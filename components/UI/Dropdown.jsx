@@ -46,6 +46,9 @@ const Dropdown = ({
   onOptionHover,
   onMenuClose,
   showGroupHeaders = false,
+  fullWidth = true,
+  onOpenChange,
+  renderTriggerContent,
   children,
 }) => {
   const [open, setOpen] = useState(false);
@@ -81,7 +84,8 @@ const Dropdown = ({
       onMenuClose && onMenuClose();
       onOptionHover && onOptionHover(null);
     }
-  }, [open, onMenuClose, onOptionHover]);
+    onOpenChange && onOpenChange(open);
+  }, [open, onMenuClose, onOptionHover, onOpenChange]);
 
   const selectedOption = useMemo(
     () => options.find((o) => String(o.value) === String(value)) || null,
@@ -132,44 +136,57 @@ const Dropdown = ({
   }, [size]);
 
   // Default trigger if children not provided
+  const triggerLabelContent = () => {
+    if (renderTriggerContent) {
+      return renderTriggerContent({
+        selectedOption,
+        placeholder,
+        value,
+        isOpen: open,
+      });
+    }
+
+    let content = placeholder;
+    let titleText = '';
+    if (selectedOption) {
+      if (typeof selectedOption.label === 'string') {
+        titleText = selectedOption.label;
+        content = selectedOption.label.length > maxLabelLength
+          ? selectedOption.label.slice(0, maxLabelLength) + '...'
+          : selectedOption.label;
+      } else {
+        content = selectedOption.label;
+      }
+    }
+
+    return (
+      <span
+        className={cx('truncate text-left flex-1', !selectedOption ? 'text-base-content/60' : '')}
+        title={titleText}
+      >
+        {content}
+      </span>
+    );
+  };
+
   const DefaultTrigger = (
     <button
       type="button"
       disabled={disabled}
       onClick={() => !disabled && setOpen((s) => !s)}
       className={cx(
-        'btn btn-outline w-full justify-between hover:bg-base-200 hover:text-base-content hover:border-base-content/20 overflow-hidden',
+        'btn btn-outline justify-between hover:bg-base-200 hover:text-base-content hover:border-base-content/20 overflow-hidden',
         sizeCls,
         disabled ? 'opacity-50 cursor-not-allowed' : '',
+        fullWidth ? 'w-full' : '',
         className
       )}
       aria-haspopup="listbox"
       aria-expanded={open}
       ref={triggerRef}
     >
-      {(() => {
-        let content = placeholder;
-        let titleText = '';
-        if (selectedOption) {
-          if (typeof selectedOption.label === 'string') {
-            titleText = selectedOption.label;
-            content = selectedOption.label.length > maxLabelLength
-              ? selectedOption.label.slice(0, maxLabelLength) + '...'
-              : selectedOption.label;
-          } else {
-            content = selectedOption.label;
-          }
-        }
-        return (
-          <span
-            className={cx('truncate text-left flex-1', !selectedOption ? 'text-base-content/60' : '')}
-            title={titleText}
-          >
-            {content}
-          </span>
-        );
-      })()}
-      <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
+      {triggerLabelContent()}
+      {!renderTriggerContent && <ChevronDown className="ml-2 h-4 w-4 opacity-70" />}
     </button>
   );
 
@@ -193,7 +210,7 @@ const Dropdown = ({
   const placementCls = placement === 'bottom-end' ? 'dropdown-end' : '';
 
   return (
-    <div className={cx('dropdown w-full', placementCls, open ? 'dropdown-open' : '')}>
+    <div className={cx('dropdown rounded-md border-base-content/10 w-full', placementCls, open ? 'dropdown-open' : '')}>
       {TriggerWrapper}
 
       <div

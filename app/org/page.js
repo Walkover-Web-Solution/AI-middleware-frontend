@@ -4,7 +4,7 @@ import Protected from '@/components/protected';
 import OrganizationHeader from '@/components/organization/OrganizationHeader';
 import OrganizationSearch from '@/components/organization/OrganizationSearch';
 import OrganizationGrid from '@/components/organization/OrganizationGrid';
-import ThemeManager from '@/components/organization/ThemeManager';
+import { ThemeManager } from '@/customHooks/useThemeManager';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
 import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -13,7 +13,6 @@ import { filterOrganizations, setInCookies } from '@/utils/utility';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
-import SearchItems from '@/components/UI/SearchItems';
 
 /**
  * The organizations page that displays all the organizations
@@ -25,19 +24,17 @@ function Page() {
   const route = useRouter();
   const searchParams = useSearchParams();
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
+  const currentUserId = useCustomSelector(state => state.userDetailsReducer.userDetails?.id);
   const [displayedOrganizations, setDisplayedOrganizations] = useState([]);
 
   const handleSwitchOrg = useCallback(async (id, name) => {
     try {
       const response = await switchOrg(id);
       const localToken = await switchUser({ orgId: id, orgName: name });
-      if (localToken?.token) {
-        setInCookies('local_token', localToken.token);
-      }
+      setInCookies('local_token', localToken.token);
       route.push(`/org/${id}/agents`);
       dispatch(setCurrentOrgIdAction(id));
       if (response.status === 200) {
-        console.log("Organization switched successfully", response.data);
       } else {
         console.error("Failed to switch organization", response.data);
       }
@@ -58,10 +55,10 @@ function Page() {
   // Auto-redirect if there's only one organization
   useEffect(() => {
     const allowRedirection = searchParams.get('redirection') !== 'false';
-    if (organizationsArray.length === 1 && allowRedirection) {
-      const singleOrg = organizationsArray[0];
-      handleSwitchOrg(singleOrg.id, singleOrg.name);
-    }
+    // if (organizationsArray.length === 1 && allowRedirection) {
+    //   const singleOrg = organizationsArray[0];
+    //   handleSwitchOrg(singleOrg.id, singleOrg.name);
+    // }
   }, [organizationsArray, handleSwitchOrg, searchParams]);
 
   return (
@@ -76,7 +73,8 @@ function Page() {
         />
         <OrganizationGrid 
           displayedOrganizations={displayedOrganizations} 
-          handleSwitchOrg={handleSwitchOrg} 
+          handleSwitchOrg={handleSwitchOrg}
+          currentUserId={currentUserId}
         />
         <CreateOrg handleSwitchOrg={handleSwitchOrg} />
       </div>

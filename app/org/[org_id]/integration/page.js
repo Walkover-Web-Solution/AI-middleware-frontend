@@ -33,7 +33,7 @@ const Page = ({ params }) => {
   }, [integrationData]);
 
   const tableData = (filterIntegration || [])?.map((item, index) => ({
-    id: item._id ,
+    id: item._id,
     actualName: item?.name,
     name: (
       <div className="flex gap-2">
@@ -61,60 +61,60 @@ const Page = ({ params }) => {
 
   return (
     <div className="w-full">
-        {/* Header Section */}
-        <div className="px-2 pt-4">
+      {/* Header Section */}
+      <div className="px-2 pt-4">
 
-          <MainLayout >
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full">
-          <PageHeader
-            title=" GTWY Embed Integration"
-            docLink="https://gtwy.ai/blogs/features/gtwy-embed--1"
-            description={descriptions?.['Gtwy as Embed'] || "Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."}
-          />
-          
-        </div>
-          </MainLayout>
+        <MainLayout >
+          <div className="flex flex-col sm:flex-row">
+            <PageHeader
+              title=" GTWY Embed Integration"
+              docLink="https://gtwy.ai/blogs/features/gtwy-embed--1"
+              description={descriptions?.['Gtwy as Embed'] || "Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."}
+            />
+
+          </div>
+        </MainLayout>
 
         {/* Controls Section */}
-        
+
         {/* Content Section */}
         <div className="w-full">
-        <div className="flex flex-row gap-4 justify-between ">
-          {integrationData?.length>5 && (
-            <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
-          )}
-          <div className={`flex-shrink-0 ${integrationData?.length>5 ? 'mr-2' : 'ml-auto mr-2'}`}>
-            <button 
-              className="btn btn-primary mr-2" 
-              onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
+          <div className="flex flex-row gap-4">
+            {integrationData?.length > 5 && (
+              <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
+            )}
+            <div className={`flex-shrink-0 ${integrationData?.length > 5 ? 'mr-2' : 'ml-2'}`}>
+              <button
+                className="btn btn-primary btn-sm mr-2"
+                onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
               >
-              + Create New Integration
-            </button>
-          </div>
-              </div>
-              </div>
-          </div>
-          {filterIntegration.length > 0 ? (
-              <div className="w-full">
-                <CustomTable
-                  data={tableData}
-                  columnsToShow={['name', 'folder_id', 'createdAt']}
-                  sorting
-                  sortingColumns={['name']}
-                  keysToWrap={['name', 'description']}
-                  handleRowClick={(data)=>handleClickIntegration(data)}
-                  keysToExtractOnRowClick = {['org_id', 'folder_id']}
-                />
-              </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No integration entries found</p>
+                + Create New Integration
+              </button>
             </div>
-          )}
-       
-      <IntegrationModal params={resolvedParams}/>
-      <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider}/>
-    
+          </div>
+        </div>
+      </div>
+      {filterIntegration.length > 0 ? (
+        <div className="w-full">
+          <CustomTable
+            data={tableData}
+            columnsToShow={['name', 'folder_id', 'createdAt']}
+            sorting
+            sortingColumns={['name']}
+            keysToWrap={['name', 'description']}
+            handleRowClick={(data) => handleClickIntegration(data)}
+            keysToExtractOnRowClick={['org_id', 'folder_id']}
+          />
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">No integration entries found</p>
+        </div>
+      )}
+
+      <IntegrationModal params={resolvedParams} />
+      <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider} />
+
     </div>
   );
 };

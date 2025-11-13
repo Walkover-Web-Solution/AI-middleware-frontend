@@ -7,12 +7,15 @@ import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/component
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
-import { ONBOARDING_VIDEOS } from "@/utils/enums";
+import useTutorialVideos from "@/hooks/useTutorialVideos";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 import InfoTooltip from "./InfoTooltip";
 import Protected from "./protected";
 
 const AddVariable = ({ params, isEmbedUser, searchParams }) => {
+  // Use the tutorial videos hook
+  const { getAddVariablesVideo } = useTutorialVideos();
+  
   const versionId = searchParams?.version;
   const { variablesKeyValue, prompt, isFirstVariable, bridgeName } = useCustomSelector((state) => ({
     variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
@@ -265,9 +268,9 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   
 
   return (
-    <div className="text-base-content " tabIndex={0}>
+    <div className="text-base-content" tabIndex={0}>
       <div
-        className={`info mt-4 p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
+        className={`info p-1 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
           handleTutorial();
           toggleAccordion();
@@ -276,22 +279,22 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
         <InfoTooltip
           tooltipContent="Variables let you dynamically insert data into a prompt using this format: {{variable_name}}."
         >
-          <span className="cursor-pointer label-text inline-block ml-1">Add Variables</span>
+          <span className="cursor-pointer text-sm inline-block ml-1">Add Variables</span>
         </InfoTooltip>
-        <span className="cursor-pointer">{isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
+        <span className="cursor-pointer">{isAccordionOpen ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}</span>
       </div>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
       {tutorialState?.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAddVariablesVideo()} flagKey={"Addvariables"} />
       )}
 
       {/* Variables Section */}
       {isAccordionOpen && (
         <div className="border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg transition-all duration-300 ease-in-out">
           <div className="h-full w-full bg-base-100 border border-base-300 rounded-lg shadow-sm">
-            <div className="p-4">
+            <div className="p-2">
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Header - only show for key-value mode */}
               {editMode === 'key-value' && (
                 <div className="flex items-center justify-between pb-2 border-b border-base-300">
@@ -328,7 +331,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
               {/* Content based on edit mode */}
               {editMode === 'key-value' ? (
                 /* Key-Value Pairs */
-                <div className="space-y-1 max-h-64 overflow-y-auto">
+                <div className="space-y-1 max-h-32 overflow-y-auto">
                   {[...keyValuePairs, { key: "", value: "", required: true }]?.map((pair, index) => (
                     <div key={index} className="flex items-center space-x-4 group hover:bg-base-200/50 p-2 rounded">
                       <div className="w-8 flex justify-center">
@@ -391,7 +394,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                 /* Bulk Edit */
                 <div>
                   <textarea
-                    className="textarea textarea-bordered w-full h-64 font-mono text-sm resize-none focus:border-primary"
+                    className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-32 font-mono text-xs resize-none focus:border-primary"
                     placeholder={`key1: value1\nkey2: value2\nkey3: value3`}
                     onBlur={(e) => onBlurHandler(e.target.value)}
                     defaultValue={formatPairsForTextarea()}

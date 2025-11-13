@@ -11,6 +11,8 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -38,6 +40,10 @@ const PreEmbedList = ({ params, searchParams }) => {
         };
     });
     const dispatch = useDispatch();
+    
+    // Delete operation hook
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PRE_TOOL_MODAL);
+    
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
     const handleOpenModal = (functionId) => {
         setPreFunctionId(functionId);
@@ -65,12 +71,66 @@ const PreEmbedList = ({ params, searchParams }) => {
         }, 0);
     }
 
-    const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: searchParams?.version
-        }))
-        closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
+    const removePreFunction = async () => {
+        await executeDelete(async () => {
+            return dispatch(updateApiAction(params.id, {
+                pre_tools: [],
+                version_id: searchParams?.version
+            }));
+        });
+    }
+
+    const handleChangePreTool = () => {
+        // Focus on the pre-tool dropdown to allow user to select a different pre-tool
+        setTimeout(() => {
+            // Look for the EmbedListSuggestionDropdownMenu dropdown
+            const dropdown = document.querySelector('.dropdown-right .dropdown-left');
+            if (dropdown) {
+                // Find the dropdown content with tabIndex
+                const dropdownContent = dropdown.querySelector('ul[tabindex="0"]');
+                if (dropdownContent) {
+                    dropdownContent.focus();
+                    // Trigger the dropdown to open by adding the 'dropdown-open' class
+                    dropdown.classList.add('dropdown-open');
+                    
+                    // Function to close dropdown and cleanup
+                    const closeDropdown = () => {
+                        dropdown.classList.remove('dropdown-open');
+                        document.removeEventListener('click', handleClickOutside);
+                        document.removeEventListener('click', handleDropdownItemClick);
+                    };
+
+                    // Add click outside handler to close dropdown
+                    const handleClickOutside = (event) => {
+                        if (!dropdown.contains(event.target)) {
+                            closeDropdown();
+                        }
+                    };
+
+                    // Add click handler for dropdown items (selection)
+                    const handleDropdownItemClick = (event) => {
+                        // Check if clicked element is a dropdown item (li or button inside dropdown)
+                        const clickedItem = event.target.closest('li');
+                        if (clickedItem && dropdown.contains(clickedItem)) {
+                            // Close dropdown after selection
+                            setTimeout(() => closeDropdown(), 100);
+                        }
+                    };
+                    
+                    // Add the event listeners after a small delay to avoid immediate closure
+                    setTimeout(() => {
+                        document.addEventListener('click', handleClickOutside);
+                        document.addEventListener('click', handleDropdownItemClick);
+                    }, 50);
+                    
+                    // Also focus on the search input for better UX
+                    const searchInput = dropdownContent.querySelector('input');
+                    if (searchInput) {
+                        setTimeout(() => searchInput.focus(), 100);
+                    }
+                }
+            }
+        }, 100);
     }
     const handleSavePreFunctionData = () => {
         if (!isEqual(preToolData, preFunctionData)) {
@@ -118,21 +178,19 @@ const PreEmbedList = ({ params, searchParams }) => {
                     title="Are you sure?"
                     description={"This action Remove the selected Pre Tool from the Agent."}
                     buttonTitle="Remove Pre Tool"
-                    modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
+                    modalType={MODAL_TYPE.DELETE_PRE_TOOL_MODAL}
+                    loading={isDeleting}
+                    isAsync={true}
                 />
 
-                <div className="label flex-col items-start w-full">
+                <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {bridge_pre_tools.length > 0 ? (
-                            <div className="flex items-center gap-1 flex-row mb-2">
+                            <div className="flex items-center gap-1 mb-2">
+                                <p className="font-medium whitespace-nowrap">Pre Tool</p>
                                 <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-
-                                    <p className="label-text info font-medium whitespace-nowrap">Pre Tool</p>
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                                 </InfoTooltip>
-                                <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4">
-                                    <AddIcon className="w-2 h-2" />
-                                    <span className="text-xs font-medium">{bridge_pre_tools.length > 0 ? "change" : "Add"}</span>
-                                </button>
                             </div>
                         ) : (
                             <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
@@ -169,6 +227,8 @@ const PreEmbedList = ({ params, searchParams }) => {
                             name="preFunction"
                             handleRemoveEmbed={removePreFunction}
                             handleOpenDeleteModal={handleOpenDeleteModal}
+                            handleChangePreTool={handleChangePreTool}
+                            halfLength={1}
                         />
                     </div>
 

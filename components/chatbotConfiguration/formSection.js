@@ -203,7 +203,7 @@ function BridgesToSwitch({ chatBotId, handleSave, orgId }) {
 
             <div className="flex justify-end mt-4">
                 <button
-                    className="btn btn-primary"
+                    className="btn btn-primary btn-sm"
                     onClick={() => handleSave({
                         target: {
                             value: eligibleBridgesArr?.filter((item) => item.checked).map((item) => ({
@@ -325,10 +325,10 @@ export default function FormSection({ params, chatbotId = null }) {
     return (
         <div className="space-y-6">
             {/* Display Settings Section */}
-            <div className="bg-base-200 rounded-lg shadow p-6">
+            <div className="bg-base-200 rounded-lg max-w-4xl shadow p-6">
                 <h3 className="text-lg font-semibold mb-6 border-b border-base-content/20 pb-2">Display Settings</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-2xl">
                     {/* Basic Information */}
                     <div className="space-y-4">
                         <label className="form-control w-full">
@@ -338,7 +338,7 @@ export default function FormSection({ params, chatbotId = null }) {
                             <input
                                 type="text"
                                 placeholder="Enter chatbot title"
-                                className="input input-bordered w-full input-sm"
+                                className="input input-bordered w-full max-w-xs input-sm"
                                 value={formData.chatbotTitle}
                                 onChange={handleInputChange}
                                 onBlur={handleBlur}
@@ -353,7 +353,7 @@ export default function FormSection({ params, chatbotId = null }) {
                             <input
                                 type="text"
                                 placeholder="Enter chatbot subtitle"
-                                className="input input-bordered w-full input-sm"
+                                className="input input-bordered w-full max-w-xs input-sm"
                                 value={formData.chatbotSubtitle}
                                 onChange={handleInputChange}
                                 onBlur={handleBlur}
@@ -368,7 +368,7 @@ export default function FormSection({ params, chatbotId = null }) {
                             <input
                                 type="text"
                                 placeholder="Enter button title"
-                                className="input input-bordered w-full input-sm"
+                                className="input input-bordered w-full max-w-xs input-sm"
                                 value={formData.buttonName}
                                 onChange={handleInputChange}
                                 onBlur={handleBlur}
@@ -383,7 +383,7 @@ export default function FormSection({ params, chatbotId = null }) {
                             <input
                                 type="text"
                                 placeholder="Enter icon URL"
-                                className="input input-bordered w-full input-sm"
+                                className="input input-bordered w-full max-w-xs input-sm"
                                 value={formData.iconUrl}
                                 onChange={handleInputChange}
                                 onBlur={handleBlur}

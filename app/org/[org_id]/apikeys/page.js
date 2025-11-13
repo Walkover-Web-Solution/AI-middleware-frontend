@@ -4,10 +4,10 @@ import MainLayout from "@/components/layoutComponents/MainLayout";
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteApikeyAction} from '@/store/action/apiKeyAction';
+import { deleteApikeyAction, updateApikeyAction  } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { BookIcon, InfoIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
+import { BookIcon, RefreshIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -15,6 +15,9 @@ import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
 import ConnectedAgentsModal from '@/components/modals/ConnectedAgentsModal';
+import { EllipsisIcon } from "lucide-react";
+import { toast } from "react-toastify";
+import useDeleteOperation from "@/customHooks/useDeleteOperation";
 
 export const runtime = 'edge';
 
@@ -25,7 +28,7 @@ const Page = () => {
   const orgId = path[2] || '';
   const { apikeyData, descriptions } = useCustomSelector((state) => ({
     apikeyData: state?.apiKeysReducer?.apikeys?.[orgId] || [],
-    descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
+    descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions || {},
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
 
@@ -38,6 +41,7 @@ const Page = () => {
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null)
   const selectedService = apikeyData?.find(item => item._id === selectedApiKey?._id)?.service;
   const [selectedApiKeyForAgents, setSelectedApiKeyForAgents] = useState(null);
+  const { isDeleting, executeDelete } = useDeleteOperation();
 
   useEffect(() => {
     if (selectedApiKeyForAgents) {
@@ -54,17 +58,18 @@ const Page = () => {
   );
 
   const deleteApikey = useCallback(
-    (item) => {
-      closeModal(MODAL_TYPE?.DELETE_MODAL)
-      dispatch(
-        deleteApikeyAction({
-          org_id: item.org_id,
-          name: item.name,
-          id: item._id,
-        })
-      )
+    async (item) => {
+      await executeDelete(async () => {
+        return dispatch(
+          deleteApikeyAction({
+            org_id: item.org_id,
+            name: item.name,
+            id: item._id,
+          })
+        );
+      });
     },
-    [dispatch]
+    [dispatch, executeDelete]
   );
 
   const showConnectedAgents = useCallback((item) => {
@@ -83,15 +88,32 @@ const Page = () => {
     ),
   }));
 
+  const resetUsage = useCallback(async(item) => {
+    const dataToSend = {
+      name: item.name,
+      apikey_object_id: item._id,
+      service: apikeyData?.find(api => api._id === item._id)?.service,
+      apikey: item.apikey,
+      comment: item.comment,
+      apikey_limit: item?.apikey_limit || 1,
+      apikey_usage: 0,
+      org_id: item.org_id,
+    }
+    const response = await dispatch(updateApikeyAction(dataToSend));
+    if(response){
+      toast.success('API key reset successfully');
+    }
+  }, [apikeyData, dispatch]);
+
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center" onClick={(e) => e.stopPropagation()}>
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={(e) => { 
+          onClick={(e) => {
             e.stopPropagation();
-            setselectedDataToDelete(row); 
+            setselectedDataToDelete(row);
             openModal(MODAL_TYPE.DELETE_MODAL);
           }}
         >
@@ -107,38 +129,48 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
+        {(row?.apikey_limit && row?.apikey_usage && Number(row?.apikey_usage) > 0) ? <div
+          className="tooltip tooltip-primary"
+          data-tip="Reset Usage"
+          onClick={(e) => {
+            e.stopPropagation();
+            resetUsage(row);
+          }}
+        >
+          <RefreshIcon size={16} />
+        </div> : null}
       </div>
     );
   };
 
   return (
     <div className="w-full">
-     <div className="px-2">
-      <MainLayout>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4 ">
-          <PageHeader
-            title="API Keys"
-            description={descriptions?.['Provider Keys'] || "Add your model-specific API keys to enable and use different AI models in your chat."}
-            docLink="https://techdoc.walkover.in/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
-          />
-        
-        </div>
-      </MainLayout>
-      <div className="flex flex-row gap-4 justify-between ">
+      <div className="px-2">
+        <MainLayout>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4 ">
+            <PageHeader
+              title="API Keys"
+              description={descriptions?.['Provider Keys'] || "Add your model-specific API keys to enable and use different AI models in your chat."}
+              docLink="https://techdoc.walkover.in/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
+            />
 
-      {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="API Keys"/>}
-      <div className={`${apikeyData?.length<=5 ? 'ml-auto ' : ''} flex-shrink-0 flex gap-4 mr-2`}>
-            <button 
-              className="btn" 
-              onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
+          </div>
+        </MainLayout>
+        <div className="flex flex-row gap-4">
+
+          {apikeyData?.length > 5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="API Keys" />}
+          <div className={`${apikeyData?.length <= 5 ? ' ' : ''} flex-shrink-0 flex gap-4 ml-2`}>
+            <button
+              className="btn btn-sm"
+              onClick={() => toggleSidebar("Api-Keys-guide-slider", "right")}
             >
-             <BookIcon />  API Key Guide
+              <BookIcon />  API Key Guide
             </button>
-            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
+            <button className="btn btn-sm btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
               + Add New API Key
             </button>
           </div>
-      </div>
+        </div>
       </div>
       {filterApiKeys.length > 0 ? (
         Object.entries(
@@ -174,10 +206,10 @@ const Page = () => {
         </div>
       )}
       <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} selectedService={selectedService} />
-      
-      <ApiKeyGuideSlider/>
-      <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}/>
-      <ConnectedAgentsModal apiKey={selectedApiKeyForAgents} orgId={orgId} key={selectedApiKeyForAgents}/>
+
+      <ApiKeyGuideSlider />
+      <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`} loading={isDeleting} isAsync={true} />
+      <ConnectedAgentsModal apiKey={selectedApiKeyForAgents} orgId={orgId} key={selectedApiKeyForAgents} />
     </div>
   );
 };

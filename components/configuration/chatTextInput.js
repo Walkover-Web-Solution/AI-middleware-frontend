@@ -1,36 +1,56 @@
 import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
-import cloneDeep from 'lodash/cloneDeep';
-import omit from 'lodash/omit';
+import { 
+  setChatLoading,
+  setChatError,
+  setChatUploadedFiles,
+  setChatUploadedImages,
+  sendMessageWithRtLayer,
+  setChatTestCaseIdAction
+} from '@/store/action/chatAction';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon } from '@/components/Icons';
+import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon, CloseCircleIcon } from '@/components/Icons';
 import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
+import { toggleSidebar } from '@/utils/utility';
 
-function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
+function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
     const [uploading, setUploading] = useState(false);
     const [uploadedVideos, setUploadedVideos] = useState(null);
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [urlInput, setUrlInput] = useState('');
+    const [showRunAnyway, setShowRunAnyway] = useState(false);
+    const [validationError, setValidationError] = useState(null);
+    const [runAnywayUsed, setRunAnywayUsed] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = searchParams?.version;
-    const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
+    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId],
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model?.toLowerCase(),
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type?.toLowerCase(),
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt,
         variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
         configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration,
         modelInfo: state?.modelReducer?.serviceModels,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type,
+        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model,
     }));
-    const dataToSend = {
+
+    // Redux selectors for chat state
+    const {conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId} = useCustomSelector((state) => ({
+      conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
+      loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
+      uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
+      uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
+      storedTestCaseId: state?.chatReducer?.testCaseIdByChannel?.[channelIdentifier] || null
+    }));
+    const dataToSend = useMemo(() => ({
         configuration: {
             model: modelName,
             type: modelType
@@ -42,7 +62,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
         response_format: {
             type: 'default'
         }
-    };
+    }), [modelName, modelType, bridge]);
     
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
     
@@ -57,130 +77,221 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
 
     useEffect(() => {
         setLocalDataToSend(dataToSend);
-    }, [bridge]);
+    }, [dataToSend]);
 
     const variables = useMemo(() => {
+        const coerceValue = (rawValue, fallback, type) => {
+            const candidate = rawValue ?? fallback ?? "";
+            const trimmed = typeof candidate === "string" ? candidate.trim() : candidate;
+            if (trimmed === "") {
+                return undefined;
+            }
+            if (type === "number") {
+                const parsed = Number(trimmed);
+                return Number.isNaN(parsed) ? undefined : parsed;
+            }
+            if (type === "boolean") {
+                if (typeof trimmed === "boolean") return trimmed;
+                if (String(trimmed).toLowerCase() === "true") return true;
+                if (String(trimmed).toLowerCase() === "false") return false;
+                return undefined;
+            }
+            if (type === "object" || type === "array") {
+                try {
+                    const parsed = typeof candidate === "string" ? JSON.parse(candidate) : candidate;
+                    return parsed;
+                } catch (err) {
+                    return undefined;
+                }
+            }
+            return candidate;
+        };
+
         return variablesKeyValue.reduce((acc, pair) => {
-            if (pair?.key && pair?.value) {
-                acc[pair.key] = pair.value;
+            if (!pair?.key) {
+                return acc;
+            }
+            const resolved =
+                pair.value && String(pair.value).length > 0
+                    ? pair.value
+                    : pair.defaultValue;
+
+            if (
+                resolved === undefined ||
+                (typeof resolved === "string" && resolved.trim() === "")
+            ) {
+                return acc;
+            }
+
+            const coerced = coerceValue(pair.value, pair.defaultValue, pair.type || "string");
+            if (coerced !== undefined) {
+                acc[pair.key] = coerced;
             }
             return acc;
         }, {});
     }, [variablesKeyValue]);
 
-    const clearState = () => {
-        setUploadedImages([]);
-            setUploadedFiles([]);
-            setUploadedVideos(null);
-            setMediaUrls(null);
-            setShowUrlInput(false);
-            setUrlInput('');
-    }
+    // Validate missing variables in prompt
+    const validatePromptVariables = useCallback(() => {
+        if (!prompt) return { isValid: true, missingVariables: [] };
+        
+        // Extract variables from prompt using regex
+        const regex = /{{(.*?)}}/g;
+        const matches = [...prompt.matchAll(regex)];
+        const promptVariables = [...new Set(matches.map(match => match[1].trim()))];
+        
+        if (!promptVariables.length) return { isValid: true, missingVariables: [] };
+        
+        // Check which variables are missing values
+        const missingVariables = promptVariables.filter(varName => {
+            const variable = variablesKeyValue.find(v => v.key === varName);
+            if (!variable) {
+                return true; // Variable not defined at all
+            }
+            
+            // Skip validation for optional variables
+            if (!variable.required) {
+                return false;
+            }
+            
+            const hasValue = variable.value !== undefined && variable.value !== null && String(variable.value).trim() !== '';
+            const hasDefault = variable.defaultValue !== undefined && variable.defaultValue !== null && String(variable.defaultValue).trim() !== '';
+            return !hasValue && !hasDefault; // Missing both value and default
+        });
+        
+        return {
+            isValid: missingVariables.length === 0,
+            missingVariables
+        };
+    }, [prompt, variablesKeyValue]);
 
-    const handleSendMessage = async (e) => {
+    const handleSendMessage = async (e, forceRun = false) => {
         const timestamp = Date.now();
         
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
         }
         if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
-            setErrorMessage("Prompt is required");
+            dispatch(setChatError(channelIdentifier, "Prompt is required"));
             return;
         }
+
+        // Validate variables in prompt (skip if forceRun is true OR if runAnywayUsed is true)
+        if (!forceRun && !runAnywayUsed) {
+            const validation = validatePromptVariables();
+            
+            if (!validation.isValid) {
+                const missingVars = validation.missingVariables.join(', ');
+                const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
+                
+                setErrorMessage(errorMsg);
+                setValidationError(errorMsg);
+                setShowRunAnyway(true);
+                
+                // Open the variable collection slider
+                toggleSidebar("variable-collection-slider", "right");
+                
+                // Store missing variables in sessionStorage for the slider to highlight
+                sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
+                
+                return;
+            } else {
+                // Clear validation states if validation passes
+                setValidationError(null);
+                setShowRunAnyway(false);
+                sessionStorage.removeItem('missingVariables');
+            }
+        } else if (forceRun) {
+            // Clear validation states when running anyway
+            setValidationError(null);
+            setShowRunAnyway(false);
+            setErrorMessage("");
+            setRunAnywayUsed(true); // Mark Run Anyway as used
+            sessionStorage.removeItem('missingVariables');
+        }
+
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
 
-        if(newMessage?.trim() === "") {
-            setErrorMessage("Message is required");
-            return;
-        }
-        const images = uploadedImages?.length > 0 ? uploadedImages.filter(img => img !== null && img !== undefined) : [];
-        const files = uploadedFiles?.length > 0 ? uploadedFiles.filter(file => file !== null && file !== undefined) : [];
-        const videos = uploadedVideos ? uploadedVideos : null;
-        const urls = mediaUrls ? mediaUrls : null;
-
-        clearState();
-
-        if ((videos?.length > 0 || urls?.length > 0) && newMessage?.trim() === "") {
-            setErrorMessage("A message is required when uploading files or videos.");
+        if (uploadedFiles?.length > 0 && newMessage?.trim() === "") {
+            dispatch(setChatError(channelIdentifier, "A message is required when uploading a PDF."));
             return;
         }
 
         if (modelType !== 'completion' && modelType !== 'embedding') {
-            if (newMessage?.trim() === "" && images?.length === 0 && files?.length === 0 && videos?.length === 0 && urls?.length === 0) {
-                setErrorMessage("Message is required");
+            if (newMessage?.trim() === "" && uploadedImages?.length === 0 && uploadedFiles?.length === 0) {
+                dispatch(setChatError(channelIdentifier, "Message cannot be empty"));
                 return;
             }
         }
         let testcase_data = {
             matching_type: selectedStrategy,
         }
-        testCaseId ? testcase_data.testcase_id = testCaseId : testcase_data = null
-        setErrorMessage("");
+        // Use stored testcase_id from Redux if available, otherwise fall back to prop
+        const activeTestCaseId = storedTestCaseId || testCaseId;
+        if (activeTestCaseId) {
+            testcase_data.testcase_id = activeTestCaseId;
+        } else {
+            testcase_data = null;
+        }
+        dispatch(setChatError(channelIdentifier, ""));
         if (modelType !== "completion") inputRef.current.value = "";
-        setLoading(true);
+        
         try {
-            const newChat = {
-                id: `user_${timestamp}`,
-                sender: "user",
-                time: new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }),
-                content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
-                images: images, // Store images in the user role
-                files: files,
-                video_data: videos, // Store videos
-                youtube_url: urls, // Store media URLs
-            };           
-            let response, responseData;
+            let responseData;
             let data;
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
                     content: newMessage,
-                    images: images, // Include images in the data
-                    files: files,
-                    video_data: videos, // Include videos in the data
-                    youtube_url: urls, // Include media URLs in the data
+                    images: uploadedImages, // Include images in the data
+                    files: uploadedFiles,
+                    video_data: uploadedVideos, // Include videos in the data
+                    youtube_url: mediaUrls, // Include media URLs in the data
                 };
-                setMessages(prevMessages => [...prevMessages, newChat]);
-                // Insert temporary assistant typing message
-                const tempAssistantId = `assistant_${timestamp}`;
-                const loadingAssistant = {
-                    id: tempAssistantId,
-                    sender: "assistant",
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    content: "",
-                    isLoading: true,
-                };
-                setMessages(prev => [...prev, loadingAssistant]);
-                const apiPayload = {
-                    localDataToSend: {
-                        version_id: versionId,
-                        testcase_data,
-                        configuration: {
-                            conversation: conversation,
-                            type: modelType
+                
+                // Use RT layer action for non-orchestral models
+                const apiCall = async () => {
+                    return await dryRun({
+                        localDataToSend: {
+                            version_id: versionId,
+                            testcase_data,
+                            configuration: {
+                                conversation: conversation,
+                                type: modelType
+                            },
+                            user: data.content,
+                            images: uploadedImages,
+                            files: uploadedFiles,
+                            variables
                         },
-                        user: data.content,
-                        images: images,
-                        files: files,
-                        video_data: videos,
-                        youtube_url: urls,
-                        variables
-                    },
-                    bridge_id: params?.id,
+                        bridge_id: params?.id,
+                    });
                 };
-                responseData = await dryRun(apiPayload);
-                // Handle unsuccessful response: rollback loading placeholder and user message
+                
+                // Send message with RT layer handling (loading will persist until RT response)
+                const result = await dispatch(sendMessageWithRtLayer(
+                    channelIdentifier, 
+                    newMessage, 
+                    apiCall, 
+                    isOrchestralModel,
+                    {
+                        images: uploadedImages,
+                        files: uploadedFiles,
+                        video_data: uploadedVideos,
+                        youtube_url: mediaUrls
+                    }
+                ));
+                
+                // Clear uploaded files after successful RT layer message creation
+                dispatch(setChatUploadedFiles(channelIdentifier, []));
+                dispatch(setChatUploadedImages(channelIdentifier, []));
+                
+                responseData = result.response;
+                
+                // Handle unsuccessful response: rollback via Redux
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
-                    // remove loading placeholder and the user message we just added
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== `user_${timestamp}`));
-                    setLoading(false);
+                    dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             } else if (modelType === "embedding") {
@@ -188,86 +299,71 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
                     role: "user",
                     content: newMessage
                 };
-                setMessages(prevMessages => [...prevMessages, newChat]);
-                // Insert temporary assistant typing message for embedding as well
-                const tempAssistantId = `assistant_${timestamp}`;
-                const loadingAssistant = {
-                    id: tempAssistantId,
-                    sender: "assistant",
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    content: "",
-                    isLoading: true,
-                };
-                setMessages(prev => [...prev, loadingAssistant]);
                 
-                const embeddingPayload = {
-                    localDataToSend: {
-                        version_id: versionId,
-                        testcase_data,
-                        configuration: {
-                            conversation: conversation,
-                            type: modelType
+                // Use RT layer action for embedding models too
+                const apiCall = async () => {
+                    return await dryRun({
+                        localDataToSend: {
+                            version_id: versionId,
+                            testcase_data,
+                            configuration: {
+                                conversation: conversation,
+                                type: modelType
+                            },
+                            text: newMessage
                         },
-                        text: newMessage,
-                        images: images,
-                        files: files,
-                        video_data: videos,
-                        youtube_url: urls,
-                        variables
-                    },
-                    bridge_id: params?.id
+                        bridge_id: params?.id
+                    });
                 };
-                responseData = await dryRun(embeddingPayload);
+                
+                // Send message with RT layer handling (loading will persist until RT response)
+                const result = await dispatch(sendMessageWithRtLayer(
+                    channelIdentifier, 
+                    newMessage, 
+                    apiCall, 
+                    isOrchestralModel
+                ));
+                
+                responseData = result.response;
+                
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
-                    // remove loading placeholder and the user message we just added
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== `user_${timestamp}`));
-                    setLoading(false);
+                    dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             } else if (modelType !== "image") {
-                if(testCaseId){
-                    testcase_data.testcase_id = testCaseId;
+                if(activeTestCaseId){
+                    testcase_data.testcase_id = activeTestCaseId;
                 }
-                // Insert temporary assistant typing message for completion path as well
-                const tempAssistantId = `assistant_${timestamp}`;
-                const loadingAssistant = {
-                    id: tempAssistantId,
-                    sender: "assistant",
-                    time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    content: "",
-                    isLoading: true,
-                };
-                setMessages(prev => [...prev, loadingAssistant]);
                 
-                const completionPayload = {
-                    localDataToSend: {
-                        ...localDataToSend,
-                        version_id: versionId,
-                        testcase_data,
-                        configuration: {
-                            ...localDataToSend.configuration
+                // Use RT layer action for completion models too
+                const apiCall = async () => {
+                    return await dryRun({
+                        localDataToSend: {
+                            ...localDataToSend,
+                            version_id: versionId,
+                            testcase_data,
+                            configuration: {
+                                ...localDataToSend.configuration
+                            },
+                            input: bridge?.inputConfig?.input?.input
                         },
-                        input: bridge?.inputConfig?.input?.input,
-                        images: images,
-                        files: files,
-                        video_data: videos,
-                        youtube_url: urls,
-                        variables
-                    },
-                    bridge_id: params?.id
+                        bridge_id: params?.id
+                    });
                 };
-                responseData = await dryRun(completionPayload);
+                
+                // Send message with RT layer handling (loading will persist until RT response)
+                const result = await dispatch(sendMessageWithRtLayer(
+                    channelIdentifier, 
+                    bridge?.inputConfig?.input?.input || "", 
+                    apiCall, 
+                    isOrchestralModel
+                ));
+                
+                responseData = result.response;
+                
                 if (!responseData || !responseData.success) {
-                    // remove loading placeholder if present
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
-                    setLoading(false);
+                    dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             }
@@ -284,62 +380,17 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
             //     }
             //     setMessages(prevMessages => [...prevMessages, toolData]);
             // }
-            // success is ensured in branches above for non-completion and embedding
-            if (!responseData || !responseData.success) {
-                setLoading(false);
-                return;
-            }
-            response = modelType === 'embedding' ? responseData.data?.response.data.embedding : responseData.response?.data;
+            // Store testcase_id if present in Redux
             if(responseData?.response?.testcase_id){
-                setTestCaseId(responseData?.response?.testcase_id);
+                dispatch(setChatTestCaseIdAction(channelIdentifier, responseData?.response?.testcase_id));
+                // Also call the prop function for backward compatibility
+                if (setTestCaseId) {
+                    setTestCaseId(responseData?.response?.testcase_id);
+                }
             }
-            const content = modelType === 'embedding' ? response : response?.content || "";
-            const assistConversation = {
-                role: response?.role || "assistant",
-                content: content,
-                fallback : response?.fallback ? response?.fallback : response?.fall_back,
-                finish_reason: response?.finish_reason || "no_reason",
-                firstAttemptError: response?.firstAttemptError,
-                image_urls: response?.image_urls || [],
-                model: response?.model
-            };
-
-            // Replace the temporary loading message with the actual response first
-            const tempAssistantIdFinal = `assistant_${timestamp}`;
-            const newChatAssist = {
-                id: tempAssistantIdFinal,
-                sender: "assistant",
-                time: new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }),
-                content: Array.isArray(content) ? content.join(", ") : content.toString(),
-                image_urls: assistConversation.image_urls,
-                fallback : assistConversation?.fallback,
-                finish_reason: assistConversation?.finish_reason,
-                firstAttemptError: response?.firstAttemptError,
-                modelName : assistConversation?.model
-            };
-
-            // Update conversation and messages together to maintain synchronization
-            if (modelType !== 'completion' && modelType !== 'embedding') {
-                const updatedConversation = [...conversation, cloneDeep(omit(data, 'files')), assistConversation].slice(-6);
-                setConversation(updatedConversation);
-                setMessages(prevMessages => {
-                    const updatedMessages = prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m);
-                    return updatedMessages;
-                });
-            } else if (modelType === 'embedding') {
-                const updatedConversation = [...conversation, cloneDeep(data), assistConversation].slice(-6);
-                setConversation(updatedConversation);
-                setMessages(prevMessages => {
-                    const updatedMessages = prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m); 
-                    return updatedMessages;
-                });
-            } else {
-                // For completion models, just replace the loading message
-                setMessages(prevMessages => prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m));
-            }
+            
+            // For orchestral models or non-RT responses, the response is already handled
+            // For RT layer responses, the message will be updated when RT layer sends the response
             //         pauseOnHover: true,
             //         draggable: true,
             //         progress: undefined,
@@ -347,13 +398,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
             //     });
              
         } catch (error) {
-            setErrorMessage("Something went wrong. Please try again.");
-            setMessages(prev => prev.filter(m => 
-                m.id !== `assistant_${timestamp}` && m.id !== `user_${timestamp}`
-            ));
-        } finally {
-            setLoading(false);
+            dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
+            dispatch(setChatLoading(channelIdentifier, false)); // Clear loading on error
         }
+        // Note: Loading is cleared by RT layer when response is received, not in finally block
+        // Note: Uploaded files are cleared immediately after successful RT layer call
     };
 
     const handleKeyDown = useCallback(
@@ -370,7 +419,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
                 }
             }
         },
-        [loading, uploading, conversation, prompt, isOrchestralModel, selectedStrategy, inputRef, testCaseId]
+        [loading, uploading, isOrchestralModel, handleSendMessageForOrchestralModel, handleSendMessage]
     );
     const handleFileChange = async (e) => {
         const files = Array.from(e.target.files);
@@ -402,50 +451,16 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
             setUploading(true);
     
             for (let file of files) {
-                try {
-                    const formData = new FormData();
-                    const isVedio = file.type.startsWith('video/');
-                    const isPdf = file.type === 'application/pdf';
-                    let isVedioOrPdf = false;
-                    if(isVedio || isPdf){
-                        isVedioOrPdf = true;
-                    }
-                    formData.append(isVedio ? 'video' : isPdf ? 'file' : 'image', file);
-                    const result = await dispatch(uploadImageAction(formData, isVedioOrPdf));
-        
-                    if (result && result.success) {
-                        if (file.type === 'application/pdf') {
-                            const fileUrl = result.image_url || result.file_url || result.url || result.data?.url || result.data?.image_url || result.data?.file_url;
-                            if (fileUrl) {
-                                setUploadedFiles(prev => [...prev, fileUrl]);
-                            } else {
-                                console.error('No file URL found in result for PDF:', result);
-                                // Don't add null to the array, just skip
-                                toast.error('File uploaded but URL not found');
-                            }
-                        } else if (file.type.startsWith('video/')) {
-                            const videoData = result.file_data || result.video_data || result.data || result.data?.video_data;
-                            setUploadedVideos(videoData); // Replace existing video
-                        } else if (file.type.startsWith('image/')) {
-                            const imageUrl = result.image_url || result.file_url || result.url || result.data?.url || result.data?.image_url || result.data?.file_url;
-                            if (imageUrl) {
-                                setUploadedImages(prev => [...prev, imageUrl]);
-                            } else {
-                                console.error('No image URL found in result for image:', result);
-                                // Don't add null to the array, just skip
-                                toast.error('Image uploaded but URL not found');
-                            }
-                        }
+                const formData = new FormData();
+                formData.append('image', file);
+                const result = await dispatch(uploadImageAction(formData));
+    
+                if (result.success) {
+                    if (file.type === 'application/pdf') {
+                        dispatch(setChatUploadedFiles(channelIdentifier, [...uploadedFiles, result.image_url]));
                     } else {
-                        console.error('Upload failed or no success flag:', result);
-                        toast.error(result?.data?.error || result?.error || result?.message || 'Upload failed');
+                        dispatch(setChatUploadedImages(channelIdentifier, [...uploadedImages, result.image_url]));
                     }
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                    toast.error(`Failed to upload: ${error.message || 'Unknown error'}`);
-                }
-                finally{
-                    setUploading(false);
                 }
             }
     
@@ -520,160 +535,108 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
     };
 
     return (
-        <div className="w-full space-y-2">
-            {/* Simplified Media Preview Container */}
-            {(uploadedImages.length > 0 || uploadedFiles.length > 0 || uploadedVideos || mediaUrls) && (
-                <div className="mb-2 p-3 bg-base-200 rounded-lg border border-base-content/30">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-base-content/70">
-                            Attached Media ({uploadedImages.length + uploadedFiles.length + (uploadedVideos ? 1 : 0) + (mediaUrls ? 1 : 0)})
-                        </span>
-                        <button 
-                            className="text-xs text-error hover:text-error-focus"
-                            onClick={() => {
-                                setUploadedImages([]);
-                                setUploadedFiles([]);
-                                setUploadedVideos(null);
-                                setMediaUrls(null);
-                            }}
-                        >
-                            Clear All
-                        </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {/* Image Previews */}
-                        {uploadedImages.map((url, index) => (
-                            <div key={`image-${index}`} className="relative">
-                                <Image
-                                    src={url}
-                                    alt={`Image ${index + 1}`}
-                                    width={50}
-                                    height={50}
-                                    className="w-12 h-12 object-cover rounded-lg border"
-                                />
-                                <button
-                                    className="absolute -top-1 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
-                                    onClick={() => {
-                                        const newImages = uploadedImages.filter((_, i) => i !== index);
-                                        setUploadedImages(newImages);
-                                    }}
-                                    title="Remove"
-                                >
-                                    ×
-                                </button>
+        <div className="input-group flex justify-end items-end gap-2 w-full relative">
+            {/* --- CORRECTED PREVIEW CONTAINER --- */}
+            {(uploadedImages.length > 0 || uploadedFiles.length > 0) && (
+                <div className="absolute bottom-16 left-0 w-full flex flex-nowrap overflow-x-auto items-end gap-2 p-2 bg-base-100 border-t rounded-t-lg">
+                    {/* Image Previews */}
+                    {uploadedImages.map((url, index) => (
+                        <div key={index} className="relative flex-shrink-0">
+                            <Image
+                                src={url}
+                                alt={`Uploaded Preview ${index + 1}`}
+                                width={64}
+                                height={64}
+                                className="w-16 h-16 object-cover bg-base-300 p-1 rounded-lg"
+                            />
+                            <button
+                                className="absolute -top-2 -right-2 text-white rounded-full"
+                                onClick={() => {
+                                    const newImages = uploadedImages.filter((_, i) => i !== index);
+                                    dispatch(setChatUploadedImages(channelIdentifier, newImages));
+                                }}
+                            >
+                                <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
+                            </button>
+                        </div>
+                    ))}
+                    {/* File Previews */}
+                    {uploadedFiles.map((url, index) => (
+                        <div key={index} className="relative flex-shrink-0">
+                            <div className="flex items-center h-16 gap-2 bg-base-300 p-2 rounded-lg">
+                                <PdfIcon height={24} width={24} />
+                                <p className='text-sm max-w-[120px] truncate' title={url}>{url.split('/').pop()}</p>
                             </div>
-                        ))}
-                        {/* File Previews */}
-                        {uploadedFiles.map((url, index) => (
-                            <div key={`file-${index}`} className="relative flex items-center gap-2 bg-base-100 border rounded-lg p-2">
-                                <PdfIcon height={16} width={16} className="text-orange-500" />
-                                <span className="text-xs">PDF</span>
-                                <button
-                                    className="absolute -top-1 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
-                                    onClick={() => {
-                                        const newFiles = uploadedFiles.filter((_, i) => i !== index);
-                                        setUploadedFiles(newFiles);
-                                    }}
-                                    title="Remove"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ))}
-                        {/* Video Previews */}
-                        {uploadedVideos && (
-                            <div key={`video-`} className="relative">
-                                <div className="relative w-12 h-12 bg-black rounded-lg overflow-hidden border">
-                                    <video
-                                        src={uploadedVideos}
-                                        className="w-full h-full object-cover"
-                                        muted
-                                        preload="metadata"
-                                        onLoadedMetadata={(e) => {
-                                            // Seek to 1 second to get a frame for thumbnail
-                                            e.target.currentTime = 1;
-                                        }}
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                        <PlayIcon size={16} className="text-white" />
-                                    </div>
-                                </div>
-                                <button
-                                    className="absolute top-0 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
-                                    onClick={() => setUploadedVideos(null)}
-                                    title="Remove"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        )}
-                        {/* URL Previews */}
-                        {mediaUrls && (
-                            <div key="url" className="relative flex items-center gap-2 bg-base-100 border rounded-lg p-2 max-w-[120px]">
-                                <LinkIcon size={16} className="text-blue-500" />
-                                <span className="text-xs truncate" title={mediaUrls}>YouTube URL</span>
-                                <button
-                                    className="absolute -top-1 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
-                                    onClick={() => removeUrl()}
-                                    title="Remove"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                            
+                            <button
+                                className="absolute -top-2 -right-2 text-white rounded-full"
+                                onClick={() => {
+                                    const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                                    dispatch(setChatUploadedFiles(channelIdentifier, newFiles));
+                                }}
+                            >
+                                <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 
+            
+            {/* Media URL Preview */}
+            {mediaUrls && (
+                <div className="absolute bottom-16 left-0 w-full flex items-center gap-2 p-2 bg-base-100 border-t rounded-t-lg">
+                    <LinkIcon size={16} className="text-base-content" />
+                    <span className="text-sm truncate flex-1">{mediaUrls}</span>
+                    <button
+                        onClick={removeUrl}
+                        className="btn btn-ghost btn-xs"
+                    >
+                        <CloseCircleIcon size={16} />
+                    </button>
+                </div>
+            )}
+            
             {/* URL Input Modal */}
             {showUrlInput && (
-                <div className="w-full bg-base-100 border border-base-300 rounded-lg shadow-lg">
-                    <div className="p-2">
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="p-1.5 bg-base-200 rounded-lg">
-                                <LinkIcon size={16} className="text-base-content" />
-                            </div>
-                            <h3 className="text-sm font-semibold text-base-content">Add Youtube URL</h3>
-                        </div>
-                        
-                        <div className="space-y-1 mt-2">
-                            <div>
-                                <input
-                                    type="url"
-                                    value={urlInput}
-                                    onChange={(e) => setUrlInput(e.target.value)}
-                                    placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
-                                    className="input input-bordered w-full focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                    autoFocus
-                                />
-                            </div>
-                            
-                            <div className="flex gap-2 justify-between items-center">
-                            <p className="text-xs text-base-content/60">
-                                    Support Youtube videos url only
-                                </p>
-                            <div className="flex gap-2 items-center">
-                            <button
-                                    className="btn btn-ghost btn-sm"
-                                    onClick={() => {
-                                        setShowUrlInput(false);
-                                        setUrlInput('');
-                                    }}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="btn btn-primary btn-sm"
-                                    onClick={addMediaUrl}
-                                    disabled={!urlInput.trim()}
-                                >
-                                    <LinkIcon size={14} />
-                                    Add URL
-                                </button>
-                            </div>
-                            </div>
-                        </div>
+                <div className="absolute bottom-16 left-0 w-full p-3 bg-base-100 border rounded-lg shadow-lg">
+                    <div className="flex gap-2 items-center">
+                        <input
+                            type="url"
+                            placeholder="Enter YouTube URL"
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            className="input input-sm flex-1 border-base-300"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') addMediaUrl();
+                                if (e.key === 'Escape') setShowUrlInput(false);
+                            }}
+                        />
+                        <button onClick={addMediaUrl} className="btn btn-primary btn-sm">
+                            Add
+                        </button>
+                        <button onClick={() => setShowUrlInput(false)} className="btn btn-ghost btn-sm">
+                            Cancel
+                        </button>
                     </div>
+                    <p className="text-xs text-base-content/60 mt-1">
+                        Support YouTube videos URL only
+                    </p>
+                </div>
+            )}
+            
+            {/* Validation Error Display */}
+            {validationError && (
+                <div className="absolute bottom-16 left-0 w-full p-3 bg-error/10 border border-error/20 rounded-lg">
+                    <p className="text-sm text-error">{validationError}</p>
+                    {showRunAnyway && (
+                        <button
+                            onClick={(e) => handleSendMessage(e, true)}
+                            className="btn btn-warning btn-sm mt-2"
+                        >
+                            Run Anyway
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -683,7 +646,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params, uploadedImages, s
                 <textarea
                     ref={inputRef}
                     placeholder="Type here"
-                    className="textarea textarea-bordered w-full focus:border-primary max-h-[200px] resize-none overflow-y-auto h-auto"
+                    className={`textarea bg-white dark:bg-black/15 textarea-bordered w-full max-h-[200px] resize-none overflow-y-auto h-auto ${
+                        validationError 
+                            ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
+                            : 'focus:border-primary'
+                    }`}
                     onKeyDown={handleKeyDown}
                     rows={1}
                     onInput={(e) => {
