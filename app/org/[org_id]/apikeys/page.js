@@ -6,7 +6,7 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, updateApikeyAction  } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
+import { closeModal, formatDate, formatDateTimeToDisplay, formatRelativeTime, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { BookIcon, RefreshIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -86,6 +86,17 @@ const Page = () => {
         <span className="capitalize">{item.service}</span>
       </div>
     ),
+    last_used: item.last_used ? (
+      <div className="group cursor-help">
+        <span className="group-hover:hidden">
+          {formatRelativeTime(item.last_used)}
+        </span>
+        <span className="hidden group-hover:inline">
+          {formatDate(item.last_used)}
+        </span>
+      </div>
+    ) : "No records found",
+    last_used_original: item.last_used
   }));
 
   const resetUsage = useCallback(async(item) => {
@@ -192,7 +203,7 @@ const Page = () => {
               data={items}
               columnsToShow={API_KEY_COLUMNS}
               sorting
-              sortingColumns={["name"]}
+              sortingColumns={["name", "last_used"]}
               keysToWrap={["apikey", "comment"]}
               endComponent={EndComponent}
               handleRowClick={(data) => showConnectedAgents(data)}

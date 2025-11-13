@@ -190,10 +190,11 @@ function Page({ params }) {
                     </span>
                   </div>
                 ),
+                created_at_original: item?.created_at,
               }))}
               columnsToShow={PAUTH_KEY_COLUMNS}
               sorting
-              sortingColumns={["name"]}
+              sortingColumns={["name", "created_at"]}
               keysToWrap={["authkey"]}
               endComponent={EndComponent}
             />
