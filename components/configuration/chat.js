@@ -36,7 +36,6 @@ import { addUserMessage } from "@/store/reducer/chatReducer";
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
   const messagesContainerRef = useRef(null);
-  const testCaseResultRef = useRef(null);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const [showTestCases, setShowTestCases] = useState(false);
@@ -48,6 +47,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const testCaseResultRef = useRef(null);
   const [testCaseConversation, setTestCaseConversation] = useState([]);
 
   const channelIdentifier = useMemo(() => {
@@ -278,7 +278,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       // Automatically show the test case results card after running the test
       const nextMessageId = updatedMessages[index + 1].id;
       dispatch(editChatMessage(channelIdentifier, index + 1, updatedMessages[index + 1]));
-      setShowTestCaseResults(prev => ({ ...prev, [nextMessageId]: true }));
+      setShowTestCaseResults(prev => ({
+        ...prev,
+        [nextMessageId]: true
+      }));
     } finally {
       setIsRunningTestCase(false);
       setCurrentRunIndex(null);
