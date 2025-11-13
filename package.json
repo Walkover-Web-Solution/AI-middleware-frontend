@@ -14,6 +14,8 @@
     "@floating-ui/react": "^0.27.12",
     "@reduxjs/toolkit": "^2.2.0",
     "@xyflow/react": "^12.8.2",
+    "@openai/chatkit": "^0.9.0",
+    "@openai/chatkit-react": "^0.9.0",
     "axios": "^1.6.7",
     "debounce": "^2.0.0",
     "interface-chatbot": "^1.0.14",

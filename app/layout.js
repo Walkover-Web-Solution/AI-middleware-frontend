@@ -26,6 +26,12 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="light">
       <body suppressHydrationWarning className={dmSans.className}>
+        {/* ChatKit Script */}
+        <Script 
+          src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
+          strategy="beforeInteractive"
+        />
+
         {/* Google Tag Manager */}
         <Script id="gtm-script" strategy="afterInteractive">
           {`
