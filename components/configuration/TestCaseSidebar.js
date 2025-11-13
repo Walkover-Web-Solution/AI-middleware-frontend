@@ -145,9 +145,27 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
 
       <div className="p-4 space-y-3">
         {testCaseArray.length === 0 ? (
-          <div className="text-center py-8 text-base-content">
-            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-base-content" />
-            <p className="text-sm">No test cases available</p>
+          <div className="text-center py-12 text-base-content">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-base-content/60" />
+            <p className="text-base font-medium mb-2">No test cases available</p>
+            <p className="text-sm text-base-content/70 mb-6">Generate test cases to validate your bridge configuration</p>
+            <button
+              className="btn btn-primary btn-md gap-2 shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={generateMoreTestCases}
+              disabled={generatingTestCases}
+            >
+              {generatingTestCases ? (
+                <>
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  <span>Generate Test Cases</span>
+                </>
+              )}
+            </button>
           </div>
         ) : (
           testCaseArray.map((testCase, index) => {
@@ -339,33 +357,28 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
         )}
       </div>
 
-      {/* Footer Actions */}
-      <div className="p-4 border-t border-base-content/20 mt-auto space-y-3">
-        <button
-          className="w-full bg-blue-500 text-base-100 py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
-          onClick={generateMoreTestCases}
-          disabled={generatingTestCases}
-        >
-          {generatingTestCases ? (
-            <div className="flex items-center justify-center">
-              <Clock className="w-4 h-4 mr-2 animate-spin" />
-              <span>Generating Test Cases...</span>
-            </div>
-          ) : 'Generate More Test Cases'}
-        </button>
-        <button
-          className="w-full bg-blue-500 text-base-100 py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
-          onClick={runAllTests}
-          disabled={testCaseArray.length === 0 || runningTests.size > 0}
-        >
-          {runningTests.size > 0 ? (
-            <div className="flex items-center justify-center">
-              <Clock className="w-4 h-4 mr-2 animate-spin" />
-              <span>Running {runningTests.size}/{testCaseArray.length} Tests...</span>
-            </div>
-          ) : 'Run All Test Cases'}
-        </button>
-      </div>
+      {/* Footer Actions - Generate More Test Cases */}
+      {/* {testCaseArray.length === 0 && (
+        <div className="p-4 border-t border-base-content/20 mt-auto">
+          <button
+            className="w-full btn btn-outline btn-sm gap-2 hover:btn-primary transition-all duration-200"
+            onClick={generateMoreTestCases}
+            disabled={generatingTestCases}
+          >
+            {generatingTestCases ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                <span>Generate More Test Cases</span>
+              </>
+            )}
+          </button>
+        </div>
+      )} */}
     </div>
   );
 };
