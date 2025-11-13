@@ -95,7 +95,6 @@ function useRtLayerEventHandler(channelIdentifier="") {
       }
       if(error)
       {
-        debugger
         dispatch(addChatErrorMessage(channelIdentifier, error?.error));
         return
       }
