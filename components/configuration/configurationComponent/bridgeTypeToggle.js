@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
 import InfoTooltip from '@/components/InfoTooltip';
+import { CircleQuestionMark } from 'lucide-react';
 
 const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
     const dispatch = useDispatch();
@@ -44,14 +45,18 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
 }, [searchParams?.version, service, bridgeType]);
 
     return (
-        <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content mb-4'>
-            {/* Main container with flex layout */}
-            <div className='flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4'>
-                
-                {/* Left side - Radio buttons and alert */}
-                <div className='flex flex-col gap-4'>
-                    {/* Radio buttons container */}
-                    <div className="flex flex-col xs:flex-row xs:flex-wrap sm:flex-row sm:flex-wrap lg:flex-row items-start gap-3 sm:gap-4 w-full">
+        <div className='flex flex-col gap-4 w-full'>
+            {/* Agent Type Label */}
+            <div className="flex items-center gap-1">
+                <span className="label-text font-medium">Agent Type</span>
+                <InfoTooltip tooltipContent="Choose how users will interact with your AI agent - through API calls, chatbot interface, batch processing, or automated triggers.">
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
+            </div>
+            
+            {/* Radio buttons container */}
+            <div className='flex flex-col gap-4'>
+                <div className="flex flex-col xs:flex-row xs:flex-wrap sm:flex-row sm:flex-wrap lg:flex-row items-start gap-3 sm:gap-4 w-full">
                         <div className="flex items-center gap-2 min-w-0">
                             <InfoTooltip tooltipContent="The API allows users to connect with AI models to perform tasks like generating responses or processing information.">
                                 <label className="flex items-center cursor-pointer min-w-0">
@@ -130,16 +135,13 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
                         )}
                     </div>
                     
-                    {/* Alert message */}
-                    {modelType === 'embedding' && (
-                        <div role="alert" className="alert p-2 w-fit">
-                            <InfoIcon size={16} />
-                            <span className='label-text-alt'>Embedding models do not support ChatBot.</span>
-                        </div>
-                    )}
-                </div>
-                
-              
+                {/* Alert message */}
+                {modelType === 'embedding' && (
+                    <div role="alert" className="alert p-2 w-fit">
+                        <InfoIcon size={16} />
+                        <span className='label-text-alt'>Embedding models do not support ChatBot.</span>
+                    </div>
+                )}
             </div>
         </div>
     );

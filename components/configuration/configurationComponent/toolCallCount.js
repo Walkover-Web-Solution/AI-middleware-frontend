@@ -4,6 +4,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from '@/utils/enums';
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { CircleQuestionMark } from 'lucide-react';
 
 function ToolCallCount({ params, searchParams }) {
     const dispatch = useDispatch();
@@ -23,17 +24,17 @@ function ToolCallCount({ params, searchParams }) {
     }
 
     return (
-        <div className='form-control'>
-            <div className="label items-center flex justify-start">
+        <div className='flex flex-col gap-3 w-full'>
+            <div className="flex items-center gap-1">
+                <span className="label-text font-medium">Maximum Function Call Limit</span>
                 <InfoTooltip tooltipContent={"This feature sets a limit on function calls. By default, functions are called one at a time, but with 'Parallel Tools' enabled, multiple functions can be called simultaneously within a single function call."}>
-                <span className="label-text font-medium info">Maximum Function Call Limit</span>
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                 </InfoTooltip>
-                
             </div>
             <input
                 type="number"
                 placeholder="Type here"
-                className="input input-sm input-bordered w-full max-w-xs"
+                className="input input-sm input-bordered w-full"
                 min={1}
                 max={30}
                 key={tool_call_count}

@@ -1,5 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
+import { clearChatTestCaseId } from '@/store/action/chatAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import { CloseIcon, ChevronDownIcon } from '@/components/Icons';
@@ -9,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 
-function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
+function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, channelIdentifier }) {
     const params = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
@@ -93,7 +94,14 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
             bridge_id: params?.id,
             matching_type: responseType
         };
-        dispatch(createTestCaseAction({ bridgeId: params?.id, data: payload })).then(() => { handleClose(); setIsLoading(false) });
+        dispatch(createTestCaseAction({ bridgeId: params?.id, data: payload })).then(() => { 
+            // Clear testcase_id from Redux when creating new testcase
+            if (channelIdentifier) {
+                dispatch(clearChatTestCaseId(channelIdentifier));
+            }
+            handleClose(); 
+            setIsLoading(false);
+        });
     };
 
     const handleChange = (newValue, index, childIndex) => {

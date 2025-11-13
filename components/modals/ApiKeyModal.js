@@ -136,6 +136,11 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                         <input
                           id={field}
                           required={isRequired}
+                          onFocus={(e) => {
+                            if (field === 'apikey' && isEditing) {
+                              e.target.value = '';
+                            }
+                          }}
                           type={(field === 'apikey' && isEditing && 'password') || (field === 'apikey_limit' && 'number') || 'text'}
                           className="input input-bordered input-sm"
                           name={field}

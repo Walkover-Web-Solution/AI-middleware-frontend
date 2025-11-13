@@ -48,10 +48,34 @@ const CustomTable = ({
             return [...data].sort((a, b) => {
                 const valueA = activeColumn === 'name' ? a.actualName : a[activeColumn];
                 const valueB = activeColumn === 'name' ? b.actualName : b[activeColumn];
+                
                 if (activeColumn === 'totaltoken') {
                     // Sort by totaltoken in ascending order
                     return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
                 }
+                
+                // Special handling for date columns (last_used, created_at)
+                if (activeColumn === 'last_used' || activeColumn === 'created_at') {
+                    // Use original timestamp values for sorting if available
+                    const originalA = activeColumn === 'last_used' 
+                        ? (a.last_used_original || a.last_used_orignal)
+                        : a.created_at_original;
+                    const originalB = activeColumn === 'last_used' 
+                        ? (b.last_used_original || b.last_used_orignal)
+                        : b.created_at_original;
+                    
+                    // Handle null/undefined values - put them at the bottom
+                    if (!originalA && !originalB) return 0;
+                    if (!originalA) return 1;
+                    if (!originalB) return -1;
+                    
+                    // Convert to Date objects for proper sorting
+                    const dateA = new Date(originalA);
+                    const dateB = new Date(originalB);
+                    
+                    return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+                }
+                
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
                     return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
                 }
@@ -251,7 +275,7 @@ const CustomTable = ({
                                             className="cursor-pointer"
                                             onClick={() => sortByColumn(column)}
                                         >
-                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column}
+                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column==="last_used"?"Last Used At":column}
                                         </span>
                                     </div>
                                 </th>
