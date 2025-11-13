@@ -104,54 +104,7 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
                           <pre className="text-base-content/80 break-words whitespace-pre-wrap">
                             {JSON.stringify(value, null, 2)}
                           </pre>
-                          {key.toLowerCase() === 'variables' && (
-                            <div className="absolute top-2 right-2">
-                              <div className="dropdown dropdown-end">
-                                <div 
-                                  tabIndex={0} 
-                                  role="button" 
-                                  className="btn btn-sm btn-ghost tooltip tooltip-primary tooltip-left hover:bg-base-300 transition-colors duration-200"
-                                  data-tip="Copy options"
-                                >
-                                  <CopyIcon size={16} className="text-base-content" />
-                                  <ChevronDown size={12} className="text-base-content" />
-                                </div>
-                                <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-64 p-2 shadow bg-base-100 border border-base-300">
-                                  <li>
-                                    <a 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        copyToClipboard(value, "Current values copied to clipboard");
-                                      }}
-                                      className="flex items-center gap-2 text-sm"
-                                    >
-                                      <CopyIcon size={14} />
-                                      <div>
-                                        <div className="font-medium">Copy Current Values</div>
-                                        <div className="text-xs opacity-70">Copy actual runtime values</div>
-                                      </div>
-                                    </a>
-                                  </li>
-                                  <li>
-                                    <a 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const keyValuePairs = generateKeyValuePairs(value);
-                                        copyToClipboard(JSON.stringify(keyValuePairs, null, 2), "Key-value pairs copied to clipboard");
-                                      }}
-                                      className="flex items-center gap-2 text-sm"
-                                    >
-                                      <CopyIcon size={14} />
-                                      <div>
-                                        <div className="font-medium">Copy Key-Value Pairs</div>
-                                        <div className="text-xs opacity-70">Copy structure with data types</div>
-                                      </div>
-                                    </a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          )}
+                          
                         </>
                       ) : (
                         <pre className="text-base-content/80 break-words whitespace-pre-wrap">
