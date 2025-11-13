@@ -66,8 +66,7 @@ function Page() {
       <ServiceInitializer />
       <ThemeManager />
       <div className="w-full max-w-4xl mt-4 flex flex-col gap-3">
-        <OrganizationHeader />
-        <OrganizationSearch 
+        <OrganizationHeader 
           organizationsArray={organizationsArray}
           setDisplayedOrganizations={setDisplayedOrganizations}
         />
