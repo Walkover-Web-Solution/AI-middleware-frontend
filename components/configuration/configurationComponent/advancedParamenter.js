@@ -4,7 +4,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { generateRandomID, openModal } from '@/utils/utility';
-import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -13,12 +13,13 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
+import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters}) => {
+const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, defaultExpanded = false, showAccordion = true, compact = false }) => {
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
   
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(showAccordion ? defaultExpanded : true);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -84,46 +85,8 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   };
 
   const level0Parameters = getParametersByLevel(0); // Hidden parameters
-  const level1Parameters = getParametersByLevel(1); // Accordion parameters  
+  const level1Parameters = getParametersByLevel(1); // Regular parameters (not in accordion)
   const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
-
-  // Generate preview text for accordion parameters
-  const getParametersPreview = useMemo(() => {
-    if (level1Parameters.length === 0) return '';
-    
-    // Define priority order for important parameters (these will show first)
-    const priorityParams = ['temperature', 'max_tokens', 'top_p', 'frequency_penalty', 'presence_penalty', 'tool_choice', 'parallel_tool_calls', 'logprobs'];
-    
-    // Sort parameters by priority, then alphabetically
-    const sortedParams = level1Parameters.sort(([keyA], [keyB]) => {
-      const priorityA = priorityParams.indexOf(keyA);
-      const priorityB = priorityParams.indexOf(keyB);
-      
-      // If both are priority params, sort by priority order
-      if (priorityA !== -1 && priorityB !== -1) {
-        return priorityA - priorityB;
-      }
-      // If only A is priority, A comes first
-      if (priorityA !== -1) return -1;
-      // If only B is priority, B comes first
-      if (priorityB !== -1) return 1;
-      // Neither are priority, sort alphabetically
-      return keyA.localeCompare(keyB);
-    });
-    
-    // Get readable names for parameters
-    const paramNames = sortedParams.slice(0, 3).map(([key]) => {
-      const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
-      // Capitalize first letter and make it more readable
-      return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ');
-    });
-    
-    // Create preview text
-    const preview = paramNames.join(', ');
-    const hasMore = level1Parameters.length > 3;
-    
-    return ` (${preview}${hasMore ? '...' : ''})`;
-  }, [level1Parameters]);
 
   const handleTutorial = () => {
     setTutorialState(prev => ({
@@ -241,6 +204,10 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
+  useEffect(() => {
+    setIsAccordionOpen(showAccordion ? defaultExpanded : true);
+  }, [defaultExpanded, showAccordion]);
+
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
@@ -280,71 +247,106 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
     const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
     if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
+
     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
+    const isDefaultValue = configuration?.[key] === 'default';
+    const checkboxSizeClass = 'checkbox-xs';
+    const inputSizeClass = 'input-xs';
+    const selectSizeClass = 'select-sm';
+    const buttonSizeClass = 'btn-xs';
+    const rangeSizeClass = 'range-xs';
+    const toggleSizeClass = 'toggle-xs';
+    const labelTextClass = 'text-sm font-medium capitalizen';
+    const sliderValueId = `sliderValue-${key} h-2`;
+
     let error = false;
+    if (field === 'slider' && !isDefaultValue) {
+      error = !(min <= configuration?.[key] && configuration?.[key] <= max) && (configuration?.['key']?.type === "string");
+    }
+
+    const sliderDisplayValue = field === 'slider' && !isDefaultValue
+      ? ((configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default')
+        ? modelInfoData?.[key]?.[configuration?.[key]]
+        : configuration?.[key])
+      : null;
+
+    const sliderValueNode = (!isDefaultValue && sliderDisplayValue !== null) ? (
+      <span
+        className={`text-xs ${error ? 'text-error' : 'text-base-content/70'}`}
+        id={sliderValueId}
+      >
+        {sliderDisplayValue}
+      </span>
+    ) : null;
+
+    // Detect if this is level 2 by checking if we're in compact mode or level 2 context
+    const isLevel2 = level === 2 || compact;
+    
     return (
-      <div key={key} className=" w-full">
-        <div className="label cursor-default">
-          <div className='flex gap-2'>
-          <div className="ml-auto flex items-center gap-2">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm cursor-pointer"
-                title={configuration?.[key] === 'default' ? 'Set to custom value' : 'Set to default'}
-                checked={configuration?.[key] !== 'default'}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  if (!checked) {
-                   setSliderValue("default", key, isDeafaultObject)
-                  } else {
-                    const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
-                    setSliderValue(fallback, key, isDeafaultObject)
-                  }
-                }}
-              />
+      <div key={key} className={`group w-full ${isLevel2 ? 'space-y-1' : 'space-y-3'}`}>
+        <div className={`flex items-center justify-between gap-2 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              className={`checkbox ${checkboxSizeClass} cursor-pointer`}
+              title={isDefaultValue ? 'Use default value' : 'Use custom value'}
+              checked={!isDefaultValue}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                if (!checked) {
+                  setSliderValue("default", key, isDeafaultObject);
+                } else {
+                  const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
+                  setSliderValue(fallback, key, isDeafaultObject);
+                }
+              }}
+            />
+            <div className="flex items-center gap-1">
+              <span className={labelTextClass}>{name || key}</span>
+              {description && (
+                <InfoTooltip tooltipContent={description}>
+                  <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
+              )}
             </div>
-            <div className='flex flex-row gap-2 items-center'>
-              {description ? <InfoTooltip tooltipContent={description}>
-                <span className="label-text capitalize info">{name || key}</span>
-              </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
-            </div>
-            
           </div>
-          {((field === 'slider') && configuration?.[key] !== 'default' && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-          {field === 'slider' && configuration?.[key] !== 'default' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
-            modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
+          <div className="flex items-center gap-2">
+            {sliderValueNode}
+            {isDefaultValue && (
+              <span className="badge badge-info badge-xs p-2">Default</span>
+            )}
+          </div>
         </div>
-        {field === 'dropdown' && configuration?.[key] !== 'default' && (
+
+        {field === 'dropdown' && !isDefaultValue && (
           <div className="w-full">
             <div className="relative">
               <div
-                className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
+                className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <span className="text-base-content">
+                <span className="truncate text-base-content text-xs">
                   {selectedOptions?.length > 0
                     ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
-                    : 'Select an tool choice option...'}
+                    : 'Select a tool choice option...'}
                 </span>
                 <div className="ml-auto">
-                  {showDropdown ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
+                  {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
                 </div>
               </div>
 
               {showDropdown && (
                 <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-[200px] overflow-y-auto mt-1 p-2">
-
                   <div className="p-2 top-0 bg-base-100">
                     <input
                       type="text"
                       placeholder="Search functions..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="input input-bordered input-sm w-full"
+                      className={`input input-bordered ${inputSizeClass} w-full`}
                     />
                   </div>
-                  {/* Add option data to show in dropdown */}
                   {options && options.map(option => (
                     <div
                       key={option?.id}
@@ -360,9 +362,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                           type="radio"
                           name="function-select"
                           checked={selectedOptions?.some(opt => opt?.name === option)}
-                          className="radio radio-sm"
+                          className="radio radio-xs"
                         />
-                        <span className="font-semibold">{option}</span>
+                        <span className="font-medium text-xs">{option}</span>
                         <span className="text-gray-500 text-xs">
                           {option === 'none'
                             ? "Model won't call a function; it will generate a message."
@@ -406,9 +408,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                                 type="radio"
                                 name="function-select"
                                 checked={isSelected}
-                                className="radio radio-sm"
+                                className="radio radio-xs"
                               />
-                              <span>{title}</span>
+                              <span className="text-xs">{title}</span>
                             </label>
                           </div>
                         );
@@ -441,9 +443,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                                   type="radio"
                                   name="agent-select"
                                   checked={isSelected}
-                                  className="radio radio-sm"
+                                  className="radio radio-xs"
                                 />
-                                <span>{title}</span>
+                                <span className="text-xs">{title}</span>
                               </label>
                             </div>
                           );
@@ -456,31 +458,29 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           </div>
         )}
 
-        {field === 'slider' && configuration?.[key] !== 'default' && (
+        {field === 'slider' && !isDefaultValue && (
           <div className="flex items-center gap-2">
-            <button type="button" className="btn btn-sm" onClick={() => setSliderValue('min', key)}>Min</button>
+            <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
               max={max || 100}
               step={step || 1}
               key={`${key}-${configuration?.[key]}-${service}-${model}`}
-              defaultValue={
-                (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
-                  modelInfoData?.[key]?.[configuration?.[key]] :
-                  configuration?.[key]
-              }
+              defaultValue={sliderDisplayValue ?? ''}
               onChange={(e) => {
-                document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
+                const el = document.getElementById(sliderValueId);
+                if (el) el.innerText = e.target.value;
                 debouncedInputChange(e, key, true);
               }}
-              className="range range-accent range-sm h-3 range-extra-small-thumb"
+              className={`range range-accent h-2 rounded-full ${rangeSizeClass}`}
               name={key}
             />
-            <button type="button" className="btn btn-sm" onClick={() => setSliderValue('max', key)}>Max</button>
+            <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
-        {field === 'text' && configuration?.[key] !== 'default' && (
+
+        {field === 'text' && !isDefaultValue && (
           <input
             type="text"
             value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
@@ -491,11 +491,12 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               }));
               debouncedInputChange(e, key);
             }}
-            className="input input-bordered input-sm w-full"
+            className={`input input-bordered ${inputSizeClass} w-full`}
             name={key}
           />
         )}
-        {field === 'number' && configuration?.[key] !== 'default' && (
+
+        {field === 'number' && !isDefaultValue && (
           <input
             type="number"
             min={min}
@@ -509,27 +510,29 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               }))
             }
             onBlur={(e) => handleInputChange(e, key)}
-            className="input input-bordered input-sm w-full"
+            className={`input input-bordered ${inputSizeClass} w-full`}
             name={key}
           />
         )}
-        {field === 'boolean' && configuration?.[key] !== 'default' && (
-          <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+
+        {field === 'boolean' && !isDefaultValue && (
+          <label className='flex items-center justify-start w-fit gap-2 bg-base-100 text-base-content'>
             <input
               name={key}
               type="checkbox"
-              className="toggle"
+              className={`toggle ${toggleSizeClass}`}
               checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
               onChange={(e) => handleInputChange(e, key)}
             />
           </label>
         )}
-        {field === 'select' && configuration?.[key] !== 'default' && (
+
+        {field === 'select' && !isDefaultValue && (
           <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
               onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
-              className="select select-sm max-w-xs select-bordered capitalize"
+              className={`select ${selectSizeClass} max-w-xs select-bordered capitalize`}
             >
               <option value='default' disabled> Select {key} mode </option>
               {options?.map((service, index) => (
@@ -539,7 +542,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
 
             {configuration?.[key]?.type === "json_schema" && (
               <>
-                <div className="flex justify-end mb-2 mt-5">
+                <div className="flex justify-end mb-2">
                   <span
                     className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => {
@@ -550,7 +553,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   </span>
                 </div>
 
-                {/* Textarea */}
                 <textarea
                   key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
                   type="input"
@@ -569,18 +571,22 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   placeholder="Enter valid JSON object here..."
                 />
 
-                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} 
-                
-                           onResetThreadId={() => {
-                                    const newId = generateRandomID();
-                                    setThreadId(newId);
-                                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                                        bridgeId: params?.id,
-                                        versionId: searchParams?.version,
-                                        thread_id: newId,
-                                    }));
-                                }} 
-                                />
+                <JsonSchemaModal
+                  params={params}
+                  searchParams={searchParams}
+                  messages={messages}
+                  setMessages={setMessages}
+                  thread_id={thread_id}
+                  onResetThreadId={() => {
+                    const newId = generateRandomID();
+                    setThreadId(newId);
+                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                      bridgeId: params?.id,
+                      versionId: searchParams?.version,
+                      thread_id: newId,
+                    }));
+                  }}
+                />
               </>
             )}
 
@@ -590,44 +596,55 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     );
   };
 
-  return (
-    <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
-      {/* Level 2 Parameters - Displayed Outside Accordion */}
-      {level2Parameters.length > 0 && (
-        <div className="w-full gap-3 flex flex-col px-3 py-2 border border-base-content/20 rounded-lg mb-4 cursor-default">
-          {level2Parameters.map(([key, paramConfig]) => (
-            renderParameterField(key, paramConfig)
-          ))}
-        </div>
-      )}
-      {(level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters))) && (
-        <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
-          handleTutorial()
-          toggleAccordion()
-        }}>
-          <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
-            <div className="cursor-pointer label-text inline-block ml-1">
-              LLM Advanced Parameters <span className="text-base-content/50 text-xs">{getParametersPreview}</span>
-            </div>
-          </InfoTooltip>
+  const shouldShowLevel1 = level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters));
 
-          <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
-        </div>
-      )}
-      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
-      {tutorialState.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
-      )}
-      {(level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters)))&& (
-        <div className={`w-full gap-3 cursor-default flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
-          {/* Level 1 Parameters - Inside Accordion */}
+  if (level === 2) {
+    if (level2Parameters.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={`z-very-low mt-2 text-base-content w-full ${className}`} tabIndex={0}>
+        {/* Level 2 Parameters - Displayed Outside Accordion */}
+        {level2Parameters.length > 0 && (
+          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-center">
+            {level2Parameters.map(([key, paramConfig]) => (
+              <div key={key} className="compact-parameter w-full max-w-md">
+                {renderParameterField(key, paramConfig)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (level === 1) {
+    if (!shouldShowLevel1) {
+      return null;
+    }
+
+    // Level 1 parameters now render without accordion
+    return (
+      <div className={`z-very-low mt-4 text-base-content w-full ${className}`} tabIndex={0}>
+        {tutorialState.showSuggestion && (
+          <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />
+        )}
+        {tutorialState.showTutorial && (
+          <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
+        )}
+        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-center`}>
           {level1Parameters.map(([key, paramConfig]) => (
-            renderParameterField(key, paramConfig)
+            <div key={key} className="w-full max-w-md">
+              {renderParameterField(key, paramConfig)}
+            </div>
           ))}
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default AdvancedParameters;

@@ -5,13 +5,14 @@ import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createBridgeVersionAction, deleteBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal, sendDataToParent } from '@/utils/utility';
+import { openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ChevronDown, ChevronLeft, ChevronUp, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Plus } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
     const router = useRouter();
@@ -23,8 +24,9 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
     const [showAllVersions, setShowAllVersions] = useState(false);
     const [maxVisibleVersions, setMaxVisibleVersions] = useState(4);
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
-    
-    const { bridgeVersionsArray, publishedVersion, bridgeName, versionDescription} = useCustomSelector((state) => ({
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_VERSION_MODAL);
+
+    const { bridgeVersionsArray, publishedVersion, bridgeName, versionDescription } = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
@@ -63,19 +65,19 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
     // SendDataToChatbot effect - only runs when version changes
     useEffect(() => {
         if (!searchParams?.version) return;
-        
+
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined') {
                 SendDataToChatbot({ "version_id": searchParams.version });
                 clearInterval(timer);
             }
         }, 300);
-        
+
         return () => clearInterval(timer);
     }, [searchParams?.version]);
 
     // Initialize version only once on mount or when versions become available
-    useEffect(() => { 
+    useEffect(() => {
         if (hasInitialized.current) {
             return;
         }
@@ -103,9 +105,9 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
 
     const handleCreateNewVersion = () => {
         // create new version
-        const version_description_input  = versionDescriptionRef?.current?.value;
-         dispatch(createBridgeVersionAction({ parentVersionId: searchParams?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value,orgId: params.org_id }, (data) => {
-            isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_description: version_description_input , agent_id: params?.id, agent_version_id: data?.version_id }, "Agent Version Created Successfully")
+        const version_description_input = versionDescriptionRef?.current?.value;
+        dispatch(createBridgeVersionAction({ parentVersionId: searchParams?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value, orgId: params.org_id }, (data) => {
+            isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_description: version_description_input, agent_id: params?.id, agent_version_id: data?.version_id }, "Agent Version Created Successfully")
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
         }))
         versionDescriptionRef.current.value = ''
@@ -120,49 +122,45 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
             alert("Cannot delete the published version");
             return;
         }
-        try {
-            await dispatch(deleteBridgeVersionAction({ versionId:selectedDataToDelete?.version, bridgeId: params.id, org_id: params.org_id }));
+
+        await executeDelete(async () => {
+            await dispatch(deleteBridgeVersionAction({ versionId: selectedDataToDelete?.version, bridgeId: params.id, org_id: params.org_id }));
             if (searchParams?.version === selectedDataToDelete?.version) {
                 const remainingVersions = bridgeVersionsArray.filter(v => v !== selectedDataToDelete?.version);
-                const nextVersion = publishedVersion && publishedVersion !== selectedDataToDelete?.version 
-                    ? publishedVersion 
+                const nextVersion = publishedVersion && publishedVersion !== selectedDataToDelete?.version
+                    ? publishedVersion
                     : remainingVersions[0];
                 router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${nextVersion}`);
             }
-        } catch (error) {
-            console.error("Error deleting version:", error)
-        }
-        finally{
             setselectedDataToDelete(null);
-            closeModal(MODAL_TYPE.DELETE_VERSION_MODAL)
-        }
-    }, [bridgeVersionsArray, publishedVersion, searchParams?.version, params, router, selectedDataToDelete]);
+        });
+    }, [bridgeVersionsArray, publishedVersion, searchParams?.version, params, router, selectedDataToDelete, dispatch, executeDelete]);
 
     // Determine which versions to show with smart visibility around active version
     const getVersionsToShow = () => {
         if (showAllVersions) {
             return bridgeVersionsArray;
         }
-        
+
         if (bridgeVersionsArray.length <= maxVisibleVersions) {
             return bridgeVersionsArray;
         }
-        
+
         // Find the index of the currently active version
         const activeIndex = bridgeVersionsArray.findIndex(version => version === searchParams?.version);
-        
+
         if (activeIndex === -1) {
             // If no active version found, show first versions
             return bridgeVersionsArray.slice(0, maxVisibleVersions);
         }
-        
+
         // Calculate how many versions to show on each side of the active version
         const sideCount = Math.floor((maxVisibleVersions - 1) / 2);
-        
+
         // Calculate start and end indices
         let startIndex = Math.max(0, activeIndex - sideCount);
         let endIndex = Math.min(bridgeVersionsArray.length, activeIndex + sideCount + 1);
-        
+
         // Adjust if we're near the beginning or end
         if (endIndex - startIndex < maxVisibleVersions) {
             if (startIndex === 0) {
@@ -171,18 +169,18 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                 startIndex = Math.max(0, bridgeVersionsArray.length - maxVisibleVersions);
             }
         }
-        
+
         return bridgeVersionsArray.slice(startIndex, endIndex);
     };
-    
+
     const versionsToShow = getVersionsToShow();
     const hasMoreVersions = bridgeVersionsArray.length > maxVisibleVersions;
 
     if (!bridgeVersionsArray.length) {
         return (
             <div className='flex items-center gap-2'>
-                <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription}/>
-                <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
+                <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription} />
+                <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion} />
             </div>
         );
     }
@@ -197,7 +195,7 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                         const isActive = searchParams?.version === version;
                         const isPublished = version === publishedVersion;
                         const canDelete = bridgeVersionsArray.length > 1 && !isPublished;
-                        
+
                         return (
                             <button
                                 key={version}
@@ -205,9 +203,9 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                                 className={`
                                     tab tab-sm h-full px-3 text-xs font-medium transition-all duration-200 border-0 relative group
                                     ${canDelete ? 'hover:pr-8' : ''}
-                                    ${isActive 
-                                        ? isPublished 
-                                            ? 'tab-active bg-green-100 text-green-800' 
+                                    ${isActive
+                                        ? isPublished
+                                            ? 'tab-active bg-green-100 text-green-800'
                                             : 'tab-active bg-primary text-primary-content'
                                         : 'hover:bg-base-300 text-base-content'
                                     }
@@ -219,11 +217,11 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                                         <span className="w-2 h-2 bg-green-500 rounded-full" title="Published Version"></span>
                                     )}
                                 </span>
-                                
+
                                 {/* Delete Button - appears on hover */}
                                 {canDelete && (
                                     <span
-                                        onClick={(e) => {e.stopPropagation(); setselectedDataToDelete({version, index:bridgeVersionsArray.indexOf(version) + 1}); openModal(MODAL_TYPE?.DELETE_VERSION_MODAL)}}
+                                        onClick={(e) => { e.stopPropagation(); setselectedDataToDelete({ version, index: bridgeVersionsArray.indexOf(version) + 1 }); openModal(MODAL_TYPE?.DELETE_VERSION_MODAL) }}
                                         className="absolute right-1 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 
                                                  transition-opacity duration-200 hover:bg-red-100 rounded p-0.5 z-10 cursor-pointer"
                                         title={`Delete Version ${bridgeVersionsArray.indexOf(version) + 1}`}
@@ -234,7 +232,7 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                             </button>
                         );
                     })}
-                    
+
                     {/* More/Less Button */}
                     {hasMoreVersions && (
                         <button
@@ -257,7 +255,7 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                             )}
                         </button>
                     )}
-                    
+
                     {/* Create New Version Button */}
                     <button
                         onClick={() => openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
@@ -270,9 +268,9 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                 </div>
             </div>
 
-            <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription}/>
-            <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
-            <DeleteModal modalType={MODAL_TYPE.DELETE_VERSION_MODAL} onConfirm={handleDeleteVersion} item={selectedDataToDelete} description={`Are you sure you want to delete the Version "${selectedDataToDelete?.index}"? This action cannot be undone.`} title='Delete Version'/>
+            <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription} />
+            <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion} />
+            <DeleteModal modalType={MODAL_TYPE.DELETE_VERSION_MODAL} onConfirm={handleDeleteVersion} item={selectedDataToDelete} description={`Are you sure you want to delete the Version "${selectedDataToDelete?.index}"? This action cannot be undone.`} title='Delete Version' loading={isDeleting} isAsync={true} />
         </div>
     );
 }

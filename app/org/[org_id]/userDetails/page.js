@@ -14,10 +14,10 @@ const page = () => {
         const configuration = {
             authToken: getFromCookies('proxy_token') || "",
             success: (data) => {
-                console.log('success response', data);
+                // console.log('success response', data);
             },
             failure: (error) => {
-                console.log('failure reason', error);
+                console.error('failure reason', error);
             },
         };
 

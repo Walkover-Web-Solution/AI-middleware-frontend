@@ -9,7 +9,6 @@ import Questions from "@/components/Questions";
 import RoadMapCards from "@/components/RoadMapCards";
 import SuggestionTemplates from "@/components/SuggestionTemplate";
 import TrustedBy from "@/components/TrustedBy";
-import Head from "next/head";
 /*
   This page is the entry point for the user to start the login process.
   The page checks if the user has already logged in or not.
@@ -19,11 +18,6 @@ import Head from "next/head";
 async function page() {
   return (
     <div className="bg-black h-full w-full text-white overflow-hidden">
-      <Head>
-        <link rel="canonical" href="https://gtwy.ai" />
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet"/>
-
-      </Head>
       <HeroPage />
       <PlatformImage />
       <TrustedBy />

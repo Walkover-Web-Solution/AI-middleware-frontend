@@ -95,7 +95,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     if (!bridgeApiKey) {
       setShowError(true);
       setErrorType('apikey');
-      setErrorBorder(apiKeySectionRef, 'select', true);
+      setErrorBorder(apiKeySectionRef, 'button', true);
       return;
     }
     

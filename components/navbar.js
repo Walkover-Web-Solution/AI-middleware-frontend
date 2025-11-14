@@ -1,14 +1,14 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, ChevronDown, BotIcon } from 'lucide-react';
+import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, BotIcon, Variable } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction, archiveBridgeAction, updateBridgeVersionAction, createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, dicardBridgeVersionAction, archiveBridgeAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal, toggleSidebar, sendDataToParent } from '@/utils/utility';
+import { openModal, toggleSidebar, sendDataToParent } from '@/utils/utility';
 import { toast } from 'react-toastify';
 const ChatBotSlider = dynamic(() => import('./sliders/chatBotSlider'), { ssr: false });
 const ConfigHistorySlider = dynamic(() => import('./sliders/configHistorySlider'), { ssr: false });
@@ -16,8 +16,8 @@ import Protected from './protected';
 const GuideSlider = dynamic(() => import('./sliders/IntegrationGuideSlider'), { ssr: false });
 import { FilterSliderIcon } from './Icons';
 const DeleteModal = dynamic(() => import('./UI/DeleteModal'), { ssr: false });
-const BridgeVersionDropdown = dynamic(() => import('./configuration/configurationComponent/bridgeVersionDropdown'), { ssr: false });
-const VersionDescriptionInput = dynamic(() => import('./configuration/configurationComponent/VersionDescriptionInput'), { ssr: false });
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+const VariableCollectionSlider = dynamic(() => import('./sliders/VariableCollectionSlider'), { ssr: false });
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -30,6 +30,8 @@ const Navbar = ({ isEmbedUser }) => {
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
+  // const [defaultGroupName, setDefaultGroupName] = useState('Default Group'); // Commented out - not needed with simple button
+  const { isDeleting: isDiscardingWithHook, executeDelete } = useDeleteOperation();
   const ellipsisMenuRef = useRef(null);
 
   const router = useRouter();
@@ -39,32 +41,38 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray } = useCustomSelector(state => ({
+  const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray, variablesKeyValue } = useCustomSelector(state => {
+    const variableState = state?.variableReducer?.VariableMapping?.[bridgeId]?.[versionId] || {};
+    return {
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId)||{},
+    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
-    isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[searchParams?.get('version')]?.is_drafted ?? false,
+    isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
     bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.bridgeType,
     isArchived: state.bridgeReducer.allBridgesMap?.[bridgeId]?.status ?? false,
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
-    hideHomeButton:  state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
-    showHistory:  state.appInfoReducer?.embedUserDetails?.showHistory,
+    hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
+    showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
-    versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[searchParams?.get('version')]?.version_description || "",
+    versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.version_description || "",
     bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.versions || [],
-  }));
+    variablesKeyValue: variableState?.variables || [],
+    // variableGroups: variableState?.groups || [], // Commented out - not needed with simple button
+    // activeVariableGroupId: variableState?.activeGroupId || null, // Commented out - not needed with simple button
+  }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
     const baseTabs = [
-      { 
-        id: 'configure', 
-        label: bridgeType === 'chatbot' ? 'Chatbot Config' : 'Agent Config', 
-        icon: BotIcon, 
-        shortLabel: bridgeType === 'chatbot' ? 'Chatbot' : 'Agent'
+      {
+        id: 'configure',
+        label: ' Agent Config',
+        icon: BotIcon,
+        shortLabel: 'Agent Config'
       },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
@@ -77,10 +85,21 @@ const Navbar = ({ isEmbedUser }) => {
   const agentName = useMemo(() => bridgeName || bridgeData?.name || 'Agent not Found', [bridgeName, bridgeData?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization not Found', [organizations, orgId]);
 
+  // Calculate active tab index for tab switcher animation
+  const activeTabIndex = useMemo(() => {
+    return TABS.findIndex(tab => tab.id === activeTab);
+  }, [TABS, activeTab]);
+
   // Create compatible searchParams object for prebuilt components
   const compatibleSearchParams = useMemo(() => ({
-    version: searchParams?.get('version')
-  }), [searchParams]);
+    version: versionId
+  }), [versionId]);
+  const variablesCount = useMemo(() => variablesKeyValue?.length ?? 0, [variablesKeyValue]);
+  // const activeVariableGroup = useMemo(() => {
+  //   if (!Array.isArray(variableGroups) || !variableGroups.length) return null;
+  //   return variableGroups.find(group => group.id === activeVariableGroupId) || variableGroups[0];
+  // }, [variableGroups, activeVariableGroupId]);
+  // const activeVariableGroupName = useMemo(() => activeVariableGroup?.name || 'Variables', [activeVariableGroup]);
 
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
@@ -144,7 +163,7 @@ const Navbar = ({ isEmbedUser }) => {
         dataToSend: { name: trimmed },
       }));
       isEmbedUser && sendDataToParent("updated", {
-        name: trimmed, 
+        name: trimmed,
         agent_id: bridgeId
       }, "Agent Name Updated");
     }
@@ -166,6 +185,24 @@ const Navbar = ({ isEmbedUser }) => {
     }
   }, [handleNameSave, handleNameCancel]);
 
+  // Variable Group Dropdown Handlers - Commented out since using simple button now
+  // const handleVariableGroupSelect = useCallback((groupId) => {
+  //   dispatch(setActiveVariableGroup({
+  //     bridgeId: bridgeId,
+  //     versionId: versionId,
+  //     groupId: groupId
+  //   }));
+  //   document.activeElement?.blur();
+  // }, [dispatch, bridgeId, versionId]);
+
+  // const handleDefaultGroupNameChange = useCallback((e) => {
+  //   setDefaultGroupName(e.target.value);
+  // }, []);
+
+  // const getDisplayGroupName = useCallback(() => {
+  //   return activeVariableGroupName || defaultGroupName;
+  // }, [activeVariableGroupName, defaultGroupName]);
+
   const handlePauseBridge = useCallback(async () => {
     const newStatus = bridgeStatus === BRIDGE_STATUS.PAUSED
       ? BRIDGE_STATUS.ACTIVE
@@ -185,20 +222,14 @@ const Navbar = ({ isEmbedUser }) => {
   }, [dispatch, bridgeId, bridgeStatus]);
 
   const handleDiscardChanges = useCallback(async () => {
-    try {
+    await executeDelete(async () => {
       dispatch(updateBridgeVersionReducer({
-        bridges: { ...bridge, _id: searchParams?.get('version'), parent_id: bridgeId, is_drafted: false }
+        bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false }
       }));
-      await dispatch(dicardBridgeVersionAction({ bridgeId, versionId: searchParams?.get('version') }));
+      await dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
       toast.success('Changes discarded successfully');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to discard changes');
-    }
-    finally{
-      closeModal(MODAL_TYPE.DELETE_MODAL);
-    }
-  }, [dispatch, bridge, searchParams?.get('version'), bridgeId]);
+    });
+  }, [executeDelete, dispatch, bridge, searchParams, bridgeId]);
 
   const handlePublish = useCallback(async () => {
     if (!isDrafted) {
@@ -211,13 +242,12 @@ const Navbar = ({ isEmbedUser }) => {
       console.error(err);
       toast.error('Failed to publish version');
     }
-  }, [dispatch, isDrafted, bridgeId, searchParams?.get('version')]);
+  }, [isDrafted]);
 
   const handleTabChange = useCallback((tabId) => {
     const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
-    const version = searchParams?.get('version');
-    router.push(base + (version ? `?version=${version}` : ''));
-  }, [router, orgId, bridgeId, searchParams]);
+    router.push(base + (versionId ? `?version=${versionId}` : ''));
+  }, [router, orgId, bridgeId, versionId]);
 
   const toggleOrgSidebar = useCallback(() => router.push(`/org?redirection=false`), [router]);
   const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
@@ -227,7 +257,7 @@ const Navbar = ({ isEmbedUser }) => {
 
   const breadcrumbItems = useMemo(() => {
     const items = [];
-    
+
     // Add org and agents breadcrumbs only for non-embed users
     if (!isEmbedUser) {
       items.push(
@@ -245,7 +275,7 @@ const Navbar = ({ isEmbedUser }) => {
         }
       );
     }
-    
+
     // Always add the agent name (editable)
     items.push({
       label: agentName,
@@ -254,10 +284,10 @@ const Navbar = ({ isEmbedUser }) => {
       current: true,
       editable: true
     });
-    
+
     return items;
   }, [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar, handleNameEdit, isEmbedUser]);
-  
+
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
@@ -350,10 +380,10 @@ const Navbar = ({ isEmbedUser }) => {
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}
-        <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 h-12 sm:h-14">
+        <div className="flex w-full items-center gap-2 px-2 sm:px-4 py-2 sm:py-3 h-12 sm:h-14">
           {/* Left: Breadcrumb or Home */}
           <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-1">
-            {(isEmbedUser && !hideHomeButton) && 
+            {(isEmbedUser && !hideHomeButton) &&
               <button
                 onClick={handleHomeClick}
                 className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 hover:bg-base-200 px-2 sm:px-3"
@@ -362,7 +392,7 @@ const Navbar = ({ isEmbedUser }) => {
                 <Home size={14} className="sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline text-xs sm:text-sm">Home</span>
               </button>
-              }
+            }
             {<nav className="flex items-center ml-2 sm:ml-6 lg:ml-0 md:ml-0 xl:ml-0 gap-0.5 sm:gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
                 {breadcrumbItems.map((item, idx) => (
                   <React.Fragment key={idx}>
@@ -373,7 +403,7 @@ const Navbar = ({ isEmbedUser }) => {
                       <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2 py-0.5 sm:py-1 rounded-md bg-primary/10 text-primary min-w-0">
                         {!isEditingName ? (
                           <div className="flex items-center gap-2">
-                            <span className="truncate font-medium text-xs sm:text-sm max-w-[80px] sm:max-w-[120px] md:max-w-[200px]" title={item.label}>
+                            <span className="truncate font-medium text-xs sm:text-sm max-w-[60px] sm:max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" title={item.label}>
                               {item.label}
                             </span>
                             <button
@@ -391,7 +421,7 @@ const Navbar = ({ isEmbedUser }) => {
                             onChange={(e) => setEditedName(e.target.value)}
                             onBlur={handleNameSave}
                             onKeyDown={handleNameKeyDown}
-                            className="bg-transparent border-none outline-none font-medium text-xs sm:text-sm max-w-[80px] sm:max-w-[120px] md:max-w-[200px]"
+                            className="bg-transparent border-none outline-none font-medium text-xs sm:text-sm max-w-[60px] sm:max-w-[100px] md:max-w-[150px] lg:max-w-[200px]"
                             autoFocus
                             maxLength={50}
                           />
@@ -403,12 +433,12 @@ const Navbar = ({ isEmbedUser }) => {
                         className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs sm:text-sm transition-all hover:bg-base-200 text-base-content/70 hover:text-base-content min-w-0"
                       >
                         {item.icon && <item.icon size={12} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />}
-                        <span className="truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px]">
+                        <span className="truncate max-w-[50px] sm:max-w-[80px] md:max-w-[120px] lg:max-w-[150px]" title={item.label}>
                           {item.label}
                         </span>
                       </button>
                     ) : (
-                      <span className="truncate font-medium text-xs sm:text-sm max-w-[80px] sm:max-w-[120px] md:max-w-[200px]" title={item.label}>
+                      <span className="truncate font-medium text-xs sm:text-sm max-w-[50px] sm:max-w-[80px] md:max-w-[120px] lg:max-w-[150px]" title={item.label}>
                         {item.label}
                       </span>
                     )}
@@ -418,7 +448,7 @@ const Navbar = ({ isEmbedUser }) => {
               </nav>}
 
             {/* Navigation Tabs - fixed position */}
-            {(isEmbedUser && showHistory || !isEmbedUser) && (
+            {/* {(isEmbedUser && showHistory || !isEmbedUser) && (
               <div className="absolute left-1/2 transform -translate-x-1/2">
                 <div className="join group flex">
                   {TABS.map(tab => (
@@ -435,10 +465,10 @@ const Navbar = ({ isEmbedUser }) => {
                   ))}
                 </div>
               </div>
-            )}
-            
+            )} */}
+
             {/* Version Controls - show on configure tab for non-embed users */}
-            
+
             {/* {activeTab === 'configure' && bridgeId && (
               <div className="hidden xl:flex items-center gap-1 sm:gap-2 mx-2 sm:mx-4">
                 <BridgeVersionDropdown 
@@ -455,13 +485,53 @@ const Navbar = ({ isEmbedUser }) => {
                 </div>
               </div>
             )} */}
-            
-            
-            
-          </div>
 
+
+
+          </div>
+          {(isEmbedUser && showHistory) || !isEmbedUser ? (
+            <div className="flex flex-1 justify-center px-1 sm:px-2">
+              <div className="relative flex w-full max-w-xs items-center overflow-hidden rounded-md border border-base-200 bg-base-200/60 p-0.5 shadow-inner sm:max-w-sm">
+                <span
+                  className="absolute inset-y-0.5 rounded-md bg-base-100 shadow transition-transform duration-300 ease-in-out"
+                  style={{
+                    width: `${100 / (TABS.length || 1)}%`,
+                    transform: `translateX(${activeTabIndex * 100}%)`,
+                  }}
+                />
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`relative z-10 flex-1 rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors duration-200 sm:px-2 sm:py-1.5 sm:text-xs ${
+                        isActive
+                          ? 'text-base-content'
+                          : 'text-base-content/70 hover:text-base-content'
+                      }`}
+                    >
+                      <span className="flex items-center justify-center gap-1.5">
+                        <tab.icon
+                          size={14}
+                          className={`hidden sm:block transition-opacity ${
+                            isActive ? 'opacity-100' : 'opacity-60'
+                          }`}
+                        />
+                        <span className="truncate">
+                          {isMobile ? tab.shortLabel : tab.label}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-1 justify-center" />
+          )}
           {/* Right: Action buttons */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
             {/* Desktop view - show buttons for both users */}
             <div className="hidden md:flex items-center gap-1 sm:gap-2">
               {!isEmbedUser && activeTab === 'configure' && <button className="btn btn-xs sm:btn-sm tooltip tooltip-left px-2 sm:px-3" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
@@ -474,7 +544,7 @@ const Navbar = ({ isEmbedUser }) => {
                   onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                   disabled={isUpdatingBridge || isPublishing}
                 >
-                  <ClipboardX size={12} className='sm:w-3.5 sm:h-3.5 text-black'/>
+                  <ClipboardX size={12} className='sm:w-3.5 sm:h-3.5 text-black' />
                   <span className="text-black text-xs sm:text-sm">Discard</span>
                 </button>
               )}
@@ -490,37 +560,93 @@ const Navbar = ({ isEmbedUser }) => {
                   <span className="text-black text-xs sm:text-sm">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 </button>
               )}
-            </div>
-
-            {/* Mobile view - compact buttons for embed users */}
-            <div className="md:hidden flex items-center gap-1">
-              {isEmbedUser && activeTab === 'configure' && (
+              {activeTab === 'configure' && (
                 <>
-                  {/* Discard icon - only show if there are drafts */}
-                  {isDrafted && (
-                    <button
-                      className="btn btn-xs flex gap-1 bg-red-200 hover:bg-red-300 text-base-content px-2"
-                      onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
-                      disabled={isUpdatingBridge || isPublishing}
-                      title="Discard changes"
-                    >
-                      <ClipboardX size={12} className='text-black'/>
-                      <span className="text-black text-xs">Discard</span>
-                    </button>
-                  )}
-
-                  {/* Publish icon */}
+                  {/* Variables Button - Opens Variable Slider */}
                   <button
-                    className={`btn btn-xs bg-green-200 hover:bg-green-300 flex gap-1 px-2 ${isPublishing ? 'loading' : ''}`}
-                    onClick={handlePublish}
-                    disabled={!isDrafted || isPublishing}
-                    title={isPublishing ? 'Publishing...' : 'Publish'}
+                    className="btn btn-outline btn-xs sm:btn-sm gap-1 sm:gap-2 px-2 sm:px-3"
+                    onClick={() => toggleSidebar("variable-collection-slider", "right")}
+                    disabled={!bridgeId}
+                    title="Manage Variables"
                   >
-                    {!isPublishing && <BookCheck size={12} className='text-black'/>}
-                    <span className="text-black text-xs">{isPublishing ? 'Pub...' : 'Publish'}</span>
+                    <span className="text-xs sm:text-sm font-medium">Variables</span>
                   </button>
+
+                  {/* Commented out Variable Group Dropdown */}
+                  {/* <div className="dropdown dropdown-end">
+                    <div tabIndex={0} role="button" className="btn btn-outline btn-xs sm:btn-sm gap-1 sm:gap-2 px-2 sm:px-3" disabled={!bridgeId}>
+                      <Variable size={14} className="sm:w-4 sm:h-4" />
+                      <span
+                        className="text-xs sm:text-sm font-medium whitespace-nowrap max-w-[80px] sm:max-w-[120px] md:max-w-[150px] truncate"
+                        title={getDisplayGroupName()}
+                      >
+                        {truncate(getDisplayGroupName(), 15)}
+                      </span>
+                      <div className="badge badge-sm badge-primary text-[10px] sm:text-xs">
+                        {variablesCount}
+                      </div>
+                      <ChevronDown size={12} className="sm:w-3 sm:h-3" />
+                    </div>
+
+                    <div tabIndex={0} className="dropdown-content z-[9999] menu p-2 shadow-lg bg-base-100 rounded-box w-80 border border-base-200">
+                        <div className="text-xs font-semibold text-base-content my-2">Variable Management</div>
+                      
+                      <div className="max-h-40 overflow-y-auto">
+                        {variableGroups && variableGroups.length > 0 ? (
+                          variableGroups.map((group) => (
+                            <li key={group.id}>
+                              <button
+                                onClick={() => handleVariableGroupSelect(group.id)}
+                                className={`text-xs justify-between w-full ${
+                                  activeVariableGroupId === group.id ? 'active' : ''
+                                }`}
+                              >
+                                <span className="truncate max-w-[200px] text-left" title={group.name}>{group.name}</span>
+                                {activeVariableGroupId === group.id && (
+                                  <span className="badge badge-xs badge-primary ml-2 flex-shrink-0">Active</span>
+                                )}
+                              </button>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-center py-4">
+                            <span className="text-xs text-base-content/50">No groups available</span>
+                          </li>
+                        )}
+                      </div>
+                      
+                      <div className="divider my-1"></div>
+                      <li>
+                        <button
+                          onClick={() => {
+                            toggleSidebar("variable-collection-slider", "right");
+                            document.activeElement?.blur();
+                          }}
+                          className="text-xs gap-2"
+                        >
+                          <Plus size={12} />
+                          Manage Groups
+                        </button>
+                      </li>
+                    </div>
+                  </div> */}
                 </>
               )}
+              {!isEmbedUser && activeTab === 'configure' && (
+                <button
+                  className="btn btn-xs sm:btn-sm tooltip tooltip-left px-2 sm:px-3 gap-1 sm:gap-2 flex items-center"
+                  data-tip="Integration Guide"
+                  onClick={toggleIntegrationGuideSlider}
+                >
+                  <FilterSliderIcon size={14} className="sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Guide</span>
+                </button>
+              )}
+            </div>
+
+            {/* Mobile view - compact buttons removed from header for embed users */}
+            <div className="md:hidden flex items-center gap-1">
+              {/* Embed user buttons moved to bottom section */}
             </div>
             {/* Ellipsis menu - only for normal users */}
             {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
@@ -551,11 +677,11 @@ const Navbar = ({ isEmbedUser }) => {
 
       </div>
 
-      {/* Mobile action buttons - only for normal users on configure tab */}
-      {isMobile && activeTab === 'configure' && !isEmbedUser && (
+      {/* Mobile action buttons - for both normal and embed users on configure tab */}
+      {isMobile && activeTab === 'configure' && (
         <div className="bg-base-100 border-b border-base-200 p-2">
           <div className="flex gap-1 sm:gap-2">
-            {!isEmbedUser && activeTab === 'configure' && <button className="btn btn-xs tooltip tooltip-left px-2" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+            {!isEmbedUser && <button className="btn btn-xs tooltip tooltip-left px-2" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
               <HistoryIcon size={14} />
             </button>}
 
@@ -580,6 +706,83 @@ const Navbar = ({ isEmbedUser }) => {
               {!isPublishing && <BookCheck size={12} className='text-black' />}
               <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Publish'}</span>
             </button>
+
+            {/* Mobile Variables Button */}
+            <button
+              className="btn btn-outline btn-xs gap-1"
+              onClick={() => toggleSidebar("variable-collection-slider", "right")}
+              disabled={!bridgeId}
+              title="Manage Variables"
+            >
+              <Variable size={12} />
+              <span className="text-xs">Variables</span>
+              <div className="badge badge-xs badge-primary">{variablesCount}</div>
+            </button>
+
+            {/* Commented out Mobile Variable Group Dropdown */}
+            {/* <div className="dropdown dropdown-end">
+              <div tabIndex={0} role="button" className="btn btn-outline btn-xs gap-1" disabled={!bridgeId}>
+                <Variable size={12} />
+                <span className="text-xs truncate max-w-[50px] sm:max-w-[80px]" title={getDisplayGroupName()}>
+                  {getDisplayGroupName()}
+                </span>
+                <div className="badge badge-xs badge-primary">{variablesCount}</div>
+                <ChevronDown size={8} />
+              </div>
+
+              <div tabIndex={0} className="dropdown-content z-[9999] menu p-2 shadow-lg bg-base-100 rounded-box w-80 border border-base-200 mt-2">
+                <div className="text-xs font-semibold text-base-content mb-2">Variable Management</div>
+                
+                <div className="max-h-32 overflow-y-auto">
+                  {variableGroups && variableGroups.length > 0 ? (
+                    variableGroups.map((group) => (
+                      <li key={group.id}>
+                        <button
+                          onClick={() => handleVariableGroupSelect(group.id)}
+                          className={`text-xs justify-between w-full ${
+                            activeVariableGroupId === group.id ? 'active' : ''
+                          }`}
+                        >
+                          <span className="truncate max-w-[200px] text-left" title={group.name}>{group.name}</span>
+                          {activeVariableGroupId === group.id && (
+                            <span className="badge badge-xs badge-primary ml-2 flex-shrink-0">Active</span>
+                          )}
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-center py-3">
+                      <span className="text-xs text-base-content/50">No groups available</span>
+                    </li>
+                  )}
+                </div>
+                
+                <div className="divider my-1"></div>
+                <li>
+                  <button
+                    onClick={() => {
+                      toggleSidebar("variable-collection-slider", "right");
+                      document.activeElement?.blur();
+                    }}
+                    className="text-xs gap-2"
+                  >
+                    <Plus size={12} />
+                    Manage Variables
+                  </button>
+                </li>
+              </div>
+            </div> */}
+
+            {!isEmbedUser && (
+              <button
+                className="btn btn-xs gap-1 tooltip tooltip-top"
+                data-tip="Integration Guide"
+                onClick={toggleIntegrationGuideSlider}
+              >
+                <FilterSliderIcon size={14} />
+                <span className="text-xs font-medium whitespace-nowrap">Guide</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -588,13 +791,25 @@ const Navbar = ({ isEmbedUser }) => {
       {!isEmbedUser && (
         <>
           <ChatBotSlider />
-          <ConfigHistorySlider versionId={searchParams?.get('version')} />
-          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:searchParams?.get('version') }} bridgeType={bridgeType}/>
+          <ConfigHistorySlider versionId={versionId} />
+          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/>
+          <VariableCollectionSlider
+            params={{ org_id: orgId, id: bridgeId }}
+            versionId={versionId}
+            isEmbedUser={isEmbedUser}
+          />
         </>
+      )}
+      {isEmbedUser && activeTab === 'configure' && (
+        <VariableCollectionSlider
+          params={{ org_id: orgId, id: bridgeId }}
+          versionId={versionId}
+          isEmbedUser={isEmbedUser}
+        />
       )}
       
       {/* Modals */}
-      <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard"/>
+      <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard" loading={isDiscardingWithHook} isAsync={true} />
     </div>
   );
 };

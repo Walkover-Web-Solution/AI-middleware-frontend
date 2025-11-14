@@ -18,9 +18,9 @@ export const getSingleBridge = async (bridgeId) => {
   }
 }
 
-export const getAllBridges = async (org_id) => {
+export const getAllBridges = async () => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`, org_id)
+    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`)
     return data;
   } catch (error) {
     console.error(error)
@@ -48,14 +48,13 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   }
 }
 
-export const deleteBridge = async (bridgeId) => {
+export const deleteBridge = async (bridgeId,org_id,restore=false) => {
   try {
-    const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
+    const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`,{data:{org_id,restore}});
     return response;
   } catch (error) {
     console.error(error);
-    toast.error("Failed to delete the agent");
-    throw new Error(error);
+    throw error;
   }
 };
 

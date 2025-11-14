@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { ChevronsUpDown, PlusCircleIcon } from "lucide-react";
+import { ChevronsUpDown, PlusCircleIcon, CircleQuestionMark } from "lucide-react";
 
 // Parameter Card Component
 const ParameterCard = ({
@@ -789,11 +789,6 @@ function FunctionParameterModal({
     if (toolName.trim() === "") {
       toast.error("Agent name cannot be empty");
       return;
-    } else if (toolName.trim() !== tool_name.trim()) {
-      dispatch(updateBridgeAction({
-        bridgeId: functionId,
-        dataToSend: { name: toolName.trim() },
-      }));
     }
   }, [toolName, tool_name, dispatch, functionId]);
 
@@ -802,7 +797,7 @@ function FunctionParameterModal({
       handleUpdateFlow();
     }
 
-    if ((name === "Agent" && tool_name.trim() !== toolName.trim())) {
+    if ((tool_name.trim() !== toolName.trim())) {
       handleToolNameChange();
     }
     handleSave();
@@ -1125,9 +1120,11 @@ function FunctionParameterModal({
             {(name === 'Agent' || (name === 'orchestralAgent' && isMasterAgent)) && (
               <div className="flex items-center justify-between gap-1 mr-12 text-xs">
                 <div className="flex items-center gap-2">
-                  <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
-                    <label className="label p-0 info flex items-center">
-                      <span className="mr-2">Agent's Thread ID</span>
+                  <label className="label p-0 flex items-center gap-1">
+                    <span className="mr-2">Agent's Thread ID</span>
+                    <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
+                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
                       <input
                         type="checkbox"
                         className="toggle toggle-sm"
@@ -1138,16 +1135,16 @@ function FunctionParameterModal({
                         checked={!!toolData?.thread_id}
                         title="Toggle to include thread_id while calling function"
                       />
-                    </label>
-                  </InfoTooltip>
+                  </label>
                 </div>
 
                 {Array.isArray(versions) && versions.length > 0 && (
                   <div className="flex flex-row ml-2">
                     <div className="form-control flex flex-row w-full max-w-xs items-center">
-                      <label className="label">
+                      <label className="label flex items-center gap-1">
+                        <span className="label-text">Agent's Version</span>
                         <InfoTooltip tooltipContent="Select the version of the agent you want to use.">
-                          <span className="label-text info">Agent's Version</span>
+                          <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
                       </label>
                       <select
@@ -1228,7 +1225,7 @@ function FunctionParameterModal({
                     <label className="block text-xs font-medium mb-1">
                       Name
                     </label>
-                    {name === "Orchestral Agent" ? (
+                    {(name === "Orchestral Agent" || name === "Agent") ? (
                       <input
                         type="text"
                         className="input input-sm text-xs input-bordered w-full"

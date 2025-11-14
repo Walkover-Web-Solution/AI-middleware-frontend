@@ -1,6 +1,6 @@
 import { BookIcon, BotIcon, KeyIcon, SettingsIcon, TestTubeDiagonalIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
-export const API_KEY_COLUMNS = ["name", "apikey", "comment"];
+export const API_KEY_COLUMNS = ["name", "apikey", "comment", 'apikey_usage', "last_used"];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
 export const ALERT_TYPE = ['Error', 'Variable'];
 export const DOCUMENT_SECTIONS = [
@@ -317,24 +317,6 @@ export const AVAILABLE_MODEL_TYPES = {
   REASONING: 'reasoning',
 };
 // Canonical descriptions for finish_reason values
-export const FINISH_REASON_DESCRIPTIONS = {
-  "completed": "Model completed naturally at a logical stopping point or due to a defined stop sequence.",
-  "truncated": "Response truncated because it exceeded the configured token limit.",
-  "tool_call": "Model stopped to invoke a function or external tool instead of continuing text.",
-  "safety_block": "Generation halted because content violated safety or policy filters.",
-  "no_reason": "No explicit finish reason provided (common for intermediate streaming chunks).",
-  "failure": "Generation failed due to an unexpected error (e.g., transient internal failure).",
-  "stop_sequence": "Model stopped after emitting a user-defined stop sequence.",
-  "timeout": "Processing time exceeded the allowed limit and was terminated.",
-  "end_of_context": "Model finished because the provided input context was fully processed.",
-  "recitation_block": "Generation halted because output closely matched training data to prevent regurgitation.",
-  "other": "Generation stopped for an unspecified or rare internal condition.",
-  "paused": "Operation paused for long-running external processing (e.g., search or tool).",
-  "eos": "Model emitted its end-of-sequence (EOS) token and ended naturally.",
-  "rate_limited": "Request halted due to service rate limits or quota being exceeded.",
-  "server_error": "Terminated due to a backend service error unrelated to the prompt.",
-  "cancelled": "Request was explicitly cancelled by the client or server."
-};
 
 export const MODAL_TYPE = {
   CREATE_VARIABLE: 'CREATE_VARIABLE',
@@ -380,11 +362,14 @@ export const MODAL_TYPE = {
   DIFF_PROMPT: "DIFF_PROMPT",
   ORCHESTRAL_AGENT_PARAMETER_MODAL: "ORCHESTRAL_AGENT_PARAMETER_MODAL",
   CREATE_ORCHESTRAL_FLOW_MODAL :"CREATE_ORCHESTRAL_FLOW_MODAL",
+  API_KEY_LIMIT_MODAL: "API_KEY_LIMIT_MODAL",
   PROMPT_SUMMARY_PUBLISH: "PROMPT_SUMMARY_PUBLISH",
-  DELETE_VERSION_MODAL: 'DELETE_VERSION_MODAL'
-}
+  DELETE_VERSION_MODAL: 'DELETE_VERSION_MODAL',
+  PREBUILT_TOOLS_CONFIG_MODAL: 'PREBUILT_TOOLS_CONFIG_MODAL',
+  INVITE_USER: 'INVITE_USER'
+};
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment', 'apikey_limit'];
 
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 

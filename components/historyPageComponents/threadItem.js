@@ -117,10 +117,11 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription } = useCustomSelector((state) => ({
+  const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription, finishReasonDescription } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id] || [],
     isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser,
+    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
@@ -131,6 +132,22 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
+
+  // Check if this is the last message of the same role (assistant, user, or tools_call)
+  const isLastMessage = () => {
+    if (!item?.role || (item.role !== 'assistant' && item.role !== 'user' && item.role !== 'tools_call')) return false;
+    
+    // Find all message indices of the same role
+    const sameRoleIndices = [];
+    thread?.forEach((msg, idx) => {
+      if (msg?.role === item.role) {
+        sameRoleIndices.push(idx);
+      }
+    });
+    
+    // Check if current index is the last index for this role
+    return sameRoleIndices.length > 0 && index === sameRoleIndices[sameRoleIndices.length - 1];
+  };
 
   // Check if this is the last message of the same role (assistant, user, or tools_call)
   const isLastMessage = () => {

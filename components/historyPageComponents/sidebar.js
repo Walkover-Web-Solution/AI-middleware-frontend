@@ -28,7 +28,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
-
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
@@ -57,7 +56,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           const thread_id = encodeURIComponent(searchParams?.thread_id?.replace(/&/g, '%26'));
           const firstSubThreadIdEncoded = encodeURIComponent(subThreads[0]?.sub_thread_id?.replace(/&/g, '%26'));
           router.push(
-            `${pathName}?version=${searchParams?.version}&thread_id=${thread_id}&subThread_id=${firstSubThreadIdEncoded}`,
+            `${pathName}?version=${searchParams?.version}&thread_id=${thread_id}&subThread_id=${firstSubThreadIdEncoded}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
             undefined,
             { shallow: true }
           );
@@ -89,7 +88,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         const start = searchParams?.start;
         const end = searchParams?.end;
         router.push(
-          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}`,
+          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
           undefined,
           { shallow: true }
         );
@@ -98,7 +97,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     else{
       if(searchParams?.thread_id){
       router.push(
-        `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start||''}&end=${searchParams.end||''}`,
+        `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start||''}&end=${searchParams.end||''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
         undefined,
         { shallow: true }
       );
@@ -115,15 +114,25 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       timeoutId = setTimeout(() => func(...args), delay);
     };
   };
-
+  useEffect(()=>{
+    if(searchParams?.message_id){
+      // Set the search query state and input value
+      setSearchQuery(searchParams.message_id);
+      if (searchRef?.current) {
+        searchRef.current.value = searchParams.message_id;
+      }
+      handleChange();
+    }
+  },[searchParams?.message_id])
   const handleChange = useCallback(debounce((e) => {
-    setSearchQuery(e?.target?.value);
+
+    setSearchQuery(e?.target?.value||searchParams?.message_id);
     handleSearch(e);
   }, 500), [setSearchQuery]);
 
   const handleSearch = async (e) => {
     e?.preventDefault();
-    if (e.target.value === '') {
+    if (e && e.target && e.target.value === '') {
       clearInput();
       return;
     }
@@ -135,12 +144,12 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     dispatch(clearSubThreadData());
 
     try {
-      const searchValue = searchRef?.current?.value || "";
+      const searchValue = searchRef?.current?.value || searchParams?.message_id || "";
       const result = await dispatch(
         getHistoryAction(params?.id, null, null, 1, searchValue, filterOption, isErrorTrue, selectedVersion)
       );
       router.push(
-        `${pathName}?version=${searchParams?.version}`,
+        `${pathName}?version=${searchParams?.version}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
         undefined,
         { shallow: true }
       );
@@ -150,7 +159,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         const subThreadId = encodeURIComponent(firstResult.sub_thread?.[0]?.sub_thread_id || threadId.replace(/&/g, '%26'));
 
         router.push(
-          `${pathName}?version=${searchParams?.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
+          `${pathName}?version=${searchParams?.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
           undefined,
           { shallow: true }
         );
@@ -179,14 +188,14 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setHasMore(true);
     setFilterOption("all");
     try {
-      const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
+      const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || searchParams?.message_id || ""));
       if (result?.length) {
         const firstResult = result[0];
         const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, '%26'));
         const subThreadId = encodeURIComponent(firstResult.sub_thread?.[0]?.sub_thread_id || threadId.replace(/&/g, '%26'));
 
         router.push(
-          `${pathName}?version=${searchParams?.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
+          `${pathName}?version=${searchParams?.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
           undefined,
           { shallow: true }
         );
@@ -229,7 +238,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setExpandedThreads([threadId]);
     const start = searchParams?.start;
     const end = searchParams?.end;
-    router.push(`${pathName}?version=${searchParams?.version}&thread_id=${encodeURIComponent(threadId ? threadId : searchParams?.thread_id.replace(/&/g, '%26'))}&subThread_id=${encodeURIComponent(subThreadId.replace(/&/g, '%26'))}&start=${start}&end=${end}`, undefined, { shallow: true });
+    router.push(`${pathName}?version=${searchParams?.version}&thread_id=${encodeURIComponent(threadId ? threadId : searchParams?.thread_id.replace(/&/g, '%26'))}&subThread_id=${encodeURIComponent(subThreadId.replace(/&/g, '%26'))}&start=${start}&end=${end}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`, undefined, { shallow: true });
   };
 
   const handleFilterChange = async user_feedback => {
@@ -462,21 +471,32 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                 {subThreads?.length === 0 ? (
                                   <li className="text-xs p-1">No sub thread available</li>
                                 ) : (
-                                  subThreads?.map((subThreadId, index) => (
+                                  subThreads?.map((subThreadId, index) => {
+                                    return (
                                     <li
                                       key={index}
                                       className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
                                         ? "hover:bg-base-primary hover:text-base-100"
                                         : "hover:bg-base-300 hover:text-base-content"
-                                        } p-1.5 rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                        } rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
                                           ? "bg-primary text-base-100"
                                           : ""
                                         }`}
                                       onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, searchParams?.thread_id)}
                                     >
-                                      {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 28)}
+                                      <div className="flex items-center justify-between">
+                                        <span className="truncate flex-1 mr-1.5">
+                                          {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 20)}
+                                        </span>
+                                        {(subThreadId?.updatedAt || subThreadId?.created_at || subThreadId?.createdAt || subThreadId?.updated_at) && (
+                                          <span className="text-xs whitespace-nowrap flex-shrink-0 opacity-70">
+                                            {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
+                                          </span>
+                                        )}
+                                      </div>
                                     </li>
-                                  ))
+                                  );
+                                  })
                                 )}
                               </ul>
                             </div>
@@ -490,30 +510,32 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                               <div className="p-2">
                                 <div className="space-y-1.5">
                                   {item?.sub_thread?.map((subThread, index) => (
-                                    <div key={index} className="ml-2">
-                                      <div
+                                    <div key={index}>
+                                      <li className={`ml-4 ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
+                                          ? "cursor-pointer hover:bg-base-primary hover:text-base-100 rounded-md transition-all duration-200 text-xs bg-primary text-base-100"
+                                          : "cursor-pointer hover:bg-base-300 hover:text-base-content rounded-md transition-all duration-200 text-xs"
+                                          } flex-grow group`}
                                         onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
-                                        className={`cursor-pointer p-2 rounded-lg transition-all duration-200 border ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
-                                          ? 'bg-base-200 border-primary text-base-content'
-                                          : 'bg-base-100 border-base-200 hover:bg-base-200 hover:border-base-300 text-base-content'
-                                          }`}
                                       >
-                                        <div className="flex items-center gap-1.5">
-                                          <MessageCircleIcon className={`w-3 h-3 ${searchParams?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-base-content'
-                                            }`} />
-                                          <span
-                                            className="font-medium text-xs"
-                                          >
-                                            {truncate(subThread?.display_name || subThread?.sub_thread_id, 25)}
+                                        <a className="w-full h-full flex items-center justify-between relative">
+                                          <span className="truncate flex-1 mr-1.5 text-xs flex items-center">
+                                            <MessageCircleIcon className={`w-3 h-3 mr-1.5 flex-shrink-0 ${searchParams?.subThread_id === subThread?.sub_thread_id ? 'text-base-100' : 'text-base-content'
+                                              }`} />
+                                            {truncate(subThread?.display_name || subThread?.sub_thread_id, 20)}
                                           </span>
-                                        </div>
-                                      </div>
-                                      {subThread?.messages?.length > 0 && (<div className="mt-1.5 ml-4 space-y-1">
+                                          {(subThread?.updated_at || subThread?.created_at) && (
+                                            <span className="text-xs whitespace-nowrap flex-shrink-0 mr-2 transition-opacity duration-200">
+                                              {formatRelativeTime(subThread?.updated_at || subThread?.created_at)}
+                                            </span>
+                                          )}
+                                        </a>
+                                      </li>
+                                      {subThread?.messages?.length > 0 && (<div className="mt-1.5 ml-4 space-y-0">
                                         {subThread?.messages?.map((msg, msgIndex) => (
                                           <div
                                             key={msgIndex}
                                             onClick={() => handleSetMessageId(msg?.message_id)}
-                                            className={`cursor-pointer p-1.5 rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-2 border-transparent hover:border-base-300`}
+                                            className={`cursor-pointer rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-2 border-transparent hover:border-base-300`}
                                           >
                                             <div className="flex items-start gap-1.5">
                                               <UserIcon className="w-2.5 h-2.5 mt-0.5 text-base-content" />

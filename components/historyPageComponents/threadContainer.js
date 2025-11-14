@@ -60,6 +60,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
   const [isImprovingPrompt, setIsImprovingPrompt] = useState(false);
+  const [generatedPrompts, setGeneratedPrompts] = useState({}); // Store generated prompts by message ID
 
   const formatDateAndTime = useCallback((created_at) => {
     const date = new Date(created_at);
@@ -82,12 +83,17 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
 
     for (let i = index; i >= 0; i--) {
       if (thread[i].role === 'user') {
-        conversation.push(...(thread[i]?.AiConfig?.input || []));
+        // Use AiConfig.input or AiConfig.messages (both exist in different scenarios)
+        const aiConfigConversation = thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages || [];
+        conversation.push(...aiConfigConversation);
         AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
-        if (thread[i + 1].role === 'tools_call') {
+        if (thread[i + 1]?.role === 'tools_call') {
           conversation.push(thread[i + 1])
         }
-        if (thread[i].id === item.id) break;
+        // Break after processing the first user message with AiConfig (either input or messages)
+        if (thread[i]?.AiConfig && (thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages)) {
+          break;
+        }
       }
     }
 
@@ -145,6 +151,11 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       }
       if (data) {
         setPromptToUpdate(data?.updated_prompt)
+        // Store the generated prompt for this message
+        setGeneratedPrompts(prev => ({
+          ...prev,
+          [modalInput?.Id]: data?.updated_prompt
+        }));
         openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
       }
     } finally {
@@ -156,6 +167,33 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     setModalInput('');
     closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   }, []);
+
+  const handleShowGeneratedPrompt = useCallback(() => {
+    if (modalInput?.Id && generatedPrompts[modalInput.Id]) {
+      setPromptToUpdate(generatedPrompts[modalInput.Id]);
+      closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+      openModal(MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL);
+    }
+  }, [modalInput, generatedPrompts]);
+
+  const handleRegenerateFromModal = useCallback(async () => {
+    if (!modalInput?.Id) return;
+    // Trigger regeneration
+    setTimeout(() => {
+      handleImprovePrompt();
+    }, 100);
+  }, [modalInput, handleImprovePrompt]);
+
+  const handlePromptSaved = useCallback(() => {
+    if (modalInput?.Id) {
+      // Clear the generated prompt for this message when saved
+      setGeneratedPrompts(prev => {
+        const updated = { ...prev };
+        delete updated[modalInput.Id];
+        return updated;
+      });
+    }
+  }, [modalInput]);
 
   const calcFlexDirection = useCallback(() => {
     if (historyRef.current && contentRef.current) {
@@ -441,6 +479,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
                       params={{ org_id: orgId, id: bridgeId }}
                       index={index}
                       item={item}
+                      thread={thread}
                       threadHandler={threadHandler}
                       formatDateAndTime={formatDateAndTime}
                       integrationData={integrationData}
@@ -477,6 +516,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         searchParams={Object.fromEntries(searchParamsHook.entries())}
         promotToUpdate={promotToUpdate}
         previousPrompt={previousPrompt}
+        handleRegenerate={modalInput?.Id && generatedPrompts[modalInput?.Id] ? handleRegenerateFromModal : null}
+        isRegenerating={isImprovingPrompt}
+        onPromptSaved={handlePromptSaved}
       />
 
       <EditMessageModal
@@ -486,6 +528,8 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         modalInput={modalInput}
         handleImprovePrompt={handleImprovePrompt}
         isImprovingPrompt={isImprovingPrompt}
+        hasGeneratedPrompt={modalInput?.Id && generatedPrompts[modalInput?.Id]}
+        handleShowGeneratedPrompt={handleShowGeneratedPrompt}
       />
     </div>
   );

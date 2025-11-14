@@ -42,7 +42,7 @@ const CommandPalette = ({isEmbedUser}) => {
         fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
       );
     };
-    const agentsGroup = filterBy(agentList, ["name", "slugName", "service", "_id"]).map((a) => ({
+    const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
       subtitle: `${a.service || ""}${a.configuration?.model ? " · " + a.configuration?.model : ""}`,
@@ -55,7 +55,7 @@ const CommandPalette = ({isEmbedUser}) => {
     // any entry of the agent's versions array or its published_version_id.
     const agentsVersionMatches = !q
       ? []
-      : (agentList || []).flatMap((a) => {
+      : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => {
           const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
           const published = a?.published_version_id ? [a.published_version_id] : [];
           const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
@@ -124,7 +124,7 @@ const CommandPalette = ({isEmbedUser}) => {
       integrations: integrationGroup,
       auths: authGroup,
     };
-  }, [query, agentList, apikeys, knowledgeBase, functions]);
+  }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData, orchestralFlowData]);
 
   const flatResults = useMemo(() => {
     return [
@@ -136,7 +136,7 @@ const CommandPalette = ({isEmbedUser}) => {
       ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
-  }, [items]);
+  }, [items, orchestralFlowData, integrationData, authData]);
 
   const groupedResults = useMemo(() => {
     const groups = {};

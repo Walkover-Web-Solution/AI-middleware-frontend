@@ -30,14 +30,11 @@ function Page() {
   const handleSwitchOrg = useCallback(async (id, name) => {
     try {
       const response = await switchOrg(id);
-      if (process.env.NEXT_PUBLIC_ENV === 'local') {
-        const localToken = await switchUser({ orgId: id, orgName: name });
-        setInCookies('local_token', localToken.token);
-      }
+      const localToken = await switchUser({ orgId: id, orgName: name });
+      setInCookies('local_token', localToken.token);
       route.push(`/org/${id}/agents`);
       dispatch(setCurrentOrgIdAction(id));
       if (response.status === 200) {
-        console.log("Organization switched successfully", response.data);
       } else {
         console.error("Failed to switch organization", response.data);
       }
@@ -58,10 +55,10 @@ function Page() {
   // Auto-redirect if there's only one organization
   useEffect(() => {
     const allowRedirection = searchParams.get('redirection') !== 'false';
-    if (organizationsArray.length === 1 && allowRedirection) {
-      const singleOrg = organizationsArray[0];
-      handleSwitchOrg(singleOrg.id, singleOrg.name);
-    }
+    // if (organizationsArray.length === 1 && allowRedirection) {
+    //   const singleOrg = organizationsArray[0];
+    //   handleSwitchOrg(singleOrg.id, singleOrg.name);
+    // }
   }, [organizationsArray, handleSwitchOrg, searchParams]);
 
   return (
@@ -69,8 +66,7 @@ function Page() {
       <ServiceInitializer />
       <ThemeManager />
       <div className="w-full max-w-4xl mt-4 flex flex-col gap-3">
-        <OrganizationHeader />
-        <OrganizationSearch 
+        <OrganizationHeader 
           organizationsArray={organizationsArray}
           setDisplayedOrganizations={setDisplayedOrganizations}
         />
