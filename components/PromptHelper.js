@@ -19,30 +19,14 @@ const PromptHelper = ({
   setMessages,
   thread_id,
   onResetThreadId,
+  showCloseButton = false,
   autoCloseOnBlur,
   setHasUnsavedChanges,
   setNewContent,
-  showNotes,
-  setShowNotes,
-  showPromptHelper,
-  setShowPromptHelper, 
   isEmbedUser
 }) => {
   const dispatch = useDispatch();
   const [optimizedPrompt, setOptimizedPrompt] = useState('');
-  const handleNotesToggle = (checked) => {
-    if (!checked && !showPromptHelper) {
-      return;
-    }
-    setShowNotes(checked);
-  };
-
-  const handlePromptHelperToggle = (checked) => {
-    if (!checked && !showNotes) {
-      return;
-    }
-    setShowPromptHelper(checked);
-  };
 
   const pathname = usePathname();
   const pathParts = pathname.split('?')[0].split('/');
@@ -80,39 +64,8 @@ const PromptHelper = ({
     }
   };
 
-  const handleScriptLoad = () => {
-    if (typeof window.sendDataToDocstar === 'function') {
-      window.sendDataToDocstar({
-        parentId: 'notes-embed',
-        page_id: bridgeId,
-      });
-      window.openTechDoc();
-    } else {
-      console.warn('sendDataToDocstar is not defined yet.');
-    }
-  };
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (isVisible && showNotes) {
-        handleScriptLoad();
-      }
-    }, 100);
-  }, [isVisible, showNotes, params.id, searchParams.version]);
 
 
-  // Calculate widths based on toggle states
-  const getNotesWidth = () => {
-    if (!showNotes || isEmbedUser) return 'w-0 hidden'; // Hidden
-    if (!showPromptHelper) return 'w-full'; // Full width when prompt helper is hidden
-    return 'w-1/2'; // 50% when both are visible
-  };
-
-  const getPromptHelperWidth = () => {
-    if (!showPromptHelper ) return 'w-0 hidden'; // Hidden
-    if (!showNotes || isEmbedUser) return 'w-full'; // Full width when notes is hidden
-    return 'w-1/2'; // 50% when both are visible
-  };
 
   const modalRef = React.createRef();
 
@@ -170,95 +123,46 @@ const PromptHelper = ({
       onBlur={handleModalBlur}
       tabIndex={-1}
     >
-      {/* Header with toggles */}
-      <div className="flex items-center justify-between p-4 border-b border-base-content/20">
-        <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold">Prompt Helper</h3>
-          <span className="text-xs text-base-content/60 bg-base-200 px-2 py-1 rounded">Press Esc to close</span>
+      {/* Header */}
+      <div className="flex items-center justify-between p-3 border-b border-base-300 bg-base-50">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-base-content">Prompt Helper</h3>
         </div>
         
-        { !isEmbedUser && <div className="flex items-center gap-4">
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-xs"
-              checked={showNotes}
-              onChange={(e) => handleNotesToggle(e.target.checked)}
-            />
-            <BookIcon size={14} />
-            <span className="text-xs">Notes</span>
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-xs"
-              checked={showPromptHelper}
-              onChange={(e) => handlePromptHelperToggle(e.target.checked)}
-              disabled={!showNotes}
-            />
-            <BrainIcon size={14} />
-            <span className="text-xs">Prompt Helper</span>
-          </label>
-          
+        {showCloseButton && (
           <button
             onClick={onClose}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-xs btn-error"
+            title="Close Prompt Helper"
           >
-            <CloseIcon size={14} />
+            Close Helper
           </button>
-        </div>}
+        )}
       </div>
 
-      {/* Content Area - Split into two sections */}
-      <div className="flex flex-row w-full h-full">
-
-        {/* Prompt Builder Section - Now on LEFT */}
-        {showPromptHelper && (
-          <div className={`${getPromptHelperWidth()} h-full transition-all duration-500 ease-in-out border-r border-base-content/20 transform`}
-            tabIndex={0}
-          >
-
-            <div
-              className="p-3 h-full  flex flex-col"
-
-            >
-              {/* Prompt Builder layout - side by side */}
-              <div className="flex flex-row h-full gap-2">
-                {/* Canvas for chat interactions */}
-                <div className="flex-1 mb-12  flex flex-col max-h-full">
-                  <Canvas
-                    OptimizePrompt={handleOptimizePrompt}
-                    messages={(() => {
-                      return messages || [];
-                    })()}
-                    setMessages={(value) => {
-                      setMessages(value);
-                    }}
-                    width="100%"
-                    height="100%"
-                    handleApplyOptimizedPrompt={handleApplyOptimizedPrompt}
-                    onResetThreadId={onResetThreadId}
-                  />
-                </div>
-
-              </div>
+      {/* Content Area - Prompt Builder Only */}
+      <div className="w-full h-full">
+        <div className="p-3 h-full flex flex-col">
+          {/* Prompt Builder layout */}
+          <div className="flex flex-row h-full gap-2">
+            {/* Canvas for chat interactions */}
+            <div className="flex-1 mb-12 flex flex-col max-h-full">
+              <Canvas
+                OptimizePrompt={handleOptimizePrompt}
+                messages={(() => {
+                  return messages || [];
+                })()}
+                setMessages={(value) => {
+                  setMessages(value);
+                }}
+                width="100%"
+                height="100%"
+                handleApplyOptimizedPrompt={handleApplyOptimizedPrompt}
+                onResetThreadId={onResetThreadId}
+              />
             </div>
           </div>
-        )}
-
-        {/* Notes Section - Now on RIGHT */}
-        {showNotes && !isEmbedUser && (
-          <div className={`${getNotesWidth()} h-full transition-all duration-500 ease-in-out transform`}
-            tabIndex={0}
-          >
-            <div className="p-3 mt-2 h-[92vh]"
-            >
-              <div id='notes-embed' className='w-full h-full' >
-                {/* This will be populated by the docstar script */}
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
