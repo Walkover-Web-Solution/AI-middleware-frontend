@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { createPortal } from "react-dom";
 import CodeBlock from "../codeBlock/codeBlock";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
@@ -11,7 +12,8 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { formatRelativeTime, openModal } from "@/utils/utility";
 import { MODAL_TYPE, FINISH_REASON_DESCRIPTIONS } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
+import { GenericSlider, useSlider } from "@/utils/sliderUtility";
 
 // Helper function to normalize image data with enhanced fallback
 const normalizeImageUrls = (imageData) => {
@@ -116,10 +118,13 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const { embedToken } = useCustomSelector((state) => ({
+  const { embedToken, knowledgeBaseData, isEmbedUser } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id] || [],
+    isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser,
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
+  const { sliderState, openSlider, closeSlider } = useSlider();
   const dropupRef = useRef(null);
   const router = useRouter();
 
@@ -136,6 +141,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     });
     openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   };
+
 
   const getMessageToDisplay = useCallback(() => {
     switch (messageType) {
@@ -190,7 +196,45 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-  const handleToolPrimaryClick = useCallback((event, tool) => {
+  const handleToolPrimaryClick = useCallback(async (event, tool) => {
+    // Check if this is a knowledge database tool
+    const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
+                             tool?.name?.toLowerCase().includes('get knowledge database') || 
+                             tool?.name?.toLowerCase().includes('knowledge') ||
+                             tool?.name?.toLowerCase().includes('rag');
+
+    if (isKnowledgeDbTool && tool?.args) {
+      try {
+        // Extract document ID from tool arguments
+        let documentId = null;
+        
+        // Check various possible argument structures
+        if (typeof tool.args === 'string') {
+          const parsedArgs = JSON.parse(tool.args);
+          documentId = parsedArgs?.Document_id || parsedArgs?.document_id || parsedArgs?.doc_id || parsedArgs?.id;
+        } else if (typeof tool.args === 'object') {
+          documentId = tool.args?.Document_id || tool.args?.document_id || tool.args?.doc_id || tool.args?.id;
+        }
+
+        if (documentId) {
+          // Find document in Redux store
+          const document = knowledgeBaseData.find(doc => doc._id === documentId);
+          
+          if (document && document.source?.data?.url) {
+            // Open slider using generic utility
+            openSlider(
+              document.source.data.url,
+              document.name || 'Knowledge Base Document'
+            );
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error handling knowledge database tool:', error);
+        // Fall back to default behavior if there's an error
+      }
+    }
+
     if (tool?.bridge_id !== null) {
       const bridgeId = tool?.bridge_id
       const versionId = tool?.version_id
@@ -213,7 +257,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         bridge_id: params?.id,
       }
     });
-  }, [embedToken, params, router]);
+  }, [embedToken, params, router, knowledgeBaseData, isEmbedUser]);
 
   const renderToolData = (toolData, index) => (
     Object.entries(toolData).map(([key, tool]) => (
@@ -669,6 +713,15 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       )}
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
+      
+      {/* Generic Slider for Knowledge Base Documents */}
+      <GenericSlider
+        isOpen={sliderState.isOpen}
+        onClose={closeSlider}
+        title={sliderState.title}
+        url={sliderState.url}
+        addSourceParam={false}
+      />
     </div >
   );
 };
