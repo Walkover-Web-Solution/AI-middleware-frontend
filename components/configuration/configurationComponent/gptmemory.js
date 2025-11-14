@@ -40,7 +40,7 @@ const   GptMemory = ({ params, searchParams }) => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <InfoTooltip tooltipContent="If this feature is enabled we will pass the stored memory data by default in history/conversation">
-                        <span className="text-base-content info text-sm ml-1">LLM Memory</span>
+                        <span className="text-base-content info text-sm ml-1">Long Term Memory</span>
                         </InfoTooltip>
                     </div>
                     
