@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -24,6 +24,20 @@ export const GenericSlider = ({
   iframeProps = {},
   customStyles = {}
 }) => {
+  // Handle ESC key to close slider
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => window.removeEventListener('keydown', handleEscapeKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen || typeof window === 'undefined') return null;
 
   const finalUrl = addSourceParam && url ? `${url}?source=single` : url;
