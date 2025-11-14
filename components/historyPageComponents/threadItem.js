@@ -11,7 +11,8 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { formatRelativeTime, openModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink} from "lucide-react";
+import { GenericSlider, useSlider } from "@/utils/sliderUtility";
 
 // Helper function to normalize image data with enhanced fallback
 const normalizeImageUrls = (imageData) => {
@@ -116,17 +117,37 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const { embedToken, finishReasonDescription } = useCustomSelector((state) => ({
+  const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription, finishReasonDescription } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id] || [],
+    isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser,
+    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
+  const { sliderState, openSlider, closeSlider } = useSlider();
   const dropupRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
+
+  // Check if this is the last message of the same role (assistant, user, or tools_call)
+  const isLastMessage = () => {
+    if (!item?.role || (item.role !== 'assistant' && item.role !== 'user' && item.role !== 'tools_call')) return false;
+    
+    // Find all message indices of the same role
+    const sameRoleIndices = [];
+    thread?.forEach((msg, idx) => {
+      if (msg?.role === item.role) {
+        sameRoleIndices.push(idx);
+      }
+    });
+    
+    // Check if current index is the last index for this role
+    return sameRoleIndices.length > 0 && index === sameRoleIndices[sameRoleIndices.length - 1];
+  };
 
   // Check if this is the last message of the same role (assistant, user, or tools_call)
   const isLastMessage = () => {
@@ -153,6 +174,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     });
     openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   };
+
 
   const getMessageToDisplay = useCallback(() => {
     switch (messageType) {
@@ -207,12 +229,81 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-  
+
+  useEffect(() => {
+    return () => {
+     closeSlider();
+     window?.closeGtwy(); 
+    }
+  }, [])
+
+  const handleToolPrimaryClick = useCallback(async (event, tool) => {
+    // Check if this is a knowledge database tool
+    const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
+                             tool?.name?.toLowerCase().includes('get knowledge database') || 
+                             tool?.name?.toLowerCase().includes('knowledge') ||
+                             tool?.name?.toLowerCase().includes('rag');
+
+    if (isKnowledgeDbTool && tool?.args) {
+      try {
+        // Extract document ID from tool arguments
+        let documentId = null;
+        
+        // Check various possible argument structures
+        if (typeof tool.args === 'string') {
+          const parsedArgs = JSON.parse(tool.args);
+          documentId = parsedArgs?.Document_id || parsedArgs?.document_id || parsedArgs?.doc_id || parsedArgs?.id;
+        } else if (typeof tool.args === 'object') {
+          documentId = tool.args?.Document_id || tool.args?.document_id || tool.args?.doc_id || tool.args?.id;
+        }
+
+        if (documentId) {
+          // Find document in Redux store
+          const document = knowledgeBaseData.find(doc => doc._id === documentId);
+          
+          if (document && document.source?.data?.url) {
+            // Open slider using generic utility
+            openSlider(
+              document.source.data.url,
+              document.name || 'Knowledge Base Document'
+            );
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error handling knowledge database tool:', error);
+        // Fall back to default behavior if there's an error
+      }
+    }
+
+    // Handle agent tools - open GTWY
+    if (tool?.data?.metadata?.type === 'agent') {
+      window.openGtwy({ 
+        agent_id: tool?.data?.metadata?.agent_id, 
+        history: { message_id: tool?.data?.metadata?.message_id }
+      });
+      return;
+    }
+
+    // Handle regular tools - open viasocket or show tool data modal
+    else {
+      // Open viasocket for regular tools
+      openViasocket(tool.id, {
+        flowHitId: tool?.metadata?.flowHitId, 
+        embedToken, 
+        meta: {
+          type: 'tool',
+          bridge_id: params?.id,
+        }
+      });
+    }
+  }, [embedToken, params, router, knowledgeBaseData, isEmbedUser, openSlider]);
 
   const renderToolData = (toolData, index) => (
     Object.entries(toolData).map(([key, tool]) => (
       <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
         <div 
+          onClick={(event) => handleToolPrimaryClick(event, tool)}
           className="cursor-pointer flex items-center justify-center py-4 pl-2">
           <div className="text-center">
             {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
@@ -221,12 +312,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
             <SquareFunctionIcon size={22}
-              onClick={() => {tool.data.metadata.type==='agent' ? window.openGtwy({ agent_id: tool?.data?.metadata?.agent_id, history: {message_id: tool?.data?.metadata?.message_id}}): openViasocket(tool.id, {
-                flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
-                  type: 'tool',
-                  bridge_id: params?.id,
-                }
-              })}}
+              onClick={(event) => handleToolPrimaryClick(event, tool)}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
@@ -673,6 +759,15 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       )}
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
+      
+      {/* Generic Slider for Knowledge Base Documents */}
+      <GenericSlider
+        isOpen={sliderState.isOpen}
+        onClose={closeSlider}
+        title={sliderState.title}
+        url={sliderState.url}
+        addSourceParam={false}
+      />
     </div >
   );
 };
