@@ -24,7 +24,6 @@ export const runtime = 'edge';
 
 // Bundle Components for collapsed panels (5px min width)
 const ConfigBundle = ({ onClick }) => {
-  console.log('ConfigBundle rendered');
   return (
     <div 
       className=" w-full h-full border-r-2 border-primary flex items-center justify-center cursor-pointer hover:bg-primary/30 transition-colors duration-200"
@@ -144,36 +143,8 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
   // Optimized UI state updates with throttling for smooth resizing
   const updateUiState = useCallback((updates) => {
-    console.log('UI State Update:', updates);
     setUiState(prev => ({ ...prev, ...updates }));
   }, []);
-
-  // Handle panel resize callbacks (legacy)
-  const handlePanelResizeLegacy = useCallback((sizes) => {
-    // Panel sizes are automatically managed by react-resizable-panels
-    // No need for manual state management
-  }, []);
-
-  // Panel collapse/expand handlers
-  const handlePanelCollapse = useCallback((panelType, isCollapsed) => {
-    console.log(`Panel ${panelType} collapse state:`, isCollapsed);
-    const collapseKey = `is${panelType}Collapsed`;
-    // Handle undefined values from react-resizable-panels
-    const actualCollapsed = isCollapsed === true || isCollapsed === undefined;
-    updateUiState({ [collapseKey]: actualCollapsed });
-  }, [updateUiState]);
-
-  // Alternative: Handle panel resize to detect collapse
-  const handlePanelResize = useCallback((sizes, panelType) => {
-    console.log(`Panel ${panelType} resize:`, sizes);
-    if (sizes && sizes.length > 0) {
-      const panelSize = sizes[0]; // First panel size
-      const isCollapsed = panelSize <= 10; // Consider collapsed if <= 10%
-      const collapseKey = `is${panelType}Collapsed`;
-      console.log(`Panel ${panelType} size: ${panelSize}%, collapsed: ${isCollapsed}`);
-      updateUiState({ [collapseKey]: isCollapsed });
-    }
-  }, [updateUiState]);
 
   const handleExpandPanel = useCallback((panelType) => {
     const collapseKey = `is${panelType}Collapsed`;
@@ -222,7 +193,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     }
   }, [dispatch, resolvedSearchParams?.version, reduxPrompt]);
 
-  const scrollContainer = leftPanelScrollRef.current;
   const scrollToTextarea = () => {
     if (leftPanelScrollRef.current && promptTextAreaRef.current) {
       const textareaContainer = promptTextAreaRef.current;
@@ -377,18 +347,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     mountRef.current = true;
   }, [bridgeType]);
 
-  // React-resizable-panels handles all resizing logic automatically
-  // No complex mouse event handling needed!
-
-
-  // Debug: Log current collapse states
-  console.log('Current collapse states:', {
-    isConfigCollapsed: uiState.isConfigCollapsed,
-    isChatCollapsed: uiState.isChatCollapsed,
-    isPromptHelperCollapsed: uiState.isPromptHelperCollapsed,
-    isNotesCollapsed: uiState.isNotesCollapsed
-  });
-
   return (
     <div
       ref={containerRef}
@@ -407,7 +365,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             className="bg-base-100"
             collapsible={false}
             onResize={(size) => {
-              console.log('Config panel size:', size);
               const isCollapsed = size <= 5;
               if (uiState.isConfigCollapsed !== isCollapsed) {
                 updateUiState({ isConfigCollapsed: isCollapsed });
@@ -459,7 +416,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               className="bg-base-50"
               collapsible={false}
               onResize={(size) => {
-                console.log('Chat panel size:', size);
                 const isCollapsed = size <= 5;
                 if (uiState.isChatCollapsed !== isCollapsed) {
                   updateUiState({ isChatCollapsed: isCollapsed });
@@ -503,7 +459,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 className="bg-base-50"
                 collapsible={false}
                 onResize={(size) => {
-                  console.log('PromptHelper panel size:', size);
                   const isCollapsed = size <= 5;
                   if (uiState.isPromptHelperCollapsed !== isCollapsed) {
                     updateUiState({ isPromptHelperCollapsed: isCollapsed });
@@ -569,7 +524,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   className="bg-base-50"
                   collapsible={false}
                   onResize={(size) => {
-                    console.log('Notes panel size:', size);
                     const isCollapsed = size <= 5;
                     if (uiState.isNotesCollapsed !== isCollapsed) {
                       updateUiState({ isNotesCollapsed: isCollapsed });
