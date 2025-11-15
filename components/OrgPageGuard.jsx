@@ -4,10 +4,17 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { getFromCookies, setInCookies } from '@/utils/utility';
 import { X } from 'lucide-react';
+import { updateUserMetaOnboarding } from '@/store/action/orgAction';
+import { useDispatch } from 'react-redux';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 const OrgPageGuard = ({ children }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const pathname = usePathname();
+  const dispatch = useDispatch();
+  const {currentUser} = useCustomSelector((state) => ({
+    currentUser: state.userDetailsReducer.userDetails,
+  }));
 
   useEffect(() => {
     // Only show onboarding on the exact /org page, not sub-routes
@@ -17,22 +24,29 @@ const OrgPageGuard = ({ children }) => {
       // Check URL parameters for form_submitted
       const urlParams = new URLSearchParams(window.location.search);
       const formSubmitted = urlParams.has('form_submitted');
-      
-      if (formSubmitted) {
-        // If form_submitted parameter exists, set cookie and don't show modal
+      if(formSubmitted){
+        const updatedDefaultOnboarding = {
+          ...currentUser,
+          "meta": {
+            ...currentUser?.meta,
+           onBordingFormSubmitted: true,
+          },        
+        };
+        dispatch(updateUserMetaOnboarding(currentUser.id, updatedDefaultOnboarding));
         setInCookies('onboarding_dismissed', 'true');
         return;
       }
       
       // Check if onboarding was dismissed
       const onboardingDismissed = getFromCookies('onboarding_dismissed');
+      const currentUserMeta = currentUser?.meta?.onBordingFormSubmitted;
       
-      if (!onboardingDismissed) {
+      if (!onboardingDismissed && !currentUserMeta) {
         // Show onboarding modal only on /org page
         setShowOnboarding(true);
       }
     }
-  }, [pathname]);
+  }, [pathname, currentUser]);
 
   const handleClose = () => {
     // Set cookie to not show again
