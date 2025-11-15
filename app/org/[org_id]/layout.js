@@ -152,7 +152,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         }
       }
     };
-  
+    }
     updateUserMeta();
   }, []);
   
