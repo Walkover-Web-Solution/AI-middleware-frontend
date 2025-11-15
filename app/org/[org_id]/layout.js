@@ -10,10 +10,9 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateUserMetaOnboarding } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { MODAL_TYPE } from "@/utils/enums";
-import { getFromCookies, openModal } from "@/utils/utility";
+import { getFromCookies, removeCookie } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -47,7 +46,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   const resolvedParams = use(params);
   const resolvedSearchParams = useSearchParams();
 
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token, currrentOrgDetail } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
@@ -56,6 +55,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
+    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   }));
   useEffect(() => {
     dispatch(getTutorialDataAction());
@@ -74,6 +74,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   useEffect(() => {
     const updateUserMeta = async () => {
       const reference_id = getFromCookies("reference_id");
+      const unlimited_access = getFromCookies("unlimited_access");
         let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
@@ -97,7 +98,17 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         currentUserMeta = data?.data?.data?.user?.meta;
       }
       }
-  
+      if (unlimited_access) {
+        const updatedOrgDetails = {
+          ...currrentOrgDetail,
+          meta: {
+            ...currrentOrgDetail?.meta,
+            unlimited_access: true,
+          },
+        };
+        dispatch(updateOrgMetaAction(resolvedParams.org_id, updatedOrgDetails));
+        removeCookie("unlimited_access");
+      }  
       // If reference_id exists but user has no reference_id in meta
       if (reference_id && !currentUser?.meta?.reference_id) {
         try {

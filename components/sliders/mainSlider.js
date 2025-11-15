@@ -50,9 +50,10 @@ function MainSlider({ isEmbedUser }) {
   const pathParts = pathname.split('?')[0].split('/');
   const orgId = pathParts[2];
 
-  const { userdetails, organizations } = useCustomSelector(state => ({
+  const { userdetails, organizations, currrentOrgDetail } = useCustomSelector(state => ({
     userdetails: state.userDetailsReducer.userDetails,
-    organizations: state.userDetailsReducer.organizations
+    organizations: state.userDetailsReducer.organizations,
+    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[orgId]
   }));
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization', [organizations, orgId]);
 
@@ -777,7 +778,7 @@ function MainSlider({ isEmbedUser }) {
                   {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
                 </button>
 
-                <button
+               {!currrentOrgDetail?.meta?.unlimited_access && <button
                   onClick={() => {
                     router.push(`/org/${orgId}/lifetime-access`);
                     if (isMobile) setIsMobileVisible(false);
@@ -788,7 +789,7 @@ function MainSlider({ isEmbedUser }) {
                 >
                   {ITEM_ICONS.lifetimeAccess}
                   {showSidebarContent && <span className="text-xs truncate">Free Lifetime Access</span>}
-                </button>
+                </button>}
 
                 <button
                   onClick={() => {
