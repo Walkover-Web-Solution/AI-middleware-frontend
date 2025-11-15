@@ -15,6 +15,8 @@ import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, TrashIcon, SettingsIcon
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import DeleteModal from '@/components/UI/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/prebuiltToolsConfigModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -88,6 +90,11 @@ const EmbedList = ({ params, searchParams }) => {
 
   }
   const [selectedPrebuiltTool, setSelectedPrebuiltTool] = useState(null);
+  
+  // Delete operation hooks
+  const { isDeleting: isDeletingTool, executeDelete: executeToolDelete } = useDeleteOperation(MODAL_TYPE.DELETE_TOOL_MODAL);
+  const { isDeleting: isDeletingPrebuiltTool, executeDelete: executePrebuiltToolDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
+  
   const handleOpenDeleteModal = (functionId, functionName) => {
     setFunctionId(functionId);
     setFunctionName(functionName);
@@ -113,20 +120,20 @@ const EmbedList = ({ params, searchParams }) => {
     }
   };
 
-  const handleRemoveFunctionFromBridge = (id, name) => {
-    dispatch(
-      updateBridgeVersionAction({
-        bridgeId: params.id,
-        versionId: searchParams?.version,
-        dataToSend: {
-          functionData: {
-            function_id: id,
-            function_name: name,
+  const handleRemoveFunctionFromBridge = async (id, name) => {
+    await executeToolDelete(async () => {
+      return dispatch(
+        updateBridgeVersionAction({
+          bridgeId: params.id,
+          versionId: searchParams?.version,
+          dataToSend: {
+            functionData: {
+              function_id: id,
+              function_name: name,
+            },
           },
-        },
-      })
-    ).then(() => {
-      closeModal(MODAL_TYPE.DELETE_TOOL_MODAL);
+        })
+      );
     });
   };
 
@@ -168,13 +175,14 @@ const EmbedList = ({ params, searchParams }) => {
   };
 
   // Handle removing a prebuilt tool from built_in_tools
-  const handleDeletePrebuiltTool = (item,name) => {
+  const handleDeletePrebuiltTool = async (item, name) => {
     if (!item?.value) return;
-    dispatch(updateBridgeVersionAction({
-      versionId: searchParams?.version,
-      dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
-    }));
-    closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
+    await executePrebuiltToolDelete(async () => {
+      return dispatch(updateBridgeVersionAction({
+        versionId: searchParams?.version,
+        dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
+      }));
+    });
   };
 
   // Handle opening prebuilt tools configuration modal
@@ -217,6 +225,8 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Tool from the Agent."}
         buttonTitle="Remove Tool"
         modalType={MODAL_TYPE.DELETE_TOOL_MODAL}
+        loading={isDeletingTool}
+        isAsync={true}
       />
       <DeleteModal
         onConfirm={handleDeletePrebuiltTool}
@@ -226,6 +236,8 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Prebuilt Tool from the Agent."}
         buttonTitle="Remove Prebuilt Tool"
         modalType={MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL}
+        loading={isDeletingPrebuiltTool}
+        isAsync={true}
       />
       <FunctionParameterModal
         name="Tool"
@@ -241,15 +253,18 @@ const EmbedList = ({ params, searchParams }) => {
         setVariablesPath={setVariablesPath}
         variablesPath={variablesPath}
       />
-      <div className="label flex-col items-start  w-full p-0">
+      <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
         {shouldToolsShow && (
           <>
             <div className="dropdown dropdown-right w-full flex items-center">
               {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? (
                 <>
-                  <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-                    <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
-                  </InfoTooltip>
+                  <div className="flex items-center gap-1 mb-2">
+                    <p className="font-medium whitespace-nowrap">Tools</p>
+                    <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
+                  </div>
                   <button
                     tabIndex={0}
                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
@@ -291,13 +306,26 @@ const EmbedList = ({ params, searchParams }) => {
             <div className="flex flex-col gap-2 w-full">
               {bridgeFunctions.length > 0 && (
                 <div className="flex flex-col gap-2 w-full">
-                  <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" handleRemoveEmbed={handleRemoveFunctionFromBridge} handleOpenDeleteModal={handleOpenDeleteModal} />
+                  <RenderEmbed 
+                    bridgeFunctions={bridgeFunctions} 
+                    integrationData={integrationData} 
+                    getStatusClass={getStatusClass} 
+                    handleOpenModal={handleOpenModal} 
+                    embedToken={embedToken} 
+                    params={params} 
+                    name="function" 
+                    handleRemoveEmbed={handleRemoveFunctionFromBridge} 
+                    handleOpenDeleteModal={handleOpenDeleteModal}
+                    halfLength={1}
+                  />
                 </div>
               )}
 
               {/* Render selected Prebuilt Tools below functions */}
               {selectedPrebuiltTools.length > 0 && (
-                <div className="flex flex-col gap-2 w-full">
+                <div className={`grid gap-2 w-full ${selectedPrebuiltTools.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
+                  gridTemplateColumns: selectedPrebuiltTools.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
+                }}>
                   {selectedPrebuiltTools.map((item) => {
                     const missingDesc = !item?.description;
                     const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
@@ -306,7 +334,7 @@ const EmbedList = ({ params, searchParams }) => {
                     return (
                       <div
                         key={item?.value}
-                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative ${hasIssue ? 'border-error' : ''} hover:bg-base-300 transition-colors duration-200`}
                       >
                         <div className="p-2 flex-1 flex items-center gap-2">
                           {GetPreBuiltToolTypeIcon(item?.value, 14, 14)}
@@ -352,6 +380,8 @@ const EmbedList = ({ params, searchParams }) => {
                       </div>
                     );
                   })}
+                  {/* Add empty div for spacing when only one item */}
+                  {selectedPrebuiltTools.length === 1 && <div></div>}
                 </div>
               )}
             </div>

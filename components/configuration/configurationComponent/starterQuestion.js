@@ -3,6 +3,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import InfoTooltip from '@/components/InfoTooltip';
+import { CircleQuestionMark } from 'lucide-react';
 
 const StarterQuestionToggle = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -19,17 +20,18 @@ const StarterQuestionToggle = ({ params, searchParams }) => {
     };
 
     return (
-        <div className="flex items-center justify-between border border-base-content/20 rounded-md gap-2">
-            <div className="label cursor-pointer ml-1">
+        <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 cursor-pointer ml-1">
+                <span className="text-sm font-medium">Starter Question</span>
                 <InfoTooltip tooltipContent={"Toggle to enable/disable starter questions"}>
-                <span className="font-medium mr-2 info">Starter Question</span>
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                 </InfoTooltip>
             </div>
             <input
                 type="checkbox"
                 checked={IsstarterQuestionEnable}
                 onChange={handleToggle}
-                className="toggle mr-2"
+                className="toggle mr-2 toggle-xs"
                 defaultValue={IsstarterQuestionEnable ? "true" : "false"}
             />
         </div>

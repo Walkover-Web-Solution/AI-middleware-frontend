@@ -1,24 +1,25 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, EllipsisVerticalIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { closeModal, GetFileTypeIcon, openModal } from '@/utils/utility';
+import { GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
-import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
     // Use the tutorial videos hook
     const { getKnowledgeBaseVideo } = useTutorialVideos();
-    
+
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -35,6 +36,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         };
     });
     const [selectedKnowledgebase, setSelectedKnowledgebase] = useState(null);
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({
@@ -57,22 +59,17 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             }
         }, 0);
     };
-    const handleDeleteKnowledgebase = (item) => {
-        dispatch(updateBridgeVersionAction({
-            versionId: searchParams?.version,
-            dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
-        }));
-         closeModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
+    const handleDeleteKnowledgebase = async (item) => {
+        await executeDelete(async () => {
+            return dispatch(updateBridgeVersionAction({
+                versionId: searchParams?.version,
+                dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
+            }));
+        });
     };
     const handleOpenDeleteModal = (item) => {
         setSelectedKnowledgebase(item);
         openModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
-    };
-    const handleTutorial = () => {
-        setTutorialState(prev => ({
-            ...prev,
-            showSuggestion: isFirstKnowledgeBase
-        }))
     };
 
     useEffect(() => {
@@ -90,40 +87,38 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         };
     }, [params.org_id]);
 
-    const renderKnowledgebase = useMemo(() => (
-        (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
+    const renderKnowledgebase = useMemo(() => {
+        const knowledgebaseItems = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
                 <div
                     key={docId}
-                    className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${!item?.description ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${!item?.description ? 'border-red-600' : ''} hover:bg-base-300 transition-colors duration-200`}
                 >
-                    <div className="p-2 w-full h-full flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
-                                <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                                    <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
-                                        <span>{item?.name?.length > 50 ? `${item?.name.slice(0, 50)}...` : item?.name}</span>
-                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                            {!item?.description ? 'Description Required' : 'Active'}
-                                        </span>
-                                    </div>
+                    <div className="p-2 flex-1 flex items-center">
+                        <div className="flex items-center gap-2 w-full">
+                            {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
+                            {item?.name?.length > 24 ? (
+                                <div className="tooltip tooltip-top min-w-0" data-tip={item?.name}>
+                                    <span className="min-w-0 text-sm truncate">
+                                        <span className="text-sm font-normal block w-full">{item?.name}</span>
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="min-w-0 text-sm truncate">
+                                    <span className="text-sm font-normal block w-full">{item?.name}</span>
                                 </span>
-                                {!item?.description && <CircleAlertIcon color='red' size={16} />}
-                            </div>
-                            <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                                {item?.description || 'A description is required for proper functionality.'}
-                            </p>
+                            )}
+                            {!item?.description && <CircleAlertIcon color='red' size={16} />}
                         </div>
                     </div>
-                    
+
                     {/* Remove button that appears on hover */}
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                               handleOpenDeleteModal(item);
+                                handleOpenDeleteModal(item);
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
@@ -133,17 +128,30 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     </div>
                 </div>
             ) : null;
-        })
-    ), [knowbaseVersionData, knowledgeBaseData]);
+        }).filter(Boolean);
+
+        return (
+            <div className={`grid gap-2 w-full ${knowledgebaseItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
+                gridTemplateColumns: knowledgebaseItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
+            }}>
+                {knowledgebaseItems}
+                {/* Add empty div for spacing when only one item */}
+                {knowledgebaseItems.length === 1 && <div></div>}
+            </div>
+        );
+    }, [knowbaseVersionData, knowledgeBaseData]);
     return (
-        <div className="label flex-col items-start w-full p-0">
+        <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
             <div className="dropdown dropdown-right flex items-center">
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (
                         <>
-                            <InfoTooltip  tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                                <p className="label-text mb-2 whitespace-nowrap font-medium info">KnowledgeBase</p>
-                            </InfoTooltip>
+                            <div className="flex items-center gap-1 mb-2">
+                                <p className="whitespace-nowrap font-medium">KnowledgeBase</p>
+                                <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                                </InfoTooltip>
+                            </div>
                             <button
                                 tabIndex={0}
                                 className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
@@ -159,17 +167,14 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 tabIndex={0}
                                 className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
                                 disabled={!shouldToolsShow}
-                                >
+                            >
                                 <AddIcon className="w-2 h-2" />
                                 <span className="text-sm font-medium">Knowledge Base</span>
-                            </button>     
-                       </InfoTooltip>
-                        
+                            </button>
+                        </InfoTooltip>
+
                     )}
                 </div>
-
-
-
                 {tutorialState?.showSuggestion && (
                     <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
                 )}
@@ -177,8 +182,8 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
-           <div className="dropdown dropdown-left mt-8">
-           <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
+                    <div className="dropdown dropdown-left mt-8">
+                        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
                             <input
                                 type='text'
@@ -215,14 +220,14 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 </div>
                             </li>
                         </div>
-                    </ul>
+                        </ul>
                     </div>
                 )}
             </div>
             <div className="flex flex-col gap-2 w-full ">
-            {renderKnowledgebase}
+                {renderKnowledgebase}
             </div>
-            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} />
+            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
         </div>
     );

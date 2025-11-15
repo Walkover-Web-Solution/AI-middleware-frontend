@@ -20,7 +20,8 @@ const ConfigurationPage = ({
     setPromptState,
     handleCloseTextAreaFocus,
     savePrompt,
-    isMobileView
+    isMobileView,
+    closeHelperButtonLocation
 }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
@@ -71,7 +72,8 @@ const ConfigurationPage = ({
         setPromptState,
         handleCloseTextAreaFocus,
         savePrompt,
-        isMobileView
+        isMobileView,
+        closeHelperButtonLocation
     }), [
         configState,
         params,
@@ -85,12 +87,13 @@ const ConfigurationPage = ({
         setPromptState,
         handleCloseTextAreaFocus,
         savePrompt,
-        isMobileView
+        isMobileView,
+        closeHelperButtonLocation
     ]);
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-1 relative mt-2 bg-base-100">
+            <div className="flex flex-col gap-2 relative bg-base-100">
                 <BridgeVersionDropdown params={params} searchParams={searchParams} />
                 <VersionDescriptionInput 
                     params={params}

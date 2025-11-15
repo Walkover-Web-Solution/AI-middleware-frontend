@@ -465,7 +465,8 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
         const key = a.bridge_id || a.name;
         const matchesSearch = (a?.name || '').toLowerCase().includes(q.toLowerCase());
         const notUsed = !usedAgentIds.has(key);
-        return matchesSearch && notUsed;
+        const isNotDeleted = !a.deletedAt;
+        return matchesSearch && notUsed && isNotDeleted;
       });
   }, [agents, q, usedAgentIds, agents, nodes]);
 

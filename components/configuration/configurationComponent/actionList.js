@@ -7,6 +7,7 @@ import ActionModel from './actionModel';
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
+import { CircleQuestionMark } from 'lucide-react';
 
 function ActionList({ params, searchParams }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
@@ -39,10 +40,11 @@ function ActionList({ params, searchParams }) {
 
     return (
         <div className="form-control mb-4">
-            <div className='flex items-start'>
-                    <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
-                        <label className="label font-medium whitespace-nowrap info">Action</label>
-                    </InfoTooltip>
+            <div className='flex items-center gap-1'>
+                <label className="label font-medium whitespace-nowrap">Action</label>
+                <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
             </div>
             <div className='flex flex-wrap gap-4'>
                 {action && Object.entries(action).sort().map(([key, value]) => (

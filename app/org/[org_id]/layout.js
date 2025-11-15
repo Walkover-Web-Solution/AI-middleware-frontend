@@ -75,6 +75,11 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     const updateUserMeta = async () => {
       const reference_id = getFromCookies("reference_id");
       const unlimited_access = getFromCookies("unlimited_access");
+        const utmSource = getFromCookies("utm_source");
+        const utmMedium = getFromCookies("utm_medium");
+        const utmCampaign = getFromCookies("utm_campaign");
+        const utmTerm = getFromCookies("utm_term");
+        const utmContent = getFromCookies("utm_content");
         let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
@@ -111,23 +116,33 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       }  
       // If reference_id exists but user has no reference_id in meta
       if (reference_id && !currentUser?.meta?.reference_id) {
+      // Build UTM object with only present values from URL that are NOT already in user meta
+      const utmParams = {};
+      if (utmSource && !currentUser?.meta?.utm_source) utmParams.utm_source = utmSource;
+      if (utmMedium && !currentUser?.meta?.utm_medium) utmParams.utm_medium = utmMedium;
+      if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
+      if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
+      if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
+
+      // If any new UTM parameter exists that user doesn't have
+      if (Object.keys(utmParams).length > 0) {
         try {
           const data = await dispatch(
             storeMarketingRefUserAction({
-              ref_id: reference_id,
+              ...utmParams,
               client_id: currentUser.id,
               client_email: currentUser.email,
               client_name: currentUser.name,
               created_at: currentUser.created_at,
             })
           );
-  
-          if (data?.status) {
+          
+          if (data) {
             const updatedUser = {
               ...currentUser,
               meta: {
                 ...currentUserMeta,
-                reference_id: reference_id,
+                ...utmParams,
               },
             };
             await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
@@ -276,7 +291,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   const docstarScriptId = "docstar-main-script";
   const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
-
   useEffect(() => {
     const existingScript = document.getElementById(docstarScriptId);
     if (existingScript) {
@@ -393,7 +407,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus && <Navbar resolvedParams={resolvedParams} />}
+              <Navbar resolvedParams={resolvedParams} />
             </div>
 
             {/* Scrollable Content */}
@@ -425,7 +439,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus ? <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/> : null}
+               <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/>
             </div>
 
             {/* Scrollable Content */}

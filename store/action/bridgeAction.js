@@ -212,8 +212,9 @@ export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => asy
     }
     return response;
   } catch (error) {
+    toast.error(error?.response?.data?.error || error?.message || error || 'Failed to delete agent');
     console.error('Failed to delete bridge:', error);
-    throw error;
+    throw  error;
   }
 };
 

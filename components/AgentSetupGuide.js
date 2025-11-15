@@ -22,6 +22,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
    };
   });
   const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
+  const [isAnimating, setIsAnimating] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
   const resetBorder = (ref, selector) => {
@@ -72,7 +73,13 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     // 2. Default AI ML key is selected OR
     // 3. Both prompt and API key are provided
     if ((service === 'ai_ml'&&hasPrompt) || (hasPrompt && hasApiKey)) {
-      setIsVisible(false);
+      if (isVisible) {
+        setIsAnimating(true);
+        setTimeout(() => {
+          setIsVisible(false);
+          setIsAnimating(false);
+        }, 300);
+      }
       setShowError(false);
       setErrorType('');
     } else {
@@ -99,8 +106,12 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       return;
     }
     
-    
-    setIsVisible(false);
+    // Smooth transition when hiding
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsVisible(false);
+      setIsAnimating(false);
+    }, 300);
   };
  
   if (!isVisible || ((bridgeApiKey && prompt !== ""))) {
@@ -110,7 +121,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   }
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-base-100 overflow-hidden z-very-high">
+    <div className={`w-full h-full bg-base-100 overflow-hidden relative transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">

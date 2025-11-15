@@ -12,10 +12,11 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick } from "@/utils/utility";
+import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick, formatDate } from "@/utils/utility";
+
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -25,6 +26,7 @@ import AgentEmptyState from "@/components/AgentEmptyState";
 import { Archive, ArchiveRestore, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import DeleteModal from "@/components/UI/DeleteModal";
 import UsageLimitModal from "@/components/modals/UsageLimitModal";
+import useDeleteOperation from "@/customHooks/useDeleteOperation";
 
 export const runtime = 'edge';
 
@@ -48,12 +50,12 @@ function Home({ params, isEmbedUser }) {
       averageResponseTime: orgData.average_response_time || [],
       isLoading: state.bridgeReducer.loading,
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
-      descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
+      descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions || {},
       bridgeStatus: state.bridgeReducer.allBridgesMap,
-      showHistory:  state.appInfoReducer.embedUserDetails?.showHistory||false,
+      showHistory: state.appInfoReducer.embedUserDetails?.showHistory || false,
     };
   });
-  const [filterBridges,setFilterBridges]=useState(allBridges);
+  const [filterBridges, setFilterBridges] = useState(allBridges);
   const [loadingAgentId, setLoadingAgentId] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [tutorialState, setTutorialState] = useState({
@@ -66,10 +68,10 @@ function Home({ params, isEmbedUser }) {
   const [portalPosition, setPortalPosition] = useState({ top: 0, left: 0 });
   const [showPortal, setShowPortal] = useState(false);
   const [portalContent, setPortalContent] = useState(null);
-  const [isHoveringPortal, setIsHoveringPortal] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [portalTriggerElement, setPortalTriggerElement] = useState(null);
   const portalRef = useRef(null);
+  const { isDeleting, executeDelete } = useDeleteOperation();
 
   useEffect(() => {
     setFilterBridges(allBridges)
@@ -108,15 +110,15 @@ function Home({ params, isEmbedUser }) {
       <div className="flex-col" title={item.name}>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            { item.name}
+            {item.name}
             {item.bridge_status === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
-                  <ClockIcon size={12}/>
+                <ClockIcon size={12} />
                 <span className="hidden sm:inline">Paused</span>
               </div>
             )}
           </div>
-          
+
         </div>
       </div>
     </div>,
@@ -131,7 +133,17 @@ function Home({ params, isEmbedUser }) {
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
     bridge_limit: item?.bridge_limit,
     agent_usage: item?.bridge_usage,
-    isLoading: loadingAgentId === item._id
+    isLoading: loadingAgentId === item._id,
+    last_used: <div className="group cursor-help">
+                        <span className="group-hover:hidden">
+                          {formatRelativeTime(item.last_used || "No records found",)}
+                        </span>
+                        <span className="hidden group-hover:inline">
+                          {formatDate(item.last_used || "No records found",)}
+                        </span>
+                      </div> ,
+    last_used_orignal: item.last_used,
+    
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -156,12 +168,9 @@ function Home({ params, isEmbedUser }) {
             )}
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs">
-              {item?.slugName || ""}
-            </p>
             {item.bridge_status === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
-                  <ClockIcon size={12}/>
+                <ClockIcon size={12} />
                 <span className="hidden sm:inline">Paused</span>
               </div>
             )}
@@ -178,8 +187,17 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    isLoading: loadingAgentId === item._id
-  }));
+    isLoading: loadingAgentId === item._id,
+    last_used: <div className="group cursor-help">
+                        <span className="group-hover:hidden">
+                          {formatRelativeTime(item.last_used ? item.last_used : "No records found",)}
+                        </span>
+                        <span className="hidden group-hover:inline">
+                          {formatDate(item.last_used ? item.last_used : "No records found",)}
+                        </span>
+                      </div> ,
+    last_used_orignal: item.last_used,
+    }));
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
   const getDaysRemaining = (deletedAt) => {
@@ -213,14 +231,6 @@ function Home({ params, isEmbedUser }) {
               <span className="text-xs text-primary opacity-70">Loading...</span>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs">
-              {item?.slugName || ""}
-            </p>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            Deleted {formatRelativeTime(item.deletedAt)}
-          </div>
         </div>
       </div>
     </div>,
@@ -234,9 +244,22 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    isLoading: loadingAgentId === item._id
+    isLoading: loadingAgentId === item._id,
+    last_used: item.last_used ? (
+      <div className="group cursor-help">
+        <span className="group-hover:hidden">
+          {formatRelativeTime(item.last_used)}
+        </span>
+        <span className="hidden group-hover:inline">
+          {formatDate(item.last_used)}
+        </span>
+      </div>
+    ) : "No records found",
+    last_used_original: item.last_used,
   }));
 
+  // Helper function to calculate days remaining for deletion (30 days from deletedAt)
+ 
   const onClickConfigure = (id, versionId) => {
     // Prevent multiple clicks while loading
     if (loadingAgentId) return;
@@ -245,21 +268,21 @@ function Home({ params, isEmbedUser }) {
     router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
   };
   const handlePauseBridge = async (bridgeId) => {
-      const newStatus = bridgeStatus[bridgeId]?.bridge_status === BRIDGE_STATUS.PAUSED
-        ? BRIDGE_STATUS.ACTIVE
-        : BRIDGE_STATUS.PAUSED;
-  
-      try {
-        await dispatch(updateBridgeAction({
-          bridgeId,
-          dataToSend: { bridge_status: newStatus }
-        }));
-        toast.success(`Agent ${newStatus === BRIDGE_STATUS.ACTIVE ? 'resumed' : 'paused'} successfully`);
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to update agent status');
-      }
-    };
+    const newStatus = bridgeStatus[bridgeId]?.bridge_status === BRIDGE_STATUS.PAUSED
+      ? BRIDGE_STATUS.ACTIVE
+      : BRIDGE_STATUS.PAUSED;
+
+    try {
+      await dispatch(updateBridgeAction({
+        bridgeId,
+        dataToSend: { bridge_status: newStatus }
+      }));
+      toast.success(`Agent ${newStatus === BRIDGE_STATUS.ACTIVE ? 'resumed' : 'paused'} successfully`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update agent status');
+    }
+  };
   const archiveBridge = (bridgeId, newStatus = 0) => {
     try {
       dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
@@ -316,20 +339,6 @@ function Home({ params, isEmbedUser }) {
     }
   };
 
-  const handlePortalClose = () => {
-    if (!isHoveringPortal) {
-      const timeout = setTimeout(() => {
-        if (portalTriggerElement) {
-          portalTriggerElement.classList.remove('portal-active');
-        }
-        setShowPortal(false);
-        setPortalContent(null);
-        setPortalTriggerElement(null);
-      }, 100);
-      setHoverTimeout(timeout);
-    }
-  };
-
   const handlePortalCloseImmediate = () => {
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
@@ -341,7 +350,6 @@ function Home({ params, isEmbedUser }) {
     setShowPortal(false);
     setPortalContent(null);
     setPortalTriggerElement(null);
-    setIsHoveringPortal(false);
   };
 
   // Use utility function for outside click handling
@@ -379,11 +387,9 @@ function Home({ params, isEmbedUser }) {
       clearTimeout(hoverTimeout);
       setHoverTimeout(null);
     }
-    setIsHoveringPortal(true);
   };
 
   const handlePortalMouseLeave = () => {
-    setIsHoveringPortal(false);
     const timeout = setTimeout(() => {
       if (portalTriggerElement) {
         portalTriggerElement.classList.remove('portal-active');
@@ -395,24 +401,12 @@ function Home({ params, isEmbedUser }) {
     setHoverTimeout(timeout);
   };
 
-  const deleteBridge = async (item, name) => {
-    try {
+   const deleteBridge = async (item, name) => {
+    await executeDelete(async () => {
       const bridgeId = item._id;
-      const response = await dispatch(deleteBridgeAction({bridgeId, org_id: resolvedParams.org_id}));
+      const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id }));
       toast.success(response?.data?.message || response?.message || response || 'Agent deleted successfully');
-      
-      // Close modal and clear state after successful deletion
-      setItemToDelete(null);
-      closeModal(MODAL_TYPE.DELETE_MODAL);
-    } catch (error) {
-      console.error('Failed to delete agent', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete agent';
-      toast.error(errorMessage);
-      
-      // Close modal even on error
-      setItemToDelete(null);
-      closeModal(MODAL_TYPE.DELETE_MODAL);
-    }
+    });
   }
 
   const restoreBridge = async (bridgeId) => {
@@ -453,7 +447,7 @@ function Home({ params, isEmbedUser }) {
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
             }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</button></li>
             <li> <button
-              onClick={(e) =>{
+              onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handlePortalCloseImmediate();
@@ -527,18 +521,24 @@ function Home({ params, isEmbedUser }) {
       <div className="flex items-center gap-2">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
-            className="btn btn-outline btn-primary btn-sm" 
+            className="btn btn-outline btn-ghost btn-xs whitespace-nowrap flex items-center gap-1" 
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               restoreBridge(row._id)
             }}
           >
-            <Undo2 size={14} />
-            Undo
+            <span className="flex items-center  gap-1">
+             <div className="flex text-xs items-center gap-1">
+             <Undo2 size={12} />
+             </div>
+             <div className="text-xs">
+             Undo
+             </div>
+            </span>
           </button>
         </div>
-        <div className="text-xs text-error font-medium">
+        <div className="text-error font-sm mt-2 text-xs whitespace-nowrap">
           {row.daysRemaining} days left
         </div>
       </div>
@@ -573,7 +573,6 @@ function Home({ params, isEmbedUser }) {
         setShowPortal(false);
         setPortalContent(null);
         setPortalTriggerElement(null);
-        setIsHoveringPortal(false);
       }
     };
 
@@ -604,34 +603,34 @@ function Home({ params, isEmbedUser }) {
 
           />
         )}
-        <CreateNewBridge orgid={resolvedParams.org_id}/>
+        <CreateNewBridge orgid={resolvedParams.org_id} />
         {!allBridges.length && isLoading && <LoadingSpinner />}
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
           <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
             <div className="w-full">
-            {allBridges.length === 0 ? (
-              <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser}/>
-            ) : (
-              <div className="flex flex-col lg:mx-0">
-                <div className="px-2 pt-4">
-                  <MainLayout>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
-                      <PageHeader
-                        title="Agents"
-                        description={descriptions?.Agents || "Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."}
-                        docLink="https://gtwy.ai/blogs/features/bridge"
-                        isEmbedUser={isEmbedUser}
-                      />
-                      
-                    </div>
-                  </MainLayout>
-                  
-                  <div className="flex flex-row gap-4">
-                    {allBridges.length > 5 && (
-                      <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
-                    )}
-                    <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
+              {allBridges.length === 0 ? (
+                <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser} />
+              ) : (
+                <div className="flex flex-col lg:mx-0">
+                  <div className="px-2 pt-4">
+                    <MainLayout>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
+                        <PageHeader
+                          title="Agents"
+                          description={descriptions?.Agents || "Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."}
+                          docLink="https://gtwy.ai/blogs/features/bridge"
+                          isEmbedUser={isEmbedUser}
+                        />
+
+                      </div>
+                    </MainLayout>
+
+                    <div className="flex flex-row gap-4">
+                      {allBridges.length > 5 && (
+                        <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents" />
+                      )}
+                      <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
                         <button className="btn btn-primary btn-sm " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                       </div>
                   </div>
@@ -639,9 +638,9 @@ function Home({ params, isEmbedUser }) {
                 
                 <CustomTable 
                   data={UnArchivedBridges} 
-                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
+                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage','last_used']} 
                   sorting 
-                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
+                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage','last_used']} 
                   handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                   keysToExtractOnRowClick={['_id', 'versionId']} 
                   keysToWrap={['name', 'model']} 
@@ -660,9 +659,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60">
                       <CustomTable 
                         data={ArchivedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                         keysToExtractOnRowClick={['_id', 'versionId']} 
                         keysToWrap={['name', 'prompt', 'model']} 
@@ -684,9 +683,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60">
                       <CustomTable 
                         data={DeletedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent} 
                       />
@@ -700,16 +699,7 @@ function Home({ params, isEmbedUser }) {
         </div>
         
         {/* Single DeleteModal for all delete operations */}
-        <DeleteModal 
-          onConfirm={deleteBridge} 
-          item={itemToDelete} 
-          title="Delete Agent" 
-          description={itemToDelete ? `Are you sure you want to delete the Agent "${itemToDelete.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.` : ""}
-          onCancel={() => {
-            setItemToDelete(null);
-            closeModal(MODAL_TYPE.DELETE_MODAL);
-          }}
-        />
+        <DeleteModal onConfirm={deleteBridge} item={itemToDelete} title="Delete Agent" description={`Are you sure you want to delete the Agent "${itemToDelete?.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.`} loading={isDeleting} isAsync={true} />
       </div>
       <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} />
       

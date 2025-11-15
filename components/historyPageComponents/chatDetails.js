@@ -51,7 +51,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
       })
       .catch((error) => {
         toast.error(`Error while copying to clipboard`);
-        console.log(error);
+        console.error(error);
       });
   };
 

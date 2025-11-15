@@ -24,6 +24,7 @@ import orchestralFlowReducer from "./reducer/orchestralFlowReducer";
 import prebuiltPromptReducer from "./reducer/prebuiltPromptReducer";
 import apiKeysReducer from "./reducer/apiKeysReducer";
 import variableReducer from "./reducer/variableReducer";
+import chatReducer from "./reducer/chatReducer";
 import appInfoReducer from "./reducer/appInfoReducer";
 const createNoopStorage = () => {
     return {
@@ -86,6 +87,7 @@ const rootReducer = combineReducers({
     prebuiltPromptReducer,
     apiKeysReducer,
     variableReducer,
+    chatReducer,
     appInfoReducer
 });
 

@@ -11,6 +11,8 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -38,6 +40,10 @@ const PreEmbedList = ({ params, searchParams }) => {
         };
     });
     const dispatch = useDispatch();
+    
+    // Delete operation hook
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PRE_TOOL_MODAL);
+    
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
     const handleOpenModal = (functionId) => {
         setPreFunctionId(functionId);
@@ -65,12 +71,13 @@ const PreEmbedList = ({ params, searchParams }) => {
         }, 0);
     }
 
-    const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: searchParams?.version
-        }))
-        closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
+    const removePreFunction = async () => {
+        await executeDelete(async () => {
+            return dispatch(updateApiAction(params.id, {
+                pre_tools: [],
+                version_id: searchParams?.version
+            }));
+        });
     }
 
     const handleChangePreTool = () => {
@@ -171,15 +178,18 @@ const PreEmbedList = ({ params, searchParams }) => {
                     title="Are you sure?"
                     description={"This action Remove the selected Pre Tool from the Agent."}
                     buttonTitle="Remove Pre Tool"
-                    modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
+                    modalType={MODAL_TYPE.DELETE_PRE_TOOL_MODAL}
+                    loading={isDeleting}
+                    isAsync={true}
                 />
 
-                <div className="label flex-col items-start w-full">
+                <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {bridge_pre_tools.length > 0 ? (
-                            <div className="flex items-center gap-1 flex-row mb-2">
+                            <div className="flex items-center gap-1 mb-2">
+                                <p className="font-medium whitespace-nowrap">Pre Tool</p>
                                 <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                                    <p className="label-text info font-medium whitespace-nowrap">Pre Tool</p>
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                                 </InfoTooltip>
                             </div>
                         ) : (
@@ -218,6 +228,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                             handleRemoveEmbed={removePreFunction}
                             handleOpenDeleteModal={handleOpenDeleteModal}
                             handleChangePreTool={handleChangePreTool}
+                            halfLength={1}
                         />
                     </div>
 
