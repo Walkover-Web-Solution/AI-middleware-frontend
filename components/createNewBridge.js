@@ -256,15 +256,16 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
                     placeholder="e.g., A customer support agent that helps users with product inquiries and troubleshooting..."
                     ref={textAreaPurposeRef}
                     onChange={handlePurposeInput}
-                    className={`textarea textarea-bordered w-full min-h-[120px] bg-base-100 transition-all duration-300 text-base resize-none ${
+                    className={`textarea textarea-bordered w-full max-h-[120px] bg-base-100 transition-all duration-300 text-base resize-none ${
                       state.validationErrors.purpose
                         ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
                         : "border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20"
                     }`}
                     aria-label="Agent purpose description"
+                    maxLength={300}
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-base-content/50">
-                    {textAreaPurposeRef?.current?.value?.length || 0}/500
+                    {textAreaPurposeRef?.current?.value?.length || 0}/300
                   </div>
                 </div>
                 
