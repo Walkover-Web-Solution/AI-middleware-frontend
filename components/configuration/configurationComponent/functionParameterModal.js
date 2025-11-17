@@ -422,9 +422,13 @@ function FunctionParameterModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
-  const { versions } = useCustomSelector(state => ({
-    versions: state?.bridgeReducer.org[params?.org_id]?.orgs?.find((item) => item._id === functionId)?.versions || [],
-  }));
+  const { versions, publishedVersion } = useCustomSelector(state => {
+    const agent = state?.bridgeReducer.org[params?.org_id]?.orgs?.find((item) => item._id === functionId);
+    return {
+      versions: agent?.versions || [],
+      publishedVersion: agent?.published_version_id || null,
+    };
+  });
 
   useEffect(() => {
     // Only reset toolName if user hasn't manually changed it
@@ -1149,12 +1153,24 @@ function FunctionParameterModal({
                       </label>
                       <select
                         className="select select-xs select-bordered ml-2"
-                        value={toolData?.version_id || ''}
+                        value={toolData?.version_id || (publishedVersion ? 'published' : '')}
                         onChange={(e) => {
-                          setToolData({ ...toolData, version_id: e.target.value });
+                          if (e.target.value === 'published') {
+                            // Remove version_id key when published version is selected
+                            const { version_id, ...updatedToolData } = toolData;
+                            setToolData(updatedToolData);
+                          } else {
+                            setToolData({ ...toolData, version_id: e.target.value });
+                          }
                           setIsModified(true);
                         }}
                       >
+                        {/* Published Version Option - only show if published version exists */}
+                        {publishedVersion && (
+                          <option value="published">
+                            Published Version
+                          </option>
+                        )}
                         {versions.map((v, idx) => (
                           <option key={v} value={v}>
                             Version {idx + 1}
