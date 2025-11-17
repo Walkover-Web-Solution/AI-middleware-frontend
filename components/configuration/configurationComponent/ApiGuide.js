@@ -3,14 +3,22 @@ import Protected from '@/components/protected';
 import GenericTable from '@/components/table/table';
 import Link from 'next/link';
 import React from 'react';
+import { extractPromptVariables } from '@/utils/utility';
 
-const ComplitionApi = (bridgeId, modelType, isEmbedUser) => {
+const ComplitionApi = (bridgeId, modelType, isEmbedUser, prompt = '') => {
   const url = `${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion`;
-
   const headers = isEmbedUser
     ? `--header 'Content-Type: application/json'`
     : `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
   --header 'Content-Type: application/json'`;
+
+  // Extract variables from prompt
+  const usedVariables = extractPromptVariables(prompt);
+  
+  // Generate variables object with example values
+  const variablesObject = usedVariables.length > 0 
+    ? usedVariables.map(variable => `    "${variable}": "YOUR_${variable.toUpperCase()}_VALUE"`).join(',\n')
+    : '    // No variables found in prompt';
 
   const body = `{
   ${modelType === 'embedding' ? '"text": "YOUR_TEXT_HERE",' : '"user": "YOUR_USER_QUESTION",'}
@@ -18,7 +26,7 @@ const ComplitionApi = (bridgeId, modelType, isEmbedUser) => {
   "thread_id": "YOUR_THREAD_ID",
   "response_type": "text", // optional
   "variables": {
-    // ...VARIABLES_USED_IN_BRIDGE
+${variablesObject}
   }
 }`;
 
@@ -60,7 +68,7 @@ const Section = ({ title, caption, children }) => (
   </div>
 );
 
-const ApiGuide = ({ params, searchParams, modelType, isEmbedUser }) => {
+const ApiGuide = ({ params, searchParams, modelType, isEmbedUser, prompt = '' }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
       {!isEmbedUser && <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
@@ -73,10 +81,10 @@ const ApiGuide = ({ params, searchParams, modelType, isEmbedUser }) => {
       <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
         <Section title={`${isEmbedUser ? 'Step 1' : 'Step 2'}`} caption="Use the API" />
         <div className="mockup-code relative">
-          <CopyButton data={ComplitionApi(params.id, modelType, isEmbedUser)} />
+          <CopyButton data={ComplitionApi(params.id, modelType, isEmbedUser, prompt)} />
           <pre className="break-words whitespace-pre-wrap">
             <code>
-              {ComplitionApi(params.id, modelType, isEmbedUser)}
+              {ComplitionApi(params.id, modelType, isEmbedUser, prompt)}
             </code>
           </pre>
         </div>

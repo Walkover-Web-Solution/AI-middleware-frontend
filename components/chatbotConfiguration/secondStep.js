@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CopyButton from "../copyButton/copyButton";
 import GenericTable from '../table/table';
+import { extractPromptVariables } from '@/utils/utility';
 
 const DataObject = {
     script: `<script\n      id="chatbot-main-script"\n      embedToken=" <embed token here> "\n      bridgeName="<slugName_of_bridge>"\n      threadId="<thread_id>"\n      subthreadId="<subthread_id>"\n      parentId="<parent_container_id>"\n      src="https://chatbot-embed.viasocket.com/chatbot-prod.js"\n     ></script>`,
@@ -48,9 +49,31 @@ const Section = ({ title, caption, children }) => (
     </div>
 );
 
-const SecondStep = ({slugName}) => {
+const SecondStep = ({slugName, prompt = ''}) => {
+    // Generate dynamic sendData code with variables from prompt
+    const generateSendDataCode = (prompt) => {
+        const usedVariables = extractPromptVariables(prompt);
+        
+        const variablesObject = usedVariables.length > 0 
+            ? usedVariables.map(variable => `        "${variable}": "YOUR_${variable.toUpperCase()}_VALUE"`).join(',\n')
+            : '        // No variables found in prompt';
+
+        return `window.Chatbot.sendData({ 
+      bridgeName: '<slugName_of_bridge>',
+      threadId: '<thread_id>',
+      subthreadId: '<subthread_id>',
+      parentId: '<parent_container_id>',
+      fullScreen: 'true/false',
+      hideCloseButton: 'true/false',
+      hideIcon: 'true/false',
+      variables: {
+${variablesObject}
+      }
+    });`;
+    };
+
     const methods = [
-        { label: '1. Use This method to send data when needed', code: DataObject.sendData },
+        { label: '1. Use This method to send data when needed', code: generateSendDataCode(prompt) },
         { label: '2. Use this method to open chatbot explicitly', code: DataObject.openChatbot },
         { label: '3. Use this method to close chatbot explicitly', code: DataObject.closeChatbot },
         { label: '4. Use this method to show chatbot icon explicitly', code: DataObject.showIcon },
@@ -70,8 +93,6 @@ const SecondStep = ({slugName}) => {
                 <pre data-prefix=">" className="text-error"><code> src=</code><code className="text-warning">"https://chatbot-embed.viasocket.com/chatbot-prod.js"</code><code className='text-error'>&gt;</code></pre>
                 <pre data-prefix=">" className="text-error"><code> threadId=</code><code className="text-warning">"Enter Thread ID here"</code></pre>
                 <pre data-prefix=">" className="text-error"><code> bridgeName=</code><code className="text-warning"> {slugName} </code></pre>
-                <pre data-prefix=">" className="text-error"><code> subThreadId=</code><code className="text-warning">"Enter Sub Thread ID here"</code></pre>
-                <pre data-prefix=">" className="text-error"><code> parentId=</code><code className="text-warning">"Enter Parent ID here"</code></pre>
                 <pre data-prefix=">" className="text-error"><code>&lt;/script&gt;</code></pre>
             </div>
 
