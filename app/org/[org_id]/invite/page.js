@@ -325,7 +325,7 @@ function UserManagementPage({ params }) {
       // Load MSG91 Proxy Auth Script
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src = 'https://test.proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
+      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
       script.onload = function() {
         if (typeof initVerification === 'function') {
           initVerification(configuration);
@@ -343,21 +343,7 @@ function UserManagementPage({ params }) {
   }, []);
 
   return (
-    <div className="mx-auto p-6 overflow-hidden">
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold mb-2">User Management with Authentication</h1>
-        <p className="text-base-content/70">
-          Secure user management with MSG91 proxy authentication
-        </p>
-      </div>
-      
-      <div className="bg-base-100 rounded-box shadow-sm border border-base-200 p-4">
-        <div className="text-center py-8">
-          <div className="loading loading-spinner loading-lg mb-4"></div>
-          <h3 className="text-lg font-medium mb-2">Initializing Authentication</h3>
-          <p className="text-base-content/70">Please wait while we verify your credentials...</p>
-        </div>
-      </div>
+    <div id = "userProxyContainer">
     </div>
   );
 }
