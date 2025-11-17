@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
+import { formatRelativeTime, formatDate } from "@/utils/utility";
 import Protected from "../protected";
 
 function getOrgIdFromPath(pathname) {
@@ -45,7 +46,25 @@ const CommandPalette = ({isEmbedUser}) => {
     const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
-      subtitle: `${a.service || ""}${a.configuration?.model ? " · " + a.configuration?.model : ""}`,
+      subtitle: (
+        <div className="flex items-center gap-2">
+          <span>{a.service || ""}{a.configuration?.model ? " · " + a.configuration?.model : ""}</span>
+          {a.last_used && (
+            <>
+              <span>•</span>
+              <span className="text-xs opacity-70">Last used:</span>
+              <div className="group cursor-help inline-flex">
+                <span className="group-hover:hidden">
+                  {formatRelativeTime(a.last_used)}
+                </span>
+                <span className="hidden group-hover:inline text-xs">
+                  {formatDate(a.last_used)}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+      ),
       type: "agents",
       published_version_id: a.published_version_id,
       versions: a.versions
@@ -82,7 +101,25 @@ const CommandPalette = ({isEmbedUser}) => {
     const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
       id: k._id,
       title: k.name || k._id,
-      subtitle: k.service || "API Key",
+      subtitle: (
+        <div className="flex items-center gap-2">
+          <span>{k.service || "API Key"}</span>
+          {k.last_used && (
+            <>
+              <span>•</span>
+              <span className="text-xs opacity-70">Last used:</span>
+              <div className="group cursor-help inline-flex">
+                <span className="group-hover:hidden">
+                  {formatRelativeTime(k.last_used)}
+                </span>
+                <span className="hidden group-hover:inline text-xs">
+                  {formatDate(k.last_used)}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+      ),
       type: "apikeys",
     }));
 
