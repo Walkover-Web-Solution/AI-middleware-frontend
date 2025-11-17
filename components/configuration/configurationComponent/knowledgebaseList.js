@@ -93,25 +93,25 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             return item ? (
                 <div
                     key={docId}
-                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${!item?.description ? 'border-red-600' : ''} hover:bg-base-300 transition-colors duration-200`}
+                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
                 >
-                    <div className="p-2 flex-1 flex items-center">
+                    <div className="flex items-center gap-2 w-full">
+                        {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
                         <div className="flex items-center gap-2 w-full">
-                            {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
                             {item?.name?.length > 24 ? (
                                 <div className="tooltip tooltip-top min-w-0" data-tip={item?.name}>
                                     <span className="min-w-0 text-sm truncate">
-                                        <span className="text-sm font-normal block w-full">{item?.name}</span>
+                                            <span className="text-sm font-normal block w-full">{truncate(item?.name, 24)}</span>
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="min-w-0 text-sm truncate">
+                                        <span className="text-sm font-normal block w-full">{truncate(item?.name, 24)}</span>
                                     </span>
-                                </div>
-                            ) : (
-                                <span className="min-w-0 text-sm truncate">
-                                    <span className="text-sm font-normal block w-full">{item?.name}</span>
-                                </span>
-                            )}
+                                )}
+                            </div>
                             {!item?.description && <CircleAlertIcon color='red' size={16} />}
                         </div>
-                    </div>
 
                     {/* Remove button that appears on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
@@ -131,12 +131,8 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         }).filter(Boolean);
 
         return (
-            <div className={`grid gap-2 w-full ${knowledgebaseItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
-                gridTemplateColumns: knowledgebaseItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
-            }}>
+            <div className={`grid gap-2 w-full`}>
                 {knowledgebaseItems}
-                {/* Add empty div for spacing when only one item */}
-                {knowledgebaseItems.length === 1 && <div></div>}
             </div>
         );
     }, [knowbaseVersionData, knowledgeBaseData]);

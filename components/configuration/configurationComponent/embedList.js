@@ -323,9 +323,7 @@ const EmbedList = ({ params, searchParams }) => {
 
               {/* Render selected Prebuilt Tools below functions */}
               {selectedPrebuiltTools.length > 0 && (
-                <div className={`grid gap-2 w-full ${selectedPrebuiltTools.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
-                  gridTemplateColumns: selectedPrebuiltTools.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
-                }}>
+                <div className={`grid gap-2 w-full`}>
                   {selectedPrebuiltTools.map((item) => {
                     const missingDesc = !item?.description;
                     const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
@@ -380,8 +378,6 @@ const EmbedList = ({ params, searchParams }) => {
                       </div>
                     );
                   })}
-                  {/* Add empty div for spacing when only one item */}
-                  {selectedPrebuiltTools.length === 1 && <div></div>}
                 </div>
               )}
             </div>

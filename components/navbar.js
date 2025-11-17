@@ -42,8 +42,7 @@ const Navbar = ({ isEmbedUser }) => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray, variablesKeyValue } = useCustomSelector(state => {
-    const variableState = state?.variableReducer?.VariableMapping?.[bridgeId]?.[versionId] || {};
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray } = useCustomSelector(state => {
     return {
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
@@ -61,9 +60,6 @@ const Navbar = ({ isEmbedUser }) => {
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
     versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.version_description || "",
     bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.versions || [],
-    variablesKeyValue: variableState?.variables || [],
-    // variableGroups: variableState?.groups || [], // Commented out - not needed with simple button
-    // activeVariableGroupId: variableState?.activeGroupId || null, // Commented out - not needed with simple button
   }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
@@ -89,17 +85,6 @@ const Navbar = ({ isEmbedUser }) => {
   const activeTabIndex = useMemo(() => {
     return TABS.findIndex(tab => tab.id === activeTab);
   }, [TABS, activeTab]);
-
-  // Create compatible searchParams object for prebuilt components
-  const compatibleSearchParams = useMemo(() => ({
-    version: versionId
-  }), [versionId]);
-  const variablesCount = useMemo(() => variablesKeyValue?.length ?? 0, [variablesKeyValue]);
-  // const activeVariableGroup = useMemo(() => {
-  //   if (!Array.isArray(variableGroups) || !variableGroups.length) return null;
-  //   return variableGroups.find(group => group.id === activeVariableGroupId) || variableGroups[0];
-  // }, [variableGroups, activeVariableGroupId]);
-  // const activeVariableGroupName = useMemo(() => activeVariableGroup?.name || 'Variables', [activeVariableGroup]);
 
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
@@ -184,24 +169,6 @@ const Navbar = ({ isEmbedUser }) => {
       handleNameCancel();
     }
   }, [handleNameSave, handleNameCancel]);
-
-  // Variable Group Dropdown Handlers - Commented out since using simple button now
-  // const handleVariableGroupSelect = useCallback((groupId) => {
-  //   dispatch(setActiveVariableGroup({
-  //     bridgeId: bridgeId,
-  //     versionId: versionId,
-  //     groupId: groupId
-  //   }));
-  //   document.activeElement?.blur();
-  // }, [dispatch, bridgeId, versionId]);
-
-  // const handleDefaultGroupNameChange = useCallback((e) => {
-  //   setDefaultGroupName(e.target.value);
-  // }, []);
-
-  // const getDisplayGroupName = useCallback(() => {
-  //   return activeVariableGroupName || defaultGroupName;
-  // }, [activeVariableGroupName, defaultGroupName]);
 
   const handlePauseBridge = useCallback(async () => {
     const newStatus = bridgeStatus === BRIDGE_STATUS.PAUSED
@@ -446,48 +413,6 @@ const Navbar = ({ isEmbedUser }) => {
                 ))}
                 {BRIDGE_STATUS?.ACTIVE && <StatusIndicator status={bridgeStatus} />}
               </nav>}
-
-            {/* Navigation Tabs - fixed position */}
-            {/* {(isEmbedUser && showHistory || !isEmbedUser) && (
-              <div className="absolute left-1/2 transform -translate-x-1/2">
-                <div className="join group flex">
-                  {TABS.map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                      className={`${activeTab === tab.id ? "btn-primary w-32" : "w-14"} btn btn-sm join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                    >
-                      <tab.icon size={16} className="shrink-0" />
-                      <span className={`${activeTab === tab.id ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200 text-xs font-medium`}>
-                        {isMobile ? tab.shortLabel : tab.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )} */}
-
-            {/* Version Controls - show on configure tab for non-embed users */}
-
-            {/* {activeTab === 'configure' && bridgeId && (
-              <div className="hidden xl:flex items-center gap-1 sm:gap-2 mx-2 sm:mx-4">
-                <BridgeVersionDropdown 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={compatibleSearchParams} 
-                  isEmbedUser={isEmbedUser} 
-                />
-                <div className="flex-1 max-w-[120px] sm:max-w-xs">
-                  <VersionDescriptionInput 
-                    params={{ org_id: orgId, id: bridgeId }} 
-                    searchParams={compatibleSearchParams} 
-                    isEmbedUser={isEmbedUser} 
-                  />
-                </div>
-              </div>
-            )} */}
-
-
-
           </div>
           {(isEmbedUser && showHistory) || !isEmbedUser ? (
             <div className="flex flex-1 justify-center px-1 sm:px-2">
@@ -560,78 +485,6 @@ const Navbar = ({ isEmbedUser }) => {
                   <span className="text-black text-xs sm:text-sm">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 </button>
               )}
-              {activeTab === 'configure' && (
-                <>
-                  {/* Variables Button - Opens Variable Slider */}
-                  <button
-                    className="btn btn-outline btn-xs sm:btn-sm gap-1 sm:gap-2 px-2 sm:px-3"
-                    onClick={() => toggleSidebar("variable-collection-slider", "right")}
-                    disabled={!bridgeId}
-                    title="Manage Variables"
-                  >
-                    <span className="text-xs sm:text-sm font-medium">Variables</span>
-                  </button>
-
-                  {/* Commented out Variable Group Dropdown */}
-                  {/* <div className="dropdown dropdown-end">
-                    <div tabIndex={0} role="button" className="btn btn-outline btn-xs sm:btn-sm gap-1 sm:gap-2 px-2 sm:px-3" disabled={!bridgeId}>
-                      <Variable size={14} className="sm:w-4 sm:h-4" />
-                      <span
-                        className="text-xs sm:text-sm font-medium whitespace-nowrap max-w-[80px] sm:max-w-[120px] md:max-w-[150px] truncate"
-                        title={getDisplayGroupName()}
-                      >
-                        {truncate(getDisplayGroupName(), 15)}
-                      </span>
-                      <div className="badge badge-sm badge-primary text-[10px] sm:text-xs">
-                        {variablesCount}
-                      </div>
-                      <ChevronDown size={12} className="sm:w-3 sm:h-3" />
-                    </div>
-
-                    <div tabIndex={0} className="dropdown-content z-[9999] menu p-2 shadow-lg bg-base-100 rounded-box w-80 border border-base-200">
-                        <div className="text-xs font-semibold text-base-content my-2">Variable Management</div>
-                      
-                      <div className="max-h-40 overflow-y-auto">
-                        {variableGroups && variableGroups.length > 0 ? (
-                          variableGroups.map((group) => (
-                            <li key={group.id}>
-                              <button
-                                onClick={() => handleVariableGroupSelect(group.id)}
-                                className={`text-xs justify-between w-full ${
-                                  activeVariableGroupId === group.id ? 'active' : ''
-                                }`}
-                              >
-                                <span className="truncate max-w-[200px] text-left" title={group.name}>{group.name}</span>
-                                {activeVariableGroupId === group.id && (
-                                  <span className="badge badge-xs badge-primary ml-2 flex-shrink-0">Active</span>
-                                )}
-                              </button>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-center py-4">
-                            <span className="text-xs text-base-content/50">No groups available</span>
-                          </li>
-                        )}
-                      </div>
-                      
-                      <div className="divider my-1"></div>
-                      <li>
-                        <button
-                          onClick={() => {
-                            toggleSidebar("variable-collection-slider", "right");
-                            document.activeElement?.blur();
-                          }}
-                          className="text-xs gap-2"
-                        >
-                          <Plus size={12} />
-                          Manage Groups
-                        </button>
-                      </li>
-                    </div>
-                  </div> */}
-                </>
-              )}
               {!isEmbedUser && activeTab === 'configure' && (
                 <button
                   className="btn btn-xs sm:btn-sm tooltip tooltip-left px-2 sm:px-3 gap-1 sm:gap-2 flex items-center"
@@ -652,29 +505,6 @@ const Navbar = ({ isEmbedUser }) => {
             {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
           </div>
         </div>
-
-        {/* Mobile/Tablet Version Controls - below breadcrumb, above tabs (1024px and below) */}
-        {/* {activeTab === 'configure' && bridgeId && (
-          <div className="xl:hidden border-t border-base-200 px-3 py-2">
-            <div className="flex items-center justify-center gap-2">
-              <div className="flex-shrink-0">
-                <BridgeVersionDropdown 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={compatibleSearchParams} 
-                  isEmbedUser={isEmbedUser} 
-                />
-              </div>
-              <div className="flex-1 max-w-xs">
-                <VersionDescriptionInput 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={compatibleSearchParams} 
-                  isEmbedUser={isEmbedUser} 
-                />
-              </div>
-            </div>
-          </div>
-        )} */}
-
       </div>
 
       {/* Mobile action buttons - for both normal and embed users on configure tab */}
@@ -718,61 +548,6 @@ const Navbar = ({ isEmbedUser }) => {
               <span className="text-xs">Variables</span>
               <div className="badge badge-xs badge-primary">{variablesCount}</div>
             </button>
-
-            {/* Commented out Mobile Variable Group Dropdown */}
-            {/* <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-outline btn-xs gap-1" disabled={!bridgeId}>
-                <Variable size={12} />
-                <span className="text-xs truncate max-w-[50px] sm:max-w-[80px]" title={getDisplayGroupName()}>
-                  {getDisplayGroupName()}
-                </span>
-                <div className="badge badge-xs badge-primary">{variablesCount}</div>
-                <ChevronDown size={8} />
-              </div>
-
-              <div tabIndex={0} className="dropdown-content z-[9999] menu p-2 shadow-lg bg-base-100 rounded-box w-80 border border-base-200 mt-2">
-                <div className="text-xs font-semibold text-base-content mb-2">Variable Management</div>
-                
-                <div className="max-h-32 overflow-y-auto">
-                  {variableGroups && variableGroups.length > 0 ? (
-                    variableGroups.map((group) => (
-                      <li key={group.id}>
-                        <button
-                          onClick={() => handleVariableGroupSelect(group.id)}
-                          className={`text-xs justify-between w-full ${
-                            activeVariableGroupId === group.id ? 'active' : ''
-                          }`}
-                        >
-                          <span className="truncate max-w-[200px] text-left" title={group.name}>{group.name}</span>
-                          {activeVariableGroupId === group.id && (
-                            <span className="badge badge-xs badge-primary ml-2 flex-shrink-0">Active</span>
-                          )}
-                        </button>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-center py-3">
-                      <span className="text-xs text-base-content/50">No groups available</span>
-                    </li>
-                  )}
-                </div>
-                
-                <div className="divider my-1"></div>
-                <li>
-                  <button
-                    onClick={() => {
-                      toggleSidebar("variable-collection-slider", "right");
-                      document.activeElement?.blur();
-                    }}
-                    className="text-xs gap-2"
-                  >
-                    <Plus size={12} />
-                    Manage Variables
-                  </button>
-                </li>
-              </div>
-            </div> */}
-
             {!isEmbedUser && (
               <button
                 className="btn btn-xs gap-1 tooltip tooltip-top"
@@ -793,20 +568,14 @@ const Navbar = ({ isEmbedUser }) => {
           <ChatBotSlider />
           <ConfigHistorySlider versionId={versionId} />
           <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/>
-          <VariableCollectionSlider
-            params={{ org_id: orgId, id: bridgeId }}
-            versionId={versionId}
-            isEmbedUser={isEmbedUser}
-          />
         </>
       )}
-      {isEmbedUser && activeTab === 'configure' && (
-        <VariableCollectionSlider
-          params={{ org_id: orgId, id: bridgeId }}
-          versionId={versionId}
-          isEmbedUser={isEmbedUser}
-        />
-      )}
+
+      <VariableCollectionSlider
+        params={{ org_id: orgId, id: bridgeId }}
+        versionId={versionId}
+        isEmbedUser={isEmbedUser}
+      />
       
       {/* Modals */}
       <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard" loading={isDiscardingWithHook} isAsync={true} />

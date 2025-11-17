@@ -24,10 +24,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [urlInput, setUrlInput] = useState('');
-    const [showRunAnyway, setShowRunAnyway] = useState(false);
     const [validationError, setValidationError] = useState(null);
-    const [runAnywayUsed, setRunAnywayUsed] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = searchParams?.version;
@@ -176,17 +173,15 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             return;
         }
 
-        // Validate variables in prompt (skip if forceRun is true OR if runAnywayUsed is true)
-        if (!forceRun && !runAnywayUsed) {
+        // Validate variables in prompt
+        if (!forceRun) {
             const validation = validatePromptVariables();
             
             if (!validation.isValid) {
                 const missingVars = validation.missingVariables.join(', ');
                 const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
                 
-                setErrorMessage(errorMsg);
                 setValidationError(errorMsg);
-                setShowRunAnyway(true);
                 
                 // Open the variable collection slider
                 toggleSidebar("variable-collection-slider", "right");
@@ -198,16 +193,8 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             } else {
                 // Clear validation states if validation passes
                 setValidationError(null);
-                setShowRunAnyway(false);
                 sessionStorage.removeItem('missingVariables');
             }
-        } else if (forceRun) {
-            // Clear validation states when running anyway
-            setValidationError(null);
-            setShowRunAnyway(false);
-            setErrorMessage("");
-            setRunAnywayUsed(true); // Mark Run Anyway as used
-            sessionStorage.removeItem('missingVariables');
         }
 
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
@@ -404,6 +391,27 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
         // Note: Loading is cleared by RT layer when response is received, not in finally block
         // Note: Uploaded files are cleared immediately after successful RT layer call
     };
+
+    // Listen for runAnyway event from variable slider
+    useEffect(() => {
+        const handleRunAnywayEvent = (event) => {
+            if (event.detail?.forceRun) {
+                handleSendMessage(null, true); // Call with forceRun = true
+            }
+        };
+        
+        const handleClearValidationEvent = () => {
+            setValidationError(null); // Clear validation error
+        };
+        
+        window.addEventListener('runAnyway', handleRunAnywayEvent);
+        window.addEventListener('clearValidationError', handleClearValidationEvent);
+        
+        return () => {
+            window.removeEventListener('runAnyway', handleRunAnywayEvent);
+            window.removeEventListener('clearValidationError', handleClearValidationEvent);
+        };
+    }, [handleSendMessage]);
 
     const handleKeyDown = useCallback(
         event => {
@@ -629,14 +637,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             {validationError && (
                 <div className="absolute bottom-16 left-0 w-full p-3 bg-error/10 border border-error/20 rounded-lg">
                     <p className="text-sm text-error">{validationError}</p>
-                    {showRunAnyway && (
-                        <button
-                            onClick={(e) => handleSendMessage(e, true)}
-                            className="btn btn-warning btn-sm mt-2"
-                        >
-                            Run Anyway
-                        </button>
-                    )}
+                    <p className="text-xs text-error/70 mt-1">Please fill in the missing variables in the Variables panel.</p>
                 </div>
             )}
 

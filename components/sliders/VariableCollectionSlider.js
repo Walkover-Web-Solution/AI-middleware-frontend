@@ -14,7 +14,7 @@ import {
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { sendDataToParent, toggleSidebar } from "@/utils/utility";
 import { CloseIcon, InfoIcon } from "@/components/Icons";
-import { Edit2, Plus, Trash2, Upload } from "lucide-react";
+import { Edit2, Plus, Trash2, Upload, Play } from "lucide-react";
 
 const SLIDER_ID = "variable-collection-slider";
 
@@ -669,6 +669,28 @@ const updateVersionVariable = useCallback(
     toggleSidebar(SLIDER_ID, "right");
   }, [commitVariables, draftVariables, resetLocalState]);
 
+  // Handle Run Anyway button click
+  const handleRunAnyway = useCallback(() => {
+    // Clear missing variables from sessionStorage
+    sessionStorage.removeItem('missingVariables');
+    setMissingVariables([]);
+    
+    // Close the slider
+    toggleSidebar(SLIDER_ID, "right");
+    
+    // Trigger the message send with forceRun = true
+    // We need to access the chat input's handleSendMessage function
+    // This will be done by dispatching a custom event
+    const runAnywayEvent = new CustomEvent('runAnyway', {
+      detail: { forceRun: true }
+    });
+    window.dispatchEvent(runAnywayEvent);
+    
+    // Also clear the validation error from chat input
+    const clearValidationEvent = new CustomEvent('clearValidationError');
+    window.dispatchEvent(clearValidationEvent);
+  }, []);
+
 
   const handleFieldChange = useCallback((index, field, value) => {
     setDraftVariables((prev) =>
@@ -1106,17 +1128,28 @@ const handleFieldCommit = useCallback(
       onClick={(event) => event.stopPropagation()}
       onMouseDown={(event) => event.stopPropagation()}
     >
-      <div className="flex flex-col gap-6 h-full">
-        <header className="flex items-start justify-between gap-4 border-b border-base-300 pb-4">
+      <div className="flex flex-col gap-6 h-full w-full">
+        <header className="border-b border-base-300 pb-4">
           <div>
             <h1 className="text-2xl font-semibold text-base-content">Variables</h1>
             <p className="mt-1 text-sm text-base-content/70 leading-relaxed">
               Organise reusable variables to control which values your agent uses.
             </p>
+            {/* Show missing variables warning without button */}
+            {missingVariables.length > 0 && (
+              <div className="mt-3 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                <p className="text-sm text-warning">
+                  Missing values for: {missingVariables.join(', ')}
+                </p>
+                <p className="text-xs text-warning/70 mt-1">
+                  Fill in the missing variables below or use "Run Anyway" button at the bottom.
+                </p>
+              </div>
+            )}
           </div>
           <button
             type="button"
-            className="btn btn-ghost btn-sm p-1"
+            className="btn btn-ghost btn-sm p-1 absolute top-6 right-6"
             onClick={closeSlider}
             aria-label="Close variable manager"
           >
@@ -1589,6 +1622,26 @@ Option 2 - JSON object:
           )}
 
         </section>
+        
+        {/* Run Anyway Button at the bottom - Only show when there are missing variables */}
+        {missingVariables.length > 0 && (
+          <div className="border-t border-base-300 pt-4 mt-auto">
+            <div className="flex justify-center">
+              <button
+                type="button"
+                className="btn btn-warning gap-2 px-6"
+                onClick={handleRunAnyway}
+                title="Run the agent anyway with missing variables"
+              >
+                <Play size={16} />
+                Run Anyway
+              </button>
+            </div>
+            <p className="text-xs text-center text-base-content/60 mt-2">
+              This will run the agent with the missing variable values
+            </p>
+          </div>
+        )}
       </div>
     </aside>
   );

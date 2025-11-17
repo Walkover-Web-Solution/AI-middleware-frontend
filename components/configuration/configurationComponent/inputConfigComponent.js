@@ -144,7 +144,7 @@ const InputConfigComponent = memo(({
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
             />
             
-            <div className="form-control h-full relative">
+            <div className="form-control relative">
                 <PromptTextarea
                     textareaRef={textareaRef}
                     initialValue={reduxPrompt}

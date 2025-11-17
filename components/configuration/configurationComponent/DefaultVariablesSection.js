@@ -33,14 +33,11 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [] }) => 
                 className="flex items-center gap-2 p-2 cursor-pointer hover:bg-base-200/50 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <span className="text-nowrap text-xs font-medium">Variables</span>
+                <span className="text-nowrap text-xs font-medium">Instructions</span>
                 <div className="flex items-center gap-2 flex-1">
                     {/* Default Variables */}
                     <div className="flex items-center gap-1">
-                        <span className="text-xs text-base-content/60">Default:</span>
-                        <p role="alert" className="label-text-alt p-1 bg-primary/20 text-primary inline-block w-fit text-xs rounded">
-                            &#123;&#123;current_time_and_date&#125;&#125;...
-                        </p>
+                        <span className="text-xs text-base-content/60">Add dynamic values using &#123;&#123;variable&#125;&#125; format.</span> |
                     </div>
                     
                     {/* Used Variables */}
@@ -64,7 +61,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [] }) => 
                     >
                         <div className="flex items-center gap-1" >
                             <SettingsIcon size={12} />
-                            <span>Manage</span>
+                            <span>Manage Variables</span>
                         </div>
                     </button>
                 </div>
