@@ -22,8 +22,15 @@ const data = [
     ['parentId', 'string', 'The parent container ID in which you want to open chatbot.', 'false'],
     ['fullScreen', 'boolean', 'Whether to open the chatbot in full screen.', 'false'],
     ['hideCloseButton', 'boolean', 'Whether to hide the close button.', 'false'],
-    ['hideIcon', 'boolean', 'Whether to hide the icon.', 'false'],
+    ['hideIcon', 'boolean', 'Whether to hide the chatbot icon.', 'false'],
     ['variables', 'object', 'Additional variables for the chatbot.', 'false'],
+    ['onOpen', 'function', 'Callback function triggered when chatbot opens.', 'false'],
+    ['onClose', 'function', 'Callback function triggered when chatbot closes.', 'false'],
+    ['iconColor', 'string', 'Color of the chatbot icon.', 'false'],
+    ['chatTitle', 'string', 'Title displayed in the chat header.', 'false'],
+    ['chatIcon', 'string', 'Icon displayed in the chat header.', 'false'],
+    ['hideFullScreenButton', 'boolean', 'Whether to hide the full screen button.', 'false'],
+    ['defaultOpen', 'boolean', 'Whether the chatbot should be open by default.', 'false'],
 ];
 
 const CodeBlock = ({ label, code }) => (
