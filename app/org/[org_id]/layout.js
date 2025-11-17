@@ -81,41 +81,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         const utmTerm = getFromCookies("utm_term");
         const utmContent = getFromCookies("utm_content");
         let currentUserMeta = currentUser?.meta;
-      // If user meta is null, initialize onboarding meta
-      if (currentUser?.meta === null) {
-        const updatedUser = {
-          ...currentUser,
-          meta: {
-            onboarding: {
-              bridgeCreation: true,
-              FunctionCreation: true,
-              knowledgeBase: true,
-              Addvariables: true,
-              AdvanceParameter: true,
-              PauthKey: true,
-              CompleteBridgeSetup: true,
-              TestCasesSetup:true
-            },
-          },
-        };
-      const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-      if (data?.data?.status) {
-        currentUserMeta = data?.data?.data?.user?.meta;
-      }
-      }
-      if (unlimited_access) {
-        const updatedOrgDetails = {
-          ...currrentOrgDetail,
-          meta: {
-            ...currrentOrgDetail?.meta,
-            unlimited_access: true,
-          },
-        };
-        dispatch(updateOrgMetaAction(resolvedParams.org_id, updatedOrgDetails));
-        removeCookie("unlimited_access");
-      }  
-      // If reference_id exists but user has no reference_id in meta
-      if (reference_id && !currentUser?.meta?.reference_id) {
+      
       // Build UTM object with only present values from URL that are NOT already in user meta
       const utmParams = {};
       if (utmSource && !currentUser?.meta?.utm_source) utmParams.utm_source = utmSource;
@@ -124,35 +90,55 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
       if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
 
-      // If any new UTM parameter exists that user doesn't have
-      if (Object.keys(utmParams).length > 0) {
+      // Check if we need to update user meta (either null meta or new UTM params
+
+      if (currentUser?.meta===null) {
         try {
-          const data = await dispatch(
-            storeMarketingRefUserAction({
-              ...utmParams,
-              client_id: currentUser.id,
-              client_email: currentUser.email,
-              client_name: currentUser.name,
-              created_at: currentUser.created_at,
-            })
-          );
-          
-          if (data) {
-            const updatedUser = {
-              ...currentUser,
-              meta: {
-                ...currentUserMeta,
+          // If UTM params exist, store marketing ref first
+          if (Object.keys(utmParams).length > 0) {
+            await dispatch(
+              storeMarketingRefUserAction({
                 ...utmParams,
-              },
-            };
-            await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+                client_id: currentUser.id,
+                client_email: currentUser.email,
+                client_name: currentUser.name,
+                created_at: currentUser.created_at,
+              })
+            );
+          }
+
+          // Single call to update user meta with all data
+          const updatedUser = {
+            ...currentUser,
+            meta: {
+              // If meta is null, initialize onboarding, otherwise use existing meta
+              ...(currentUser?.meta === null ? {
+                onboarding: {
+                  bridgeCreation: true,
+                  FunctionCreation: true,
+                  knowledgeBase: true,
+                  Addvariables: true,
+                  AdvanceParameter: true,
+                  PauthKey: true,
+                  CompleteBridgeSetup: true,
+                  TestCasesSetup: true
+                }
+              } : currentUserMeta),
+              // Add UTM params if they exist
+              ...utmParams,
+            },
+          };
+
+          const data = await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+          if (data?.data?.status) {
+            currentUserMeta = data?.data?.data?.user?.meta;
           }
         } catch (err) {
-          console.error("Error storing marketing ref:", err);
+          console.error("Error updating user meta:", err);
         }
       }
     };
-    }
+  
     updateUserMeta();
   }, []);
   
