@@ -9,7 +9,7 @@ import { openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ChevronDown, ChevronLeft, Plus } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Plus, Info } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
@@ -26,11 +26,12 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
     const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_VERSION_MODAL);
 
-    const { bridgeVersionsArray, publishedVersion, bridgeName, versionDescription } = useCustomSelector((state) => ({
+    const { bridgeVersionsArray, publishedVersion, bridgeName, versionDescription, bridgeVersionMapping } = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
+        bridgeVersionMapping: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id] || {},
     }));
 
     // Calculate responsive max visible versions based on screen width
@@ -61,6 +62,11 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
                 isProcessing.current = false;
             });
     }, [dispatch]);
+
+    // Helper function to get version description
+    const getVersionDescription = useCallback((versionId) => {
+        return bridgeVersionMapping?.[versionId]?.version_description || "No description available";
+    }, [bridgeVersionMapping]);
 
     // SendDataToChatbot effect - only runs when version changes
     useEffect(() => {
@@ -186,86 +192,92 @@ function BridgeVersionTabs({ params, searchParams, isEmbedUser }) {
     }
 
     return (
-        <div className='flex items-center gap-2 w-full'>
+        <div className='flex items-center gap-1'>
             {/* Version Tabs Container */}
-            <div className="flex items-center overflow-hidden">
-                {/* Version Tabs Group */}
-                <div className="tabs tabs-boxed bg-base-200 p-0 gap-0 h-8 flex-nowrap overflow-x-auto scrollbar-hide mr-24">
-                    {versionsToShow.map((version, index) => {
-                        const isActive = searchParams?.version === version;
-                        const isPublished = version === publishedVersion;
-                        const canDelete = bridgeVersionsArray.length > 1 && !isPublished;
+            <div className="flex items-center gap-1">
+                {versionsToShow.map((version, index) => {
+                    const isActive = searchParams?.version === version;
+                    const isPublished = version === publishedVersion;
+                    const versionNumber = bridgeVersionsArray.indexOf(version) + 1;
+                    const versionDesc = getVersionDescription(version);
+                    const canDelete = bridgeVersionsArray.length > 1 && !isPublished;
 
-                        return (
+                    return (
+                        <div key={version} className="relative group">
                             <button
-                                key={version}
                                 onClick={() => handleVersionChange(version)}
                                 className={`
-                                    tab tab-sm h-full px-3 text-xs font-medium transition-all duration-200 border-0 relative group
-                                    ${canDelete ? 'hover:pr-8' : ''}
+                                    flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 relative
+                                    ${canDelete ? 'group-hover:pr-8' : ''}
                                     ${isActive
-                                        ? isPublished
-                                            ? 'tab-active bg-green-100 text-green-800'
-                                            : 'tab-active bg-primary text-primary-content'
-                                        : 'hover:bg-base-300 text-base-content'
+                                        ? 'bg-base-300 text-base-content border border-base-300'
+                                        : 'bg-base-100 text-base-content border border-base-200 hover:bg-base-200'
                                     }
                                 `}
                             >
-                                <span className="flex items-center gap-1">
-                                    V{bridgeVersionsArray.indexOf(version) + 1}
-                                    {isPublished && (
-                                        <span className="w-2 h-2 bg-green-500 rounded-full" title="Published Version"></span>
-                                    )}
-                                </span>
-
-                                {/* Delete Button - appears on hover */}
-                                {canDelete && (
-                                    <span
-                                        onClick={(e) => { e.stopPropagation(); setselectedDataToDelete({ version, index: bridgeVersionsArray.indexOf(version) + 1 }); openModal(MODAL_TYPE?.DELETE_VERSION_MODAL) }}
-                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 
-                                                 transition-opacity duration-200 hover:bg-red-100 rounded p-0.5 z-10 cursor-pointer"
-                                        title={`Delete Version ${bridgeVersionsArray.indexOf(version) + 1}`}
-                                    >
-                                        <TrashIcon size={12} className="text-red-500 hover:text-red-700" />
-                                    </span>
+                                <span>V{versionNumber}</span>
+                                {isPublished && (
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" title="Published Version"></span>
                                 )}
+                                
+                                {/* Info Icon - always visible */}
+                                <div className="tooltip tooltip-bottom" data-tip={versionDesc}>
+                                    <Info 
+                                        size={12} 
+                                        className="transition-opacity duration-200 cursor-help text-base-content/60"
+                                    />
+                                </div>
                             </button>
-                        );
-                    })}
 
-                    {/* More/Less Button */}
-                    {hasMoreVersions && (
-                        <button
-                            onClick={() => setShowAllVersions(!showAllVersions)}
-                            className="tab tab-sm h-full px-2 text-xs hover:bg-base-300 text-base-content flex-shrink-0"
-                            title={showAllVersions ? "Show Less" : `Show More (${bridgeVersionsArray.length - versionsToShow.length} hidden)`}
-                        >
-                            {showAllVersions ? (
-                                <>
-                                    <ChevronLeft className="w-3 h-3" />
-                                    <span className="hidden sm:inline ml-1">Less</span>
-                                </>
-                            ) : (
-                                <>
-                                    <ChevronDown className="w-3 h-3" />
-                                    <span className="badge badge-xs badge-primary ml-1">
-                                        +{bridgeVersionsArray.length - versionsToShow.length}
-                                    </span>
-                                </>
+                            {/* Delete Button - appears on hover, positioned outside button */}
+                            {canDelete && (
+                                <span
+                                    onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        setselectedDataToDelete({ version, index: bridgeVersionsArray.indexOf(version) + 1 }); 
+                                        openModal(MODAL_TYPE?.DELETE_VERSION_MODAL) 
+                                    }}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 
+                                             transition-opacity duration-200 hover:bg-red-100 rounded p-0.5 z-10 cursor-pointer"
+                                    title={`Delete Version ${bridgeVersionsArray.indexOf(version) + 1}`}
+                                >
+                                    <TrashIcon size={12} className="text-red-500 hover:text-red-700" />
+                                </span>
                             )}
-                        </button>
-                    )}
+                        </div>
+                    );
+                })}
 
-                    {/* Create New Version Button */}
+                {/* More/Less Button */}
+                {hasMoreVersions && (
                     <button
-                        onClick={() => openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
-                        className="tab tab-sm h-full px-2 text-xs hover:bg-base-300 text-base-content flex-shrink-0"
-                        title="Create New Version"
+                        onClick={() => setShowAllVersions(!showAllVersions)}
+                        className="flex items-center gap-1 px-2 py-1 text-xs bg-base-100 text-base-content border border-base-200 hover:bg-base-200 rounded-md transition-all duration-200"
+                        title={showAllVersions ? "Show Less" : `Show More (${bridgeVersionsArray.length - versionsToShow.length} hidden)`}
                     >
-                        <Plus className="w-3 h-3" />
-                        <span className="hidden sm:inline ml-1">New</span>
+                        {showAllVersions ? (
+                            <>
+                                <ChevronLeft className="w-3 h-3" />
+                                <span className="hidden sm:inline">Less</span>
+                            </>
+                        ) : (
+                            <>
+                                <ChevronDown className="w-3 h-3" />
+                                <span className="text-xs">+{bridgeVersionsArray.length - versionsToShow.length}</span>
+                            </>
+                        )}
                     </button>
-                </div>
+                )}
+
+                {/* Create New Version Button */}
+                <button
+                    onClick={() => openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs bg-base-100 text-base-content border border-base-200 hover:bg-base-200 rounded-md transition-all duration-200"
+                    title="Create New Version"
+                >
+                    <Plus className="w-3 h-3" />
+                    <span className="hidden sm:inline">New</span>
+                </button>
             </div>
 
             <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription} />

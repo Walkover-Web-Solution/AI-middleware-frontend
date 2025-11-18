@@ -94,12 +94,7 @@ const ConfigurationPage = ({
     return (
         <ConfigurationProvider value={contextValue}>
             <div className="flex flex-col gap-2 relative bg-base-100">
-                <BridgeVersionDropdown params={params} searchParams={searchParams} />
-                <VersionDescriptionInput 
-                    params={params}
-                    searchParams={searchParams} 
-                    isEmbedUser={isEmbedUser} 
-                  />
+               
                 {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
                     <ChatbotConfigView params={params} searchParams={searchParams} />
                 ) : ( */}
