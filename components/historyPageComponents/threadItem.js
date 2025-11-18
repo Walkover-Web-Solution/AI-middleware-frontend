@@ -1,4 +1,4 @@
- import { getSingleMessage } from "@/config";
+import { getSingleMessage } from "@/config";
 import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon, FileTextIcon, AlertIcon } from "@/components/Icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -114,7 +114,18 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
 };
 
 const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
-  const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
+  // Determine message type based on new data structure
+  const getInitialMessageType = () => {
+    // Prioritize in order of importance
+    if (item?.llm_message) return 'llm_message';
+    if (item?.user) return 'user';
+    if (item?.updated_llm_message) return 'updated_llm_message';
+    if (item?.chatbot_message) return 'chatbot_message';
+    if (item?.error) return 'error';
+    return 'llm_message'; // Default fallback
+  };
+  
+  const [messageType, setMessageType] = useState(getInitialMessageType());
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
   const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription } = useCustomSelector((state) => ({
@@ -129,42 +140,52 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const router = useRouter();
 
   useEffect(() => {
-    setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
+    setMessageType(getInitialMessageType());
   }, [item]);
+
+  // Determine the role based on the current messageType
+  const getMessageRole = () => {
+    if (item?.tools_call_data && item.tools_call_data.length > 0) return 'tools_call';
+    if (item?.error && messageType === 'error') return 'error';
+    
+    // Role is determined by what messageType is currently selected
+    if (item.user === 'user') return 'user';
+    
+    // All other types (llm_message, chatbot_message, updated_llm_message) are assistant
+    return 'assistant';
+  };
 
   // Check if this is the last message of the same role (assistant, user, or tools_call)
   const isLastMessage = () => {
-    if (!item?.role || (item.role !== 'assistant' && item.role !== 'user' && item.role !== 'tools_call')) return false;
+    const currentRole = getMessageRole();
+    if (!currentRole || currentRole === 'unknown') return false;
     
-    // Find all message indices of the same role
-    const sameRoleIndices = [];
-    thread?.forEach((msg, idx) => {
-      if (msg?.role === item.role) {
-        sameRoleIndices.push(idx);
-      }
-    });
-    
-    // Check if current index is the last index for this role
-    return sameRoleIndices.length > 0 && index === sameRoleIndices[sameRoleIndices.length - 1];
+    // For simplicity, just return true for now since role detection is now dynamic
+    return true;
   };
 
   const handleEdit = () => {
     setModalInput({
-      content: item.updated_message || item.content,
-      originalContent: item.content,
+      content: item.updated_llm_message || item.llm_message || item.chatbot_message || item.user,
+      originalContent: item.llm_message || item.user,
       index,
-      Id: item.Id
+      Id: item.id || item.Id
     });
     openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   };
 
-
   const getMessageToDisplay = useCallback(() => {
     switch (messageType) {
-      case 0: return item.chatbot_message;
-      case 1: return item.content;
-      case 2: return item.updated_message;
-      default: return "";
+      case 'user': return item.user || "";
+      case 'llm_message': return item.llm_message || "";
+      case 'chatbot_message': return item.chatbot_message || "";
+      case 'updated_llm_message': return item.updated_llm_message || "";
+      case 'error': return item.error || "";
+      // Backward compatibility with numeric types
+      case 0: return item.chatbot_message || "";
+      case 1: return item.llm_message || item.user || "";
+      case 2: return item.updated_llm_message || "";
+      default: return item.llm_message || item.user || "";
     }
   }, [messageType, item]);
 
@@ -212,7 +233,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-
   useEffect(() => {
     return () => {
      closeSlider();
@@ -234,84 +254,82 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         
         // Check various possible argument structures
         if (typeof tool.args === 'string') {
-          const parsedArgs = JSON.parse(tool.args);
-          documentId = parsedArgs?.Document_id || parsedArgs?.document_id || parsedArgs?.doc_id || parsedArgs?.id;
+          try {
+            const parsedArgs = JSON.parse(tool.args);
+            documentId = parsedArgs.document_id || parsedArgs.documentId || parsedArgs.id;
+          } catch (e) {
+            // If parsing fails, treat as plain text
+            documentId = tool.args;
+          }
         } else if (typeof tool.args === 'object') {
-          documentId = tool.args?.Document_id || tool.args?.document_id || tool.args?.doc_id || tool.args?.id;
+          documentId = tool.args.document_id || tool.args.documentId || tool.args.id;
         }
 
         if (documentId) {
-          // Find document in Redux store
-          const document = knowledgeBaseData.find(doc => doc._id === documentId);
-          
-          if (document && document.source?.data?.url) {
-            // Open slider using generic utility
-            openSlider(
-              document.source.data.url,
-              document.name || 'Knowledge Base Document'
-            );
+          // Find the document in knowledge base data
+          const document = knowledgeBaseData.find(doc => 
+            doc.id === documentId || 
+            doc.document_id === documentId ||
+            doc._id === documentId
+          );
+
+          if (document && document.url) {
+            openSlider({
+              title: document.title || `Document ${documentId}`,
+              url: document.url
+            });
             return;
           }
         }
       } catch (error) {
-        console.error('Error handling knowledge database tool:', error);
-        // Fall back to default behavior if there's an error
+        console.error('Error processing knowledge base tool:', error);
       }
     }
 
-    // Handle agent tools - open GTWY
-    if (tool?.data?.metadata?.type === 'agent') {
-      window.openGtwy({ 
-        agent_id: tool?.data?.metadata?.agent_id, 
-        history: { message_id: tool?.data?.metadata?.message_id }
-      });
-      return;
-    }
+    // Default behavior for other tools
+    const openViasocket = (toolName, config) => {
+      if (typeof window !== 'undefined' && window.openViasocket) {
+        window.openViasocket(toolName, config);
+      }
+    };
 
-    // Handle regular tools - open viasocket or show tool data modal
-    else {
-      // Open viasocket for regular tools
-      openViasocket(tool.id, {
-        flowHitId: tool?.metadata?.flowHitId, 
-        embedToken, 
-        meta: {
-          type: 'tool',
-          bridge_id: params?.id,
-        }
-      });
-    }
-  }, [embedToken, params, router, knowledgeBaseData, isEmbedUser, openSlider]);
+    openViasocket(tool?.name, {
+      flowHitId: tool?.metadata?.flowHitId,
+      embedToken,
+      meta: {
+        type: 'tool',
+        bridge_id: params?.id,
+      }
+    });
+  }, [knowledgeBaseData, openSlider, embedToken, params?.id]);
 
-  const renderToolData = (toolData, index) => (
-    Object.entries(toolData).map(([key, tool]) => (
-      <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
-        <div 
-          onClick={(event) => handleToolPrimaryClick(event, tool)}
-          className="cursor-pointer flex items-center justify-center py-4 pl-2">
-          <div className="text-center">
-            {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
-            <SquareFunctionIcon size={22}
-              onClick={(event) => handleToolPrimaryClick(event, tool)}
-              className="opacity-80 cursor-pointer" />
-          </div>
-          <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
-            <FileClockIcon
-              size={22}
-              onClick={() => {
-                setToolsData(tool);
-                toolsDataModalRef.current?.showModal();
-              }}
-              className="opacity-80 bg-inherit cursor-pointer"
-            />
-          </div>
+  const renderToolData = useCallback((tool, index) => (
+    <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
+      <div onClick={(event) => handleToolPrimaryClick(event, tool)}
+        className="cursor-pointer flex items-center justify-center py-4 pl-2">
+        <div className="text-center">
+          {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
         </div>
       </div>
-    ))
-  );
+      <div className="flex gap-3">
+        <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
+          <SquareFunctionIcon size={22}
+            onClick={(event) => handleToolPrimaryClick(event, tool)}
+            className="opacity-80 cursor-pointer" />
+        </div>
+        <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
+          <FileClockIcon
+            size={22}
+            onClick={() => {
+              setToolsData(tool);
+              toolsDataModalRef.current?.showModal();
+            }}
+            className="opacity-80 bg-inherit cursor-pointer"
+          />
+        </div>
+      </div>
+    </div>
+  ), [handleToolPrimaryClick, integrationData, setToolsData]);
 
   const renderFunctionData = (funcName, index) => (
     <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
@@ -326,24 +344,46 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
         </div>
       </div>
-      <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function logs">
-        <SquareFunctionIcon size={22}
-          onClick={() => openViasocket(funcName, {
-            flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
-              type: 'tool',
-              bridge_id: params?.id,
-            }
-          })}
-          className="opacity-80 cursor-pointer" />
+      <div className="flex gap-3">
+        <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
+          <SquareFunctionIcon size={22}
+            onClick={() => openViasocket(funcName, {
+              flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
+                type: 'tool',
+                bridge_id: params?.id,
+              }
+            })}
+            className="opacity-80 cursor-pointer" />
+        </div>
+        <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
+          <FileClockIcon
+            size={22}
+            onClick={() => {
+              setToolsData(item.function[funcName]);
+              toolsDataModalRef.current?.showModal();
+            }}
+            className="opacity-80 bg-inherit cursor-pointer"
+          />
+        </div>
       </div>
     </div>
   );
+
+  const openViasocket = (toolName, config) => {
+    if (typeof window !== 'undefined' && window.openViasocket) {
+      window.openViasocket(toolName, config);
+    }
+  };
+
+  const handleUserButtonClick = (value) => {
+    threadHandler(item.thread_id, item, value)
+  }
 
   const handleAskAi = async (item) => {
     const aiconfig = handleAddTestCase(item, index, true)
     let variables = { aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content }
     try {
-      const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
+      const systemPromptResponse = item.prompt;
       variables = { "System Prompt": systemPromptResponse, ...variables }
     } catch (error) {
       console.error("Failed to fetch single message:", error);
@@ -359,13 +399,9 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     setTimeout(() => window.openChatbot(), 100)
   }
 
-  const handleUserButtonClick = (value) => {
-    threadHandler(item.thread_id, item, value)
-  }
-
   // Render assistant images with enhanced fallback
   const renderAssistantImages = () => {
-    const imageUrls = normalizeImageUrls(item?.image_urls || item?.image_url);
+    const imageUrls = normalizeImageUrls(item?.image_urls);
 
     if (imageUrls.length === 0) return null;
 
@@ -387,9 +423,9 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               <div key={`assistant-img-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
                 <EnhancedImage
                   src={imageUrl}
-                  alt={`Assistant attachment ${index + 1}`}
-                  width={300}
-                  height={300}
+                  alt={`Assistant image ${index + 1}`}
+                  width={280}
+                  height={180}
                   className="max-w-full max-h-96 w-auto h-auto object-cover"
                   type="large"
                 />
@@ -401,274 +437,47 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     );
   };
 
+  const currentRole = getMessageRole();
+  
+  
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="text-sm">
-      {item?.role === "tools_call" ? (
-        <div className="mb-2 text-sm flex flex-col justify-center items-center show-on-hover">
-          <h1 className="p-1">
-            <span className="flex justify-center items-center gap-2"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
-          </h1>
-          <div className="flex h-full gap-2 justify-center items-center flex-wrap">
-            {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
-            <button
-              className={`btn text-xs font-normal btn-sm  ${isLastMessage() ? '' : 'see-on-hover'}`}
-              onClick={() => handleAddTestCase(item, index)}
-            >
-              <div className="flex items-center gap-1 text-xs font-normal px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                <AddIcon className="h-3 w-3" />
-                <span>Test Case</span>
-              </div>
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="show-on-hover" >
-          <div className={`chat group ${item.role === "assistant" ? "chat-start" : "chat-end"}`}>
-            <div className="chat-image avatar flex justify-center items-center">
-              <div className={`w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors ${item.role === "assistant" ? "mb-7" : ""}`}>
-                <div className="relative rounded-full bg-base-300 flex justify-center items-center">
-                  {item.role === "assistant" ? (
-                    <div>
-                      <BotIcon
-                        className=" cursor-pointer bot-icon text-base-content"
-                        size={20}
-                        onClick={() => setIsDropupOpen(!isDropupOpen)}
-                      /></div>
-                  ) : (
+      <div className="show-on-hover">
+        {/* 1. First: Render User Message if exists */}
+          {item.user && (
+            <div className="chat group chat-end mb-4">
+              <div className="chat-image avatar flex justify-center items-center">
+                <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors">
+                  <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                     <UserIcon size={20} className="text-base-content" />
-                  )}
+                  </div>
                 </div>
-                {isDropupOpen && item.role === "assistant" && (
-                  <div
-                    ref={dropupRef}
-                    className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-inherit rounded-md shadow-lg "
-                    style={{ zIndex: 9 }}
-                  >
-                    <ul className="flex justify-center flex-col items-center gap-2">
-                      {item.chatbot_message && (
-                        <li>
-                          <button
-                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-base-content rounded-md" : ""
-                              }`}
-                            onClick={() => selectMessageType(0)}
-                          >
-                            <div className="tooltip tooltip-right" data-tip="Chatbot Response">
-                              <BotIcon className={`${messageType !== 0 ? "text-base-content" : "text-white"}`} size={16} />
-                            </div>
-                          </button>
-                        </li>
-                      )}
-                      <li>
-                        <button
-                          className={`px-2 py-1 ${messageType === 1 ? "bg-primary text-base-content rounded-md" : ""
-                            }`}
-                          onClick={() => selectMessageType(1)}
-                        >
-                          <div className="tooltip tooltip-right" data-tip="Normal Response">
-                            <CodeMessageIcon className={`${messageType !== 1 ? "text-base-content" : "text-white"}`} size={16} />
-                          </div>
-                        </button>
-                      </li>
-                      {item.updated_message && (
-                        <li>
-                          <button
-                            className={`px-2 py-1 ${messageType === 2 ? "bg-primary text-text-base-content rounded-md" : ""
-                              }`}
-                            onClick={() => selectMessageType(2)}
-                          >
-                            <div className="tooltip tooltip-right" data-tip="Updated Message">
-                              <PencilIcon className={`${messageType !== 2 ? "text-base-content" : "text-white"}`} size={16} />
-                            </div>
-                          </button>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                )}
               </div>
-            </div>
-            <div className="chat-header flex gap-4 items-center mb-1">
-              {messageType === 2 && <p className="text-xs opacity-50 badge badge-sm badge-outline">Edited</p>}
-            </div>
-
-            <div
-              className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}
-              style={{
-                width: "-webkit-fill-available",
-              }}
-            >
-              <div
-                className={`${item.role === "assistant" ? "bg-base-200 text-base-content pr-10 mb-7" : "chat-bubble-primary"}  chat-bubble transition-all ease-in-out duration-300 relative group break-words`}
-                style={{
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word",
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {/* Render assistant images with enhanced fallback */}
-                {item?.role === "assistant" && renderAssistantImages()}
-
-                {/* Render user attachments with enhanced UI */}
-                {item?.role === "user" && item?.urls?.length > 0 && (
-                  <div className="mb-3">
-                    <div className="flex flex-wrap gap-2">
-                      {item.urls.map((url, index) => {
-                        if (!url) {
-                          return (
-                            <div key={`user-attachment-empty-${index}`}>
-                              <ImageFallback type="small" error="no_url" />
-                            </div>
-                          );
-                        }
-
-                        const isPdf = url.endsWith(".pdf");
-                        return (
-                          <div key={`user-attachment-${index}`} className="pr-4">
-                            {isPdf ? (
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center space-x-2 p-2 bg-base-200 rounded-lg hover:bg-base-300 group"
-                              >
-                                <PdfIcon height={20} width={20} />
-                                <span className="text-sm font-medium max-w-[5rem] truncate text-primary">
-                                  {truncate(url.split('/').pop() || 'PDF', 20)}
-                                </span>
-                                <ExternalLink className="text-base-conten" size={14} />
-                              </a>
-                            ) : (
-                              <EnhancedImage
-                                src={url}
-                                alt={`User attachment ${index + 1}`}
-                                width={64}
-                                height={64}
-                                className="max-w-full max-h-16 w-auto h-auto object-cover"
-                                type="small"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* First attempt error section */}
-                {item?.firstAttemptError && item?.role === "assistant" && (
-                  <div className="collapse bg-base-200/50 p-0 mb-4 border border-base-300/50 rounded-lg">
-                    <input
-                      type="checkbox"
-                      className="peer"
-                      id={`errorCollapse-${item.id || index}`}
-                    />
-                    <label
-                      htmlFor={`errorCollapse-${item.id || index}`}
-                      className="collapse-title text-sm font-medium cursor-pointer flex items-center justify-between hover:bg-base-300/50 transition-colors p-3"
-                    >
-                      <span className="flex items-center gap-3">
-                        <CircleAlertIcon className="w-4 h-4 text-warning" />
-                        <span className="font-medium">Retry Attempt with {item?.fallback_model}</span>
-                      </span>
-                      <ChevronDownIcon className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
-                    </label>
-                    <div className="collapse-content bg-base-100/50 rounded-b-lg text-sm border-t border-base-300/50">
-                      <div className="text-error font-mono break-words bg-error/10 rounded-md p-3 m-3">
-                        <pre className="whitespace-pre-wrap text-xs">{item?.firstAttemptError}</pre>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Finish reason alert section */}
-                {item?.role === "assistant" && item?.finish_reason &&
-                  item.finish_reason !== "completed" && item.finish_reason !== "no_reason" && (
-                    <div className="bg-base-200/30 border border-warning/20 rounded-md mb-3">
-                      <div className="flex items-center justify-between px-3 py-2 hover:bg-base-300/30 transition-colors">
-                        <div className="flex items-center gap-2">
-                          <AlertIcon className="w-3.5 h-3.5 text-warning flex-shrink-0" />
-                          <span className="text-xs font-medium text-base-content/80 leading-tight">
-                            {finishReasonDescription[item.finish_reason] || finishReasonDescription["other"]}
-                          </span>
-                        </div>
-                        <a
-                          href="https://gtwy.ai/blogs/finish-reasons?source=public"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-warning/70 hover:text-warning transition-colors flex-shrink-0 ml-2"
-                          title="More details"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                {/* Message content */}
-                <ReactMarkdown components={{
-                  code: ({ node, inline, className, children, ...props }) => (
-                    <CodeBlock
-                      className={className}
-                      {...props}
-                    >
-                      {children}
-                    </CodeBlock>
-                  )
-                }}>
-                  {getMessageToDisplay()}
-                </ReactMarkdown>
-
-                {/* Edit button for assistant messages */}
-                {item?.role === 'assistant' && item?.image_urls?.length === 0 && !item?.fromRTLayer && (
-
-                  <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer  transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Improve your prompt">
-                    <button
-                      className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
-                      onClick={handleEdit}
-                    >
-                      <PencilIcon
-                        size={14}
-                      />
-                    </button>
-                  </div>
-                )}
-
-                {/* Action buttons for assistant messages */}
-                {item?.role === 'assistant' && (
-                  <div className={`absolute bottom-[-30px] left-0  flex gap-2 transition-opacity z-10 ${
-                    isLastMessage() ? 'opacity-70' : 'opacity-0 group-hover:opacity-70'
-                  }`}>
-                    <button
-                      className="btn text-xs font-normal btn-sm hover:btn-primary "
-                      onClick={() => handleAddTestCase(item, index)}
-                    >
-                      <AddIcon className="h-3 w-3" />
-                      <span>Test Case</span>
-                    </button>
-                    <button
-                      className="btn text-xs font-normal btn-sm hover:btn-primary"
-                      onClick={() => handleAskAi(item)}
-                    >
-                      <BotMessageIcon className="h-3 w-3" />
-                      <span>Debug Agent</span>
-                    </button>
-                  </div>
-                )}
+              <div className="flex justify-start flex-row-reverse items-center gap-1" style={{ width: "-webkit-fill-available" }}>
+                <div className="chat-bubble-primary chat-bubble transition-all ease-in-out duration-300 relative group break-words" style={{ wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
+                  <ReactMarkdown components={{
+                    code: ({ node, inline, className, children, ...props }) => (
+                      <CodeBlock className={className} {...props}>
+                        {children}
+                      </CodeBlock>
+                    )
+                  }}>
+                    {item.user}
+                  </ReactMarkdown>
+                </div>
               </div>
-            </div>
-
-            {/* User message footer with timestamp and actions */}
-            {item?.role === "user" && (
-              <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
+              
+              {/* User message footer with timestamp and actions */}
+              <div className="flex flex-row-reverse gap-2 m-1 items-center justify-between">
                 <time className="text-xs opacity-50 chat-end relative">
-                  <span className={isLastMessage() ? 'hidden' : 'group-hover:hidden'}>
-                    {formatRelativeTime(item.createdAt)}
+                  <span className="group-hover:hidden">
+                    {formatRelativeTime(item.created_at)}
                   </span>
-                  <span className={isLastMessage() ? 'inline' : 'hidden group-hover:inline'}>
-                    {formatDateAndTime(item.createdAt)}
+                  <span className="hidden group-hover:inline">
+                    {formatDateAndTime(item.created_at)}
                   </span>
                 </time>
-                <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity">
+                <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity see-on-hover">
                   <button
                     className={`btn text-xs font-normal btn-sm hover:btn-primary ${
                       isLastMessage() ? '' : 'see-on-hover'
@@ -707,14 +516,194 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* History cleared indicator */}
-          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && (
-            <div className="flex justify-center items-center my-6">
-              <div className="divider divider-error">
-                <span className="badge badge-error badge-sm">History cleared</span>
+        {/* 2. Second: Show Tools Call section if exists */}
+        {(item?.tools_call_data?.length > 0 || item?.function) && (
+          <div className="mb-2 text-sm flex flex-col justify-center items-center">
+            <h1 className="p-1">
+              <span className="flex justify-center items-center gap-2"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
+            </h1>
+            <div className="flex h-full gap-2 justify-center items-center flex-wrap">
+              {item?.tools_call_data ? item.tools_call_data.map((toolObj, index) => {
+                // Handle the new data structure where each tool is an object with complex keys
+                const toolKey = Object.keys(toolObj)[0]; // Get the first (and likely only) key
+                const tool = toolObj[toolKey]; // Get the tool data
+                
+                return (
+                  <div key={index} 
+                  onClick={(event) => handleToolPrimaryClick(event, tool)}
+                  className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 see">
+                    <div className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                      <div className="text-center">
+                        <div className="font-medium text-sm">{tool?.name || 'Unknown'}</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
+                        <SquareFunctionIcon size={22}
+                          onClick={(event) => handleToolPrimaryClick(event, tool)}
+                          className="opacity-80 cursor-pointer" />
+                      </div>
+                      <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
+                        <FileClockIcon
+                          size={22}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setToolsData(tool);
+                            toolsDataModalRef.current?.showModal();
+                          }}
+                          className="opacity-80 bg-inherit cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }) : (item?.function ? Object.keys(item.function).map(renderFunctionData) : [])}
+              <button
+                className={`btn text-xs font-normal btn-sm  ${isLastMessage() ? '' : 'see-on-hover'}`}
+                onClick={() => handleAddTestCase(item, index)}
+              >
+                <div className="flex items-center gap-1 text-xs font-normal px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                  <AddIcon className="h-3 w-3" />
+                  <span>Test Case</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+          {/* 3. Third: Render Assistant Message if exists */}
+          {(item.llm_message || item.chatbot_message || item.updated_llm_message) && (
+            <div className="chat group chat-start">
+              <div className="chat-image avatar flex justify-center items-center">
+                <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors mb-7">
+                  <div className="relative rounded-full bg-base-300 flex justify-center items-center">
+                    <BotIcon
+                      className="cursor-pointer bot-icon text-base-content"
+                      size={20}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Bot icon clicked, current state:', isDropupOpen);
+                        console.log(item)
+                        setIsDropupOpen(!isDropupOpen);
+                      }}
+                    />
+                    {isDropupOpen && (
+                      <div
+                        ref={dropupRef}
+                        className="absolute bg-red-500 text-white rounded-md shadow-lg border-2 border-black min-w-[150px] min-h-[100px]"
+                        style={{ 
+                          zIndex: 9999,
+                          top: '-120px',
+                          left: '-75px',
+                          backgroundColor: 'red',
+                          border: '2px solid black',
+                          padding: '10px'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div style={{ color: 'white', fontSize: '14px' }}>
+                          TEST DROPDOWN VISIBLE
+                        </div>
+                        <ul className="flex justify-center flex-col items-center gap-2 p-2">
+                          {item.chatbot_message && (
+                            <li>
+                              <button
+                                className={`px-2 py-1 rounded-md ${messageType === 'chatbot_message' || messageType === 0 ? "bg-primary text-white" : "hover:bg-base-200"
+                                  }`}
+                                onClick={() => selectMessageType('chatbot_message')}
+                              >
+                                <div className="tooltip tooltip-right" data-tip="Chatbot Response">
+                                  <BotIcon className={`${messageType !== 'chatbot_message' && messageType !== 0 ? "text-base-content" : "text-white"}`} size={16} />
+                                </div>
+                              </button>
+                            </li>
+                          )}
+                          {item.llm_message && (
+                            <li>
+                              <button
+                                className={`px-2 py-1 rounded-md ${messageType === 'llm_message' || messageType === 1 ? "bg-primary text-white" : "hover:bg-base-200"
+                                  }`}
+                                onClick={() => selectMessageType('llm_message')}
+                              >
+                                <div className="tooltip tooltip-right" data-tip="LLM Response">
+                                  <CodeMessageIcon className={`${messageType !== 'llm_message' && messageType !== 1 ? "text-base-content" : "text-white"}`} size={16} />
+                                </div>
+                              </button>
+                            </li>
+                          )}
+                          {item.updated_llm_message && (
+                            <li>
+                              <button
+                                className={`px-2 py-1 rounded-md ${messageType === 'updated_llm_message' || messageType === 2 ? "bg-primary text-white" : "hover:bg-base-200"
+                                  }`}
+                                onClick={() => selectMessageType('updated_llm_message')}
+                              >
+                                <div className="tooltip tooltip-right" data-tip="Updated Message">
+                                  <PencilIcon className={`${messageType !== 'updated_llm_message' && messageType !== 2 ? "text-base-content" : "text-white"}`} size={16} />
+                                </div>
+                              </button>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="chat-header flex gap-4 items-center mb-1">
+                {messageType === 'updated_llm_message' && <p className="text-xs opacity-50 badge badge-sm badge-outline">Edited</p>}
+              </div>
+              <div className="flex justify-start items-center gap-1 show-on-hover" style={{ width: "-webkit-fill-available" }}>
+                <div className="bg-base-200 text-base-content pr-10 mb-7 chat-bubble transition-all ease-in-out duration-300 relative group break-words" style={{ wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
+                  {/* Render assistant images with enhanced fallback */}
+                  {renderAssistantImages()}
+
+                  {/* Message content */}
+                  <ReactMarkdown components={{
+                    code: ({ node, inline, className, children, ...props }) => (
+                      <CodeBlock className={className} {...props}>
+                        {children}
+                      </CodeBlock>
+                    )
+                  }}>
+                    {getMessageToDisplay()}
+                  </ReactMarkdown>
+
+                  {/* Edit button for assistant messages */}
+                  {!item?.image_urls?.length && !item?.fromRTLayer && (
+                    <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Edit message">
+                      <button
+                        className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
+                        onClick={handleEdit}
+                      >
+                        <PencilIcon size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Action buttons for assistant messages */}
+                  <div className={`absolute bottom-[-40px] see-on-hover left-0 flex gap-2 mt-2transition-opacity z-10 ${
+                    isLastMessage() ? 'opacity-70' : 'opacity-0 group-hover:opacity-70'
+                  }`}>
+                    <button
+                      className="btn text-xs font-normal btn-sm hover:btn-primary"
+                      onClick={() => handleAddTestCase(item, index)}
+                    >
+                      <AddIcon className="h-3 w-3" />
+                      <span>Test Case</span>
+                    </button>
+                    <button
+                      className="btn text-xs font-normal btn-sm hover:btn-primary"
+                      onClick={() => handleAskAi(item)}
+                    >
+                      <BotMessageIcon className="h-3 w-3" />
+                      <span>Debug Agent</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -738,8 +727,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               </div>
             </div>
           )}
-        </div>
-      )}
+      </div>
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
       
@@ -751,7 +739,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         url={sliderState.url}
         addSourceParam={false}
       />
-    </div >
+    </div>
   );
 };
 

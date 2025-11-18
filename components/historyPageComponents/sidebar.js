@@ -1,5 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector.js";
-import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
+import { getHistoryAction, getSubThreadsAction, getThread, searchMessageHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction.js";
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { formatRelativeTime, openModal } from "@/utils/utility.js";
@@ -146,7 +146,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     try {
       const searchValue = searchRef?.current?.value || searchParams?.message_id || "";
       const result = await dispatch(
-        getHistoryAction(params?.id, null, null, 1, searchValue, filterOption, isErrorTrue, selectedVersion)
+        searchMessageHistoryAction({bridgeId: params?.id, keyword: searchValue, time_range:null})
       );
       router.push(
         `${pathName}?version=${searchParams?.version}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
@@ -244,7 +244,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleFilterChange = async user_feedback => {
     setFilterOption(user_feedback);
     setThreadPage(1);
-    dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
+    // dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
   };
 
   const Skeleton = ({ count = 3 }) => (
@@ -296,7 +296,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }
 
   return (
-    <div className="drawer-side justify-items-stretch text-xs bg-base-200 min-w-[280px] max-w-[280px] border-r border-base-300 relative" id="sidebar">
+    <div className="drawer-side justify-items-stretch text-xs bg-base-200 min-w-[290px] max-w-[290px] border-r border-base-300 relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-2 gap-2 flex flex-col">
         <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg min-h-0">
@@ -325,8 +325,9 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                     </label>
                   ))}
                 </div>
+                {console.log(userFeedbackCount?.[filterOption === 'all' ? 1 : filterOption === '1' ? 2 : 3])}
                 <p className="text-xs text-base-content mb-2 text-center">
-                  {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the agent is ${userFeedbackCount}`}
+                  {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the agent is ${userFeedbackCount?.[filterOption === 'all' ? 0 : filterOption === '1' ? 1 : 2]}`}
                 </p>
 
                 <div className="flex items-center justify-center gap-2">
@@ -399,7 +400,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             loader={<h4></h4>}
             scrollableTarget="sidebar"
           >
-            <div className="slider-container min-w-[40%] w-full overflow-x-auto pb-20">
+            <div className="slider-container min-w-[45%] w-full overflow-x-auto pb-20">
               <ul className="menu min-h-full text-base-content flex flex-col space-y-1">
                 {historyData?.map((item) => (
                   <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
@@ -434,7 +435,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                         <a className="w-full h-full flex items-center justify-between relative">
                           <span className="truncate flex-1 mr-1.5 text-xs">{truncate(item?.thread_id, 30)}</span>
                           <span className="text-xs whitespace-nowrap flex-shrink-0 mr-2 transition-opacity duration-200">
-                            {formatRelativeTime(item?.updatedAt)}
+                            {formatRelativeTime(item?.updated_at)}
                           </span>
                           {/* Tooltip for full thread ID on hover */}
                           {item?.thread_id?.length > 35 && (

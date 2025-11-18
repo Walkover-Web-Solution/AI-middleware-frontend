@@ -1,13 +1,17 @@
-import { getHistory, getSingleThreadData, getSubThreadIds, updateHistoryMessage, userFeedbackCount } from "@/config";
+import { getHistory, getSingleThreadData, getSubThreadIds, getThreads, searchMessageHistory, updateHistoryMessage, userFeedbackCount } from "@/config";
 import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
 
 export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback, isErrorTrue, selectedVersion) => async (dispatch) => {
   try {
-    const data = await getHistory(id, page, start, end, keyword,user_feedback, isErrorTrue, selectedVersion );
+    const data = await getThreads(id, page, start, end, keyword,user_feedback, isErrorTrue, selectedVersion );
     if (data && data.data) {
       dispatch(fetchAllHistoryReducer({ data: data.data, page }));
-      return data.data; // Return the data for further checks
     }
+    if(data && data?.total_user_feedback_count)
+    {
+      dispatch(userFeedbackCountReducer({data:data.total_user_feedback_count}))
+    }
+    return data.data
   } catch (error) {
     console.error(error);
   }
@@ -36,7 +40,7 @@ export const updateContentHistory = ({ id, bridge_id, message, index }) => async
 export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(dispatch) =>{
   try {
     const data = await userFeedbackCount({bridge_id,user_feedback});
-    dispatch(userFeedbackCountReducer({data:data.data.result}))
+    
   } catch (error) {
     console.error(error)
   }
@@ -52,3 +56,12 @@ export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) =
   }
 }
 
+export const searchMessageHistoryAction = ({bridgeId, keyword, time_range}) => async(dispatch) => {
+  try {
+    const data = await searchMessageHistory(bridgeId, keyword, time_range);
+     dispatch(fetchThreadReducer({ data: data.data, nextPage }));
+    return data;
+  } catch (error) {
+    
+  }
+}
