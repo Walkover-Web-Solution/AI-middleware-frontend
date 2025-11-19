@@ -285,16 +285,15 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         console.error('Error processing knowledge base tool:', error);
       }
     }
+    if(tool?.meta?.type === "agent")
+    {
+      window.openGtwy(
 
-    // Default behavior for other tools
-    const openViasocket = (toolName, config) => {
-      if (typeof window !== 'undefined' && window.openViasocket) {
-        window.openViasocket(toolName, config);
-      }
-    };
-
-    openViasocket(tool?.name, {
-      flowHitId: tool?.metadata?.flowHitId,
+      )
+    }
+    debugger
+    openViasocket(tool?.id, {
+      flowHitId: tool?.data?.metadata?.flowHitId,
       embedToken,
       meta: {
         type: 'tool',
@@ -368,12 +367,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       </div>
     </div>
   );
-
-  const openViasocket = (toolName, config) => {
-    if (typeof window !== 'undefined' && window.openViasocket) {
-      window.openViasocket(toolName, config);
-    }
-  };
 
   const handleUserButtonClick = (value) => {
     threadHandler(item.thread_id, item, value)
@@ -560,7 +553,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                     </div>
                   </div>
                 );
-              }) : (item?.function ? Object.keys(item.function).map(renderFunctionData) : [])}
+              }) : (item?.function ? Object.keys(item.function).map(renderToolData) : [])}
               <button
                 className={`btn text-xs font-normal btn-sm  ${isLastMessage() ? '' : 'see-on-hover'}`}
                 onClick={() => handleAddTestCase(item, index)}
@@ -585,8 +578,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                       size={20}
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Bot icon clicked, current state:', isDropupOpen);
-                        console.log(item)
                         setIsDropupOpen(!isDropupOpen);
                       }}
                     />
