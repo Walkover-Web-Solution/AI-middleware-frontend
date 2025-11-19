@@ -1,88 +1,130 @@
 "use client";
-import { useEffect, use } from "react";
+import { useEffect, use, useMemo, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getFromCookies } from "@/utils/utility";
 
-export default function layoutHistoryPage({ children, params }) {
-    const resolvedParams = use(params);
-    
-    const {chatbot_token, history_page_chatbot_token} = useCustomSelector((state) => ({
-        chatbot_token: state?.ChatBot?.chatbot_token || '',
-        history_page_chatbot_token : state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.history_page_chatbot_token
-      }));
-      
-  const scriptId = "chatbot-main-script";
-  const scriptSrcProd = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC_PROD;
-  const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+/**
+ * Optimized History Layout Component
+ * - Reduced script manipulation overhead
+ * - Better cleanup and error handling
+ * - Memoized script configurations
+ */
+export default function OptimizedHistoryLayout({ children, params }) {
+  const resolvedParams = use(params);
+  
+  // Memoized selector to prevent unnecessary re-renders
+  const { chatbot_token, history_page_chatbot_token } = useCustomSelector((state) => ({
+    chatbot_token: state?.ChatBot?.chatbot_token || '',
+    history_page_chatbot_token: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.history_page_chatbot_token
+  }), [resolvedParams?.org_id]);
 
-  useEffect(() => {
+  // Memoized script configurations
+  const scriptConfig = useMemo(() => ({
+    chatbotMainId: "chatbot-main-script",
+    gtwUserScriptId: 'gtwy-user-script',
+    scriptSrcProd: process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC_PROD,
+    scriptSrc: process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC,
+    gtwScriptUrl: process.env.NEXT_PUBLIC_ENV !== 'PROD'
+      ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
+      : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`
+  }), []);
+
+  // Optimized script management functions
+  const removeScript = useCallback((scriptId) => {
     const existingScript = document.getElementById(scriptId);
     if (existingScript) {
-      document.head.removeChild(existingScript);
+      try {
+        document.head.removeChild(existingScript);
+      } catch (error) {
+        console.warn(`Failed to remove script ${scriptId}:`, error);
+      }
     }
-    
+  }, []);
+
+  const createScript = useCallback((config) => {
     const script = document.createElement("script");
-    script.setAttribute("embedToken", history_page_chatbot_token);
-    script.setAttribute("hideIcon", "true");
-    script.id = scriptId;
-    script.src = scriptSrcProd;
+    Object.entries(config.attributes || {}).forEach(([key, value]) => {
+      script.setAttribute(key, value);
+    });
+    if (config.id) script.id = config.id;
+    if (config.src) script.src = config.src;
+    return script;
+  }, []);
+
+  // Chatbot script effect
+  useEffect(() => {
+    if (!history_page_chatbot_token) return;
+
+    removeScript(scriptConfig.chatbotMainId);
+    
+    const script = createScript({
+      id: scriptConfig.chatbotMainId,
+      src: scriptConfig.scriptSrcProd,
+      attributes: {
+        embedToken: history_page_chatbot_token,
+        hideIcon: "true"
+      }
+    });
+
     document.head.appendChild(script);
 
     return () => {
-      const script = document.getElementById(scriptId);
-      if (script) {
-        document.head.removeChild(script);
-      }
-      const updateScript = () => {
-        const existingScript = document.getElementById(scriptId);
-        if (existingScript) {
-          document.head.removeChild(existingScript);
-        }
+      removeScript(scriptConfig.chatbotMainId);
+      
+      // Delayed script update
+      const timeoutId = setTimeout(() => {
         if (chatbot_token) {
-          const script = document.createElement("script");
-          script.setAttribute("embedToken", chatbot_token);
-          script.setAttribute("hideIcon", true);
-          script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
-          script.id = scriptId;
-          script.src = scriptSrc;
-          document.head.appendChild(script);
+          removeScript(scriptConfig.chatbotMainId);
+          
+          const updateScript = createScript({
+            id: scriptConfig.chatbotMainId,
+            src: scriptConfig.scriptSrc,
+            attributes: {
+              embedToken: chatbot_token,
+              hideIcon: "true",
+              eventsToSubscribe: JSON.stringify(["MESSAGE_CLICK"])
+            }
+          });
+          
+          document.head.appendChild(updateScript);
         }
-      };
-  
-      setTimeout(() => {
-        updateScript();
       }, 150);
+
+      return () => clearTimeout(timeoutId);
     };
-  }, []);
+  }, [history_page_chatbot_token, chatbot_token, scriptConfig, removeScript, createScript]);
 
+  // GTWY user script effect
   useEffect(() => {
-      const existingScript = document.getElementById('gtwy-user-script');
-      if (existingScript) existingScript.remove();
-  
-      if (params?.org_id) {
-        const scriptId = 'gtwy-user-script';
-        const scriptURl =
-          process.env.NEXT_PUBLIC_ENV !== 'PROD'
-            ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
-            : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.src = scriptURl;
-        script.setAttribute('skipLoadGtwy', true);
-        script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
-        script.setAttribute('org_id', params?.org_id);
-        script.setAttribute('customIframeId', 'gtwyEmbedInterface');
-        script.setAttribute('gtwy_user', true);
-        script.setAttribute('slide','right');
-        // script.setAttribute('parentId', 'gtwy');
-        // script.setAttribute('hideHeader', true);
-        document.head.appendChild(script);
-      }
-    }, [params]);
+    if (!resolvedParams?.org_id) return;
 
-  return (
-    <>
-      {children}
-    </>
-  );
+    removeScript(scriptConfig.gtwUserScriptId);
+
+    const token = sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token');
+    if (!token) {
+      console.warn('No proxy token found for GTWY user script');
+      return;
+    }
+
+    const script = createScript({
+      id: scriptConfig.gtwUserScriptId,
+      src: scriptConfig.gtwScriptUrl,
+      attributes: {
+        skipLoadGtwy: "true",
+        token: token,
+        org_id: resolvedParams.org_id,
+        customIframeId: 'gtwyEmbedInterface',
+        gtwy_user: "true",
+        slide: 'right'
+      }
+    });
+
+    document.head.appendChild(script);
+
+    return () => {
+      removeScript(scriptConfig.gtwUserScriptId);
+    };
+  }, [resolvedParams?.org_id, scriptConfig, removeScript, createScript]);
+
+  return <>{children}</>;
 }

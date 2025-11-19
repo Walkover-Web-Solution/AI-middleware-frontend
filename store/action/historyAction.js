@@ -56,12 +56,29 @@ export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) =
   }
 }
 
-export const searchMessageHistoryAction = ({bridgeId, keyword, time_range}) => async(dispatch) => {
+export const searchMessageHistoryAction = ({bridgeId, keyword, time_range, page = 1}) => async(dispatch) => {
   try {
-    const data = await searchMessageHistory(bridgeId, keyword, time_range);
-     dispatch(fetchThreadReducer({ data: data.data, nextPage }));
-    return data;
-  } catch (error) {
+    // Import search actions from history reducer
+    const { setSearchResults, setSearchQuery, setSearchLoading } = await import('../reducer/historyReducer');
     
+    dispatch(setSearchLoading(true));
+    dispatch(setSearchQuery(keyword || ""));
+    
+    const data = await searchMessageHistory(bridgeId, keyword, time_range);
+    
+    // Store search results in history reducer
+    dispatch(setSearchResults({ 
+      data: data?.data || [], 
+      page: page,
+      hasMore: data?.data?.length >= 40 
+    }));
+    
+    dispatch(setSearchLoading(false));
+    return data?.data || [];
+  } catch (error) {
+    const { setSearchLoading } = await import('../reducer/historyReducer');
+    dispatch(setSearchLoading(false));
+    console.error("Search error:", error);
+    return [];
   }
 }

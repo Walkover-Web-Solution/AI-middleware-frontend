@@ -6,7 +6,14 @@ const initialState = {
   thread: [],
   selectedVersion : 'all',
   loading: false,
-  success: false
+  success: false,
+  // Search state
+  searchResults: [],
+  searchQuery: "",
+  isSearchActive: false,
+  searchLoading: false,
+  hasMoreSearchResults: false,
+  searchPage: 1,
 };
 
 export const historyReducer = createSlice({
@@ -68,8 +75,53 @@ export const historyReducer = createSlice({
       const {thread_id, sub_thread_id, Messages} = action.payload;
       const threadIndex = state.thread.findIndex((thread) => thread.thread_id === thread_id && thread.sub_thread_id === sub_thread_id);
       if (threadIndex !== -1) {
-          state.thread.push(Messages);
+        Messages.map((message) => {
+          state.thread.push(message);
+        })
       } 
+    },
+    // Search reducers
+    setSearchResults: (state, action) => {
+      const { data, page = 1, hasMore = false } = action.payload;
+      if (page === 1) {
+        state.searchResults = data || [];
+      } else {
+        state.searchResults = [...state.searchResults, ...(data || [])];
+      }
+      state.hasMoreSearchResults = hasMore;
+      state.searchPage = page;
+    },
+    
+    setSearchQuery: (state, action) => {
+      state.searchQuery = action.payload;
+      state.isSearchActive = action.payload && action.payload.trim().length > 0;
+    },
+    
+    setSearchLoading: (state, action) => {
+      state.searchLoading = action.payload;
+    },
+    
+    clearSearchResults: (state) => {
+      state.searchResults = [];
+      state.searchQuery = "";
+      state.isSearchActive = false;
+      state.searchLoading = false;
+      state.hasMoreSearchResults = false;
+      state.searchPage = 1;
+    },
+    
+    appendSearchResults: (state, action) => {
+      const { data } = action.payload;
+      state.searchResults = [...state.searchResults, ...(data || [])];
+      state.searchPage += 1;
+    },
+    
+    setSearchPage: (state, action) => {
+      state.searchPage = action.payload;
+    },
+    
+    setHasMoreSearchResults: (state, action) => {
+      state.hasMoreSearchResults = action.payload;
     },
   },
 });
@@ -86,6 +138,14 @@ export const {
   setSelectedVersion,
   clearHistoryData,
   addThreadUsingRtLayer,
-  addThreadNMessageUsingRtLayer
+  addThreadNMessageUsingRtLayer,
+  // Search actions
+  setSearchResults,
+  setSearchQuery,
+  setSearchLoading,
+  clearSearchResults,
+  appendSearchResults,
+  setSearchPage,
+  setHasMoreSearchResults
 } = historyReducer.actions;
 export default historyReducer.reducer;

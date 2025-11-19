@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { getHistoryAction, getSubThreadsAction, getThread, searchMessageHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction.js";
-import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
+import { clearSubThreadData, clearThreadData, clearSearchResults, setSearchQuery } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { formatRelativeTime, openModal } from "@/utils/utility.js";
 import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
@@ -15,16 +15,19 @@ import { setSelectedVersion } from '@/store/reducer/historyReducer';
 import { FileTextIcon } from "lucide-react";
 
 const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, searchParams, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue }) => {
-  const { subThreads } = useCustomSelector(state => ({
-    subThreads: state?.historyReducer?.subThreads || [],
+  const { subThreads, searchResults, searchQuery, isSearchActive, searchLoading, hasMoreSearchResults } = useCustomSelector(state => ({
+    subThreads: Array.isArray(state?.historyReducer?.subThreads) ? state.historyReducer.subThreads : [],
+    searchResults: Array.isArray(state?.historyReducer?.searchResults) ? state.historyReducer.searchResults : [],
+    searchQuery: state?.historyReducer?.searchQuery || "",
+    isSearchActive: state?.historyReducer?.isSearchActive || false,
+    searchLoading: state?.historyReducer?.searchLoading || false,
+    hasMoreSearchResults: state?.historyReducer?.hasMoreSearchResults || false,
   }));
 
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]);
   const [loadingSubThreads, setLoadingSubThreads] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false);
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
@@ -117,18 +120,19 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   useEffect(()=>{
     if(searchParams?.message_id){
       // Set the search query state and input value
-      setSearchQuery(searchParams.message_id);
+      dispatch(setSearchQuery(searchParams.message_id));
       if (searchRef?.current) {
         searchRef.current.value = searchParams.message_id;
       }
       handleChange();
     }
   },[searchParams?.message_id])
+  
   const handleChange = useCallback(debounce((e) => {
-
-    setSearchQuery(e?.target?.value||searchParams?.message_id);
+    const value = e?.target?.value || searchParams?.message_id || "";
+    dispatch(setSearchQuery(value));
     handleSearch(e);
-  }, 500), [setSearchQuery]);
+  }, 500), [dispatch, searchParams?.message_id]);
 
   const handleSearch = async (e) => {
     e?.preventDefault();
@@ -137,7 +141,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       return;
     }
 
-    setSearchLoading(true);
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
@@ -168,22 +171,17 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         dispatch(clearThreadData())
       }
 
-
-
       if (result?.length < 40) {
         setHasMore(false);
       }
     } catch (error) {
       console.error("Search error:", error);
-    } finally {
-      setSearchLoading(false);
     }
   };
 
   const clearInput = async () => {
-    setSearchQuery("");
+    dispatch(clearSearchResults());
     if (searchRef?.current) searchRef.current.value = "";
-    setSearchLoading(true);
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
@@ -203,8 +201,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       if (result?.length < 40) setHasMore(false);
     } catch (error) {
       console.error("Clear search error:", error);
-    } finally {
-      setSearchLoading(false);
     }
   };
 
@@ -382,27 +378,27 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         </form>
       </div>
       <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-
-      {/* Fixed: Render search loader at the top level, not inside InfiniteScroll */}
+{console.log(isSearchActive)}
+      {/* Render search loader at the top level, not inside InfiniteScroll */}
       <div className="flex-1 overflow-hidden">
         {searchLoading ? (
           <Skeleton count={8} />
         ) : loading ? (
           <div className="flex justify-center items-center bg-base-200 h-full">
           </div>
-        ) : historyData?.length === 0 ? (
+        ) : (isSearchActive ? (Array.isArray(searchResults) ? searchResults.length === 0 : true) : (Array.isArray(historyData) ? historyData.length === 0 : true)) ? (
           <NoDataFound />
         ) : (
           <InfiniteScroll
-            dataLength={historyData?.length}
+            dataLength={isSearchActive ? (Array.isArray(searchResults) ? searchResults.length : 0) : (Array.isArray(historyData) ? historyData.length : 0)}
             next={fetchMoreData}
-            hasMore={!searchQuery && hasMore}
+            hasMore={isSearchActive ? hasMoreSearchResults : (!searchQuery && hasMore)}
             loader={<h4></h4>}
             scrollableTarget="sidebar"
           >
             <div className="slider-container min-w-[45%] w-full overflow-x-auto pb-20">
               <ul className="menu min-h-full text-base-content flex flex-col space-y-1">
-                {historyData?.map((item) => (
+                {(isSearchActive ? (Array.isArray(searchResults) ? searchResults : []) : (Array.isArray(historyData) ? historyData : []))?.map((item) => (
                   <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
                     {isThreadSelectable && (
                       <div onClick={(e) => e?.stopPropagation()}>
@@ -423,7 +419,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                         onClick={() => {
                           const isCurrentlySelected = decodeURIComponent(searchParams?.thread_id) === item?.thread_id;
                           
-                          if (isCurrentlySelected && !searchQuery) {
+                          if (isCurrentlySelected && !isSearchActive) {
                             // If thread is already selected and no search query, toggle dropdown
                             handleToggleThread(item?.thread_id);
                           } else {

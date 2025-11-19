@@ -94,11 +94,12 @@ export const searchMessageHistory = async(bridgeId, keyword, time_range) =>{
   try {
     const searchResult = await axios.post(`${URL}/history/search/${bridgeId}`,{
       keyword,
-      time_range
+      time_range: time_range || {}
     })
     return searchResult;
   } catch (error) {
-    
+    console.error("Search API error:", error);
+    throw error;
   }
 }
 
