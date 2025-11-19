@@ -285,13 +285,13 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         console.error('Error processing knowledge base tool:', error);
       }
     }
-    if(tool?.meta?.type === "agent")
-    {
-      window.openGtwy(
-
-      )
+    if (tool?.data?.metadata?.type === 'agent') {
+      window.openGtwy({ 
+        agent_id: tool?.data?.metadata?.agent_id, 
+        history: { message_id: tool?.data?.metadata?.message_id }
+      });
+      return;
     }
-    debugger
     openViasocket(tool?.id, {
       flowHitId: tool?.data?.metadata?.flowHitId,
       embedToken,
