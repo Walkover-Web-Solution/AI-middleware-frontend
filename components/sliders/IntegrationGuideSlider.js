@@ -9,7 +9,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { toggleSidebar } from "@/utils/utility";
 import SlugNameInput from "../configuration/configurationComponent/slugNameInput";
 
-function GuideSlider({ params, bridgeType }) {
+function GuideSlider({ params, bridgeType, onClose }) {
   const [activeTab, setActiveTab] = useState(bridgeType != "trigger" ? bridgeType : "chatbot");
   useEffect(()=>{
     setActiveTab(bridgeType != "trigger" ? bridgeType : "chatbot");
@@ -50,7 +50,11 @@ function GuideSlider({ params, bridgeType }) {
         <div className="flex justify-between items-center border-b pb-4">
           <h3 className="font-bold text-lg">Integration Guide</h3>
           <CloseIcon
-          onClick={()=>{toggleSidebar("integration-guide-slider", "right")}}
+          onClick={()=>{
+            toggleSidebar("integration-guide-slider", "right");
+            // Call onClose after a delay to allow animation to complete
+            setTimeout(() => onClose && onClose(), 300);
+          }}
             className="cursor-pointer hover:text-error transition-colors"
           />
         </div>

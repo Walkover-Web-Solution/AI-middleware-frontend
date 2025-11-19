@@ -393,8 +393,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              <Navbar resolvedParams={resolvedParams} />
-            </div>
+                <Navbar params={resolvedParams} searchParams={resolvedSearchParams} />
+              </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
