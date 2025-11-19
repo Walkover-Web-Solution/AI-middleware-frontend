@@ -188,8 +188,21 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   }
 };
 
-export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
+export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch, getState) => {
   try {
+    const state = getState();
+    const bridgeId = Object.keys(state?.bridgeReducer?.allBridgesMap || {}).find(id => 
+      state?.bridgeReducer?.allBridgesMap[id]?.versions?.includes(versionId)
+    );
+    const publishedVersionId = state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id;
+    
+    // Check if trying to edit published version
+    if (versionId === publishedVersionId) {
+      toast.error("You can't edit the published version. Please create a new version to make changes.");
+      dispatch(isError());
+      return;
+    }
+    
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
@@ -201,8 +214,6 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     dispatch(isError());
   }
 };
-
-
 
 export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => async (dispatch) => {
   try {

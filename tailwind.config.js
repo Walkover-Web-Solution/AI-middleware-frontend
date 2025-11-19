@@ -49,9 +49,9 @@ module.exports = {
           "color-scheme": "light",
 
           /* Light: canvas soft warm gray, cards white, borders gentle gray */
-          "base-100": "oklch(99% 0.005 95)",  // canvas (very soft gray)
+          "base-100": "oklch(93.5% 0 0)",  // canvas (very soft gray)
           "base-200": "oklch(98% 0 0)",       // cards/panels (white-ish)
-          "base-300": "oklch(93.5% 0 0)",     // borders/dividers
+          "base-300": "oklch(99% 0.005 95)",     // borders/dividers
           "base-400": "oklch(100% 0 0)",
           "base-content": "oklch(26% 0 0)",   // soft dark gray text
 
@@ -87,9 +87,9 @@ module.exports = {
           "color-scheme": "dark",
       
           /* Background layering */
-          "base-100": "oklch(25% 0 0)",   // lighter dark (canvas, main background)
+          "base-100":"oklch(18% 0 0)",   // lighter dark (canvas, main background)
           "base-200": "oklch(22% 0 0)",   // slightly darker (cards, panels)
-          "base-300": "oklch(18% 0 0)",   // darkest (borders, separators)
+          "base-300": "oklch(25% 0 0)",    // darkest (borders, separators)
           "base-400": "oklch(16% 0 0)",
           "base-content": "oklch(85% 0 0)", // dull white text
       
