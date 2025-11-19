@@ -4,7 +4,7 @@ import GenericTable from '../table/table';
 import { extractPromptVariables } from '@/utils/utility';
 
 const DataObject = {
-    script: `<script\n      id="chatbot-main-script"\n      embedToken=" <embed token here> "\n      bridgeName="<slugName_of_bridge>"\n      threadId="<thread_id>"\n      subthreadId="<subthread_id>"\n      parentId="<parent_container_id>"\n      src="https://chatbot-embed.viasocket.com/chatbot-prod.js"\n     ></script>`,
+    script: `<script\n      id="chatbot-main-script"\n      embedToken=" <embed token here> "\n      bridgeName="<slugName_of_bridge>"\n      threadId="<thread_id>"\n     src="https://chatbot-embed.viasocket.com/chatbot-prod.js"\n     ></script>`,
     event: `window.addEventListener('message', (event) => {
         const receivedData = event.data;
      });`,
