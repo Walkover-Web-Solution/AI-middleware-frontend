@@ -1,9 +1,22 @@
 import { getHistory, getSingleThreadData, getSubThreadIds, getThreads, searchMessageHistory, updateHistoryMessage, userFeedbackCount } from "@/config";
-import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
+import { 
+  fetchAllHistoryReducer, 
+  fetchSubThreadReducer, 
+  fetchThreadReducer, 
+  updateHistoryMessageReducer, 
+  userFeedbackCountReducer,
+  setSearchQuery,
+  setSearchLoading,
+  setSearchResults,
+  appendSearchResults,
+  setSearchHasMore,
+  clearSearchResults,
+  setSearchDateRange
+} from "../reducer/historyReducer";
 
-export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback, isErrorTrue, selectedVersion) => async (dispatch) => {
+export const getHistoryAction = (id, page = 1, user_feedback, isErrorTrue, selectedVersion) => async (dispatch) => {
   try {
-    const data = await getThreads(id, page, start, end, keyword,user_feedback, isErrorTrue, selectedVersion );
+    const data = await getThreads(id, page, user_feedback, isErrorTrue, selectedVersion );
     if (data && data.data) {
       dispatch(fetchAllHistoryReducer({ data: data.data, page }));
     }
@@ -56,12 +69,42 @@ export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) =
   }
 }
 
-export const searchMessageHistoryAction = ({bridgeId, keyword, time_range}) => async(dispatch) => {
+export const searchMessageHistoryAction = ({
+  bridgeId, 
+  keyword, 
+  time_range = null, 
+  startDate = null,
+  endDate = null
+}) => async(dispatch) => {
   try {
-    const data = await searchMessageHistory(bridgeId, keyword, time_range);
-     dispatch(fetchThreadReducer({ data: data.data, nextPage }));
+    dispatch(setSearchLoading(true));
+    if (keyword) {
+      dispatch(setSearchQuery(keyword));
+    }
+    if (startDate || endDate) {
+      dispatch(setSearchDateRange({ start: startDate, end: endDate }));
+    }
+    const timeRange = time_range || (startDate && endDate ? { start: startDate, end: endDate } : null);
+    const data = await searchMessageHistory(bridgeId, keyword, timeRange);
+    if (data && data.data) {
+      const searchData = Array.isArray(data.data?.data) ? data.data.data : [];
+      dispatch(setSearchResults({ data: searchData, page: 1 }));
+      dispatch(setSearchHasMore(false));
+    } else {
+      dispatch(setSearchResults({ data: [], page: 1 }));
+      dispatch(setSearchHasMore(false));
+    }
+    
     return data;
   } catch (error) {
-    
+    console.error('Search failed:', error);
+    dispatch(setSearchLoading(false));
+    dispatch(setSearchResults({ data: [], page: 1 }));
+    throw error;
   }
-}
+};
+
+// Action to clear search
+export const clearSearchAction = () => (dispatch) => {
+  dispatch(clearSearchResults());
+};

@@ -310,9 +310,7 @@ export const allowedAttributes = {
     ],
     optional: [
         ['message_id', 'Message ID'],
-        ['input_tokens', 'Input Tokens'],
-        ['output_tokens', 'Output Tokens'],
-        ['expected_cost', 'Expected Cost'],
+        ['tokens', 'Tokens'],
         ['createdAt', 'Created At'],
         ['service', 'Service'],
         ['model', 'Model'],
@@ -786,10 +784,10 @@ export const generateKeyValuePairs = (obj) => {
 
 export const formatRelativeTime = (dateString) => {
   const normalized = normalizeToUTC(dateString);
-  if (!normalized) return 'No records found';
+  if (!normalized) return '';
 
   const date = new Date(normalized);
-  if (isNaN(date.getTime())) return 'No records found';
+  if (isNaN(date.getTime())) return '';
 
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);

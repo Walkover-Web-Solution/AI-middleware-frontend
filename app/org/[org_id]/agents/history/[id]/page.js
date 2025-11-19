@@ -151,11 +151,9 @@ function Page({params, searchParams }) {
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    const startDate = search.get("start");
-    const endDate = search.get("end");
-    const result = await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, nextPage));
+    const result = await dispatch(getHistoryAction(resolvedParams.id, nextPage, "all", false, selectedVersion));
     if (result?.length < 40) setHasMore(false);
-  }, [dispatch, page, resolvedParams.id, search]);
+  }, [dispatch, page, resolvedParams.id]);
 
   if (loading || !historyData) return (
     <div>

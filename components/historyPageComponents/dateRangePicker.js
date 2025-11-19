@@ -1,7 +1,8 @@
-import { getHistoryAction } from '@/store/action/historyAction';
+import { getHistoryAction, searchMessageHistoryAction } from '@/store/action/historyAction';
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'next/navigation';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 
 
@@ -18,6 +19,12 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
   const [endingDate, setEndingDate] = useState(getDefaultDate());
 
   const searchParams = useSearchParams();
+  
+  // Get search state to check if search is active
+  const { isSearchActive, searchQuery } = useCustomSelector(state => ({
+    isSearchActive: state?.historyReducer?.search?.isActive || false,
+    searchQuery: state?.historyReducer?.search?.query || ''
+  }));
 
   useEffect(() => {
     const start = searchParams.get('start');
@@ -30,10 +37,27 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('start', startingDate);
     newSearchParams.set('end', endingDate);
-    const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id, startingDate, endingDate, 1, null, null, false, selectedVersion));
-    setHasMore(true);
-    setPage(1);
+    
+    // Check if there's a search query in URL params or Redux state
+    const currentSearchQuery = searchParams.get('message_id') || searchQuery;
+    
+    // If there's a search query, call search API with date range
+    if (currentSearchQuery) {
+      await dispatch(searchMessageHistoryAction({
+        bridgeId: params.id,
+        keyword: currentSearchQuery,
+        startDate: startingDate,
+        endDate: endingDate
+      }));
+    } else {
+      await dispatch(searchMessageHistoryAction({
+        bridgeId: params.id,
+        keyword: '', // empty keyword to get all results within date range
+        startDate: startingDate,
+        endDate: endingDate
+      }));
+    }
+    
     const queryString = newSearchParams.toString();
     window.history.replaceState(null, '', `?${queryString}`);
   };
@@ -48,12 +72,25 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
     newSearchParams.delete('start');
     newSearchParams.delete('end');
     newSearchParams.delete('thread_id');
-    const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, isErrorTrue, selectedVersion));
+    
+    // Check if there's still a search query after clearing date range
+    const currentSearchQuery = searchParams.get('message_id') || searchQuery;
+    
+    if (currentSearchQuery) {
+      await dispatch(searchMessageHistoryAction({
+        bridgeId: params.id,
+        keyword: currentSearchQuery,
+        startDate: null,
+        endDate: null
+      }));
+    } else {
+      await dispatch(getHistoryAction(params.id, 1, filterOption, isErrorTrue, selectedVersion));
+      setHasMore(true);
+      setPage(1);
+    }
+    
     const queryString = newSearchParams.toString();
     window.history.replaceState(null, '', `?${queryString}`);
-    setHasMore(true);
-    setPage(1);
   };
   // ... existing code ...
 

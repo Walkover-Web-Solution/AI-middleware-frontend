@@ -77,9 +77,9 @@ export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue,
   try {
     const getSingleThreadData = await axios.get(`${URL}/history/threads/${bridgeId}`, {
       params: {
-        page: page,
+        page: page ? page : 1,
         limit: 40,
-        user_feedback: !user_feedback ? "all" : user_feedback,
+        user_feedback: !user_feedback || user_feedback === "undefined" ? "all" : user_feedback,
         version_id: (versionId === 'all'|| versionId === 'undefined') ? null : versionId
       }
     });
@@ -94,11 +94,12 @@ export const searchMessageHistory = async(bridgeId, keyword, time_range) =>{
   try {
     const searchResult = await axios.post(`${URL}/history/search/${bridgeId}`,{
       keyword,
-      time_range
+      time_range: time_range || {}
     })
     return searchResult;
   } catch (error) {
-    
+    console.error('Search API error:', error);
+    throw error;
   }
 }
 
