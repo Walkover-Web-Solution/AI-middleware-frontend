@@ -21,14 +21,13 @@ const PromptTextarea = memo(({
             lastExternalValueRef.current = initialValue;
         }
     }, [initialValue]);
-    // Memoized textarea class to prevent recalculation
-    const textareaClass = useMemo(() => {
-        return `textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-            ? "min-h-[calc(100vh-60px)] w-[700px] border-primary shadow-md"
-            : "min-h-96"
-        } ${className}`;
-    }, [isPromptHelperOpen, className]);
-
+    
+    // Manage textarea height based on PromptHelper state
+    useEffect(() => {
+        if(!isPromptHelperOpen){
+            textareaRef.current.style.height = '24rem';
+        }
+    }, [isPromptHelperOpen]);
     // Zero-render change handler - no state updates
     const handleChange = useCallback((e) => {
         const value = e.target.value;
@@ -63,7 +62,7 @@ const PromptTextarea = memo(({
     return (
         <textarea
             ref={textareaRef}
-            className={textareaClass}
+            className={`textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 min-h-96 max-h-[calc(100vh-80px)] ${isPromptHelperOpen ? "min-h-[calc(100vh-80px)] w-[700px] border-primary shadow-md" : "h-96 max-h-[calc(100vh-80px)]"}`}
             defaultValue={initialValue}
             onChange={handleChange}
             onFocus={handleFocus}

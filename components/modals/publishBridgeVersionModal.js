@@ -611,7 +611,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       await dispatch(
         publishBridgeVersionAction({
           bridgeId: params?.id,
-          versionId: searchParams?.version,
+          versionId: searchParams?.get("version"),
           orgId: params?.org_id,
           isPublic: isPublicAgent,
         })

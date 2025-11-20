@@ -10,10 +10,9 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateUserMetaOnboarding } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { MODAL_TYPE } from "@/utils/enums";
-import { getFromCookies, openModal } from "@/utils/utility";
+import { getFromCookies, removeCookie } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -47,7 +46,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   const resolvedParams = use(params);
   const resolvedSearchParams = useSearchParams();
 
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token, currrentOrgDetail } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
@@ -56,6 +55,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
+    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   }));
   useEffect(() => {
     dispatch(getTutorialDataAction());
@@ -73,34 +73,15 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
+      const reference_id = getFromCookies("reference_id");
+      const unlimited_access = getFromCookies("unlimited_access");
         const utmSource = getFromCookies("utm_source");
         const utmMedium = getFromCookies("utm_medium");
         const utmCampaign = getFromCookies("utm_campaign");
         const utmTerm = getFromCookies("utm_term");
         const utmContent = getFromCookies("utm_content");
         let currentUserMeta = currentUser?.meta;
-      // If user meta is null, initialize onboarding meta
-      if (currentUser?.meta === null) {
-        const updatedUser = {
-          ...currentUser,
-          meta: {
-            onboarding: {
-              bridgeCreation: true,
-              FunctionCreation: true,
-              knowledgeBase: true,
-              Addvariables: true,
-              AdvanceParameter: true,
-              PauthKey: true,
-              CompleteBridgeSetup: true,
-              TestCasesSetup:true
-            },
-          },
-        };
-      const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-      if (data?.data?.status) {
-        currentUserMeta = data?.data?.data?.user?.meta;
-      }
-      }
+      
       // Build UTM object with only present values from URL that are NOT already in user meta
       const utmParams = {};
       if (utmSource && !currentUser?.meta?.utm_source) utmParams.utm_source = utmSource;
@@ -109,31 +90,51 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
       if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
 
-      // If any new UTM parameter exists that user doesn't have
-      if (Object.keys(utmParams).length > 0) {
+      // Check if we need to update user meta (either null meta or new UTM params
+
+      if (currentUser?.meta===null) {
         try {
-          const data = await dispatch(
-            storeMarketingRefUserAction({
-              ...utmParams,
-              client_id: currentUser.id,
-              client_email: currentUser.email,
-              client_name: currentUser.name,
-              created_at: currentUser.created_at,
-            })
-          );
-          
-          if (data) {
-            const updatedUser = {
-              ...currentUser,
-              meta: {
-                ...currentUserMeta,
+          // If UTM params exist, store marketing ref first
+          if (Object.keys(utmParams).length > 0) {
+            await dispatch(
+              storeMarketingRefUserAction({
                 ...utmParams,
-              },
-            };
-            await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+                client_id: currentUser.id,
+                client_email: currentUser.email,
+                client_name: currentUser.name,
+                created_at: currentUser.created_at,
+              })
+            );
+          }
+
+          // Single call to update user meta with all data
+          const updatedUser = {
+            ...currentUser,
+            meta: {
+              // If meta is null, initialize onboarding, otherwise use existing meta
+              ...(currentUser?.meta === null ? {
+                onboarding: {
+                  bridgeCreation: true,
+                  FunctionCreation: true,
+                  knowledgeBase: true,
+                  Addvariables: true,
+                  AdvanceParameter: true,
+                  PauthKey: true,
+                  CompleteBridgeSetup: true,
+                  TestCasesSetup: true
+                }
+              } : currentUserMeta),
+              // Add UTM params if they exist
+              ...utmParams,
+            },
+          };
+
+          const data = await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+          if (data?.data?.status) {
+            currentUserMeta = data?.data?.data?.user?.meta;
           }
         } catch (err) {
-          console.error("Error storing marketing ref:", err);
+          console.error("Error updating user meta:", err);
         }
       }
     };
@@ -276,7 +277,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   const docstarScriptId = "docstar-main-script";
   const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
-
   useEffect(() => {
     const existingScript = document.getElementById(docstarScriptId);
     if (existingScript) {
@@ -393,8 +393,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus && <Navbar resolvedParams={resolvedParams} />}
-            </div>
+                <Navbar params={resolvedParams} searchParams={resolvedSearchParams} />
+              </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -425,7 +425,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus ? <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/> : null}
+               <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/>
             </div>
 
             {/* Scrollable Content */}

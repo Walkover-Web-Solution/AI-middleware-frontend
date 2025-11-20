@@ -12,7 +12,8 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { getIconOfService, openModal, closeModal, formatRelativeTime } from "@/utils/utility";
+import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick, formatDate } from "@/utils/utility";
+
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from "react";
@@ -132,7 +133,17 @@ function Home({ params, isEmbedUser }) {
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
     agent_limit: item?.bridge_limit,
     agent_usage: item?.bridge_usage,
-    isLoading: loadingAgentId === item._id
+    isLoading: loadingAgentId === item._id,
+    last_used: <div className="group cursor-help">
+                        <span className="group-hover:hidden">
+                          {formatRelativeTime(item.last_used || "No records found",)}
+                        </span>
+                        <span className="hidden group-hover:inline">
+                          {formatDate(item.last_used || "No records found",)}
+                        </span>
+                      </div> ,
+    last_used_orignal: item.last_used,
+    
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -176,8 +187,17 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    isLoading: loadingAgentId === item._id
-  }));
+    isLoading: loadingAgentId === item._id,
+    last_used: <div className="group cursor-help">
+                        <span className="group-hover:hidden">
+                          {formatRelativeTime(item.last_used ? item.last_used : "No records found",)}
+                        </span>
+                        <span className="hidden group-hover:inline">
+                          {formatDate(item.last_used ? item.last_used : "No records found",)}
+                        </span>
+                      </div> ,
+    last_used_orignal: item.last_used,
+    }));
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
   const getDaysRemaining = (deletedAt) => {
@@ -224,9 +244,22 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-    isLoading: loadingAgentId === item._id
+    isLoading: loadingAgentId === item._id,
+    last_used: item.last_used ? (
+      <div className="group cursor-help">
+        <span className="group-hover:hidden">
+          {formatRelativeTime(item.last_used)}
+        </span>
+        <span className="hidden group-hover:inline">
+          {formatDate(item.last_used)}
+        </span>
+      </div>
+    ) : "No records found",
+    last_used_original: item.last_used,
   }));
 
+  // Helper function to calculate days remaining for deletion (30 days from deletedAt)
+ 
   const onClickConfigure = (id, versionId) => {
     // Prevent multiple clicks while loading
     if (loadingAgentId) return;
@@ -472,9 +505,9 @@ function Home({ params, isEmbedUser }) {
                 
                 <CustomTable 
                   data={UnArchivedBridges} 
-                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
+                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage','last_used']} 
                   sorting 
-                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage']} 
+                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage','last_used']} 
                   handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                   keysToExtractOnRowClick={['_id', 'versionId']} 
                   keysToWrap={['name', 'model']} 
@@ -493,9 +526,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60">
                       <CustomTable 
                         data={ArchivedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                         keysToExtractOnRowClick={['_id', 'versionId']} 
                         keysToWrap={['name', 'prompt', 'model']} 
@@ -517,9 +550,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60">
                       <CustomTable 
                         data={DeletedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent} 
                       />

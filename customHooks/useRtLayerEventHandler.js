@@ -95,11 +95,12 @@ function useRtLayerEventHandler(channelIdentifier="") {
       }
       if(error)
       {
-        debugger
         dispatch(addChatErrorMessage(channelIdentifier, error?.error));
         return
       }
       const { Thread, Messages, type } = response;
+      
+      // Handle agent_updated type
       if (type === 'agent_updated') {
         const agentId = response.version_id || response.bridge_id;
         const currentTabInitiated = didCurrentTabInitiateUpdate(String(agentId));
@@ -113,6 +114,65 @@ function useRtLayerEventHandler(channelIdentifier="") {
         }
         return;
       }
+
+      // Handle new history data format (direct message in response)
+      if (response.message_id) {
+        // Create thread data from response
+        const threadData = {
+          thread_id: response.thread_id,
+          sub_thread_id: response.sub_thread_id || response.thread_id,
+          bridge_id: response.bridge_id
+        };
+
+        // Create message data from response
+        const messageData = {
+          id: response.message_id,
+          user: response.user,
+          llm_message: response.llm_message,
+          chatbot_message: response.chatbot_message,
+          updated_llm_message: response.updated_llm_message,
+          error: response.error,
+          tools_call_data: response.tools_call_data || [],
+          image_urls: response.image_urls || [],
+          urls: response.urls || [],
+          user_feedback: response.user_feedback,
+          version_id: response.version_id,
+          org_id: response.org_id,
+          bridge_id: response.bridge_id,
+          prompt: response.prompt,
+          AiConfig: response.AiConfig,
+          fallback_model: response.fallback_model,
+          model: response.model,
+          status: response.status,
+          tokens: response.tokens,
+          variables: response.variables,
+          latency: response.latency,
+          firstAttemptError: response.firstAttemptError,
+          finish_reason: response.finish_reason,
+          parent_id: response.parent_id,
+          child_id: response.child_id,
+          fromRTLayer: true,
+          created_at: new Date().toISOString() // Add timestamp
+        };
+
+        // Dispatch to history reducer
+        if (threadData.thread_id) {
+          dispatch(addThreadUsingRtLayer({ Thread: threadData }));
+          
+          // Create Messages object in the format expected by the reducer
+          const Messages = {
+            [response.message_id]: messageData
+          };
+          
+          dispatch(addThreadNMessageUsingRtLayer({
+            thread_id: threadData.thread_id, 
+            sub_thread_id: threadData.sub_thread_id, 
+            Messages
+          }));
+        }
+        return;
+      }
+
       // Handle chat messages for dry run (non-orchestral)
       if (response.data) {
         const channelId = channelIdentifier;        
@@ -156,7 +216,7 @@ function useRtLayerEventHandler(channelIdentifier="") {
         }
       }
    
-      // Handle history data (existing functionality)
+      // Handle legacy history data format (existing functionality)
       if (!Thread || !Messages) {
         return;
       }

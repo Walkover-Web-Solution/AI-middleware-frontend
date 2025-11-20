@@ -14,6 +14,7 @@ import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
     // Use the tutorial videos hook
@@ -92,25 +93,25 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             return item ? (
                 <div
                     key={docId}
-                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${!item?.description ? 'border-red-600' : ''} hover:bg-base-300 transition-colors duration-200`}
+                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
                 >
-                    <div className="p-2 flex-1 flex items-center">
+                    <div className="flex items-center gap-2 w-full">
+                        {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
                         <div className="flex items-center gap-2 w-full">
-                            {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
                             {item?.name?.length > 24 ? (
                                 <div className="tooltip tooltip-top min-w-0" data-tip={item?.name}>
                                     <span className="min-w-0 text-sm truncate">
-                                        <span className="text-sm font-normal block w-full">{item?.name}</span>
+                                            <span className="text-sm font-normal block w-full">{truncate(item?.name, 24)}</span>
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="min-w-0 text-sm truncate">
+                                        <span className="text-sm font-normal block w-full">{truncate(item?.name, 24)}</span>
                                     </span>
-                                </div>
-                            ) : (
-                                <span className="min-w-0 text-sm truncate">
-                                    <span className="text-sm font-normal block w-full">{item?.name}</span>
-                                </span>
-                            )}
+                                )}
+                            </div>
                             {!item?.description && <CircleAlertIcon color='red' size={16} />}
                         </div>
-                    </div>
 
                     {/* Remove button that appears on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
@@ -130,24 +131,23 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         }).filter(Boolean);
 
         return (
-            <div className={`grid gap-2 w-full ${knowledgebaseItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
-                gridTemplateColumns: knowledgebaseItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
-            }}>
+            <div className={`grid gap-2 w-full`}>
                 {knowledgebaseItems}
-                {/* Add empty div for spacing when only one item */}
-                {knowledgebaseItems.length === 1 && <div></div>}
             </div>
         );
     }, [knowbaseVersionData, knowledgeBaseData]);
     return (
-        <div className="label flex-col items-start w-full p-0">
+        <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
             <div className="dropdown dropdown-right flex items-center">
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (
                         <>
-                            <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                                <p className="label-text mb-2 whitespace-nowrap font-medium info">KnowledgeBase</p>
-                            </InfoTooltip>
+                            <div className="flex items-center gap-1 mb-2">
+                                <p className="whitespace-nowrap font-medium">KnowledgeBase</p>
+                                <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                                </InfoTooltip>
+                            </div>
                             <button
                                 tabIndex={0}
                                 className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"

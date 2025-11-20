@@ -50,9 +50,10 @@ function MainSlider({ isEmbedUser }) {
   const pathParts = pathname.split('?')[0].split('/');
   const orgId = pathParts[2];
 
-  const { userdetails, organizations } = useCustomSelector(state => ({
+  const { userdetails, organizations, currrentOrgDetail } = useCustomSelector(state => ({
     userdetails: state.userDetailsReducer.userDetails,
-    organizations: state.userDetailsReducer.organizations
+    organizations: state.userDetailsReducer.organizations,
+    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[orgId]
   }));
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization', [organizations, orgId]);
 
@@ -260,10 +261,9 @@ function MainSlider({ isEmbedUser }) {
 
     try {
       const response = await switchOrg(id);
-      if (process.env.NEXT_PUBLIC_ENV === 'local') {
-        const localToken = await switchUser({ orgId: id, orgName: name });
-        setInCookies('local_token', localToken.token);
-      }
+      const localToken = await switchUser({ orgId: id, orgName: name });
+      setInCookies('local_token', localToken.token);
+      
       router.push(`/org/${id}/agents`);
       dispatch(setCurrentOrgIdAction(id));
       if (isMobile) setIsMobileVisible(false);
@@ -776,6 +776,19 @@ function MainSlider({ isEmbedUser }) {
                   {ITEM_ICONS.tutorial}
                   {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
                 </button>
+
+               {!currrentOrgDetail?.meta?.unlimited_access && <button
+                  onClick={() => {
+                    router.push(`/org/${orgId}/lifetime-access`);
+                    if (isMobile) setIsMobileVisible(false);
+                  }}
+                  onMouseEnter={e => onItemEnter('lifetimeAccess', e)}
+                  onMouseLeave={onItemLeave}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
+                >
+                  {ITEM_ICONS.lifetimeAccess}
+                  {showSidebarContent && <span className="text-xs truncate">Free Lifetime Access</span>}
+                </button>}
 
                 <button
                   onClick={() => {

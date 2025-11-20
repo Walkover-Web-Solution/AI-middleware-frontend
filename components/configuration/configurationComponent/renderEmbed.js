@@ -112,35 +112,9 @@ const RenderEmbed = ({
 
     return (
       <div className="w-full">
-        <div className={`grid gap-2 w-full ${displayItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
-          gridTemplateColumns: displayItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
-        }}>
+        <div className={`grid gap-2 w-full`}>
           {embedItems}
-          {/* Add empty div for spacing when only one item */}
-          {displayItems.length === 1 && <div></div>}
         </div>
-        
-        {/* Show/Hide toggle button */}
-        {shouldShowToggle && (
-          <div className="flex justify-center mt-3">
-            <button
-              onClick={toggleExpanded}
-              className="flex items-center gap-2 px-3 py-1 text-sm text-base-content/70 hover:text-base-content bg-base-100 hover:bg-base-200 rounded-lg border border-base-300 transition-all duration-200"
-            >
-              {isExpanded ? (
-                <>
-                  <ChevronUpIcon size={16} />
-                  <span>Show Less</span>
-                </>
-              ) : (
-                <>
-                  <ChevronDownIcon size={16} />
-                  <span>Show {hiddenItemsCount} More</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
       </div>
     );
   }, [displayItems, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount]);

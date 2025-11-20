@@ -128,6 +128,27 @@ export const chatReducer = createSlice({
       }
     },
 
+    // Remove message
+    removeMessage: (state, action) => {
+      const { channelId, messageId } = action.payload;
+      if (state.messagesByChannel[channelId]) {
+        // Remove message from messages array
+        state.messagesByChannel[channelId] = state.messagesByChannel[channelId].filter(msg => msg.id !== messageId);
+        
+        // Rebuild conversation array from remaining user/assistant messages
+        const updatedConversation = [];
+        state.messagesByChannel[channelId].forEach(msg => {
+          if (msg.sender === 'user' || msg.sender === 'assistant') {
+            updatedConversation.push({
+              role: msg.sender === 'user' ? 'user' : 'assistant',
+              content: msg.content
+            });
+          }
+        });
+        state.conversationsByChannel[channelId] = updatedConversation;
+      }
+    },
+
     // Set loading state
     setChannelLoading: (state, action) => {
       const { channelId, loading } = action.payload;
@@ -323,6 +344,7 @@ export const {
   addAssistantMessage,
   updateAssistantMessage,
   editMessage,
+  removeMessage,
   setChannelLoading,
   setChannelError,
   clearChannelMessages,

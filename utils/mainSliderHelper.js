@@ -13,6 +13,7 @@ import {
   Cog,
 } from 'lucide-react';
 import { AddIcon, KeyIcon } from '@/components/Icons';
+import GiftIcon from '@/icons/GiftIcon';
 import React from 'react';
 
 
@@ -35,6 +36,7 @@ export const ITEM_ICONS = {
   // Admin section icons
   adminSettings: <Settings2 size={15} />,
   tutorial: <MonitorPlayIcon size={15} />,
+  lifetimeAccess: <GiftIcon size={15} />,
   speakToUs: <MessageCircleMoreIcon size={15} />,
   feedbackAdmin: <MessageSquareMoreIcon size={15} />,
   // Settings menu icons
@@ -57,6 +59,8 @@ export const DISPLAY_NAMES = (key) => {
       return 'Feedback';
     case 'tutorial':
       return 'Tutorial';
+    case 'lifetimeAccess':
+      return 'Free Lifetime Access';
     case 'speak-to-us':
       return 'Speak to Us';
     case 'integration':

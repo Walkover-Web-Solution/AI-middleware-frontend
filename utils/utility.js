@@ -310,9 +310,7 @@ export const allowedAttributes = {
     ],
     optional: [
         ['message_id', 'Message ID'],
-        ['input_tokens', 'Input Tokens'],
-        ['output_tokens', 'Output Tokens'],
-        ['expected_cost', 'Expected Cost'],
+        ['tokens', 'Tokens'],
         ['createdAt', 'Created At'],
         ['service', 'Service'],
         ['model', 'Model'],
@@ -686,6 +684,29 @@ export function markUpdateInitiatedByCurrentTab(agentId) {
     console.error('Error marking update initiation:', error);
   }
 }
+const normalizeToUTC = (dateString) => {
+  if (!dateString) return null;
+
+  // Case 1: Already valid ISO with Z (UTC)
+  if (dateString.includes("T") && dateString.endsWith("Z")) {
+    return dateString;
+  }
+
+  // Case 2: ISO without Z → treat as UTC, add Z
+  if (dateString.includes("T") && !dateString.endsWith("Z")) {
+    return dateString + "Z";
+  }
+
+  // Case 3: Space format "YYYY-MM-DD HH:MM:SS"
+  if (dateString.includes(" ")) {
+    return dateString.replace(" ", "T") + "Z";
+  }
+
+  // Fallback
+  return null;
+};
+
+
 
 /**
  * Check if the current tab initiated a specific agent update
@@ -761,37 +782,43 @@ export const generateKeyValuePairs = (obj) => {
     return result;
   };
 
+export const formatRelativeTime = (dateString) => {
+  const normalized = normalizeToUTC(dateString);
+  if (!normalized) return '';
 
- export const formatRelativeTime = (dateString) => {
-  if (!dateString) return '';
-  
-  const date = new Date(dateString);
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return '';
+
   const now = new Date();
-  const diffInSeconds = Math.floor((now - date) / 1000);
-  
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
   if (diffInSeconds < 60) return 'Just now';
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
   if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+  
   return `${Math.floor(diffInSeconds / 31536000)}y ago`;
 };
 
 export const formatDate = (dateString) => {
-    if (isNaN(Date.parse(dateString))) {
-      return dateString; // Return original string if it's not a valid date
-    }
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
-    }).format(date);
-  };
+  const normalized = normalizeToUTC(dateString);
+  if (!normalized) return dateString;
+
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return dateString;
+
+  return new Intl.DateTimeFormat("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  }).format(date);
+};
 
 /**
  * Reusable outside click handler utility
@@ -825,4 +852,17 @@ export const useOutsideClick = (elementRef, triggerRef, onOutsideClick, isActive
   };
 
   return { handleClickOutside, handleKeyDown, handleScroll };
+};
+
+export const extractPromptVariables = (prompt) => {
+  if (!prompt) return [];
+  const variableRegex = /\{\{([^}]+)\}\}/g;
+  const matches = [];
+  let match;
+  while ((match = variableRegex.exec(prompt)) !== null) {
+    if (!matches.includes(match[1])) {
+      matches.push(match[1]);
+    }
+  }
+  return matches;
 };

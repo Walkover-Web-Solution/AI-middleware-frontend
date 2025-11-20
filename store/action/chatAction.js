@@ -4,6 +4,7 @@ import {
   addAssistantMessage,
   updateAssistantMessage,
   editMessage,
+  removeMessage,
   setChannelLoading,
   setChannelError,
   clearChannelMessages,
@@ -216,16 +217,19 @@ export const clearChatChannelData = (channelId) => (dispatch) => {
 };
 
 // Combined action for sending message and handling RT response
-export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrchestralModel = false) => async (dispatch) => {
+export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrchestralModel = false, additionalData = {}) => async (dispatch, getState) => {
+  let userMessage = null;
+  let loadingMessage = null;
+  
   try {
     // Set loading state
     dispatch(setChatLoading(channelId, true));
     
     // Send user message
-    const userMessage = dispatch(sendUserMessage(channelId, messageContent));
+    userMessage = dispatch(sendUserMessage(channelId, messageContent));
     
     // Add loading assistant message
-    const loadingMessage = dispatch(addLoadingAssistantMessage(channelId));
+    loadingMessage = dispatch(addLoadingAssistantMessage(channelId));
     
     // Make API call (this should trigger RT layer response)
     const response = await apiCall({
@@ -243,7 +247,15 @@ export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrc
     
     return { userMessage, loadingMessage, response };
   } catch (error) {
-    dispatch(setChatError(channelId, error.message));
+    // Remove both user message and loading assistant message on error
+    if (userMessage) {
+      dispatch(removeMessage({ channelId, messageId: userMessage.id }));
+    }
+    if (loadingMessage) {
+      dispatch(removeMessage({ channelId, messageId: loadingMessage.id }));
+    }
+    
+    dispatch(setChatError(channelId, error.message || "Something went wrong. Please try again."));
     dispatch(setChatLoading(channelId, false)); // Clear loading on error
     throw error;
   }

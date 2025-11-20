@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 import { BotIcon } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
@@ -259,50 +260,27 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
         return (
             <div className="w-full">
-                <div className={`grid gap-2 w-full ${displayItems.length === 1 ? 'grid-cols-2' : 'grid-cols-1'}`} style={{
-                    gridTemplateColumns: displayItems.length === 1 ? 'repeat(2, minmax(250px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))'
-                }}>
+                <div className={`grid gap-2 w-full`}>
                     {agentItems}
-                    {/* Add empty div for spacing when only one item */}
-                    {displayItems.length === 1 && <div></div>}
                 </div>
-                
-                {/* Show/Hide toggle button */}
-                {shouldShowToggle && (
-                    <div className="flex justify-center mt-3">
-                        <button
-                            onClick={toggleExpanded}
-                            className="flex items-center gap-2 px-3 py-1 text-sm text-base-content/70 hover:text-base-content bg-base-100 hover:bg-base-200 rounded-lg border border-base-300 transition-all duration-200"
-                        >
-                            {isExpanded ? (
-                                <>
-                                    <ChevronUpIcon size={16} />
-                                    <span>Show Less</span>
-                                </>
-                            ) : (
-                                <>
-                                    <ChevronDownIcon size={16} />
-                                    <span>Show {hiddenItemsCount} More</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
-                )}
             </div>
         );
     }, [displayItems, bridgeData, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount, handleAgentClicked, handleOpenAgentVariable, handleOpenDeleteModal]);
 
     return (
         <div>
-            <div className="label p-0 flex-col items-start mb-0">
+            <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
 
                 <>
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {Object?.entries(connect_agents)?.length > 0 ? (
                             <>
-                                <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                                    <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                                </InfoTooltip>
+                                <div className="flex items-center gap-1 mb-2">
+                                    <p className="font-medium whitespace-nowrap">Agents</p>
+                                    <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                                    </InfoTooltip>
+                                </div>
                                 <button
                                     tabIndex={0}
                                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"

@@ -210,6 +210,23 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                       const value = selectedItem[key];
                       if (value === undefined) return null;
 
+                      // If the value is an object, render each property as separate rows
+                      if (typeof value === 'object' && value !== null && key !== 'createdAt') {
+                        return Object.entries(value).map(([objKey, objValue]) => (
+                          <tr key={`${key}-${objKey}`} className="border-b bg-base-100 transition-colors duration-150">
+                            <td className="py-4 px-6 text-sm font-semibold capitalize">
+                              {objKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className="text-gray-600 break-words">
+                                {objValue?.toString()}
+                              </span>
+                            </td>
+                          </tr>
+                        ));
+                      }
+
+                      // Regular single value display
                       return (
                         <tr key={key} className="border-b bg-base-100 transition-colors duration-150">
                           <td className="py-4 px-6 text-sm font-semibold capitalize">
@@ -217,7 +234,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                           </td>
                           <td className="py-4 px-6">
                             <span className="text-gray-600 break-words">
-                              {key === 'createdAt' ? new Date(value).toLocaleString() : value?.toString()}
+                              {key === 'createdAt' 
+                                ? new Date(value).toLocaleString() 
+                                : value?.toString()
+                              }
                             </span>
                           </td>
                         </tr>

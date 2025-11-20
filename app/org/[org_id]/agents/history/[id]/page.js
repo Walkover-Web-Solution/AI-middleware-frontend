@@ -65,7 +65,7 @@ function Page({params, searchParams }) {
   }, []);
 
   useEffect(() => {
-    dispatch(userFeedbackCountAction({ bridge_id: resolvedParams.id, user_feedback: "all" }));
+    // dispatch(userFeedbackCountAction({ bridge_id: resolvedParams.id, user_feedback: "all" }));
   }, [dispatch, resolvedParams.id]);
 
   useEffect(() => {
@@ -113,8 +113,22 @@ function Page({params, searchParams }) {
 
   const threadHandler = useCallback(
     async (thread_id, item, value) => {
-      if (item?.role === "assistant") return;
-      if ((item?.role === "user" || item?.role === "tools_call")) {
+      // Determine role based on new data structure
+      const getItemRole = () => {
+        if (item?.tools_call_data && item.tools_call_data.length > 0) return 'tools_call';
+        if (item?.error) return 'error';
+        if (item?.user) return 'user';
+        if (item?.llm_message || item?.chatbot_message || item?.updated_llm_message) return 'assistant';
+        return 'unknown';
+      };
+
+      const currentRole = getItemRole();
+      
+      // Don't handle assistant messages
+      if (currentRole === "assistant") return;
+      
+      // Handle user and tools_call messages
+      if (currentRole === "user" || currentRole === "tools_call") {
         try {
           setSelectedItem({ variables: item.variables, ...item, value});
           if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
@@ -123,6 +137,7 @@ function Page({params, searchParams }) {
           console.error("Failed to fetch single message:", error);
         }
       } else {
+        // Handle other cases (navigation)
         const start = search.get("start");
         const end = search.get("end");
         const messageId = search.get("message_id");
@@ -136,11 +151,9 @@ function Page({params, searchParams }) {
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    const startDate = search.get("start");
-    const endDate = search.get("end");
-    const result = await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, nextPage));
+    const result = await dispatch(getHistoryAction(resolvedParams.id, nextPage, "all", false, selectedVersion));
     if (result?.length < 40) setHasMore(false);
-  }, [dispatch, page, resolvedParams.id, search]);
+  }, [dispatch, page, resolvedParams.id]);
 
   if (loading || !historyData) return (
     <div>

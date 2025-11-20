@@ -31,12 +31,11 @@ import {
   setChatUploadedImages,
   clearChatTestCaseIdAction
 } from "@/store/action/chatAction";
+import { removeMessage } from "@/store/reducer/chatReducer";
 import { addUserMessage } from "@/store/reducer/chatReducer";
-
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
   const messagesContainerRef = useRef(null);
-  const testCaseResultRef = useRef(null);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const [showTestCases, setShowTestCases] = useState(false);
@@ -48,6 +47,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const testCaseResultRef = useRef(null);
   const [testCaseConversation, setTestCaseConversation] = useState([]);
 
   const channelIdentifier = useMemo(() => {
@@ -240,9 +240,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       if (inputRef.current) {
         inputRef.current.value = newMessage;
       }
-      // Remove both the temporary loading assistant message and the user message on error
+      // Remove both user message and loading assistant message on error
       const userMessageId = `user_${timestamp}`;
-      // Remove temporary messages on error
+      dispatch(removeMessage({ channelId: channelIdentifier, messageId: userMessageId }));
+      dispatch(removeMessage({ channelId: channelIdentifier, messageId: tempAssistantId }));
+      
       dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
     } finally {
       dispatch(setChatLoading(channelIdentifier, false));
@@ -276,7 +278,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       // Automatically show the test case results card after running the test
       const nextMessageId = updatedMessages[index + 1].id;
       dispatch(editChatMessage(channelIdentifier, index + 1, updatedMessages[index + 1]));
-      setShowTestCaseResults(prev => ({ ...prev, [nextMessageId]: true }));
+      setShowTestCaseResults(prev => ({
+        ...prev,
+        [nextMessageId]: true
+      }));
     } finally {
       setIsRunningTestCase(false);
       setCurrentRunIndex(null);

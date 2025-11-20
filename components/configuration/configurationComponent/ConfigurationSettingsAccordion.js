@@ -40,9 +40,10 @@ const ConfigurationSettingsAccordion = () => {
       <div
         className={`transition-all duration-300 ease-in-out ${isOpen ? 'px-2 py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg opacity-100' : 'max-h-0 opacity-0 overflow-hidden border border-base-content/20 rounded-lg p-0'}`}
       >
-        <div className="flex flex-col gap-2">
+        {/* Settings Content */}
+        <div className="flex flex-col gap-6">
           {shouldShowAgentType && (
-            <div className="bg-base-100 border border-base-content/20 rounded-lg p-2">
+            <div className="bg-base-100 rounded-lg">
               <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} />
             </div>
           )}
@@ -50,19 +51,25 @@ const ConfigurationSettingsAccordion = () => {
           {/* Only show tone, response style, and advanced config if modelType is NOT image */}
           {modelType !== 'image' && (
             <>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <ToneDropdown params={params} searchParams={searchParams} />
-                <ResponseStyleDropdown params={params} searchParams={searchParams} />
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="bg-base-100 rounded-lg">
+                  <ToneDropdown params={params} searchParams={searchParams} />
+                </div>
+                <div className="bg-base-100 rounded-lg">
+                  <ResponseStyleDropdown params={params} searchParams={searchParams} />
+                </div>
               </div>
 
               {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
-                <AdvancedConfiguration
-                  params={params}
-                  searchParams={searchParams}
-                  bridgeType={bridgeType}
-                  modelType={modelType}
-                  forceExpanded
-                />
+                <div className="bg-base-100 rounded-lg">
+                  <AdvancedConfiguration
+                    params={params}
+                    searchParams={searchParams}
+                    bridgeType={bridgeType}
+                    modelType={modelType}
+                    forceExpanded
+                  />
+                </div>
               )}
             </>
           )}
