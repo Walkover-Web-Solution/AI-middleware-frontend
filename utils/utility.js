@@ -853,3 +853,16 @@ export const useOutsideClick = (elementRef, triggerRef, onOutsideClick, isActive
 
   return { handleClickOutside, handleKeyDown, handleScroll };
 };
+
+export const extractPromptVariables = (prompt) => {
+  if (!prompt) return [];
+  const variableRegex = /\{\{([^}]+)\}\}/g;
+  const matches = [];
+  let match;
+  while ((match = variableRegex.exec(prompt)) !== null) {
+    if (!matches.includes(match[1])) {
+      matches.push(match[1]);
+    }
+  }
+  return matches;
+};
