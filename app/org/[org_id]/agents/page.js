@@ -19,7 +19,7 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { createPortal } from "react-dom";
+import usePortalDropdown from "@/customHooks/usePortalDropdown";
 import SearchItems from "@/components/UI/SearchItems";
 import { ClockFading } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
@@ -59,18 +59,18 @@ function Home({ params, isEmbedUser }) {
   const [loadingAgentId, setLoadingAgentId] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [tutorialState, setTutorialState] = useState({
-    showTutorial: false,
-    showSuggestion: isFirstBridgeCreation
+    showSuggestion: isFirstBridgeCreation,
+    showTutorial: false
   });
   const [selectedBridgeForLimit, setSelectedBridgeForLimit] = useState(null);
   
-  // Portal state for dropdown priority
-  const [portalPosition, setPortalPosition] = useState({ top: 0, left: 0 });
-  const [showPortal, setShowPortal] = useState(false);
-  const [portalContent, setPortalContent] = useState(null);
-  const [hoverTimeout, setHoverTimeout] = useState(null);
-  const [portalTriggerElement, setPortalTriggerElement] = useState(null);
-  const portalRef = useRef(null);
+  // Use portal dropdown hook
+  const {
+    handlePortalOpen,
+    handlePortalCloseImmediate,
+    PortalDropdown,
+    PortalStyles
+  } = usePortalDropdown();
   const { isDeleting, executeDelete } = useDeleteOperation();
 
   useEffect(() => {
@@ -131,7 +131,7 @@ function Home({ params, isEmbedUser }) {
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
-    bridge_limit: item?.bridge_limit,
+    agent_limit: item?.bridge_limit,
     agent_usage: item?.bridge_usage,
     isLoading: loadingAgentId === item._id,
     last_used: <div className="group cursor-help">
@@ -318,108 +318,6 @@ function Home({ params, isEmbedUser }) {
     if (res?.success) toast.success('Agent Usage Reset Successfully');
   }
 
-  // Portal handlers for dropdown priority
-  const handlePortalOpen = (triggerElement, content) => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-    const rect = triggerElement.getBoundingClientRect();
-    setPortalPosition({
-      top: rect.bottom + window.scrollY + 5,
-      left: rect.left + window.scrollX - 150 // Offset to align properly
-    });
-    setPortalContent(content);
-    setPortalTriggerElement(triggerElement);
-    setShowPortal(true);
-    
-    // Add priority class to trigger element
-    if (triggerElement) {
-      triggerElement.classList.add('portal-active');
-    }
-  };
-
-  const handlePortalCloseImmediate = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-    if (portalTriggerElement) {
-      portalTriggerElement.classList.remove('portal-active');
-    }
-    setShowPortal(false);
-    setPortalContent(null);
-    setPortalTriggerElement(null);
-  };
-
-  // Use utility function for outside click handling
-  const { handleClickOutside, handleKeyDown, handleScroll } = useOutsideClick(
-    portalRef,
-    { current: portalTriggerElement },
-    handlePortalCloseImmediate,
-    showPortal
-  );
-
-  // Add event listeners for dropdown auto-close
-  useEffect(() => {
-    if (showPortal) {
-      // Add scroll listeners to window and any scrollable containers
-      window.addEventListener('scroll', handleScroll, true);
-      document.addEventListener('scroll', handleScroll, true);
-      
-      // Add click outside listener
-      document.addEventListener('mousedown', handleClickOutside);
-      
-      // Add keyboard listener for Escape key
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll, true);
-      document.removeEventListener('scroll', handleScroll, true);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showPortal, handleClickOutside, handleKeyDown, handleScroll]);
-
-  const handlePortalMouseEnter = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-  };
-
-  const handlePortalMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      if (portalTriggerElement) {
-        portalTriggerElement.classList.remove('portal-active');
-      }
-      setShowPortal(false);
-      setPortalContent(null);
-      setPortalTriggerElement(null);
-    }, 100);
-    setHoverTimeout(timeout);
-  };
-
-   const deleteBridge = async (item, name) => {
-    await executeDelete(async () => {
-      const bridgeId = item._id;
-      const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id }));
-      toast.success(response?.data?.message || response?.message || response || 'Agent deleted successfully');
-    });
-  }
-
-  const restoreBridge = async (bridgeId) => {
-    try {
-      const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id, restore: true }));
-      toast.success(response?.data?.message || response?.message || response || 'Agent restored successfully');
-    } catch (error) {
-      console.error('Failed to restore agent', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to restore agent';
-      toast.error(errorMessage);
-    }
-  }
-
   const EndComponent = ({ row }) => {
     const handleDropdownClick = (e) => {
       e.preventDefault();
@@ -428,19 +326,17 @@ function Home({ params, isEmbedUser }) {
       const dropdownContent = (
         <ul className="menu bg-base-100 rounded-box w-52 p-2 shadow">
           <li><a onClick={(e) => {
-            e.preventDefault();
+            e.preventDefault();           
             e.stopPropagation();
-            handlePortalCloseImmediate();
             handleSetBridgeLimit(row);
           }}><ClockFading className="" size={16} />Usage Limit</a></li>
-          {(row?.bridge_limit && row?.bridge_usage !== 0) && (
+          {(row?.bridge_limit && row?.bridge_usage !== 0)? (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handlePortalCloseImmediate();
               resetUsage(row);
             }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
-          )}
+          ) : null}
           <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -450,7 +346,6 @@ function Home({ params, isEmbedUser }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handlePortalCloseImmediate();
                 handlePauseBridge(row._id)
               }}
               className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
@@ -470,7 +365,6 @@ function Home({ params, isEmbedUser }) {
             <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handlePortalCloseImmediate();
               setItemToDelete(row);
               // Small delay to ensure state is set before opening modal
               setTimeout(() => {
@@ -545,51 +439,24 @@ function Home({ params, isEmbedUser }) {
     )
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-        event.preventDefault();
-        inputRef.current?.focus(); // Focus on the input field
-      }
-    };
+  const deleteBridge = async (item, name) => {
+    await executeDelete(async () => {
+      const bridgeId = item._id;
+      const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id }));
+      toast.success(response?.data?.message || response?.message || response || 'Agent deleted successfully');
+    });
+  }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
-  // Handle clicks outside portal to close it
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (portalRef.current && !portalRef.current.contains(event.target)) {
-        if (hoverTimeout) {
-          clearTimeout(hoverTimeout);
-          setHoverTimeout(null);
-        }
-        if (portalTriggerElement) {
-          portalTriggerElement.classList.remove('portal-active');
-        }
-        setShowPortal(false);
-        setPortalContent(null);
-        setPortalTriggerElement(null);
-      }
-    };
-
-    if (showPortal) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+  const restoreBridge = async (bridgeId) => {
+    try {
+      const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id, restore: true }));
+      toast.success(response?.data?.message || response?.message || response || 'Agent restored successfully');
+    } catch (error) {
+      console.error('Failed to restore agent', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to restore agent';
+      toast.error(errorMessage);
     }
-  }, [showPortal, hoverTimeout, portalTriggerElement]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimeout) {
-        clearTimeout(hoverTimeout);
-      }
-    };
-  }, [hoverTimeout]);
+  }
 
   return (
     <div className="w-full overflow-x-hidden flex justify-start">
@@ -701,45 +568,11 @@ function Home({ params, isEmbedUser }) {
         {/* Single DeleteModal for all delete operations */}
         <DeleteModal onConfirm={deleteBridge} item={itemToDelete} title="Delete Agent" description={`Are you sure you want to delete the Agent "${itemToDelete?.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.`} loading={isDeleting} isAsync={true} />
       </div>
-      <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} />
+      <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} item="Agent Name" />
       
-      {/* Global styles for portal priority */}
-      <style jsx global>{`
-        .portal-active {
-          opacity: 1 !important;
-          visibility: visible !important;
-          z-index: 9999 !important;
-        }
-        
-        .table-row:hover .portal-active {
-          opacity: 1 !important;
-        }
-        
-        .group:hover .portal-active {
-          opacity: 1 !important;
-        }
-        
-        .portal-active * {
-          pointer-events: auto !important;
-        }
-      `}</style>
-      
-      {/* Portal for dropdown */}
-      {showPortal && portalContent && typeof document !== 'undefined' && createPortal(
-        <div 
-          ref={portalRef}
-          className="fixed z-[9999999] bg-base-100 shadow-lg rounded-lg border border-base-300"
-          style={{
-            top: `${portalPosition.top}px`,
-            left: `${portalPosition.left}px`
-          }}
-          onMouseEnter={handlePortalMouseEnter}
-          onMouseLeave={handlePortalMouseLeave}
-        >
-          {portalContent}
-        </div>,
-        document.body
-      )}
+      {/* Portal components from hook */}
+      <PortalStyles />
+      <PortalDropdown />
     </div>
   );
 }

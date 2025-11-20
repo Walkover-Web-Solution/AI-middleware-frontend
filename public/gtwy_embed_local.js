@@ -197,10 +197,7 @@
                 this.initializeGtwyEmbed().then(() => this.openGtwy());
                 return;
             }
-      console.log(agent_id, meta, agent_name, agent_purpose,history,"hello")
-            [agent_id, {agent_id,history}, { agent_id, meta }, { agent_name }, { agent_purpose }]
-                .filter(data => data && Object.values(data).some(v => v))
-                .forEach(data => SendDataToGtwyEmbed(data));
+            [(agent_id, {agent_id,history}, { agent_id, meta }, { agent_name }, { agent_purpose })]?.filter(data => data && Object.values(data).some(v => v))?.forEach(data => SendDataToGtwyEmbed(data))||[];
 
             const container = document.getElementById('gtwy-iframe-parent-container');
             const iframe = document.getElementById('gtwyInterfaceEmbed');
