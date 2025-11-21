@@ -1,4 +1,4 @@
-import { 
+import {
   initializeChannel,
   addUserMessage,
   addAssistantMessage,
@@ -72,11 +72,11 @@ export const updateAssistantMessageWithResponse = (channelId, messageId, respons
     role: responseData?.role || "assistant"
   };
 
-  dispatch(updateAssistantMessage({ 
-    channelId, 
-    messageId, 
-    content, 
-    additionalData 
+  dispatch(updateAssistantMessage({
+    channelId,
+    messageId,
+    content,
+    additionalData
   }));
 };
 
@@ -138,11 +138,11 @@ export const loadTestCaseIntoChat = (channelId, testCaseConversation, expected, 
     content: msg.content
   }));
 
-  dispatch(loadTestCaseMessages({ 
-    channelId, 
-    messages: convertedMessages, 
+  dispatch(loadTestCaseMessages({
+    channelId,
+    messages: convertedMessages,
     conversation: backendConversation,
-    testCaseId 
+    testCaseId
   }));
 };
 
@@ -168,10 +168,10 @@ export const addChatErrorMessage = (channelId, error) => (dispatch) => {
 // Handle incoming RT layer message
 export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch) => {
   const timestamp = Date.now();
-  
+
   // Determine message type and create UI message
   const messageType = socketMessage.role || socketMessage.sender || 'assistant';
-  
+
   const uiMessage = {
     id: socketMessage.id || `rt_${messageType}_${timestamp}`,
     sender: messageType,
@@ -185,10 +185,10 @@ export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch) => 
     ...socketMessage
   };
 
-  dispatch(addRtLayerMessage({ 
-    channelId, 
-    message: uiMessage, 
-    messageType 
+  dispatch(addRtLayerMessage({
+    channelId,
+    message: uiMessage,
+    messageType
   }));
 
   // Clear loading state when RT layer message is received
@@ -198,11 +198,11 @@ export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch) => 
 
 // Handle RT layer streaming update
 export const handleRtLayerStreamingUpdate = (channelId, messageId, content, isComplete = false) => (dispatch) => {
-  dispatch(updateRtLayerMessage({ 
-    channelId, 
-    messageId, 
-    content, 
-    isComplete 
+  dispatch(updateRtLayerMessage({
+    channelId,
+    messageId,
+    content,
+    isComplete
   }));
 
   // Clear loading state when streaming is complete
@@ -220,31 +220,22 @@ export const clearChatChannelData = (channelId) => (dispatch) => {
 export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrchestralModel = false, additionalData = {}) => async (dispatch, getState) => {
   let userMessage = null;
   let loadingMessage = null;
-  
+
   try {
     // Set loading state
     dispatch(setChatLoading(channelId, true));
-    
+
     // Send user message
     userMessage = dispatch(sendUserMessage(channelId, messageContent));
-    
+
     // Add loading assistant message
     loadingMessage = dispatch(addLoadingAssistantMessage(channelId));
-    
+
     // Make API call (this should trigger RT layer response)
     const response = await apiCall({
       conversation: [], // Will be populated from Redux state
       user: messageContent
     });
-
-    // For orchestral models, handle immediately and clear loading
-    if (isOrchestralModel) {
-      dispatch(updateAssistantMessageWithResponse(channelId, loadingMessage.id, response));
-      dispatch(setChatLoading(channelId, false)); // Clear loading only for orchestral models
-    }
-    // For all other responses (including RT layer), loading will ONLY be cleared when RT message is received
-    // Do NOT clear loading based on API response - wait for actual RT layer message
-    
     return { userMessage, loadingMessage, response };
   } catch (error) {
     // Remove both user message and loading assistant message on error
@@ -254,7 +245,7 @@ export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrc
     if (loadingMessage) {
       dispatch(removeMessage({ channelId, messageId: loadingMessage.id }));
     }
-    
+
     dispatch(setChatError(channelId, error.message || "Something went wrong. Please try again."));
     dispatch(setChatLoading(channelId, false)); // Clear loading on error
     throw error;

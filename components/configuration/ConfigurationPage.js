@@ -9,8 +9,7 @@ import Protected from "../protected";
 import VersionDescriptionInput from './configurationComponent/VersionDescriptionInput';
 import { InfoIcon, MessageCircleMoreIcon } from 'lucide-react';
 import { openModal, toggleSidebar } from '@/utils/utility';
-import GtwyIntegrationGuideSlider from '../sliders/gtwyIntegrationGuideSlider';
-import GuideSlider from '../sliders/IntegrationGuideSlider';
+import ConnectedAgentFlowPanel from './ConnectedAgentFlowPanel';
 
 const ConfigurationPage = ({ 
     params, 
@@ -25,7 +24,9 @@ const ConfigurationPage = ({
     handleCloseTextAreaFocus,
     savePrompt,
     isMobileView,
-    closeHelperButtonLocation
+    closeHelperButtonLocation,
+    bridgeName,
+    onViewChange,
 }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
@@ -34,18 +35,28 @@ const ConfigurationPage = ({
     const configState = useConfigurationState(params, searchParams);
     const { bridgeType } = configState;
     useEffect(() => {
-        if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
-            if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
-                setCurrentView('config');
-                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
-            }
+        if (bridgeType === 'trigger' && currentView !== 'config') {
+            setCurrentView('config');
+            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
         }
     }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
+    useEffect(() => {
+        const resolvedView = searchParams?.view || 'config';
+        if (resolvedView !== currentView) {
+            setCurrentView(resolvedView);
+        }
+    }, [searchParams?.view, currentView]);
+
+    useEffect(() => {
+        onViewChange?.(currentView === 'agent-flow');
+    }, [currentView, onViewChange]);
+
     const handleNavigation = useCallback((target) => {
         setCurrentView(target);
+        onViewChange?.(target === 'agent-flow');
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
-    }, [params.org_id, params.id, searchParams?.version, router]);
+    }, [params.org_id, params.id, searchParams?.version, router, onViewChange]);
 
      const renderHelpSection = useMemo(() => () => {
         return (
@@ -76,19 +87,6 @@ const ConfigurationPage = ({
                         </a>
                     )}
 
-                    {/* Integration Guide */}
-                    {!isEmbedUser && (
-                        <button
-                            onClick={() => {
-                                // Use setTimeout to ensure the component is rendered before toggling
-                                setTimeout(() => toggleSidebar("integration-guide-slider", "right"), 10);
-                            }}
-                            className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
-                        >
-                            <span>Integration Guide</span>
-                            <span>→</span>
-                        </button>
-                    )}
                 </div>
 
             </div>
@@ -110,7 +108,10 @@ const ConfigurationPage = ({
         handleCloseTextAreaFocus,
         savePrompt,
         isMobileView,
-        closeHelperButtonLocation
+        closeHelperButtonLocation,
+        currentView,
+        bridgeName,
+        switchView: handleNavigation
     }), [
         configState,
         params,
@@ -125,7 +126,10 @@ const ConfigurationPage = ({
         handleCloseTextAreaFocus,
         savePrompt,
         isMobileView,
-        closeHelperButtonLocation
+        closeHelperButtonLocation,
+        currentView,
+        bridgeName,
+        handleNavigation
     ]);
 
     return (
@@ -140,12 +144,6 @@ const ConfigurationPage = ({
                 {renderHelpSection()}
             </div>
             
-            {/* Integration Guide Slider */}
-            
-                <GuideSlider 
-                    params={params}
-                    bridgeType={bridgeType}
-                />
             
         </ConfigurationProvider>
     );

@@ -23,14 +23,13 @@ const CommandPalette = ({isEmbedUser}) => {
 
   const orgId = useMemo(() => getOrgIdFromPath(pathname), [pathname]);
 
-  const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData, orchestralFlowData } = useCustomSelector((state) => ({
+  const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData } = useCustomSelector((state) => ({
     agentList: state?.bridgeReducer?.org?.[orgId]?.orgs || [],
     apikeys: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     knowledgeBase: state?.knowledgeBaseReducer?.knowledgeBaseData?.[orgId] || [],
     functionData: state?.bridgeReducer?.org?.[orgId]?.functionData || {},
     integrationData: state?.integrationReducer?.integrationData?.[orgId] || [],
     authData: state?.authDataReducer?.authData || [],
-    orchestralFlowData: state?.orchestralFlowReducer?.orchetralFlowData?.[orgId] || [],
   }));
 
   const functions = useMemo(() => Object.values(functionData || {}), [functionData]);
@@ -91,12 +90,6 @@ const CommandPalette = ({isEmbedUser}) => {
           }));
         });
 
-      const orchestralFlowGroup = filterBy(orchestralFlowData, ["flow_name", "_id"]).map((d) => ({
-      id: d._id,
-      title: d.flow_name || d._id,
-      subtitle: "Orchestral Flow",
-      type: "flows",
-    }));
 
     const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
       id: k._id,
@@ -154,14 +147,13 @@ const CommandPalette = ({isEmbedUser}) => {
     return {
       // Combine normal agent matches with version-id based matches
       agents: [...new Set([...agentsGroup, ...agentsVersionMatches])],
-      flows:orchestralFlowGroup,
       apikeys: apikeysGroup,
       docs: kbGroup,
       // functions: functionsGroup,
       integrations: integrationGroup,
       auths: authGroup,
     };
-  }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData, orchestralFlowData]);
+  }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
 
   const flatResults = useMemo(() => {
     return [
@@ -171,9 +163,8 @@ const CommandPalette = ({isEmbedUser}) => {
       // ...items.functions.map((it) => ({ group: "Functions", ...it })),
       ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
       ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
-      ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
-  }, [items, orchestralFlowData, integrationData, authData]);
+  }, [items, integrationData, authData]);
 
   const groupedResults = useMemo(() => {
     const groups = {};
@@ -236,9 +227,6 @@ const CommandPalette = ({isEmbedUser}) => {
         break;
       case "Auths":
         router.push(`/org/${orgId}/pauthkey`);
-        break;
-      case "flows":
-        router.push(`/org/${orgId}/orchestratal_model/${item.id}`);
         break;
       default:
         router.push("/");

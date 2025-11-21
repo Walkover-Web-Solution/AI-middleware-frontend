@@ -20,7 +20,9 @@ const NonImageModelConfig = memo(() => {
         service, 
         showDefaultApikeys, 
         isEmbedUser,
-        hideAdvancedParameters 
+        hideAdvancedParameters,
+        currentView,
+        switchView
     } = useConfigurationContext();
 
     return (

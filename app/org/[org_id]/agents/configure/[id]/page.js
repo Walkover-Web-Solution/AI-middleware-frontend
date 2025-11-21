@@ -178,6 +178,15 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       return 'notes'; // Show in Notes panel
     }
   }, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isPromptHelperOpen]);
+
+  const [isAgentFlowView, setIsAgentFlowView] = useState(() => resolvedSearchParams?.view === 'agent-flow');
+  useEffect(() => {
+    setIsAgentFlowView(resolvedSearchParams?.view === 'agent-flow');
+  }, [resolvedSearchParams?.view]);
+
+  const handleViewChange = useCallback((isFlowView) => {
+    setIsAgentFlowView(isFlowView);
+  }, []);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
 
@@ -350,11 +359,33 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
+      className={`w-full h-full transition-all duration-300 ease-in-out ${isAgentFlowView ? 'overflow-y-auto bg-base-100' : 'overflow-hidden'} ${!isAgentFlowView && !isFocus ? 'max-h-[calc(100vh-4rem)]' : ''} ${uiState.isDesktop && !isAgentFlowView ? 'flex flex-row' : ''} ${!uiState.isDesktop ? 'overflow-y-auto' : ''}`}
     >
       {/* Debug Panel States */}
       
       {uiState.isDesktop ? (
+        isAgentFlowView ? (
+          <div className="w-full h-full">
+            <div className="h-full overflow-y-auto py-4 px-4">
+              <ConfigurationPage
+                promptTextAreaRef={promptTextAreaRef}
+                params={resolvedParams}
+                searchParams={resolvedSearchParams}
+                isEmbedUser={isEmbedUser}
+                uiState={uiState}
+                updateUiState={updateUiState}
+                promptState={promptState}
+                setPromptState={setPromptState}
+                handleCloseTextAreaFocus={handleCloseTextAreaFocus}
+                savePrompt={savePrompt}
+                isMobileView={isMobileView}
+                closeHelperButtonLocation={closeHelperButtonLocation}
+                bridgeName={bridgeName}
+                onViewChange={handleViewChange}
+              />
+            </div>
+          </div>
+        ) : (
         // Desktop: Use react-resizable-panels for smooth resizing
         <PanelGroup direction="horizontal" className="w-full h-full">
           {/* Configuration Panel */}
@@ -395,6 +426,8 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   savePrompt={savePrompt}
                   isMobileView={isMobileView}
                   closeHelperButtonLocation={closeHelperButtonLocation}
+                  bridgeName={bridgeName}
+                  onViewChange={handleViewChange}
                 />
               </div>
             </div>
@@ -547,7 +580,31 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           )}
 
         </PanelGroup>
+        )
       ) : (
+        isAgentFlowView ? (
+          <div className="overflow-y-auto w-full h-full">
+            <div className="min-h-screen border-b border-base-300 bg-base-100">
+              <div className="py-4 px-4">
+                <ConfigurationPage
+                  promptTextAreaRef={promptTextAreaRef}
+                  params={resolvedParams}
+                  searchParams={resolvedSearchParams}
+                  isEmbedUser={isEmbedUser}
+                  uiState={uiState}
+                  updateUiState={updateUiState}
+                  promptState={promptState}
+                  setPromptState={setPromptState}
+                  handleCloseTextAreaFocus={handleCloseTextAreaFocus}
+                  savePrompt={savePrompt}
+                  isMobileView={isMobileView}
+                  bridgeName={bridgeName}
+                  onViewChange={handleViewChange}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
         // Mobile: Simple stacked layout
         <div className="overflow-y-auto">
           {/* Configuration Panel */}
@@ -565,6 +622,8 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
                 savePrompt={savePrompt}
                 isMobileView={isMobileView}
+                bridgeName={bridgeName}
+                onViewChange={handleViewChange}
               />
             </div>
           </div>
@@ -590,6 +649,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
           </div>
         </div>
+        )
       )}
       
     </div>

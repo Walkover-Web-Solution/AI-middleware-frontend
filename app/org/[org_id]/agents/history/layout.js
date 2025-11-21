@@ -57,7 +57,7 @@ export default function layoutHistoryPage({ children, params }) {
 
   useEffect(() => {
       const existingScript = document.getElementById('gtwy-user-script');
-      if (existingScript) existingScript.remove();
+      if (existingScript) return;
   
       if (params?.org_id) {
         const scriptId = 'gtwy-user-script';
@@ -69,13 +69,13 @@ export default function layoutHistoryPage({ children, params }) {
         script.id = scriptId;
         script.src = scriptURl;
         script.setAttribute('skipLoadGtwy', true);
-        script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
+        script.setAttribute('token', getFromCookies('local_token'));
         script.setAttribute('org_id', params?.org_id);
         script.setAttribute('customIframeId', 'gtwyEmbedInterface');
         script.setAttribute('gtwy_user', true);
         script.setAttribute('slide','right');
-        // script.setAttribute('parentId', 'gtwy');
-        // script.setAttribute('hideHeader', true);
+        script.setAttribute('parentId', 'gtwy');
+        script.setAttribute('hideHeader', true);
         document.head.appendChild(script);
       }
     }, [params]);

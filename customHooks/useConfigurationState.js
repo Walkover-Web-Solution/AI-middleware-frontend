@@ -23,6 +23,7 @@ export const useConfigurationState = (params, searchParams) => {
             shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
             bridge_functions: versionData?.function_ids || [],
             connect_agents: versionData?.connected_agents || {},
+            connectedAgentFlow: versionData?.connected_agent_flow || null,
             knowbaseVersionData: versionData?.doc_ids || [],
             hideAdvancedParameters: state.appInfoReducer.embedUserDetails.hideAdvancedParameters,
             hideAdvancedConfigurations: state.appInfoReducer.embedUserDetails.hideAdvancedConfigurations,

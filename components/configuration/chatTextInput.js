@@ -1,13 +1,13 @@
 import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
-import { 
-  setChatLoading,
-  setChatError,
-  setChatUploadedFiles,
-  setChatUploadedImages,
-  sendMessageWithRtLayer,
-  setChatTestCaseIdAction
+import {
+    setChatLoading,
+    setChatError,
+    setChatUploadedFiles,
+    setChatUploadedImages,
+    sendMessageWithRtLayer,
+    setChatTestCaseIdAction
 } from '@/store/action/chatAction';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -18,7 +18,7 @@ import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
 import { toggleSidebar } from '@/utils/utility';
 
-function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
+function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef }) {
     const [uploading, setUploading] = useState(false);
     const [uploadedVideos, setUploadedVideos] = useState(null);
     const [mediaUrls, setMediaUrls] = useState(null);
@@ -40,12 +40,12 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
     }));
 
     // Redux selectors for chat state
-    const {conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId} = useCustomSelector((state) => ({
-      conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
-      loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
-      uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
-      uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
-      storedTestCaseId: state?.chatReducer?.testCaseIdByChannel?.[channelIdentifier] || null
+    const { conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId } = useCustomSelector((state) => ({
+        conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
+        loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
+        uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
+        uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
+        storedTestCaseId: state?.chatReducer?.testCaseIdByChannel?.[channelIdentifier] || null
     }));
     const dataToSend = useMemo(() => ({
         configuration: {
@@ -60,17 +60,17 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             type: 'default'
         }
     }), [modelName, modelType, bridge]);
-    
+
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
-    
-    const { isVision, isFileSupported, isVideoSupported} = useMemo(() => {
-        const validationConfig = modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig || {};    
+
+    const { isVision, isFileSupported, isVideoSupported } = useMemo(() => {
+        const validationConfig = modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig || {};
         return {
-          isVision: validationConfig.vision,
-          isFileSupported: validationConfig.files,
-          isVideoSupported: validationConfig.video
+            isVision: validationConfig.vision,
+            isFileSupported: validationConfig.files,
+            isVideoSupported: validationConfig.video
         };
-      }, [modelInfo, service, configuration?.type, configuration?.model]);
+    }, [modelInfo, service, configuration?.type, configuration?.model]);
 
     useEffect(() => {
         setLocalDataToSend(dataToSend);
@@ -131,31 +131,31 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
     // Validate missing variables in prompt
     const validatePromptVariables = useCallback(() => {
         if (!prompt) return { isValid: true, missingVariables: [] };
-        
+
         // Extract variables from prompt using regex
         const regex = /{{(.*?)}}/g;
         const matches = [...prompt.matchAll(regex)];
         const promptVariables = [...new Set(matches.map(match => match[1].trim()))];
-        
+
         if (!promptVariables.length) return { isValid: true, missingVariables: [] };
-        
+
         // Check which variables are missing values
         const missingVariables = promptVariables.filter(varName => {
             const variable = variablesKeyValue.find(v => v.key === varName);
             if (!variable) {
                 return true; // Variable not defined at all
             }
-            
+
             // Skip validation for optional variables
             if (!variable.required) {
                 return false;
             }
-            
+
             const hasValue = variable.value !== undefined && variable.value !== null && String(variable.value).trim() !== '';
             const hasDefault = variable.defaultValue !== undefined && variable.defaultValue !== null && String(variable.defaultValue).trim() !== '';
             return !hasValue && !hasDefault; // Missing both value and default
         });
-        
+
         return {
             isValid: missingVariables.length === 0,
             missingVariables
@@ -164,11 +164,11 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
 
     const handleSendMessage = async (e, forceRun = false) => {
         const timestamp = Date.now();
-        
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
         }
-        if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
+        // Skip prompt validation for chat models - they don't require a system prompt
+        if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding' && modelType !== 'chat')) {
             dispatch(setChatError(channelIdentifier, "Prompt is required"));
             return;
         }
@@ -176,19 +176,17 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
         // Validate variables in prompt
         if (!forceRun) {
             const validation = validatePromptVariables();
-            
             if (!validation.isValid) {
                 const missingVars = validation.missingVariables.join(', ');
                 const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
-                
                 setValidationError(errorMsg);
-                
+
                 // Open the variable collection slider
                 toggleSidebar("variable-collection-slider", "right");
-                
+
                 // Store missing variables in sessionStorage for the slider to highlight
                 sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
-                
+
                 return;
             } else {
                 // Clear validation states if validation passes
@@ -222,7 +220,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
         }
         dispatch(setChatError(channelIdentifier, ""));
         if (modelType !== "completion") inputRef.current.value = "";
-        
+
         try {
             let responseData;
             let data;
@@ -235,7 +233,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                     video_data: uploadedVideos, // Include videos in the data
                     youtube_url: mediaUrls, // Include media URLs in the data
                 };
-                
+
                 // Use RT layer action for non-orchestral models
                 const apiCall = async () => {
                     return await dryRun({
@@ -249,17 +247,18 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                             user: data.content,
                             images: uploadedImages,
                             files: uploadedFiles,
-                            variables
+                            variables,
+                            orchestrator_flag: isOrchestralModel
                         },
                         bridge_id: params?.id,
                     });
                 };
-                
+
                 // Send message with RT layer handling (loading will persist until RT response)
                 const result = await dispatch(sendMessageWithRtLayer(
-                    channelIdentifier, 
-                    newMessage, 
-                    apiCall, 
+                    channelIdentifier,
+                    newMessage,
+                    apiCall,
                     isOrchestralModel,
                     {
                         images: uploadedImages,
@@ -268,13 +267,13 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                         youtube_url: mediaUrls
                     }
                 ));
-                
+
                 // Clear uploaded files after successful RT layer message creation
                 dispatch(setChatUploadedFiles(channelIdentifier, []));
                 dispatch(setChatUploadedImages(channelIdentifier, []));
-                
+
                 responseData = result.response;
-                
+
                 // Handle unsuccessful response: rollback via Redux
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
@@ -286,7 +285,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                     role: "user",
                     content: newMessage
                 };
-                
+
                 // Use RT layer action for embedding models too
                 const apiCall = async () => {
                     return await dryRun({
@@ -297,32 +296,33 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                                 conversation: conversation,
                                 type: modelType
                             },
-                            text: newMessage
+                            text: newMessage,
+                            orchestrator_flag: isOrchestralModel
                         },
-                        bridge_id: params?.id
+                        bridge_id: params?.id,
                     });
                 };
-                
+
                 // Send message with RT layer handling (loading will persist until RT response)
                 const result = await dispatch(sendMessageWithRtLayer(
-                    channelIdentifier, 
-                    newMessage, 
-                    apiCall, 
+                    channelIdentifier,
+                    newMessage,
+                    apiCall,
                     isOrchestralModel
                 ));
-                
+
                 responseData = result.response;
-                
+
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
                     dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
                 }
             } else if (modelType !== "image") {
-                if(activeTestCaseId){
+                if (activeTestCaseId) {
                     testcase_data.testcase_id = activeTestCaseId;
                 }
-                
+
                 // Use RT layer action for completion models too
                 const apiCall = async () => {
                     return await dryRun({
@@ -333,22 +333,23 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                             configuration: {
                                 ...localDataToSend.configuration
                             },
-                            input: bridge?.inputConfig?.input?.input
+                            input: bridge?.inputConfig?.input?.input,
+                            orchestrator_flag: isOrchestralModel
                         },
-                        bridge_id: params?.id
+                        bridge_id: params?.id,
                     });
                 };
-                
+
                 // Send message with RT layer handling (loading will persist until RT response)
                 const result = await dispatch(sendMessageWithRtLayer(
-                    channelIdentifier, 
-                    bridge?.inputConfig?.input?.input || "", 
-                    apiCall, 
+                    channelIdentifier,
+                    bridge?.inputConfig?.input?.input || "",
+                    apiCall,
                     isOrchestralModel
                 ));
-                
+
                 responseData = result.response;
-                
+
                 if (!responseData || !responseData.success) {
                     dispatch(setChatError(channelIdentifier, "Failed to get response"));
                     return;
@@ -368,14 +369,14 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             //     setMessages(prevMessages => [...prevMessages, toolData]);
             // }
             // Store testcase_id if present in Redux
-            if(responseData?.response?.testcase_id){
+            if (responseData?.response?.testcase_id) {
                 dispatch(setChatTestCaseIdAction(channelIdentifier, responseData?.response?.testcase_id));
                 // Also call the prop function for backward compatibility
                 if (setTestCaseId) {
                     setTestCaseId(responseData?.response?.testcase_id);
                 }
             }
-            
+
             // For orchestral models or non-RT responses, the response is already handled
             // For RT layer responses, the message will be updated when RT layer sends the response
             //         pauseOnHover: true,
@@ -383,7 +384,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             //         progress: undefined,
             //         icon: () => <AlertIcon size={20} className="text-warning" />
             //     });
-             
+
         } catch (error) {
             dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
             dispatch(setChatLoading(channelIdentifier, false)); // Clear loading on error
@@ -399,19 +400,26 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                 handleSendMessage(null, true); // Call with forceRun = true
             }
         };
-        
+
         const handleClearValidationEvent = () => {
             setValidationError(null); // Clear validation error
         };
-        
+
         window.addEventListener('runAnyway', handleRunAnywayEvent);
         window.addEventListener('clearValidationError', handleClearValidationEvent);
-        
+
         return () => {
             window.removeEventListener('runAnyway', handleRunAnywayEvent);
             window.removeEventListener('clearValidationError', handleClearValidationEvent);
         };
     }, [handleSendMessage]);
+
+    // Provide handleSendMessage function to parent component
+    useEffect(() => {
+        if (handleSendMessageRef) {
+            handleSendMessageRef.current = handleSendMessage;
+        }
+    }, [handleSendMessageRef, handleSendMessage]);
 
     const handleKeyDown = useCallback(
         event => {
@@ -422,12 +430,12 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                     // Only prevent default and send if not loading
                     if (!loading && !uploading) {
                         event.preventDefault();
-                        isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage(event);
+                        handleSendMessage(event);
                     }
                 }
             }
         },
-        [loading, uploading, isOrchestralModel, handleSendMessageForOrchestralModel, handleSendMessage]
+        [loading, uploading, handleSendMessage]
     );
     const handleFileChange = async (e) => {
         const files = Array.from(e.target.files);
@@ -439,7 +447,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
         const newPdfs = files.filter(file => file.type === 'application/pdf');
         const newVideos = files.filter(file => file.type.startsWith('video/'));
         const newImages = files.filter(file => file.type.startsWith('image/'));
-    
+
         const totalPdfs = uploadedFiles.length + newPdfs.length;
         const totalImages = uploadedImages.length + newImages.length;
         const hasExistingVideo = uploadedVideos !== null;
@@ -449,20 +457,20 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             toast.error('Only one video is allowed.');
             return;
         }
-    
+
         if (totalImages > 4) {
             toast.error('Only four images are allowed.');
             return;
         }
-    
+
         if (files.length > 0) {
             setUploading(true);
-    
+
             for (let file of files) {
                 const formData = new FormData();
                 formData.append('image', file);
                 const result = await dispatch(uploadImageAction(formData));
-    
+
                 if (result.success) {
                     if (file.type === 'application/pdf') {
                         dispatch(setChatUploadedFiles(channelIdentifier, [...uploadedFiles, result.image_url]));
@@ -471,7 +479,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                     }
                 }
             }
-    
+
             setUploading(false);
         }
         // Clear the file input value to allow re-uploading the same file
@@ -502,7 +510,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
 
 
     const handleAttachmentOption = (type) => {
-        switch(type) {
+        switch (type) {
             case 'images':
                 if (fileInput) {
                     fileInput.accept = 'image/*';
@@ -526,17 +534,17 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                 break;
             default:
                 if (fileInput) {
-                    fileInput.accept = isVision && isFileSupported && isVideoSupported 
-                        ? 'image/*,.pdf,video/*' 
-                        : isVision && isVideoSupported 
-                        ? 'image/*,video/*' 
-                        : isVision && isFileSupported 
-                        ? 'image/*,.pdf' 
-                        : isVision 
-                        ? 'image/*' 
-                        : isFileSupported 
-                        ? '.pdf' 
-                        : 'image/*,.pdf,video/*';
+                    fileInput.accept = isVision && isFileSupported && isVideoSupported
+                        ? 'image/*,.pdf,video/*'
+                        : isVision && isVideoSupported
+                            ? 'image/*,video/*'
+                            : isVision && isFileSupported
+                                ? 'image/*,.pdf'
+                                : isVision
+                                    ? 'image/*'
+                                    : isFileSupported
+                                        ? '.pdf'
+                                        : 'image/*,.pdf,video/*';
                     fileInput.click();
                 }
         }
@@ -575,7 +583,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                                 <PdfIcon height={24} width={24} />
                                 <p className='text-sm max-w-[120px] truncate' title={url}>{url.split('/').pop()}</p>
                             </div>
-                            
+
                             <button
                                 className="absolute -top-2 -right-2 text-white rounded-full"
                                 onClick={() => {
@@ -590,7 +598,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                 </div>
             )}
 
-            
+
             {/* Media URL Preview */}
             {mediaUrls && (
                 <div className="absolute bottom-16 left-0 w-full flex items-center gap-2 p-2 bg-base-100 border-t rounded-t-lg">
@@ -604,7 +612,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                     </button>
                 </div>
             )}
-            
+
             {/* URL Input Modal */}
             {showUrlInput && (
                 <div className="absolute bottom-16 left-0 w-full p-3 bg-base-100 border rounded-lg shadow-lg">
@@ -632,7 +640,7 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
                     </p>
                 </div>
             )}
-            
+
             {/* Validation Error Display */}
             {validationError && (
                 <div className="absolute bottom-16 left-0 w-full p-3 bg-error/10 border border-error/20 rounded-lg">
@@ -644,150 +652,149 @@ function ChatTextInput({ channelIdentifier, params, handleSendMessageForOrchestr
             {/* Input Group */}
             <div className="input-group flex justify-end items-end gap-2 w-full relative">
                 {(modelType !== "completion") && (modelType !== 'image') && (
-                <textarea
-                    ref={inputRef}
-                    placeholder="Type here"
-                    className={`textarea bg-white dark:bg-black/15 textarea-bordered w-full max-h-[200px] resize-none overflow-y-auto h-auto ${
-                        validationError 
-                            ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
-                            : 'focus:border-primary'
-                    }`}
-                    onKeyDown={handleKeyDown}
-                    rows={1}
-                    onInput={(e) => {
-                        e.target.style.height = 'auto'; // Reset height
-                        e.target.style.height = `${e.target.scrollHeight}px`; // Set to scroll height
-                    }}
-                />
-            )}
-            <input
-                ref={(el) => setFileInput(el)} // Use callback ref to set the state
-                type="file"
-                accept={
-                    isVision && isFileSupported && isVideoSupported 
-                        ? 'image/*,.pdf,video/*' 
-                        : isVision && isVideoSupported 
-                        ? 'image/*,video/*' 
-                        : isVision && isFileSupported 
-                        ? 'image/*,.pdf' 
-                        : isVision 
-                        ? 'image/*' 
-                        : isFileSupported 
-                        ? '.pdf' 
-                        : 'image/*,.pdf,video/*'
-                }
-                multiple={isVision || isFileSupported || isVideoSupported}
-                onChange={handleFileChange}
-                className="hidden"
-                data-max-size="35MB"
-            />
-            {/* DaisyUI Dropdown for Attachments */}
-            {(isVision || isFileSupported || isVideoSupported) && (
-                <div className="dropdown dropdown-top dropdown-end">
-                    <div className="tooltip tooltip-top" data-tip="Attach files">
-                        <label 
-                            tabIndex={0} 
-                            className={`btn btn-circle transition-all duration-200 ${
-                                uploading 
-                                    ? 'btn-disabled bg-base-300' 
-                                    : 'btn-ghost hover:btn-primary hover:scale-105'
+                    <textarea
+                        ref={inputRef}
+                        placeholder="Type here"
+                        className={`textarea bg-white dark:bg-black/15 textarea-bordered w-full max-h-[200px] resize-none overflow-y-auto h-auto ${validationError
+                                ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+                                : 'focus:border-primary'
                             }`}
-                            disabled={loading || uploading}
-                        >
-                            {uploading ? (
-                                <span className="loading loading-spinner loading-sm"></span>
-                            ) : (
-                                <Paperclip size={18} />
+                        onKeyDown={handleKeyDown}
+                        rows={1}
+                        onInput={(e) => {
+                            e.target.style.height = 'auto'; // Reset height
+                            e.target.style.height = `${e.target.scrollHeight}px`; // Set to scroll height
+                        }}
+                    />
+                )}
+                <input
+                    ref={(el) => setFileInput(el)} // Use callback ref to set the state
+                    type="file"
+                    accept={
+                        isVision && isFileSupported && isVideoSupported
+                            ? 'image/*,.pdf,video/*'
+                            : isVision && isVideoSupported
+                                ? 'image/*,video/*'
+                                : isVision && isFileSupported
+                                    ? 'image/*,.pdf'
+                                    : isVision
+                                        ? 'image/*'
+                                        : isFileSupported
+                                            ? '.pdf'
+                                            : 'image/*,.pdf,video/*'
+                    }
+                    multiple={isVision || isFileSupported || isVideoSupported}
+                    onChange={handleFileChange}
+                    className="hidden"
+                    data-max-size="35MB"
+                />
+                {/* DaisyUI Dropdown for Attachments */}
+                {(isVision || isFileSupported || isVideoSupported) && (
+                    <div className="dropdown dropdown-top dropdown-end">
+                        <div className="tooltip tooltip-top" data-tip="Attach files">
+                            <label
+                                tabIndex={0}
+                                className={`btn btn-circle transition-all duration-200 ${uploading
+                                        ? 'btn-disabled bg-base-300'
+                                        : 'btn-ghost hover:btn-primary hover:scale-105'
+                                    }`}
+                                disabled={loading || uploading}
+                            >
+                                {uploading ? (
+                                    <span className="loading loading-spinner loading-sm"></span>
+                                ) : (
+                                    <Paperclip size={18} />
+                                )}
+                            </label>
+                        </div>
+
+                        {/* DaisyUI Dropdown Content */}
+                        <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-100 rounded-box w-60 border border-base-300">
+                            <li className="menu-title">
+                                <span className="text-xs font-semibold text-base-content/60">Attach files</span>
+                            </li>
+
+                            {/* Images Option */}
+                            {isVision && (
+                                <li>
+                                    <a onClick={() => handleAttachmentOption('images')} className="flex items-center gap-3 p-3">
+                                        <div className="p-1.5 bg-base-100 rounded-lg">
+                                            <UploadIcon size={16} className="text-base-content" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-sm font-medium">Upload Images</div>
+                                            <div className="text-xs text-base-content/60">JPG, PNG, GIF, WebP</div>
+                                        </div>
+                                    </a>
+                                </li>
                             )}
-                        </label>
+
+                            {/* Videos Option */}
+                            {isVideoSupported && (
+                                <li>
+                                    <a onClick={() => handleAttachmentOption('videos')} className="flex items-center gap-3 p-3">
+                                        <div className="p-1.5 bg-base-100 rounded-lg">
+                                            <PlayIcon size={16} className="text-base-content" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-sm font-medium">Upload Video</div>
+                                            <div className="text-xs text-base-content/60">MP4, WebM, AVI (1 max)</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            )}
+
+                            {/* Files Option */}
+                            {isFileSupported && (
+                                <li>
+                                    <a onClick={() => handleAttachmentOption('files')} className="flex items-center gap-3 p-3">
+                                        <div className="p-1.5 bg-base-100 rounded-lg">
+                                            <PdfIcon height={16} width={16} className="text-base-content" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-sm font-medium">Upload Documents</div>
+                                            <div className="text-xs text-base-content/60">PDF files</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            )}
+
+                            {/* URL Option */}
+                            {(isVideoSupported) && (
+                                <li>
+                                    <a onClick={() => handleAttachmentOption('url')} className="flex items-center gap-3 p-3">
+                                        <div className="p-1.5 bg-base-100 rounded-lg">
+                                            <LinkIcon size={16} className="text-base-content" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-sm font-medium">Add URL</div>
+                                            <div className="text-xs text-base-content/60">Youtube URL</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            )}
+                        </ul>
                     </div>
-
-                    {/* DaisyUI Dropdown Content */}
-                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-100 rounded-box w-60 border border-base-300">
-                        <li className="menu-title">
-                            <span className="text-xs font-semibold text-base-content/60">Attach files</span>
-                        </li>
-                        
-                        {/* Images Option */}
-                        {isVision && (
-                            <li>
-                                <a onClick={() => handleAttachmentOption('images')} className="flex items-center gap-3 p-3">
-                                    <div className="p-1.5 bg-base-100 rounded-lg">
-                                        <UploadIcon size={16} className="text-base-content" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium">Upload Images</div>
-                                        <div className="text-xs text-base-content/60">JPG, PNG, GIF, WebP</div>
-                                    </div>
-                                </a>
-                            </li>
+                )}
+                {/* Enhanced Send Button */}
+                <div className="tooltip tooltip-top" data-tip="Send message">
+                    <button
+                        className={`btn btn-circle transition-all duration-200 ${loading || uploading || (modelType === 'image')
+                                ? 'btn-disabled'
+                                : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                            }`}
+                        onClick={() => {
+                            handleSendMessage();
+                        }}
+                        disabled={loading || uploading || (modelType === 'image')}
+                    >
+                        {(loading || uploading) ? (
+                            <span className="loading loading-dots loading-md"></span>
+                        ) : (
+                            <SendHorizontalIcon size={18} />
                         )}
-
-                        {/* Videos Option */}
-                        {isVideoSupported && (
-                            <li>
-                                <a onClick={() => handleAttachmentOption('videos')} className="flex items-center gap-3 p-3">
-                                    <div className="p-1.5 bg-base-100 rounded-lg">
-                                        <PlayIcon size={16} className="text-base-content" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium">Upload Video</div>
-                                        <div className="text-xs text-base-content/60">MP4, WebM, AVI (1 max)</div>
-                                    </div>
-                                </a>
-                            </li>
-                        )}
-
-                        {/* Files Option */}
-                        {isFileSupported && (
-                            <li>
-                                <a onClick={() => handleAttachmentOption('files')} className="flex items-center gap-3 p-3">
-                                    <div className="p-1.5 bg-base-100 rounded-lg">
-                                        <PdfIcon height={16} width={16} className="text-base-content" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium">Upload Documents</div>
-                                        <div className="text-xs text-base-content/60">PDF files</div>
-                                    </div>
-                                </a>
-                            </li>
-                        )}
-
-                        {/* URL Option */}
-                        {(isVideoSupported) && (
-                            <li>
-                                <a onClick={() => handleAttachmentOption('url')} className="flex items-center gap-3 p-3">
-                                    <div className="p-1.5 bg-base-100 rounded-lg">
-                                        <LinkIcon size={16} className="text-base-content" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium">Add URL</div>
-                                        <div className="text-xs text-base-content/60">Youtube URL</div>
-                                    </div>
-                                </a>
-                            </li>
-                        )}
-                    </ul>
+                    </button>
                 </div>
-            )}
-            {/* Enhanced Send Button */}
-            <div className="tooltip tooltip-top" data-tip="Send message">
-                <button
-                    className={`btn btn-circle transition-all duration-200 ${
-                        loading || uploading || (modelType === 'image')
-                            ? 'btn-disabled'
-                            : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
-                    }`}
-                    onClick={() => {isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage()}}
-                    disabled={loading || uploading || (modelType === 'image')}
-                >
-                    {(loading || uploading) ? (
-                        <span className="loading loading-dots loading-md"></span>
-                    ) : (
-                        <SendHorizontalIcon size={18} />
-                    )}
-                </button>
-            </div>
             </div>
         </div>
     )

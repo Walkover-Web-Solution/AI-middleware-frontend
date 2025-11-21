@@ -17,7 +17,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "../protected";
 import ReactMarkdown from "../LazyMarkdown";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { 
+import {
   initializeChatChannel,
   sendUserMessage,
   addLoadingAssistantMessage,
@@ -49,9 +49,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [editContent, setEditContent] = useState('');
   const testCaseResultRef = useRef(null);
   const [testCaseConversation, setTestCaseConversation] = useState([]);
-
   const channelIdentifier = useMemo(() => {
-    return (params.org_id + '_'+ params?.id + '_'+ searchParams?.version).replace(/ /g, "_");
+    return (params.org_id + '_' + params?.id + '_' + searchParams?.version).replace(/ /g, "_");
   }, [params, searchParams]);
 
   // Redux selectors for chat state
@@ -63,7 +62,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
     uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [], 
+    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
 
   // Initialize channel and RT layer
@@ -72,7 +71,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       dispatch(initializeChatChannel(channelIdentifier));
     }
   }, [channelIdentifier, dispatch]);
-  
+
   useRtLayerEventHandler(channelIdentifier);
   useEffect(() => {
     const el = messagesContainerRef.current;
@@ -85,9 +84,9 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     function handleClickOutside(event) {
       // Check if click is outside test case result and not on a toggle button
       const isToggleButton = event.target.closest('button[class*="absolute -bottom-8"]');
-      if (testCaseResultRef.current && 
-          !testCaseResultRef.current.contains(event.target) && 
-          !isToggleButton) {
+      if (testCaseResultRef.current &&
+        !testCaseResultRef.current.contains(event.target) &&
+        !isToggleButton) {
         setShowTestCaseResults({});
       }
     }
@@ -108,7 +107,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     }
     setEditingMessage(null);
     setEditContent('');
-    
+
     // Focus on input field after reset
     setTimeout(() => {
       if (inputRef.current) {
@@ -121,7 +120,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     setEditingMessage(messageId);
     setEditContent(currentContent);
   };
-  
+
   const handleSaveEdit = (messageId) => {
     if (channelIdentifier) {
       dispatch(editChatMessage(channelIdentifier, messageId, editContent));
@@ -141,7 +140,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     try {
       // Add a small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       if (channelIdentifier) {
         dispatch(loadTestCaseIntoChat(channelIdentifier, testCaseConversation, expected, testCaseId));
       }
@@ -153,107 +152,27 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     }
   }
 
-  const handleSendMessageForOrchestralModel = async (userMessage) => {
-    const newMessage = userMessage ? userMessage.replace(/\r?\n/g, '\n') : inputRef?.current?.value.replace(/\r?\n/g, '\n');
-    if (newMessage?.trim() === "") return;
-    if (inputRef.current) {
-      inputRef.current.style.height = '40px'; // Set initial height
-    }
-    inputRef.current.value = "";
-    const timestamp = Date.now();
-    const tempAssistantId = `assistant_${timestamp}`;
-    try {
-      // Generate unique IDs using timestamp to avoid conflicts
-      const newChat = {
-        id: `user_${timestamp}`,
-        sender: "user",
-        playground: true,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
-        image_urls: uploadedImages || [], // Include uploaded images in user message
-        files: uploadedFiles || [], // Include uploaded files in user message
-      };
-      let response, responseData;
-      let data;
-      data = {
-        role: "user",
-        content: newMessage,
-        images: uploadedImages || [], // Include uploaded images in API call
-        files: uploadedFiles || [], // Include uploaded files in API call
-      };
-
-      dispatch(addUserMessage({ channelId: channelIdentifier, message: newChat }));
-      dispatch(setChatUploadedImages(channelIdentifier, []));
-      dispatch(setChatUploadedFiles(channelIdentifier, []));
-
-      const loadingAssistant = {
-        id: tempAssistantId,
-        sender: "assistant",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        content: "",
-        isLoading: true,
-      };
-      dispatch(addLoadingAssistantMessage(channelIdentifier, tempAssistantId));
-      responseData = await dryRun({
-        localDataToSend: {
-
-          configuration: {
-            conversation: conversation,
-          },
-          user: data.content,
-          orchestrator_id: params.orchestralId
-        },
-        orchestrator_id: params.orchestralId
-      });
-
-      response = responseData.response?.data;      
-      const content = response?.content || "";
-      const assistConversation = {
-        role: response?.role || "assistant",
-        content: content,
-        fallback: response?.fallback,
-        firstAttemptError: response?.firstAttemptError,
-        image_urls: response?.images || [], // Map images to image_urls like RT layer does
-        model: response?.model,
-        finish_reason: response?.finish_reason
-      };
-
-      const responseDataForUpdate = {
-        content: Array.isArray(content) ? content.join(", ") : content.toString(),
-        image_urls: response?.images || [], // Use images field like RT layer does
-        fallback: response?.fallback,
-        firstAttemptError: response?.firstAttemptError,
-        model: assistConversation?.model,
-        finish_reason: assistConversation?.finish_reason
-      };
-      
-      dispatch(updateAssistantMessageWithResponse(channelIdentifier, tempAssistantId, responseDataForUpdate));
-    } catch (error) {
-      console.error(error);
-      // Restore the user message to the input field
-      if (inputRef.current) {
-        inputRef.current.value = newMessage;
-      }
-      // Remove both user message and loading assistant message on error
-      const userMessageId = `user_${timestamp}`;
-      dispatch(removeMessage({ channelId: channelIdentifier, messageId: userMessageId }));
-      dispatch(removeMessage({ channelId: channelIdentifier, messageId: tempAssistantId }));
-      
-      dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
-    } finally {
-      dispatch(setChatLoading(channelIdentifier, false));
-    }
-
-  }
+  // Handle userMessage prop - automatically send message and create Redux entry
+  const handleSendMessageRef = useRef(null);
 
   useEffect(() => {
-    handleSendMessageForOrchestralModel(userMessage);
+    if (userMessage && userMessage.trim() !== "") {
+      if (handleSendMessageRef.current && inputRef.current) {
+        inputRef.current.value = userMessage;
+        setTimeout(() => {
+          handleSendMessageRef.current(null, true); // Pass forceRun=true
+        }, 50);
+
+        // Clear the input field after sending
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.value = "";
+          }
+        }, 200);
+      } else {
+        console.warn("[Chat] Missing handleSendMessageRef or inputRef");
+      }
+    }
   }, [userMessage]);
 
   const handleRunTestCase = async (index) => {
@@ -274,7 +193,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         ...updatedMessages[index + 1],
         testCaseResult: data?.results?.[0]
       }
-      
+
       // Automatically show the test case results card after running the test
       const nextMessageId = updatedMessages[index + 1].id;
       dispatch(editChatMessage(channelIdentifier, index + 1, updatedMessages[index + 1]));
@@ -320,7 +239,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         </button>
         <span className="label-text">Experiments</span>
         <div className="flex items-center gap-2">
-          
+
           {messages?.length > 0 && (
             <div className="flex items-center gap-2 justify-center">
               <select
@@ -341,12 +260,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
             title="Open Chatbot"
           >
             <div className="tooltip tooltip-left" data-tip="Open Chatbot">
-              <Bot size={14}/>
+              <Bot size={14} />
             </div>
           </button>}
           {/* Test Cases Toggle Button */}
         </div>
-        
+
       </div>
       <div className="flex mt-4 h-[86vh] overflow-hidden relative">
         {/* Overlay Test Cases Sidebar */}
@@ -376,11 +295,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               </div>
             </div>
           )}
-          
+
           <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
             <div ref={messagesContainerRef} className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
               {messages.map((message, index) => {
-                
+
                 return (
                   <div
                     key={index}
@@ -391,10 +310,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                   >
                     <div className="chat-image avatar"></div>
                     <div className="chat-header">
-                      {message.sender === "expected" ? "Expected Response" : 
-                       message.sender === "error" ? "Error" :
-                       message.testCaseResult ? "Model Answer" : 
-                       message.sender}
+                      {message.sender === "expected" ? "Expected Response" :
+                        message.sender === "error" ? "Error" :
+                          message.testCaseResult ? "Model Answer" :
+                            message.sender}
                       {message.isEdited && (
                         <span className="text-xs text-warning ml-2 font-medium">(edited)</span>
                       )}
@@ -609,65 +528,64 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                               {/* Test Case Result Display */}
                               <div className="chat-bubble gap-0 relative min-w-full">
                                 <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
-                                {/* Header */}
-                                <div className="flex items-center gap-2 mb-4">
-                                  <Target className="h-4 w-4" />
-                                  <span className="text-sm font-medium">Test Case Result</span>
-                                  {message.testCaseResult.success && (
-                                    <CheckCircle className="h-4 w-4 text-success ml-auto" />
-                                  )}
-                                </div>
+                                  {/* Header */}
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Target className="h-4 w-4" />
+                                    <span className="text-sm font-medium">Test Case Result</span>
+                                    {message.testCaseResult.success && (
+                                      <CheckCircle className="h-4 w-4 text-success ml-auto" />
+                                    )}
+                                  </div>
 
-                                {/* Similarity Score */}
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-medium text-neutral-content/80">SIMILARITY SCORE</span>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-12 bg-neutral-content/20 rounded-full h-1.5">
-                                      <div
-                                        className={`h-1.5 rounded-full transition-all duration-300 ${message.testCaseResult.score >= 0.8 ? 'bg-success' :
+                                  {/* Similarity Score */}
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-medium text-neutral-content/80">SIMILARITY SCORE</span>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-12 bg-neutral-content/20 rounded-full h-1.5">
+                                        <div
+                                          className={`h-1.5 rounded-full transition-all duration-300 ${message.testCaseResult.score >= 0.8 ? 'bg-success' :
                                             message.testCaseResult.score >= 0.6 ? 'bg-warning' : 'bg-error'
-                                          }`}
-                                        style={{ width: `${Math.max(message.testCaseResult.score * 100, 8)}%` }}
-                                      ></div>
+                                            }`}
+                                          style={{ width: `${Math.max(message.testCaseResult.score * 100, 8)}%` }}
+                                        ></div>
+                                      </div>
+                                      <span className="text-sm font-medium">
+                                        {(message.testCaseResult.score * 100).toFixed(1)}%
+                                      </span>
                                     </div>
-                                    <span className="text-sm font-medium">
-                                      {(message.testCaseResult.score * 100).toFixed(1)}%
+                                  </div>
+
+                                  {/* Method */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <span className="text-sm font-medium text-neutral-content/80">METHOD</span>
+                                    <span className="text-sm font-medium capitalize">
+                                      {message.testCaseResult.matching_type}
                                     </span>
                                   </div>
-                                </div>
 
-                                {/* Method */}
-                                <div className="flex items-center justify-between mb-4">
-                                  <span className="text-sm font-medium text-neutral-content/80">METHOD</span>
-                                  <span className="text-sm font-medium capitalize">
-                                    {message.testCaseResult.matching_type}
-                                  </span>
-                                </div>
-
-                                {/* Expected */}
-                                <div className="mb-3">
-                                  <span className="text-sm font-medium text-neutral-content/80 block mb-2">EXPECTED</span>
-                                  <div className="text-sm bg-neutral-content/10 rounded-md p-3 border border-neutral-content/20">
-                                    {message.testCaseResult.expected?.response || 'No expected response'}
+                                  {/* Expected */}
+                                  <div className="mb-3">
+                                    <span className="text-sm font-medium text-neutral-content/80 block mb-2">EXPECTED</span>
+                                    <div className="text-sm bg-neutral-content/10 rounded-md p-3 border border-neutral-content/20">
+                                      {message.testCaseResult.expected?.response || 'No expected response'}
+                                    </div>
                                   </div>
-                                </div>
 
-                                {/* Actual */}
-                                <div>
-                                  <span className="text-sm font-medium text-neutral-content/80 block mb-2">ACTUAL</span>
-                                  <div className="text-sm bg-neutral-content/10 rounded-md p-3 border border-neutral-content/20">
-                                    {message.testCaseResult.actual_result || 'No actual result'}
+                                  {/* Actual */}
+                                  <div>
+                                    <span className="text-sm font-medium text-neutral-content/80 block mb-2">ACTUAL</span>
+                                    <div className="text-sm bg-neutral-content/10 rounded-md p-3 border border-neutral-content/20">
+                                      {message.testCaseResult.actual_result || 'No actual result'}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
                           ) : (
                             /* Regular Assistant/User/Expected/Error Message - Show model answer if testcase was run */
-                            <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${
-                              message.sender === "assistant" ? "mr-8" : 
-                              message.sender === "error" ? "bg-error/10 border border-error/30 text-error" : ""
-                            }`}>
+                            <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" :
+                                message.sender === "error" ? "bg-error/10 border border-error/30 text-error" : ""
+                              }`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
                                 <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">
@@ -755,7 +673,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                       }}
                                     >
                                       {/* Show model's actual response if testcase was run, otherwise show original content */}
-                                      {message.testCaseResult && message.sender === "assistant" 
+                                      {message.testCaseResult && message.sender === "assistant"
                                         ? message.testCaseResult.actual_result || message.content
                                         : message.content}
                                     </ReactMarkdown>
@@ -770,17 +688,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setUiState(prev => ({
+                                setShowTestCaseResults(prev => ({
                                   ...prev,
-                                  showTestCaseResults: {
-                                    ...prev.showTestCaseResults,
-                                    [message.id]: !prev.showTestCaseResults[message.id]
-                                  }
+                                  [message.id]: !prev[message.id]
                                 }));
                               }}
                               className="absolute -bottom-8 left-4 flex items-center gap-2 text-xs text-base-content/70 hover:text-base-content transition-colors px-2 py-1 rounded-full bg-base-100 border border-base-content/20 shadow-sm hover:bg-base-200/50"
                             >
-                              {uiState.showTestCaseResults[message.id] ? (
+                              {showTestCaseResults[message.id] ? (
                                 <>
                                   <ToggleRight className="h-3 w-3" />
                                   <span>Model Answer</span>
@@ -790,7 +705,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                   <ToggleLeft className="h-3 w-3" />
                                   <span>Test Details</span>
                                   <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${message.testCaseResult.score >= 0.8 ? 'bg-success/20 text-success' :
-                                      message.testCaseResult.score >= 0.6 ? 'bg-warning/20 text-warning' : 'bg-error/20 text-error'
+                                    message.testCaseResult.score >= 0.6 ? 'bg-warning/20 text-warning' : 'bg-error/20 text-error'
                                     }`}>
                                     {(message.testCaseResult.score * 100).toFixed(1)}%
                                   </span>
@@ -812,13 +727,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                   <ChatTextInput
                     channelIdentifier={channelIdentifier}
                     params={params}
-                    handleSendMessageForOrchestralModel={handleSendMessageForOrchestralModel}
                     isOrchestralModel={isOrchestralModel}
                     inputRef={inputRef}
                     searchParams={searchParams}
                     setTestCaseId={setTestCaseId}
                     testCaseId={testCaseId}
                     selectedStrategy={selectedStrategy}
+                    handleSendMessageRef={handleSendMessageRef}
                   />
                 </div>
               </div>
@@ -827,8 +742,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         </div>
       </div>
 
-      <AddTestCaseModal 
-        testCaseConversation={testCaseConversation} 
+      <AddTestCaseModal
+        testCaseConversation={testCaseConversation}
         setTestCaseConversation={setTestCaseConversation}
         channelIdentifier={channelIdentifier}
       />
