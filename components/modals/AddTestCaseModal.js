@@ -26,40 +26,79 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
 
         return { mongoIdsOfTools: mongoIds };
     });
-    // Ensure testCaseConversation is not undefined or null
-    const initialTestCases = testCaseConversation && testCaseConversation.length > 0 ? testCaseConversation.map((message) => {
-        if (message.role === "user" || message.sender === "user") {
-            return {
-                role: message.role || message.sender,
-                content: message.content?.[0]?.text || message?.content
-            };
-        } else if ((message.role === "assistant" || message.sender === "assistant") && message.content) {
-            return {
-                role: message.role || message.sender,
-                content: message.content?.[0]?.text || message?.content
-            };
-        } else if (message.role === "tools_call" || message.sender === "tools_call") {
-            const toolCallData = message.tools_call_data;
-          
-            const tools = [];
-          
-            if (toolCallData && typeof toolCallData === 'object') {
-              for (const [toolName, toolDetails] of Object.entries(toolCallData)) {
-                tools.push({
-                  name: toolName,
-                  id: mongoIdsOfTools[toolDetails?.id],
-                  arguments: toolDetails?.args,
+    // Process testCaseConversation - handle both array of messages and single object with AiConfig
+    const processTestCaseData = () => {
+        if (!testCaseConversation || testCaseConversation.length === 0) return [];
+        
+        // If it's a single object with AiConfig, extract the conversation from AiConfig.input
+        if (testCaseConversation.length === 1 && testCaseConversation[0]?.AiConfig?.input) {
+            const historyItem = testCaseConversation[0];
+            const aiConfigInput = historyItem.AiConfig.input;
+            const processedMessages = [];
+            
+            // Create conversation from AiConfig.input - only user and assistant messages
+            aiConfigInput.forEach(msg => {
+                // Only include user, assistant, developer, and system messages
+                if (msg.role === "user" || msg.role === "assistant") {
+                    processedMessages.push({
+                        role: msg.role,
+                        content: msg.content
+                    });
+                }
+                // Skip function calls, reasoning, and other metadata
+            });
+            
+            // Add the expected response from LLM as the final message
+            // This will be treated as the expected response for the test case
+            const expectedResponse = historyItem.llm_message || historyItem.chatbot_message || historyItem.updated_llm_message;
+            if (expectedResponse) {
+                processedMessages.push({
+                    role: "assistant",
+                    content: expectedResponse,
+                    isExpectedResponse: true // Mark this as the expected response
                 });
-              }
             }
-          
-            return {
-              role: message?.role || message?.sender,
-              tools,
-            };
-          }
-        return null;
-    }).filter(Boolean) : [];
+            
+            return processedMessages;
+        }
+        
+        // Handle regular conversation array format
+        return testCaseConversation.map((message) => {
+            if (message.role === "user" || message.sender === "user") {
+                return {
+                    role: message.role || message.sender,
+                    content: message.content?.[0]?.text || message?.content
+                };
+            } else if ((message.role === "assistant" || message.sender === "assistant") && message.content) {
+                return {
+                    role: message.role || message.sender,
+                    content: message.content?.[0]?.text || message?.content
+                };
+            } else if (message.role === "tools_call" || message.sender === "tools_call") {
+                const toolCallData = message.tools_call_data;
+              
+                const tools = [];
+              
+                if (toolCallData && typeof toolCallData === 'object') {
+                  for (const [toolName, toolDetails] of Object.entries(toolCallData)) {
+                    tools.push({
+                      name: toolName,
+                      id: mongoIdsOfTools[toolDetails?.id],
+                      arguments: toolDetails?.args,
+                    });
+                  }
+                }
+              
+                return {
+                  role: message?.role || message?.sender,
+                  tools,
+                };
+              }
+            return null;
+        }).filter(Boolean);
+    };
+
+    const initialTestCases = processTestCaseData();
 
     const [finalTestCases, setFinalTestCases] = useState(initialTestCases);
     const [responseType, setResponseType] = useState('cosine');

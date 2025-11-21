@@ -4,7 +4,7 @@ import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
+import { getHistoryAction, userFeedbackCountAction, searchMessageHistoryAction } from "@/store/action/historyAction";
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
@@ -83,7 +83,24 @@ function Page({params, searchParams }) {
        dispatch(clearThreadData());
       const startDate = resolvedSearchParams?.start;
       const endDate = resolvedSearchParams?.end;
-     const result =  await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, 1, null, filterOption, isErrorTrue, selectedVersion));
+      
+      // Use searchMessageHistoryAction only if valid date range is provided, otherwise use getHistoryAction
+      let result;
+      const hasValidDateRange = (startDate && startDate !== 'null' && startDate !== 'undefined') || 
+                               (endDate && endDate !== 'null' && endDate !== 'undefined');
+      
+      if (hasValidDateRange) {
+        result = await dispatch(searchMessageHistoryAction({
+          bridgeId: resolvedParams.id,
+          keyword: '', // empty keyword to get all results within date range
+          startDate,
+          endDate,
+          user_feedback: filterOption,
+          version_id: selectedVersion
+        }));
+      } else {
+        result = await dispatch(getHistoryAction(resolvedParams.id, 1, filterOption, isErrorTrue, selectedVersion));
+      }
       if(resolvedSearchParams?.thread_id) {
         const threadId = resolvedSearchParams?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
