@@ -70,7 +70,10 @@ function Home({ params, isEmbedUser }) {
     handlePortalCloseImmediate,
     PortalDropdown,
     PortalStyles
-  } = usePortalDropdown();
+  } = usePortalDropdown({
+    offsetX: -120,  // Better positioning for table dropdowns
+    offsetY: 5
+  });
   const { isDeleting, executeDelete } = useDeleteOperation();
 
   useEffect(() => {
@@ -132,7 +135,7 @@ function Home({ params, isEmbedUser }) {
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
     averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
     agent_limit: item?.bridge_limit,
-    agent_usage: item?.bridge_usage,
+    agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
     isLoading: loadingAgentId === item._id,
     last_used: <div className="group cursor-help">
                         <span className="group-hover:hidden">
@@ -330,7 +333,7 @@ function Home({ params, isEmbedUser }) {
             e.stopPropagation();
             handleSetBridgeLimit(row);
           }}><ClockFading className="" size={16} />Usage Limit</a></li>
-          {(row?.bridge_limit && row?.bridge_usage !== 0)? (
+          {(Number(row?.agent_usage) > 0)? (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -503,16 +506,18 @@ function Home({ params, isEmbedUser }) {
                   </div>
                 </div>
                 
-                <CustomTable 
-                  data={UnArchivedBridges} 
-                  columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage','last_used']} 
-                  sorting 
-                  sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime', 'agent_usage','last_used']} 
-                  handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
-                  keysToExtractOnRowClick={['_id', 'versionId']} 
-                  keysToWrap={['name', 'model']} 
-                  endComponent={EndComponent} 
-                />
+                <div className="w-full overflow-visible">
+                  <CustomTable 
+                    data={UnArchivedBridges} 
+                    columnsToShow={['name', 'model', 'totalTokens', 'agent_usage','last_used']} 
+                    sorting 
+                    sortingColumns={['name', 'model', 'totalTokens', 'agent_usage','last_used']} 
+                    handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
+                    keysToExtractOnRowClick={['_id', 'versionId']} 
+                    keysToWrap={['name', 'model']} 
+                    endComponent={EndComponent} 
+                  />
+                </div>
                 
                 {filteredArchivedBridges?.length > 0 && (
                   <div className="">
@@ -523,12 +528,12 @@ function Home({ params, isEmbedUser }) {
                       </p>
                       <p className="border-t border-base-300 w-full"></p>
                     </div>
-                    <div className="opacity-60">
+                    <div className="opacity-60 overflow-visible">
                       <CustomTable 
                         data={ArchivedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
+                        columnsToShow={['name', 'model', 'totalTokens','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
+                        sortingColumns={['name', 'model', 'totalTokens','last_used']} 
                         handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                         keysToExtractOnRowClick={['_id', 'versionId']} 
                         keysToWrap={['name', 'prompt', 'model']} 
@@ -547,12 +552,12 @@ function Home({ params, isEmbedUser }) {
                       </p>
                       <p className="border-t border-base-300 w-full"></p>
                     </div>
-                    <div className="opacity-60">
+                    <div className="opacity-60 overflow-visible">
                       <CustomTable 
                         data={DeletedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
+                        columnsToShow={['name', 'model', 'totalTokens','last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime','last_used']} 
+                        sortingColumns={['name', 'model', 'totalTokens','last_used']} 
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent} 
                       />

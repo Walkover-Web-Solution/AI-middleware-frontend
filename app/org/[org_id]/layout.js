@@ -396,7 +396,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              <main className={`px-2 h-full ${path.length > 4&& !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              <main className={`px-2 h-full ${path.length > 4&& !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-2rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
             </div>
           </div>
         </div>
@@ -433,7 +433,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                   <LoadingSpinner />
                 </div>
               ) : (
-                <main className={`px-2 h-full ${path.length > 4 && !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+                <main className={`px-2 h-full ${path.length > 4 && !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-2rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
               )}
             </div>
           </div>

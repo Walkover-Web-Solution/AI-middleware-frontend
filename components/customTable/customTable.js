@@ -46,22 +46,28 @@ const CustomTable = ({
     const sortedData = useMemo(() => {
         if (sorting && activeColumn) {
             return [...data].sort((a, b) => {
-                const valueA = activeColumn === 'name' ? a.actualName : a[activeColumn];
-                const valueB = activeColumn === 'name' ? b.actualName : b[activeColumn];
+                const valueA = activeColumn === 'name' ? a.actualName : 
+                              activeColumn === 'createdAt' ? a.createdAt_original : a[activeColumn];
+                const valueB = activeColumn === 'name' ? b.actualName : 
+                              activeColumn === 'createdAt' ? b.createdAt_original : b[activeColumn];
                 
                 if (activeColumn === 'totaltoken') {
                     // Sort by totaltoken in ascending order
                     return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
                 }
                 
-                // Special handling for date columns (last_used, created_at)
-                if (activeColumn === 'last_used' || activeColumn === 'created_at') {
+                // Special handling for date columns (last_used, created_at, createdAt)
+                if (activeColumn === 'last_used' || activeColumn === 'created_at' || activeColumn === 'createdAt') {
                     // Use original timestamp values for sorting if available
                     const originalA = activeColumn === 'last_used' 
                         ? (a.last_used_original || a.last_used_orignal)
+                        : activeColumn === 'createdAt' 
+                        ? a.createdAt_original
                         : a.created_at_original;
                     const originalB = activeColumn === 'last_used' 
                         ? (b.last_used_original || b.last_used_orignal)
+                        : activeColumn === 'createdAt' 
+                        ? b.createdAt_original
                         : b.created_at_original;
                     
                     // Handle null/undefined values - put them at the bottom
@@ -275,7 +281,7 @@ const CustomTable = ({
                                             className="cursor-pointer"
                                             onClick={() => sortByColumn(column)}
                                         >
-                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column==="last_used"?"Last Used At":column}
+                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column==="last_used"?"Last Used At":column==="apikey_usage"?"Apikey Usage":column==="agent_usage"?"Agent Usage":column==="embed_usage"?"Embed Usage":column}
                                         </span>
                                     </div>
                                 </th>
@@ -316,7 +322,9 @@ const CustomTable = ({
                                     {visibleColumns?.map((column) => (
                                         <td
                                             key={column}
-                                            className="px-4 py-2 text-left whitespace-nowrap"
+                                            className={`px-4 py-2 text-left whitespace-nowrap ${
+                                                column === 'last_used' || column === 'createdAt' ? 'w-40 min-w-40 max-w-40' : ''
+                                            }`}
                                         >
                                             {getDisplayValue(row, column)}
                                         </td>
@@ -347,7 +355,7 @@ const CustomTable = ({
     };
 
     return (
-        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto">
+        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto overflow-y-visible">
             {/* Responsive view switching */}
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>

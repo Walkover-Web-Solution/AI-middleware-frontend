@@ -315,7 +315,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   // Get config and root-level data from Redux store
   const integrationData = useCustomSelector((state) =>
     state?.integrationReducer?.integrationData?.[data?.org_id]?.find(
-      (f) => f.folder_id === data?.folder_id
+      (f) => f.folder_id === data?.embed_id
     )
   );
 
@@ -411,7 +411,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       const cleanedConfig = { ...restConfig }; // strictly visual/config flags
 
       const dataToSend = {
-        folder_id: data?.folder_id,
+        folder_id: data?.embed_id,
         orgId: data?.org_id,
         config: cleanedConfig.config ? cleanedConfig.config : cleanedConfig, // no api keys inside config
       };
@@ -486,7 +486,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
-  "folder_id": "${data?.folder_id}",
+  "folder_id": "${data?.embed_id}",
   "user_id": "Your_user_id"
 }`;
 
@@ -621,7 +621,7 @@ window.openGtwy({
                         </pre>
                         <pre data-prefix=">">
                           <code className="text-error">folder_id=</code>
-                          <code className="text-warning">{data?.folder_id}</code>
+                          <code className="text-warning">{data?.embed_id}</code>
                         </pre>
                         <pre data-prefix=">">
                           <code className="text-error">user_id=</code>

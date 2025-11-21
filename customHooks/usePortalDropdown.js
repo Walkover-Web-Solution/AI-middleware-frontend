@@ -33,10 +33,29 @@ export const usePortalDropdown = (options = {}) => {
     }
     
     const rect = triggerElement.getBoundingClientRect();
-    setPortalPosition({
-      top: rect.bottom + window.scrollY + offsetY,
-      left: rect.left + window.scrollX + offsetX
-    });
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate initial position
+    let top = rect.bottom + window.scrollY + offsetY;
+    let left = rect.left + window.scrollX + offsetX;
+    
+    // Adjust horizontal position if dropdown would go off-screen
+    const dropdownWidth = 200; // Estimated dropdown width
+    if (left + dropdownWidth > viewportWidth) {
+      left = rect.right + window.scrollX - dropdownWidth;
+    }
+    if (left < 0) {
+      left = 10; // Minimum margin from left edge
+    }
+    
+    // Adjust vertical position if dropdown would go off-screen
+    const dropdownHeight = 150; // Estimated dropdown height
+    if (top + dropdownHeight > viewportHeight + window.scrollY) {
+      top = rect.top + window.scrollY - dropdownHeight - offsetY;
+    }
+    
+    setPortalPosition({ top, left });
     setPortalContent(content);
     setPortalTriggerElement(triggerElement);
     setShowPortal(true);
@@ -127,10 +146,13 @@ export const usePortalDropdown = (options = {}) => {
     return createPortal(
       <div 
         ref={portalRef}
-        className="fixed z-[9999999] bg-base-100 shadow-lg rounded-lg border border-base-300"
+        className="fixed bg-base-100 shadow-lg rounded-lg border border-base-300"
         style={{
           top: `${portalPosition.top}px`,
-          left: `${portalPosition.left}px`
+          left: `${portalPosition.left}px`,
+          zIndex: 999999999,
+          position: 'fixed',
+          pointerEvents: 'auto'
         }}
         onMouseEnter={handlePortalMouseEnter}
         onMouseLeave={handlePortalMouseLeave}

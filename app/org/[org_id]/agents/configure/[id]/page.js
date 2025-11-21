@@ -359,7 +359,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full transition-all duration-300 ease-in-out ${isAgentFlowView ? 'overflow-y-auto bg-base-100' : 'overflow-hidden'} ${!isAgentFlowView && !isFocus ? 'max-h-[calc(100vh-4rem)]' : ''} ${uiState.isDesktop && !isAgentFlowView ? 'flex flex-row' : ''} ${!uiState.isDesktop ? 'overflow-y-auto' : ''}`}
+      className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
     >
       {/* Debug Panel States */}
       

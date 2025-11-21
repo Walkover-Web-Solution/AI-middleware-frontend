@@ -676,11 +676,7 @@ function MainSlider({ isEmbedUser }) {
                             <button
                               key={key}
                               onClick={() => {
-                                if(key === 'agents' &&  pathParts.length >  4){
-                                  toggleSidebar(`default-agent-sidebar`)
-                                }else{
                                   router.push(`/org/${orgId}/${key}`);
-                                }
                                 if (isMobile) setIsMobileVisible(false);
                               }}
                               onMouseEnter={e => onItemEnter(key, e)}
