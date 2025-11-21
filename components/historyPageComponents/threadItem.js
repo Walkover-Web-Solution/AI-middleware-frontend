@@ -384,7 +384,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     window.SendDataToChatbot({
       "parentId": '',
       "bridgeName": "history_page_chabot",
-      "threadId": item?.id,
+      "threadId": String(item?.id),
       variables,
       version_id: 'null',
       hideCloseButton: 'false'
