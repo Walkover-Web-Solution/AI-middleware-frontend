@@ -4,13 +4,19 @@ import { truncate } from "@/components/historyPageComponents/assistFile";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { MODAL_TYPE } from "@/utils/enums";
-import React, { useCallback, useEffect, useMemo, useState, use } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, use, useRef } from 'react';
 import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
-import { openModal, toggleSidebar } from "@/utils/utility";
+import { openModal, toggleSidebar, closeModal } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
 import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
 import SearchItems from "@/components/UI/SearchItems";
+import { EllipsisIcon, RefreshIcon } from "@/components/Icons";
+import { ClockFading } from "lucide-react";
+import UsageLimitModal from "@/components/modals/UsageLimitModal";
+import { updateIntegrationDataAction } from "@/store/action/integrationAction";
+import { toast } from "react-toastify";
+import usePortalDropdown from "@/customHooks/usePortalDropdown";
 
 export const runtime = 'edge';
 
@@ -27,10 +33,20 @@ const Page = ({ params }) => {
   const [selectedIntegration, setSelectedIntegration] = useState(null);
   const [filterIntegration, setFilterIntegration] = useState(integrationData);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
+  const [selectedIntegrationForLimit, setSelectedIntegrationForLimit] = useState(null);
+  
+  // Use portal dropdown hook
+  const {
+    handlePortalOpen,
+    handlePortalCloseImmediate,
+    PortalDropdown,
+    PortalStyles
+  } = usePortalDropdown();
 
   useEffect(() => {
     setFilterIntegration(integrationData);
   }, [integrationData]);
+
 
   const tableData = (filterIntegration || [])?.map((item, index) => ({
     id: item._id,
@@ -43,9 +59,11 @@ const Page = ({ params }) => {
       </div>
     ),
     createdAt: new Date(item?.created_at).toLocaleString(),
-    folder_id: item?.folder_id,
+    embed_id: item?.folder_id,
     originalName: item?.name,
     org_id: item?.org_id,
+    embed_limit: item?.folder_limit,
+    embed_usage: item?.folder_usage,
     originalItem: item
   }));
 
@@ -57,6 +75,78 @@ const Page = ({ params }) => {
   const handleClickIntegration = (item) => {
     setSelectedIntegration(item);
     toggleGtwyIntegraionSlider();
+  };
+
+  const handleSetIntegrationLimit = (item) => {
+    // Transform the data to match what UsageLimitModal expects
+    const transformedData = {
+      ...item,
+      bridge_limit: item.embed_limit, // Map integration_limit to bridge_limit
+      actualName: item.actualName || item.originalName // Ensure actualName is available
+    };
+    setSelectedIntegrationForLimit(transformedData);
+    openModal(MODAL_TYPE.API_KEY_LIMIT_MODAL);
+  };
+
+  const handleUpdateIntegrationLimit = async (integration, limit) => {
+    closeModal(MODAL_TYPE?.API_KEY_LIMIT_MODAL);
+    const dataToSend = {
+       ...integration.originalItem,
+      folder_limit: limit,
+    };
+    const res = await dispatch(updateIntegrationDataAction(resolvedParams.org_id, dataToSend));
+    if (res?.data) toast.success('Integration Usage Limit Updated Successfully');
+  };
+
+  const resetUsage = async (integration) => {
+    const dataToSend = { 
+       ...integration.originalItem,
+       folder_usage: 0 
+    };
+    const res = await dispatch(updateIntegrationDataAction(resolvedParams.org_id, dataToSend));
+    if (res?.data) toast.success('Integration Usage Reset Successfully');
+  }
+
+  const EndComponent = ({ row }) => {
+    const handleDropdownClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const dropdownContent = (
+        <ul className="menu bg-base-100 rounded-box w-52 p-2 shadow">
+          <li><a onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handlePortalCloseImmediate();
+            handleSetIntegrationLimit(row);
+          }}><ClockFading className="" size={16} />Usage Limit</a></li>
+          {(row?.embed_limit && row?.embed_usage !== 0) ? (
+            <li><a onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handlePortalCloseImmediate();
+              resetUsage(row);
+            }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
+          ) : null}
+        </ul>
+      );
+      
+      handlePortalOpen(e.currentTarget, dropdownContent);
+    };
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="bg-transparent">
+          <div 
+            role="button" 
+            className="hover:bg-base-200 rounded-lg p-3 cursor-pointer" 
+            onClick={handleDropdownClick}
+          >
+            <EllipsisIcon className="rotate-90" size={16} />
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -98,12 +188,13 @@ const Page = ({ params }) => {
         <div className="w-full">
           <CustomTable
             data={tableData}
-            columnsToShow={['name', 'folder_id', 'createdAt']}
+            columnsToShow={['name', 'embed_id', 'createdAt','embed_usage']}
             sorting
-            sortingColumns={['name']}
+            sortingColumns={['name','embed_usage']}
             keysToWrap={['name', 'description']}
             handleRowClick={(data) => handleClickIntegration(data)}
             keysToExtractOnRowClick={['org_id', 'folder_id']}
+            endComponent={EndComponent}
           />
         </div>
       ) : (
@@ -114,6 +205,11 @@ const Page = ({ params }) => {
 
       <IntegrationModal params={resolvedParams} />
       <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider} />
+      <UsageLimitModal data={selectedIntegrationForLimit} onConfirm={handleUpdateIntegrationLimit} item="Embed Name" />
+      
+      {/* Portal components from hook */}
+      <PortalStyles />
+      <PortalDropdown />
 
     </div>
   );

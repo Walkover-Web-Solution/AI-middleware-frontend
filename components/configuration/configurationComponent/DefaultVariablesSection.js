@@ -1,23 +1,13 @@
 import React, { memo, useState, useMemo } from 'react';
 import { ChevronDownIcon, InfoIcon, SettingsIcon } from '@/components/Icons';
-import { toggleSidebar } from '@/utils/utility';
+import { toggleSidebar, extractPromptVariables } from '@/utils/utility';
 
 // Optimized default variables section with accordion
 const DefaultVariablesSection = memo(({ prompt = '', customVariables = [] }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-
-    // Extract variables used in the prompt
+   // Extract variables used in the prompt
     const usedVariables = useMemo(() => {
-        if (!prompt) return [];
-        const variableRegex = /\{\{([^}]+)\}\}/g;
-        const matches = [];
-        let match;
-        while ((match = variableRegex.exec(prompt)) !== null) {
-            if (!matches.includes(match[1])) {
-                matches.push(match[1]);
-            }
-        }
-        return matches;
+        return extractPromptVariables(prompt);
     }, [prompt]);
 
     const defaultVariables = [

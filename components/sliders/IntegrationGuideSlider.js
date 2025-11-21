@@ -14,8 +14,9 @@ function GuideSlider({ params, bridgeType, onClose }) {
   useEffect(()=>{
     setActiveTab(bridgeType != "trigger" ? bridgeType : "chatbot");
   },[bridgeType])
-  const { slugName } = useCustomSelector((state) => ({
+  const { slugName, prompt } = useCustomSelector((state) => ({
     slugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+    prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt
 }));
   const tabs = [
     { id: "api", label: "API" },
@@ -26,12 +27,12 @@ function GuideSlider({ params, bridgeType, onClose }) {
   const renderTabContent = () => {
     switch(activeTab) {
       case "api":
-        return <ApiGuide params={params}/>;
+        return <ApiGuide params={params} prompt={prompt}/>;
       case "chatbot":
         return  <div className="">
         <SlugNameInput params={params}/>
         <PrivateFormSection params={params} ChooseChatbot={true}/>
-        <SecondStep slugName={slugName}/>
+        <SecondStep slugName={slugName} prompt={prompt}/>
     </div>
       case "batch":
         return <BatchApiGuide params={params}/>

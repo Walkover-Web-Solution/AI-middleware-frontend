@@ -4,7 +4,7 @@ import Modal from '@/components/UI/Modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 
-const UsageLimitModal = ({ data, onConfirm }) => {
+const UsageLimitModal = ({ data, onConfirm ,item }) => {
   const [limit, setLimit] = useState(data?.bridge_limit);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,7 +24,7 @@ const UsageLimitModal = ({ data, onConfirm }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!limit || isNaN(parseInt(limit))) {
+    if (!limit || isNaN(parseFloat(limit)) || parseFloat(limit) < 0) {
       setError('Please enter a valid number for the limit');
       return;
     }
@@ -33,7 +33,7 @@ const UsageLimitModal = ({ data, onConfirm }) => {
     setError('');
 
     try {
-      await onConfirm(data, parseInt(limit));
+      await onConfirm(data, parseFloat(limit));
       handleClose();
     } catch (err) {
       setError(err.message || 'Failed to set API key limit');
@@ -54,7 +54,7 @@ const UsageLimitModal = ({ data, onConfirm }) => {
               Set Usage Limit
             </h2>
             <p className="text-sm text-base-content flex items-center gap-2">
-             Agent Name: {data?.actualName}
+            {item}: {data?.actualName}
             </p>
           </div>
           
@@ -67,6 +67,7 @@ const UsageLimitModal = ({ data, onConfirm }) => {
                 value={limit || ''}
                 onChange={(e) => setLimit(e.target.value)}
                 min="0"
+                step="0.0001"
               />
               {error && <p className="text-error text-sm mt-1">{error}</p>}
             </div>
