@@ -1,48 +1,49 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  orchetralFlowData: {},
-  loading: false
+  connectedAgentFlowByBridge: {}, // Structure: orgId > bridgeId > versionId = data
+  connectedAgentFlowLoading: false,
 };
 
 export const orchetralFlowReducer = createSlice({
   name: "orchetralFlow",
   initialState,
   reducers: {
-    fetchAllOrchetralFlowData: (state, action) => {
-      state.orchetralFlowData[action.payload.orgId] = action.payload.data.data;
-      state.loading = false;
+    setConnectedAgentFlowLoading: (state, action) => {
+      state.connectedAgentFlowLoading = action.payload;
     },
-    addOrchetralFlowDataReducer: (state, action) => {
-      const { orgId, data, orchestrator_id } = action.payload;
-      if (state.orchetralFlowData[orgId]) {
-        state.orchetralFlowData[orgId].push({ ...data, _id: orchestrator_id });
-      } else {
-        state.orchetralFlowData[orgId] = [{ ...data, _id: orchestrator_id }];
+    setConnectedAgentFlowData: (state, action) => {
+      const { orgId, bridgeId, versionId, data } = action.payload;
+      
+      // Initialize nested structure if it doesn't exist
+      if (!state.connectedAgentFlowByBridge[orgId]) {
+        state.connectedAgentFlowByBridge[orgId] = {};
+      }
+      if (!state.connectedAgentFlowByBridge[orgId][bridgeId]) {
+        state.connectedAgentFlowByBridge[orgId][bridgeId] = {};
+      }
+      
+      // Store data at orgId > bridgeId > versionId
+      state.connectedAgentFlowByBridge[orgId][bridgeId][versionId] = data || {};
+      state.connectedAgentFlowLoading = false;
+    },
+    setConnectedAgentFlowError: (state) => {
+      state.connectedAgentFlowLoading = false;
+    },
+    clearConnectedAgentFlowData: (state, action) => {
+      const { orgId, bridgeId, versionId } = action.payload;
+      if (state.connectedAgentFlowByBridge[orgId]?.[bridgeId]?.[versionId]) {
+        delete state.connectedAgentFlowByBridge[orgId][bridgeId][versionId];
       }
     },
-    deleteOrchetralFlowReducer: (state, action) => {
-      const { orgId, id } = action.payload;
-      if (state.orchetralFlowData[orgId]) {
-        state.orchetralFlowData[orgId] = state.orchetralFlowData[orgId].filter(entry => entry._id !== id);
-      }
-    },
-    updateOrchetralFlowDataReducer: (state, action) => {
-      const { orgId, data, orchestrator_id } = action.payload;
-      if (state.orchetralFlowData[orgId]) {
-        state.orchetralFlowData[orgId] = state.orchetralFlowData[orgId].map(entry => 
-          entry._id === orchestrator_id ? { ...data, orchestrator_id } : entry
-        );
-      }
-    }
   }
 });
 
 export const {
-  fetchAllOrchetralFlowData,
-  addOrchetralFlowDataReducer,
-  deleteOrchetralFlowReducer,
-  updateOrchetralFlowDataReducer
+  setConnectedAgentFlowLoading,
+  setConnectedAgentFlowData,
+  setConnectedAgentFlowError,
+  clearConnectedAgentFlowData
 } = orchetralFlowReducer.actions;
 
 export default orchetralFlowReducer.reducer;

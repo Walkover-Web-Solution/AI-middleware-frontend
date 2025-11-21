@@ -3,7 +3,6 @@ import {
   Database, Shield, BarChart3, AlertTriangle, UserPlus,
   Bot,
   Blocks,
-  Workflow,
   FileSliders,
   MessageSquareMore,
   Settings2,
@@ -21,7 +20,6 @@ import React from 'react';
 export const ITEM_ICONS = {
   org: <Building2 size={15} />,
   agents: <Bot size={15} />,
-  orchestratal_model: <Workflow size={15} />,
   chatbotConfig: <FileSliders size={15} />,
   chatbot: <MessageSquare size={15} />,
   pauthkey: <Shield size={15} />,
@@ -49,8 +47,6 @@ export const ITEM_ICONS = {
 
 export const DISPLAY_NAMES = (key) => {
   switch (key) {
-    case 'orchestratal_model':
-      return 'Orchestral Model';
     case 'knowledge_base':
       return 'Knowledge base';
     case 'chatbotConfig':
@@ -83,7 +79,7 @@ export const DISPLAY_NAMES = (key) => {
 
 
 export const NAV_SECTIONS = [
-  { items: ['agents', 'orchestratal_model', 'chatbotConfig', 'knowledge_base'] },
+  { items: ['agents', 'chatbotConfig', 'knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'Developer', items: ['integration', 'RAG_embed'] },

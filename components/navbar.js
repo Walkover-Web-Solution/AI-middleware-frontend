@@ -95,11 +95,8 @@ const Navbar = ({ isEmbedUser, params }) => {
   // Close ellipsis menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (ellipsisMenuRef.current && !ellipsisMenuRef.current.contains(event.target)) {
+      if (ellipsisMenuRef?.current && !ellipsisMenuRef?.current.contains(event.target)) {
         setShowEllipsisMenu(false);
-      }
-      if (configPublishModalRef.current && !configPublishModalRef.current.contains(event.target)) {
-        setShowConfigPublishModal(false);
       }
     };
 

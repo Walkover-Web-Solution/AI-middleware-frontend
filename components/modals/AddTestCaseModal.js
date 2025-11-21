@@ -1,6 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
-import { clearChatTestCaseId } from '@/store/action/chatAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import { CloseIcon, ChevronDownIcon } from '@/components/Icons';
@@ -9,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
+import { clearChatTestCaseIdAction } from '@/store/action/chatAction';
 
 function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, channelIdentifier }) {
     const params = useParams();
@@ -97,7 +97,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
         dispatch(createTestCaseAction({ bridgeId: params?.id, data: payload })).then(() => { 
             // Clear testcase_id from Redux when creating new testcase
             if (channelIdentifier) {
-                dispatch(clearChatTestCaseId(channelIdentifier));
+                dispatch(clearChatTestCaseIdAction(channelIdentifier));
             }
             handleClose(); 
             setIsLoading(false);
