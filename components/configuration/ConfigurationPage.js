@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import React from 'react';  
+import React from 'react';
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import SetupView from "./SetupView";
@@ -10,12 +10,13 @@ import VersionDescriptionInput from './configurationComponent/VersionDescription
 import { InfoIcon, MessageCircleMoreIcon } from 'lucide-react';
 import { openModal, toggleSidebar } from '@/utils/utility';
 import ConnectedAgentFlowPanel from './ConnectedAgentFlowPanel';
+import GuideSlider from '../sliders/IntegrationGuideSlider';
 
-const ConfigurationPage = ({ 
-    params, 
-    isEmbedUser, 
-    apiKeySectionRef, 
-    promptTextAreaRef, 
+const ConfigurationPage = ({
+    params,
+    isEmbedUser,
+    apiKeySectionRef,
+    promptTextAreaRef,
     searchParams,
     uiState,
     updateUiState,
@@ -31,7 +32,7 @@ const ConfigurationPage = ({
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
-    
+
     const configState = useConfigurationState(params, searchParams);
     const { bridgeType } = configState;
     useEffect(() => {
@@ -58,7 +59,7 @@ const ConfigurationPage = ({
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
     }, [params.org_id, params.id, searchParams?.version, router, onViewChange]);
 
-     const renderHelpSection = useMemo(() => () => {
+    const renderHelpSection = useMemo(() => () => {
         return (
             <div className="z-very-low mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
                 <div className="flex flex-row gap-6 mt-4 items-center">
@@ -85,6 +86,20 @@ const ConfigurationPage = ({
                             <span>Help Docs</span>
                             <span>→</span>
                         </a>
+                    )}
+
+                     {/* Integration Guide */}
+                    {!isEmbedUser && (
+                        <button
+                            onClick={() => {
+                                // Use setTimeout to ensure the component is rendered before toggling
+                                setTimeout(() => toggleSidebar("integration-guide-slider", "right"), 10);
+                            }}
+                            className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
+                        >
+                            <span>Integration Guide</span>
+                            <span>→</span>
+                        </button>
                     )}
 
                 </div>
@@ -135,16 +150,15 @@ const ConfigurationPage = ({
     return (
         <ConfigurationProvider value={contextValue}>
             <div className="flex flex-col gap-2 relative bg-base-100">
-               
-                {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
-                    <ChatbotConfigView params={params} searchParams={searchParams} />
-                ) : ( */}
-                    <SetupView />
-                {/* )} */}
+                <SetupView />
                 {renderHelpSection()}
             </div>
-            
-            
+            {/* Integration Guide Slider */}
+            <GuideSlider
+                params={params}
+                bridgeType={bridgeType}
+            />
+
         </ConfigurationProvider>
     );
 };
