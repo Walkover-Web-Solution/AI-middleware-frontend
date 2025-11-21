@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import React from 'react';
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
@@ -7,9 +7,9 @@ import SetupView from "./SetupView";
 import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 import Protected from "../protected";
 import VersionDescriptionInput from './configurationComponent/VersionDescriptionInput';
-import { InfoIcon, MessageCircleMoreIcon } from 'lucide-react';
+import { InfoIcon, Lock, MessageCircleMoreIcon } from 'lucide-react';
 import { openModal, toggleSidebar } from '@/utils/utility';
-import ConnectedAgentFlowPanel from './ConnectedAgentFlowPanel';
+import GtwyIntegrationGuideSlider from '../sliders/gtwyIntegrationGuideSlider';
 import GuideSlider from '../sliders/IntegrationGuideSlider';
 
 const ConfigurationPage = ({
@@ -25,9 +25,7 @@ const ConfigurationPage = ({
     handleCloseTextAreaFocus,
     savePrompt,
     isMobileView,
-    closeHelperButtonLocation,
-    bridgeName,
-    onViewChange,
+    closeHelperButtonLocation
 }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
@@ -36,28 +34,18 @@ const ConfigurationPage = ({
     const configState = useConfigurationState(params, searchParams);
     const { bridgeType } = configState;
     useEffect(() => {
-        if (bridgeType === 'trigger' && currentView !== 'config') {
-            setCurrentView('config');
-            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
+        if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
+            if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
+                setCurrentView('config');
+                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
+            }
         }
     }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
-    useEffect(() => {
-        const resolvedView = searchParams?.view || 'config';
-        if (resolvedView !== currentView) {
-            setCurrentView(resolvedView);
-        }
-    }, [searchParams?.view, currentView]);
-
-    useEffect(() => {
-        onViewChange?.(currentView === 'agent-flow');
-    }, [currentView, onViewChange]);
-
     const handleNavigation = useCallback((target) => {
         setCurrentView(target);
-        onViewChange?.(target === 'agent-flow');
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
-    }, [params.org_id, params.id, searchParams?.version, router, onViewChange]);
+    }, [params.org_id, params.id, searchParams?.version, router]);
 
     const renderHelpSection = useMemo(() => () => {
         return (
@@ -88,7 +76,7 @@ const ConfigurationPage = ({
                         </a>
                     )}
 
-                     {/* Integration Guide */}
+                    {/* Integration Guide */}
                     {!isEmbedUser && (
                         <button
                             onClick={() => {
@@ -101,7 +89,6 @@ const ConfigurationPage = ({
                             <span>→</span>
                         </button>
                     )}
-
                 </div>
 
             </div>
@@ -123,10 +110,7 @@ const ConfigurationPage = ({
         handleCloseTextAreaFocus,
         savePrompt,
         isMobileView,
-        closeHelperButtonLocation,
-        currentView,
-        bridgeName,
-        switchView: handleNavigation
+        closeHelperButtonLocation
     }), [
         configState,
         params,
@@ -141,19 +125,58 @@ const ConfigurationPage = ({
         handleCloseTextAreaFocus,
         savePrompt,
         isMobileView,
-        closeHelperButtonLocation,
-        currentView,
-        bridgeName,
-        handleNavigation
+        closeHelperButtonLocation
     ]);
+
+    // Check if viewing published data
+    const isPublished = searchParams?.isPublished === 'true';
+    const [bannerState, setBannerState] = useState({ show: isPublished, animating: false });
+    const prevIsPublished = useRef(isPublished);
+
+    // Handle banner animation when isPublished changes
+    useEffect(() => {
+        if (prevIsPublished.current !== isPublished) {
+            if (isPublished) {
+                // Switching to published - show with slide-in animation
+                setBannerState({ show: true, animating: false });
+            } else {
+                // Switching from published - start slide-out animation
+                setBannerState({ show: true, animating: true });
+                // Hide banner after animation completes
+                setTimeout(() => {
+                    setBannerState({ show: false, animating: false });
+                }, 300); // Match animation duration
+            }
+            prevIsPublished.current = isPublished;
+        }
+    }, [isPublished]);
 
     return (
         <ConfigurationProvider value={contextValue}>
             <div className="flex flex-col gap-2 relative bg-base-100">
+                {/* Published Data Banner - Sticky and close to navbar */}
+                {bannerState.show && (
+                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 px-4 py-2 ${bannerState.animating ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                        }`}>
+                        <div className="flex items-center justify-center gap-2 text-sm">
+                            <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-blue-700 dark:text-slate-300">
+                                This is a <span className="text-blue-800 dark:text-white font-medium">read-only</span> published data.
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
+                    <ChatbotConfigView params={params} searchParams={searchParams} />
+                ) : ( */}
                 <SetupView />
+                {/* )} */}
                 {renderHelpSection()}
             </div>
+
             {/* Integration Guide Slider */}
+
             <GuideSlider
                 params={params}
                 bridgeType={bridgeType}

@@ -7,10 +7,16 @@ import InfoTooltip from '@/components/InfoTooltip';
 
 const UserReferenceForRichText = ({ params, searchParams }) => {
     const dispatch = useDispatch();
-    const { is_rich_text = true, user_reference } = useCustomSelector((state) => ({
-        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text,
-        user_reference: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.user_reference || "",
-    }));
+    const { is_rich_text = true, user_reference } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        return {
+            is_rich_text: isPublished ? (bridgeDataFromState?.configuration?.is_rich_text) : (versionData?.configuration?.is_rich_text),
+            user_reference: isPublished ? (bridgeDataFromState?.user_reference || "") : (versionData?.user_reference || ""),
+        };
+    });
     const isRichText = is_rich_text === "" ? true : is_rich_text;
     const [userReference, setUserReference] = useState(user_reference);
     const [showInput, setShowInput] = useState(user_reference?.length > 0);

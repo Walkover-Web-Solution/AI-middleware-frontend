@@ -14,12 +14,16 @@ import Dropdown from '@/components/UI/Dropdown';
 function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-        const bridgeData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
-        const service = bridgeData?.[searchParams?.version]?.service;
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
         const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        const service = activeData?.service;
+        const serviceName = activeData?.service;
+        const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+        const modelName = activeData?.configuration?.model;
         const apiKeyObjectIdData = state.appInfoReducer.embedUserDetails?.apikey_object_id || {}
         const showDefaultApikeys = state.appInfoReducer.embedUserDetails?.addDefaultApiKeys;
         return {
@@ -27,8 +31,8 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             DEFAULT_MODEL: state?.serviceReducer?.default_model,
             bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
             service: service,
-            prompt: bridgeData?.[searchParams?.version]?.configuration?.prompt || "",
-            bridgeApiKey: bridgeData?.[searchParams?.version]?.apikey_object_id?.[service],
+            prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionData?.configuration?.prompt || ""),
+            bridgeApiKey: isPublished ? (bridgeDataFromState?.apikey_object_id?.[service]) : (versionData?.apikey_object_id?.[service]),
             shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
             apiKeyObjectIdData,
             showDefaultApikeys

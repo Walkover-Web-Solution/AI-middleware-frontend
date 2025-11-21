@@ -7,16 +7,22 @@ import Protected from './protected';
 const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isEmbedUser, searchParams }) => {
   const { bridgeApiKey, prompt,shouldPromptShow,service, showDefaultApikeys } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const isPublished = searchParams?.isPublished === 'true';
+    
+    // Use published data if isPublished=true, otherwise use version data
+    const dataSource = isPublished ? bridgeDataFromState : versionData;
+    const service = dataSource?.service;
     const modelReducer = state?.modelReducer?.serviceModels;
-    const serviceName = versionData?.service;
-    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-    const modelName = versionData?.configuration?.model;
+    const serviceName = dataSource?.service;
+    const modelTypeName = dataSource?.configuration?.type?.toLowerCase();
+    const modelName = dataSource?.configuration?.model;
     const showDefaultApikeys = state.appInfoReducer.embedUserDetails.addDefaultApiKeys;
+    
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
-      shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+      bridgeApiKey: isPublished ? bridgeDataFromState?.apikey_object_id?.[service] : versionData?.apikey_object_id?.[service],
+      prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionData?.configuration?.prompt || ""),
+      shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service,
       showDefaultApikeys
    };

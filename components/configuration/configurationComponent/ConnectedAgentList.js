@@ -29,16 +29,22 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
         const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        const serviceName = activeData?.service;
+        const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+        const modelName = activeData?.configuration?.model;
+        
         return {
             bridgeData: bridges,
-            connect_agents: versionData?.connected_agents || {},
+            connect_agents: isPublished ? (bridgeDataFromState?.connected_agents || {}) : (versionData?.connected_agents || {}),
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
-            variables_path: versionData?.variables_path || {},
+            variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
             bridges: state?.bridgeReducer?.allBridgesMap
 
         };

@@ -8,10 +8,16 @@ import InfoTooltip from '@/components/InfoTooltip';
 const   GptMemory = ({ params, searchParams }) => {
     const dispatch = useDispatch();
 
-    const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => ({
-        gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory_context || "",
-        gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory || false,
-    }));
+    const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        return {
+            gpt_memory_context: isPublished ? (bridgeDataFromState?.gpt_memory_context || "") : (versionData?.gpt_memory_context || ""),
+            gpt_memory: isPublished ? (bridgeDataFromState?.gpt_memory || false) : (versionData?.gpt_memory || false),
+        };
+    });
     const [memoryContext, setMemoryContext] = useState(gpt_memory_context);
     const [showInput, setShowInput] = useState(gpt_memory_context?.length > 0);
 

@@ -11,14 +11,19 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
     const dispatch = useDispatch();
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
-        const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
         const apikeys = state?.apiKeysReducer?.apikeys || {};
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
 
         return {
-            bridge: bridgeMap,
+            bridge: activeData || {},
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
-            bridgeApikey_object_id: bridgeMap?.apikey_object_id,
-            currentService: bridgeMap?.service,
+            bridgeApikey_object_id: isPublished ? (bridgeDataFromState?.apikey_object_id) : (versionData?.apikey_object_id),
+            currentService: isPublished ? (bridgeDataFromState?.service) : (versionData?.service),
         };
     });
 

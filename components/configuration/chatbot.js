@@ -3,7 +3,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import LoadingSpinner from "@/components/loadingSpinner";
 
 const Chatbot = ({ params, searchParams }) => {
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Memoize isPublished to make it reactive to searchParams changes
+  const isPublished = useMemo(() => {
+    // Handle both URLSearchParams object and plain object
+    let result;
+    if (searchParams?.get) {
+      // URLSearchParams object
+      result = searchParams.get('isPublished') === 'true';
+    } else {
+      // Plain object
+      result = searchParams?.isPublished === 'true';
+    }
+    return result;
+  }, [searchParams]); 
   const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => {
     const versionState = state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version] || {};
     return {
@@ -103,7 +117,15 @@ const Chatbot = ({ params, searchParams }) => {
 
   // Initialize chatbot when all required data is available
   useEffect(() => {
-    if (!bridgeName || !bridgeSlugName || !searchParams?.version) {
+    // Get version from searchParams (handle both formats)
+    const version = searchParams?.get ? searchParams.get('version') : searchParams?.version;
+    
+    if (!bridgeName || !bridgeSlugName) {
+      return;
+    }
+    
+    // For published mode, we don't need a version, for draft mode we do
+    if (!isPublished && !version) {
       return;
     }
 
@@ -117,14 +139,14 @@ const Chatbot = ({ params, searchParams }) => {
           "fullScreen": true,
           "hideCloseButton": false,
           "hideIcon": true,
-          "version_id": searchParams?.version,
+          "version_id": isPublished ? "null" : version,
           "variables": variables || {}
         });
         clearInterval(intervalId);
       }
     }, 300);
 
-  }, [chatbot_token, searchParams?.version, bridgeSlugName, bridgeName, variables]);
+  }, [chatbot_token, searchParams, isPublished, bridgeSlugName, bridgeName, variables]);
 
   return (
     <>

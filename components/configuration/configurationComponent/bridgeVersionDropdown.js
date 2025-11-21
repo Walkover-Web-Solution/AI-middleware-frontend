@@ -7,22 +7,28 @@ import { createBridgeVersionAction, deleteBridgeVersionAction, getBridgeVersionA
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { ChevronDown, ChevronLeft, Plus, Info } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
-function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
+function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions = 2 }) {
     const router = useRouter();
     const dispatch = useDispatch();
+    
+    // Memoize isPublished to make it reactive to searchParams changes
+    const isPublished = useMemo(() => {
+        const result = searchParams?.get?.('isPublished') === 'true';
+        return result;
+    }, [searchParams]);
     const versionDescriptionRef = useRef('');
     const hasInitialized = useRef(false);
     const lastFetchedVersion = useRef(null);
     const isProcessing = useRef(false);
     const [showVersionDropdown, setShowVersionDropdown] = useState(false);
-    const [maxVisibleVersions, setMaxVisibleVersions] = useState(4);
+    const [maxVisibleVersions, setMaxVisibleVersions] = useState(maxVersions);
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
     const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_VERSION_MODAL);
     const dropdownRef = useRef(null);
@@ -35,21 +41,10 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
         bridgeVersionMapping: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id] || {},
     }));
 
-    // Calculate responsive max visible versions based on screen width
+    // Update maxVisibleVersions when maxVersions prop changes
     useEffect(() => {
-        const updateMaxVersions = () => {
-            const width = window.innerWidth;
-            if (width < 640) setMaxVisibleVersions(2);      // Mobile
-            else if (width < 768) setMaxVisibleVersions(3);  // Small tablet
-            else if (width < 1024) setMaxVisibleVersions(4); // Tablet
-            else if (width < 1280) setMaxVisibleVersions(5); // Small desktop
-            else setMaxVisibleVersions(6);                   // Large desktop
-        };
-
-        updateMaxVersions();
-        window.addEventListener('resize', updateMaxVersions);
-        return () => window.removeEventListener('resize', updateMaxVersions);
-    }, []);
+        setMaxVisibleVersions(maxVersions);
+    }, [maxVersions]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -83,13 +78,16 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
 
     // Helper function to get version display name
     const getVersionDisplayName = useCallback((version) => {
+        // Find the index in the original array (this maintains consistent numbering)
+        const originalIndex = bridgeVersionsArray.indexOf(version);
+        
         if (version === publishedVersion) {
-            return "Published";
+            // For published version, show "V{number} Published"
+            return `V${originalIndex + 1} `;
+        } else {
+            // For non-published versions, show "V{number}"
+            return `V${originalIndex + 1}`;
         }
-        // Get all non-published versions and find the index
-        const nonPublishedVersions = bridgeVersionsArray.filter(v => v !== publishedVersion);
-        const nonPublishedIndex = nonPublishedVersions.indexOf(version);
-        return nonPublishedIndex >= 0 ? `V${nonPublishedIndex + 1}` : `V${bridgeVersionsArray.indexOf(version) + 1}`;
     }, [bridgeVersionsArray, publishedVersion]);
 
     // SendDataToChatbot effect - only runs when version changes
@@ -99,13 +97,13 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
 
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined') {
-                SendDataToChatbot({ "version_id": currentVersion });
+                SendDataToChatbot( isPublished ? { "version_id": "null"} : { "version_id": currentVersion});
                 clearInterval(timer);
             }
         }, 300);
 
         return () => clearInterval(timer);
-    }, [searchParams?.get?.('version')]);
+    }, [searchParams, isPublished]);
 
     // Initialize version only once on mount or when versions become available
     useEffect(() => {
@@ -114,7 +112,13 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
         }
         
         const currentVersion = searchParams?.get?.('version');
+        const isPublished = searchParams?.get?.('isPublished') === 'true';
         
+        // If isPublished=true, don't push version ID - just return
+        if (isPublished) {
+            hasInitialized.current = true;
+            return;
+        }
         
         // If no version in URL but we have versions available
         if (!currentVersion && (bridgeVersionsArray.length > 0 || publishedVersion)) {
@@ -340,11 +344,6 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
                                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Published Version"></span>
                                 )}
                                 
-                                {/* Info Icon - always visible */}
-                                    <Info 
-                                        size={12} 
-                                        className={`transition-opacity duration-200 cursor-help flex-shrink-0`}
-                                    />
                             </button>
                                 </div>
 

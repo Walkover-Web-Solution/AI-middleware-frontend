@@ -22,21 +22,27 @@ const PreEmbedList = ({ params, searchParams }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken, variables_path } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        const serviceName = activeData?.service;
+        const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+        const modelName = activeData?.configuration?.model;
+        
         return {
             integrationData: orgData?.integrationData || {},
             function_data: orgData?.functionData || {},
-            bridge_pre_tools: versionData?.pre_tools || [],
+            bridge_pre_tools: isPublished ? (bridgeDataFromState?.pre_tools || []) : (versionData?.pre_tools || []),
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
-            variables_path: versionData?.variables_path || {},
+            variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
         };
     });
     const dispatch = useDispatch();
