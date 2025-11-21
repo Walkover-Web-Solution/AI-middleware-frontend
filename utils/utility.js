@@ -784,10 +784,10 @@ export const generateKeyValuePairs = (obj) => {
 
 export const formatRelativeTime = (dateString) => {
   const normalized = normalizeToUTC(dateString);
-  if (!normalized) return '';
+  if (!normalized) return 'No records found';
 
   const date = new Date(normalized);
-  if (isNaN(date.getTime())) return '';
+  if (isNaN(date.getTime())) return 'No records found';
 
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -809,13 +809,12 @@ export const formatDate = (dateString) => {
   if (isNaN(date.getTime())) return dateString;
 
   return new Intl.DateTimeFormat("en-IN", {
-    year: "numeric",
+    year: "2-digit",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
+    hour12: false,
     timeZone: "Asia/Kolkata",
   }).format(date);
 };

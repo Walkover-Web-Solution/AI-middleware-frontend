@@ -80,6 +80,7 @@ const Page = () => {
   const dataWithIcons = filterApiKeys.map((item) => ({
     ...item,
     actualName: item.name,
+    apikey_usage: item?.apikey_usage ? parseFloat(item.apikey_usage).toFixed(4) : 0,
     service: (
       <div className="flex items-center gap-2">
         {getIconOfService(item.service, 18, 18)}
@@ -91,7 +92,7 @@ const Page = () => {
         <span className="group-hover:hidden">
           {formatRelativeTime(item.last_used)}
         </span>
-        <span className="hidden group-hover:inline">
+        <span className="hidden group-hover:inline ">
           {formatDate(item.last_used)}
         </span>
       </div>
@@ -104,7 +105,6 @@ const Page = () => {
       name: item.name,
       apikey_object_id: item._id,
       service: apikeyData?.find(api => api._id === item._id)?.service,
-      apikey: item.apikey,
       comment: item.comment,
       apikey_limit: item?.apikey_limit || 1,
       apikey_usage: 0,
@@ -203,7 +203,7 @@ const Page = () => {
               data={items}
               columnsToShow={API_KEY_COLUMNS}
               sorting
-              sortingColumns={["name", "last_used"]}
+              sortingColumns={["name", "last_used","apikey_usage"]}
               keysToWrap={["apikey", "comment"]}
               endComponent={EndComponent}
               handleRowClick={(data) => showConnectedAgents(data)}

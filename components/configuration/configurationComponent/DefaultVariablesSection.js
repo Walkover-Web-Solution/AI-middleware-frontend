@@ -27,7 +27,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [] }) => 
                 <div className="flex items-center gap-2 flex-1">
                     {/* Default Variables */}
                     <div className="flex items-center gap-1">
-                        <span className="text-xs text-base-content/60">Add dynamic values using &#123;&#123;variable&#125;&#125; format.</span> |
+                        <span className="text-xs text-base-content/60">Add dynamic values using &#123;&#123;variable&#125;&#125; format.</span> {usedVariables.length > 0 && "|"}
                     </div>
                     
                     {/* Used Variables */}

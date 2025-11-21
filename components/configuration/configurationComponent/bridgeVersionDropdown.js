@@ -219,42 +219,82 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
             return orderedVersions;
         }
 
-        // Find the index of the currently active version in the ordered array
         const currentVersion = searchParams?.get?.('version');
-        const activeIndex = orderedVersions.findIndex(version => version === currentVersion);
-
-        if (activeIndex === -1) {
-            // If no active version found, show first versions (published + others)
-            return orderedVersions.slice(0, maxVisibleVersions);
-        }
-
-        // If published version exists, always include it
+        
+        // If published version exists, always ensure it's included first
         if (publishedVersion) {
-            if (activeIndex === 0) {
-                // Active version is published, show published + next versions
-                return orderedVersions.slice(0, maxVisibleVersions);
-            } else {
-                // Active version is not published, show published + versions around active
-                const remainingSlots = maxVisibleVersions - 1; // Reserve 1 slot for published
-                const sideCount = Math.floor((remainingSlots - 1) / 2);
+            // Always include published version as first item
+            const remainingSlots = maxVisibleVersions - 1;
+            
+            // Find where the current version is in the other versions array
+            const currentVersionIndexInOthers = otherVersions.findIndex(v => v === currentVersion);
+            
+            if (currentVersion === publishedVersion) {
+                // Current version is published, show published + first other versions
+                const additionalVersions = otherVersions.slice(0, remainingSlots);
+                return [publishedVersion, ...additionalVersions];
+            } else if (currentVersionIndexInOthers !== -1) {
+                // Current version is not published but exists in other versions
+                // Create a window that includes the current version
+                let startIndex = 0;
+                let endIndex = remainingSlots;
                 
-                let startIndex = Math.max(1, activeIndex - sideCount); // Start from 1 to skip published
-                let endIndex = Math.min(orderedVersions.length, activeIndex + sideCount + 1);
-                
-                // Adjust if we're near the end
-                if (endIndex - startIndex < remainingSlots) {
-                    if (endIndex === orderedVersions.length) {
-                        startIndex = Math.max(1, orderedVersions.length - remainingSlots);
+                // If current version is within first remainingSlots, show from start
+                if (currentVersionIndexInOthers < remainingSlots) {
+                    startIndex = 0;
+                    endIndex = remainingSlots;
+                } else {
+                    // Current version is beyond initial window, center it
+                    const halfWindow = Math.floor(remainingSlots / 2);
+                    startIndex = Math.max(0, currentVersionIndexInOthers - halfWindow);
+                    endIndex = Math.min(otherVersions.length, startIndex + remainingSlots);
+                    
+                    // Adjust if we're near the end
+                    if (endIndex - startIndex < remainingSlots) {
+                        startIndex = Math.max(0, otherVersions.length - remainingSlots);
+                        endIndex = otherVersions.length;
                     }
                 }
                 
-                const selectedVersions = orderedVersions.slice(startIndex, endIndex);
+                const selectedVersions = otherVersions.slice(startIndex, endIndex);
                 return [publishedVersion, ...selectedVersions];
+            } else {
+                // Current version not found, show published + first other versions
+                const additionalVersions = otherVersions.slice(0, remainingSlots);
+                return [publishedVersion, ...additionalVersions];
             }
+        } else {
+            // No published version - use sliding window approach for current version
+            const currentVersionIndex = orderedVersions.findIndex(v => v === currentVersion);
+            
+            if (currentVersionIndex === -1) {
+                // No current version found, show first versions
+                return orderedVersions.slice(0, maxVisibleVersions);
+            }
+            
+            // Calculate window that includes current version
+            let startIndex = 0;
+            let endIndex = maxVisibleVersions;
+            
+            if (currentVersionIndex < maxVisibleVersions) {
+                // Current version is in first window
+                startIndex = 0;
+                endIndex = maxVisibleVersions;
+            } else {
+                // Current version is beyond first window, center it
+                const halfWindow = Math.floor(maxVisibleVersions / 2);
+                startIndex = Math.max(0, currentVersionIndex - halfWindow);
+                endIndex = Math.min(orderedVersions.length, startIndex + maxVisibleVersions);
+                
+                // Adjust if we're near the end
+                if (endIndex - startIndex < maxVisibleVersions) {
+                    startIndex = Math.max(0, orderedVersions.length - maxVisibleVersions);
+                    endIndex = orderedVersions.length;
+                }
+            }
+            
+            return orderedVersions.slice(startIndex, endIndex);
         }
-        
-        // Fallback to original logic if no published version
-        return orderedVersions.slice(0, maxVisibleVersions);
     };
 
     const versionsToShow = getVersionsToShow();
@@ -282,26 +322,28 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
                     return (
                         <div key={version} className="relative group">
                             <div className="tooltip tooltip-bottom" data-tip={versionDesc}>
+                                
                             <button
                                 onClick={() => handleVersionChange(version)}
                                 className={`
-                                    flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 relative
+                                   btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 relative whitespace-nowrap min-w-fit
                                     ${canDelete ? 'group-hover:pr-8' : ''}
                                     ${isActive
-                                        ? (isPublished ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-base-300 text-base-content border border-base-300')
-                                        : (isPublished ? 'bg-base-100 text-base-content hover:bg-green-50 hover:text-green-700 border border-base-300' : 'bg-base-100 text-base-content hover:bg-base-200')
+                                        ? (isPublished ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-primary hover:bg-primary text-black')
+                                        : (isPublished ? 'bg-base-100 text-base-content hover:bg-green-50 hover:text-green-700 border border-base-300' : 'bg-base-100 hover:bg-primary/50 hover:text-black text-base-content hover:bg-base-200')
                                     }
                                 `}
+                                style={{ minWidth: 'max-content' }}
                             >
                                 <span>{versionDisplayName}</span>
                                 {isPublished && (
-                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" title="Published Version"></span>
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Published Version"></span>
                                 )}
                                 
                                 {/* Info Icon - always visible */}
                                     <Info 
                                         size={12} 
-                                        className="transition-opacity duration-200 cursor-help text-base-content/60"
+                                        className={`transition-opacity duration-200 cursor-help flex-shrink-0`}
                                     />
                             </button>
                                 </div>

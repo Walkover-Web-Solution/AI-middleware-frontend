@@ -350,7 +350,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
+      className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
     >
       {/* Debug Panel States */}
       

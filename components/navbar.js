@@ -314,9 +314,9 @@ const Navbar = ({ isEmbedUser, params }) => {
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}
-        <div className="flex w-full items-center justify-between px-6 h-10">
+        <div className="flex w-full items-center justify-between px-2 sm:px-4 lg:px-6 h-10 min-w-0">
           {/* Left: Agent Name and Versions */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-5 min-w-0 flex-1">
             {(isEmbedUser && !hideHomeButton) &&
               <button
                 onClick={handleHomeClick}
@@ -329,12 +329,12 @@ const Navbar = ({ isEmbedUser, params }) => {
             }
             
             {/* Simple Agent Name Display */}
-            <div className="flex items-center ml-2 sm:ml-6 lg:ml-0 md:ml-0 xl:ml-0 min-w-0 flex-1">
-              <div className="flex items-center px-2 py-2 rounded-lg min-w-0 max-w-fit cursor-pointer group hover:bg-base-200/50 transition-colors">
+            <div className="flex items-center ml-1 sm:ml-2 lg:ml-0 min-w-0 flex-1">
+              <div className="flex items-center px-1 sm:px-2 py-1 sm:py-2 rounded-lg min-w-0 max-w-[120px] sm:max-w-fit cursor-pointer group hover:bg-base-200/50 transition-colors">
                 {!isEditingName ? (
                   <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
                     <span 
-                      className="font-semibold text-xs text-base-content truncate" 
+                      className="font-semibold text-xs text-base-content truncate flex-shrink" 
                       title={`${agentName} - Click to edit`}
                     >
                       {agentName}
@@ -359,10 +359,10 @@ const Navbar = ({ isEmbedUser, params }) => {
               </div>
               
               {/* Divider */}
-              <div className="mx-2 h-4 w-px bg-base-300"></div>
+              <div className="mx-1 sm:mx-2 h-4 w-px bg-base-300 flex-shrink-0"></div>
               
               {/* Bridge Version Dropdown */}
-              <div>
+              <div className="flex-shrink-0">
                 <BridgeVersionDropdown 
                   params={{ org_id: orgId, id: bridgeId }} 
                   searchParams={searchParams}
@@ -370,101 +370,123 @@ const Navbar = ({ isEmbedUser, params }) => {
               </div>
               
               {/* Status Indicator */}
-              {bridgeStatus !== BRIDGE_STATUS.ACTIVE && <StatusIndicator status={bridgeStatus} />}
+              {bridgeStatus !== BRIDGE_STATUS.ACTIVE && (
+                <div className="flex-shrink-0">
+                  <StatusIndicator status={bridgeStatus} />
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right: Action buttons */}
-          <div className="flex items-center gap-6">
-            {/* Navigation Tabs */}
-            {(isEmbedUser && showHistory) || !isEmbedUser ? (
-              <div className="flex items-center gap-1">
-                {TABS.map((tab) => {
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                      className={`
-                        px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-2 text-xs font-medium
-                        ${isActive
-                          ? 'text-base-content hover:text-base-content/80 hover:bg-base-200/50 border-base-300/50 bg-base-300 border'
-                          : 'text-base-content/70 hover:text-base-content hover:bg-base-200/50'
-                        }
-                      `}
-                    >
-                      <tab.icon
-                        size={14}
-                        className={`w-3.5 h-3.5 transition-opacity ${
-                          isActive ? 'opacity-100' : 'opacity-60'
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 flex-shrink-0">
+            {/* Navigation Tabs - Fixed Position with Sliding Animation */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {(isEmbedUser && showHistory) || !isEmbedUser ? (
+                <div className="relative flex items-center gap-1">
+                  {/* Sliding background indicator */}
+                  <span
+                    className="absolute inset-0 rounded-lg bg-primary shadow-sm transition-all duration-300 ease-in-out"
+                    style={{
+                      width: `${100 / (TABS.length || 1)}%`,
+                      transform: `translateX(${activeTabIndex * 100}%)`,
+                    }}
+                  />
+                  {TABS.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => handleTabChange(tab.id)}
+                        className={`relative z-10 px-2 sm:px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-xs font-medium whitespace-nowrap ${
+                          isActive
+                            ? 'text-black hover:text-black/80 bg-primary hover:bg-primary'
+                            : 'text-base-content/70 hover:text-black hover:bg-primary/50'
                         }`}
-                      />
-                      <span className="truncate">
-                        {isMobile ? tab.shortLabel : tab.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
+                      >
+                        <tab.icon
+                          size={14}
+                          className={`w-3.5 h-3.5 transition-opacity ${
+                            isActive ? 'opacity-100' : 'opacity-60'
+                          }`}
+                        />
+                        <span className="truncate text-xs">
+                          {window.innerWidth < 640 ? tab.shortLabel : tab.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                // Invisible placeholder to maintain spacing when tabs are hidden
+                <div className="w-32 h-8"></div>
+              )}
+            </div>
             
             {/* Divider */}
-            <div className="h-4 w-px bg-base-300"></div>
+             <div className="h-4 w-px bg-base-300 flex-shrink-0"></div>
             
-            {/* Desktop view - show buttons for both users */}
-            <div className="hidden md:flex items-center gap-2">
-              {/* History button */}
-              {!isEmbedUser && activeTab === 'configure' && (
-                <button className="tooltip tooltip-left p-1" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
-                  <HistoryIcon size={16} />
-                </button>
-              )}
+            {/* Desktop view - show buttons for both users with fixed positioning */}
+            <div className="hidden md:flex items-center gap-1 lg:gap-2 flex-shrink-0">
+              {/* History button - Fixed Position */}
+              <div className="flex items-center">
+                {!isEmbedUser && (
+                  <button className="tooltip tooltip-left p-1" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+                    <HistoryIcon size={16} />
+                  </button>
+                )}
+              </div>
               
-              {/* Publish/Discard Dropdown */}
-              {activeTab === 'configure' && (
+              {/* Publish/Discard Dropdown - Fixed Position */}
+              <div className="flex items-center">
                 <div className="dropdown dropdown-end">
-                  <div 
-                    tabIndex={0} 
-                    role="button" 
-                    className={`inline-flex items-center justify-center whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium ${isPublishing ? 'loading' : ''}`}
-                    disabled={isPublishing}
-                  >
-                    <span className="text-white text-xs">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
-                    {!isPublishing && <ChevronDown size={12} className="text-white" />}
-                  </div>
-                  <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
-                    <li>
-                      <button
-                        onClick={handlePublish}
-                        disabled={!isDrafted || isPublishing}
-                        className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <BookCheck size={14} className="text-success" />
-                        <span>Configure and Publish</span>
-                      </button>
-                    </li>
-                    {isDrafted && (
+                    <div 
+                      tabIndex={0} 
+                      role="button" 
+                      className={`inline-flex items-center justify-center whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
+                      disabled={isPublishing}
+                    >
+                      <span className="text-white text-xs truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
+                      {!isPublishing && <ChevronDown size={12} className="text-white" />}
+                    </div>
+                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
                       <li>
                         <button
-                          onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
-                          disabled={isUpdatingBridge || isPublishing}
+                          onClick={handlePublish}
+                          disabled={!isDrafted || isPublishing}
                           className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <RefreshCcw size={14} className="text-error" />
-                          <span>Revert to Published</span>
+                          <BookCheck size={14} className="text-success" />
+                          <span>Configure and Publish</span>
                         </button>
                       </li>
-                    )}
-                  </ul>
-                </div>
-              )}
+                      {isDrafted && (
+                        <li>
+                          <button
+                            onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
+                            disabled={isUpdatingBridge || isPublishing}
+                            className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <RefreshCcw size={14} className="text-error" />
+                            <span>Revert to Published</span>
+                          </button>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
               
-              {/* Ellipsis menu - positioned after Configure and Publish */}
-              {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
+              </div>
+              
+              {/* Ellipsis menu - Fixed Position */}
+              <div className="flex items-center">
+                {!isEmbedUser && (
+                  <EllipsisMenu />
+                )}
+              </div>
             </div>
 
             {/* Mobile view - compact buttons removed from header for embed users */}
-            <div className="md:hidden flex items-center gap-1">
+            <div className="md:hidden flex items-center gap-1 flex-shrink-0">
               {/* Ellipsis menu - only for normal users */}
               {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
             </div>

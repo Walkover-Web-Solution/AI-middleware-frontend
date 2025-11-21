@@ -7,7 +7,7 @@ import { MODAL_TYPE } from "@/utils/enums";
 import React, { useCallback, useEffect, useMemo, useState, use, useRef } from 'react';
 import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
-import { openModal, toggleSidebar, closeModal } from "@/utils/utility";
+import { openModal, toggleSidebar, closeModal, formatRelativeTime, formatDate } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
 import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
 import SearchItems from "@/components/UI/SearchItems";
@@ -58,12 +58,22 @@ const Page = ({ params }) => {
         </div>
       </div>
     ),
-    createdAt: new Date(item?.created_at).toLocaleString(),
+    createdAt: item.created_at ? (
+      <div className="group cursor-help">
+        <span className="group-hover:hidden">
+          {formatRelativeTime(item.created_at)}
+        </span>
+        <span className="hidden group-hover:inline">
+          {formatDate(item.created_at)}
+        </span>
+      </div>
+    ) : "No records found",
+    createdAt_original: item.created_at,
     embed_id: item?.folder_id,
     originalName: item?.name,
     org_id: item?.org_id,
     embed_limit: item?.folder_limit,
-    embed_usage: item?.folder_usage,
+    embed_usage: item?.folder_usage ? parseFloat(item.folder_usage).toFixed(4) : 0,
     originalItem: item
   }));
 
@@ -120,7 +130,7 @@ const Page = ({ params }) => {
             handlePortalCloseImmediate();
             handleSetIntegrationLimit(row);
           }}><ClockFading className="" size={16} />Usage Limit</a></li>
-          {(row?.embed_limit && row?.embed_usage !== 0) ? (
+          {(Number(row?.embed_usage) > 0) ? (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -185,15 +195,15 @@ const Page = ({ params }) => {
         </div>
       </div>
       {filterIntegration.length > 0 ? (
-        <div className="w-full">
+        <div className="w-full overflow-visible">
           <CustomTable
             data={tableData}
             columnsToShow={['name', 'embed_id', 'createdAt','embed_usage']}
             sorting
-            sortingColumns={['name','embed_usage']}
+            sortingColumns={['name','embed_usage','createdAt']}
             keysToWrap={['name', 'description']}
             handleRowClick={(data) => handleClickIntegration(data)}
-            keysToExtractOnRowClick={['org_id', 'folder_id']}
+            keysToExtractOnRowClick={['org_id', 'embed_id']}
             endComponent={EndComponent}
           />
         </div>
