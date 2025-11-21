@@ -4,6 +4,7 @@ import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
+import ConnectedAgentFlowPanel from "./ConnectedAgentFlowPanel";
 import { useConfigurationContext } from './ConfigurationContext';
 
 const SetupView = memo(() => {
@@ -19,8 +20,14 @@ const SetupView = memo(() => {
         bridgeApiKey,
         shouldPromptShow,
         service,
-        showDefaultApikeys
+        showDefaultApikeys,
+        currentView
     } = useConfigurationContext();
+
+    // Render agent flow panel when view is 'agent-flow'
+    if (currentView === 'agent-flow') {
+        return <ConnectedAgentFlowPanel />;
+    }
 
     return (
         <>

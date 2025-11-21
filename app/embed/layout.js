@@ -190,10 +190,11 @@ const Layout = ({ children }) => {
           return
         }
         if(history){
-          router.push(`/org/${orgId}/agents/history/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}&message_id=${history.message_id}`);
+          router.push(`/org/${orgId}/agents/history/${messageData.agent_id || event?.data?.data?.data?.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}&message_id=${history.message_id}`);
           return;
         }
-        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
+        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id || event?.data?.data?.data?.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
+        return
       }
       else if(messageData?.agent_purpose)
       {

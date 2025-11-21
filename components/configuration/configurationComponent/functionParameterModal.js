@@ -68,9 +68,9 @@ const ParameterCard = ({
               setEditingName(e.target.value);
             }}
             onBlur={(e) => {
-              if (onParameterNameChange && e.target.value.trim() !== paramKey && e.target.value.trim() !== '') {
+              if (onParameterNameChange && e?.target.value?.trim() !== paramKey && e?.target.value?.trim() !== '') {
                 onParameterNameChange(currentPath, e.target.value.trim(), paramKey);
-              } else if (e.target.value.trim() === '') {
+              } else if (e?.target.value?.trim() === '') {
                 setEditingName(paramKey); // Reset to original if empty
               }
             }}
@@ -721,7 +721,7 @@ function FunctionParameterModal({
   }, [updateField]);
 
   const handleParameterNameChange = useCallback((currentPath, newName, oldName) => {
-    if (!newName.trim() || newName === oldName) return;
+    if (!newName?.trim() || newName === oldName) return;
     
     const keyParts = currentPath.split(".");
     const parentPath = keyParts.slice(0, -1);
@@ -790,7 +790,7 @@ function FunctionParameterModal({
   }, [updateField]);
 
   const handleToolNameChange = useCallback(() => {
-    if (toolName.trim() === "") {
+    if (toolName?.trim() === "") {
       toast.error("Agent name cannot be empty");
       return;
     }
@@ -801,7 +801,7 @@ function FunctionParameterModal({
       handleUpdateFlow();
     }
 
-    if ((tool_name.trim() !== toolName.trim())) {
+    if ((tool_name?.trim() !== toolName?.trim())) {
       handleToolNameChange();
     }
     handleSave();

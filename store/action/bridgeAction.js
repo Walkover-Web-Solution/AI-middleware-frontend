@@ -196,12 +196,12 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     );
     const publishedVersionId = state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id;
     
-    // Check if trying to edit published version
-    if (versionId === publishedVersionId) {
-      toast.error("You can't edit the published version. Please create a new version to make changes.");
-      dispatch(isError());
-      return;
-    }
+    // // Check if trying to edit published version
+    // if (versionId === publishedVersionId) {
+    //   toast.error("You can't edit the published version. Please create a new version to make changes.");
+    //   dispatch(isError());
+    //   return;
+    // }
     
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
