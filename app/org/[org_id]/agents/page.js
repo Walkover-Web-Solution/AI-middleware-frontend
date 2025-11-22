@@ -332,18 +332,20 @@ function Home({ params, isEmbedUser }) {
       
       const dropdownContent = (
         <ul className="menu bg-base-100 rounded-box w-52 p-2 shadow">
-          <li><a onClick={(e) => {
-            e.preventDefault();           
-            e.stopPropagation();
-            handleSetBridgeLimit(row);
-          }}><ClockFading className="" size={16} />Usage Limit</a></li>
-          {(Number(row?.agent_usage) > 0)? (
+          {!isEmbedUser && (
+            <li><a onClick={(e) => {
+              e.preventDefault();           
+              e.stopPropagation();
+              handleSetBridgeLimit(row);
+            }}><ClockFading className="" size={16} />Usage Limit</a></li>
+          )}
+          {!isEmbedUser && (Number(row?.agent_usage) > 0) && (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               resetUsage(row);
-            }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
-          ) : null}
+            }}><RefreshIcon className="" size={16} />Reset Usage</a></li>
+          )}
           <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

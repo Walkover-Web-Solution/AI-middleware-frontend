@@ -95,7 +95,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     key={docId}
                     className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
                 >
-                    <div className="flex items-center gap-2 w-full">
+                    <div className="flex items-center gap-2 w-full ml-2">
                         {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
                         <div className="flex items-center gap-2 w-full">
                             {item?.name?.length > 24 ? (

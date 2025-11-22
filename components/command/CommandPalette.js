@@ -192,7 +192,6 @@ const CommandPalette = ({isEmbedUser}) => {
   // Categories array for navigation
   const categories = useMemo(() => [
     { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
-    { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
     { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
     { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
     { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },

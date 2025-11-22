@@ -4,6 +4,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { AlertIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
+import { CircleQuestionMark } from 'lucide-react';
 
 const UserReferenceForRichText = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -51,9 +52,9 @@ const UserReferenceForRichText = ({ params, searchParams }) => {
                                 <AlertIcon size={12} className="text-warning flex-shrink-0 " />
                                 </InfoTooltip>
                         )}
+                        <span className="text-base-content  text-sm ml-0">Rich Text Supported</span>
                         <InfoTooltip tooltipContent="Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content. Or else, responses will appear in plain text.">
-                           
-                        <span className="text-base-content info text-sm ml-0">Rich Text Supported</span>
+                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
                        
                     </div>
