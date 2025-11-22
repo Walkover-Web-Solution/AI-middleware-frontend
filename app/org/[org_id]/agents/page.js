@@ -200,6 +200,8 @@ function Home({ params, isEmbedUser }) {
                         </span>
                       </div> ,
     last_used_orignal: item.last_used,
+    agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
+
     }));
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
@@ -259,6 +261,8 @@ function Home({ params, isEmbedUser }) {
       </div>
     ) : "No records found",
     last_used_original: item.last_used,
+    agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
+
   }));
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
@@ -328,18 +332,20 @@ function Home({ params, isEmbedUser }) {
       
       const dropdownContent = (
         <ul className="menu bg-base-100 rounded-box w-52 p-2 shadow">
-          <li><a onClick={(e) => {
-            e.preventDefault();           
-            e.stopPropagation();
-            handleSetBridgeLimit(row);
-          }}><ClockFading className="" size={16} />Usage Limit</a></li>
-          {(Number(row?.agent_usage) > 0)? (
+          {!isEmbedUser && (
+            <li><a onClick={(e) => {
+              e.preventDefault();           
+              e.stopPropagation();
+              handleSetBridgeLimit(row);
+            }}><ClockFading className="" size={16} />Usage Limit</a></li>
+          )}
+          {!isEmbedUser && (Number(row?.agent_usage) > 0) && (
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               resetUsage(row);
-            }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
-          ) : null}
+            }}><RefreshIcon className="" size={16} />Reset Usage</a></li>
+          )}
           <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -531,9 +537,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60 overflow-visible">
                       <CustomTable 
                         data={ArchivedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens','last_used']} 
+                        columnsToShow={['name', 'model', 'totalTokens','agent_usage', 'last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens','last_used']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'agent_usage','last_used']} 
                         handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                         keysToExtractOnRowClick={['_id', 'versionId']} 
                         keysToWrap={['name', 'prompt', 'model']} 
@@ -555,9 +561,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60 overflow-visible">
                       <CustomTable 
                         data={DeletedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens','last_used']} 
+                        columnsToShow={['name', 'model', 'totalTokens','agent_usage', 'last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens','last_used']} 
+                        sortingColumns={['name', 'model', 'totalTokens','agent_usage','last_used']} 
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent} 
                       />
@@ -578,6 +584,7 @@ function Home({ params, isEmbedUser }) {
       {/* Portal components from hook */}
       <PortalStyles />
       <PortalDropdown />
+      
     </div>
   );
 }

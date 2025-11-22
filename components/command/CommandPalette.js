@@ -206,25 +206,14 @@ const CommandPalette = ({isEmbedUser}) => {
   }, []);
   const closePalette = useCallback(() => setOpen(false), []);
 
-  // Categories array for navigation - reorder to show current category first
-  const categories = useMemo(() => {
-    const allCategories = [
-      { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
-      { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
-      { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
-      { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
-      { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
-      { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-    ];
-    
-    if (!currentCategory) return allCategories;
-    
-    // Move current category to the top
-    const currentCategoryObj = allCategories.find(cat => cat.key === currentCategory);
-    const otherCategories = allCategories.filter(cat => cat.key !== currentCategory);
-    
-    return currentCategoryObj ? [currentCategoryObj, ...otherCategories] : allCategories;
-  }, [currentCategory]);
+  // Categories array for navigation
+  const categories = useMemo(() => [
+    { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
+    { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
+    { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
+    { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
+    { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
+  ], []);
 
   const navigateTo = useCallback((item) => {
     if (!orgId) {

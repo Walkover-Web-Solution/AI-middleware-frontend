@@ -4,6 +4,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { isValidJson, validateUrl } from '@/utils/utility';
+import { CircleQuestionMark } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -84,11 +85,12 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
 
     return (
         <div>
-            <label className="label">
+            <div className="flex items-center gap-2">
+                  <span className="label-text">Select Response Format</span>
                 <InfoTooltip tooltipContent="Configure the response format for your API calls">
-                  <span className="info label-text">Select Response Format</span>
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                 </InfoTooltip>
-              </label>
+              </div>
             {responseOptions.map(({ value, label }) => (
                 <div className="form-control w-fit" key={value}>
                     <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">

@@ -193,7 +193,7 @@ export const genrateSummary = async (version_id) => {
 export const getConnectedAgentFlowApi = async ({ versionId }) => {
   try {
     
-    const response = await axios.get(`${PYTHON_URL}/bridge/versions/connected-agents/${versionId}`);
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/connected-agents/${versionId}?type=version`);
     return response?.data;
   } catch (error) {
     console.error('Failed to fetch connected agent flow', error);

@@ -4,6 +4,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
+import { CircleQuestionMark } from 'lucide-react';
 
 const   GptMemory = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -45,8 +46,9 @@ const   GptMemory = ({ params, searchParams }) => {
             <div className="p-1">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
+                        <span className="text-base-content text-sm ml-1">Long Term Memory</span>
                         <InfoTooltip tooltipContent="If this feature is enabled we will pass the stored memory data by default in history/conversation">
-                        <span className="text-base-content info text-sm ml-1">Long Term Memory</span>
+                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
                     </div>
                     

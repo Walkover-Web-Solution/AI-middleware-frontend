@@ -458,8 +458,8 @@ const Navbar = ({ isEmbedUser, params }) => {
                         onClick={() => handleTabChange(tab.id)}
                         className={`relative z-10 px-2 sm:px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-xs font-medium whitespace-nowrap ${
                           isActive
-                            ? 'text-black hover:text-black/80 bg-primary hover:bg-primary'
-                            : 'text-base-content/70 hover:text-black hover:bg-primary/50'
+                            ? 'text-primary-content bg-transparent hover:bg-transparent'
+                            : 'text-base-content/70 hover:text-base-content hover:bg-base-200/30'
                         }`}
                       >
                         <tab.icon
