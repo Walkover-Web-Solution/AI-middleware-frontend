@@ -27,6 +27,7 @@ import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { getAllAuthData } from "@/store/action/authkeyAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { setInCookies } from "@/utils/utility";
+import ServiceInitializer from "@/components/organization/ServiceInitializer";
 
 const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
 const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
@@ -412,6 +413,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           setIsSliderOpen={setIsSliderOpen}
           isSliderOpen={isSliderOpen}
         />
+          <ServiceInitializer />
       </div>
     );
   }

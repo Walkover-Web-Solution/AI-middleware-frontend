@@ -64,6 +64,8 @@ const ConfigurationPage = ({
             <div className="z-very-low mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
                 <div className="flex flex-row gap-6 mt-4 items-center">
                     {/* Speak to us */}
+                    {!isEmbedUser && (
+                    <>
                     <button
                         data-cal-namespace="30min"
                         data-cal-link="team/gtwy.ai/ai-consultation"
@@ -76,7 +78,7 @@ const ConfigurationPage = ({
                     </button>
 
                     {/* Help Docs */}
-                    {!isEmbedUser && (
+                
                         <a
                             href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
                             className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors"
@@ -86,10 +88,10 @@ const ConfigurationPage = ({
                             <span>Help Docs</span>
                             <span>→</span>
                         </a>
-                    )}
+                    
 
                      {/* Integration Guide */}
-                    {!isEmbedUser && (
+                    
                         <button
                             onClick={() => {
                                 // Use setTimeout to ensure the component is rendered before toggling
@@ -100,8 +102,9 @@ const ConfigurationPage = ({
                             <span>Integration Guide</span>
                             <span>→</span>
                         </button>
+                    
+                    </>
                     )}
-
                 </div>
 
             </div>

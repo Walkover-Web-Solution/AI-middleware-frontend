@@ -1,6 +1,6 @@
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { MessageCircleIcon, MessageSquareIcon, PlugIcon, SettingsIcon } from "./Icons";
+import { MessageCircleIcon, MessageSquareIcon, PlugIcon, SettingsIcon, MessageCircleMoreIcon } from "./Icons";
 import { PlusIcon, Zap } from "lucide-react";
 import PageHeader from "./Pageheader";
 import CreateNewBridge from "./createNewBridge";
@@ -18,9 +18,9 @@ const AgentEmptyState = ({ orgid, isEmbedUser }) => {
   return (
     <div className=" mt-8 px-4">
       <div className=" mx-2 ">
-        {/* Header Section with Left-Right Layout */}
-        <div className="flex w-full justify-between">
-          {/* Left Side - Heading and Description */}
+        {/* Header Section with Overlapping Layout */}
+        <div className="relative w-full">
+          {/* Full Width - Heading and Description */}
          {!isEmbedUser ?  <PageHeader
             title="Welcome To GTWY AI"
             description="Build and manage AI agents for your workflows. Agents help automate tasks, answer queries, and deliver intelligent assistance."
@@ -32,13 +32,23 @@ const AgentEmptyState = ({ orgid, isEmbedUser }) => {
                         isEmbedUser={isEmbedUser}
                       />}
 
-          {/* Right Side - Create Agent Button */}
-          <div className="flex-shrink-0">
-            <div className="text-center ">
+          {/* Floating Right - Create Agent Buttons */}
+          <div className="absolute top-0 right-0">
+            <div className="text-center flex flex-row gap-2">
               <button className="btn btn-primary btn-sm" onClick={() => { openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL) }}>
                 + Create New Agent
               </button>
-
+              
+              <button
+                data-cal-namespace="30min"
+                data-cal-link="team/gtwy.ai/ai-consultation"
+                data-cal-origin="https://cal.id"
+                data-cal-config='{"layout":"month_view"}'
+                className="btn btn-primary btn-sm gap-1"
+              >
+                <MessageCircleMoreIcon size={12} />
+                <span className="text-sm">Speak To Us</span>
+              </button>
             </div>
           </div>
         </div>

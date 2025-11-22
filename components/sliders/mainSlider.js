@@ -6,6 +6,29 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
+
+// Add CSS animation for the gradient border
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes gradientMove {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+  `;
+  if (!document.head.querySelector('style[data-gradient-animation]')) {
+    style.setAttribute('data-gradient-animation', 'true');
+    document.head.appendChild(style);
+  }
+}
+
 import { useDispatch } from 'react-redux';
 import {
   Building2, ChevronDown,
@@ -773,30 +796,52 @@ function MainSlider({ isEmbedUser }) {
                   {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
                 </button>
 
-               {!currrentOrgDetail?.meta?.unlimited_access && <button
-                  onClick={() => {
-                    router.push(`/org/${orgId}/lifetime-access`);
-                    if (isMobile) setIsMobileVisible(false);
-                  }}
-                  onMouseEnter={e => onItemEnter('lifetimeAccess', e)}
-                  onMouseLeave={onItemLeave}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
-                >
-                  {ITEM_ICONS.lifetimeAccess}
-                  {showSidebarContent && <span className="text-xs truncate">Free Lifetime Access</span>}
-                </button>}
+               {!currrentOrgDetail?.meta?.unlimited_access && 
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      router.push(`/org/${orgId}/lifetime-access`);
+                      if (isMobile) setIsMobileVisible(false);
+                    }}
+                    onMouseEnter={e => onItemEnter('lifetimeAccess', e)}
+                    onMouseLeave={onItemLeave}
+                    className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-all duration-300 border-2 border-yellow-400/50 ${!showSidebarContent ? 'justify-center' : ''}`}
+                  >
+                    {/* Inner content */}
+                    <div className="relative z-10 flex items-center gap-3 w-full">
+                      <div className="relative">
+                        {ITEM_ICONS.lifetimeAccess}
+                        {/* Sparkle effect */}
+                        <div className="absolute -top-1 -right-1 w-1 h-1 bg-yellow-400 rounded-full animate-ping opacity-40"></div>
+                      </div>
+                      {showSidebarContent && (
+                        <span className="text-xs truncate font-medium bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                          Free Lifetime Access
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                  
+                  {/* Gift ribbon effect */}
+                  {showSidebarContent && (
+                    <div className="absolute -top-0.5 -right-0.5 text-xs opacity-60 transform rotate-12">
+                      🎁
+                    </div>
+                  )}
+                </div>
+              }
 
                 <button
-                  onClick={() => {
-                    openModal(MODAL_TYPE.DEMO_MODAL);
-                    if (isMobile) setIsMobileVisible(false);
-                  }}
+                   data-cal-namespace="30min"
+                        data-cal-link="team/gtwy.ai/ai-consultation"
+                        data-cal-origin="https://cal.id"
+                        data-cal-config='{"layout":"month_view"}'
                   onMouseEnter={e => onItemEnter('speak-to-us', e)}
                   onMouseLeave={onItemLeave}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
                   {ITEM_ICONS.speakToUs}
-                  {showSidebarContent && <span className="text-xs truncate">Speak to Us</span>}
+                  {showSidebarContent && <span className="text-xs truncate">Speak To Us</span>}
                 </button>
 
                 <a

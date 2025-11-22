@@ -584,6 +584,7 @@ function Home({ params, isEmbedUser }) {
       {/* Portal components from hook */}
       <PortalStyles />
       <PortalDropdown />
+      
     </div>
   );
 }
