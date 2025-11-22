@@ -5,13 +5,13 @@ import BridgeTypeToggle from './bridgeTypeToggle';
 import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
 import AdvancedConfiguration from './advancedConfiguration';
+import Protected from '@/components/protected';
 
-const ConfigurationSettingsAccordion = () => {
+const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
     params,
     searchParams,
-    isEmbedUser,
     showConfigType,
     hideAdvancedConfigurations,
     bridgeType,
@@ -44,7 +44,7 @@ const ConfigurationSettingsAccordion = () => {
       >
         {/* Settings Content */}
         <div className="flex flex-col gap-6">
-          <div className="bg-base-100 rounded-lg border border-base-200 p-3 flex items-center justify-between gap-4">
+          {!isEmbedUser && <div className="bg-base-100 rounded-lg border border-base-200 p-3 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-base-content">Connected Agent Flow</p>
               <p className="text-xs text-base-content/60">Switch to orchestral flow builder.</p>
@@ -61,7 +61,7 @@ const ConfigurationSettingsAccordion = () => {
                 }}
               />
             </label>
-          </div>
+          </div>}
           {shouldShowAgentType && (
             <div className="bg-base-100 rounded-lg">
               <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} />
@@ -99,4 +99,4 @@ const ConfigurationSettingsAccordion = () => {
   );
 };
 
-export default React.memo(ConfigurationSettingsAccordion);
+export default Protected(React.memo(ConfigurationSettingsAccordion));
