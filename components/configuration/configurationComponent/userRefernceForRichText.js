@@ -2,34 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import { AlertIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
+import { AlertIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon, ShieldIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
-import { CircleQuestionMark } from 'lucide-react';
+import { CircleQuestionMark, Crown } from 'lucide-react';
 
 const UserReferenceForRichText = ({ params, searchParams }) => {
     const dispatch = useDispatch();
-    const { is_rich_text = true, user_reference } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
-        
-        return {
-            is_rich_text: isPublished ? (bridgeDataFromState?.configuration?.is_rich_text) : (versionData?.configuration?.is_rich_text),
-            user_reference: isPublished ? (bridgeDataFromState?.user_reference || "") : (versionData?.user_reference || ""),
-        };
-    });
-    const isRichText = is_rich_text === "" ? true : is_rich_text;
+    const { is_rich_text = true, user_reference } = useCustomSelector((state) => ({
+        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text,
+        user_reference: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.user_reference || "",
+    }));
+    
+    // Disable rich text functionality - force to false for premium feature
+    const isRichText = false; // Disabled for premium feature
     const [userReference, setUserReference] = useState(user_reference);
-    const [showInput, setShowInput] = useState(user_reference?.length > 0);
+    const [showInput, setShowInput] = useState(false); // Always false since feature is disabled
 
     const handleCheckboxChange = (e) => {
-        const newValue = e.target.checked;
-        let updatedDataToSend = {
-            configuration: {
-                is_rich_text: newValue
-            }
-        };
-        dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
+        // Prevent any changes - show premium upgrade message
+        e.preventDefault();
+        return false;
     };
 
     const handleUserReferenceChange = (e) => {
@@ -53,23 +45,21 @@ const UserReferenceForRichText = ({ params, searchParams }) => {
                 
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3">
-                        {isRichText && (
-                                <InfoTooltip tooltipContent="When Rich Text is enabled, responses will be returned in Markdown format, overriding the current response format.">
-                                <AlertIcon size={12} className="text-warning flex-shrink-0 " />
-                                </InfoTooltip>
-                        )}
-                        <span className="text-base-content  text-sm ml-0">Rich Text Supported</span>
-                        <InfoTooltip tooltipContent="Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content. Or else, responses will appear in plain text.">
-                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        <InfoTooltip tooltipContent="Rich Text support is available in the Premium version. Upgrade to unlock advanced formatting with buttons, tables, cards, and markdown.">
+                            <Crown size={16} className="text-amber-500 flex-shrink-0 cursor-help" />
                         </InfoTooltip>
-                       
+                        <span className="text-base-content text-sm ml-0">Rich Text Supported</span>
+                        <InfoTooltip tooltipContent="Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content. This is a premium feature available in the Pro version.">
+                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        </InfoTooltip>
                     </div>
 
                     <input
                         type="checkbox"
                         checked={isRichText}
                         onChange={handleCheckboxChange}
-                        className="toggle toggle-xs"
+                        disabled={true}
+                        className="toggle toggle-xs opacity-50 cursor-not-allowed"
                     />
                 </div>
 
