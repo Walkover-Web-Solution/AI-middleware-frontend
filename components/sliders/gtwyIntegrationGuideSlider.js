@@ -311,6 +311,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   });
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedConfig, setLastSavedConfig] = useState(null);
 
   // Get config and root-level data from Redux store
   const integrationData = useCustomSelector((state) =>
@@ -342,7 +343,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       ? integrationData.apikey_object_id 
       : {};
 
-    return { ...merged, apikey_object_id: apiKeyIds };
+    return { ...merged, apikey_object_id: apiKeyIds, embed_id: data?.embed_id };
   });
 
   useEffect(() => {
@@ -356,15 +357,23 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       if (merged.addDefaultApiKeys) {
         // If addDefaultApiKeys is enabled in saved config, use saved API keys
         finalApiKeyIds = integrationData?.apikey_object_id || {};
-      } else if (prevConfig?.addDefaultApiKeys) {
-        // If addDefaultApiKeys is currently enabled but not saved, preserve current selections
+      } else if (prevConfig?.addDefaultApiKeys && data?.embed_id === prevConfig?.embed_id) {
+        // Only preserve current selections if it's the same integration
+        // This prevents API key selections from carrying over to different integrations
         finalApiKeyIds = prevConfig.apikey_object_id || {};
       }
       // Otherwise, keep empty object (no API keys)
   
-      return { ...merged, apikey_object_id: finalApiKeyIds };
+      const newConfig = { ...merged, apikey_object_id: finalApiKeyIds, embed_id: data?.embed_id };
+      
+      // Set this as the last saved config if we have integration data (meaning it's saved)
+      if (integrationData && config) {
+        setLastSavedConfig(newConfig);
+      }
+      
+      return newConfig;
     })
-  }, [integrationData, config]);
+  }, [integrationData, config, data?.embed_id]);
 
   const gtwyAccessToken = useCustomSelector((state) =>
     state?.userDetailsReducer?.organizations?.[data?.org_id]?.meta?.gtwyAccessToken || ""
@@ -428,6 +437,12 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 
       await dispatch(updateIntegrationDataAction(data?.org_id, dataToSend));
       
+      // Store the saved configuration for change detection
+      setLastSavedConfig({
+        ...configuration,
+        apikey_object_id: configuration.addDefaultApiKeys ? (apikey_object_id || {}) : {}
+      });
+      
       // Clear API keys from local state after successful save if addDefaultApiKeys is false
       if (!configuration.addDefaultApiKeys) {
         setConfiguration(prev => ({
@@ -450,20 +465,35 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     }));
   };
 
-  // Check if configuration has changed from the initial Redux config + root apikey_object_id
+  // Check if configuration has changed from the last saved state
   const isConfigChanged = () => {
+    // If we have a last saved config, compare against that
+    if (lastSavedConfig) {
+      const normalizedCurrent = {
+        ...configuration,
+        apikey_object_id: configuration.apikey_object_id || {},
+      };
+      
+      const normalizedSaved = {
+        ...lastSavedConfig,
+        apikey_object_id: lastSavedConfig.apikey_object_id || {},
+      };
+      
+      // Remove embed_id from comparison as it's just for tracking
+      const { embed_id: currentEmbedId, ...currentForComparison } = normalizedCurrent;
+      const { embed_id: savedEmbedId, ...savedForComparison } = normalizedSaved;
+      
+      return JSON.stringify(currentForComparison) !== JSON.stringify(savedForComparison);
+    }
+    
+    // Fallback to original logic if no saved config exists
     const defaults = generateInitialConfig();
     const baseline = config ? { ...defaults, ...config } : defaults;
 
-    const baselineApiKeyIds = data?.apikey_object_id
-      ? { ...data.apikey_object_id }
-      : config?.apiKeys
-        ? { ...config.apiKeys }
-        : {};
+    const baselineApiKeyIds = integrationData?.apikey_object_id || {};
 
     const normalizedCurrent = {
       ...configuration,
-      // normalize undefined objects
       apikey_object_id: configuration.apikey_object_id || {},
     };
 
@@ -471,8 +501,12 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       ...baseline,
       apikey_object_id: baselineApiKeyIds,
     };
+    
+    // Remove embed_id from comparison
+    const { embed_id: currentEmbedId, ...currentForComparison } = normalizedCurrent;
+    const { embed_id: baselineEmbedId, ...baselineForComparison } = normalizedBaseline;
 
-    return JSON.stringify(normalizedCurrent) !== JSON.stringify(normalizedBaseline);
+    return JSON.stringify(currentForComparison) !== JSON.stringify(baselineForComparison);
   };
 
   // Group configs by section

@@ -200,6 +200,8 @@ function Home({ params, isEmbedUser }) {
                         </span>
                       </div> ,
     last_used_orignal: item.last_used,
+    agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
+
     }));
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
@@ -259,6 +261,8 @@ function Home({ params, isEmbedUser }) {
       </div>
     ) : "No records found",
     last_used_original: item.last_used,
+    agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
+
   }));
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
@@ -531,9 +535,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60 overflow-visible">
                       <CustomTable 
                         data={ArchivedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens','last_used']} 
+                        columnsToShow={['name', 'model', 'totalTokens','agent_usage', 'last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens','last_used']} 
+                        sortingColumns={['name', 'model', 'totalTokens', 'agent_usage','last_used']} 
                         handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                         keysToExtractOnRowClick={['_id', 'versionId']} 
                         keysToWrap={['name', 'prompt', 'model']} 
@@ -555,9 +559,9 @@ function Home({ params, isEmbedUser }) {
                     <div className="opacity-60 overflow-visible">
                       <CustomTable 
                         data={DeletedBridges} 
-                        columnsToShow={['name', 'model', 'totalTokens','last_used']} 
+                        columnsToShow={['name', 'model', 'totalTokens','agent_usage', 'last_used']} 
                         sorting 
-                        sortingColumns={['name', 'model', 'totalTokens','last_used']} 
+                        sortingColumns={['name', 'model', 'totalTokens','agent_usage','last_used']} 
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent} 
                       />

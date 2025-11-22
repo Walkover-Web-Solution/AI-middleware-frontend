@@ -41,10 +41,17 @@ function ToolCallCount({ params, searchParams }) {
                 defaultValue={tool_call_count || 3}
                 onInput={(e) => {
                     const value = parseInt(e.target.value, 10);
-                    if (value < 2) e.target.value = 2;
                     if (value > 30) e.target.value = 30;
                 }}
-                onBlur={(e) => handleFunctionCountChange(e)}
+                onBlur={(e) => {
+                    const value = parseInt(e.target.value, 10);
+                    if (isNaN(value) || value < 2) {
+                        e.target.value = 2;
+                    } else if (value > 30) {
+                        e.target.value = 30;
+                    }
+                    handleFunctionCountChange(e);
+                }}
             />
         </div>
     )
