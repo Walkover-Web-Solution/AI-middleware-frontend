@@ -42,6 +42,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
+  const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
   const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray, variablesCount } = useCustomSelector(state => {
     return {
     organizations: state.userDetailsReducer.organizations,
@@ -217,8 +218,29 @@ const Navbar = ({ isEmbedUser, params }) => {
 
   const handleTabChange = useCallback((tabId) => {
     const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
-    router.push(base + (versionId ? `?version=${versionId}` : ''));
-  }, [router, orgId, bridgeId, versionId]);
+    
+    // If currently in published mode and navigating to testcase or history
+    if (isPublished && (tabId === 'testcase' || tabId === 'history')) {
+      // Use published version ID and remove isPublished parameter
+      router.push(base + (publishedVersion ? `?version=${publishedVersion}` : ''));
+    } else {
+      // Normal navigation with current version
+      router.push(base + (versionId ? `?version=${versionId}` : ''));
+    }
+  }, [router, orgId, bridgeId, versionId, isPublished, publishedVersion]);
+
+  const handlePublishedClick = useCallback(() => {
+    if (!publishedVersion) {
+      toast.error('No published version available');
+      return;
+    }
+    
+    const currentUrl = new URL(window.location);
+    // Don't push versionId when isPublished=true, just set isPublished flag
+    currentUrl.searchParams.delete('version'); // Remove version parameter
+    currentUrl.searchParams.set('isPublished', 'true');
+    router.push(currentUrl.pathname + currentUrl.search);
+  }, [router, publishedVersion]);
 
   const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
   const toggleIntegrationGuideSlider = useCallback(() => toggleSidebar("integration-guide-slider", "right"), []);
@@ -234,15 +256,14 @@ const Navbar = ({ isEmbedUser, params }) => {
     )
   );
 
-  const handleArchiveBridge = (bridgeId, newStatus = 0) => {
+  const handleArchiveBridge = async (bridgeId, newStatus = 0) => {
     try {
-      dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
-        if (bridgeStatus === 1) {
-          toast.success('Agent Unarchived Successfully');
-        } else {
-          toast.success('Agent Archived Successfully');
-        }
-      });
+      const bridgeStatus = await dispatch(archiveBridgeAction(bridgeId, newStatus));
+      if (bridgeStatus === 1) {
+        toast.success('Agent Unarchived Successfully');
+      } else {
+        toast.success('Agent Archived Successfully');
+      }
     } catch (error) {
       console.error('Failed to archive/unarchive agents', error);
     }
@@ -253,19 +274,24 @@ const Navbar = ({ isEmbedUser, params }) => {
     <div className="relative" ref={ellipsisMenuRef}>
       <button
         onClick={() => setShowEllipsisMenu(!showEllipsisMenu)}
-        className="p-2"
+        className="p-2 hover:bg-base-200 rounded-md transition-colors"
         title="More options"
       >
         <MoreVertical size={16} />
       </button>
 
       {showEllipsisMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg z-medium">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-[9999]">
           <div className="py-1">
             <button
-              onClick={handlePauseBridge}
+              onMouseDown={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                await handlePauseBridge();
+                setShowEllipsisMenu(false);
+              }}
               disabled={isUpdatingBridge}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 cursor-pointer ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
             >
               {bridgeStatus === BRIDGE_STATUS.PAUSED ? (
@@ -283,9 +309,14 @@ const Navbar = ({ isEmbedUser, params }) => {
           </div>
           <div className="py-1">
             <button
-              onClick={() => handleArchiveBridge(bridgeId, isArchived ? 0 : 1)}
+              onMouseDown={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                await handleArchiveBridge(bridgeId, isArchived ? 0 : 1);
+                setShowEllipsisMenu(false);
+              }}
               disabled={isUpdatingBridge}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 cursor-pointer ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
             >
               {isArchived ? (
@@ -331,7 +362,7 @@ const Navbar = ({ isEmbedUser, params }) => {
             }
             
             {/* Simple Agent Name Display */}
-            <div className="flex items-center ml-1 sm:ml-2 lg:ml-0 min-w-0 flex-1">
+            <div className="hidden sm:flex items-center ml-1 sm:ml-2 lg:ml-0 min-w-0 flex-1">
               <div className="flex items-center px-1 sm:px-2 py-1 sm:py-2 rounded-lg min-w-0 max-w-[120px] sm:max-w-fit cursor-pointer group hover:bg-base-200/50 transition-colors">
                 {!isEditingName ? (
                   <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
@@ -363,13 +394,38 @@ const Navbar = ({ isEmbedUser, params }) => {
               {/* Divider */}
               <div className="mx-1 sm:mx-2 h-4 w-px bg-base-300 flex-shrink-0"></div>
               
-              {/* Bridge Version Dropdown */}
-              <div className="flex-shrink-0">
-                <BridgeVersionDropdown 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={searchParams}
-                />
-              </div>
+              {/* Published Button + Bridge Version Dropdown */}
+              {activeTab === 'configure' && (
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Published Button */}
+                  {publishedVersion && (
+                    <button
+                      onClick={handlePublishedClick}
+                      className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap min-w-fit ${
+                        isPublished
+                          ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
+                          : 'bg-base-100 text-base-content border border-base-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                      }`}
+                      title={isPublished ? 'Currently viewing published version' : 'Switch to published version'}
+                    >
+                      <span className="hidden sm:inline">Published</span>
+                      <span className="sm:hidden">Pub</span>
+                      {isPublished && (
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Active"></span>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Bridge Version Dropdown - Desktop Only */}
+                  <div className="hidden sm:flex min-w-0 flex-1">
+                    <BridgeVersionDropdown 
+                      params={{ org_id: orgId, id: bridgeId }} 
+                      searchParams={searchParams}
+                      maxVersions={2}
+                    />
+                  </div>
+                </div>
+              )}
               
               {/* Status Indicator */}
               {bridgeStatus !== BRIDGE_STATUS.ACTIVE && (
@@ -413,7 +469,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                           }`}
                         />
                         <span className="truncate text-xs">
-                          {window.innerWidth < 640 ? tab.shortLabel : tab.label}
+                          {isMobile ? tab.shortLabel : tab.label}
                         </span>
                       </button>
                     );
@@ -489,10 +545,81 @@ const Navbar = ({ isEmbedUser, params }) => {
 
             {/* Mobile view - compact buttons removed from header for embed users */}
             <div className="md:hidden flex items-center gap-1 flex-shrink-0">
-              {/* Ellipsis menu - only for normal users */}
-              {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
+              {/* Hidden on mobile - moved to bottom navbar */}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Version Dropdown - Below navbar */}
+      <div className="sm:hidden bg-base-100 border-b border-base-200 px-2 py-2">
+        <div className="flex items-center justify-between gap-2">
+          {/* Agent Name - Editable */}
+          <div className="flex items-center min-w-0 flex-1">
+            <div className="flex items-center px-1 py-1 rounded-lg min-w-0 max-w-[120px] cursor-pointer group hover:bg-base-200/50 transition-colors">
+              {!isEditingName ? (
+                <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
+                  <span 
+                    className="font-semibold text-xs text-base-content truncate flex-shrink" 
+                    title={`${agentName} - Click to edit`}
+                  >
+                    {agentName}
+                  </span>
+                  <Edit2 
+                    size={10} 
+                    className="text-base-content/40 group-hover:text-base-content/60 transition-colors flex-shrink-0" 
+                  />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onBlur={handleNameSave}
+                  onKeyDown={handleNameKeyDown}
+                  className="input input-xs text-xs text-base-content w-full"
+                  autoFocus
+                  maxLength={50}
+                />
+              )}
+            </div>
+          </div>
+          
+          {/* Published Button and Version Dropdown - Only show on configure tab */}
+          {activeTab === 'configure' && (
+            <>
+              {/* Published Button */}
+              {publishedVersion && (
+                <button
+                  onClick={handlePublishedClick}
+                  className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap ${
+                    isPublished
+                      ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
+                      : 'bg-base-100 text-base-content border border-base-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                  }`}
+                  title={isPublished ? 'Currently viewing published version' : 'Switch to published version'}
+                >
+                  <span>Pub</span>
+                  {isPublished && (
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Active"></span>
+                  )}
+                </button>
+              )}
+
+              {/* Version Dropdown */}
+              <div className="min-w-0">
+                <BridgeVersionDropdown 
+                  params={{ org_id: orgId, id: bridgeId }} 
+                  searchParams={searchParams}
+                  maxVersions={2}
+                  showDropdownOnly={true}
+                />
+              </div>
+            </>
+          )}
+          
+          {/* Ellipsis Menu */}
+          {!isEmbedUser && <EllipsisMenu />}
         </div>
       </div>
 

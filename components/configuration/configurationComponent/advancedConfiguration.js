@@ -23,22 +23,27 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
   const dispatch = useDispatch();
 
   const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
-    const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const isPublished = searchParams?.isPublished === 'true';
     const apikeys = state?.apiKeysReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const service = versionData?.service;
-    const model = versionData?.model;
+    
+    // Use bridgeData when isPublished=true, otherwise use versionData
+    const activeData = isPublished ? bridgeDataFromState : versionData;
+    const service = activeData?.service;
+    const model = activeData?.model;
+    
     return {
-      bridge: bridgeMap,
+      bridge: activeData || {},
       apikeydata: apikeys[params?.org_id] || [],
-      bridgeApikey_object_id: bridgeMap?.apikey_object_id||{},
+      bridgeApikey_object_id: isPublished ? (bridgeDataFromState?.apikey_object_id || {}) : (versionData?.apikey_object_id || {}),
       SERVICES: state?.serviceReducer?.services,
       isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration,
       serviceModels: state?.modelReducer?.serviceModels || {},
       currentService: service,
-      currentModel: versionData?.configuration?.model,
-      fallbackModel: versionData?.fall_back,
+      currentModel: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+      fallbackModel: isPublished ? (bridgeDataFromState?.fall_back) : (versionData?.fall_back),
       DefaultModel: state?.serviceReducer?.default_model||[],
 
     };

@@ -112,13 +112,22 @@ ModelPreview.displayName = 'ModelPreview';
 const ModelDropdown = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
-    const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => ({
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
-        fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.fine_tune_model?.current_model,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type,
-        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service],
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    }));
+    const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        
+        return {
+            model: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+            fineTuneModel: isPublished ? (bridgeDataFromState?.configuration?.fine_tune_model?.current_model) : (versionData?.configuration?.fine_tune_model?.current_model),
+            modelType: isPublished ? (bridgeDataFromState?.configuration?.type) : (versionData?.configuration?.type),
+            modelsList: state?.modelReducer?.serviceModels[activeData?.service],
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        };
+    });
 
     const [hoveredModel, setHoveredModel] = useState(null);
     const [modelSpecs, setModelSpecs] = useState();

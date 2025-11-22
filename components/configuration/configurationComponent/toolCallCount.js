@@ -8,11 +8,17 @@ import { CircleQuestionMark } from 'lucide-react';
 
 function ToolCallCount({ params, searchParams }) {
     const dispatch = useDispatch();
-    const { tool_call_count, modelType, model } = useCustomSelector((state) => ({
-        tool_call_count: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.tool_call_count,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
-    }));
+    const { tool_call_count, modelType, model } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        return {
+            tool_call_count: isPublished ? (bridgeDataFromState?.tool_call_count) : (versionData?.tool_call_count),
+            modelType: isPublished ? (bridgeDataFromState?.configuration?.type?.toLowerCase()) : (versionData?.configuration?.type?.toLowerCase()),
+            model: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+        };
+    });
 
     const handleFunctionCountChange = (e) => {
         const new_value = parseInt(e.target.value, 10);

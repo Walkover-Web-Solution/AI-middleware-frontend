@@ -31,15 +31,21 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [summaryAccordionOpen, setSummaryAccordionOpen] = useState(false);
   
 
-  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap, prompt } = useCustomSelector((state) => ({
-    bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
-    versionData: state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.get("version")],
-    bridgeData: state.bridgeReducer.allBridgesMap?.[params?.id],
-    agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
-    bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
-    allBridgesMap: state.bridgeReducer.allBridgesMap || {},
-    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.get("version")]?.configuration?.prompt || "",
-  }));
+  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap, prompt } = useCustomSelector((state) => {
+    const isPublished = searchParams?.get("isPublished") === 'true';
+    const bridgeDataFromState = state.bridgeReducer.allBridgesMap?.[params?.id];
+    const versionDataFromState = state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.get("version")];
+    
+    return {
+      bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
+      versionData: versionDataFromState,
+      bridgeData: bridgeDataFromState,
+      agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
+      bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
+      allBridgesMap: state.bridgeReducer.allBridgesMap || {},
+      prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionDataFromState?.configuration?.prompt || ""),
+    };
+  });
   // Memoized form data initialization
   const [formData, setFormData] = useState(() => ({
     url_slugname: '',

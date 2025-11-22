@@ -9,10 +9,16 @@ import { CircleQuestionMark } from 'lucide-react';
 
 const GuardrailSelector = ({ params, searchParams }) => {  
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
-        (state) => ({
-            guardrailsData: state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version]?.guardrails || {},
-            GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData || {}
-        })
+        (state) => {
+            const versionData = state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version];
+            const bridgeDataFromState = state.bridgeReducer?.allBridgesMap?.[params?.id];
+            const isPublished = searchParams?.isPublished === 'true';
+            
+            return {
+                guardrailsData: isPublished ? (bridgeDataFromState?.guardrails || {}) : (versionData?.guardrails || {}),
+                GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData || {}
+            };
+        }
     );
     const [customPrompt, setCustomPrompt] = useState(guardrailsData?.guardrails_custom_prompt || "");
     const [showCustomInput, setShowCustomInput] = useState(false);
@@ -54,7 +60,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
 
     useEffect(() => {
         if (guardrailsData) {
-            // Set enabled state from is_enabled
+            setGuardrailsEnabled(guardrailsData?.is_enabled||false);
             
             // Set selected guardrails from guardrails_configuration
             const selected = Object.entries(guardrailsData?.guardrails_configuration || {})

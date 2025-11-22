@@ -24,12 +24,18 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        const serviceName = activeData?.service;
+        const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+        const modelName = activeData?.configuration?.model;
+        
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.doc_ids || [],
+            knowbaseVersionData: isPublished ? (bridgeDataFromState?.doc_ids || []) : (versionData?.doc_ids || []),
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName

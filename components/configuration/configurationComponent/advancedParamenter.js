@@ -32,24 +32,29 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const dispatch = useDispatch();
 
   const {service,version_function_data,configuration,integrationData,isFirstParameter,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
-    const versionData =state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const integrationData =state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const isPublished = searchParams?.isPublished === 'true';
+    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     const user = state.userDetailsReducer.userDetails;
-    const bridge=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const service = versionData?.service;
-    const configuration = versionData?.configuration;
+    
+    // Use bridgeData when isPublished=true, otherwise use versionData
+    const activeData = isPublished ? bridgeDataFromState : versionData;
+    const service = activeData?.service;
+    const configuration = activeData?.configuration;
     const type = configuration?.type;
     const model = configuration?.model;
-    const modelInfoData =state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
+    const modelInfoData = state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
+    
     return {
-      version_function_data: versionData?.apiCalls,
+      version_function_data: isPublished ? (bridgeDataFromState?.apiCalls) : (versionData?.apiCalls),
       integrationData,
       service,
       configuration,
       isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
-      connected_agents: versionData?.connected_agents,
+      connected_agents: isPublished ? (bridgeDataFromState?.connected_agents) : (versionData?.connected_agents),
       modelInfoData,
-      bridge
+      bridge: activeData
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);

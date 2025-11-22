@@ -412,7 +412,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
             >
               {/* Configuration Content */}
-              <div ref={leftPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-4">
+              <div ref={leftPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4">
                 <ConfigurationPage
                   promptTextAreaRef={promptTextAreaRef}
                   params={resolvedParams}

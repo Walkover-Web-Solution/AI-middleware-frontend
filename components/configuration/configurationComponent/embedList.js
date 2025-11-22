@@ -44,26 +44,32 @@ const EmbedList = ({ params, searchParams }) => {
   const dispatch = useDispatch();
   const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const isPublished = searchParams?.isPublished === 'true';
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
-    const serviceName = versionData?.service;
-    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-    const modelName = versionData?.configuration?.model;
+    
+    // Use bridgeData when isPublished=true, otherwise use versionData
+    const activeData = isPublished ? bridgeDataFromState : versionData;
+    const serviceName = activeData?.service;
+    const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+    const modelName = activeData?.configuration?.model;
     const currentUser = state.userDetailsReducer.userDetails;
+    
     return {
       integrationData: orgData?.integrationData || {},
       function_data: orgData?.functionData || {},
-      bridge_functions: versionData?.function_ids || [],
+      bridge_functions: isPublished ? (bridgeDataFromState?.function_ids || []) : (versionData?.function_ids || []),
       modelType: modelTypeName,
       model: modelName,
       shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
       showInbuiltTools: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.inbuilt_tools,
       embedToken: orgData?.embed_token,
-      variables_path: versionData?.variables_path || {},
+      variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
-      toolsVersionData: versionData?.built_in_tools,
+      toolsVersionData: isPublished ? (bridgeDataFromState?.built_in_tools) : (versionData?.built_in_tools),
       isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
-      prebuiltToolsFilters: versionData?.web_search_filters || [],
+      prebuiltToolsFilters: isPublished ? (bridgeDataFromState?.web_search_filters || []) : (versionData?.web_search_filters || []),
     };
   });
   // Use the tutorial videos hook

@@ -49,9 +49,23 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [editContent, setEditContent] = useState('');
   const testCaseResultRef = useRef(null);
   const [testCaseConversation, setTestCaseConversation] = useState([]);
+
+  // Get published version ID from Redux store
+  const publishedVersionId = useCustomSelector((state) => 
+    state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id
+  );
+
   const channelIdentifier = useMemo(() => {
-    return (params.org_id + '_' + params?.id + '_' + searchParams?.version).replace(/ /g, "_");
-  }, [params, searchParams]);
+    const isPublished = searchParams?.isPublished === 'true';
+    
+    if (isPublished) {
+      // For published version, use published version ID in channel identifier
+      return (params.org_id + '_'+ params?.id + '_' + publishedVersionId).replace(/ /g, "_");
+    } else {
+      // For draft versions, include the version
+      return (params.org_id + '_'+ params?.id + '_' + searchParams?.version).replace(/ /g, "_");
+    }
+  }, [params, searchParams, publishedVersionId]);
 
   // Redux selectors for chat state
   const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({

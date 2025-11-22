@@ -22,6 +22,23 @@ const CommandPalette = ({isEmbedUser}) => {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
   const orgId = useMemo(() => getOrgIdFromPath(pathname), [pathname]);
+  
+  // Detect current category based on pathname
+  const currentCategory = useMemo(() => {
+    if (!pathname) return null;
+    
+    const parts = pathname.split("/").filter(Boolean);
+    
+    // Check for specific routes
+    if (parts.includes("agents")) return "agents";
+    if (parts.includes("orchestratal_model")) return "flows";
+    if (parts.includes("apikeys")) return "apikeys";
+    if (parts.includes("pauthkey")) return "Auths";
+    if (parts.includes("knowledge_base")) return "docs";
+    if (parts.includes("integration")) return "integrations";
+    
+    return null;
+  }, [pathname]);
 
   const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData } = useCustomSelector((state) => ({
     agentList: state?.bridgeReducer?.org?.[orgId]?.orgs || [],
@@ -356,20 +373,32 @@ const CommandPalette = ({isEmbedUser}) => {
             <div className="">
 
               <div className="space-y-1 p-2">
-                {categories.map((c, index) => (
-                  <button
-                    key={c.key}
-                    onClick={() => navigateCategory(c.key)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex flex-col ${
-                      index === activeCategoryIndex 
-                        ? 'bg-primary text-primary-content' 
-                        : 'bg-base-200 hover:bg-base-300'
-                    }`}
-                  >
-                    <div className="font-medium">{c.label}</div>
-                    <div className="text-xs opacity-70">{c.desc}</div>
-                  </button>
-                ))}
+                {categories.map((c, index) => {
+                  const isCurrentCategory = currentCategory === c.key;
+                  const isActiveCategory = index === activeCategoryIndex;
+                  
+                  return (
+                    <button
+                      key={c.key}
+                      onClick={() => navigateCategory(c.key)}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex flex-col relative ${
+                        isActiveCategory 
+                          ? 'bg-primary text-primary-content' 
+                          : 'bg-base-200 hover:bg-base-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium">{c.label}</div>
+                        {isCurrentCategory && (
+                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                        )}
+                      </div>
+                      <div className="text-xs opacity-70">
+                        {c.desc}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (

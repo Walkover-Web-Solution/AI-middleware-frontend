@@ -10,10 +10,16 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
 function ActionList({ params, searchParams }) {
-    const { action, bridgeType } = useCustomSelector((state) => ({
-        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.actions,
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
-    }));
+    const { action, bridgeType } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+
+        return {
+            action: isPublished ? (bridgeDataFromState?.actions) : (versionData?.actions),
+            bridgeType: bridgeDataFromState?.bridgeType
+        };
+    });
 
     const dispatch = useDispatch();
     const [selectedKey, setSelectedKey] = useState(null);

@@ -28,16 +28,26 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = searchParams?.version;
-    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId],
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt,
-        variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
-        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration,
-        modelInfo: state?.modelReducer?.serviceModels,
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type,
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model,
-    }));
+    const isPublished = searchParams?.isPublished === 'true';
+    
+    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        
+        return {
+            bridge: activeData,
+            prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt) : (versionData?.configuration?.prompt),
+            variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
+            configuration: isPublished ? (bridgeDataFromState?.configuration) : (versionData?.configuration),
+            modelInfo: state?.modelReducer?.serviceModels,
+            service: isPublished ? (bridgeDataFromState?.service?.toLowerCase()) : (versionData?.service?.toLowerCase()),
+            modelType: isPublished ? (bridgeDataFromState?.configuration?.type) : (versionData?.configuration?.type),
+            modelName: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+        };
+    });
 
     // Redux selectors for chat state
     const { conversation, loading, uploadedFiles, uploadedImages, storedTestCaseId } = useCustomSelector((state) => ({
@@ -238,7 +248,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                 const apiCall = async () => {
                     return await dryRun({
                         localDataToSend: {
-                            version_id: versionId,
+                            ...(isPublished ? {} : { version_id: versionId }),
                             testcase_data,
                             configuration: {
                                 conversation: conversation,
@@ -290,7 +300,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                 const apiCall = async () => {
                     return await dryRun({
                         localDataToSend: {
-                            version_id: versionId,
+                            ...(isPublished ? {} : { version_id: versionId }),
                             testcase_data,
                             configuration: {
                                 conversation: conversation,
@@ -328,7 +338,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     return await dryRun({
                         localDataToSend: {
                             ...localDataToSend,
-                            version_id: versionId,
+                            ...(isPublished ? {} : { version_id: versionId }),
                             testcase_data,
                             configuration: {
                                 ...localDataToSend.configuration
