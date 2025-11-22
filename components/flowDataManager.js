@@ -866,19 +866,6 @@ export function FlowControlPanel({
 
   return (
     <div className="relative z-[9990]">
-      {/* Back button */}
-      {isEmbedUser && <button className="btn btn-outline absolute top-4 left-4 cursor-pointer tooltip tooltip-right btn-sm" data-tip="Back to flows list" onClick={() => router.push(`/org/${params?.org_id}/orchestratal_model`)}>
-        <ArrowLeft size={16}/>
-      </button>}
-      {/* Top-right Controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        {/* Discard button: show only when createdFlow && isModified */}
-
-
-
-      
-      </div>
-
       {/* Quick Test Input with highlight ring */}
       {!isChatOpen && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2">

@@ -167,7 +167,7 @@ function AgentNode({ id, data }) {
   }, [id, data.selectedAgent, data.onRequestDelete]);
 
   const functions = useMemo(() => {
-    const selected = allAgent.find((a) => a._id === data.selectedAgent?._id);
+    const selected = allAgent?.find((a) => a._id === data.selectedAgent?._id);
     if (!selected?.function_ids || !allFunction) return [];
     return selected.function_ids.map((fid) => allFunction[fid]).filter(Boolean);
   }, [allAgent, data.selectedAgent, allFunction]);
@@ -345,39 +345,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   const edgesRef = useRef(edges);
   useEffect(() => void (nodesRef.current = nodes), [nodes]);
   useEffect(() => void (edgesRef.current = edges), [edges]);
-
-  useEffect(() => {
-    const existingScript = document.getElementById('gtwy-user-script');
-    if (existingScript) return;
-
-    if (params?.org_id) {
-      const scriptId = 'gtwy-user-script';
-      const scriptURl =
-        process.env.NEXT_PUBLIC_ENV !== 'PROD'
-          ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
-          : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.src = scriptURl;
-      script.setAttribute('skipLoadGtwy', true);
-      script.setAttribute('token', getFromCookies('local_token'));
-      script.setAttribute('org_id', params?.org_id);
-      script.setAttribute('customIframeId', 'gtwyEmbedInterface');
-      script.setAttribute('gtwy_user', true);
-      script.setAttribute('parentId', 'gtwy');
-      script.setAttribute('hideHeader', true);
-      document.head.appendChild(script);
-    }
-
-    return () => {
-      const script = document.getElementById('gtwy-user-script');
-      if (script) {
-        script.remove();
-        sessionStorage.removeItem('orchestralUser');
-      }
-    };
-  }, [params]);
-
   const [shouldLayout, setShouldLayout] = useState(false);
   const [masterAgent, setMasterAgent] = useState(null);
   const [isVariableModified, setIsVariableModified] = useState(false);
@@ -492,16 +459,47 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         return;
       }
 
-      // Prepare the connected agents data
+      // Prepare the connected agents data with enhanced processing
       const connectedAgentsData = {};
       const agentName = agentData.name || agentData.agent_name || 'Unknown Agent';
 
-      // Send agent data for both adding and deleting
+      // Process main agent data
       connectedAgentsData[agentName] = {
         bridge_id: agentData._id || agentData.bridge_id,
         thread_id: agentData.thread_id || false,
-        version_id: agentData?.bridgeData?.published_version_id || agentData.published_version_id,
+        version_id: agentData?.bridgeData?.published_version_id || agentData.published_version_id || agentData?.versions?.[0],
       };
+
+      // Process nested connected agents if they exist
+      if (agentData.connected_agents && agentData.connected_agents.length > 0) {
+        agentData.connected_agents.forEach(connectedAgent => {
+          const connectedAgentName = connectedAgent.name || connectedAgent.agent_name || `Agent_${connectedAgent._id}`;
+          connectedAgentsData[connectedAgentName] = {
+            bridge_id: connectedAgent._id || connectedAgent.bridge_id,
+            thread_id: connectedAgent.thread_id || false,
+            version_id: connectedAgent.published_version_id || connectedAgent?.versions?.[0],
+          };
+
+          // Process deeply nested connections recursively
+          if (connectedAgent.connected_agents && connectedAgent.connected_agents.length > 0) {
+            const processNestedAgents = (nestedAgents, depth = 0) => {
+              if (depth > 3) return; // Prevent infinite recursion
+              nestedAgents.forEach(nestedAgent => {
+                const nestedAgentName = nestedAgent.name || nestedAgent.agent_name || `Agent_${nestedAgent._id}`;
+                connectedAgentsData[nestedAgentName] = {
+                  bridge_id: nestedAgent._id || nestedAgent.bridge_id,
+                  thread_id: nestedAgent.thread_id || false,
+                  version_id: nestedAgent.published_version_id || nestedAgent?.versions?.[0],
+                };
+                if (nestedAgent.connected_agents) {
+                  processNestedAgents(nestedAgent.connected_agents, depth + 1);
+                }
+              });
+            };
+            processNestedAgents(connectedAgent.connected_agents);
+          }
+        });
+      }
 
       // Prepare the update payload
       const updatePayload = {
@@ -977,18 +975,63 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
       if (action === 'ADD_NODE') {
         const { sourceNodeId, agent, isFirstAgent } = payload;
-        const childrenRefs = normalizeConnectedRefs(agent.connected_agents);
+        
+        // Enhanced connected agent processing with published version IDs
+        const processConnectedAgents = (connectedAgents) => {
+          return normalizeConnectedRefs(connectedAgents).map(ref => {
+            const connectedAgent = agents.find(a => a._id === ref || a.name === ref);
+            if (connectedAgent) {
+              return {
+                ...ref,
+                _id: connectedAgent._id,
+                name: connectedAgent.name,
+                published_version_id: connectedAgent.published_version_id || connectedAgent.versions?.[0],
+                bridge_id: connectedAgent._id,
+                // Include nested connected agents if they exist
+                connected_agents: connectedAgent.connected_agents ? processConnectedAgents(connectedAgent.connected_agents) : []
+              };
+            }
+            return ref;
+          });
+        };
+
+        const enhancedAgent = {
+          ...agent,
+          connected_agents: agent.connected_agents ? processConnectedAgents(agent.connected_agents) : []
+        };
+
+        const childrenRefs = normalizeConnectedRefs(enhancedAgent.connected_agents);
         const nodeId = agent._id || agent.id || agent.bridge_id || agent.name;
-        // Call the update bridge function with source and agent data
+        
+        // Call the update bridge function with enhanced agent data
         if (isConnectedMode) {
           const sourceNode = nodes.find(n => n.id === sourceNodeId);
           if (sourceNode?.data) {
-            updateBridgeWithSourceData(sourceNodeId, agent, sourceNode.data);
+            updateBridgeWithSourceData(sourceNodeId, enhancedAgent, sourceNode.data);
           }
         }
 
         if (childrenRefs.length > 0) {
-          createFanoutSubgraphRef.current?.(sourceNodeId, agent, childrenRefs, isFirstAgent, new Set());
+          // Process and add all connected agents with their internal connections
+          createFanoutSubgraphRef.current?.(sourceNodeId, enhancedAgent, childrenRefs, isFirstAgent, new Set());
+          
+          // Update internal connections for nested connected agents
+          setTimeout(() => {
+            childrenRefs.forEach(childRef => {
+              const childAgent = agents.find(a => a._id === childRef || a.name === childRef);
+              if (childAgent?.connected_agents && childAgent.connected_agents.length > 0) {
+                const childNodeId = childAgent._id || childAgent.name;
+                const childNode = nodes.find(n => n.id === childNodeId);
+                if (childNode?.data && isConnectedMode) {
+                  const processedChildAgent = {
+                    ...childAgent,
+                    connected_agents: processConnectedAgents(childAgent.connected_agents)
+                  };
+                  updateBridgeWithSourceData(childNodeId, processedChildAgent, childNode.data);
+                }
+              }
+            });
+          }, 200);
         } else {
           const newNodeId = nodeId;
           if (isFirstAgent) {
@@ -1170,6 +1213,10 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
               description: rootAgent.description,
               thread_id: rootAgent.thread_id,
               variables: rootAgent.variables,
+              // Include enhanced connected agent data
+              connected_agents: rootAgent.connected_agents || [],
+              published_version_id: rootAgent.published_version_id || rootAgent?.versions?.[0],
+              bridgeData: agents.find?.((bridge) => bridge._id === rootAgentKey),
             },
             isFirstAgent: !!isFirstAgent,
             openSidebar,
@@ -1206,10 +1253,30 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         setNodes((nds) => nds.map((n) => (n.id === rootNodeId ? { ...n, data: { ...n.data, isLast: false } } : n)));
 
         immediateChildren.forEach((child, i) => {
-          const childBridge = { ...agents.find?.((bridge) => bridge._id === child.bridge_id), description: child.description };
+          const childBridge = { 
+            ...agents.find?.((bridge) => bridge._id === child.bridge_id), 
+            description: child.description,
+            // Include enhanced connected agent data for child
+            connected_agents: child.connected_agents || [],
+            published_version_id: child.published_version_id || child?.versions?.[0],
+            thread_id: child.thread_id || false,
+            variables: child.variables || {}
+          };
           const childConnectedRefs = normalizeConnectedRefs(childBridge?.connected_agents || []);
+          
           setTimeout(() => {
             createFanoutSubgraph(rootNodeId, childBridge, childConnectedRefs, false, newVisitedAgents);
+            
+            // Update child agent's internal connections if they exist
+            if (isConnectedMode && childBridge.connected_agents && childBridge.connected_agents.length > 0) {
+              setTimeout(() => {
+                const childNodeId = childBridge._id || childBridge.name;
+                const childNode = nodes.find(n => n.id === childNodeId);
+                if (childNode?.data) {
+                  updateBridgeWithSourceData(childNodeId, childBridge, childNode.data);
+                }
+              }, 150);
+            }
           }, 100 * i);
         });
       }
