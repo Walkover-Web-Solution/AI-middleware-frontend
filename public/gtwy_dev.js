@@ -12,7 +12,7 @@
                 hideFullScreenButton: 'false', hideHeader: 'false', skipLoadGtwy: false
             };
             this.urls = {
-                gtwyUrl: 'http://localhost:3000/embed',
+                gtwyUrl: 'https://dev-embed.gtwy.ai/embed',
                 login: 'https://dev-db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {

@@ -6,6 +6,7 @@ import { createNodesFromAgentDoc } from '@/components/flowDataManager';
 import { useConfigurationContext } from './ConfigurationContext';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getConnectedAgentFlowAction } from '@/store/action/orchestralFlowAction';
+import { getFromCookies } from '@/utils/utility';
 
 const AgentToAgentConnection = dynamic(() => import('@/components/agentToAgentConnection'), {
   ssr: false,
@@ -172,6 +173,37 @@ const ConnectedAgentFlowPanel = () => {
     },
     [dispatch, params, searchParams, bridgeType, bridgeName]
   );
+   useEffect(() => {
+    console.log("ConnectedAgentFlowPanel useEffect running", params);
+    const existingScript = document.getElementById('gtwy-user-script');
+    if (existingScript || isEmbedUser) return;
+
+    if (params?.org_id) {
+      const scriptId = 'gtwy-user-script';
+      const scriptURl =
+        process.env.NEXT_PUBLIC_ENV !== 'PROD'
+          ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
+          : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = scriptURl;
+      script.setAttribute('skipLoadGtwy', true);
+      script.setAttribute('token', getFromCookies('local_token'));
+      script.setAttribute('org_id', params?.org_id);
+      script.setAttribute('customIframeId', 'gtwyEmbedInterface');
+      script.setAttribute('gtwy_user', true);
+      script.setAttribute('parentId', 'gtwy');
+      script.setAttribute('hideHeader', true);
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      const script = document.getElementById('gtwy-user-script');
+      if (script) {
+        sessionStorage.removeItem('orchestralUser');
+      }
+    };
+  }, [params]);
 
   return (
     <div className="w-full">

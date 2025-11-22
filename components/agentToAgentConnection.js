@@ -167,7 +167,7 @@ function AgentNode({ id, data }) {
   }, [id, data.selectedAgent, data.onRequestDelete]);
 
   const functions = useMemo(() => {
-    const selected = allAgent.find((a) => a._id === data.selectedAgent?._id);
+    const selected = allAgent?.find((a) => a._id === data.selectedAgent?._id);
     if (!selected?.function_ids || !allFunction) return [];
     return selected.function_ids.map((fid) => allFunction[fid]).filter(Boolean);
   }, [allAgent, data.selectedAgent, allFunction]);
@@ -345,39 +345,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   const edgesRef = useRef(edges);
   useEffect(() => void (nodesRef.current = nodes), [nodes]);
   useEffect(() => void (edgesRef.current = edges), [edges]);
-
-  useEffect(() => {
-    const existingScript = document.getElementById('gtwy-user-script');
-    if (existingScript) return;
-
-    if (params?.org_id) {
-      const scriptId = 'gtwy-user-script';
-      const scriptURl =
-        process.env.NEXT_PUBLIC_ENV !== 'PROD'
-          ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
-          : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.src = scriptURl;
-      script.setAttribute('skipLoadGtwy', true);
-      script.setAttribute('token', getFromCookies('local_token'));
-      script.setAttribute('org_id', params?.org_id);
-      script.setAttribute('customIframeId', 'gtwyEmbedInterface');
-      script.setAttribute('gtwy_user', true);
-      script.setAttribute('parentId', 'gtwy');
-      script.setAttribute('hideHeader', true);
-      document.head.appendChild(script);
-    }
-
-    return () => {
-      const script = document.getElementById('gtwy-user-script');
-      if (script) {
-        script.remove();
-        sessionStorage.removeItem('orchestralUser');
-      }
-    };
-  }, [params]);
-
   const [shouldLayout, setShouldLayout] = useState(false);
   const [masterAgent, setMasterAgent] = useState(null);
   const [isVariableModified, setIsVariableModified] = useState(false);
