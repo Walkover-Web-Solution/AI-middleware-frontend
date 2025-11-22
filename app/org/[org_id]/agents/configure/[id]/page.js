@@ -110,10 +110,33 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   // Optimized selector with better memoization
   const { bridgeType, versionService, bridgeName, isFocus, reduxPrompt, bridge } = useConfigurationSelector(resolvedParams, resolvedSearchParams);
 
-  // Separate selector for allbridges to prevent unnecessary re-renders
-  const allbridges = useCustomSelector(
-    useCallback((state) => state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [], [resolvedParams?.org_id])
+  // Merged selector for all additional data needed
+  const { allbridges, bridgeApiKey, prompt, shouldPromptShow, service, showDefaultApikeys } = useCustomSelector(
+    useCallback((state) => {
+      const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
+      const service = versionData?.service;
+      const modelReducer = state?.modelReducer?.serviceModels;
+      const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+      const modelName = versionData?.configuration?.model;
+      
+      return {
+        // All bridges data
+        allbridges: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [],
+        // AgentSetupGuide visibility data
+        bridgeApiKey: versionData?.apikey_object_id?.[service],
+        prompt: versionData?.configuration?.prompt || "",
+        shouldPromptShow: modelReducer?.[service]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+        service: service,
+        showDefaultApikeys: state.appInfoReducer.embedUserDetails.addDefaultApiKeys
+      };
+    }, [resolvedParams?.org_id, resolvedParams?.id, resolvedSearchParams?.version])
   );
+
+  // Determine if AgentSetupGuide is visible (same logic as in AgentSetupGuide component)
+  const isAgentSetupGuideVisible = useMemo(() => {
+    const isVisible = (isEmbedUser && showDefaultApikeys) ? false : (!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml' || prompt === "");
+    return isVisible && !(bridgeApiKey && prompt !== "");
+  }, [isEmbedUser, showDefaultApikeys, bridgeApiKey, prompt, shouldPromptShow, service]);
 
   // Consolidated prompt state - reduced from 8 individual states
   const [promptState, setPromptState] = useState(() => ({
@@ -459,7 +482,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 <ChatBundle onClick={() => handleExpandPanel('Chat')} />
               ) : (
                 <div className="h-full flex flex-col" id="parentChatbot">
-                  <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                  <div className={`flex-1 ${isAgentSetupGuideVisible ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
                     <div className="h-full flex flex-col">
                       <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
                       {!sessionStorage.getItem('orchestralUser') ? (
@@ -629,7 +652,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           </div>
 
           {/* Chat Panel */}
-          <div className="min-h-screen" id="parentChatbot">
+          <div className={`min-h-screen ${isAgentSetupGuideVisible ? 'overflow-hidden' : 'overflow-y-auto'}`} id="parentChatbot">
             <div className="h-full flex flex-col">
               <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
               {!sessionStorage.getItem('orchestralUser') ? (
