@@ -115,6 +115,30 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     useCallback((state) => state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [], [resolvedParams?.org_id])
   );
 
+  // Selector for AgentSetupGuide visibility logic
+  const { bridgeApiKey, prompt, shouldPromptShow, service, showDefaultApikeys } = useCustomSelector((state) => {
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
+    const service = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version]?.service;
+    const modelReducer = state?.modelReducer?.serviceModels;
+    const serviceName = versionData?.service;
+    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+    const modelName = versionData?.configuration?.model;
+    const showDefaultApikeys = state.appInfoReducer.embedUserDetails.addDefaultApiKeys;
+    return {
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version]?.apikey_object_id?.[service],
+      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version]?.configuration?.prompt || "",
+      shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+      service: service,
+      showDefaultApikeys
+    };
+  });
+
+  // Determine if AgentSetupGuide is visible (same logic as in AgentSetupGuide component)
+  const isAgentSetupGuideVisible = useMemo(() => {
+    const isVisible = (isEmbedUser && showDefaultApikeys) ? false : (!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml' || prompt === "");
+    return isVisible && !(bridgeApiKey && prompt !== "");
+  }, [isEmbedUser, showDefaultApikeys, bridgeApiKey, prompt, shouldPromptShow, service]);
+
   // Consolidated prompt state - reduced from 8 individual states
   const [promptState, setPromptState] = useState(() => ({
     prompt: "",
@@ -459,7 +483,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 <ChatBundle onClick={() => handleExpandPanel('Chat')} />
               ) : (
                 <div className="h-full flex flex-col" id="parentChatbot">
-                  <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                  <div className={`flex-1 ${isAgentSetupGuideVisible ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
                     <div className="h-full flex flex-col">
                       <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
                       {!sessionStorage.getItem('orchestralUser') ? (
@@ -629,7 +653,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           </div>
 
           {/* Chat Panel */}
-          <div className="min-h-screen" id="parentChatbot">
+          <div className={`min-h-screen ${isAgentSetupGuideVisible ? 'overflow-hidden' : 'overflow-y-auto'}`} id="parentChatbot">
             <div className="h-full flex flex-col">
               <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
               {!sessionStorage.getItem('orchestralUser') ? (
