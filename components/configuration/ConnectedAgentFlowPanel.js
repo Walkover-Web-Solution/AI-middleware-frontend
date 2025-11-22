@@ -174,7 +174,6 @@ const ConnectedAgentFlowPanel = () => {
     [dispatch, params, searchParams, bridgeType, bridgeName]
   );
    useEffect(() => {
-    console.log("ConnectedAgentFlowPanel useEffect running", params);
     const existingScript = document.getElementById('gtwy-user-script');
     if (existingScript || isEmbedUser) return;
 
