@@ -77,7 +77,7 @@ export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue,
   try {
     const getSingleThreadData = await axios.get(`${URL}/history/threads/${bridgeId}`, {
       params: {
-        page: page ? page : 1,
+        page: page && !isNaN(page) ? page : 1,
         limit: 40,
         user_feedback: !user_feedback || user_feedback === "undefined" ? "all" : user_feedback,
         version_id: (versionId === 'all'|| versionId === 'undefined') ? null : versionId

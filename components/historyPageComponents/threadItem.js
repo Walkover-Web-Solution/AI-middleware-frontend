@@ -374,7 +374,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
 
   const handleAskAi = async (item) => {
     const aiconfig = handleAddTestCase(item, index, true)
-    let variables = { aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content }
+    let variables = { aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.llm_message }
     try {
       const systemPromptResponse = item.prompt;
       variables = { "System Prompt": systemPromptResponse, ...variables }
