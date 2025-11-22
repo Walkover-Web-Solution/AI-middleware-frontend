@@ -329,8 +329,8 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
                                    btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 relative whitespace-nowrap min-w-fit
                                     ${canDelete ? 'group-hover:pr-8' : ''}
                                     ${isActive
-                                        ? (isPublished ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-primary hover:bg-primary text-black')
-                                        : (isPublished ? 'bg-base-100 text-base-content hover:bg-green-50 hover:text-green-700 border border-base-300' : 'bg-base-100 hover:bg-primary/50 hover:text-black text-base-content hover:bg-base-200')
+                                        ? (isPublished ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-primary hover:bg-primary text-primary-content')
+                                        : (isPublished ? 'bg-base-100 text-base-content hover:bg-green-50 hover:text-green-700 border border-base-300' : 'text-base-content/70 hover:text-base-content')
                                     }
                                 `}
                                 style={{ minWidth: 'max-content' }}

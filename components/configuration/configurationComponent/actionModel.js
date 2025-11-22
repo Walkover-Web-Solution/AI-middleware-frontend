@@ -79,7 +79,7 @@ const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
             clearInputFields();
             setSelectedAction(ACTIONS.DEFAULT);
         }
-    }, [actionId, actions, handleInputChange, clearInputFields]);
+    }, [actionId,actions]);
 
     const handleModalClose = useCallback(() => {
         closeModal(MODAL_TYPE.ACTION_MODAL);

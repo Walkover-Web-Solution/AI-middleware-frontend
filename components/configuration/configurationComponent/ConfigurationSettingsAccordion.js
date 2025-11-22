@@ -27,7 +27,7 @@ const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
   return (
     <div className="z-very-low text-base-content w-full max-w-md cursor-pointer" tabIndex={0}>
       <div
-        className={`info px-2 py-1.5 ${isOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
+        className={`px-2 py-1.5 ${isOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <div className="flex items-center gap-2">
