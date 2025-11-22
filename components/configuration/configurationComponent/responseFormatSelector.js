@@ -8,9 +8,17 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const ResponseFormatSelector = ({ params, searchParams }) => {
-    const { response_format } = useCustomSelector((state) => ({
-        response_format: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.response_format,
-    }));
+    const { response_format } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        return {
+            response_format: isPublished 
+                ? bridgeDataFromState?.configuration?.response_format 
+                : versionData?.configuration?.response_format,
+        };
+    });
 
     const [selectedOption, setSelectedOption] = useState(response_format?.type || 'default');
     const [webhookData, setWebhookData] = useState({ url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
@@ -21,8 +29,14 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
         if (response_format) {
             setSelectedOption(response_format.type === 'RTLayer' ? 'RTLayer' : response_format.type === 'webhook' ? 'custom' : 'default');
             setWebhookData({ url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
+        } else {
+            // Reset to default when no response_format data
+            setSelectedOption('default');
+            setWebhookData({ url: "", headers: "" });
         }
-    }, [response_format, params.id]);
+        // Clear any existing errors when switching versions
+        setErrors({ webhook: "", headers: "" });
+    }, [response_format, searchParams?.version, searchParams?.isPublished]);
 
     const handleChangeWebhook = (e) => {
         const newurl = e.target.value;
