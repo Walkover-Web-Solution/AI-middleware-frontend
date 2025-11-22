@@ -141,6 +141,11 @@ const Navbar = ({ isEmbedUser, params }) => {
       setEditedName(agentName);
       return;
     }
+    if (trimmed !== agentName && trimmed.includes('%')) {
+      toast.error("Agent name cannot contain % character");
+      setEditedName(agentName);
+      return;
+    }
     if (trimmed !== agentName) {
       dispatch(updateBridgeAction({
         bridgeId: bridgeId,

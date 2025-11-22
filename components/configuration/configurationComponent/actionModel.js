@@ -34,7 +34,7 @@ const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
     const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(true);
 
     const { actions } = useCustomSelector((state) => ({
-        actions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.actions?.[actionId]
+        actions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.actions?.[actionId]
     }));
 
     const { clearInputFields, areFieldsFilled } = useInputHandlers(descriptionRef, dataRef, selectedAction);
@@ -65,11 +65,21 @@ const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
 
     useEffect(() => {
         if (actionId && actions) {
-            descriptionRef.current.value = actions?.description;
-            dataRef.current.value = actions.variable;
-            setSelectedAction(actions.type);
+            if (descriptionRef.current) {
+                descriptionRef.current.value = actions?.description || '';
+            }
+            if (dataRef.current) {
+                dataRef.current.value = actions?.variable || '';
+            }
+            setSelectedAction(actions?.type || ACTIONS.DEFAULT);
+            // Trigger input change to update button state
+            handleInputChange();
+        } else if (!actionId) {
+            // Clear form when creating new action
+            clearInputFields();
+            setSelectedAction(ACTIONS.DEFAULT);
         }
-    }, [actionId, actions]);
+    }, [actionId, actions, handleInputChange, clearInputFields]);
 
     const handleModalClose = useCallback(() => {
         closeModal(MODAL_TYPE.ACTION_MODAL);

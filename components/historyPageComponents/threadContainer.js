@@ -80,23 +80,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const handleAddTestCase = useCallback((item, index, variables = false) => {
     const conversation = [];
     let AiConfigForVariable = {};
-
-    for (let i = index; i >= 0; i--) {
-      if (thread[i].role === 'user') {
-        // Use AiConfig.input or AiConfig.messages (both exist in different scenarios)
-        const aiConfigConversation = thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages || [];
-        conversation.push(...aiConfigConversation);
-        AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
-        if (thread[i + 1]?.role === 'tools_call') {
-          conversation.push(thread[i + 1])
-        }
-        // Break after processing the first user message with AiConfig (either input or messages)
-        if (thread[i]?.AiConfig && (thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages)) {
-          break;
-        }
-      }
-    }
-
+    AiConfigForVariable = thread[index]?.AiConfig ? thread[index]?.AiConfig : {};
     conversation.push(item || {});
     setTestCaseConversation(conversation);
     if (variables) return AiConfigForVariable;
@@ -125,9 +109,11 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     try {
       let prevConv;
       const variables = {};
+      debugger
       thread.forEach((item) => {
-        if (item.Id === modalInput?.Id) {
-          const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
+        if (item.id === modalInput?.Id) {
+          debugger
+          const conversation = item?.AiConfig?.input || item?.AiConfig?.messages
           const filteredConversation = conversation.filter((value) => {
             if (value.role === 'developer') {
               variables['prompt'] = value.content;
@@ -140,7 +126,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
           })
           variables["conversation_history"] = filteredConversation;
         }
-        item.role === 'user' ? prevConv = item : null
       })
       variables["updated_response"] = modalInput.content;
       let data;

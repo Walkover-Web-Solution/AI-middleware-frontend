@@ -99,7 +99,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
 
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined') {
-                SendDataToChatbot({ "version_id": currentVersion });
+                SendDataToChatbot({ "version_id": "null"});
                 clearInterval(timer);
             }
         }, 300);
