@@ -395,33 +395,37 @@ const Navbar = ({ isEmbedUser, params }) => {
               <div className="mx-1 sm:mx-2 h-4 w-px bg-base-300 flex-shrink-0"></div>
               
               {/* Published Button + Bridge Version Dropdown */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Published Button */}
-                <button
-                  onClick={handlePublishedClick}
-                  className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap min-w-fit ${
-                    isPublished
-                      ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
-                      : 'bg-base-100 text-base-content border border-base-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300'
-                  }`}
-                  title={isPublished ? 'Currently viewing published version' : 'Switch to published version'}
-                >
-                  <span className="hidden sm:inline">Published</span>
-                  <span className="sm:hidden">Pub</span>
-                  {isPublished && (
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Active"></span>
+              {activeTab === 'configure' && (
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Published Button */}
+                  {publishedVersion && (
+                    <button
+                      onClick={handlePublishedClick}
+                      className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap min-w-fit ${
+                        isPublished
+                          ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
+                          : 'bg-base-100 text-base-content border border-base-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                      }`}
+                      title={isPublished ? 'Currently viewing published version' : 'Switch to published version'}
+                    >
+                      <span className="hidden sm:inline">Published</span>
+                      <span className="sm:hidden">Pub</span>
+                      {isPublished && (
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Active"></span>
+                      )}
+                    </button>
                   )}
-                </button>
 
-                {/* Bridge Version Dropdown - Desktop Only */}
-                <div className="hidden sm:flex min-w-0 flex-1">
-                  <BridgeVersionDropdown 
-                    params={{ org_id: orgId, id: bridgeId }} 
-                    searchParams={searchParams}
-                    maxVersions={2}
-                  />
+                  {/* Bridge Version Dropdown - Desktop Only */}
+                  <div className="hidden sm:flex min-w-0 flex-1">
+                    <BridgeVersionDropdown 
+                      params={{ org_id: orgId, id: bridgeId }} 
+                      searchParams={searchParams}
+                      maxVersions={2}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Status Indicator */}
               {bridgeStatus !== BRIDGE_STATUS.ACTIVE && (
@@ -581,31 +585,38 @@ const Navbar = ({ isEmbedUser, params }) => {
             </div>
           </div>
           
-          {/* Published Button */}
-          <button
-            onClick={handlePublishedClick}
-            className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap ${
-              isPublished
-                ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
-                : 'bg-base-100 text-base-content border border-base-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300'
-            }`}
-            title={isPublished ? 'Currently viewing published version' : 'Switch to published version'}
-          >
-            <span>Pub</span>
-            {isPublished && (
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Active"></span>
-            )}
-          </button>
+          {/* Published Button and Version Dropdown - Only show on configure tab */}
+          {activeTab === 'configure' && (
+            <>
+              {/* Published Button */}
+              {publishedVersion && (
+                <button
+                  onClick={handlePublishedClick}
+                  className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap ${
+                    isPublished
+                      ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
+                      : 'bg-base-100 text-base-content border border-base-300 hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                  }`}
+                  title={isPublished ? 'Currently viewing published version' : 'Switch to published version'}
+                >
+                  <span>Pub</span>
+                  {isPublished && (
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0" title="Active"></span>
+                  )}
+                </button>
+              )}
 
-          {/* Version Dropdown */}
-          <div className="min-w-0">
-            <BridgeVersionDropdown 
-              params={{ org_id: orgId, id: bridgeId }} 
-              searchParams={searchParams}
-              maxVersions={2}
-              showDropdownOnly={true}
-            />
-          </div>
+              {/* Version Dropdown */}
+              <div className="min-w-0">
+                <BridgeVersionDropdown 
+                  params={{ org_id: orgId, id: bridgeId }} 
+                  searchParams={searchParams}
+                  maxVersions={2}
+                  showDropdownOnly={true}
+                />
+              </div>
+            </>
+          )}
           
           {/* Ellipsis Menu */}
           {!isEmbedUser && <EllipsisMenu />}

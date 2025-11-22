@@ -60,7 +60,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
 
     useEffect(() => {
         if (guardrailsData) {
-            // Set enabled state from is_enabled
+            setGuardrailsEnabled(guardrailsData?.is_enabled||false);
             
             // Set selected guardrails from guardrails_configuration
             const selected = Object.entries(guardrailsData?.guardrails_configuration || {})
