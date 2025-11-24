@@ -10,7 +10,7 @@ import GuardrailSelector from './guardrailSelector';
 import { getIconOfService } from '@/utils/utility';
 import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, forceExpanded = false }) => {
+const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, forceExpanded = false ,isPublished }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(forceExpanded);
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState({});
@@ -25,7 +25,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
   const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-    const isPublished = searchParams?.isPublished === 'true';
     const apikeys = state?.apiKeysReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
     
@@ -214,7 +213,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
   const renderContent = () => (
     <div className="flex flex-col gap-6">
       <div className="bg-base-100 rounded-lg">
-        <GuardrailSelector params={params} searchParams={searchParams} />
+        <GuardrailSelector params={params} searchParams={searchParams} isPublished={isPublished} />
       </div>
 
       <div className="bg-base-100 rounded-lg">
@@ -227,6 +226,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
               </InfoTooltip>
             </div>
             <input
+            disabled={isPublished}
               type="checkbox"
               className="toggle toggle-sm"
               checked={isFallbackEnabled}
@@ -246,10 +246,11 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
                     if (modelDropdown) modelDropdown.removeAttribute("open");
                   }
                 }}
-                disabled={bridgeType === 'batch'}
+                disabled={bridgeType === 'batch' || isPublished}
               >
                 <summary
                   tabIndex={0}
+                  disabled={isPublished}
                   role="button"
                   className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${bridgeType === 'batch' ? 'btn-disabled cursor-not-allowed opacity-50' : ''}`}
                 >
@@ -277,6 +278,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
                               const details = e.currentTarget.closest('details');
                               if (details) details.removeAttribute('open');
                             }}
+                            disabled={isPublished}
                           >
                             {getIconOfService(svc.value, 16, 16)}
                             <span className="capitalize">{svc.displayName || svc.value}</span>
@@ -317,6 +319,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
             <details id="model-dropdown" className="dropdown w-full">
               <summary
                 tabIndex={0}
+                disabled={isPublished}
                 role="button"
                 className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
               >
@@ -371,7 +374,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
 
       {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
         <div className="bg-base-100 rounded-lg">
-          <ResponseFormatSelector params={params} searchParams={searchParams} />
+          <ResponseFormatSelector isPublished={isPublished} params={params} searchParams={searchParams} />
         </div>
       )}
 
@@ -412,10 +415,10 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
                         <div
                           key={apiKey?._id}
                           className="p-2 hover:bg-base-200 cursor-pointer rounded"
-                          onClick={() => handleSelectionChange(service?.value, apiKey?._id)}
                         >
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
+                              disabled={isPublished}
                               type="radio"
                               name={`apiKey-${service?.value}`}
                               value={apiKey?._id}
@@ -444,7 +447,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
       </div>
 
       <div className="bg-base-100 rounded-lg">
-        <ToolCallCount params={params} searchParams={searchParams}/>
+        <ToolCallCount params={params} searchParams={searchParams} isPublished={isPublished}/>
       </div>
     </div>
   );

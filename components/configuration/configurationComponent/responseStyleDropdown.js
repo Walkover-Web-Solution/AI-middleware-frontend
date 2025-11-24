@@ -35,7 +35,7 @@ const RESPONSE_STYLES = [
   },
 ];
 
-const ResponseStyleDropdown = ({ params, searchParams }) => {
+const ResponseStyleDropdown = ({ params, searchParams ,isPublished }) => {
   const { reduxResponseStyle } = useCustomSelector((state) => ({
     reduxResponseStyle:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
@@ -101,6 +101,7 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
       
       {/* Response Style Dropdown */}
       <select
+        disabled={isPublished}
         value={selectedStyle}
         onChange={handleStyleChange}
         className="select select-sm select-bordered capitalize w-full"

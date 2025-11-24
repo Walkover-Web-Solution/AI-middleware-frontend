@@ -498,20 +498,20 @@ const Navbar = ({ isEmbedUser, params }) => {
               {/* Publish/Discard Dropdown - Fixed Position */}
               <div className="flex items-center">
                 <div className="dropdown dropdown-end">
-                    <div 
-                      tabIndex={0} 
+                    <button 
+                      tabIndex={0}
                       role="button" 
-                      className={`inline-flex items-center justify-center whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
-                      disabled={isPublishing}
+                      className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
+                      disabled={isPublishing || isPublished}
                     >
                       <span className="text-white text-xs truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
                       {!isPublishing && <ChevronDown size={12} className="text-white" />}
-                    </div>
+                    </button>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
                       <li>
                         <button
                           onClick={handlePublish}
-                          disabled={!isDrafted || isPublishing}
+                          disabled={!isDrafted || isPublishing || isPublished}
                           className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <BookCheck size={14} className="text-success" />
@@ -522,7 +522,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                         <li>
                           <button
                             onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
-                            disabled={isUpdatingBridge || isPublishing}
+                            disabled={isUpdatingBridge || isPublishing || isPublished}
                             className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <RefreshCcw size={14} className="text-error" />

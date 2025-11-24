@@ -7,7 +7,7 @@ import ResponseStyleDropdown from './responseStyleDropdown';
 import AdvancedConfiguration from './advancedConfiguration';
 import Protected from '@/components/protected';
 
-const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
+const ConfigurationSettingsAccordion = ({isEmbedUser,isPublished}) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
     params,
@@ -53,6 +53,7 @@ const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
               <span className="text-xs font-semibold">{currentView === 'agent-flow' ? 'On' : 'Off'}</span>
               <input
                 type="checkbox"
+                disabled={isPublished}
                 className="toggle toggle-primary toggle-sm"
                 checked={currentView === 'agent-flow'}
                 onChange={() => {
@@ -64,7 +65,7 @@ const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
           </div>}
           {shouldShowAgentType && (
             <div className="bg-base-100 rounded-lg">
-              <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} />
+              <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} />
             </div>
           )}
 
@@ -73,10 +74,10 @@ const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
             <>
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="bg-base-100 rounded-lg">
-                  <ToneDropdown params={params} searchParams={searchParams} />
+                  <ToneDropdown params={params} searchParams={searchParams} isPublished={isPublished} />
                 </div>
                 <div className="bg-base-100 rounded-lg">
-                  <ResponseStyleDropdown params={params} searchParams={searchParams} />
+                  <ResponseStyleDropdown params={params} searchParams={searchParams} isPublished={isPublished} />
                 </div>
               </div>
 
@@ -88,6 +89,7 @@ const ConfigurationSettingsAccordion = ({isEmbedUser}) => {
                     bridgeType={bridgeType}
                     modelType={modelType}
                     forceExpanded
+                    isPublished={isPublished}
                   />
                 </div>
               )}

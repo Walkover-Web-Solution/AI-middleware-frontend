@@ -9,7 +9,8 @@ const PromptTextarea = memo(({
     onKeyDown,
     isPromptHelperOpen,
     className = "",
-    placeholder = ""
+    placeholder = "",
+    isPublished = false
 }) => {
     const isComposingRef = useRef(false);
     const lastExternalValueRef = useRef(initialValue);
@@ -70,6 +71,9 @@ const PromptTextarea = memo(({
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
             placeholder={placeholder}
+            readOnly={isPublished}
+            disabled={isPublished}
+            title={isPublished ? "Cannot edit in published mode" : ""}
         />
     );
 });

@@ -8,11 +8,10 @@ import { CircleQuestionMark } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ResponseFormatSelector = ({ params, searchParams }) => {
+const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
     const { response_format } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         
         return {
             response_format: isPublished 
@@ -95,6 +94,7 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
                 <div className="form-control w-fit" key={value}>
                     <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
                         <input
+                            disabled={isPublished}
                             type="radio"
                             name="radio-10"
                             className="radio radio-sm"
@@ -110,6 +110,7 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
                     <label className="form-control w-full mb-4">
                         <span className="text-sm block mb-2">Webhook URL</span>
                         <input
+                            disabled={isPublished}
                             type="text"
                             placeholder="https://example.com/webhook"
                             className="input input-bordered max-w-xs input-sm w-full"
@@ -122,6 +123,7 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
                     <label className="form-control mb-4">
                         <span className="text-sm block mb-2">Headers (JSON format)</span>
                         <textarea
+                            disabled={isPublished}
                             className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"
                             id="headers"
                             defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
@@ -130,7 +132,7 @@ const ResponseFormatSelector = ({ params, searchParams }) => {
                         ></textarea>
                         {errors.headers && <p className="text-red-500 text-xs mt-2">{errors.headers}</p>}
                     </label>
-                    <button className="btn btn-primary btn-sm my-2 float-right" onClick={() => handleResponseChange("custom")} disabled={errors.webhook !== '' || errors.headers !== ''}>
+                    <button className="btn btn-primary btn-sm my-2 float-right" onClick={() => handleResponseChange("custom")} disabled={errors.webhook !== '' || errors.headers !== '' || isPublished}>
                         Apply
                     </button>
                 </div>

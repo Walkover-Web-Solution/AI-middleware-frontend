@@ -16,7 +16,7 @@ import useTutorialVideos from '@/hooks/useTutorialVideos';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 
-const KnowledgebaseList = ({ params, searchParams }) => {
+const KnowledgebaseList = ({ params, searchParams, isPublished }) => {
     // Use the tutorial videos hook
     const { getKnowledgeBaseVideo } = useTutorialVideos();
 
@@ -25,7 +25,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
         const modelReducer = state?.modelReducer?.serviceModels;
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
+        
         
         // Use bridgeData when isPublished=true, otherwise use versionData
         const activeData = isPublished ? bridgeDataFromState : versionData;
@@ -128,6 +128,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
+                            disabled={isPublished}
                         >
                             <TrashIcon size={16} />
                         </button>
@@ -155,9 +156,10 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 </InfoTooltip>
                             </div>
                             <button
+
                                 tabIndex={0}
-                                className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
-                                disabled={!shouldToolsShow}
+                                className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!shouldToolsShow||isPublished}
                             >
                                 <AddIcon className="w-2 h-2" />
                                 <span className="text-xs font-medium">Add</span>
@@ -167,8 +169,8 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                         <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
                             <button
                                 tabIndex={0}
-                                className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
-                                disabled={!shouldToolsShow}
+                                className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!shouldToolsShow||isPublished}
                             >
                                 <AddIcon className="w-2 h-2" />
                                 <span className="text-sm font-medium">Knowledge Base</span>

@@ -35,7 +35,7 @@ function getStatusClass(status) {
   }
 };
 
-const EmbedList = ({ params, searchParams }) => {
+const EmbedList = ({ params, searchParams, isPublished }) => {
   const [functionId, setFunctionId] = useState(null);
   const [functionData, setfunctionData] = useState({});
   const [toolData, setToolData] = useState({});
@@ -45,7 +45,6 @@ const EmbedList = ({ params, searchParams }) => {
   const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-    const isPublished = searchParams?.isPublished === 'true';
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
     
@@ -246,6 +245,7 @@ const EmbedList = ({ params, searchParams }) => {
         isAsync={true}
       />
       <FunctionParameterModal
+        isPublished={isPublished}
         name="Tool"
         functionId={functionId}
         Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}
@@ -273,8 +273,8 @@ const EmbedList = ({ params, searchParams }) => {
                   </div>
                   <button
                     tabIndex={0}
-                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
-                    disabled={!shouldToolsShow}
+                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!shouldToolsShow||isPublished}
                   >
                     <AddIcon className="w-2 h-2" />
                     <span className="text-xs font-medium">Add</span>
@@ -284,8 +284,9 @@ const EmbedList = ({ params, searchParams }) => {
                 <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                   <button
                     tabIndex={0}
-                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleTutorial}
+                    disabled={isPublished}
                   >
                     <AddIcon className="w-2 h-2" />
                     <p className="label-text text-sm whitespace-nowrap">Tool</p>
@@ -323,6 +324,7 @@ const EmbedList = ({ params, searchParams }) => {
                     handleRemoveEmbed={handleRemoveFunctionFromBridge} 
                     handleOpenDeleteModal={handleOpenDeleteModal}
                     halfLength={1}
+                    isPublished={isPublished}
                   />
                 </div>
               )}
@@ -366,6 +368,7 @@ const EmbedList = ({ params, searchParams }) => {
                               }}
                               className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                               title="Config"
+                              disabled={isPublished}
                             >
                               <SettingsIcon size={16} />
                             </button>
@@ -377,6 +380,7 @@ const EmbedList = ({ params, searchParams }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
+                            disabled={isPublished}
                           >
                             <TrashIcon size={16} />
                           </button>

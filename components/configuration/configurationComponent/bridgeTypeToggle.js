@@ -7,7 +7,7 @@ import Protected from '@/components/protected';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
+const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) => {
     const dispatch = useDispatch();
     const { bridgeType, modelType, service } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
@@ -61,6 +61,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
                             <InfoTooltip tooltipContent="The API allows users to connect with AI models to perform tasks like generating responses or processing information.">
                                 <label className="flex items-center cursor-pointer min-w-0">
                                     <input
+                                        disabled={isPublished}
                                         type="radio"
                                         name="bridgeType"
                                         value="api"
@@ -85,7 +86,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
                                         className="radio radio-sm sm:radio"
                                         checked={bridgeType?.toString()?.toLowerCase() === "chatbot"}
                                         onChange={(e) => handleInputChange(e, "bridgeType")}
-                                        disabled={modelType === 'embedding'}
+                                        disabled={modelType === 'embedding'||isPublished}
                                     />
                                     <div className="group relative inline-block">
                                         <span className="label-text text-sm sm:text-base ml-2 cursor-pointer">ChatBot</span>
@@ -104,7 +105,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
                                         className="radio radio-sm sm:radio"
                                         checked={bridgeType?.toString()?.toLowerCase() === "batch"}
                                         onChange={(e) => handleInputChange(e, "bridgeType")}
-                                        disabled={modelType === 'embedding' || service?.toLowerCase() !== 'openai' || modelType === 'image'}
+                                        disabled={modelType === 'embedding' || service?.toLowerCase() !== 'openai' || modelType === 'image'||isPublished}
                                     />
                                     <div className="group relative inline-block">
                                         <span className="label-text text-sm sm:text-base ml-2 cursor-pointer whitespace-nowrap">Batch API</span>

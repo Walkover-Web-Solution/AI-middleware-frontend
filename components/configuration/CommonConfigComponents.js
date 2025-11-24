@@ -15,7 +15,8 @@ const CommonConfigComponents = ({
     service, 
     showDefaultApikeys, 
     isEmbedUser,
-    hideAdvancedParameters = false
+    hideAdvancedParameters = false,
+    isPublished = false
 }) => {
     return (
         <>
@@ -28,6 +29,7 @@ const CommonConfigComponents = ({
                 shouldPromptShow={shouldPromptShow} 
                 service={service} 
                 deafultApiKeys={showDefaultApikeys}
+                isPublished={isPublished}
             />}
             <div className="flex flex-col sm:flex-row gap-2 items-start w-full max-w-md">
                 <div className="w-auto">
@@ -36,17 +38,19 @@ const CommonConfigComponents = ({
                         apiKeySectionRef={apiKeySectionRef}
                         promptTextAreaRef={promptTextAreaRef}
                         searchParams={searchParams}
+                        isPublished={isPublished}
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full">
                     <div className="w-full">
-                        <ModelDropdown params={params} searchParams={searchParams} />
+                        <ModelDropdown isPublished={isPublished} params={params} searchParams={searchParams} />
                     </div>
                     <AdvancedSettingsButton
                         params={params}
                         searchParams={searchParams}
                         isEmbedUser={isEmbedUser}
                         hideAdvancedParameters={hideAdvancedParameters}
+                        isPublished={isPublished}
                     />
                 </div>
             </div>

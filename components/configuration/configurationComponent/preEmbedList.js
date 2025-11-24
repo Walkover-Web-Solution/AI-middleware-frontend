@@ -14,7 +14,7 @@ import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 
-const PreEmbedList = ({ params, searchParams }) => {
+const PreEmbedList = ({ params, searchParams, isPublished }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
@@ -164,6 +164,7 @@ const PreEmbedList = ({ params, searchParams }) => {
         <>
             <div>
                 <FunctionParameterModal
+                    isPublished={isPublished}
                     name="Pre Tool"
                     functionId={preFunctionId}
                     Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
@@ -203,12 +204,13 @@ const PreEmbedList = ({ params, searchParams }) => {
 
 
                                 <button
-                                tabIndex={0}
-                                className=" flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
-                            >
-                                <AddIcon className="w-4 h-4" />
-                                <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
-                            </button>
+                                    disabled={isPublished}
+                                    tabIndex={0}
+                                    className={` flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 ${isPublished ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <AddIcon className="w-4 h-4" />
+                                    <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
+                                </button>
                             </InfoTooltip>
                         )}
                         <EmbedListSuggestionDropdownMenu
@@ -224,6 +226,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                     </div>
                     <div className="w-full">
                         <RenderEmbed
+                            isPublished={isPublished}
                             bridgeFunctions={bridgePreFunctions}
                             integrationData={integrationData}
                             getStatusClass={getStatusClass}

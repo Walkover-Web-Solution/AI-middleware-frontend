@@ -21,7 +21,8 @@ const SetupView = memo(() => {
         shouldPromptShow,
         service,
         showDefaultApikeys,
-        currentView
+        currentView,
+        isPublished
     } = useConfigurationContext();
 
     // Render agent flow panel when view is 'agent-flow'
@@ -47,12 +48,14 @@ const SetupView = memo(() => {
                         showDefaultApikeys={showDefaultApikeys}
                         isEmbedUser={isEmbedUser}
                         hideAdvancedParameters={hideAdvancedParameters}
+                        isPublished={isPublished}
                     />
                     <AdvancedParameters 
                         params={params} 
                         searchParams={searchParams} 
                         isEmbedUser={isEmbedUser} 
                         hideAdvancedParameters={hideAdvancedParameters}
+                        isPublished={isPublished}
                         className="max-w-md"
                         level={2}
                     />

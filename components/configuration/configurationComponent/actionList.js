@@ -9,11 +9,10 @@ import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-function ActionList({ params, searchParams }) {
+function ActionList({ params, searchParams , isPublished}) {
     const { action, bridgeType } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
 
         return {
             action: isPublished ? (bridgeDataFromState?.actions) : (versionData?.actions),
@@ -61,15 +60,16 @@ function ActionList({ params, searchParams }) {
                             setSelectedKey(key);
                             openModal(MODAL_TYPE.ACTION_MODAL)
                         }}
+                        disabled={isPublished}
                     >
                         <div className="p-4 w-full">
                             <div className='flex items-center justify-between'>
                                 <h1 className="inline-flex items-center text-lg font-semibold text-base-content">
                                     {key}
                                 </h1>
-                                <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
-                                    <TrashIcon size={16} className='cursor-pointer text-error' />
-                                </div>
+                                <button disabled={isPublished} onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 disabled:opacity-50 disabled:cursor-not-allowed transition duration-100 ease-in-out'>
+                                    <TrashIcon size={16} className='text-error' />
+                                </button>
                             </div>
                             <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                 Description: {value?.description}
@@ -90,7 +90,7 @@ function ActionList({ params, searchParams }) {
                     </div>
                 ))}
             </div>
-            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} />
+            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} isPublished={isPublished} />
         </div>
     );
 }

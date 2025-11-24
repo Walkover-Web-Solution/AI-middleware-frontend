@@ -26,7 +26,7 @@ const useInputHandlers = (descriptionRef, dataRef, selectedAction) => {
     return { clearInputFields, areFieldsFilled };
 };
 
-const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
+const ActionModel = ({ params, searchParams, actionId, setActionId , isPublished=false}) => {
     const descriptionRef = useRef(null);
     const dataRef = useRef(null);
     const dispatch = useDispatch();
@@ -98,25 +98,29 @@ const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
             <button className="btn btn-outline btn-sm w-fit" onClick={() => {
                 document.getElementById('actionModel').showModal();
                 clearInputFields();
-            }}>
+                
+            }} disabled={isPublished}>
                 <AddIcon size={16} /> Add a new action
             </button>
 
             <dialog id={MODAL_TYPE.ACTION_MODAL} className="modal">
                 <div className="modal-box w-full bg-base-100 text-base-content">
                     <ActionSelect 
+                        isPublished={isPublished}
                         selectedAction={selectedAction} 
                         setSelectedAction={setSelectedAction}
                         handleInputChange={handleInputChange}
                     />
                     
-                    <ActionDescription 
+                    <ActionDescription
+                        isPublished={isPublished}
                         descriptionRef={descriptionRef}
                         handleInputChange={handleInputChange}
                     />
 
                     {selectedAction === ACTIONS.DEFAULT && (
                         <ActionDataInput 
+                            isPublished={isPublished}
                             dataRef={dataRef}
                             handleInputChange={handleInputChange}
                         />
@@ -126,7 +130,7 @@ const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
                         <button className="btn" onClick={handleModalClose}>Close</button>
                         <button
                             className="btn ml-2 btn-primary"
-                            disabled={isCreateButtonDisabled}
+                            disabled={isCreateButtonDisabled||isPublished}
                             onClick={handleCreateUpdate}
                         >
                             {actionId?.length ? "Update" : "Create"}
@@ -138,12 +142,13 @@ const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
     );
 };
 
-const ActionSelect = ({ selectedAction, setSelectedAction, handleInputChange }) => (
+const ActionSelect = ({ selectedAction, setSelectedAction, handleInputChange, isPublished }) => (
     <label className="form-control">
         <div className="label">
             <span className="label-text text-lg">Select an Action</span>
         </div>
         <select
+            disabled={isPublished}
             className="select select-sm select-bordered"
             value={selectedAction}
             onChange={(e) => {
@@ -161,12 +166,13 @@ const ActionSelect = ({ selectedAction, setSelectedAction, handleInputChange }) 
     </label>
 );
 
-const ActionDescription = ({ descriptionRef, handleInputChange }) => (
+const ActionDescription = ({ descriptionRef, handleInputChange, isPublished }) => (
     <label className="form-control">
         <div className="label">
             <span className="label-text text-lg">Description</span>
         </div>
         <textarea
+            disabled={isPublished}
             className="textarea bg-white dark:bg-black/15 textarea-bordered h-24"
             placeholder="Enter a brief bio"
             ref={descriptionRef}
@@ -178,12 +184,13 @@ const ActionDescription = ({ descriptionRef, handleInputChange }) => (
     </label>
 );
 
-const ActionDataInput = ({ dataRef, handleInputChange }) => (
+const ActionDataInput = ({ dataRef, handleInputChange, isPublished }) => (
     <label className="form-control">
         <div className="label">
             <span className="label-text text-lg">Data Structure for Frontend</span>
         </div>
         <textarea
+            disabled={isPublished}
             className="textarea bg-white dark:bg-black/15 textarea-bordered h-24"
             placeholder="Enter data structure format"
             ref={dataRef}

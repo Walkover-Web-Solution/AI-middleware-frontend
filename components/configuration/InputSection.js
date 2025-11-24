@@ -17,13 +17,14 @@ const InputSection = memo(() => {
         setPromptState,
         handleCloseTextAreaFocus,
         savePrompt,
-        isMobileView
+        isMobileView,
+        isPublished
     } = useConfigurationContext();
 
     return (
         <>
             {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
-                <PreEmbedList params={params} searchParams={searchParams} />
+                <PreEmbedList isPublished={isPublished} params={params} searchParams={searchParams} />
             )}
             <InputConfigComponent
                 params={params}
@@ -37,6 +38,7 @@ const InputSection = memo(() => {
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
                 savePrompt={savePrompt}
                 isMobileView={isMobileView}
+                isPublished={isPublished}
             />
         </>
     );

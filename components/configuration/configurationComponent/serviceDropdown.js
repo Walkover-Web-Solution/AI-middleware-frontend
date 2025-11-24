@@ -11,11 +11,10 @@ import InfoTooltip from "@/components/InfoTooltip";
 import React from "react";
 import Dropdown from '@/components/UI/Dropdown';
 
-function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser }) {
+function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser, isPublished }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         const modelReducer = state?.modelReducer?.serviceModels;
         
         // Use bridgeData when isPublished=true, otherwise use versionData
@@ -143,6 +142,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
 
     const renderServiceDropdown = () => (
         <Dropdown
+            disabled={isPublished}
             options={serviceOptions}
             value={selectedService || ''}
             onChange={handleServiceChange}
