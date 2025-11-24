@@ -107,12 +107,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const handleImprovePrompt = async () => {
     setIsImprovingPrompt(true);
     try {
-      let prevConv;
       const variables = {};
-      debugger
       thread.forEach((item) => {
         if (item.id === modalInput?.Id) {
-          debugger
           const conversation = item?.AiConfig?.input || item?.AiConfig?.messages
           const filteredConversation = conversation.filter((value) => {
             if (value.role === 'developer') {
