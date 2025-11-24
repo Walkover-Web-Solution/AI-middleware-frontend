@@ -15,6 +15,11 @@ export const orchetralFlowReducer = createSlice({
     setConnectedAgentFlowData: (state, action) => {
       const { orgId, bridgeId, versionId, data } = action.payload;
       
+      // Ensure root object exists (in case of corrupted or partial rehydrated state)
+      if (!state.connectedAgentFlowByBridge) {
+        state.connectedAgentFlowByBridge = {};
+      }
+
       // Initialize nested structure if it doesn't exist
       if (!state.connectedAgentFlowByBridge[orgId]) {
         state.connectedAgentFlowByBridge[orgId] = {};

@@ -114,7 +114,9 @@ const ConfigurationPage = ({
         handleCloseTextAreaFocus,
         savePrompt,
         isMobileView,
-        closeHelperButtonLocation
+        closeHelperButtonLocation,
+        currentView,
+        switchView: handleNavigation
     }), [
         configState,
         params,
@@ -129,7 +131,9 @@ const ConfigurationPage = ({
         handleCloseTextAreaFocus,
         savePrompt,
         isMobileView,
-        closeHelperButtonLocation
+        closeHelperButtonLocation,
+        currentView,
+        handleNavigation
     ]);
 
     // Check if viewing published data

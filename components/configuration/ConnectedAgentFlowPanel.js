@@ -7,6 +7,7 @@ import { useConfigurationContext } from './ConfigurationContext';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getConnectedAgentFlowAction } from '@/store/action/orchestralFlowAction';
 import { getFromCookies } from '@/utils/utility';
+import Protected from '../protected';
 
 const AgentToAgentConnection = dynamic(() => import('@/components/agentToAgentConnection'), {
   ssr: false,
@@ -115,7 +116,7 @@ const formatAgentsForPersist = (agents = {}) =>
     return acc;
   }, {});
 
-const ConnectedAgentFlowPanel = () => {
+const ConnectedAgentFlowPanel = ({isEmbedUser}) => {
   const dispatch = useDispatch();
   const {
     params,
@@ -233,4 +234,4 @@ const ConnectedAgentFlowPanel = () => {
   );
 };
 
-export default ConnectedAgentFlowPanel;
+export default Protected(ConnectedAgentFlowPanel);

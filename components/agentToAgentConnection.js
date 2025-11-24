@@ -464,6 +464,9 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       const agentName = agentData.name || agentData.agent_name || 'Unknown Agent';
 
       // Process main agent data
+      // Check if this agent is being connected to the master agent (bridge-node-root or master agent)
+      const isConnectingToMaster = sourceNodeId === 'bridge-node-root' || sourceData?.isFirstAgent;
+      
       connectedAgentsData[agentName] = {
         bridge_id: agentData._id || agentData.bridge_id,
         thread_id: agentData.thread_id || false,
@@ -514,7 +517,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       }
 
       // Use the actual version ID if available, otherwise use bridge ID
-      const versionId = sourceAgent?.bridgeData?.published_version_id || sourceAgent?.bridgeData?.version_id || sourceBridgeId;
+      const versionId = isConnectingToMaster ? searchParams?.version : sourceAgent?.bridgeData?.published_version_id || sourceAgent?.bridgeData?.versions?.[0] || sourceAgent?.bridgeData?.version_id || sourceBridgeId;
 
       await dispatch(updateBridgeVersionAction({
         versionId,
