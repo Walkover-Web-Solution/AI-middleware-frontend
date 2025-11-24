@@ -104,6 +104,8 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     isNotesCollapsed: false
   }));
 
+  const [isGuideVisible, setIsGuideVisible] = useState(false);
+
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null);
 
@@ -459,9 +461,14 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 <ChatBundle onClick={() => handleExpandPanel('Chat')} />
               ) : (
                 <div className="h-full flex flex-col" id="parentChatbot">
-                  <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                  <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
                     <div className="h-full flex flex-col">
-                      <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
+                      <AgentSetupGuide
+                        promptTextAreaRef={promptTextAreaRef}
+                        params={resolvedParams}
+                        searchParams={resolvedSearchParams}
+                        onVisibilityChange={setIsGuideVisible}
+                      />
                       {!sessionStorage.getItem('orchestralUser') ? (
                         <div className="flex-1 min-h-0">
                           {bridgeType === 'batch' && versionService === 'openai' ? (
