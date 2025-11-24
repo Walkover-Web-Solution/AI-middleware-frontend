@@ -7,7 +7,7 @@ import { Plus, PlusIcon, Settings, Bot, X, CircleArrowOutUpRight } from 'lucide-
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { usePathname, useRouter } from 'next/navigation';
 import { BRIDGE_TYPES, useAgentLookup, normalizeConnectedRefs, shallowEqual, AgentSidebar, FlowControlPanel, AgentConfigSidebar } from '@/components/flowDataManager';
-import { getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import CreateBridgeCards from './CreateBridgeCards';
 import { useDispatch } from 'react-redux';
@@ -17,6 +17,8 @@ import DeleteModal from './UI/DeleteModal';
 import Protected from './protected';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { toast } from 'react-toastify';
+import { isEqual } from 'lodash';
 
 /* ========================= Helpers ========================= */
 function hydrateNodes(rawNodes, ctx) {
@@ -532,14 +534,14 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
   const openAgentVariableModal = useCallback(
     (payload) => {
-      const sel = payload?.selectedAgent;
+      const sel = payload?.selectedAgent?.bridgeData;
       if (!sel?._id) return;
       const agent = agents.find((a) => a._id === sel._id);
       const base = {
         name: sel?.name || '',
         description: agent?.connected_agent_details?.description || '',
         fields: agent?.connected_agent_details?.agent_variables?.fields || {},
-        required_params: agent?.connected_agent_details?.agent_variables?.required_params || [],
+        required_params: agent?.connected_agent_details?.agent_variables?.required_params || []
       };
 
       setNodes((currentNodes) => {
@@ -552,7 +554,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           flushSync(() => {
             setCurrentVariable(base);
             setSelectedAgent(sel);
-            setToolData({ ...base, thread_id: sel?.variables?.thread_id || !!sel?.thread_id });
+            setToolData({ ...base, thread_id: sel?.variables?.thread_id || !!sel?.thread_id, version_id: sel?.published_version_id || !!sel?.version_id });
             setVariablesPath({ ...(parentVariablesPath[sel._id] || parentVariablesPath || {}) });
           })
           openModal(MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL);
@@ -567,7 +569,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   const closeConfigSidebar = useCallback(() => setConfigSidebar({ isOpen: false, nodeId: null, agent: null }), []);
 
   const handleSaveAgentParameters = useCallback(() => {
-    const nodeToUpdate = nodes.find((node) => node.type === 'agentNode' && node.data?.selectedAgent?._id === selectedAgent?._id);
+    const nodeToUpdate = nodes.find((node) => node.type === 'agentNode' && node.data?.selectedAgent?._id === selectedAgent?._id || node?.data?.selectedAgent?._id === selectedAgent?.published_version_id);
     if (!nodeToUpdate) return;
 
     const incomingEdge = edges.find((edge) => edge.target === nodeToUpdate.id);
@@ -627,9 +629,13 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         dataToSend.agents.connected_agents[selectedAgent?.name].version_id = toolData?.version_id
       }
       // on Save the bridge and thread id in version only
+      // Use the source agent's (parent node's) published_version_id instead of selected agent's
+      const sourceAgentVersionId = parentNode?.data?.selectedAgent?.bridgeData?.published_version_id || 
+                                   searchParams?.version || 
+                                   parentNode?.data?.selectedAgent?.bridgeData?.versions?.[0];
       dispatch(updateBridgeVersionAction({
         bridgeId: selectedAgent?._id || selectedAgent?.bridge_id,
-        versionId: selectedAgent?.published_version_id || selectedAgent?.version_id || selectedAgent?._id || selectedAgent?.bridge_id,
+        versionId: sourceAgentVersionId,
         dataToSend
       }))
       dispatch(updateBridgeAction({
@@ -640,11 +646,11 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
               fields: toolData?.fields,
               required_params: toolData?.required_params
             },
-            description: agentTools?.description
+            description: toolData?.description ? toolData?.description : selectedAgent?.connected_agent_details?.description
           }
         }
       }))
-      if (!isEqual(variablesPath, variables_path[selectedAgent?._id || selectedAgent?.bridge_id])) {
+      if (!isEqual(variablesPath, variablesPath[selectedAgent?._id || selectedAgent?.bridge_id])) {
         dispatch(
           updateBridgeVersionAction({
             bridgeId: params.id,
@@ -656,6 +662,10 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       closeModal(MODAL_TYPE?.ORCHESTRAL_AGENT_PARAMETER_MODAL)
       setCurrentVariable(null)
       setSelectedAgent(null)
+      setToolData([])
+      setVariablesPath([])
+      setCurrentVariable([])
+
     } catch (error) {
       toast?.error("Failed to save agent")
       console.error(error)
