@@ -98,7 +98,15 @@ const ConfigurationPage = ({
             </div>
         );
     }, [isEmbedUser]);
-
+    
+    // Detect if viewing published content (read-only mode)
+    const isPublished = useMemo(() => {
+        if (searchParams?.get) {
+            return searchParams.get('isPublished') === 'true';
+        } else {
+            return searchParams?.isPublished === 'true';
+        }
+    }, [searchParams]);
     // Create context value with consolidated state - significantly reduced dependencies
     const contextValue = useMemo(() => ({
         ...configState,
@@ -116,7 +124,8 @@ const ConfigurationPage = ({
         isMobileView,
         closeHelperButtonLocation,
         currentView,
-        switchView: handleNavigation
+        switchView: handleNavigation,
+        isPublished
     }), [
         configState,
         params,
@@ -132,12 +141,13 @@ const ConfigurationPage = ({
         savePrompt,
         isMobileView,
         closeHelperButtonLocation,
+        isPublished,
         currentView,
         handleNavigation
     ]);
 
+
     // Check if viewing published data
-    const isPublished = searchParams?.isPublished === 'true';
     const [bannerState, setBannerState] = useState({ show: isPublished, animating: false });
     const prevIsPublished = useRef(isPublished);
 

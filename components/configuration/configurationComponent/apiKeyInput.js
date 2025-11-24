@@ -7,13 +7,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false }) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false ,isPublished}) => {
     const dispatch = useDispatch();
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         const apikeys = state?.apiKeysReducer?.apikeys || {};
         
         // Use bridgeData when isPublished=true, otherwise use versionData
@@ -76,6 +75,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
     return (
         <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
             <Dropdown
+            disabled={isPublished}
                 options={dropdownOptions}
                 value={selectedValue || ''}
                 onChange={(val) => handleDropdownChange(val)}

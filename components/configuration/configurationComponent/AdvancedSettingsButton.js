@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SettingsIcon } from '@/components/Icons';
 import AdvancedParameters from './advancedParamenter';
 
-const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvancedParameters = false }) => {
+const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvancedParameters = false, isPublished = false }) => {
     const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
     const advancedSettingsRef = useRef(null);
 
@@ -50,6 +50,7 @@ const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvance
                         defaultExpanded
                         showAccordion={false}
                         compact
+                        isPublished={isPublished}
                     />
                 </div>
             )}

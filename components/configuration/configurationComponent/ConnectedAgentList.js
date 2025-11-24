@@ -17,7 +17,7 @@ import { CircleQuestionMark } from 'lucide-react';
 import { BotIcon } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
-const ConnectedAgentList = ({ params, searchParams }) => {
+const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
@@ -30,7 +30,6 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         const modelReducer = state?.modelReducer?.serviceModels;
         
         // Use bridgeData when isPublished=true, otherwise use versionData
@@ -256,6 +255,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
+                            disabled={isPublished}
                         >
                             <TrashIcon size={16} />
                         </button>
@@ -289,7 +289,8 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 </div>
                                 <button
                                     tabIndex={0}
-                                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
+                                    disabled={isPublished}
+                                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <AddIcon className="w-2 h-2" />
                                     <span className="text-xs">Add</span>
@@ -298,8 +299,9 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                         ) : (
                             <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
                                 <button
+                                    disabled={isPublished}
                                     tabIndex={0}
-                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <AddIcon className="w-2 h-2" />
                                     <p className="label-text text-sm whitespace-nowrap">Agent</p>
@@ -335,6 +337,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 isAsync={true}
             />
             <FunctionParameterModal
+                isPublished={isPublished}
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
                 function_details={currentVariable}

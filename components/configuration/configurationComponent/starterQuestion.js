@@ -5,12 +5,11 @@ import { useDispatch } from 'react-redux';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const StarterQuestionToggle = ({ params, searchParams }) => {
+const StarterQuestionToggle = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
     const IsstarterQuestionEnable = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         
         return isPublished ? (bridgeDataFromState?.IsstarterQuestionEnable || false) : (versionData?.IsstarterQuestionEnable || false);
     });
@@ -37,6 +36,7 @@ const StarterQuestionToggle = ({ params, searchParams }) => {
                 onChange={handleToggle}
                 className="toggle mr-2 toggle-xs"
                 defaultValue={IsstarterQuestionEnable ? "true" : "false"}
+                disabled={isPublished}
             />
         </div>
     );

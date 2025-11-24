@@ -68,7 +68,7 @@ const TONES = [
   },
 ];
 
-const ToneDropdown = ({ params, searchParams }) => {
+const ToneDropdown = ({ params, searchParams ,isPublished }) => {
   const { reduxTone } = useCustomSelector((state) => ({
     reduxTone:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
@@ -134,6 +134,7 @@ const ToneDropdown = ({ params, searchParams }) => {
       
       {/* Tone Dropdown */}
       <select
+        disabled={isPublished}
         value={selectedTone}
         onChange={handleToneChange}
         className="select select-sm select-bordered capitalize w-full"

@@ -7,12 +7,11 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { CircleQuestionMark } from 'lucide-react';
 
 
-const GuardrailSelector = ({ params, searchParams }) => {  
+const GuardrailSelector = ({ params, searchParams ,isPublished }) => {  
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
         (state) => {
             const versionData = state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version];
             const bridgeDataFromState = state.bridgeReducer?.allBridgesMap?.[params?.id];
-            const isPublished = searchParams?.isPublished === 'true';
             
             return {
                 guardrailsData: isPublished ? (bridgeDataFromState?.guardrails || {}) : (versionData?.guardrails || {}),
@@ -160,6 +159,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                 </div>
                 <label className="swap">
                     <input 
+                        disabled={isPublished}
                         type="checkbox" 
                         checked={guardrailsEnabled} 
                         onChange={handleToggleGuardrails}
@@ -194,6 +194,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                     <div className="m-2 mb-4">
                         {!showOptions ? (
                             <button
+                                disabled={isPublished}
                                 onClick={handleToggleOptions}
                                 className="btn btn-sm btn-outline w-full flex items-center gap-2"
                             >
@@ -206,6 +207,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-sm font-medium">Available Guards</span>
                                         <button
+                                            disabled={isPublished}
                                             onClick={handleToggleOptions}
                                             className="btn btn-ghost btn-sm btn-circle"
                                         >
@@ -219,6 +221,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                             <div key={key} className="form-control">
                                                 <div className="label cursor-pointer justify-start gap-2">
                                                     <input 
+                                                        disabled={isPublished}
                                                         type="checkbox" 
                                                         className="checkbox checkbox-sm" 
                                                         checked={selectedGuardrails.includes(key)} 
@@ -235,6 +238,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         <div className="form-control col-span-full">
                                             <div className="label cursor-pointer justify-start gap-2">
                                                 <input 
+                                                    disabled={isPublished}
                                                     type="checkbox" 
                                                     className="checkbox checkbox-sm" 
                                                     checked={showCustomInput || customPrompt.trim() !== ''} 
@@ -248,6 +252,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                             {showCustomInput && (
                                                 <div className="mt-2">
                                                     <textarea
+                                                        disabled={isPublished}
                                                         placeholder="Write your custom guardrail prompt here..."
                                                         className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
                                                         onBlur={handleCustomPromptChange}

@@ -109,7 +109,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
 
 ModelPreview.displayName = 'ModelPreview';
 
-const ModelDropdown = ({ params, searchParams }) => {
+const ModelDropdown = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => {
@@ -194,6 +194,7 @@ const ModelDropdown = ({ params, searchParams }) => {
         <div className="flex flex-col items-start gap-4 relative">
             <div className="w-full" ref={dropdownRef}>
                 <Dropdown
+                    disabled={isPublished}
                     options={modelOptions}
                     value={model || ''}
                     onChange={handleSelect}

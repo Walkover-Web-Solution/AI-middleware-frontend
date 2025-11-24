@@ -6,11 +6,11 @@ import { AlertIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon, Shield
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark, Crown } from 'lucide-react';
 
-const UserReferenceForRichText = ({ params, searchParams }) => {
+const UserReferenceForRichText = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
     const { is_rich_text = true, user_reference } = useCustomSelector((state) => ({
-        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text,
-        user_reference: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.user_reference || "",
+        is_rich_text: isPublished ? state?.bridgeReducer?.allBridgesMap?.[params?.id]?.is_rich_text : state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text,
+        user_reference: isPublished ? state?.bridgeReducer?.allBridgesMap?.[params?.id]?.user_reference : state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.user_reference || "",
     }));
     
     // Disable rich text functionality - force to false for premium feature

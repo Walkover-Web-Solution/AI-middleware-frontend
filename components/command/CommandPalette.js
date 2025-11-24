@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronDown, ChevronRight } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/utils/utility";
 import Protected from "../protected";
 
@@ -13,6 +13,19 @@ function getOrgIdFromPath(pathname) {
   return null;
 }
 
+function getCurrentCategoryGroup(currentCategory) {
+  // Map current category keys to group names used in search results
+  const categoryGroupMap = {
+    'agents': 'Agents',
+    'apikeys': 'API Keys',
+    'Auths': 'Auth Keys',
+    'docs': 'Knowledge Base',
+    'integrations': 'Integrations'
+  };
+  
+  return categoryGroupMap[currentCategory] || null;
+}
+
 const CommandPalette = ({isEmbedUser}) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -20,6 +33,7 @@ const CommandPalette = ({isEmbedUser}) => {
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  const [collapsedCategories, setCollapsedCategories] = useState(new Set());
 
   const orgId = useMemo(() => getOrgIdFromPath(pathname), [pathname]);
   
@@ -29,13 +43,13 @@ const CommandPalette = ({isEmbedUser}) => {
     
     const parts = pathname.split("/").filter(Boolean);
     
-    // Check for specific routes
+    // Check for specific routes in order of specificity
     if (parts.includes("agents")) return "agents";
-    if (parts.includes("orchestratal_model")) return "flows";
     if (parts.includes("apikeys")) return "apikeys";
     if (parts.includes("pauthkey")) return "Auths";
     if (parts.includes("knowledge_base")) return "docs";
     if (parts.includes("integration")) return "integrations";
+    if (parts.includes("orchestratal_model")) return "flows";
     
     return null;
   }, [pathname]);
@@ -59,12 +73,12 @@ const CommandPalette = ({isEmbedUser}) => {
         fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
       );
     };
-    const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id"]).map((a) => ({
+    const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id","last_used","total_tokens"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
       subtitle: (
         <div className="flex items-center gap-2">
-          <span>{a.service || ""}{a.configuration?.model ? " · " + a.configuration?.model : ""}</span>
+          <span>{a.service || ""}{a.configuration?.model ? " · " + a.configuration?.model : ""}{a.total_tokens ? " · " + a.total_tokens + " tokens" : ""}</span>
           {a.last_used && (
             <>
               <span>•</span>
@@ -172,25 +186,71 @@ const CommandPalette = ({isEmbedUser}) => {
     };
   }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
 
-  const flatResults = useMemo(() => {
-    return [
-      ...items.agents.map((it) => ({ group: "Agents", ...it })),
-      ...items.apikeys.map((it) => ({ group: "API Keys", ...it })),
-      ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
-      // ...items.functions.map((it) => ({ group: "Functions", ...it })),
-      ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
-      ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
-    ];
-  }, [items, integrationData, authData]);
+  const allResults = useMemo(() => [
+    ...items.agents.map((it) => ({ group: "Agents", ...it })),
+    ...items.apikeys.map((it) => ({ group: "API Keys", ...it })),
+    ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
+    // ...items.functions.map((it) => ({ group: "Functions", ...it })),
+    ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
+    ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
+  ], [items, integrationData, authData]);
 
-  const groupedResults = useMemo(() => {
+  const flatResults = useMemo(() => {
+    // Create flat results in same order as groupedResults (current category first)
     const groups = {};
-    flatResults.forEach((r) => {
+    allResults.forEach((r) => {
       if (!groups[r.group]) groups[r.group] = [];
       groups[r.group].push(r);
     });
-    return groups;
-  }, [flatResults]);
+    
+    // Sort groups to show current category first (same as groupedResults)
+    const sortedResults = [];
+    const currentCategoryGroup = getCurrentCategoryGroup(currentCategory);
+    
+    // Add current category first if it exists and has results
+    if (currentCategoryGroup && groups[currentCategoryGroup] && !collapsedCategories.has(currentCategoryGroup)) {
+      sortedResults.push(...groups[currentCategoryGroup]);
+    }
+    
+    // Add all other categories in alphabetical order
+    Object.keys(groups)
+      .filter(group => group !== currentCategoryGroup)
+      .sort()
+      .forEach(group => {
+        if (!collapsedCategories.has(group)) {
+          sortedResults.push(...groups[group]);
+        }
+      });
+    
+    return sortedResults;
+  }, [allResults, collapsedCategories, currentCategory]);
+
+  const groupedResults = useMemo(() => {
+    const groups = {};
+    allResults.forEach((r) => {
+      if (!groups[r.group]) groups[r.group] = [];
+      groups[r.group].push(r);
+    });
+    
+    // Sort groups to show current category first
+    const sortedGroups = {};
+    const currentCategoryGroup = getCurrentCategoryGroup(currentCategory);
+    
+    // Add current category first if it exists and has results
+    if (currentCategoryGroup && groups[currentCategoryGroup]) {
+      sortedGroups[currentCategoryGroup] = groups[currentCategoryGroup];
+    }
+    
+    // Add all other categories
+    Object.keys(groups)
+      .filter(group => group !== currentCategoryGroup)
+      .sort()
+      .forEach(group => {
+        sortedGroups[group] = groups[group];
+      });
+    
+    return sortedGroups;
+  }, [allResults, currentCategory]);
 
   const openPalette = useCallback(() => {
     // Check if any DaisyUI modal is currently open
@@ -203,17 +263,42 @@ const CommandPalette = ({isEmbedUser}) => {
     setQuery("");
     setActiveIndex(0);
     setActiveCategoryIndex(0);
+    setCollapsedCategories(new Set()); // Reset collapsed state when opening
   }, []);
   const closePalette = useCallback(() => setOpen(false), []);
 
-  // Categories array for navigation
-  const categories = useMemo(() => [
-    { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
-    { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
-    { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
-    { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
-    { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-  ], []);
+  const toggleCategory = useCallback((categoryGroup) => {
+    setCollapsedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryGroup)) {
+        newSet.delete(categoryGroup);
+      } else {
+        newSet.add(categoryGroup);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Categories array for navigation - reorder based on current category
+  const categories = useMemo(() => {
+    const allCategories = [
+      { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
+      { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
+      { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
+      { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
+      { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
+    ];
+    
+    // Reorder to show current category first
+    const currentCategoryIndex = allCategories.findIndex(cat => cat.key === currentCategory);
+    if (currentCategoryIndex > -1) {
+      const currentCat = allCategories[currentCategoryIndex];
+      const otherCats = allCategories.filter((_, index) => index !== currentCategoryIndex);
+      return [currentCat, ...otherCats];
+    }
+    
+    return allCategories;
+  }, [currentCategory]);
 
   const navigateTo = useCallback((item) => {
     if (!orgId) {
@@ -285,7 +370,7 @@ const CommandPalette = ({isEmbedUser}) => {
 
   useEffect(() => {
     const handler = (e) => {
-      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org"))) {
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser && !pathname.endsWith("/org") && !pathname.endsWith('/login'))) {
         e.preventDefault();
         openPalette();
       }
@@ -374,28 +459,20 @@ const CommandPalette = ({isEmbedUser}) => {
 
               <div className="space-y-1 p-2">
                 {categories.map((c, index) => {
-                  const isCurrentCategory = currentCategory === c.key;
                   const isActiveCategory = index === activeCategoryIndex;
                   
                   return (
                     <button
                       key={c.key}
                       onClick={() => navigateCategory(c.key)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex flex-col relative ${
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center  justify-between relative ${
                         isActiveCategory 
                           ? 'bg-primary text-primary-content' 
                           : 'bg-base-200 hover:bg-base-300'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="font-medium">{c.label}</div>
-                        {isCurrentCategory && (
-                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
-                        )}
-                      </div>
-                      <div className="text-xs opacity-70">
-                        {c.desc}
-                      </div>
+                      <div className="font-medium truncate">{c.label}</div>
+                      <span className="text-xs opacity-70 truncate">{c.desc}</span>
                     </button>
                   );
                 })}
@@ -403,39 +480,63 @@ const CommandPalette = ({isEmbedUser}) => {
             </div>
           ) : (
             <>
-              {flatResults.length === 0 ? (
+              {Object.keys(groupedResults).length === 0 ? (
                 <div className="p-6 text-center text-sm opacity-70">No results</div>
               ) : (
-                Object.entries(groupedResults).map(([group, rows]) => (
-                  <div key={group} className="mb-3">
-                    <div className="px-2 py-1 text-xs uppercase tracking-wide opacity-60">{group}</div>
-                    <ul>
-                      {rows.map((row) => {
-                        const globalIdx = flatResults.findIndex((r) => r === row);
-                        const active = globalIdx === activeIndex;
-                        return (
-                          <li
-                            key={`${row.type}-${row.id}`}
-                            data-result-index={globalIdx}
-                            onClick={() => navigateTo(row)}
-                            className={`cursor-pointer rounded px-3 py-2 ${
-                              active ? "bg-primary text-primary-content" : "hover:bg-base-200"
-                            }`}
-                          >
-                            <div className="text-sm font-medium">{row.title}</div>
-                            <div className="text-xs opacity-70">{row.subtitle}</div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                ))
+                Object.entries(groupedResults).map(([group, rows]) => {
+                  const isCollapsed = collapsedCategories.has(group);
+                  const hasResults = rows.length > 0;
+                  
+                  if (!hasResults) return null;
+                  
+                  return (
+                    <div key={group} className="mb-3">
+                      <div 
+                        className="flex items-center w-full justify-between px-2 py-1 cursor-pointer hover:bg-base-200 rounded"
+                        onClick={() => toggleCategory(group)}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isCollapsed ? (
+                            <ChevronRight className="w-3 h-3" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3" />
+                          )}
+                          <span className="text-xs uppercase tracking-wide opacity-60">
+                            {group} ({rows.length})
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {!isCollapsed && (
+                        <ul className="ml-2">
+                          {rows.map((row) => {
+                            const globalIdx = flatResults.findIndex((r) => r === row);
+                            const active = globalIdx === activeIndex;
+                            return (
+                              <li
+                                key={`${row.type}-${row.id}`}
+                                data-result-index={globalIdx}
+                                onClick={() => navigateTo(row)}
+                                className={`cursor-pointer rounded px-3 py-2 flex items-center w-full justify-between ${
+                                  active ? "bg-primary text-primary-content" : "hover:bg-base-200"
+                                }`}
+                              >
+                                <div className="font-medium truncate">{row.title}</div>
+                                <span className="text-xs opacity-70 truncate">{row.subtitle}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </>
           )}
         </div>
         <div className="flex items-center justify-between border-t border-base-300 p-2 text-xs opacity-70">
-          <div>Navigate with ↑ ↓ · Enter to open · Esc to close</div>
+          <div>Navigate with ↑ ↓ · Enter to open · Click to collapse/expand · Esc to close</div>
           <div>Cmd/Ctrl + K</div>
         </div>
       </div>

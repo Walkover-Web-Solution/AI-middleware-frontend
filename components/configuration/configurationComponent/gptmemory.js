@@ -6,13 +6,12 @@ import { PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/componen
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const   GptMemory = ({ params, searchParams }) => {
+const   GptMemory = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
 
     const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         
         return {
             gpt_memory_context: isPublished ? (bridgeDataFromState?.gpt_memory_context || "") : (versionData?.gpt_memory_context || ""),
@@ -57,6 +56,7 @@ const   GptMemory = ({ params, searchParams }) => {
                         checked={gpt_memory}
                         onChange={handleCheckboxChange}
                         className="toggle toggle-xs"
+                        disabled={isPublished}
                     />
                 </div>
                 
@@ -100,6 +100,7 @@ const   GptMemory = ({ params, searchParams }) => {
                             </p>
                         </div>
                         <textarea
+                        disabled={isPublished}
                             className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-[3.5rem] resize-y border-base-300 focus:border-base-content/30 focus:outline-none transition-colors text-xs leading-relaxed placeholder:text-base-content/40"
                            defaultValue={gpt_memory_context}
                            onBlur={handleUserReferenceChange}

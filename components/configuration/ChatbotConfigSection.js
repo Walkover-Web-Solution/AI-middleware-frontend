@@ -6,7 +6,7 @@ import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import ActionList from "./configurationComponent/actionList";
 import { useConfigurationContext } from './ConfigurationContext';
 
-const ChatbotConfigSection = () => {
+const ChatbotConfigSection = ( {isPublished} ) => {
     const [isChatbotAccordionOpen, setIsChatbotAccordionOpen] = useState(false);
     const { params, searchParams, bridgeType } = useConfigurationContext();
 
@@ -33,9 +33,9 @@ const ChatbotConfigSection = () => {
             </div>
             
             <div className={`w-full gap-2 cursor-default flex flex-col px-3 ${isChatbotAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isChatbotAccordionOpen ? 'opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
-                <UserRefernceForRichText params={params} searchParams={searchParams} />
-                <StarterQuestionToggle params={params} searchParams={searchParams} />
-                <ActionList params={params} searchParams={searchParams} />
+                <UserRefernceForRichText params={params} searchParams={searchParams} isPublished={isPublished} />
+                <StarterQuestionToggle params={params} searchParams={searchParams} isPublished={isPublished} />
+                <ActionList params={params} searchParams={searchParams} isPublished={isPublished} />
             </div>
         </div>
     );

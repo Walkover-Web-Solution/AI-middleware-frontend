@@ -1,7 +1,7 @@
 import { modelSuggestionApi } from '@/config';
 import React, { useState, useCallback } from 'react'
 
-const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys }) => {
+const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys, isPublished }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const setErrorBorder = (ref, selector, scrollToView = false) => {
@@ -63,7 +63,7 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
                                 <button
                                     className="flex items-center gap-2  rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                                     onClick={handleGetRecommendations}
-                                    disabled={isLoadingRecommendations}
+                                    disabled={isLoadingRecommendations||isPublished}
                                 >
                                     {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
                                 </button>

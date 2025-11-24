@@ -6,12 +6,11 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { CircleQuestionMark } from 'lucide-react';
 
-function ToolCallCount({ params, searchParams }) {
+function ToolCallCount({ params, searchParams ,isPublished }) {
     const dispatch = useDispatch();
     const { tool_call_count, modelType, model } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        const isPublished = searchParams?.isPublished === 'true';
         
         return {
             tool_call_count: isPublished ? (bridgeDataFromState?.tool_call_count) : (versionData?.tool_call_count),
@@ -38,6 +37,7 @@ function ToolCallCount({ params, searchParams }) {
                 </InfoTooltip>
             </div>
             <input
+            disabled={isPublished}
                 type="number"
                 placeholder="Type here"
                 className="input input-sm input-bordered w-full"

@@ -14,7 +14,8 @@ const RenderEmbed = ({
   handleOpenDeleteModal,
   handleChangePreTool,
   name,
-  halfLength = 1
+  halfLength = 1,
+  isPublished
 }) => {
   // Sort functions first
   const sortedFunctions = useMemo(() => {
@@ -91,6 +92,7 @@ const RenderEmbed = ({
                   }}
                   className="btn btn-ghost btn-sm p-1 hover:text-primary"
                   title="Change Pre Tool"
+                  disabled={isPublished}
                 >
                   <RefreshIcon size={16} />
                 </button>
@@ -102,6 +104,7 @@ const RenderEmbed = ({
                 }}
                 className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
+                disabled={isPublished}
               >
                 <TrashIcon size={16} />
               </button>

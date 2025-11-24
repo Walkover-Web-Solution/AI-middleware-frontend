@@ -3,7 +3,7 @@ import { ChevronDownIcon, InfoIcon, SettingsIcon } from '@/components/Icons';
 import { toggleSidebar, extractPromptVariables } from '@/utils/utility';
 
 // Optimized default variables section with accordion
-const DefaultVariablesSection = memo(({ prompt = '', customVariables = [] }) => {
+const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPublished = false }) => {
     const [isExpanded, setIsExpanded] = useState(false);
    // Extract variables used in the prompt
     const usedVariables = useMemo(() => {
@@ -48,6 +48,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [] }) => 
                             toggleSidebar("variable-collection-slider", "right")
                         }}
                         title="Manage Variables"
+                        disabled={isPublished}
                     >
                         <div className="flex items-center gap-1" >
                             <SettingsIcon size={12} />
