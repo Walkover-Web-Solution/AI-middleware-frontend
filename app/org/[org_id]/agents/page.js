@@ -34,6 +34,26 @@ const BRIDGE_STATUS = {
   ACTIVE: 1,
   PAUSED: 0
 };
+
+// Footer Component
+const PoweredByFooter = () => {
+  return (
+    <footer className="w-full py-4 border-t border-base-300">
+      <div className="flex justify-center items-center gap-2  font-medium opacity-50 text-sm text-base-content/70">
+        <span>Powered by</span>
+        <a 
+          href="https://gtwy.ai" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="font-semibold text-primary hover:text-primary-focus transition-colors"
+        >
+          GTWY
+        </a>
+      </div>
+    </footer>
+  );
+};
+
 function Home({ params, isEmbedUser }) {
   // Use the tutorial videos hook
   const { getBridgeCreationVideo } = useTutorialVideos();
@@ -574,6 +594,9 @@ function Home({ params, isEmbedUser }) {
             )}
             </div>
           </div>
+          
+          {/* Powered By Footer */}
+          {isEmbedUser &&<PoweredByFooter />}
         </div>
         
         {/* Single DeleteModal for all delete operations */}
