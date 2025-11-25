@@ -36,14 +36,6 @@ const OrgPageGuard = ({ children }) => {
         setInCookies('onboarding_dismissed', 'true');
         return;
       }
-      else {
-        const onboardingDismissed = getFromCookies('onboarding_dismissed');
-        if (!onboardingDismissed && !currentUser?.meta?.onBordingFormSubmitted && !isExactOrgPage) {
-          setInCookies('onboarding_dismissed', 'true');
-          return;
-        }
-      }
-
       // Check if onboarding was dismissed
       const onboardingDismissed = getFromCookies('onboarding_dismissed');
       const currentUserMeta = currentUser?.meta?.onBordingFormSubmitted;
@@ -53,6 +45,13 @@ const OrgPageGuard = ({ children }) => {
         setShowOnboarding(true);
       }
     }
+    else {
+        const onboardingDismissed = getFromCookies('onboarding_dismissed');
+        if (!onboardingDismissed && !currentUser?.meta?.onBordingFormSubmitted && !isExactOrgPage) {
+          setInCookies('onboarding_dismissed', 'true');
+          return;
+        }
+      }
   }, [pathname, currentUser]);
 
   const handleClose = () => {

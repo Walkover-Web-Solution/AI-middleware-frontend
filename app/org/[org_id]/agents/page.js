@@ -441,10 +441,10 @@ function Home({ params, isEmbedUser }) {
 
   const DeletedEndComponent = ({ row }) => {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
-            className="btn btn-outline btn-ghost btn-xs whitespace-nowrap flex items-center gap-1" 
+            className="btn btn-outline btn-ghost btn-sm whitespace-nowrap flex items-center gap-1" 
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -455,13 +455,13 @@ function Home({ params, isEmbedUser }) {
              <div className="flex text-xs items-center gap-1">
              <Undo2 size={12} />
              </div>
-             <div className="text-xs">
+             <div className="text-sm">
              Undo
              </div>
             </span>
           </button>
         </div>
-        <div className="text-error font-sm mt-2 text-xs whitespace-nowrap">
+        <div className="text-error font-sm mt-2 text-sm whitespace-nowrap">
           {row.daysRemaining} days left
         </div>
       </div>
