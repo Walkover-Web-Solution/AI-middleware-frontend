@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Clock, AlertCircle, Eye, EyeOff, History, ChevronDown, ChevronRight, TrashIcon } from 'lucide-react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
-import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction } from '@/store/action/testCasesAction';
+import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, generateAdditionalTestCasesAction } from '@/store/action/testCasesAction';
 
 
 const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
@@ -10,6 +10,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [expandedVersions, setExpandedVersions] = useState({});
   const [selectedVersion, setSelectedVersion] = useState('');
+  const [generatingTestCases, setGeneratingTestCases] = useState(false);
   const dispatch = useDispatch();
 
   const { testCases, isFirstTestcase, versions } = useCustomSelector((state) => ({
@@ -43,6 +44,21 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
     await dispatch(runTestCaseAction({ versionId: resolvedParams?.version, bridgeId: params?.id }));
     await dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
     setRunningTests(new Set());
+  }
+
+  const generateMoreTestCases = async () => {
+    setGeneratingTestCases(true);
+    try {
+      await dispatch(generateAdditionalTestCasesAction({ 
+        bridgeId: params?.id, 
+        versionId: resolvedParams?.version 
+      }));
+      await dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+    } catch (error) {
+      console.error('Error generating additional test cases:', error);
+    } finally {
+      setGeneratingTestCases(false);
+    }
   }
 
   const handleDeleteTestCase = async (testId) => {
@@ -129,9 +145,27 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
 
       <div className="p-4 space-y-3">
         {testCaseArray.length === 0 ? (
-          <div className="text-center py-8 text-base-content">
-            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-base-content" />
-            <p className="text-sm">No test cases available</p>
+          <div className="text-center py-12 text-base-content">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-base-content/60" />
+            <p className="text-base font-medium mb-2">No test cases available</p>
+            <p className="text-sm text-base-content/70 mb-6">Generate test cases to validate your bridge configuration</p>
+            <button
+              className="btn btn-primary btn-md gap-2 shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={generateMoreTestCases}
+              disabled={generatingTestCases}
+            >
+              {generatingTestCases ? (
+                <>
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  <span>Generate Test Cases</span>
+                </>
+              )}
+            </button>
           </div>
         ) : (
           testCaseArray.map((testCase, index) => {
@@ -323,6 +357,28 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
         )}
       </div>
 
+      {/* Footer Actions - Generate More Test Cases */}
+      {/* {testCaseArray.length === 0 && (
+        <div className="p-4 border-t border-base-content/20 mt-auto">
+          <button
+            className="w-full btn btn-outline btn-sm gap-2 hover:btn-primary transition-all duration-200"
+            onClick={generateMoreTestCases}
+            disabled={generatingTestCases}
+          >
+            {generatingTestCases ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                <span>Generate More Test Cases</span>
+              </>
+            )}
+          </button>
+        </div>
+      )} */}
     </div>
   );
 };
