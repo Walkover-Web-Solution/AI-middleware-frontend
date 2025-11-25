@@ -190,7 +190,7 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
                     isAsync={true}
                 />
 
-                <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
+                <div className="w-full max-w-md gap-2 flex flex-col px-2 cursor-default">
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {bridge_pre_tools.length > 0 ? (
                             <div className="flex items-center gap-1 mb-2">

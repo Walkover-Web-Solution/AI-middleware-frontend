@@ -75,7 +75,6 @@ export default function layoutHistoryPage({ children, params }) {
         script.setAttribute('gtwy_user', true);
         script.setAttribute('slide','right');
         script.setAttribute('parentId', 'gtwy');
-        script.setAttribute('hideHeader', true);
         document.head.appendChild(script);
       }
     }, [params]);
