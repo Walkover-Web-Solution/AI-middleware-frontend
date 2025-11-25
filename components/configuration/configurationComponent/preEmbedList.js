@@ -66,8 +66,9 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
     };
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
-            pre_tools: [id],
-            version_id: searchParams?.version
+            pre_tools: id,
+            version_id: searchParams?.version,
+            status: 1
         }));
         // Close dropdown after selection
         setTimeout(() => {
@@ -80,8 +81,9 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
     const removePreFunction = async () => {
         await executeDelete(async () => {
             return dispatch(updateApiAction(params.id, {
-                pre_tools: [],
-                version_id: searchParams?.version
+                pre_tools: preFunctionId,
+                version_id: searchParams?.version,
+                status: 0
             }));
         });
     }
