@@ -330,44 +330,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     </div>
   ), [handleToolPrimaryClick, integrationData, setToolsData]);
 
-  const renderFunctionData = (funcName, index) => (
-    <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
-      <div onClick={() => openViasocket(funcName, {
-        flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
-          type: 'tool',
-          bridge_id: params?.id,
-        }
-      })}
-        className="cursor-pointer flex items-center justify-center py-4 pl-2">
-        <div className="text-center">
-          {truncate(integrationData?.[funcName]?.title || funcName, 20)}
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
-          <SquareFunctionIcon size={22}
-            onClick={() => openViasocket(funcName, {
-              flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
-                type: 'tool',
-                bridge_id: params?.id,
-              }
-            })}
-            className="opacity-80 cursor-pointer" />
-        </div>
-        <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
-          <FileClockIcon
-            size={22}
-            onClick={() => {
-              setToolsData(item.function[funcName]);
-              toolsDataModalRef.current?.showModal();
-            }}
-            className="opacity-80 bg-inherit cursor-pointer"
-          />
-        </div>
-      </div>
-    </div>
-  );
-
   const handleUserButtonClick = (value) => {
     threadHandler(item.thread_id, item, value)
   }

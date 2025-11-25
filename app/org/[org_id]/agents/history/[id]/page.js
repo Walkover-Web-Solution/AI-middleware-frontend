@@ -145,7 +145,7 @@ function Page({params, searchParams }) {
       if (currentRole === "assistant") return;
       
       // Handle user and tools_call messages
-      if (currentRole === "user" || currentRole === "tools_call") {
+      if (currentRole === "user" || currentRole === "tools_call" || currentRole === "error") {
         try {
           setSelectedItem({ variables: item.variables, ...item, value});
           if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
