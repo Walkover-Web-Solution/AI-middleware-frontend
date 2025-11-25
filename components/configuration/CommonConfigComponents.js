@@ -5,29 +5,29 @@ import ApiKeyInput from "./configurationComponent/apiKeyInput";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
 import AdvancedSettingsButton from "./configurationComponent/AdvancedSettingsButton";
 
-const CommonConfigComponents = ({ 
-    params, 
-    searchParams, 
-    apiKeySectionRef, 
-    promptTextAreaRef, 
-    bridgeApiKey, 
-    shouldPromptShow, 
-    service, 
-    showDefaultApikeys, 
+const CommonConfigComponents = ({
+    params,
+    searchParams,
+    apiKeySectionRef,
+    promptTextAreaRef,
+    bridgeApiKey,
+    shouldPromptShow,
+    service,
+    showDefaultApikeys,
     isEmbedUser,
     hideAdvancedParameters = false,
     isPublished = false
 }) => {
     return (
         <>
-            {!isEmbedUser && <RecommendedModal 
-                params={params} 
-                searchParams={searchParams} 
-                apiKeySectionRef={apiKeySectionRef} 
-                promptTextAreaRef={promptTextAreaRef} 
-                bridgeApiKey={bridgeApiKey} 
-                shouldPromptShow={shouldPromptShow} 
-                service={service} 
+            {!isEmbedUser && <RecommendedModal
+                params={params}
+                searchParams={searchParams}
+                apiKeySectionRef={apiKeySectionRef}
+                promptTextAreaRef={promptTextAreaRef}
+                bridgeApiKey={bridgeApiKey}
+                shouldPromptShow={shouldPromptShow}
+                service={service}
                 deafultApiKeys={showDefaultApikeys}
                 isPublished={isPublished}
             />}
@@ -54,6 +54,16 @@ const CommonConfigComponents = ({
                     />
                 </div>
             </div>
+            {(!isEmbedUser || (!showDefaultApikeys && isEmbedUser)) && <div className="mt-2 w-full max-w-md">
+                <ApiKeyInput
+                    apiKeySectionRef={apiKeySectionRef}
+                    params={params}
+                    searchParams={searchParams}
+                    isEmbedUser={isEmbedUser}
+                    hideAdvancedParameters={hideAdvancedParameters}
+                    isPublished={isPublished}
+                />
+            </div>}
         </>
     );
 };

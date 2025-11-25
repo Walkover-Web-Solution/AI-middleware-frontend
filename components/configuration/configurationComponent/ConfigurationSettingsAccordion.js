@@ -7,7 +7,7 @@ import ResponseStyleDropdown from './responseStyleDropdown';
 import AdvancedConfiguration from './advancedConfiguration';
 import Protected from '@/components/protected';
 
-const ConfigurationSettingsAccordion = ({isEmbedUser,isPublished}) => {
+const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
     params,
@@ -44,25 +44,6 @@ const ConfigurationSettingsAccordion = ({isEmbedUser,isPublished}) => {
       >
         {/* Settings Content */}
         <div className="flex flex-col gap-6">
-          {!isEmbedUser && <div className="bg-base-100 rounded-lg border border-base-200 p-3 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-base-content">Connected Agent Flow</p>
-              <p className="text-xs text-base-content/60">Switch to orchestral flow builder.</p>
-            </div>
-            <label className="label cursor-pointer gap-2">
-              <span className="text-xs font-semibold">{currentView === 'agent-flow' ? 'On' : 'Off'}</span>
-              <input
-                type="checkbox"
-                disabled={isPublished}
-                className="toggle toggle-primary toggle-sm"
-                checked={currentView === 'agent-flow'}
-                onChange={() => {
-                  const newView = currentView === 'agent-flow' ? 'config' : 'agent-flow';
-                  switchView?.(newView);
-                }}
-              />
-            </label>
-          </div>}
           {shouldShowAgentType && (
             <div className="bg-base-100 rounded-lg">
               <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} />
@@ -72,6 +53,25 @@ const ConfigurationSettingsAccordion = ({isEmbedUser,isPublished}) => {
           {/* Only show tone, response style, and advanced config if modelType is NOT image */}
           {modelType !== 'image' && (
             <>
+              {!isEmbedUser && <div className="bg-base-100 rounded-lg border border-base-200 p-3 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-base-content">Connected Agent Flow</p>
+                  <p className="text-xs text-base-content/60">Switch to orchestral flow builder.</p>
+                </div>
+                <label className="label cursor-pointer gap-2">
+                  <span className="text-xs font-semibold">{currentView === 'agent-flow' ? 'On' : 'Off'}</span>
+                  <input
+                    type="checkbox"
+                    disabled={isPublished}
+                    className="toggle toggle-primary toggle-sm"
+                    checked={currentView === 'agent-flow'}
+                    onChange={() => {
+                      const newView = currentView === 'agent-flow' ? 'config' : 'agent-flow';
+                      switchView?.(newView);
+                    }}
+                  />
+                </label>
+              </div>}
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="bg-base-100 rounded-lg">
                   <ToneDropdown params={params} searchParams={searchParams} isPublished={isPublished} />

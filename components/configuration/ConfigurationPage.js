@@ -4,12 +4,9 @@ import React from 'react';
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import SetupView from "./SetupView";
-import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 import Protected from "../protected";
-import VersionDescriptionInput from './configurationComponent/VersionDescriptionInput';
-import { InfoIcon, Lock, MessageCircleMoreIcon } from 'lucide-react';
-import { openModal, toggleSidebar } from '@/utils/utility';
-import GtwyIntegrationGuideSlider from '../sliders/gtwyIntegrationGuideSlider';
+import { Lock } from 'lucide-react';
+import { toggleSidebar } from '@/utils/utility';
 import GuideSlider from '../sliders/IntegrationGuideSlider';
 
 const ConfigurationPage = ({
@@ -184,21 +181,13 @@ const ConfigurationPage = ({
                         </div>
                     </div>
                 )}
-
-                {/* {currentView === 'chatbot-config' && bridgeType !== 'chatbot' ? (
-                    <ChatbotConfigView params={params} searchParams={searchParams} />
-                ) : ( */}
                 <SetupView />
-                {/* )} */}
                 {renderHelpSection()}
             </div>
-
-            {/* Integration Guide Slider */}
-
-            <GuideSlider
+            {!isEmbedUser && <GuideSlider
                 params={params}
                 bridgeType={bridgeType}
-            />
+            />}
 
         </ConfigurationProvider>
     );

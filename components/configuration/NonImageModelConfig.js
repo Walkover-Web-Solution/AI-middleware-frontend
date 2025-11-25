@@ -7,7 +7,6 @@ import { useConfigurationContext } from './ConfigurationContext';
 import AdvancedParameters from './configurationComponent/advancedParamenter';
 import GptMemory from './configurationComponent/gptmemory';
 import ConfigurationSettingsAccordion from './configurationComponent/ConfigurationSettingsAccordion';
-import ApiKeyInput from './configurationComponent/apiKeyInput';
 
 const NonImageModelConfig = memo(() => {
     const { 
@@ -21,8 +20,6 @@ const NonImageModelConfig = memo(() => {
         showDefaultApikeys, 
         isEmbedUser,
         hideAdvancedParameters,
-        currentView,
-        switchView,
         isPublished
     } = useConfigurationContext();
 
@@ -43,18 +40,6 @@ const NonImageModelConfig = memo(() => {
                 hideAdvancedParameters={hideAdvancedParameters}
                 isPublished={isPublished}
             />
-                {((!showDefaultApikeys && isEmbedUser) || !isEmbedUser) && (
-                    <div className="mt-2 w-full max-w-md">
-                        <ApiKeyInput 
-                            apiKeySectionRef={apiKeySectionRef} 
-                            params={params} 
-                            searchParams={searchParams} 
-                            isEmbedUser={isEmbedUser}
-                            hideAdvancedParameters={hideAdvancedParameters}
-                            isPublished={isPublished}
-                        />
-                    </div>
-                )}
             <AdvancedParameters
                 params={params}
                 searchParams={searchParams}
@@ -65,8 +50,6 @@ const NonImageModelConfig = memo(() => {
                 isPublished={isPublished}
             />
 
-            {/* API Key section moved down after level 2 parameters */}
-  
             <div className="flex gap-4 mt-2 flex-col w-full max-w-md">
             <GptMemory params={params} searchParams={searchParams} isPublished={isPublished} />
             <ChatbotConfigSection isPublished={isPublished} />

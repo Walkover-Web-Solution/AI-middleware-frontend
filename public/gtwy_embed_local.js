@@ -344,7 +344,7 @@
             if (!this.state.hasParentContainer) {
                 const hideHeader = ['true', true].includes(this.config.hideHeader);
                 Object.assign(iframe.style, {
-                    marginTop: hideHeader ? '0vh' : '5vh',
+                    marginTop: hideHeader ? '0vh' : '7vh',
                     maxHeight: hideHeader ? '100vh' : '95vh'
                 });
             }
@@ -432,7 +432,7 @@
                     if (header) header.style.display = hide ? 'none' : 'flex';
                     if (iframe) {
                         Object.assign(iframe.style, {
-                            marginTop: hide ? '0px' : '5vh',
+                            marginTop: hide ? '0px' : '7vh',
                             maxHeight: hide ? '100vh' : '95vh'
                         });
                     }
