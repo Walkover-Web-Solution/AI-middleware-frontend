@@ -89,6 +89,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
       if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
       if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
+      if (reference_id && !currentUser?.meta?.reference_id) utmParams.reference_id = reference_id;
+      if (unlimited_access && !currentUser?.meta?.unlimited_access) utmParams.unlimited_access = unlimited_access;
 
       // Check if we need to update user meta (either null meta or new UTM params
 

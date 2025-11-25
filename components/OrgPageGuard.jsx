@@ -12,7 +12,7 @@ const OrgPageGuard = ({ children }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const {currentUser} = useCustomSelector((state) => ({
+  const { currentUser } = useCustomSelector((state) => ({
     currentUser: state.userDetailsReducer.userDetails,
   }));
 
@@ -24,19 +24,26 @@ const OrgPageGuard = ({ children }) => {
       // Check URL parameters for form_submitted
       const urlParams = new URLSearchParams(window.location.search);
       const formSubmitted = urlParams.has('form_submitted');
-      if(formSubmitted){
+      if (formSubmitted) {
         const updatedDefaultOnboarding = {
           ...currentUser,
           "meta": {
             ...currentUser?.meta,
-           onBordingFormSubmitted: true,
-          },        
+            onBordingFormSubmitted: true,
+          },
         };
         dispatch(updateUserMetaOnboarding(currentUser.id, updatedDefaultOnboarding));
         setInCookies('onboarding_dismissed', 'true');
         return;
       }
-      
+      else {
+        const onboardingDismissed = getFromCookies('onboarding_dismissed');
+        if (!onboardingDismissed && !currentUser?.meta?.onBordingFormSubmitted && !isExactOrgPage) {
+          setInCookies('onboarding_dismissed', 'true');
+          return;
+        }
+      }
+
       // Check if onboarding was dismissed
       const onboardingDismissed = getFromCookies('onboarding_dismissed');
       const currentUserMeta = currentUser?.meta?.onBordingFormSubmitted;

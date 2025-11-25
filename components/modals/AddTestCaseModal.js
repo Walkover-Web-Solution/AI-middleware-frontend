@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { CloseIcon, ChevronDownIcon } from '@/components/Icons';
+import { CloseIcon } from '@/components/Icons';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -29,20 +29,32 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
     // Process testCaseConversation - handle both array of messages and single object with AiConfig
     const processTestCaseData = () => {
         if (!testCaseConversation || testCaseConversation.length === 0) return [];
-        
-        // If it's a single object with AiConfig, extract the conversation from AiConfig.input
-        if (testCaseConversation.length === 1 && testCaseConversation[0]?.AiConfig?.input) {
+
+        const getContentText = (content) => {
+            if (Array.isArray(content)) {
+                return content?.[0]?.text ?? '';
+            }
+            return typeof content === 'string' ? content : '';
+        };
+
+        // If it's a single object with AiConfig, extract the conversation from AiConfig input/messages
+        if (testCaseConversation.length === 1 && testCaseConversation[0]?.AiConfig) {
             const historyItem = testCaseConversation[0];
-            const aiConfigInput = historyItem.AiConfig.input;
+            const aiConfigInput = historyItem.AiConfig.input || historyItem.AiConfig.messages;
+
+            if (!Array.isArray(aiConfigInput)) {
+                return [];
+            }
+
             const processedMessages = [];
-            
+
             // Create conversation from AiConfig.input - only user and assistant messages
             aiConfigInput.forEach(msg => {
                 // Only include user, assistant, developer, and system messages
                 if (msg.role === "user" || msg.role === "assistant") {
                     processedMessages.push({
                         role: msg.role,
-                        content: msg.content
+                        content: getContentText(msg.content)
                     });
                 }
                 // Skip function calls, reasoning, and other metadata
@@ -67,12 +79,12 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
             if (message.role === "user" || message.sender === "user") {
                 return {
                     role: message.role || message.sender,
-                    content: message.content?.[0]?.text || message?.content
+                    content: getContentText(message.content)
                 };
             } else if ((message.role === "assistant" || message.sender === "assistant") && message.content) {
                 return {
                     role: message.role || message.sender,
-                    content: message.content?.[0]?.text || message?.content
+                    content: getContentText(message.content)
                 };
             } else if (message.role === "tools_call" || message.sender === "tools_call") {
                 const toolCallData = message.tools_call_data;

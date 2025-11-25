@@ -1,16 +1,16 @@
 import { useCustomSelector } from "@/customHooks/customSelector.js";
-import { getHistoryAction, getSubThreadsAction, getThread, searchMessageHistoryAction, clearSearchAction } from "@/store/action/historyAction.js";
+import { getHistoryAction, getSubThreadsAction, searchMessageHistoryAction, clearSearchAction } from "@/store/action/historyAction.js";
 import { clearSubThreadData, clearThreadData, setSearchQuery } from "@/store/reducer/historyReducer.js";
-import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
-import { formatRelativeTime, openModal } from "@/utils/utility.js";
-import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
+import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
+import { formatRelativeTime} from "@/utils/utility.js";
+import { ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation.js";
+import { usePathname, useRouter } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 import { FileTextIcon } from "lucide-react";
 
@@ -29,7 +29,6 @@ const Sidebar = memo(({
   setFilterOption, 
   searchRef, 
   setThreadPage, 
-  setHasMoreThreadData, 
   selectedVersion, 
   setIsErrorTrue, 
   isErrorTrue 
@@ -39,7 +38,6 @@ const Sidebar = memo(({
     searchResults,
     searchQuery,
     searchLoading,
-    searchHasMore,
     isSearchActive,
     searchDateRange,
     userFeedbackCount,
