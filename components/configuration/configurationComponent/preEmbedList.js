@@ -68,7 +68,7 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
         dispatch(updateApiAction(params.id, {
             pre_tools: id,
             version_id: searchParams?.version,
-            status: 1
+            status: "1"
         }));
         // Close dropdown after selection
         setTimeout(() => {
@@ -83,7 +83,7 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
             return dispatch(updateApiAction(params.id, {
                 pre_tools: preFunctionId,
                 version_id: searchParams?.version,
-                status: 0
+                status: "0"
             }));
         });
     }

@@ -32,7 +32,7 @@ function CodeBlock({
     const isCurrentlyDark = isDark !== undefined ? isDark : isDarkTheme;
 
     // DaisyUI / Tailwind based container classes
-    const blockClasses = `text-sm w-full rounded-lg border border-base-300 bg-base-200 dark:bg-base-300 text-base-content overflow-x-auto`;    
+    const blockClasses = `text-sm w-full rounded-lg border border-base-300 bg-base-200 text-base-content overflow-x-auto`;    
 
     return !inline && match ? (
         <div className={blockClasses}>
@@ -48,7 +48,7 @@ function CodeBlock({
                     margin: 0,
                     padding: '0.75rem 1rem',
                 }}
-                className="outline-none border-0 m-0 w-full rounded-lg"
+                className="outline-none border-0 m-0 w-full rounded-lg font-mono font-normal"
                 language={match[1]}
                 wrapLongLines={true}
                 codeTagProps={{
@@ -65,7 +65,7 @@ function CodeBlock({
         </div>
     ) : (
         <code
-            className={`${className || ''} px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono bg-base-200 dark:bg-base-300 text-base-content`}
+            className={`${className || ''} px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono font-normal bg-base-200 text-base-content`}
             {...props}
         >
             {children}

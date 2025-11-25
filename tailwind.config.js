@@ -87,9 +87,9 @@ module.exports = {
           "color-scheme": "dark",
       
           /* Background layering */
-          "base-100":"oklch(18% 0 0)",   // lighter dark (canvas, main background)
+          "base-100": "oklch(25% 0 0)",   // lighter dark (canvas, main background)
           "base-200": "oklch(22% 0 0)",   // slightly darker (cards, panels)
-          "base-300": "oklch(25% 0 0)",    // darkest (borders, separators)
+          "base-300": "oklch(18% 0 0)",   // darkest (borders, separators)
           "base-400": "oklch(16% 0 0)",
           "base-content": "oklch(85% 0 0)", // dull white text
       
