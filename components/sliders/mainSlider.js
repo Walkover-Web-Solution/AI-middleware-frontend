@@ -865,7 +865,7 @@ function MainSlider({ isEmbedUser }) {
             <div className="border-t border-base-300 p-2">
               <div className="text-center">
                 {showSidebarContent ? (
-                  <span className="text-sm text-base-content/70">GTWY.AI</span>
+                  <span className="text-sm text-base-content/70">GTWY</span>
                 ) : (
                   <span className="text-xs text-base-content/50">GTWY</span>
                 )}

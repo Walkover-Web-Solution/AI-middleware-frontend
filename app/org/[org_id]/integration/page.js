@@ -91,7 +91,7 @@ const Page = ({ params }) => {
     // Transform the data to match what UsageLimitModal expects
     const transformedData = {
       ...item,
-      bridge_limit: item.embed_limit, // Map integration_limit to bridge_limit
+      item_limit: item.embed_limit, // Map integration_limit to bridge_limit
       actualName: item.actualName || item.originalName // Ensure actualName is available
     };
     setSelectedIntegrationForLimit(transformedData);

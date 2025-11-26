@@ -326,7 +326,14 @@ function Home({ params, isEmbedUser }) {
   }
   
   const handleSetBridgeLimit = (item) => {
-    setSelectedBridgeForLimit(item);
+    const transformedData = {
+      ...item,
+      // Map agent_limit (used in table rows) to bridge_limit (used by the modal)
+      item_limit: item.agent_limit,
+      // Ensure actualName is present for the modal subtitle
+      actualName: item.actualName || item.name || "",
+    };
+    setSelectedBridgeForLimit(transformedData);
     openModal(MODAL_TYPE.API_KEY_LIMIT_MODAL);
   };
 
@@ -356,6 +363,7 @@ function Home({ params, isEmbedUser }) {
             <li><a onClick={(e) => {
               e.preventDefault();           
               e.stopPropagation();
+              handlePortalCloseImmediate();
               handleSetBridgeLimit(row);
             }}><ClockFading className="" size={16} />Usage Limit</a></li>
           )}
@@ -363,18 +371,21 @@ function Home({ params, isEmbedUser }) {
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handlePortalCloseImmediate();
               resetUsage(row);
             }}><RefreshIcon className="" size={16} />Reset Usage</a></li>
           )}
           <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handlePortalCloseImmediate();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
             }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</button></li>
             <li> <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                handlePortalCloseImmediate();
                 handlePauseBridge(row._id)
               }}
               className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
@@ -394,6 +405,7 @@ function Home({ params, isEmbedUser }) {
             <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handlePortalCloseImmediate();
               setItemToDelete(row);
               // Small delay to ensure state is set before opening modal
               setTimeout(() => {
@@ -488,8 +500,9 @@ function Home({ params, isEmbedUser }) {
   }
 
   return (
-    <div className="w-full overflow-x-hidden flex justify-start">
-      <div className="w-full max-w-full">
+    <div className="w-full overflow-x-hidden flex flex-col min-h-screen">
+      <div className="w-full max-w-full flex-1">
+
         {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
         {tutorialState?.showTutorial && (
           <OnBoarding
@@ -504,6 +517,7 @@ function Home({ params, isEmbedUser }) {
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
           <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
+
             <div className="w-full">
               {allBridges.length === 0 ? (
                 <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser} />
@@ -596,12 +610,15 @@ function Home({ params, isEmbedUser }) {
           </div>
           
           {/* Powered By Footer */}
-          {isEmbedUser &&<PoweredByFooter />}
+          
         </div>
         
         {/* Single DeleteModal for all delete operations */}
         <DeleteModal onConfirm={deleteBridge} item={itemToDelete} title="Delete Agent" description={`Are you sure you want to delete the Agent "${itemToDelete?.actualName}"? This agent will be moved to deleted items and permanently removed after 30 days.`} loading={isDeleting} isAsync={true} />
       </div>
+
+      {/* Powered By Footer pinned to bottom */}
+    {isEmbedUser && <PoweredByFooter />}
       <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} item="Agent Name" />
       
       {/* Portal components from hook */}

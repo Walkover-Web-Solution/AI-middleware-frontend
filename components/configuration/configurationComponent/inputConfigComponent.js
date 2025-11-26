@@ -63,9 +63,9 @@ const InputConfigComponent = memo(({
         }, 500); // Longer debounce since it's just for diff modal
     }, [reduxPrompt, promptState.hasUnsavedChanges, setPromptState]);
     
-    // Optimized save handler using current ref value
+    // Optimized save handler using current editor text (contentEditable div)
     const handleSavePrompt = useCallback(() => {
-        const currentValue = textareaRef.current?.value;
+        const currentValue = (textareaRef.current?.innerText || '').trim();
         savePrompt(currentValue);
         oldContentRef.current = currentValue;
         hasUnsavedChangesRef.current = false;
