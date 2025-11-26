@@ -224,6 +224,8 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   const [bulkEditMode, setBulkEditMode] = useState(false);
   const [bulkEditText, setBulkEditText] = useState("");
   const [missingVariables, setMissingVariables] = useState([]);
+  const [blockedDeleteKey, setBlockedDeleteKey] = useState("");
+  const [blockedDeleteMessage, setBlockedDeleteMessage] = useState("");
 
   const activeGroupId = activeGroup?.id;
 
@@ -463,6 +465,8 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       setBulkEditMode(false);
       setBulkEditText("");
       setMissingVariables([]); // Clear missing variables state
+      setBlockedDeleteKey("");
+      setBlockedDeleteMessage("");
       
       // Force a fresh sync with the latest store data
       syncDraftWithStore(sourceList);
@@ -693,13 +697,17 @@ const updateVersionVariable = useCallback(
 
 
   const handleFieldChange = useCallback((index, field, value) => {
+    if (field === "key" && blockedDeleteKey && value.trim() !== blockedDeleteKey) {
+      setBlockedDeleteKey("");
+      setBlockedDeleteMessage("");
+    }
     setDraftVariables((prev) =>
       prev.map((variable, idx) =>
         idx === index ? { ...variable, [field]: value } : variable
       )
     );
     setError("");
-  }, []);
+  }, [blockedDeleteKey]);
 
 const applyDraftUpdate = useCallback(
 (updater, options) => {
@@ -812,11 +820,27 @@ const handleFieldCommit = useCallback(
   const handleDeleteVariable = useCallback(
     (index) => {
       applyDraftUpdate(
-        (prev) => prev.filter((_, idx) => idx !== index),
+        (prev) => {
+          const target = prev[index];
+          const key = typeof target?.key === "string" ? target.key.trim() : "";
+
+          if (key && promptKeySet.has(key)) {
+            setError("");
+            setBlockedDeleteKey(key);
+            setBlockedDeleteMessage(
+              `Variable "${key}" is referenced in the prompt and can't be removed.`
+            );
+            return prev;
+          }
+
+          setBlockedDeleteKey("");
+          setBlockedDeleteMessage("");
+          return prev.filter((_, idx) => idx !== index);
+        },
         { suppressErrors: true }
       );
     },
-    [applyDraftUpdate]
+    [applyDraftUpdate, promptKeySet]
   );
 
   // Auto-add functionality is now handled in handleFieldCommit
@@ -1343,6 +1367,9 @@ const handleFieldCommit = useCallback(
               <div className="divide-y divide-base-200">
                 {variableCount ? (
                   draftVariables.map((variable, index) => {
+                    const trimmedKey = typeof variable.key === "string" ? variable.key.trim() : "";
+                    const showBlockedWarning =
+                      Boolean(blockedDeleteKey) && trimmedKey === blockedDeleteKey;
                     // Check if previous variable has a key to enable current row
                     const isPreviousRowFilled = index === 0 || (draftVariables[index - 1]?.key?.trim());
                     const isCurrentRowEnabled = isPreviousRowFilled;
@@ -1350,8 +1377,9 @@ const handleFieldCommit = useCallback(
                     return (
                     <div
                       key={variable.id || `${variable.key}-${index}`}
-                      className="grid grid-cols-[1fr,1.2fr,1fr,0.8fr,0.6fr,auto] gap-2 px-3 py-2 text-sm items-center"
+                      className="px-3 py-2 text-sm"
                     >
+                      <div className="grid grid-cols-[1fr,1.2fr,1fr,0.8fr,0.6fr,auto] gap-2 items-center">
                       <input
                         type="text"
                         className={`input input-xs input-bordered w-full ${
@@ -1569,6 +1597,12 @@ const handleFieldCommit = useCallback(
                           <Trash2 size={12} />
                         </button>
                       </div>
+                      </div>
+                      {showBlockedWarning && (
+                        <p className="text-[11px] text-warning mt-1">
+                          {blockedDeleteMessage || `Variable "${trimmedKey}" is referenced in the prompt and can't be removed.`}
+                        </p>
+                      )}
                     </div>
                   );
                   })

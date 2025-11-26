@@ -14,18 +14,23 @@ import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink} from "lucide-react";
 import { GenericSlider, useSlider } from "@/utils/sliderUtility";
 
-// Helper function to normalize image data with enhanced fallback
-const normalizeImageUrls = (imageData) => {
-  if (!imageData) return [];
+// Helper function to normalize attachment data with enhanced fallback
+const normalizeImageUrls = (imageData, source = "assistant") => {
+  if (!Array.isArray(imageData)) return [];
 
-  // If it's already an array, return filtered valid images
-  if (Array.isArray(imageData)) {
-    return imageData.filter(img => {
-      if (!img) return false;
-      return img.permanent_url;
+  return imageData.reduce((acc, attachment) => {
+    if (!attachment) return acc;
+    const resolvedUrl = attachment.permanent_url || attachment.url;
+    if (!resolvedUrl) return acc;
+
+    acc.push({
+      ...attachment,
+      resolvedUrl,
+      normalizedType: attachment?.type,
+      source,
     });
-  }
-  return [];
+    return acc;
+  }, []);
 };
 
 // Enhanced fallback component with better UX
@@ -354,19 +359,37 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     setTimeout(() => window.openChatbot(), 100)
   }
 
-  // Render assistant images with enhanced fallback
-  const renderAssistantImages = () => {
-    const imageUrls = normalizeImageUrls(item?.image_urls);
+  // Render attachments (images / pdf / video) for a message bubble
+  const renderAttachments = (attachments = []) => {
+    if (!attachments.length) return null;
 
-    if (imageUrls.length === 0) return null;
+    const formatAttachmentName = (url = "") => {
+      if (!url) return "Attachment";
+      try {
+        const cleanUrl = decodeURIComponent(url.split("?")[0]);
+        const segments = cleanUrl.split("/");
+        return segments.pop() || "Attachment";
+      } catch (error) {
+        return "Attachment";
+      }
+    };
+
+    const getSourceLabel = (source) => (source && source.toLowerCase() === "user" ? "USER" : "LLM");
+
+    const openAttachment = (url) => {
+      if (!url) return;
+      if (typeof window !== "undefined") {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    };
 
     return (
       <div className="mb-4">
         <div className="flex flex-wrap gap-3">
-          {imageUrls.map((attachment, index) => {
-            const imageUrl = attachment.permanent_url;
+          {attachments.map((attachment, index) => {
+            const attachmentUrl = attachment.resolvedUrl || attachment.permanent_url || attachment.url;
 
-            if (!imageUrl) {
+            if (!attachmentUrl) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
                   <ImageFallback type="large" error="failed_to_load" />
@@ -374,16 +397,72 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               );
             }
 
+            const typeLabel = (attachment.normalizedType || "file").toUpperCase();
+            const sourceLabel = getSourceLabel(attachment.source);
+            const overlayLabel = `${typeLabel} - ${sourceLabel}`;
+
+            if (attachment.normalizedType === "video") {
+              return (
+                <div key={`assistant-video-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
+                  <video
+                    src={attachmentUrl}
+                    controls
+                    className="w-full rounded-lg border border-base-300 bg-black max-h-96"
+                    preload="metadata"
+                  />
+                  <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide">
+                    {overlayLabel}
+                  </span>
+                </div>
+              );
+            }
+
+            if (attachment.normalizedType === "pdf" || attachment.normalizedType === "file") {
+              return (
+                <div key={`assistant-doc-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
+                  <div className="bg-base-100 border border-base-300 rounded-lg p-4 h-full flex flex-col gap-3">
+                    <div className="flex items-center justify-between text-xs text-base-content/70">
+                      <div className="flex items-center gap-2">
+                        {attachment.normalizedType === "pdf" ? (
+                          <PdfIcon height={20} width={20} />
+                        ) : (
+                          <FileTextIcon className="w-5 h-5" />
+                        )}
+                        <span className="font-semibold uppercase tracking-wide">{typeLabel}</span>
+                      </div>
+                      <span className="text-[10px] font-semibold uppercase bg-base-200 px-2 py-1 rounded-full tracking-wide text-base-content">
+                        {sourceLabel}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium break-words text-base-content">
+                      {truncate(formatAttachmentName(attachmentUrl), 40)}
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline w-fit"
+                      onClick={() => openAttachment(attachmentUrl)}
+                    >
+                      <ExternalLink size={14} />
+                      <span>Open</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={`assistant-img-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
                 <EnhancedImage
-                  src={imageUrl}
-                  alt={`Assistant image ${index + 1}`}
+                  src={attachmentUrl}
+                  alt={`Assistant attachment ${index + 1}`}
                   width={280}
                   height={180}
                   className="max-w-full max-h-96 w-auto h-auto object-cover"
                   type="large"
                 />
+                <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide">
+                  {overlayLabel}
+                </span>
               </div>
             );
           })}
@@ -392,9 +471,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     );
   };
 
-  const currentRole = getMessageRole();
-  
-  
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="text-sm">
       <div className="show-on-hover">
@@ -419,6 +495,9 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   }}>
                     {item.user}
                   </ReactMarkdown>
+
+                  {/* User attachments */}
+                  {renderAttachments(normalizeImageUrls(item?.user_urls, "user"))}
                 </div>
               </div>
               
@@ -611,8 +690,8 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               </div>
               <div className="flex justify-start items-center gap-1 show-on-hover" style={{ width: "-webkit-fill-available" }}>
                 <div className="bg-base-200 text-base-content pr-10 mb-7 chat-bubble transition-all ease-in-out duration-300 relative group break-words" style={{ wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
-                  {/* Render assistant images with enhanced fallback */}
-                  {renderAssistantImages()}
+                  {/* Assistant attachments */}
+                  {renderAttachments(normalizeImageUrls(item?.llm_urls, "llm"))}
 
                   {/* Message content */}
                   <ReactMarkdown components={{

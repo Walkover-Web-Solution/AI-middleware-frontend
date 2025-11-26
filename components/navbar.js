@@ -249,7 +249,7 @@ const Navbar = ({ isEmbedUser, params }) => {
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium bg-warning/10 text-warning border border-warning/20">
         <Clock size={12} />
         <span className="hidden sm:inline">Paused</span>
       </div>
@@ -357,7 +357,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 title="Go to Home"
               >
                 <Home size={14} className="sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Home</span>
+                <span className="hidden sm:inline text-sm sm:text-sm">Home</span>
               </button>
             }
             
@@ -367,7 +367,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 {!isEditingName ? (
                   <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
                     <span 
-                      className="font-semibold text-xs text-base-content truncate flex-shrink" 
+                      className="font-semibold text-sm text-base-content truncate flex-shrink" 
                       title={`${agentName} - Click to edit`}
                     >
                       {agentName}
@@ -384,7 +384,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                     onChange={(e) => setEditedName(e.target.value)}
                     onBlur={handleNameSave}
                     onKeyDown={handleNameKeyDown}
-                    className="input input-xs text-xs text-base-content"
+                    className="input input-xs text-sm text-base-content"
                     autoFocus
                     maxLength={50}
                   />
@@ -456,7 +456,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                       <button
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
-                        className={`relative z-10 px-2 sm:px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-xs font-medium whitespace-nowrap ${
+                        className={`relative z-10 px-2 sm:px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm font-medium whitespace-nowrap ${
                           isActive
                             ? 'text-primary-content bg-transparent hover:bg-transparent'
                             : 'text-base-content/70 hover:text-base-content hover:bg-base-200/30'
@@ -489,9 +489,14 @@ const Navbar = ({ isEmbedUser, params }) => {
               {/* History button - Fixed Position */}
               <div className="flex items-center">
                 {!isEmbedUser && (
-                  <button className="tooltip tooltip-left p-1" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
-                    <HistoryIcon size={16} />
-                  </button>
+                  <div className="tooltip tooltip-bottom" data-tip="Updates History">
+                    <button
+                      className="p-1 bg-base-300 rounded-md hover:bg-base-200 transition-colors"
+                      onClick={toggleConfigHistorySidebar}
+                    >
+                      <HistoryIcon size={16} />
+                    </button>
+                  </div>
                 )}
               </div>
               
@@ -501,10 +506,10 @@ const Navbar = ({ isEmbedUser, params }) => {
                     <button 
                       tabIndex={0}
                       role="button" 
-                      className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
+                      className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
                       disabled={isPublishing || isPublished}
                     >
-                      <span className="text-white text-xs truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
+                      <span className="text-white text-sm truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
                       {!isPublishing && <ChevronDown size={12} className="text-white" />}
                     </button>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
@@ -512,7 +517,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                         <button
                           onClick={handlePublish}
                           disabled={!isDrafted || isPublishing || isPublished}
-                          className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <BookCheck size={14} className="text-success" />
                           <span>Configure and Publish</span>
@@ -523,7 +528,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                           <button
                             onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                             disabled={isUpdatingBridge || isPublishing || isPublished}
-                            className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <RefreshCcw size={14} className="text-error" />
                             <span>Revert to Published</span>
@@ -560,7 +565,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               {!isEditingName ? (
                 <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
                   <span 
-                    className="font-semibold text-xs text-base-content truncate flex-shrink" 
+                    className="font-semibold text-sm text-base-content truncate flex-shrink" 
                     title={`${agentName} - Click to edit`}
                   >
                     {agentName}
@@ -577,7 +582,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                   onChange={(e) => setEditedName(e.target.value)}
                   onBlur={handleNameSave}
                   onKeyDown={handleNameKeyDown}
-                  className="input input-xs text-xs text-base-content w-full"
+                  className="input input-xs text-sm text-base-content w-full"
                   autoFocus
                   maxLength={50}
                 />
@@ -648,7 +653,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                   <button
                     onClick={handlePublish}
                     disabled={!isDrafted || isPublishing}
-                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <BookCheck size={14} className="text-green-600" />
                     <span>Publish</span>
@@ -678,7 +683,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 onClick={toggleIntegrationGuideSlider}
               >
                 <FilterSliderIcon size={14} />
-                <span className="text-xs font-medium whitespace-nowrap">Guide</span>
+                <span className="text-sm font-medium whitespace-nowrap">Guide</span>
               </button>
             )} */}
           </div>
