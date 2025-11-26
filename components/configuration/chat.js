@@ -236,6 +236,96 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     }, 200);
   };
 
+  const renderMessageAttachments = (message) => {
+    const hasImages = Array.isArray(message?.image_urls) && message.image_urls.length > 0;
+    const hasFiles = Array.isArray(message?.files) && message.files.length > 0;
+    const hasVideo = Boolean(message?.video_data);
+    const hasYoutube = Boolean(message?.youtube_url);
+
+    if (!hasImages && !hasFiles && !hasVideo && !hasYoutube) {
+      return null;
+    }
+
+    return (
+      <div className="mt-3 flex flex-col gap-3">
+        {hasImages && (
+          <div className="flex flex-wrap gap-2">
+            {message.image_urls.map((url, imgIndex) => (
+              typeof url === "string" && url ? (
+                <Image
+                  key={imgIndex}
+                  src={url}
+                  alt={`Message Image ${imgIndex + 1}`}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-cover rounded-lg cursor-pointer"
+                  onClick={() => window.open(url, "_blank")}
+                />
+              ) : null
+            ))}
+          </div>
+        )}
+
+        {hasVideo && (
+          <div className="flex flex-wrap gap-2">
+            <div className="relative">
+              <video
+                src={message.video_data?.uri}
+                width={160}
+                height={120}
+                className="w-40 h-30 object-cover rounded-lg cursor-pointer"
+                controls
+                preload="metadata"
+                onClick={() => window.open(message.video_data?.uri, "_blank")}
+              />
+              <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                Video
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasYoutube && (
+          <div className="bg-base-200 p-3 rounded-lg border border-base-content/30">
+            <div className="flex items-center gap-2 mb-2">
+              <PlayIcon size={16} className="text-red-500" />
+              <span className="text-sm font-medium">YouTube Video</span>
+            </div>
+            <a
+              href={message.youtube_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-500 hover:underline block truncate"
+            >
+              {message.youtube_url}
+            </a>
+          </div>
+        )}
+
+        {hasFiles && (
+          <div className="flex flex-wrap gap-2 bg-base-200 p-2 rounded-md">
+            {message.files.map((url, fileIndex) => (
+              typeof url === "string" && url ? (
+                <a
+                  key={fileIndex}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-1 hover:underline"
+                >
+                  <PdfIcon height={20} width={20} />
+                  <span className="text-sm overflow-hidden truncate max-w-[10rem]">
+                    {truncate(url.split("/").pop(), 20)}
+                  </span>
+                </a>
+              ) : null
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="px-4 pt-4 bg-base-100">
       <div className="w-full flex justify-between items-center px-2">
@@ -399,94 +489,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                           </div>
                         )}
                     </div>
-
-                    {(message?.image_urls?.length > 0 || message?.files?.length > 0 || message?.video_data || message?.youtube_url) && (
-                      <div className="mt-2">
-                        {message?.image_urls?.length > 0 && (
-                          <div className="flex flex-wrap items-end justify-end">
-                            {message.image_urls.map((url, imgIndex) => {
-                              if (!url || typeof url !== 'string') {
-                                return null;
-                              }
-                              return (
-                                <Image
-                                  key={imgIndex}
-                                  src={url}
-                                  alt={`Message Image ${imgIndex + 1}`}
-                                  width={80}
-                                  height={80}
-                                  className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
-                                  onClick={() => window.open(url, "_blank")}
-                                />
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {message?.video_data && (
-                          <div className="flex flex-wrap items-end justify-end">
-                            <div className="relative m-1">
-                              <video
-                                src={message.video_data?.uri}
-                                width={160}
-                                height={120}
-                                className="w-40 h-30 object-cover rounded-lg cursor-pointer"
-                                controls
-                                preload="metadata"
-                                onClick={() => window.open(message.video_data?.uri, "_blank")}
-                              />
-                              <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                                Video
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {message?.youtube_url && (
-                          <div className="flex flex-wrap items-end justify-end">
-                            <div className="m-1 bg-base-200 p-3 rounded-lg border border-base-content/30">
-                              <div className="flex items-center gap-2 mb-2">
-                                <PlayIcon size={16} className="text-red-500" />
-                                <span className="text-sm font-medium">YouTube Video</span>
-                              </div>
-                              <a
-                                href={message.youtube_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-blue-500 hover:underline block truncate max-w-[200px]"
-                              >
-                                {message.youtube_url}
-                              </a>
-                            </div>
-                          </div>
-                        )}
-
-                        {message?.files?.length > 0 && (
-                          <div className="flex flex-wrap items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
-                            {message.files.map((url, fileIndex) => {
-                              // Safety check to ensure url is defined and is a string
-                              if (!url || typeof url !== 'string') {
-                                return null;
-                              }
-                              return (
-                                <a
-                                  key={fileIndex}
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center space-x-1 hover:underline"
-                                >
-                                  <PdfIcon height={20} width={20} />
-                                  <span className="text-sm overflow-hidden truncate max-w-[10rem]">
-                                    {truncate(url.split("/").pop(), 20)}
-                                  </span>
-                                </a>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {message?.sender === "tools_call" &&
                       message?.tools_call_data && (
@@ -692,6 +694,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                         : message.content}
                                     </ReactMarkdown>
                                   )}
+                                  {renderMessageAttachments(message)}
                                 </div>
                               )}
                             </div>

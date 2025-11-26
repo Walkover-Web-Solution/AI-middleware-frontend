@@ -238,12 +238,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-  useEffect(() => {
-    return () => {
-     closeSlider();
-    }
-  }, [])
-
   const handleToolPrimaryClick = useCallback(async (event, tool) => {
     // Check if this is a knowledge database tool
     const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
