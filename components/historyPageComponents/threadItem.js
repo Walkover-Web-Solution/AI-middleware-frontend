@@ -475,7 +475,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="text-sm">
       <div className="show-on-hover">
         {/* 1. First: Render User Message if exists */}
-          {item.user && (
             <div className="chat group chat-end mb-4">
               <div className="chat-image avatar flex justify-center items-center">
                 <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors">
@@ -551,7 +550,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                 </div>
               </div>
             </div>
-          )}
 
         {/* 2. Second: Show Tools Call section if exists */}
         {(item?.tools_call_data?.length > 0 || item?.function) && (
@@ -609,7 +607,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         )}
 
           {/* 3. Third: Render Assistant Message if exists */}
-          {(item.llm_message || item.chatbot_message || item.updated_llm_message) && (
+          {(!item.error) && (
             <div className="chat group chat-start">
               <div className="chat-image avatar flex justify-center items-center">
                 <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors mb-7">
