@@ -12,7 +12,6 @@ const PromptTextarea = memo(({
     placeholder = "",
     isPublished = false
 }) => {
-    console.log(initialValue,"initialValue")
     const isComposingRef = useRef(false);
     const lastExternalValueRef = useRef(initialValue);
     const hasInitializedRef = useRef(false);
