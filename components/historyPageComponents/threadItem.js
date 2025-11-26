@@ -241,7 +241,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   useEffect(() => {
     return () => {
      closeSlider();
-     window?.closeGtwy(); 
     }
   }, [])
 
@@ -291,10 +290,19 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       }
     }
     if (tool?.data?.metadata?.type === 'agent') {
-      window.openGtwy({ 
-        agent_id: tool?.data?.metadata?.agent_id, 
-        history: { message_id: tool?.data?.metadata?.message_id }
-      });
+      const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || '';
+      const orgId = params?.org_id;
+      const agentId = tool?.data?.metadata?.agent_id;
+      const messageId = tool?.data?.metadata?.message_id;
+
+      if (baseUrl && orgId && agentId) {
+        const url = `${baseUrl}/org/${orgId}/agents/history/${agentId}?message_id=${encodeURIComponent(
+          messageId || ''
+        )}`;
+        if (typeof window !== 'undefined') {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      }
       return;
     }
     openViasocket(tool?.id, {
