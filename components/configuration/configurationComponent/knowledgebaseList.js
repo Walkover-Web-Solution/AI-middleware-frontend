@@ -144,7 +144,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished }) => {
         );
     }, [knowbaseVersionData, knowledgeBaseData]);
     return (
-        <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
+        <div className="label max-w-md flex-col items-start w-full p-0">
             <div className="dropdown dropdown-right flex items-center">
                 <div className='flex items-center w-full'>
                     {knowbaseVersionData?.length > 0 ? (

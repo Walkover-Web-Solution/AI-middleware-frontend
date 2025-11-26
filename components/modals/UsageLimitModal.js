@@ -5,13 +5,13 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 
 const UsageLimitModal = ({ data, onConfirm ,item }) => {
-  const [limit, setLimit] = useState(data?.bridge_limit);
+  const [limit, setLimit] = useState(data?.item_limit);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (data && data.bridge_limit) {
-      setLimit(data.bridge_limit);
+    if (data && data.item_limit) {
+      setLimit(data.item_limit);
     } else {
       setLimit('');
     }

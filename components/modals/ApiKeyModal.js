@@ -36,7 +36,8 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
             name: formData.get('name') || '',
             apikey: formData.get('apikey') || '',
             comment: formData.get('comment') || '',
-            service: service || formData.get('service') || ''
+            service: service || formData.get('service') || '',
+            apikey_limit: formData.get('apikey_limit') || ''
         };
 
         // Check if all required fields are filled for Add mode
@@ -51,7 +52,9 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                 currentData.name !== (selectedApiKey.name || '') ||
                 currentData.apikey !== (selectedApiKey.apikey || '') ||
                 currentData.comment !== (selectedApiKey.comment || '') ||
-                currentData.service !== (selectedApiKey.service || service || '');
+                currentData.service !== (selectedApiKey.service || service || '') ||
+                // Compare numeric values for limit so decimal edits are detected
+                (currentData.apikey_limit !== '' && Number(currentData.apikey_limit) !== Number(selectedApiKey.apikey_limit || 0));
             
             setischanged(prev => ({
                 ...prev,
@@ -147,8 +150,9 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                           key={field}
                           placeholder={`Enter ${displayLabel}`}
                           defaultValue={field === 'apikey_limit' ? (selectedApiKey ? selectedApiKey.apikey_limit : '') : selectedApiKey ? selectedApiKey[field] : ''}
-                            onChange={handleFormChange}
-                            {...(field !== 'apikey' && { maxLength: 50 })}
+                          onChange={handleFormChange}
+                          {...(field !== 'apikey' && { maxLength: 50 })}
+                          {...(field === 'apikey_limit' && { step: '0.00001', inputMode: 'decimal', min: '0' })}
                         />
                       </div>
                     );
