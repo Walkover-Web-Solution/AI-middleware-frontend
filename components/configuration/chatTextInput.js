@@ -18,6 +18,8 @@ import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
 import { toggleSidebar } from '@/utils/utility';
 
+const VARIABLE_SLIDER_DISABLE_KEY = 'variableSliderDisabled';
+
 function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef }) {
     const [uploading, setUploading] = useState(false);
     const [uploadedVideos, setUploadedVideos] = useState(null);
@@ -183,8 +185,10 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             return;
         }
 
+        const isSliderAutoOpenDisabled = typeof window !== 'undefined' && sessionStorage.getItem(VARIABLE_SLIDER_DISABLE_KEY) === 'true';
+
         // Validate variables in prompt
-        if (!forceRun) {
+        if (!forceRun && !isSliderAutoOpenDisabled) {
             const validation = validatePromptVariables();
             if (!validation.isValid) {
                 const missingVars = validation.missingVariables.join(', ');
@@ -203,6 +207,8 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                 setValidationError(null);
                 sessionStorage.removeItem('missingVariables');
             }
+        } else {
+            setValidationError(null);
         }
 
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');

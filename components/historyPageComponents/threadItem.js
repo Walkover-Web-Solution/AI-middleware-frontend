@@ -238,13 +238,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-  useEffect(() => {
-    return () => {
-     closeSlider();
-     window?.closeGtwy(); 
-    }
-  }, [])
-
   const handleToolPrimaryClick = useCallback(async (event, tool) => {
     // Check if this is a knowledge database tool
     const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
@@ -291,10 +284,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       }
     }
     if (tool?.data?.metadata?.type === 'agent') {
-      window.openGtwy({ 
-        agent_id: tool?.data?.metadata?.agent_id, 
-        history: { message_id: tool?.data?.metadata?.message_id }
-      });
       return;
     }
     openViasocket(tool?.id, {

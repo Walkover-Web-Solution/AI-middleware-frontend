@@ -25,8 +25,14 @@ export const initializeChatChannel = (channelId) => (dispatch) => {
 };
 
 // Send user message (for dry run API)
-export const sendUserMessage = (channelId, messageContent, messageId) => (dispatch) => {
+export const sendUserMessage = (channelId, messageContent, messageId, extraData = {}) => (dispatch) => {
   const timestamp = Date.now();
+  const attachments = {
+    image_urls: extraData.image_urls || extraData.images || [],
+    files: extraData.files || [],
+    video_data: extraData.video_data || null,
+    youtube_url: extraData.youtube_url || null,
+  };
   const userMessage = {
     id: messageId || `user_${timestamp}`,
     sender: "user",
@@ -36,6 +42,7 @@ export const sendUserMessage = (channelId, messageContent, messageId) => (dispat
       minute: "2-digit",
     }),
     content: messageContent.replace(/\n/g, "  \n"), // Markdown line break
+    ...attachments,
   };
 
   dispatch(addUserMessage({ channelId, message: userMessage }));
@@ -226,7 +233,7 @@ export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrc
     dispatch(setChatLoading(channelId, true));
 
     // Send user message
-    userMessage = dispatch(sendUserMessage(channelId, messageContent));
+    userMessage = dispatch(sendUserMessage(channelId, messageContent, null, additionalData));
 
     // Add loading assistant message
     loadingMessage = dispatch(addLoadingAssistantMessage(channelId));

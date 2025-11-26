@@ -17,6 +17,7 @@ import { CloseIcon, InfoIcon } from "@/components/Icons";
 import { Edit2, Plus, Trash2, Upload, Play } from "lucide-react";
 
 const SLIDER_ID = "variable-collection-slider";
+const SLIDER_DISABLE_KEY = "variableSliderDisabled";
 
 const VARIABLE_TYPES = [
   { value: "string", label: "String" },
@@ -678,6 +679,7 @@ const updateVersionVariable = useCallback(
     // Clear missing variables from sessionStorage
     sessionStorage.removeItem('missingVariables');
     setMissingVariables([]);
+    sessionStorage.setItem(SLIDER_DISABLE_KEY, "true");
     
     // Close the slider
     toggleSidebar(SLIDER_ID, "right");
