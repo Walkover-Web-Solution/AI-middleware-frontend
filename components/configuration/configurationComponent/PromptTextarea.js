@@ -14,14 +14,27 @@ const PromptTextarea = memo(({
 }) => {
     const isComposingRef = useRef(false);
     const lastExternalValueRef = useRef(initialValue);
+    const hasInitializedRef = useRef(false);
     
     // Update editor content when external value changes (like from Redux)
     useEffect(() => {
-        if (initialValue !== lastExternalValueRef.current && textareaRef.current && !isComposingRef.current) {
-            textareaRef.current.innerText = initialValue || "";
+        const editor = textareaRef.current;
+        if (!editor || isComposingRef.current) return;
+
+        // On first mount, always hydrate with initialValue even if it equals the ref
+        if (!hasInitializedRef.current) {
+            editor.innerText = initialValue || "";
+            lastExternalValueRef.current = initialValue;
+            hasInitializedRef.current = true;
+            return;
+        }
+
+        // After first mount, only update when external value actually changes
+        if (initialValue !== lastExternalValueRef.current) {
+            editor.innerText = initialValue || "";
             lastExternalValueRef.current = initialValue;
         }
-    }, [initialValue]);
+    }, [initialValue, textareaRef]);
     
     // Manage textarea height based on PromptHelper state
     useEffect(() => {

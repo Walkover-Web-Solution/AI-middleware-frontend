@@ -515,8 +515,17 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                     onClose={handleCloseTextAreaFocus}
                     savePrompt={savePrompt}
                     setPrompt={(value) => {
+                      // Update prompt state for diff/summary
                       setPromptState(prev => ({ ...prev, newContent: value }));
-                      promptTextAreaRef.current.querySelector('textarea').value = value;
+
+                      // Sync the contentEditable prompt editor DOM with the new value
+                      const container = promptTextAreaRef.current;
+                      if (container) {
+                        const editor = container.querySelector('[contenteditable="true"]');
+                        if (editor) {
+                          editor.innerText = value || "";
+                        }
+                      }
                     }}
                     showCloseButton={closeHelperButtonLocation === 'promptHelper'}
                     messages={promptState.messages}
