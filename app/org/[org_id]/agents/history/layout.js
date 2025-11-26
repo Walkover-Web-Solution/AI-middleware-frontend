@@ -55,29 +55,29 @@ export default function layoutHistoryPage({ children, params }) {
     };
   }, []);
 
-  useEffect(() => {
-      const existingScript = document.getElementById('gtwy-user-script');
-      if (existingScript) return;
+  // useEffect(() => {
+  //     const existingScript = document.getElementById('gtwy-user-script');
+  //     if (existingScript) return;
   
-      if (params?.org_id) {
-        const scriptId = 'gtwy-user-script';
-        const scriptURl =
-          process.env.NEXT_PUBLIC_ENV !== 'PROD'
-            ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
-            : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.src = scriptURl;
-        script.setAttribute('skipLoadGtwy', true);
-        script.setAttribute('token', getFromCookies('local_token'));
-        script.setAttribute('org_id', params?.org_id);
-        script.setAttribute('customIframeId', 'gtwyEmbedInterface');
-        script.setAttribute('gtwy_user', true);
-        script.setAttribute('slide','right');
-        script.setAttribute('parentId', 'gtwy');
-        document.head.appendChild(script);
-      }
-    }, [params]);
+  //     if (params?.org_id) {
+  //       const scriptId = 'gtwy-user-script';
+  //       const scriptURl =
+  //         process.env.NEXT_PUBLIC_ENV !== 'PROD'
+  //           ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
+  //           : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
+  //       const script = document.createElement('script');
+  //       script.id = scriptId;
+  //       script.src = scriptURl;
+  //       script.setAttribute('skipLoadGtwy', true);
+  //       script.setAttribute('token', getFromCookies('local_token'));
+  //       script.setAttribute('org_id', params?.org_id);
+  //       script.setAttribute('customIframeId', 'gtwyEmbedInterface');
+  //       script.setAttribute('gtwy_user', true);
+  //       script.setAttribute('slide','right');
+  //       script.setAttribute('parentId', 'gtwy');
+  //       document.head.appendChild(script);
+  //     }
+  //   }, [params]);
 
   return (
     <>
