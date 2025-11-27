@@ -19,6 +19,22 @@ import {
   clearChannelData
 } from '../reducer/chatReducer';
 
+const haveSameItems = (first = [], second = []) => {
+  if (!Array.isArray(first) || !Array.isArray(second)) return false;
+  if (!first.length || !second.length) return false;
+  if (first.length !== second.length) return false;
+  return first.every((item, index) => item === second[index]);
+};
+
+const getVideoIdentifier = (video) => {
+  if (!video) return null;
+  if (typeof video === 'string') return video;
+  if (typeof video === 'object') {
+    return video?.uri || video?.url || null;
+  }
+  return null;
+};
+
 // Initialize chat channel
 export const initializeChatChannel = (channelId) => (dispatch) => {
   dispatch(initializeChannel({ channelId }));
@@ -173,13 +189,13 @@ export const addChatErrorMessage = (channelId, error) => (dispatch) => {
 };
 
 // Handle incoming RT layer message
-export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch) => {
+export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch, getState) => {
   const timestamp = Date.now();
 
   // Determine message type and create UI message
   const messageType = socketMessage.role || socketMessage.sender || 'assistant';
 
-  const uiMessage = {
+  let uiMessage = {
     id: socketMessage.id || `rt_${messageType}_${timestamp}`,
     sender: messageType,
     time: new Date().toLocaleTimeString([], {
@@ -191,6 +207,43 @@ export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch) => 
     // Include additional RT layer data
     ...socketMessage
   };
+
+  const normalizedImages = Array.isArray(socketMessage.image_urls)
+    ? socketMessage.image_urls
+    : Array.isArray(socketMessage.images)
+      ? socketMessage.images
+      : [];
+  uiMessage.image_urls = normalizedImages;
+  uiMessage.files = Array.isArray(socketMessage.files) ? socketMessage.files : (uiMessage.files || []);
+  uiMessage.video_data = socketMessage.video_data || uiMessage.video_data || null;
+  uiMessage.youtube_url = socketMessage.youtube_url || uiMessage.youtube_url || null;
+
+  if (messageType === 'assistant' && channelId) {
+    const state = getState();
+    const existingMessages = state?.chatReducer?.messagesByChannel?.[channelId] || [];
+    const lastUserMessage = [...existingMessages].reverse().find((msg) => msg.sender === 'user');
+
+    if (lastUserMessage) {
+      if (haveSameItems(lastUserMessage.image_urls, uiMessage.image_urls)) {
+        uiMessage = { ...uiMessage, image_urls: [] };
+      }
+      if (haveSameItems(lastUserMessage.files, uiMessage.files)) {
+        uiMessage = { ...uiMessage, files: [] };
+      }
+      const userVideo = getVideoIdentifier(lastUserMessage.video_data);
+      const assistantVideo = getVideoIdentifier(uiMessage.video_data);
+      if (userVideo && assistantVideo && userVideo === assistantVideo) {
+        uiMessage = { ...uiMessage, video_data: null };
+      }
+      if (
+        lastUserMessage.youtube_url &&
+        uiMessage.youtube_url &&
+        lastUserMessage.youtube_url === uiMessage.youtube_url
+      ) {
+        uiMessage = { ...uiMessage, youtube_url: null };
+      }
+    }
+  }
 
   dispatch(addRtLayerMessage({
     channelId,
