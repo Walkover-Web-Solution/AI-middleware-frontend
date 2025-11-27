@@ -133,11 +133,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const [messageType, setMessageType] = useState(getInitialMessageType());
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription } = useCustomSelector((state) => ({
+  const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription, orgBridges, allBridgesMap } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id] || [],
     isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser,
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
+    orgBridges: state?.bridgeReducer?.org?.[params?.org_id]?.orgs || [],
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const { sliderState, openSlider, closeSlider } = useSlider();
@@ -238,6 +239,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
+  useEffect(() => {
+    return () => {
+     closeSlider();
+    }
+  }, [])
+
   const handleToolPrimaryClick = useCallback(async (event, tool) => {
     // Check if this is a knowledge database tool
     const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
@@ -284,6 +291,35 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       }
     }
     if (tool?.data?.metadata?.type === 'agent') {
+      const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || '';
+      const orgId = params?.org_id;
+      const agentId = tool?.data?.metadata?.agent_id;
+      const messageId = tool?.data?.metadata?.message_id;
+
+      // 1) Find this bridge/agent in the org list
+      const bridgeFromOrg = orgBridges.find((b) => b?._id === agentId);
+      // 2) Also look it up in allBridgesMap
+      // 3) Resolve published_version_id
+      const publishedVersionId = bridgeFromOrg?.published_version_id;
+
+      // If the agent bridge does not exist in org data, do not navigate
+      if (!bridgeFromOrg) {
+        console.warn('Agent bridge not found for org', { orgId, agentId });
+        return;
+      }
+      const threadId = tool?.data?.metadata?.thread_id;
+      const subThreadId = tool?.data?.metadata?.sub_thread_id||tool?.data?.metadata?.thread_id;
+      if (baseUrl && orgId && agentId) {
+        const searchParams = new URLSearchParams();
+        if (publishedVersionId) searchParams.set('version', publishedVersionId);
+        if (messageId) searchParams.set('message_id', messageId);
+        if (threadId) searchParams.set('thread_id', threadId); 
+        if (subThreadId) searchParams.set('sub_thread_id', subThreadId);       
+        const url = `${baseUrl}/org/${orgId}/agents/history/${agentId}?${searchParams.toString()}`;
+        if (typeof window !== 'undefined') {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      }
       return;
     }
     openViasocket(tool?.id, {
@@ -294,7 +330,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         bridge_id: params?.id,
       }
     });
-  }, [knowledgeBaseData, openSlider, embedToken, params?.id]);
+  }, [knowledgeBaseData, openSlider, embedToken, params?.id, params?.org_id, orgBridges, allBridgesMap]);
 
   const renderToolData = useCallback((tool, index) => (
     <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
