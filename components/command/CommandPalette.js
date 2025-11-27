@@ -430,7 +430,6 @@ const CommandPalette = ({isEmbedUser}) => {
                 const currentIdx = prev;
                 for (let offset = 1; offset < landingFlatList.length; offset++) {
                   const idx = (currentIdx + offset) % landingFlatList.length;
-                  console.log(idx,currentCategory,landingFlatList.length,"length")
                   if (landingFlatList[idx]?.type === 'category') return idx;
                 }
                 return prev;
