@@ -23,11 +23,10 @@ const NotesPanel = dynamic(() => import("@/components/NotesPanel"), { ssr: false
 export const runtime = 'edge';
 
 // Bundle Components for collapsed panels (5px min width)
-const ConfigBundle = ({ onClick }) => {
+const ConfigBundle = () => {
   return (
     <div 
-      className=" w-full h-full border-r-2 border-primary flex items-center justify-center cursor-pointer hover:bg-primary/30 transition-colors duration-200"
-      onClick={onClick}
+      className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Configuration Panel"
       style={{ minWidth: '15px' }}
     >
@@ -38,11 +37,10 @@ const ConfigBundle = ({ onClick }) => {
   );
 };
 
-const ChatBundle = ({ onClick }) => {
+const ChatBundle = () => {
   return (
     <div 
-      className="w-full h-full flex items-center justify-center cursor-pointer duration-200"
-      onClick={onClick}
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Chat Panel"
       style={{ minWidth: '20px' }}
     >
@@ -53,11 +51,10 @@ const ChatBundle = ({ onClick }) => {
   );
 };
 
-const PromptHelperBundle = ({ onClick }) => {
+const PromptHelperBundle = () => {
   return (
     <div 
-      className="w-full h-full flex items-center justify-center cursor-pointer transition-colors duration-200"
-      onClick={onClick}
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Prompt Helper Panel"
       style={{ minWidth: '20px' }}
     >
@@ -68,11 +65,10 @@ const PromptHelperBundle = ({ onClick }) => {
   );
 };
 
-const NotesBundle = ({ onClick }) => {
+const NotesBundle = () => {
   return (
     <div 
-      className="w-full h-full flex items-center justify-center cursor-pointer duration-200"
-      onClick={onClick}
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Notes Panel"
       style={{ minWidth: '20px' }}
     >
@@ -148,10 +144,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     setUiState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const handleExpandPanel = useCallback((panelType) => {
-    const collapseKey = `is${panelType}Collapsed`;
-    updateUiState({ [collapseKey]: false });
-  }, [updateUiState]);
 
   const leftPanelScrollRef = useRef(null);
   const handleCloseTextAreaFocus = useCallback(() => {
@@ -406,7 +398,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           >
             {/* Bundle - Show when collapsed */}
             {uiState.isConfigCollapsed && (
-              <ConfigBundle onClick={() => handleExpandPanel('Config')} />
+              <ConfigBundle />
             )}
             
             {/* Configuration Content - Always in DOM, just hidden when collapsed */}
@@ -414,7 +406,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
             >
               {/* Configuration Content */}
-              <div ref={leftPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4">
+              <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : 'px-4'}`}>
                 <ConfigurationPage
                   promptTextAreaRef={promptTextAreaRef}
                   params={resolvedParams}
@@ -458,7 +450,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               }}
             >
               {uiState.isChatCollapsed ? (
-                <ChatBundle onClick={() => handleExpandPanel('Chat')} />
+                <ChatBundle />
               ) : (
                 <div className="h-full flex flex-col" id="parentChatbot">
                   <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
@@ -506,7 +498,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 }}
               >
                 {uiState.isPromptHelperCollapsed ? (
-                  <PromptHelperBundle onClick={() => handleExpandPanel('PromptHelper')} />
+                  <PromptHelperBundle />
                 ) : (
                   <PromptHelper
                     isVisible={uiState.isPromptHelperOpen && !isMobileView}
@@ -580,7 +572,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   }}
                 >
                   {uiState.isNotesCollapsed ? (
-                    <NotesBundle onClick={() => handleExpandPanel('Notes')} />
+                    <NotesBundle />
                   ) : (
                     <NotesPanel
                       isVisible={true}

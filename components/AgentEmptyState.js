@@ -39,7 +39,7 @@ const AgentEmptyState = ({ orgid, isEmbedUser }) => {
                 + Create New Agent
               </button>
               
-              <button
+             {!isEmbedUser ? <button
                 data-cal-namespace="30min"
                 data-cal-link="team/gtwy.ai/ai-consultation"
                 data-cal-origin="https://cal.id"
@@ -48,7 +48,7 @@ const AgentEmptyState = ({ orgid, isEmbedUser }) => {
               >
                 <MessageCircleMoreIcon size={12} />
                 <span className="text-sm">Speak To Us</span>
-              </button>
+              </button> : null}
             </div>
           </div>
         </div>
