@@ -173,6 +173,7 @@ const Sidebar = memo(({
     dispatch(clearSubThreadData());
 
     try {
+      const currentMessageId = searchParams?.message_id;
       const searchValue = searchRef?.current?.value || searchParams?.message_id || "";
       
       // Get date range from search params or current state
@@ -191,11 +192,11 @@ const Sidebar = memo(({
       // Navigate with search parameters
       const searchUrl = new URL(window.location.href);
       searchUrl.searchParams.set('version', searchParams?.version || 'all');
-      if (searchParams?.message_id) {
-        searchUrl.searchParams.set('message_id', searchParams.message_id);
-      }
       if (startDate) searchUrl.searchParams.set('start', startDate);
       if (endDate) searchUrl.searchParams.set('end', endDate);
+      if (currentMessageId) {
+        searchUrl.searchParams.set('message_id', currentMessageId);
+      }
 
       router.push(searchUrl.pathname + searchUrl.search, undefined, { shallow: true });
 
@@ -210,8 +211,8 @@ const Sidebar = memo(({
         resultUrl.searchParams.set('subThread_id', subThreadId);
         if (startDate) resultUrl.searchParams.set('start', startDate);
         if (endDate) resultUrl.searchParams.set('end', endDate);
-        if (searchParams?.message_id) {
-          resultUrl.searchParams.set('message_id', searchParams.message_id);
+        if (currentMessageId) {
+          resultUrl.searchParams.set('message_id', currentMessageId);
         }
 
         router.push(resultUrl.pathname + resultUrl.search, undefined, { shallow: true });
@@ -227,6 +228,7 @@ const Sidebar = memo(({
     // Clear search state using new search slice
     dispatch(clearSearchAction());
     if (searchRef?.current) searchRef.current.value = "";
+    searchParams.delete('message_id');
     
     setPage(1);
     setHasMore(true);
@@ -241,7 +243,7 @@ const Sidebar = memo(({
         isErrorTrue, 
         selectedVersion
       ));
-      
+      let nextThreadRawId = result?.[0]?.thread_id || searchParams?.thread_id || null;
       if (result?.length) {
         const firstResult = result[0];
         const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, '%26'));
@@ -254,14 +256,30 @@ const Sidebar = memo(({
         clearUrl.searchParams.set('subThread_id', subThreadId);
         if (searchParams?.start) clearUrl.searchParams.set('start', searchParams.start);
         if (searchParams?.end) clearUrl.searchParams.set('end', searchParams.end);
-        if (searchParams?.message_id) {
-          clearUrl.searchParams.set('message_id', searchParams.message_id);
-        }
 
         router.push(clearUrl.pathname + clearUrl.search, undefined, { shallow: true });
       }
+
+      if (nextThreadRawId) {
+        setLoadingSubThreads(true);
+        dispatch(clearSubThreadData());
+        try {
+          await dispatch(
+            getSubThreadsAction({
+              thread_id: nextThreadRawId,
+              error: isErrorTrue,
+              bridge_id: params.id,
+              version_id: selectedVersion
+            })
+          );
+          setExpandedThreads([nextThreadRawId]);
+        } finally {
+          setLoadingSubThreads(false);
+        }
+      }
       
       if (result?.length < 40) setHasMore(false);
+
     } catch (error) {
       console.error("Clear search error:", error);
     }
@@ -590,12 +608,12 @@ const Sidebar = memo(({
                                           )}
                                         </a>
                                       </li>
-                                      {subThread?.messages?.length > 0 && (<div className="mt-1.5 ml-4 space-y-0">
+                                      {subThread?.messages?.length > 0 && (<div className="mt-2 ml-4 space-y-2">
                                         {subThread?.messages?.map((msg, msgIndex) => (
                                           <div
                                             key={msgIndex}
                                             onClick={() => handleSetMessageId(msg?.message_id)}
-                                            className={`cursor-pointer rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-2 border-transparent hover:border-base-300`}
+                                            className={`cursor-pointer rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content border-l-2 border-transparent hover:border-base-300`}
                                           >
                                             <div className="flex items-start gap-1.5">
                                               <UserIcon className="w-2.5 h-2.5 mt-0.5 text-base-content" />

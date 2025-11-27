@@ -45,6 +45,12 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const integrationData = useCustomSelector(
     (state) => state?.bridgeReducer?.org?.[orgId]?.integrationData
   ) || {};
+  const { searchResults, isSearchActive } = useCustomSelector((state) => ({
+    searchResults: Array.isArray(state?.historyReducer?.search?.results)
+      ? state.historyReducer.search.results
+      : [],
+    isSearchActive: state?.historyReducer?.search?.isActive || false,
+  }));
 
   const historyRef = useRef(null);
   const contentRef = useRef(null);
@@ -238,6 +244,12 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const startDate = search?.start;
   const endDate = search?.end;
   const pathName = pathNameProp || pathname;
+  const availableThreads = useMemo(() => {
+    if (isSearchActive) {
+      return searchResults;
+    }
+    return Array.isArray(historyData) ? historyData : [];
+  }, [isSearchActive, searchResults, historyData]);
 
   const fetchThread = useCallback(
     async ({
@@ -276,9 +288,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       const error = errorFromURL || isErrorTrue;
       const version = versionFromURL || '';
 
-      // If no thread selected, navigate to the first one from historyData
-      if (!thread_id && Array.isArray(historyData) && historyData.length > 0) {
-        const firstThreadId = historyData[0]?.thread_id;
+      // If no thread selected, navigate to the first one from whichever data source is active
+      if (!thread_id && Array.isArray(availableThreads) && availableThreads.length > 0) {
+        const firstThreadId = availableThreads[0]?.thread_id;
         if (firstThreadId) {
           const params = new URLSearchParams(searchParamsHook.toString());
           params.set('thread_id', firstThreadId);
@@ -292,7 +304,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         }
       }
 
-      if (!thread_id || !historyData?.some((h) => h?.thread_id === thread_id)) {
+      if (!thread_id || !availableThreads?.some((h) => h?.thread_id === thread_id)) {
         setLoadingData(false);
         return;
       }
@@ -327,7 +339,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadIdFromURL, filterOption, historyData, errorFromURL, subThreadIdFromURL]);
+  }, [threadIdFromURL, filterOption, availableThreads, errorFromURL, subThreadIdFromURL]);
 
   // Fetch more (pagination)
   const fetchMoreThreadData = useCallback(async () => {
