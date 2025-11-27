@@ -140,7 +140,7 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
-        {(row?.apikey_limit && row?.apikey_usage && Number(row?.apikey_usage) > 0) ? <div
+        {(row?.apikey_usage && Number(row?.apikey_usage) > 0) ? <div
           className="tooltip tooltip-primary"
           data-tip="Reset Usage"
           onClick={(e) => {
