@@ -47,6 +47,8 @@ export const ITEM_ICONS = {
 
 export const DISPLAY_NAMES = (key) => {
   switch (key) {
+    case 'agents':
+      return 'Agents';
     case 'knowledge_base':
       return 'Knowledge base';
     case 'chatbotConfig':
