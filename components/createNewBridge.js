@@ -2,7 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { closeModal, sendDataToParent } from "@/utils/utility";
+import { closeModal, focusDialogWhenOpen, sendDataToParent } from "@/utils/utility";
 import { DEFAULT_PROMPT, MODAL_TYPE } from "@/utils/enums";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import LoadingSpinner from "./loadingSpinner";
 import Protected from "./protected";
 import CreateBridgeCards from "./CreateBridgeCards";
-import { Info, Lightbulb, Plus } from "lucide-react";
+import { BotIcon, Info, Lightbulb, Plus } from "lucide-react";
 import { CloseIcon } from "./Icons";
 
 const INITIAL_STATE = {
@@ -95,6 +95,13 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   useEffect(() => () => {
     closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
+  }, []);
+
+  useEffect(() => {
+    const cleanup = focusDialogWhenOpen(MODAL_TYPE.CREATE_BRIDGE_MODAL, () => {
+      textAreaPurposeRef?.current?.focus?.();
+    });
+    return cleanup;
   }, []);
 
   // Handlers
@@ -214,9 +221,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
+                <BotIcon size={20} className="text-primary"/>
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-base-content">Create New Agent</h3>
@@ -255,8 +260,9 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
                     id="agent-purpose"
                     placeholder="e.g., A customer support agent that helps users with product inquiries and troubleshooting..."
                     ref={textAreaPurposeRef}
+                    autoFocus
                     onChange={handlePurposeInput}
-                    className={`textarea textarea-bordered w-full max-h-[120px] bg-base-100 transition-all duration-300 text-base resize-none ${
+                    className={`textarea textarea-bordered w-full min-h-[150px] max-h-[150px] bg-base-100 transition-all duration-300 text-base resize-none placeholder:text-base-content/40 ${
                       state.validationErrors.purpose
                         ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
                         : "border-base-300 focus:border-primary focus:ring-2 focus:ring-primary/20"

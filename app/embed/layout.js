@@ -139,7 +139,6 @@ const Layout = ({ children }) => {
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
           urlParamsObj?.folder_id && sessionStorage.setItem('embedUser', true);
-          urlParamsObj?.gtwy_user && sessionStorage.setItem('orchestralUser', true);
         }
 
         if (urlParamsObj.config) {
@@ -149,12 +148,6 @@ const Layout = ({ children }) => {
             }
           });
         }
-        if(urlParamsObj?.config?.configureGtwyRedirection === 'orchestral_page'){
-          setIsLoading(true);
-          router.push(`/org/${urlParamsObj.org_id}/orchestratal_model`);
-          return;
-        }
-
         if (urlParamsObj?.agent_name) {
           setIsLoading(true)
           setCurrentAgentName(urlParamsObj.agent_name);

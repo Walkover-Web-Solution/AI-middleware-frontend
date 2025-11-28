@@ -197,15 +197,7 @@
                 this.initializeGtwyEmbed().then(() => this.openGtwy());
                 return;
             }
-            [
-                { agent_id }, 
-                { agent_id, history }, 
-                { agent_id, meta }, 
-                { agent_name }, 
-                { agent_purpose }
-            ]
-                .filter(data => data && Object.values(data).some(v => v))
-                .forEach(data => SendDataToGtwyEmbed(data));
+            [(agent_id, {agent_id,history}, { agent_id, meta }, { agent_name }, { agent_purpose })]?.filter(data => data && Object.values(data).some(v => v))?.forEach(data => SendDataToGtwyEmbed(data))||[];
 
             const container = document.getElementById('gtwy-iframe-parent-container');
             const iframe = document.getElementById('gtwyInterfaceEmbed');
@@ -345,14 +337,14 @@
                 id: iframeId,
                 title: 'iframe',
                 sandbox: 'allow-scripts allow-same-origin allow-popups allow-forms',
-                allow: 'microphone *; camera *; midi *; encrypted-media *'
+                allow: 'clipboard-read *; clipboard-write *; microphone *; camera *; midi *; encrypted-media *'
             });
             Object.assign(iframe.style, { width: '100%', height: '100%', border: 'none' });
 
             if (!this.state.hasParentContainer) {
                 const hideHeader = ['true', true].includes(this.config.hideHeader);
                 Object.assign(iframe.style, {
-                    marginTop: hideHeader ? '0vh' : '7vh',
+                    marginTop: hideHeader ? '0vh' : '5vh',
                     maxHeight: hideHeader ? '100vh' : '95vh'
                 });
             }
@@ -431,7 +423,7 @@
                     }
                 });
 
-                if ('hideHeader' in config) {
+                if ('hideHeader' in config &&  !this.state.hasParentContainer) {
                     this.config.hideHeader = config.hideHeader;
                     const header = document.getElementById('gtwy-embed-header');
                     const iframe = document.getElementById('iframe-component-gtwyInterfaceEmbed');
@@ -440,7 +432,7 @@
                     if (header) header.style.display = hide ? 'none' : 'flex';
                     if (iframe) {
                         Object.assign(iframe.style, {
-                            marginTop: hide ? '0px' : '7vh',
+                            marginTop: hide ? '0px' : '5vh',
                             maxHeight: hide ? '100vh' : '95vh'
                         });
                     }

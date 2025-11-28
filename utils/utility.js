@@ -85,6 +85,32 @@ const updateContent = (obj2, updatedObj1) => {
     }
 };
 
+export const focusDialogWhenOpen = (dialogId, onOpen, delay = 50) => {
+    if (typeof window === "undefined") return () => {};
+
+    const modal = document.getElementById(dialogId);
+
+    const handleOpen = () => {
+        if (modal?.hasAttribute?.("open")) {
+            onOpen?.();
+        }
+    };
+
+    const timer = setTimeout(handleOpen, delay);
+    const observer = modal
+        ? new MutationObserver(() => handleOpen())
+        : null;
+
+    if (observer) {
+        observer.observe(modal, { attributes: true, attributeFilter: ["open"] });
+    }
+
+    return () => {
+        clearTimeout(timer);
+        observer?.disconnect();
+    };
+};
+
 
 
 
