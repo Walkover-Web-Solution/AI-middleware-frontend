@@ -91,7 +91,7 @@ module.exports = {
           "base-200": "oklch(22% 0 0)",   // slightly darker (cards, panels)
           "base-300": "oklch(18% 0 0)",   // darkest (borders, separators)
           "base-400": "oklch(16% 0 0)",
-          "base-content": "oklch(85% 0 0)", // dull white text
+          "base-content": "oklch(100% 0 0)", // pure white text
       
           /* Brand neutrals */
           "primary": "oklch(78% 0 0)",   // light gray for highlights

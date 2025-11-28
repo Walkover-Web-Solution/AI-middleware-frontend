@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import TriggersList from "./configurationComponent/TriggersList";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
@@ -30,9 +30,14 @@ const SetupView = memo(() => {
         return <ConnectedAgentFlowPanel />;
     }
 
+    const shouldRenderStandaloneTriggers = useMemo(
+        () => bridgeType === 'trigger' && !isEmbedUser && modelType === 'image',
+        [bridgeType, isEmbedUser, modelType]
+    );
+
     return (
         <>
-            {bridgeType === 'trigger' && !isEmbedUser && (
+            {shouldRenderStandaloneTriggers && (
                 <TriggersList params={params} />
             )}
             {modelType === "image" ? (
