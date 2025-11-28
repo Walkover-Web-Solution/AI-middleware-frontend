@@ -542,7 +542,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                 </div>
               </div>
             </div>
-
+ 
         {/* 2. Second: Show Tools Call section if exists */}
         {(item?.tools_call_data?.length > 0 || item?.function) && (
           <div className="mb-2 text-sm flex flex-col justify-center items-center">
@@ -550,50 +550,52 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               <span className="flex justify-center items-center gap-2"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
             </h1>
             <div className="flex h-full gap-2 justify-center items-center flex-wrap">
-              {item?.tools_call_data ? item.tools_call_data.map((toolObj, index) => {
-                // Handle the new data structure where each tool is an object with complex keys
-                const toolKey = Object.keys(toolObj)[0]; // Get the first (and likely only) key
-                const tool = toolObj[toolKey]; // Get the tool data
-                
-                return (
-                  <div key={index} 
-                  onClick={(event) => handleToolPrimaryClick(event, tool)}
-                  className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 see">
-                    <div className="cursor-pointer flex items-center justify-center py-4 pl-2">
-                      <div className="text-center">
-                        <div className="font-medium text-sm">{tool?.name || 'Unknown'}</div>
+              {item?.tools_call_data
+                ? item.tools_call_data
+                    // tools_call_data can be an array of objects, each with multiple toolu_* keys
+                    .flatMap((toolObj) => Object.entries(toolObj || {}))
+                    .map(([toolKey, tool], index) => (
+                      <div
+                        key={toolKey || index}
+                        onClick={(event) => handleToolPrimaryClick(event, tool)}
+                        className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 see"
+                      >
+                        <div className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                          <div className="text-center">
+                            <div className="font-medium text-sm">{tool?.name || "Unknown"}</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <div
+                            className="tooltip tooltip-top relative text-base-content"
+                            data-tip="function logs"
+                          >
+                            <SquareFunctionIcon
+                              size={22}
+                              onClick={(event) => handleToolPrimaryClick(event, tool)}
+                              className="opacity-80 cursor-pointer"
+                            />
+                          </div>
+                          <div
+                            className="tooltip tooltip-top pr-2 relative text-base-content"
+                            data-tip="function data"
+                          >
+                            <FileClockIcon
+                              size={22}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setToolsData(tool);
+                                toolsDataModalRef.current?.showModal();
+                              }}
+                              className="opacity-80 bg-inherit cursor-pointer"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
-                        <SquareFunctionIcon size={22}
-                          onClick={(event) => handleToolPrimaryClick(event, tool)}
-                          className="opacity-80 cursor-pointer" />
-                      </div>
-                      <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
-                        <FileClockIcon
-                          size={22}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setToolsData(tool);
-                            toolsDataModalRef.current?.showModal();
-                          }}
-                          className="opacity-80 bg-inherit cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              }) : (item?.function ? Object.keys(item.function).map(renderToolData) : [])}
-              <button
-                className={`btn text-xs font-normal btn-sm  ${isLastMessage() ? '' : 'see-on-hover'}`}
-                onClick={() => handleAddTestCase(item, index)}
-              >
-                <div className="flex items-center gap-1 text-xs font-normal px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                  <AddIcon className="h-3 w-3" />
-                  <span>Test Case</span>
-                </div>
-              </button>
+                    ))
+                : item?.function
+                ? Object.keys(item.function).map(renderToolData)
+                : []}
             </div>
           </div>
         )}
