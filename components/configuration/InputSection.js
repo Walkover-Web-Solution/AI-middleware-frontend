@@ -26,16 +26,20 @@ const InputSection = memo(() => {
     return (
         <>
             {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
-                <div className="w-full gap-2 flex flex-row items-start justify-between pt-4 cursor-default">
-                    <PreEmbedList isPublished={isPublished} params={params} searchParams={searchParams} />
-                    {!isEmbedUser && <button
-                        type="button"
-                        className="btn btn-xs btn-outline gap-1 mt-1 whitespace-nowrap"
-                        onClick={() => toggleSidebar('integration-guide-slider', 'right')}
-                    >
-                        <BookText className="w-3 h-3" />
-                        <span>Integration Guide</span>
-                    </button>}
+                <div className="w-full pt-4 cursor-default flex flex-row justify-between items-start gap-2">
+                    <div className="w-full max-w-md flex-shrink-0">
+                        <PreEmbedList isPublished={isPublished} params={params} searchParams={searchParams} />
+                    </div>
+                    {!isEmbedUser && (
+                        <button
+                            type="button"
+                            className="btn btn-xs btn-outline gap-1 mt-1 whitespace-nowrap"
+                            onClick={() => toggleSidebar('integration-guide-slider', 'right')}
+                        >
+                            <BookText className="w-3 h-3" />
+                            <span>Integration Guide</span>
+                        </button>
+                    )}
                 </div>
             )}
             <InputConfigComponent
