@@ -549,32 +549,38 @@ const Sidebar = memo(({
                                 {subThreads?.length === 0 ? (
                                   <li className="text-xs p-1">No sub thread available</li>
                                 ) : (
-                                  subThreads?.map((subThreadId, index) => {
-                                    return (
-                                    <li
-                                      key={index}
-                                      className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
-                                        ? "hover:bg-base-primary hover:text-base-100"
-                                        : "hover:bg-base-300 hover:text-base-content"
-                                        } rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
-                                          ? "bg-primary text-base-100"
-                                          : ""
-                                        }`}
-                                      onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, searchParams?.thread_id)}
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <span className="truncate flex-1 mr-1.5">
-                                          {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 20)}
-                                        </span>
-                                        {(subThreadId?.updatedAt || subThreadId?.created_at || subThreadId?.createdAt || subThreadId?.updated_at) && (
-                                          <span className="text-xs whitespace-nowrap flex-shrink-0 opacity-70">
-                                            {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </li>
-                                  );
-                                  })
+                                  [...subThreads]
+                                    .sort((a, b) => {
+                                      const aDate = new Date(a?.created_at || a?.createdAt || a?.updated_at || a?.updatedAt || 0).getTime();
+                                      const bDate = new Date(b?.created_at || b?.createdAt || b?.updated_at || b?.updatedAt || 0).getTime();
+                                      return bDate - aDate; // newest first
+                                    })
+                                    .map((subThreadId, index) => {
+                                      return (
+                                        <li
+                                          key={index}
+                                          className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                            ? "hover:bg-base-primary hover:text-base-100"
+                                            : "hover:bg-base-300 hover:text-base-content"
+                                            } rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                              ? "bg-primary text-base-100"
+                                              : ""
+                                            }`}
+                                          onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, searchParams?.thread_id)}
+                                        >
+                                          <div className="flex items-center justify-between">
+                                            <span className="truncate flex-1 mr-1.5">
+                                              {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 20)}
+                                            </span>
+                                            {(subThreadId?.updatedAt || subThreadId?.created_at || subThreadId?.createdAt || subThreadId?.updated_at) && (
+                                              <span className="text-xs whitespace-nowrap flex-shrink-0 opacity-70">
+                                                {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </li>
+                                      );
+                                    })
                                 )}
                               </ul>
                             </div>
