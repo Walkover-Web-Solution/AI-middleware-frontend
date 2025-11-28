@@ -643,13 +643,13 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             <div className="grid gap-3">
               {list.map((agent, idx) => {
                 const hasPublishedVersion = agent.published_version_id;
-                const doesNotHavePausedStatus = agent.bridge_status !== 1;
+                const doesNotHavePausedStatus = agent.bridge_status !== 0;
                 const doesNotHaveArchivedStatus = agent.status !== 0;
                 const isDisabled = !(hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus);
 
                 const getStatusLabel = () => {
                   if (!hasPublishedVersion) return 'Not Published';
-                  if (agent.bridge_status === 1) return 'Paused';
+                  if (agent.bridge_status === 0) return 'Paused';
                   if (agent.status === 0) return 'Archived';
                   return 'Active';
                 };
