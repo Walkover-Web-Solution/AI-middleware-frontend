@@ -33,7 +33,7 @@ const inferType = (value, fallback) => {
   if (typeof value === "object" && value !== null) return "object";
   if (typeof value === "boolean") return "boolean";
   if (typeof value === "number") return "number";
-  
+
   // Convert to string for string-based analysis
   const sample = String(value ?? fallback ?? "").trim();
   if (!sample) return "string";
@@ -158,8 +158,7 @@ const validateVariables = (variables, options = {}) => {
     }
     if (key && normalisedKeys.has(lowerKey) && !suppressErrors) {
       errors.push(
-        `Duplicate key "${key}" found (rows ${normalisedKeys.get(lowerKey) + 1} and ${
-          index + 1
+        `Duplicate key "${key}" found (rows ${normalisedKeys.get(lowerKey) + 1} and ${index + 1
         })`
       );
     } else if (key) {
@@ -263,9 +262,9 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       const baseVariables = Array.isArray(sourceList)
         ? sourceList
         : Array.isArray(variablesKeyValue)
-        ? variablesKeyValue
-        : [];
-      
+          ? variablesKeyValue
+          : [];
+
       // Create a fresh copy to avoid reference issues
       const allVariables = baseVariables.map(variable => ({
         id: variable.id || createLocalId(),
@@ -275,7 +274,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
         type: variable.type || "string",
         required: variable.required !== false,
       }));
-      
+
       // Add variables from variables_path
       Object.keys(variablesPath || {}).forEach(functionId => {
         const functionVars = variablesPath[functionId] || {};
@@ -288,11 +287,11 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
 
           // Check if this variable already exists
           const existsInSource = allVariables.find(v => v.key === trimmedKey);
-          
+
           if (!existsInSource) {
             // Check if this variable exists in variable_state
             const variableStateData = variable_state[trimmedKey];
-            
+
             // Add the path variable to the list with data from variable_state if available
             allVariables.push({
               id: createLocalId(),
@@ -305,7 +304,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           }
         });
       });
-      
+
       // Also check for variables that exist in variable_state but not in Redux or variables_path
       Object.keys(variable_state || {}).forEach(stateKey => {
         const trimmedKey = typeof stateKey === "string" ? stateKey.trim() : "";
@@ -313,10 +312,10 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           return;
         }
         const existsInVariables = allVariables.find(v => v.key === trimmedKey);
-        
+
         if (!existsInVariables) {
           const variableStateData = variable_state[trimmedKey];
-          
+
           // Add variable from variable_state
           allVariables.push({
             id: createLocalId(),
@@ -328,7 +327,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           });
         }
       });
-      
+
       const { normalised } = validateVariables(allVariables, { suppressErrors: true });
       setDraftVariables(normalised);
     },
@@ -388,7 +387,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Also check periodically in case sessionStorage is updated by same tab
     const interval = setInterval(checkMissingVariables, 1000);
 
@@ -468,14 +467,14 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       setMissingVariables([]); // Clear missing variables state
       setBlockedDeleteKey("");
       setBlockedDeleteMessage("");
-      
+
       // Force a fresh sync with the latest store data
       syncDraftWithStore(sourceList);
     },
     [syncDraftWithStore]
   );
 
-const updateVersionVariable = useCallback(
+  const updateVersionVariable = useCallback(
     (updatedPairs) => {
 
       const filteredPairs = (updatedPairs || variablesKeyValue)
@@ -497,11 +496,11 @@ const updateVersionVariable = useCallback(
           const type = originalType || inferredType || "string";
           const rawValue = pair?.value ?? "";
           const rawDefaultValue = pair?.defaultValue ?? "";
-          
+
           // Format the main value
           const valueCheck = validateAndFormatValue(rawValue, type, { allowEmpty: false });
           let formattedValue = valueCheck.ok ? valueCheck.value : rawValue;
-          
+
           // Convert values to proper types for API
           if (type === "boolean" && valueCheck.ok && typeof formattedValue === "string") {
             formattedValue = formattedValue === "true";
@@ -516,11 +515,11 @@ const updateVersionVariable = useCallback(
               // If parsing fails, keep the string value
             }
           }
-          
+
           // Format the default value
           const defaultCheck = validateAndFormatValue(rawDefaultValue, type, { allowEmpty: true });
           let formattedDefaultValue = defaultCheck.ok ? defaultCheck.value : rawDefaultValue;
-          
+
           // Convert default values to proper types for API
           if (
             type === "boolean" &&
@@ -550,24 +549,24 @@ const updateVersionVariable = useCallback(
         ?.filter(Boolean) ?? [];
       // Deep check filtered pairs against existing variable_state
       const currentVariableState = Object.assign({}, ...filteredPairs);
-      
+
       // Check if there are actual changes between current and existing variable_state
       const hasVariableStateChanged = () => {
         const existingKeys = Object.keys(variable_state || {});
         const currentKeys = Object.keys(currentVariableState || {});
-        
+
         // Check if keys are different
         if (existingKeys.length !== currentKeys.length) return true;
         if (!existingKeys.every(key => currentKeys.includes(key))) return true;
-        
+
         // Check if values are different for each key
         return currentKeys.some(key => {
           const existing = variable_state[key];
           const current = currentVariableState[key];
-          
+
           if (!existing && !current) return false;
           if (!existing || !current) return true;
-          
+
           // Deep compare the variable objects
           return (
             existing.status !== current.status ||
@@ -575,7 +574,7 @@ const updateVersionVariable = useCallback(
           );
         });
       };
-      
+
       // Only proceed with API call if there are changes
       if (!hasVariableStateChanged()) {
         return;
@@ -618,54 +617,54 @@ const updateVersionVariable = useCallback(
   );
 
   const commitVariables = useCallback(
-(candidateList, { suppressErrors = false } = {}) => {
-  if (!activeGroupId) {
-    if (!suppressErrors) {
-      setError("Select or create a group first.");
-    }
-    return { success: false };
-  }
+    (candidateList, { suppressErrors = false } = {}) => {
+      if (!activeGroupId) {
+        if (!suppressErrors) {
+          setError("Select or create a group first.");
+        }
+        return { success: false };
+      }
 
-  const { isValid, errors: validationErrors, normalised } =
-    validateVariables(candidateList);
+      const { isValid, errors: validationErrors, normalised } =
+        validateVariables(candidateList);
 
-  if (!isValid) {
-    if (!suppressErrors && validationErrors.length) {
-      setError(validationErrors.join(" • "));
-    }
-    return { success: false };
-  }
+      if (!isValid) {
+        if (!suppressErrors && validationErrors.length) {
+          setError(validationErrors.join(" • "));
+        }
+        return { success: false };
+      }
 
-  setError("");
-  
-  // Always save all variables to Redux first (even if not in prompt/variables_path)
-  const allVariables = normalised.filter(v => v.key && v.key.trim());
-  
-  // Update all variables in Redux
-  if (allVariables.length > 0) {
-    dispatch(
-      updateVariables({
-        data: allVariables,
-        bridgeId: params.id,
-        versionId,
-        groupId: activeGroupId,
-      })
-    );
-  }
-  
-  // Check if variables have actually changed compared to DB data before making API calls
-  if (!hasVariablesChanged(normalised)) {
-    // No changes detected for relevant variables, return success without additional API calls
-    return { success: true, normalised };
-  }
-  updateVersionVariable(normalised);
+      setError("");
 
-  // Variables are now saved to DB, no need to track original state
+      // Always save all variables to Redux first (even if not in prompt/variables_path)
+      const allVariables = normalised.filter(v => v.key && v.key.trim());
 
-  return { success: true, normalised };
-},
-[activeGroupId, dispatch, params.id, updateVersionVariable, versionId, hasVariablesChanged, variablesKeyValue]
-);
+      // Update all variables in Redux
+      if (allVariables.length > 0) {
+        dispatch(
+          updateVariables({
+            data: allVariables,
+            bridgeId: params.id,
+            versionId,
+            groupId: activeGroupId,
+          })
+        );
+      }
+
+      // Check if variables have actually changed compared to DB data before making API calls
+      if (!hasVariablesChanged(normalised)) {
+        // No changes detected for relevant variables, return success without additional API calls
+        return { success: true, normalised };
+      }
+      updateVersionVariable(normalised);
+
+      // Variables are now saved to DB, no need to track original state
+
+      return { success: true, normalised };
+    },
+    [activeGroupId, dispatch, params.id, updateVersionVariable, versionId, hasVariablesChanged, variablesKeyValue]
+  );
 
   const closeSlider = useCallback(() => {
     const result = commitVariables(draftVariables, { suppressErrors: true }) || {};
@@ -680,10 +679,10 @@ const updateVersionVariable = useCallback(
     sessionStorage.removeItem('missingVariables');
     setMissingVariables([]);
     sessionStorage.setItem(SLIDER_DISABLE_KEY, "true");
-    
+
     // Close the slider
     toggleSidebar(SLIDER_ID, "right");
-    
+
     // Trigger the message send with forceRun = true
     // We need to access the chat input's handleSendMessage function
     // This will be done by dispatching a custom event
@@ -691,7 +690,7 @@ const updateVersionVariable = useCallback(
       detail: { forceRun: true }
     });
     window.dispatchEvent(runAnywayEvent);
-    
+
     // Also clear the validation error from chat input
     const clearValidationEvent = new CustomEvent('clearValidationError');
     window.dispatchEvent(clearValidationEvent);
@@ -711,100 +710,105 @@ const updateVersionVariable = useCallback(
     setError("");
   }, [blockedDeleteKey]);
 
-const applyDraftUpdate = useCallback(
-(updater, options) => {
-  setDraftVariables((prev) => {
-    const next = updater(prev);
-    if (!Array.isArray(next)) {
-      return prev;
-    }
-    const result = commitVariables(next, options);
-    if (result.success && result.normalised) {
-      return result.normalised;
-    }
-    return next;
-  });
-},
-[commitVariables]
-);
-
-const handleFieldCommit = useCallback(
-(index, field, value) => {
-  applyDraftUpdate((prev) => {
-    if (!prev[index]) return prev;
-    const next = prev.map((variable, idx) => {
-      if (idx !== index) return variable;
-      const updated = { ...variable };
-      if (field === "type") {
-        const newType = value;
-        updated.type = newType;
-        const valueCheck = validateAndFormatValue(updated.value, newType, {
-          allowEmpty: false,
-        });
-        updated.value = valueCheck.ok ? valueCheck.value : fallbackValueForType(newType);
-        const defaultCheck = validateAndFormatValue(
-          updated.defaultValue,
-          newType,
-          { allowEmpty: true }
-        );
-        updated.defaultValue = defaultCheck.ok ? defaultCheck.value : "";
-      } else if (field === "value") {
-        const valueCheck = validateAndFormatValue(value, updated.type, {
-          allowEmpty: false,
-        });
-        updated[field] = valueCheck.ok ? valueCheck.value : value;
-        
-        // Clear missing variable error if value is provided
-        if (value && value.trim() && missingVariables.includes(updated.key)) {
-          const updatedMissingVars = missingVariables.filter(key => key !== updated.key);
-          setMissingVariables(updatedMissingVars);
-          if (updatedMissingVars.length === 0) {
-            sessionStorage.removeItem('missingVariables');
-          } else {
-            sessionStorage.setItem('missingVariables', JSON.stringify(updatedMissingVars));
-          }
+  const applyDraftUpdate = useCallback(
+    (updater, options) => {
+      setDraftVariables((prev) => {
+        const next = updater(prev);
+        if (!Array.isArray(next)) {
+          return prev;
         }
-      } else if (field === "defaultValue") {
-        const defaultCheck = validateAndFormatValue(value, updated.type, {
-          allowEmpty: true,
-        });
-        updated[field] = defaultCheck.ok ? defaultCheck.value : value;
-        
-        // Clear missing variable error if default value is provided and no main value exists
-        if (value && value.trim() && !updated.value && missingVariables.includes(updated.key)) {
-          const updatedMissingVars = missingVariables.filter(key => key !== updated.key);
-          setMissingVariables(updatedMissingVars);
-          if (updatedMissingVars.length === 0) {
-            sessionStorage.removeItem('missingVariables');
-          } else {
-            sessionStorage.setItem('missingVariables', JSON.stringify(updatedMissingVars));
-          }
+        const result = commitVariables(next, options);
+        if (result.success && result.normalised) {
+          return result.normalised;
         }
-      } else {
-        updated[field] = value;
-      }
-      
-      return updated;
-    });
-    
-    // Auto-add new variable if the last variable's key was just filled
-    if (field === "key" && value.trim() && index === prev.length - 1) {
-      next.push({
-        id: createLocalId(),
-        key: "",
-        value: "",
-        defaultValue: "",
-        type: "string",
-        required: true,
+        return next;
       });
-    }
-    
-    return next;
-  });
-},
-[applyDraftUpdate, missingVariables]
-);
+    },
+    [commitVariables]
+  );
 
+  const handleFieldCommit = useCallback(
+    (index, field, value) => {
+      applyDraftUpdate((prev) => {
+        if (!prev[index]) return prev;
+        const next = prev.map((variable, idx) => {
+          if (idx !== index) return variable;
+          const updated = { ...variable };
+          if (field === "type") {
+            const newType = value;
+            updated.type = newType;
+            const valueCheck = validateAndFormatValue(updated.value, newType, {
+              allowEmpty: false,
+            });
+            updated.value = valueCheck.ok ? valueCheck.value : fallbackValueForType(newType);
+            const defaultCheck = validateAndFormatValue(
+              updated.defaultValue,
+              newType,
+              { allowEmpty: true }
+            );
+            updated.defaultValue = defaultCheck.ok ? defaultCheck.value : "";
+          } else if (field === "value") {
+            const valueCheck = validateAndFormatValue(value, updated.type, {
+              allowEmpty: false,
+            });
+            updated[field] = valueCheck.ok ? valueCheck.value : value;
+
+            // Clear missing variable error if value is provided
+            if (value && value.trim() && missingVariables.includes(updated.key)) {
+              const updatedMissingVars = missingVariables.filter(key => key !== updated.key);
+              setMissingVariables(updatedMissingVars);
+              if (updatedMissingVars.length === 0) {
+                sessionStorage.removeItem('missingVariables');
+              } else {
+                sessionStorage.setItem('missingVariables', JSON.stringify(updatedMissingVars));
+              }
+            }
+          } else if (field === "defaultValue") {
+            const defaultCheck = validateAndFormatValue(value, updated.type, {
+              allowEmpty: true,
+            });
+            updated[field] = defaultCheck.ok ? defaultCheck.value : value;
+
+            // Clear missing variable error if default value is provided and no main value exists
+            if (value && value.trim() && !updated.value && missingVariables.includes(updated.key)) {
+              const updatedMissingVars = missingVariables.filter(key => key !== updated.key);
+              setMissingVariables(updatedMissingVars);
+              if (updatedMissingVars.length === 0) {
+                sessionStorage.removeItem('missingVariables');
+              } else {
+                sessionStorage.setItem('missingVariables', JSON.stringify(updatedMissingVars));
+              }
+            }
+          } else {
+            updated[field] = value;
+          }
+
+          return updated;
+        });
+
+        // Auto-add new variable if the last variable's key was just filled
+        if (field === "key" && value.trim() && index === prev.length - 1) {
+          next.push({
+            id: createLocalId(),
+            key: "",
+            value: "",
+            defaultValue: "",
+            type: "string",
+            required: true,
+          });
+        }
+
+        return next;
+      });
+    },
+    [applyDraftUpdate, missingVariables]
+  );
+
+  useEffect(() => {
+    return () => {
+      sessionStorage.setItem('variableSliderDisabled', 'false');
+    }
+  }, []);
 
   const handleRequiredToggle = useCallback(
     (index) => {
@@ -983,7 +987,7 @@ const handleFieldCommit = useCallback(
         const parsed = jsonVariables.map(({ key, value }) => {
           const type = inferType(value, '');
           const valueCheck = validateAndFormatValue(value, type, { allowEmpty: false });
-          
+
           return {
             key,
             value: valueCheck.ok ? valueCheck.value : value,
@@ -992,7 +996,7 @@ const handleFieldCommit = useCallback(
             type,
           };
         });
-        
+
         const result = commitVariables(parsed);
         if (result.success && result.normalised) {
           setDraftVariables(result.normalised);
@@ -1002,7 +1006,7 @@ const handleFieldCommit = useCallback(
         }
         return;
       }
-      
+
       // If not JSON, parse as key-value pairs
       const lines = bulkEditText
         .split("\n")
@@ -1040,7 +1044,7 @@ const handleFieldCommit = useCallback(
 
         const type = inferType(value, '');
         const valueCheck = validateAndFormatValue(value, type, { allowEmpty: false });
-        
+
         parsed.push({
           key,
           value: valueCheck.ok ? valueCheck.value : value,
@@ -1375,238 +1379,232 @@ const handleFieldCommit = useCallback(
                     // Check if previous variable has a key to enable current row
                     const isPreviousRowFilled = index === 0 || (draftVariables[index - 1]?.key?.trim());
                     const isCurrentRowEnabled = isPreviousRowFilled;
-                    
+
                     return (
-                    <div
-                      key={variable.id || `${variable.key}-${index}`}
-                      className="px-3 py-2 text-sm"
-                    >
-                      <div className="grid grid-cols-[1fr,1.2fr,1fr,0.8fr,0.6fr,auto] gap-2 items-center">
-                      <input
-                        type="text"
-                        className={`input input-xs input-bordered w-full ${
-                          missingVariables.includes(variable.key) 
-                            ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
-                            : ''
-                        }`}
-                        value={variable.key}
-                        disabled={!isCurrentRowEnabled}
-                        onChange={(event) =>
-                          handleFieldChange(index, "key", event.target.value)
-                        }
-                        onBlur={(event) => handleFieldCommit(index, "key", event.target.value.trim())}
-                        placeholder="customer_email"
-                      />
-
-                      {variable.type === "boolean" ? (
-                        <select
-                          className={`select select-xs select-bordered w-full ${
-                            missingVariables.includes(variable.key) 
-                              ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
-                              : ''
-                          }`}
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={
-                            variable.value === "false"
-                              ? "false"
-                              : variable.value === "true"
-                              ? "true"
-                              : ""
-                          }
-                          onChange={(event) => {
-                            handleFieldChange(index, "value", event.target.value);
-                            handleFieldCommit(index, "value", event.target.value);
-                          }}
-                        >
-                          <option value="">Select…</option>
-                          <option value="true">True</option>
-                          <option value="false">False</option>
-                        </select>
-                      ) : variable.type === "number" ? (
-                        <input
-                          type="number"
-                          step="any"
-                          className={`input input-xs input-bordered w-full ${
-                            missingVariables.includes(variable.key) 
-                              ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
-                              : ''
-                          }`}
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.value}
-                          onChange={(event) =>
-                            handleFieldChange(index, "value", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "value", event.target.value)
-                          }
-                          placeholder="Dynamic value or placeholder"
-                        />
-                      ) : variable.type === "string" ? (
-                        <input
-                          type="text"
-                          className={`input input-xs input-bordered w-full ${
-                            missingVariables.includes(variable.key) 
-                              ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
-                              : ''
-                          }`}
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.value}
-                          onChange={(event) =>
-                            handleFieldChange(index, "value", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "value", event.target.value)
-                          }
-                          placeholder="Dynamic value or placeholder"
-                        />
-                      ) : variable.type === "object" || variable.type === "array" ? (
-                        <textarea
-                          className={`textarea textarea-xs textarea-bordered w-full min-h-[90px] font-mono text-xs ${
-                            missingVariables.includes(variable.key) 
-                              ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' 
-                              : ''
-                          }`}
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.value}
-                          onChange={(event) =>
-                            handleFieldChange(index, "value", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "value", event.target.value)
-                          }
-                          placeholder={
-                            variable.type === "array"
-                              ? '[\n  "value"\n]'
-                              : '{\n  "key": "value"\n}'
-                          }
-                        />
-                      ) : (
-                        <textarea
-                          className="textarea textarea-xs textarea-bordered w-full min-h-[60px]"
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.value}
-                          onChange={(event) =>
-                            handleFieldChange(index, "value", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "value", event.target.value)
-                          }
-                          placeholder="Dynamic value or placeholder"
-                        />
-                      )}
-
-                      {variable.type === "boolean" ? (
-                        <select
-                          className="select select-xs select-bordered w-full"
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={
-                            variable.defaultValue === "false"
-                              ? "false"
-                              : variable.defaultValue === "true"
-                              ? "true"
-                              : ""
-                          }
-                          onChange={(event) => {
-                            handleFieldChange(index, "defaultValue", event.target.value);
-                            handleFieldCommit(index, "defaultValue", event.target.value);
-                          }}
-                        >
-                          <option value="">None</option>
-                          <option value="true">True</option>
-                          <option value="false">False</option>
-                        </select>
-                      ) : variable.type === "number" ? (
-                        <input
-                          type="number"
-                          step="any"
-                          className="input input-xs input-bordered w-full"
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.defaultValue}
-                          onChange={(event) =>
-                            handleFieldChange(index, "defaultValue", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "defaultValue", event.target.value)
-                          }
-                          placeholder="Optional fallback"
-                        />
-                      ) : variable.type === "object" || variable.type === "array" ? (
-                        <textarea
-                          className="textarea textarea-xs textarea-bordered w-full min-h-[90px] font-mono text-xs"
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.defaultValue}
-                          onChange={(event) =>
-                            handleFieldChange(index, "defaultValue", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "defaultValue", event.target.value)
-                          }
-                          placeholder="Optional JSON fallback"
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          className="input input-xs input-bordered w-full"
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          value={variable.defaultValue}
-                          onChange={(event) =>
-                            handleFieldChange(index, "defaultValue", event.target.value)
-                          }
-                          onBlur={(event) =>
-                            handleFieldCommit(index, "defaultValue", event.target.value)
-                          }
-                          placeholder="Fallback when no value supplied"
-                        />
-                      )}
-
-                      <select
-                        className="select select-xs select-bordered w-full"
-                        disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                        value={variable.type}
-                        onChange={(event) => {
-                          const newType = event.target.value;
-                          handleFieldChange(index, "type", newType);
-                          handleFieldCommit(index, "type", newType);
-                        }}
+                      <div
+                        key={variable.id || `${variable.key}-${index}`}
+                        className="px-3 py-2 text-sm"
                       >
-                        {VARIABLE_TYPES.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                        <div className="grid grid-cols-[1fr,1.2fr,1fr,0.8fr,0.6fr,auto] gap-2 items-center">
+                          <input
+                            type="text"
+                            className={`input input-xs input-bordered w-full ${missingVariables.includes(variable.key)
+                                ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+                                : ''
+                              }`}
+                            value={variable.key}
+                            disabled={!isCurrentRowEnabled}
+                            onChange={(event) =>
+                              handleFieldChange(index, "key", event.target.value)
+                            }
+                            onBlur={(event) => handleFieldCommit(index, "key", event.target.value.trim())}
+                            placeholder="customer_email"
+                          />
 
-                      <button
-                        type="button"
-                        className={`badge badge-xs cursor-pointer hover:opacity-80 ${
-                          variable.required ? "badge-primary" : "badge-ghost"
-                        }`}
-                        disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                        onClick={() => handleRequiredToggle(index)}
-                        title="Click to toggle required status"
-                      >
-                        {variable.required ? "Required" : "Optional"}
-                      </button>
+                          {variable.type === "boolean" ? (
+                            <select
+                              className={`select select-xs select-bordered w-full ${missingVariables.includes(variable.key)
+                                  ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+                                  : ''
+                                }`}
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={
+                                variable.value === "false"
+                                  ? "false"
+                                  : variable.value === "true"
+                                    ? "true"
+                                    : ""
+                              }
+                              onChange={(event) => {
+                                handleFieldChange(index, "value", event.target.value);
+                                handleFieldCommit(index, "value", event.target.value);
+                              }}
+                            >
+                              <option value="">Select…</option>
+                              <option value="true">True</option>
+                              <option value="false">False</option>
+                            </select>
+                          ) : variable.type === "number" ? (
+                            <input
+                              type="number"
+                              step="any"
+                              className={`input input-xs input-bordered w-full ${missingVariables.includes(variable.key)
+                                  ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+                                  : ''
+                                }`}
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.value}
+                              onChange={(event) =>
+                                handleFieldChange(index, "value", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "value", event.target.value)
+                              }
+                              placeholder="Dynamic value or placeholder"
+                            />
+                          ) : variable.type === "string" ? (
+                            <input
+                              type="text"
+                              className={`input input-xs input-bordered w-full ${missingVariables.includes(variable.key)
+                                  ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+                                  : ''
+                                }`}
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.value}
+                              onChange={(event) =>
+                                handleFieldChange(index, "value", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "value", event.target.value)
+                              }
+                              placeholder="Dynamic value or placeholder"
+                            />
+                          ) : variable.type === "object" || variable.type === "array" ? (
+                            <textarea
+                              className={`textarea textarea-xs textarea-bordered w-full min-h-[90px] font-mono text-xs ${missingVariables.includes(variable.key)
+                                  ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+                                  : ''
+                                }`}
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.value}
+                              onChange={(event) =>
+                                handleFieldChange(index, "value", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "value", event.target.value)
+                              }
+                              placeholder={
+                                variable.type === "array"
+                                  ? '[\n  "value"\n]'
+                                  : '{\n  "key": "value"\n}'
+                              }
+                            />
+                          ) : (
+                            <textarea
+                              className="textarea textarea-xs textarea-bordered w-full min-h-[60px]"
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.value}
+                              onChange={(event) =>
+                                handleFieldChange(index, "value", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "value", event.target.value)
+                              }
+                              placeholder="Dynamic value or placeholder"
+                            />
+                          )}
 
-                      <div className="flex justify-end gap-1">
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-xs text-error"
-                          disabled={!isCurrentRowEnabled || !variable.key.trim()}
-                          onClick={() => handleDeleteVariable(index)}
-                          title="Delete variable"
-                        >
-                          <Trash2 size={12} />
-                        </button>
+                          {variable.type === "boolean" ? (
+                            <select
+                              className="select select-xs select-bordered w-full"
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={
+                                variable.defaultValue === "false"
+                                  ? "false"
+                                  : variable.defaultValue === "true"
+                                    ? "true"
+                                    : ""
+                              }
+                              onChange={(event) => {
+                                handleFieldChange(index, "defaultValue", event.target.value);
+                                handleFieldCommit(index, "defaultValue", event.target.value);
+                              }}
+                            >
+                              <option value="">None</option>
+                              <option value="true">True</option>
+                              <option value="false">False</option>
+                            </select>
+                          ) : variable.type === "number" ? (
+                            <input
+                              type="number"
+                              step="any"
+                              className="input input-xs input-bordered w-full"
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.defaultValue}
+                              onChange={(event) =>
+                                handleFieldChange(index, "defaultValue", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "defaultValue", event.target.value)
+                              }
+                              placeholder="Optional fallback"
+                            />
+                          ) : variable.type === "object" || variable.type === "array" ? (
+                            <textarea
+                              className="textarea textarea-xs textarea-bordered w-full min-h-[90px] font-mono text-xs"
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.defaultValue}
+                              onChange={(event) =>
+                                handleFieldChange(index, "defaultValue", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "defaultValue", event.target.value)
+                              }
+                              placeholder="Optional JSON fallback"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              className="input input-xs input-bordered w-full"
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              value={variable.defaultValue}
+                              onChange={(event) =>
+                                handleFieldChange(index, "defaultValue", event.target.value)
+                              }
+                              onBlur={(event) =>
+                                handleFieldCommit(index, "defaultValue", event.target.value)
+                              }
+                              placeholder="Fallback when no value supplied"
+                            />
+                          )}
+
+                          <select
+                            className="select select-xs select-bordered w-full"
+                            disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                            value={variable.type}
+                            onChange={(event) => {
+                              const newType = event.target.value;
+                              handleFieldChange(index, "type", newType);
+                              handleFieldCommit(index, "type", newType);
+                            }}
+                          >
+                            {VARIABLE_TYPES.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            className={`badge badge-xs cursor-pointer hover:opacity-80 ${variable.required ? "badge-primary" : "badge-ghost"
+                              }`}
+                            disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                            onClick={() => handleRequiredToggle(index)}
+                            title="Click to toggle required status"
+                          >
+                            {variable.required ? "Required" : "Optional"}
+                          </button>
+
+                          <div className="flex justify-end gap-1">
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-xs text-error"
+                              disabled={!isCurrentRowEnabled || !variable.key.trim()}
+                              onClick={() => handleDeleteVariable(index)}
+                              title="Delete variable"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                        {showBlockedWarning && (
+                          <p className="text-[11px] text-warning mt-1">
+                            {blockedDeleteMessage || `Variable "${trimmedKey}" is referenced in the prompt and can't be removed.`}
+                          </p>
+                        )}
                       </div>
-                      </div>
-                      {showBlockedWarning && (
-                        <p className="text-[11px] text-warning mt-1">
-                          {blockedDeleteMessage || `Variable "${trimmedKey}" is referenced in the prompt and can't be removed.`}
-                        </p>
-                      )}
-                    </div>
-                  );
+                    );
                   })
                 ) : (
                   <div className="px-4 py-6 text-center text-sm text-base-content/60">
@@ -1658,7 +1656,7 @@ Option 2 - JSON object:
           )}
 
         </section>
-        
+
         {/* Run Anyway Button at the bottom - Only show when there are missing variables */}
         {missingVariables.length > 0 && (
           <div className="border-t border-base-300 pt-4 mt-auto">
