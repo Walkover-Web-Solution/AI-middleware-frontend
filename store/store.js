@@ -13,7 +13,6 @@ import modelReducer from "./reducer/modelReducer";
 import orgReducer from "./reducer/orgReducer";
 import responseTypeReducer from "./reducer/responseTypeReducer";
 import userDetailsReducer from "./reducer/userDetailsReducer";
-import webhookAlertReducer from "./reducer/webhookAlertReducer";
 import testCasesReducer from "./reducer/testCasesReducer";
 import serviceReducer from "./reducer/serviceReducer";
 import flowDataReducer from "./reducer/flowDataReducer";
@@ -75,7 +74,6 @@ const rootReducer = combineReducers({
     orgReducer,
     responseTypeReducer,
     ChatBot,
-    webhookAlertReducer,
     knowledgeBaseReducer,
     testCasesReducer,
     serviceReducer,

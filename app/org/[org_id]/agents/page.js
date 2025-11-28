@@ -12,7 +12,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick, formatDate } from "@/utils/utility";
+import { getIconOfService, openModal, closeModal, formatRelativeTime, formatDate } from "@/utils/utility";
 
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
@@ -60,7 +60,6 @@ function Home({ params, isEmbedUser }) {
   
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const inputRef = useRef(null);
   const router = useRouter();
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};

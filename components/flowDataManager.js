@@ -1,11 +1,10 @@
 
-import { TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, CircleArrowOutUpRight, ChevronUp, ChevronDown, X, ArrowLeft } from 'lucide-react';
+import { TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, CircleArrowOutUpRight, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
-import { useRouter } from 'next/navigation';
 /* Global stack to make only the topmost handle ESC/overlay */
 const SlideStack = {
   stack: [],
@@ -833,21 +832,11 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
    Flow Control Panel (uses SlideOver for Chat)
 -------------------------------------------------------- */
 export function FlowControlPanel({
-  onSaveAgent,
-  onDiscard, // ← optional: pass a handler to discard changes
-  bridgeType = 'default',
-  name,
-  description,
-  createdFlow,
-  setIsLoading,
   params,
   searchParams,
-  isEmbedUser,
-  mode = 'orchestral', // 'orchestral' or 'connected'
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
-  const router = useRouter()
   const handleQuickTestKeyDown = (e) => {
     if (e.key === 'Enter') {
       const val = e.currentTarget.value.trim();
