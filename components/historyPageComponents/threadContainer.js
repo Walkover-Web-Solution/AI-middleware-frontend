@@ -45,6 +45,12 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const integrationData = useCustomSelector(
     (state) => state?.bridgeReducer?.org?.[orgId]?.integrationData
   ) || {};
+  const { searchResults, isSearchActive } = useCustomSelector((state) => ({
+    searchResults: Array.isArray(state?.historyReducer?.search?.results)
+      ? state.historyReducer.search.results
+      : [],
+    isSearchActive: state?.historyReducer?.search?.isActive || false,
+  }));
 
   const historyRef = useRef(null);
   const contentRef = useRef(null);
@@ -60,6 +66,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
   const [isImprovingPrompt, setIsImprovingPrompt] = useState(false);
+  const [generatedPrompts, setGeneratedPrompts] = useState({}); // Store generated prompts by message ID
 
   const formatDateAndTime = useCallback((created_at) => {
     const date = new Date(created_at);
@@ -79,18 +86,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const handleAddTestCase = useCallback((item, index, variables = false) => {
     const conversation = [];
     let AiConfigForVariable = {};
-
-    for (let i = index; i >= 0; i--) {
-      if (thread[i].role === 'user') {
-        conversation.push(...(thread[i]?.AiConfig?.input || []));
-        AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
-        if (thread[i + 1].role === 'tools_call') {
-          conversation.push(thread[i + 1])
-        }
-        if (thread[i].id === item.id) break;
-      }
-    }
-
+    AiConfigForVariable = thread[index]?.AiConfig ? thread[index]?.AiConfig : {};
     conversation.push(item || {});
     setTestCaseConversation(conversation);
     if (variables) return AiConfigForVariable;
@@ -117,11 +113,10 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const handleImprovePrompt = async () => {
     setIsImprovingPrompt(true);
     try {
-      let prevConv;
       const variables = {};
       thread.forEach((item) => {
-        if (item.Id === modalInput?.Id) {
-          const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
+        if (item.id === modalInput?.Id) {
+          const conversation = item?.AiConfig?.input || item?.AiConfig?.messages
           const filteredConversation = conversation.filter((value) => {
             if (value.role === 'developer') {
               variables['prompt'] = value.content;
@@ -134,7 +129,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
           })
           variables["conversation_history"] = filteredConversation;
         }
-        item.role === 'user' ? prevConv = item : null
       })
       variables["updated_response"] = modalInput.content;
       let data;
@@ -145,6 +139,11 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       }
       if (data) {
         setPromptToUpdate(data?.updated_prompt)
+        // Store the generated prompt for this message
+        setGeneratedPrompts(prev => ({
+          ...prev,
+          [modalInput?.Id]: data?.updated_prompt
+        }));
         openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
       }
     } finally {
@@ -156,6 +155,33 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     setModalInput('');
     closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   }, []);
+
+  const handleShowGeneratedPrompt = useCallback(() => {
+    if (modalInput?.Id && generatedPrompts[modalInput.Id]) {
+      setPromptToUpdate(generatedPrompts[modalInput.Id]);
+      closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+      openModal(MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL);
+    }
+  }, [modalInput, generatedPrompts]);
+
+  const handleRegenerateFromModal = useCallback(async () => {
+    if (!modalInput?.Id) return;
+    // Trigger regeneration
+    setTimeout(() => {
+      handleImprovePrompt();
+    }, 100);
+  }, [modalInput, handleImprovePrompt]);
+
+  const handlePromptSaved = useCallback(() => {
+    if (modalInput?.Id) {
+      // Clear the generated prompt for this message when saved
+      setGeneratedPrompts(prev => {
+        const updated = { ...prev };
+        delete updated[modalInput.Id];
+        return updated;
+      });
+    }
+  }, [modalInput]);
 
   const calcFlexDirection = useCallback(() => {
     if (historyRef.current && contentRef.current) {
@@ -218,6 +244,12 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const startDate = search?.start;
   const endDate = search?.end;
   const pathName = pathNameProp || pathname;
+  const availableThreads = useMemo(() => {
+    if (isSearchActive) {
+      return searchResults;
+    }
+    return Array.isArray(historyData) ? historyData : [];
+  }, [isSearchActive, searchResults, historyData]);
 
   const fetchThread = useCallback(
     async ({
@@ -256,9 +288,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       const error = errorFromURL || isErrorTrue;
       const version = versionFromURL || '';
 
-      // If no thread selected, navigate to the first one from historyData
-      if (!thread_id && Array.isArray(historyData) && historyData.length > 0) {
-        const firstThreadId = historyData[0]?.thread_id;
+      // If no thread selected, navigate to the first one from whichever data source is active
+      if (!thread_id && Array.isArray(availableThreads) && availableThreads.length > 0) {
+        const firstThreadId = availableThreads[0]?.thread_id;
         if (firstThreadId) {
           const params = new URLSearchParams(searchParamsHook.toString());
           params.set('thread_id', firstThreadId);
@@ -272,7 +304,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         }
       }
 
-      if (!thread_id || !historyData?.some((h) => h?.thread_id === thread_id)) {
+      if (!thread_id || !availableThreads?.some((h) => h?.thread_id === thread_id)) {
         setLoadingData(false);
         return;
       }
@@ -307,7 +339,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadIdFromURL, filterOption, historyData, errorFromURL, subThreadIdFromURL]);
+  }, [threadIdFromURL, filterOption, availableThreads, errorFromURL, subThreadIdFromURL]);
 
   // Fetch more (pagination)
   const fetchMoreThreadData = useCallback(async () => {
@@ -441,6 +473,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
                       params={{ org_id: orgId, id: bridgeId }}
                       index={index}
                       item={item}
+                      thread={thread}
                       threadHandler={threadHandler}
                       formatDateAndTime={formatDateAndTime}
                       integrationData={integrationData}
@@ -477,6 +510,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         searchParams={Object.fromEntries(searchParamsHook.entries())}
         promotToUpdate={promotToUpdate}
         previousPrompt={previousPrompt}
+        handleRegenerate={modalInput?.Id && generatedPrompts[modalInput?.Id] ? handleRegenerateFromModal : null}
+        isRegenerating={isImprovingPrompt}
+        onPromptSaved={handlePromptSaved}
       />
 
       <EditMessageModal
@@ -486,6 +522,8 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         modalInput={modalInput}
         handleImprovePrompt={handleImprovePrompt}
         isImprovingPrompt={isImprovingPrompt}
+        hasGeneratedPrompt={modalInput?.Id && generatedPrompts[modalInput?.Id]}
+        handleShowGeneratedPrompt={handleShowGeneratedPrompt}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import AddVariable from "../addVariable";
+
 import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 import { useConfigurationContext } from './ConfigurationContext';
 
@@ -15,7 +15,7 @@ const AdvancedSection = memo(() => {
 
     return (
         <>
-            <AddVariable params={params} searchParams={searchParams} />
+            
             {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
                 <AdvancedConfiguration
                     params={params}

@@ -192,16 +192,12 @@
             container.classList.add(`slide-${slideType}`);
             this.addStyles();
         }
-
-        openGtwy(agent_id = null, meta = {}, agent_name = null, agent_purpose = null) {
+        openGtwy(agent_id = null, meta = {}, agent_name = null, agent_purpose = null,history=null) {
             if (!this.state.isInitialized) {
                 this.initializeGtwyEmbed().then(() => this.openGtwy());
                 return;
             }
-
-            [agent_id, { agent_id, meta }, { agent_name }, { agent_purpose }]
-                .filter(data => data && Object.values(data).some(v => v))
-                .forEach(data => SendDataToGtwyEmbed(data));
+            [(agent_id, {agent_id,history}, { agent_id, meta }, { agent_name }, { agent_purpose })]?.filter(data => data && Object.values(data).some(v => v))?.forEach(data => SendDataToGtwyEmbed(data))||[];
 
             const container = document.getElementById('gtwy-iframe-parent-container');
             const iframe = document.getElementById('gtwyInterfaceEmbed');
@@ -341,7 +337,7 @@
                 id: iframeId,
                 title: 'iframe',
                 sandbox: 'allow-scripts allow-same-origin allow-popups allow-forms',
-                allow: 'microphone *; camera *; midi *; encrypted-media *'
+                allow: 'clipboard-read *; clipboard-write *; microphone *; camera *; midi *; encrypted-media *'
             });
             Object.assign(iframe.style, { width: '100%', height: '100%', border: 'none' });
 
@@ -427,7 +423,7 @@
                     }
                 });
 
-                if ('hideHeader' in config) {
+                if ('hideHeader' in config &&  !this.state.hasParentContainer) {
                     this.config.hideHeader = config.hideHeader;
                     const header = document.getElementById('gtwy-embed-header');
                     const iframe = document.getElementById('iframe-component-gtwyInterfaceEmbed');
@@ -531,8 +527,8 @@
     };
 
     // Global API
-    window.openGtwy = ({ agent_id = "", meta = {}, agent_name = "", agent_purpose = "" } = {}) => {
-        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name, agent_purpose);
+    window.openGtwy = ({ agent_id = "", meta = {}, agent_name = "", agent_purpose = "", history = null } = {}) => {
+        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name, agent_purpose, history);
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
 

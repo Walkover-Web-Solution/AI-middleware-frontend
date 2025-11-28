@@ -9,31 +9,42 @@ const PromptTextarea = memo(({
     onKeyDown,
     isPromptHelperOpen,
     className = "",
-    placeholder = ""
+    placeholder = "",
+    isPublished = false
 }) => {
     const isComposingRef = useRef(false);
     const lastExternalValueRef = useRef(initialValue);
+    const hasInitializedRef = useRef(false);
     
-    // Update textarea value when external value changes (like from Redux)
+    // Update editor content when external value changes (like from Redux)
     useEffect(() => {
-        if (initialValue !== lastExternalValueRef.current && textareaRef.current && !isComposingRef.current) {
-            textareaRef.current.value = initialValue;
+        const editor = textareaRef.current;
+        if (!editor || isComposingRef.current) return;
+
+        // On first mount, always hydrate with initialValue even if it equals the ref
+        if (!hasInitializedRef.current) {
+            editor.innerText = initialValue || "";
+            lastExternalValueRef.current = initialValue;
+            hasInitializedRef.current = true;
+            return;
+        }
+
+        // After first mount, only update when external value actually changes
+        if (initialValue !== lastExternalValueRef.current) {
+            editor.innerText = initialValue || "";
             lastExternalValueRef.current = initialValue;
         }
-    }, [initialValue]);
-
-    // Memoized textarea class to prevent recalculation
-    const textareaClass = useMemo(() => {
-        return `textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-            ? "h-[calc(100vh-60px)] w-[700px] border-primary shadow-md"
-            : "min-h-96"
-        } ${className}`;
-    }, [isPromptHelperOpen, className]);
-
+    }, [initialValue, textareaRef]);
+    
+    // Manage textarea height based on PromptHelper state
+    useEffect(() => {
+        if(!isPromptHelperOpen){
+            textareaRef.current.style.height = '24rem';
+        }
+    }, [isPromptHelperOpen]);
     // Zero-render change handler - no state updates
     const handleChange = useCallback((e) => {
-        const value = e.target.value;
-        
+        const value = e.target.innerText;
         // Only call parent onChange if not composing (for IME support)
         if (!isComposingRef.current) {
             onChange(value);
@@ -47,7 +58,7 @@ const PromptTextarea = memo(({
     
     const handleCompositionEnd = useCallback((e) => {
         isComposingRef.current = false;
-        const value = e.target.value;
+        const value = e.target.innerText;
         onChange(value);
     }, [onChange]);
 
@@ -62,18 +73,23 @@ const PromptTextarea = memo(({
     }, [onKeyDown]);
 
     return (
-        <textarea
-            ref={textareaRef}
-            className={textareaClass}
-            defaultValue={initialValue}
-            onChange={handleChange}
-            onFocus={handleFocus}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={handleCompositionStart}
-            onCompositionEnd={handleCompositionEnd}
-            placeholder={placeholder}
-        />
-    );
+    <div
+  ref={textareaRef}
+  contentEditable={!isPublished}
+  className={`textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y overflow-auto relative z-low caret-base-content p-2 rounded-b-none transition-none !duration-0
+    ${isPromptHelperOpen 
+      ? "min-h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] w-[700px] border-primary shadow-md pb-8"
+      : "h-96 min-h-96"
+    }`}
+  onInput={handleChange}
+  onFocus={handleFocus}
+  onKeyDown={handleKeyDown}
+  onCompositionStart={handleCompositionStart}
+  onCompositionEnd={handleCompositionEnd}
+  placeholder={placeholder}
+  title={isPublished ? "Cannot edit in published mode" : ""}
+/>
+);
 });
 
 PromptTextarea.displayName = 'PromptTextarea';

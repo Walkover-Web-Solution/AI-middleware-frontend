@@ -8,6 +8,7 @@ import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, Ext
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
+import PageHeader from '@/components/Pageheader';
 
 export const runtime = 'edge';
 
@@ -106,17 +107,12 @@ function TestCases({ params }) {
       )}
       
       <div className="">
-          <h1 className="text-2xl font-semibold text-base-content mb-2">Test Cases</h1>
-            <p className="text-base-content text-sm leading-relaxed ">
-              Test cases are used to compare outputs from different versions with varying prompts and models. You can add test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy.
-            </p>
-            <a href="https://gtwy.ai/blogs/features/testcases"
-              className="inline-flex mb-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
-              target="_blank"
-              rel="noopener noreferrer">
-              <span>Learn more</span>
-               <ExternalLinkIcon size={16}/>
-            </a>
+
+         <PageHeader
+             title="Test Cases"
+             description="Test cases are used to compare outputs from different versions with varying prompts and models. You can add test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy."
+             docLink="https://gtwy.ai/blogs/features/testcases"
+           />
               {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"TestCasesSetup"} TutorialDetails={"TestCases Creation"} />}
       {tutorialState?.showTutorial && (
         <OnBoarding
@@ -139,6 +135,7 @@ function TestCases({ params }) {
                     <th key={index} className={`p-3 text-left text-sm font-medium text-gray-700 border-b ${version === selectedVersion ? 'relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:bg-green-500 after:rounded-full' : ''}`}>
                       <div className="flex items-center gap-2">
                         <div className="tooltip tooltip-left" data-tip="Run Test Case">
+                          {Array.isArray(testCases) && testCases?.length > 0 && (
                           <button
                             className="btn btn-sm btn-circle bg-base-100 border border-base-300 hover:bg-primary hover:border-primary hover:text-base-content disabled:bg-base-100 disabled:border-base-300 disabled:text-base-content"
                             onClick={() => handleRunTestCase(version)}
@@ -146,6 +143,7 @@ function TestCases({ params }) {
                           >
                             <PlayIcon size={12} />
                           </button>
+                        )}
                         </div>
                         <span className={`font-medium text-base-content `}>
                           {`V${index + 1}`}

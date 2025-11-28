@@ -2,6 +2,8 @@ import { memo } from 'react';
 import PreEmbedList from "./configurationComponent/preEmbedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import { useConfigurationContext } from './ConfigurationContext';
+import { toggleSidebar } from '@/utils/utility';
+import {BookText } from 'lucide-react';
 
 const InputSection = memo(() => {
     const { 
@@ -17,13 +19,28 @@ const InputSection = memo(() => {
         setPromptState,
         handleCloseTextAreaFocus,
         savePrompt,
-        isMobileView
+        isMobileView,
+        isPublished
     } = useConfigurationContext();
 
     return (
         <>
             {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
-                <PreEmbedList params={params} searchParams={searchParams} />
+                <div className="w-full pt-4 cursor-default flex flex-wrap justify-between items-start gap-2">
+                    <div className="flex-1 min-w-[220px] max-w-md">
+                        <PreEmbedList isPublished={isPublished} params={params} searchParams={searchParams} />
+                    </div>
+                    {!isEmbedUser && (
+                        <button
+                            type="button"
+                            className="btn btn-xs btn-outline gap-1 mt-1 whitespace-nowrap shrink-0"
+                            onClick={() => toggleSidebar('integration-guide-slider', 'right')}
+                        >
+                            <BookText className="w-3 h-3" />
+                            <span>Integration Guide</span>
+                        </button>
+                    )}
+                </div>
             )}
             <InputConfigComponent
                 params={params}
@@ -37,6 +54,7 @@ const InputSection = memo(() => {
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
                 savePrompt={savePrompt}
                 isMobileView={isMobileView}
+                isPublished={isPublished}
             />
         </>
     );

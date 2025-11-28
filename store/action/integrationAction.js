@@ -37,7 +37,8 @@ export const updateIntegrationDataAction = (orgId, dataToSend) => async (dispatc
     if(response.data)
     {
      dispatch(updateIntegrationDataReducer({data:response?.data?.data, orgId}))
-    }
+     return response
+    } 
   } catch (error) {
     toast.error("Something went Wrong")
     console.error(error)

@@ -107,7 +107,7 @@ export const bridgeReducer = createSlice({
         configuration: { ...configuration }
       };
        
-      if (extraData?.bridgeType) {
+       if (extraData?.bridgeType || extraData?.bridge_quota) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update
@@ -198,9 +198,17 @@ export const bridgeReducer = createSlice({
     },
 
     deleteBridgeReducer: (state, action) => {
-      const { bridgeId, orgId } = action.payload;
-      delete state.allBridgesMap[bridgeId];
-      state.org[orgId].orgs = state.org[orgId]?.orgs?.filter(bridge => bridge._id !== bridgeId);
+      const { bridgeId, orgId, restore } = action.payload;
+      const bridge = state.org[orgId]?.orgs?.find(bridge => bridge._id === bridgeId);
+      if (bridge) {
+        if (restore) {
+          // Remove deletedAt to restore the bridge
+          delete bridge.deletedAt;
+        } else {
+          // Add deletedAt to mark as deleted
+          bridge.deletedAt = new Date().toISOString();
+        }
+      }
     },
     integrationReducer: (state, action) => {
       const { dataToSend, orgId } = action.payload;

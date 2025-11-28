@@ -1,57 +1,32 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback } from 'react';
 import { useCustomSelector } from './customSelector';
 import { shallowEqual } from 'react-redux';
-
-// Performance-optimized selector with memoization and shallow comparison
-export const useOptimizedSelector = (selector, dependencies = []) => {
-  const previousResultRef = useRef();
-  const selectorRef = useRef(selector);
-  
-  // Update selector ref when dependencies change
-  const dependenciesRef = useRef(dependencies);
-  const hasDependenciesChanged = !shallowEqual(dependenciesRef.current, dependencies);
-  
-  if (hasDependenciesChanged) {
-    selectorRef.current = selector;
-    dependenciesRef.current = dependencies;
-  }
-  
-  // Use the stable selector reference
-  const result = useCustomSelector(selectorRef.current, shallowEqual);
-  
-  // Additional memoization layer for complex objects
-  const memoizedResult = useMemo(() => {
-    if (previousResultRef.current && shallowEqual(previousResultRef.current, result)) {
-      return previousResultRef.current;
-    }
-    previousResultRef.current = result;
-    return result;
-  }, [result]);
-  
-  return memoizedResult;
-};
 
 // Specialized selector for configuration state
 export const useConfigurationSelector = (params, searchParams) => {
   const paramsId = params?.id;
   const version = searchParams?.version;
+  const isPublished = searchParams?.isPublished === 'true' || searchParams?.get?.('isPublished') === 'true';
   
   return useCustomSelector(
     useCallback((state) => {
       const bridgeData = state?.bridgeReducer?.allBridgesMap?.[paramsId];
       const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[paramsId]?.[version];
       
+      // Use bridgeData when isPublished=true, otherwise use versionData
+      const activeData = isPublished ? bridgeData : versionData;
+      
       return {
         bridgeType: bridgeData?.bridgeType,
-        versionService: versionData?.service,
+        versionService: isPublished ? (bridgeData?.service) : (versionData?.service),
         bridgeName: bridgeData?.name,
-        reduxPrompt: versionData?.configuration?.prompt || "",
-        bridge: versionData || {},
+        reduxPrompt: isPublished ? (bridgeData?.configuration?.prompt || "") : (versionData?.configuration?.prompt || ""),
+        bridge: activeData || {},
         isFocus: state?.bridgeReducer?.isFocus,
-        modelType: versionData?.configuration?.type?.toLowerCase(),
-        modelName: versionData?.configuration?.model,
+        modelType: isPublished ? (bridgeData?.configuration?.type?.toLowerCase()) : (versionData?.configuration?.type?.toLowerCase()),
+        modelName: isPublished ? (bridgeData?.configuration?.model) : (versionData?.configuration?.model),
       };
-    }, [paramsId, version]),
+    }, [paramsId, version, isPublished]),
     shallowEqual
   );
 };
@@ -60,19 +35,25 @@ export const useConfigurationSelector = (params, searchParams) => {
 export const usePromptSelector = (params, searchParams) => {
   const paramsId = params?.id;
   const version = searchParams?.version;
-  
+  const isPublished = searchParams?.isPublished === 'true' || searchParams?.get?.('isPublished') === 'true';
   return useCustomSelector(
     useCallback((state) => {
+      const bridgeData = state?.bridgeReducer?.allBridgesMap?.[paramsId];
       const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[paramsId]?.[version];
+      const variableState =
+        state?.variableReducer?.VariableMapping?.[paramsId]?.[version] || {};
+      
+      // Use bridgeData when isPublished=true, otherwise use versionData
+      const activeData = isPublished ? bridgeData : versionData;
       
       return {
-        prompt: versionData?.configuration?.prompt || "",
-        service: versionData?.service || "",
-        serviceType: versionData?.configuration?.type || "",
-        variablesKeyValue: versionData?.variables || [],
-        bridge: versionData || ""
+        prompt: isPublished ? (bridgeData?.configuration?.prompt || "") : (versionData?.configuration?.prompt || ""),
+        service: isPublished ? (bridgeData?.service || "") : (versionData?.service || ""),
+        serviceType: isPublished ? (bridgeData?.configuration?.type || "") : (versionData?.configuration?.type || ""),
+        variablesKeyValue: variableState?.variables || [],
+        bridge: activeData || ""
       };
-    }, [paramsId, version]),
+    }, [paramsId, version, isPublished]),
     shallowEqual
   );
 };

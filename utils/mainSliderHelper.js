@@ -3,35 +3,52 @@ import {
   Database, Shield, BarChart3, AlertTriangle, UserPlus,
   Bot,
   Blocks,
-  Workflow,
   FileSliders,
   MessageSquareMore,
+  Settings2,
+  MonitorPlayIcon,
+  MessageCircleMoreIcon,
+  MessageSquareMoreIcon,
+  Cog,
 } from 'lucide-react';
+import { AddIcon, KeyIcon } from '@/components/Icons';
+import GiftIcon from '@/icons/GiftIcon';
 import React from 'react';
 
 
 
 export const ITEM_ICONS = {
-  org: <Building2 size={16} />,
-  agents: <Bot size={16} />,
-  orchestratal_model: <Workflow size={16} />,
-  chatbotConfig: <FileSliders size={16} />,
-  chatbot: <MessageSquare size={16} />,
-  pauthkey: <Shield size={16} />,
-  apikeys: <Database size={16} />,
-  alerts: <AlertTriangle size={16} />,
-  invite: <UserPlus size={16} />,
-  metrics: <BarChart3 size={16} />,
-  knowledge_base: <BookOpen size={16} />,
-  feedback: <MessageSquareMore size={16} />,
-  RAG_embed: <Blocks size={16} />,
-  integration: <Blocks size={16} />
+  org: <Building2 size={15} />,
+  agents: <Bot size={15} />,
+  chatbotConfig: <FileSliders size={15} />,
+  chatbot: <MessageSquare size={15} />,
+  pauthkey: <Shield size={15} />,
+  apikeys: <Database size={15} />,
+  alerts: <AlertTriangle size={15} />,
+  invite: <UserPlus size={15} />,
+  metrics: <BarChart3 size={15} />,
+  knowledge_base: <BookOpen size={15} />,
+  feedback: <MessageSquareMore size={15} />,
+  RAG_embed: <Blocks size={15} />,
+  integration: <Blocks size={15} />,
+  // Admin section icons
+  adminSettings: <Settings2 size={15} />,
+  tutorial: <MonitorPlayIcon size={15} />,
+  lifetimeAccess: <GiftIcon size={15} />,
+  speakToUs: <MessageCircleMoreIcon size={15} />,
+  feedbackAdmin: <MessageSquareMoreIcon size={15} />,
+  // Settings menu icons
+  workspace: <Settings2 size={15} />,
+  userDetails: <Cog size={15} />,
+  auth: <KeyIcon size={15} />,
+  addModel: <AddIcon size={15} />,
+  prebuiltPrompts: <Bot size={15} />
 };
 
 export const DISPLAY_NAMES = (key) => {
   switch (key) {
-    case 'orchestratal_model':
-      return 'Orchestral Model';
+    case 'agents':
+      return 'Agents';
     case 'knowledge_base':
       return 'Knowledge base';
     case 'chatbotConfig':
@@ -40,6 +57,8 @@ export const DISPLAY_NAMES = (key) => {
       return 'Feedback';
     case 'tutorial':
       return 'Tutorial';
+    case 'lifetimeAccess':
+      return 'Free Lifetime Access';
     case 'speak-to-us':
       return 'Speak to Us';
     case 'integration':
@@ -62,11 +81,11 @@ export const DISPLAY_NAMES = (key) => {
 
 
 export const NAV_SECTIONS = [
-  { items: ['agents', 'orchestratal_model', 'chatbotConfig', 'knowledge_base'] },
+  { items: ['agents', 'chatbotConfig', 'knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'Developer', items: ['integration', 'RAG_embed'] },
-  { title: 'TEAM & COLLABORATION', items: ['invite'] }
+  // { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
 

@@ -1,5 +1,4 @@
 import axios from "@/utils/interceptor";
-import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
@@ -67,7 +66,7 @@ export const improvePrompt =  async (variables) =>{
   }
 }
 
-// Prebuilt Prompts APIs
+// AI Assistant Tools APIs
 export const getPrebuiltPrompts = async ()=>{
   try{
      const getPrebuiltPrompts = await axios.get(`${PYTHON_URL}/prebuilt_prompt`)
@@ -100,9 +99,9 @@ export const resetPrebuiltPrompt = async (dataToSend) => {
 }
 
 // Functions Management APIs
-export const getAllFunctionsApi = async (org_id) => {
+export const getAllFunctionsApi = async () => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/functions/all`, org_id)
+    const data = await axios.get(`${PYTHON_URL}/functions/all`)
     return data;
   } catch (error) {
     console.error(error)
@@ -163,9 +162,9 @@ export const updateWebhookAlert = async ({ data, id }) => {
   }
 };
 
-export const getAllWebhookAlert = async (org_id) => {
+export const getAllWebhookAlert = async () => {
   try {
-    const response = await axios.get(`${URL}/alerting`, org_id);
+    const response = await axios.get(`${URL}/alerting`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -311,6 +310,16 @@ export const getAllShowCase = async () => {
 export const getAllAgentsApi = async () => {
   try {
     const response = await axios.get(`${PYTHON_URL}/publicAgent/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+
+export const getFinishReasons = async () => {
+  try {
+    const response = await axios.get("https://flow.sokt.io/func/scritxGh53At");
     return response;
   } catch (error) {
     console.error(error);

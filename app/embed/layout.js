@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
 import { setEmbedUserDetailsAction } from '@/store/action/appInfoAction';
@@ -19,18 +19,27 @@ const Layout = ({ children }) => {
   const [currentAgentName, setCurrentAgentName] = useState(null);
   const [processedAgentName, setProcessedAgentName] = useState(null);
 
-  const interfaceDetailsParam = searchParams.get('interfaceDetails');
-  const decodedParam = interfaceDetailsParam ? decodeURIComponent(interfaceDetailsParam) : null;
-  const urlParamsObj = decodedParam ? JSON.parse(decodedParam) : {};
+  // Memoize URL params parsing to avoid unnecessary re-parsing
+  const urlParamsObj = useMemo(() => {
+    const interfaceDetailsParam = searchParams.get('interfaceDetails');
+    const decodedParam = interfaceDetailsParam ? decodeURIComponent(interfaceDetailsParam) : null;
+    return decodedParam ? JSON.parse(decodedParam) : {};
+  }, [searchParams]);
 
-  const allBridges = useCustomSelector(
-    (state) => state.bridgeReducer?.orgs?.[urlParamsObj.org_id]?.orgs || []
-  );
+  const { allBridges, services, models, userDetailsData } = useCustomSelector((state) => ({
+    allBridges: state.bridgeReducer?.orgs?.[urlParamsObj.org_id]?.orgs || [],
+    services: state.serviceReducer?.services || null,
+    models: state.modelReducer?.serviceModels || null,
+    userDetailsData: state.userDetailsReducer?.userDetails || null
+  }));
 
   useEffect(() => {
     window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
-    dispatch(getServiceAction());
-  }, [dispatch]);
+    // Only call getServiceAction if services data is not already present
+    if (!services || Object.keys(services).length === 0) {
+      dispatch(getServiceAction());
+    }
+  }, [dispatch, services]);
 
   const createNewAgent = useCallback((agent_name, orgId, agent_purpose) => {
     const dataToSend = agent_purpose ? {purpose: agent_purpose.trim()} : {
@@ -84,6 +93,7 @@ const Layout = ({ children }) => {
     setIsLoading(true);
     const trimmedAgentName = agentName.trim();
 
+    // First check if agent exists in current store
     if (allBridges && allBridges.length > 0) {
       const agentInStore = allBridges.find(
         (agent) => agent?.name?.trim() === trimmedAgentName
@@ -94,11 +104,14 @@ const Layout = ({ children }) => {
       }
     }
 
+    // Only fetch bridges if not already present in store
     try {
-       let bridges = allBridges;
-       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
-        bridges = data
-       }));
+      let bridges = allBridges;
+      if (!allBridges || allBridges.length === 0) {
+        await dispatch(getAllBridgesAction((data) => {
+          bridges = data;
+        }));
+      }
 
       const existingAgent = bridges?.find(
         (agent) => agent?.name?.trim() === trimmedAgentName
@@ -122,11 +135,10 @@ const Layout = ({ children }) => {
 
         if (urlParamsObj.token) {
           dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
-          sessionStorage.setItem('proxy_token', urlParamsObj.token);
+          sessionStorage.setItem('local_token', urlParamsObj.token);
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
           urlParamsObj?.folder_id && sessionStorage.setItem('embedUser', true);
-          urlParamsObj?.gtwy_user && sessionStorage.setItem('orchestralUser', true);
         }
 
         if (urlParamsObj.config) {
@@ -136,12 +148,6 @@ const Layout = ({ children }) => {
             }
           });
         }
-        if(urlParamsObj?.config?.configureGtwyRedirection === 'orchestral_page'){
-          setIsLoading(true);
-          router.push(`/org/${urlParamsObj.org_id}/orchestratal_model`);
-          return;
-        }
-
         if (urlParamsObj?.agent_name) {
           setIsLoading(true)
           setCurrentAgentName(urlParamsObj.agent_name);
@@ -158,7 +164,7 @@ const Layout = ({ children }) => {
     };
 
     initialize();
-  }, [decodedParam]);
+  }, [urlParamsObj]);
 
   useEffect(() => {
     if (currentAgentName) {
@@ -171,39 +177,50 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = async (event) => {
-
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
+      
+      // Only fetch bridges if not already present in store
       let bridges = allBridges;
-       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
-        bridges = data
-       }));
+      if (!allBridges || allBridges.length === 0) {
+        await dispatch(getAllBridgesAction((data) => {
+          bridges = data;
+        }));
+      }
+      
       const messageData = event.data.data.data;
       const orgId = sessionStorage.getItem('gtwy_org_id');
+      
       if (messageData?.agent_name) {
-        setIsLoading(true)
-        handleAgentNavigation(messageData.agent_name, orgId)
+        setIsLoading(true);
+        handleAgentNavigation(messageData.agent_name, orgId);
       } else if (messageData?.agent_id && orgId) {
-        // setIsLoading(true);
-        const bridgeData = bridges.find((bridge) => bridge._id === messageData.agent_id)
-        if(!bridgeData){
-          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
-          return
-        }
-        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
-      }
-      else if(messageData?.agent_purpose)
-      {
-        createNewAgent('', orgId, messageData.agent_purpose)
-        setIsLoading(true);  
-      }
-      if(messageData?.meta?.length > 0 && messageData?.agent_id && orgId){
+        const bridgeData = bridges.find((bridge) => bridge._id === messageData.agent_id);
+        const history = messageData?.history;
         
-       const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id)
-       if(!bridge){
-          return
+        if (!bridgeData) {
+          router.push(`/org/${orgId}/agents`);
+          return;
+        }
+        
+        if (history) {
+          router.push(`/org/${orgId}/agents/history/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}&message_id=${history.message_id}`);
+          return;
+        }
+        
+        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}?version=${bridgeData.published_version_id || bridgeData.versions[0]}`);
+        return;
+      } else if (messageData?.agent_purpose) {
+        createNewAgent('', orgId, messageData.agent_purpose);
+        setIsLoading(true);
+      }
+      
+      if (messageData?.meta?.length > 0 && messageData?.agent_id && orgId) {
+        const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id);
+        if (!bridge) {
+          return;
         }
         dispatch(updateBridgeAction({
-          dataToSend: {meta: messageData.meta},
+          dataToSend: { meta: messageData.meta },
           bridgeId: messageData.agent_id
         }, response => {
           if(response?.data?.bridge){
@@ -230,25 +247,28 @@ const Layout = ({ children }) => {
   }, []);
 
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-base-100">
-        <div className="text-center">
-          <div className="text-4xl font-bold text-base-content mb-4">
-            GTWY
-          </div>
-          <div className="flex items-center justify-center space-x-1 text-xl text-base-content">
-            <span>is loading</span>
-            <div className="flex space-x-1 ml-2">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-            </div>
+  // Memoize loading component to avoid unnecessary re-renders
+  const LoadingComponent = useMemo(() => (
+    <div className="flex items-center justify-center min-h-screen bg-base-100">
+      <div className="text-center">
+        <div className="text-4xl font-bold text-base-content mb-4">
+          GTWY
+        </div>
+        <div className="flex items-center justify-center space-x-1 text-xl text-base-content">
+          <span>is loading</span>
+          <div className="flex space-x-1 ml-2">
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
           </div>
         </div>
-        <ServiceInitializer/>
       </div>
-    );
+      <ServiceInitializer/>
+    </div>
+  ), []);
+
+  if (isLoading) {
+    return LoadingComponent;
   }
 
   return (

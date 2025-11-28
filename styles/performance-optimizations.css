@@ -145,3 +145,63 @@
     will-change: auto !important;
   }
 }
+
+/* Banner animations - Updated for slimmer design */
+@keyframes slideInFromNavbar {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 50px;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+}
+
+@keyframes slideOutToNavbar {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 50px;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.animate-slide-in-from-navbar {
+  animation: slideInFromNavbar 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  overflow: hidden;
+}
+
+.animate-slide-out-to-navbar {
+  animation: slideOutToNavbar 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}

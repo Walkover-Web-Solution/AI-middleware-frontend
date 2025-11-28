@@ -33,7 +33,7 @@ function VersionDescriptionInput({ params, searchParams, isEmbedUser }) {
     }, [saveBridgeVersionDescription]);
 
     return (
-        <div className='w-full mb-4 ml-1'>
+        <div className='w-full ml-1'>
             <div className='flex flex-row items-center'>
                 <div className="relative w-full">
                     <input
@@ -47,6 +47,7 @@ function VersionDescriptionInput({ params, searchParams, isEmbedUser }) {
                         style={{
                             backgroundColor: "transparent",
                         }}
+                        maxLength={100}
                     />
                 </div>
             </div>

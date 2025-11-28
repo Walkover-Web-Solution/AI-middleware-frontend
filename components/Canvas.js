@@ -161,7 +161,7 @@ function Canvas({
         </div>
 
       {/* Chat Container */}
-      <div className="flex-1 flex flex-col bg-base-100 border border-base-300 rounded-lg shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col bg-base-100 shadow-sm overflow-hidden">
         {/* Messages Area */}
         <div 
           id="messages" 
@@ -279,12 +279,12 @@ function Canvas({
         </div>
 
         {/* Input Area */}
-        <div className="bg-gradient-to-r from-base-100 to-base-200 border-t border-base-300 px-2 py-2 ">
+        <div className="p-1">
           <div className="flex gap-3 items-center max-w-4xl mx-auto justify-center">
             <div className="flex-1 relative mt-1">
               <textarea
                 ref={textareaRef}
-                className="w-full px-4 py-3 text-sm bg-base-100 border border-base-content/40 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none transition-all duration-200 shadow-sm hover:shadow-md min-h-[44px] max-h-32 placeholder-gray-400"
+                className="w-full textarea textarea-bordered"
                 placeholder={` how you'd like to improve your ${label}...`}
                 value={instruction}
                 rows={1}
@@ -310,14 +310,17 @@ function Canvas({
             </div>
             
             <button 
-              className="h-11 w-11 bg-gradient-to-r from-base-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 text-base-content bg-base-100 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 disabled:hover:scale-100 shadow-lg hover:shadow-xl disabled:shadow-sm group" 
-              disabled={loading || !instruction.trim()} 
+className={`btn btn-circle transition-all duration-200 ${
+                        loading 
+                            ? 'btn-disabled'
+                            : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                    }`}              disabled={loading || !instruction.trim()} 
               onClick={handleSend}
             >
               {loading ? (
-                <div className="loader ease-linear rounded-full border-8 border-t-8 border-base-200"></div>
+                        <span className="loading loading-dots loading-md"></span>
               ) : (
-                <SendHorizontalIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                        <SendHorizontalIcon size={18} />
               )}
             </button>
           </div>

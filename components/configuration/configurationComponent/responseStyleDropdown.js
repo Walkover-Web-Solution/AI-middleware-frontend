@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import InfoTooltip from "@/components/InfoTooltip";
+import { CircleQuestionMark } from 'lucide-react';
 
 const RESPONSE_STYLES = [
   {
@@ -34,7 +35,7 @@ const RESPONSE_STYLES = [
   },
 ];
 
-const ResponseStyleDropdown = ({ params, searchParams }) => {
+const ResponseStyleDropdown = ({ params, searchParams ,isPublished }) => {
   const { reduxResponseStyle } = useCustomSelector((state) => ({
     reduxResponseStyle:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
@@ -89,29 +90,35 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
   };
 
   return (
-    <label className="form-control w-full">
-        <InfoTooltip tooltipContent={"Select the depth of response (optional)."} >
-      <div className="flex items-center gap-2">
-        <select
-          value={selectedStyle}
-          onChange={handleStyleChange}
-          className="select select-sm select-bordered capitalize w-full max-w-xs"
-        >
-          <option value="" disabled>
-            Select a Response Style
-          </option>
-          <option value="">
-            None
-          </option>
-          {RESPONSE_STYLES.map((style) => (
-            <option key={style.value} value={style.value}>
-              {style.value}
-            </option>
-          ))}
-        </select>
+    <div className="flex flex-col gap-3 w-full">
+      {/* Response Style Label */}
+      <div className="flex items-center gap-1">
+        <span className="label-text font-medium">Response Style</span>
+        <InfoTooltip tooltipContent="Choose how detailed and structured you want your AI agent's responses to be.">
+          <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+        </InfoTooltip>
       </div>
-      </InfoTooltip>
-    </label>
+      
+      {/* Response Style Dropdown */}
+      <select
+        disabled={isPublished}
+        value={selectedStyle}
+        onChange={handleStyleChange}
+        className="select select-sm select-bordered capitalize w-full"
+      >
+        <option value="" disabled>
+          Select a Response Style
+        </option>
+        <option value="">
+          None
+        </option>
+        {RESPONSE_STYLES.map((style) => (
+          <option key={style.value} value={style.value}>
+            {style.value}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 

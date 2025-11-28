@@ -75,3 +75,14 @@ export const generateGtwyAccessTokenAction = (orgId) => async (dispatch) => {
     throw error;
   }
 }
+
+export const updateOrgMetaAction = (orgId, orgDetails) => async (dispatch) => {
+  try {
+    const response = await updateOrganizationData(orgId, orgDetails);
+    dispatch(updateUserDetails({ orgId, updatedUserDetails: response?.data?.data?.company }));
+    return response;
+  } catch (error) {
+    console.error('Error updating organization meta:', error);
+    throw error;
+  }
+}

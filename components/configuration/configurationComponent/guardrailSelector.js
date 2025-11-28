@@ -4,14 +4,20 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { CircleQuestionMark } from 'lucide-react';
 
 
-const GuardrailSelector = ({ params, searchParams }) => {  
+const GuardrailSelector = ({ params, searchParams ,isPublished }) => {  
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
-        (state) => ({
-            guardrailsData: state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version]?.guardrails || {},
-            GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData || {}
-        })
+        (state) => {
+            const versionData = state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version];
+            const bridgeDataFromState = state.bridgeReducer?.allBridgesMap?.[params?.id];
+            
+            return {
+                guardrailsData: isPublished ? (bridgeDataFromState?.guardrails || {}) : (versionData?.guardrails || {}),
+                GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData || {}
+            };
+        }
     );
     const [customPrompt, setCustomPrompt] = useState(guardrailsData?.guardrails_custom_prompt || "");
     const [showCustomInput, setShowCustomInput] = useState(false);
@@ -53,7 +59,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
 
     useEffect(() => {
         if (guardrailsData) {
-            // Set enabled state from is_enabled
+            setGuardrailsEnabled(guardrailsData?.is_enabled||false);
             
             // Set selected guardrails from guardrails_configuration
             const selected = Object.entries(guardrailsData?.guardrails_configuration || {})
@@ -142,20 +148,22 @@ const GuardrailSelector = ({ params, searchParams }) => {
     };
     
     return (
-        <div className="form-control border border-base-content/20 rounded-md w-full">
+        <div className="flex flex-col gap-3 w-full">
             {/* Always visible header with toggle */}
-            <div className="label flex items-center ml-2 justify-between">
-                <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                    <span className="label-text capitalize font-medium">Prompt Guards</span>
                     <InfoTooltip tooltipContent="Guardrails help ensure that the AI responses adhere to specific guidelines or restrictions.">
-                        <span className="label-text capitalize font-medium">Prompt Guards</span>
+                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                     </InfoTooltip>
                 </div>
                 <label className="swap">
                     <input 
+                        disabled={isPublished}
                         type="checkbox" 
                         checked={guardrailsEnabled} 
                         onChange={handleToggleGuardrails}
-                        className="toggle"
+                        className="toggle toggle-sm"
                     />
                     
                 </label>
@@ -186,6 +194,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                     <div className="m-2 mb-4">
                         {!showOptions ? (
                             <button
+                                disabled={isPublished}
                                 onClick={handleToggleOptions}
                                 className="btn btn-sm btn-outline w-full flex items-center gap-2"
                             >
@@ -198,6 +207,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-sm font-medium">Available Guards</span>
                                         <button
+                                            disabled={isPublished}
                                             onClick={handleToggleOptions}
                                             className="btn btn-ghost btn-sm btn-circle"
                                         >
@@ -211,6 +221,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                             <div key={key} className="form-control">
                                                 <div className="label cursor-pointer justify-start gap-2">
                                                     <input 
+                                                        disabled={isPublished}
                                                         type="checkbox" 
                                                         className="checkbox checkbox-sm" 
                                                         checked={selectedGuardrails.includes(key)} 
@@ -227,6 +238,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         <div className="form-control col-span-full">
                                             <div className="label cursor-pointer justify-start gap-2">
                                                 <input 
+                                                    disabled={isPublished}
                                                     type="checkbox" 
                                                     className="checkbox checkbox-sm" 
                                                     checked={showCustomInput || customPrompt.trim() !== ''} 
@@ -240,8 +252,9 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                             {showCustomInput && (
                                                 <div className="mt-2">
                                                     <textarea
+                                                        disabled={isPublished}
                                                         placeholder="Write your custom guardrail prompt here..."
-                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
+                                                        className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
                                                         onBlur={handleCustomPromptChange}
                                                         onChange={(e) => setCustomPrompt(e.target.value)}
                                                         value={customPrompt}

@@ -5,7 +5,7 @@ import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import { useConfigurationContext } from './ConfigurationContext';
 
-const ToolsSection = memo(() => {
+const ToolsSection = memo(({ isPublished }) => {
     const { params, searchParams, shouldToolsShow } = useConfigurationContext();
 
     if (!shouldToolsShow) {
@@ -18,14 +18,11 @@ const ToolsSection = memo(() => {
     }
 
     return (
-        <>
-            <EmbedList params={params} searchParams={searchParams} />
-            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-            <ConnectedAgentList params={params} searchParams={searchParams} />
-            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-            <KnowledgebaseList params={params} searchParams={searchParams} />
-            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-        </>
+        <div className='flex mt-4 gap-4 flex-col'>
+            <EmbedList params={params} searchParams={searchParams} isPublished={isPublished} />
+            <ConnectedAgentList params={params} searchParams={searchParams} isPublished={isPublished} />
+            <KnowledgebaseList params={params} searchParams={searchParams} isPublished={isPublished} />
+        </div>
     );
 });
 

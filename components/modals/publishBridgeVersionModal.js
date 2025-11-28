@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useMemo, useEffect } from "react";
-import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot } from "lucide-react";
+import React, { useCallback, useState, useMemo, useEffect, useRef } from "react";
+import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot, ChevronDown } from "lucide-react";
 import {
   getAllBridgesAction,
   getBridgeVersionAction,
@@ -16,7 +16,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
-import PromptSummaryModal from "./PromptSummaryModal";
+import { AgentSummaryContent } from "./PromptSummaryModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -27,17 +27,25 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [selectedAgentsToPublish, setSelectedAgentsToPublish] = useState(new Set());
   const [allConnectedAgents, setAllConnectedAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
-  const [autoGenerateSummary, setAutoGenerateSummary] = useState(false);
+  const [showSummaryValidation, setShowSummaryValidation] = useState(false);
+  const [summaryAccordionOpen, setSummaryAccordionOpen] = useState(false);
+  
 
-  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap } = useCustomSelector((state) => ({
-    bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
-    versionData: state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.version],
-    bridgeData: state.bridgeReducer.allBridgesMap?.[params?.id],
-    agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
-    bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
-    allBridgesMap: state.bridgeReducer.allBridgesMap || {},
-  }));
-
+  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap, prompt } = useCustomSelector((state) => {
+    const isPublished = searchParams?.get("isPublished") === 'true';
+    const bridgeDataFromState = state.bridgeReducer.allBridgesMap?.[params?.id];
+    const versionDataFromState = state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.get("version")];
+    
+    return {
+      bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
+      versionData: versionDataFromState,
+      bridgeData: bridgeDataFromState,
+      agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
+      bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
+      allBridgesMap: state.bridgeReducer.allBridgesMap || {},
+      prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionDataFromState?.configuration?.prompt || ""),
+    };
+  });
   // Memoized form data initialization
   const [formData, setFormData] = useState(() => ({
     url_slugname: '',
@@ -59,6 +67,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       }));
     }
   }, [bridge]);
+
   
   const getAllConnectedAgents = useCallback(async (agentId, versionData, agentList, useVersionData = false, visited = new Set(), level = 0, allBridgesMap = null) => {
     // Prevent infinite loops and invalid agents
@@ -377,6 +386,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     }));
   }, []);
 
+
   // Helper function to get all agents recursively (flattened for operations)
   const getAllAgentsFlat = useCallback((agents) => {
     const result = [];
@@ -558,8 +568,17 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     try {
       // Require a summary before publishing
       if (!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) {
-        openModal(MODAL_TYPE.PROMPT_SUMMARY);
+        // Show validation error and redirect to summary section
+        setShowSummaryValidation(true);
+        setSummaryAccordionOpen(true);
         setIsLoading(false);
+        // Scroll to summary section
+        setTimeout(() => {
+          const summarySection = document.querySelector('.summary-accordion');
+          if (summarySection) {
+            summarySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
         return;
       }
 
@@ -597,7 +616,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       await dispatch(
         publishBridgeVersionAction({
           bridgeId: params?.id,
-          versionId: searchParams?.version,
+          versionId: searchParams?.get("version"),
           orgId: params?.org_id,
           isPublic: isPublicAgent,
         })
@@ -620,7 +639,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
           name: agent_name,
           agent_description: agent_description,
           agent_id: params?.id,
-          agent_version_id: searchParams?.version
+          agent_version_id: searchParams?.get("version")
         }, "Agent Published Successfully");
       }
 
@@ -662,27 +681,39 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
             </div>
           </div>
 
-          {/* Summary required alert */}
-          {(!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) && (
-            <div className="alert alert-warning w-full flex justify-between bg-warning border border-warning/30 mb-4">
-              <div className="flex items-start gap-3 w-full">
-                <AlertTriangle className="h-5 w-5 mt-0.5" />
-                <div className="flex-1">
-                  <h4 className="font-medium">Summary required</h4>
-                  <p className="text-sm opacity-80">You need to add a agent summary for this agent before publishing.</p>
-                </div>
-                <button
-                  className="btn btn-sm bg-base-200 flex justify-end btn-outline"
-                  onClick={() => {
-                    setAutoGenerateSummary(true);
-                    openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
-                  }}
-                >
-                  Generate Agent Summary
-                </button>
-              </div>
+          {/* Agent Summary Accordion */}
+          <div className={`collapse collapse-arrow border bg-base-100 rounded-lg mb-6 summary-accordion ${
+            showSummaryValidation && (!bridge_summary || bridge_summary.trim() === '') 
+              ? 'border-red-500' 
+              : 'border-base-300'
+          }`}>
+            <input 
+              type="checkbox" 
+              className="peer" 
+              defaultChecked={summaryAccordionOpen}
+              checked={summaryAccordionOpen}
+              onChange={(e) => setSummaryAccordionOpen(e.target.checked)}
+            />
+            <div className="collapse-title font-medium flex items-center">
+              <Bot className="w-5 h-5 mr-2" />
+              Agent Summary
+              {showSummaryValidation && (!bridge_summary || bridge_summary.trim() === '') && (
+                <span className="text-red-500 ml-2">*</span>
+              )}
             </div>
-          )}
+            <div className="collapse-content">
+              <AgentSummaryContent 
+                params={params}
+                prompt={prompt}
+                versionId={searchParams?.get("version")}
+                showTitle={false}
+                showButtons={true}
+                onSave={() => setShowSummaryValidation(false)}
+                isMandatory={showSummaryValidation}
+                showValidationError={showSummaryValidation}
+              />
+            </div>
+          </div>
 
           {/* Warning Section */}
           {!showComparison && (
@@ -998,15 +1029,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       </div>
 
       <div className="modal-backdrop" onClick={handleCloseModal}></div>
-
-      {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
-      <PromptSummaryModal 
-        modalType={MODAL_TYPE.PROMPT_SUMMARY_PUBLISH}
-        params={params} 
-        searchParams={searchParams} 
-        autoGenerateSummary={autoGenerateSummary}
-        setAutoGenerateSummary={setAutoGenerateSummary}
-      />
     </Modal>
   );
 }

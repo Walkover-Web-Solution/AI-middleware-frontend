@@ -4,24 +4,31 @@ import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from './protected';
 
-const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isEmbedUser, searchParams }) => {
+const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isEmbedUser, searchParams, onVisibilityChange = () => {} }) => {
   const { bridgeApiKey, prompt,shouldPromptShow,service, showDefaultApikeys } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const isPublished = searchParams?.isPublished === 'true';
+    
+    // Use published data if isPublished=true, otherwise use version data
+    const dataSource = isPublished ? bridgeDataFromState : versionData;
+    const service = dataSource?.service;
     const modelReducer = state?.modelReducer?.serviceModels;
-    const serviceName = versionData?.service;
-    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-    const modelName = versionData?.configuration?.model;
+    const serviceName = dataSource?.service;
+    const modelTypeName = dataSource?.configuration?.type?.toLowerCase();
+    const modelName = dataSource?.configuration?.model;
     const showDefaultApikeys = state.appInfoReducer.embedUserDetails.addDefaultApiKeys;
+    
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
-      shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+      bridgeApiKey: isPublished ? bridgeDataFromState?.apikey_object_id?.[service] : versionData?.apikey_object_id?.[service],
+      prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionData?.configuration?.prompt || ""),
+      shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service,
       showDefaultApikeys
    };
   });
   const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
+  const [isAnimating, setIsAnimating] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
   const resetBorder = (ref, selector) => {
@@ -72,13 +79,25 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     // 2. Default AI ML key is selected OR
     // 3. Both prompt and API key are provided
     if ((service === 'ai_ml'&&hasPrompt) || (hasPrompt && hasApiKey)) {
-      setIsVisible(false);
+      if (isVisible) {
+        setIsAnimating(true);
+        setTimeout(() => {
+          setIsVisible(false);
+          setIsAnimating(false);
+        }, 300);
+      }
       setShowError(false);
       setErrorType('');
     } else {
       setIsVisible(true);
     }
   }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow,service, showDefaultApikeys]);
+
+  useEffect(() => {
+    if (typeof onVisibilityChange === 'function') {
+      onVisibilityChange(isVisible);
+    }
+  }, [isVisible, onVisibilityChange]);
 
   const handleStart = () => {
     if(isEmbedUser && showDefaultApikeys)
@@ -95,12 +114,16 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     if (!bridgeApiKey) {
       setShowError(true);
       setErrorType('apikey');
-      setErrorBorder(apiKeySectionRef, 'select', true);
+      setErrorBorder(apiKeySectionRef, 'button', true);
       return;
     }
     
-    
-    setIsVisible(false);
+    // Smooth transition when hiding
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsVisible(false);
+      setIsAnimating(false);
+    }, 300);
   };
  
   if (!isVisible || ((bridgeApiKey && prompt !== ""))) {
@@ -110,7 +133,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   }
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-base-100 overflow-hidden z-very-high">
+    <div className={`w-full h-full z-very-high bg-base-100 overflow-hidden relative transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">

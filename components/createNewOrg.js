@@ -20,10 +20,11 @@ const CreateOrg = ({ handleSwitchOrg }) => {
     const route = useRouter();
 
     useEffect(() => {
-        // Filter timezones based on search term
+        // Filter timezones based on search term (trim whitespace and filter by "starts with")
+        const trimmedSearch = timezoneSearch.trim().toLowerCase();
         const filtered = timezoneData.filter(timezone => 
-            timezone.identifier.toLowerCase().includes(timezoneSearch.toLowerCase()) ||
-            timezone.offSet.toLowerCase().includes(timezoneSearch.toLowerCase())
+            timezone.identifier.toLowerCase().startsWith(trimmedSearch) ||
+            timezone.offSet.toLowerCase().startsWith(trimmedSearch)
         );
         setFilteredTimezones(filtered);
     }, [timezoneSearch]);
@@ -79,8 +80,8 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             {isLoading && <LoadingSpinner />}
             <div className=""></div>
             <dialog id={MODAL_TYPE.CREATE_ORG_MODAL} className="modal">
-                <div className="flex items-center justify-center min-h-screen">
-                    <form className="modal-box relative p-5 bg-base-100 rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
+                <div className="flex items-center justify-center min-h-screen py-8">
+                    <form className="modal-box relative p-5 bg-base-100 rounded-lg shadow-xl mx-4 max-h-[90vh] overflow-y-auto" onSubmit={createOrgHandler}>
                         <h3 className="font-bold text-lg mb-2">Create Workspace</h3>
                         <label className='label-text mb-1'>Workspace Name *</label>
                         <input
@@ -101,55 +102,62 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             rows="4"
                             value={orgDetails.about}
                             onChange={handleChange}
-                            placeholder="About your Workspace"
+                            placeholder="About Your Workspace"
                             className="p-2.5 w-full text-sm textarea textarea-bordered"
                             minLength={10}
                             maxLength={400}
                         />
                         <label className='label-text mb-1'>Timezone *</label>
                         
-                        <div className={`transition-all duration-300 ${showTimezoneDropdown ? 'mb-64' : 'mb-4'}`}>
+                        <div className={`mb-4 ${showTimezoneDropdown ? 'mb-80' : ''}`}>
                             <div className="relative">
                                 <div 
-                                    className={`relative w-full cursor-pointer ${showTimezoneDropdown ? 'border-t border-x border-base-content/30 rounded-t-lg rounded-x-lg' : 'border border-base-content/10 rounded-lg'} p-2  flex items-center justify-between`}
+                                    className="relative w-full cursor-pointer border border-base-content/20 rounded-lg p-3 flex items-center justify-between hover:border-base-content/40 transition-colors duration-200 bg-base-100"
                                     onClick={() => setShowTimezoneDropdown(!showTimezoneDropdown)}
                                 >
-                                    <span>
+                                    <span className="text-sm">
                                         {orgDetails.timezone ? 
                                             `${orgDetails.timezone} (${timezoneData.find(tz => tz.identifier === orgDetails.timezone)?.offSet})` : 
                                             "Select a timezone"}
                                     </span>
-                                    <span className={`transition-transform duration-200 ${showTimezoneDropdown ? 'rotate-180' : ''}`}><ChevronDown size={16}/></span>
+                                    <span className={`transition-transform duration-200 ${showTimezoneDropdown ? 'rotate-180' : ''}`}>
+                                        <ChevronDown size={16}/>
+                                    </span>
                                 </div>
                                 
                                 {showTimezoneDropdown && (
-                                    <div className={`absolute min-h-[250px] z-10 w-full bg-base-100 max-h-60 overflow-y-auto ${showTimezoneDropdown ? 'border-x border-b border-base-content/30 rounded-lg rounded-t-none rounded-x-lg' : ''}`}>
-                                        <div className="sticky top-0 bg-base-100 p-2 z-20">
-                                            <div className="flex items-center">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Search timezone..."
-                                                    className="input outline-none input-sm flex-grow py-2 px-3 text-sm"
-                                                    value={timezoneSearch}
-                                                    onChange={(e) => setTimezoneSearch(e.target.value)}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    autoFocus
-                                                />
-                                            </div>
+                                    <div className="absolute mt-1 z-30 w-full bg-base-100 border border-base-content/20 rounded-lg shadow-lg max-h-72 overflow-hidden">
+                                        <div className="sticky top-0 bg-base-100 p-3 border-b border-base-content/10">
+                                            <input
+                                                type="text"
+                                                placeholder="Search timezone"
+                                                className="input input-sm w-full border-base-content/20 focus:border-primary"
+                                                value={timezoneSearch}
+                                                onChange={(e) => setTimezoneSearch(e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                autoFocus
+                                            />
                                         </div>
-                                        {filteredTimezones.length === 0 ? (
-                                            <div className="p-2 mx-auto w-full text-center text-base-content/30">No timezones found</div>
-                                        ) : (
-                                            filteredTimezones.map((timezone) => (
-                                                <div 
-                                                    key={timezone.identifier} 
-                                                    className={`p-2 hover:bg-base-200 cursor-pointer ${orgDetails.timezone === timezone.identifier ? 'bg-primary text-white' : ''}`}
-                                                    onClick={() => selectTimezone(timezone)}
-                                                >
-                                                    {timezone.identifier} ({timezone.offSet})
-                                                </div>
-                                            ))
-                                        )}
+                                        <div className="max-h-60 overflow-y-auto">
+                                            {filteredTimezones.length === 0 ? (
+                                                <div className="p-4 text-center text-base-content/50 text-sm">No timezones found</div>
+                                            ) : (
+                                                filteredTimezones.map((timezone) => (
+                                                    <div 
+                                                        key={timezone.identifier} 
+                                                        className={`p-3 hover:bg-base-200 cursor-pointer text-sm transition-colors duration-150 ${
+                                                            orgDetails.timezone === timezone.identifier 
+                                                                ? 'bg-primary text-primary-content' 
+                                                                : 'text-base-content'
+                                                        }`}
+                                                        onClick={() => selectTimezone(timezone)}
+                                                    >
+                                                        <div className="font-medium">{timezone.identifier}</div>
+                                                        <div className="text-xs opacity-70">{timezone.offSet}</div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>

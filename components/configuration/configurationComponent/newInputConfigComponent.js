@@ -81,7 +81,7 @@ const NewInputConfigComponent = ({ params }) => {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center">
                 <div className="label flex items-center gap-2">
                     <span className="label-text capitalize font-medium">Prompt</span>
                     <div className="h-4 w-px bg-gray-300 mx-2"></div>

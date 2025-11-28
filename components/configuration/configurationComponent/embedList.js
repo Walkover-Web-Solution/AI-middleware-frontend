@@ -15,6 +15,8 @@ import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, TrashIcon, SettingsIcon
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import DeleteModal from '@/components/UI/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/prebuiltToolsConfigModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -33,7 +35,7 @@ function getStatusClass(status) {
   }
 };
 
-const EmbedList = ({ params, searchParams }) => {
+const EmbedList = ({ params, searchParams, isPublished }) => {
   const [functionId, setFunctionId] = useState(null);
   const [functionData, setfunctionData] = useState({});
   const [toolData, setToolData] = useState({});
@@ -42,26 +44,31 @@ const EmbedList = ({ params, searchParams }) => {
   const dispatch = useDispatch();
   const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
-    const serviceName = versionData?.service;
-    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-    const modelName = versionData?.configuration?.model;
+    
+    // Use bridgeData when isPublished=true, otherwise use versionData
+    const activeData = isPublished ? bridgeDataFromState : versionData;
+    const serviceName = activeData?.service;
+    const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+    const modelName = activeData?.configuration?.model;
     const currentUser = state.userDetailsReducer.userDetails;
+    
     return {
       integrationData: orgData?.integrationData || {},
       function_data: orgData?.functionData || {},
-      bridge_functions: versionData?.function_ids || [],
+      bridge_functions: isPublished ? (bridgeDataFromState?.function_ids || []) : (versionData?.function_ids || []),
       modelType: modelTypeName,
       model: modelName,
       shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
       showInbuiltTools: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.inbuilt_tools,
       embedToken: orgData?.embed_token,
-      variables_path: versionData?.variables_path || {},
+      variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
-      toolsVersionData: versionData?.built_in_tools,
+      toolsVersionData: isPublished ? (bridgeDataFromState?.built_in_tools) : (versionData?.built_in_tools),
       isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
-      prebuiltToolsFilters: versionData?.web_search_filters || [],
+      prebuiltToolsFilters: isPublished ? (bridgeDataFromState?.web_search_filters || []) : (versionData?.web_search_filters || []),
     };
   });
   // Use the tutorial videos hook
@@ -88,6 +95,11 @@ const EmbedList = ({ params, searchParams }) => {
 
   }
   const [selectedPrebuiltTool, setSelectedPrebuiltTool] = useState(null);
+  
+  // Delete operation hooks
+  const { isDeleting: isDeletingTool, executeDelete: executeToolDelete } = useDeleteOperation(MODAL_TYPE.DELETE_TOOL_MODAL);
+  const { isDeleting: isDeletingPrebuiltTool, executeDelete: executePrebuiltToolDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
+  
   const handleOpenDeleteModal = (functionId, functionName) => {
     setFunctionId(functionId);
     setFunctionName(functionName);
@@ -113,20 +125,20 @@ const EmbedList = ({ params, searchParams }) => {
     }
   };
 
-  const handleRemoveFunctionFromBridge = (id, name) => {
-    dispatch(
-      updateBridgeVersionAction({
-        bridgeId: params.id,
-        versionId: searchParams?.version,
-        dataToSend: {
-          functionData: {
-            function_id: id,
-            function_name: name,
+  const handleRemoveFunctionFromBridge = async (id, name) => {
+    await executeToolDelete(async () => {
+      return dispatch(
+        updateBridgeVersionAction({
+          bridgeId: params.id,
+          versionId: searchParams?.version,
+          dataToSend: {
+            functionData: {
+              function_id: id,
+              function_name: name,
+            },
           },
-        },
-      })
-    ).then(() => {
-      closeModal(MODAL_TYPE.DELETE_TOOL_MODAL);
+        })
+      );
     });
   };
 
@@ -168,13 +180,14 @@ const EmbedList = ({ params, searchParams }) => {
   };
 
   // Handle removing a prebuilt tool from built_in_tools
-  const handleDeletePrebuiltTool = (item,name) => {
+  const handleDeletePrebuiltTool = async (item, name) => {
     if (!item?.value) return;
-    dispatch(updateBridgeVersionAction({
-      versionId: searchParams?.version,
-      dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
-    }));
-    closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
+    await executePrebuiltToolDelete(async () => {
+      return dispatch(updateBridgeVersionAction({
+        versionId: searchParams?.version,
+        dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
+      }));
+    });
   };
 
   // Handle opening prebuilt tools configuration modal
@@ -217,6 +230,8 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Tool from the Agent."}
         buttonTitle="Remove Tool"
         modalType={MODAL_TYPE.DELETE_TOOL_MODAL}
+        loading={isDeletingTool}
+        isAsync={true}
       />
       <DeleteModal
         onConfirm={handleDeletePrebuiltTool}
@@ -226,8 +241,11 @@ const EmbedList = ({ params, searchParams }) => {
         description={"This action Remove the selected Prebuilt Tool from the Agent."}
         buttonTitle="Remove Prebuilt Tool"
         modalType={MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL}
+        loading={isDeletingPrebuiltTool}
+        isAsync={true}
       />
       <FunctionParameterModal
+        isPublished={isPublished}
         name="Tool"
         functionId={functionId}
         Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}
@@ -241,19 +259,22 @@ const EmbedList = ({ params, searchParams }) => {
         setVariablesPath={setVariablesPath}
         variablesPath={variablesPath}
       />
-      <div className="label flex-col items-start  w-full p-0">
+      <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
         {shouldToolsShow && (
           <>
             <div className="dropdown dropdown-right w-full flex items-center">
               {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? (
                 <>
-                  <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-                    <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
-                  </InfoTooltip>
+                  <div className="flex items-center gap-1 mb-2">
+                    <p className="font-medium whitespace-nowrap">Tools</p>
+                    <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
+                  </div>
                   <button
                     tabIndex={0}
-                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
-                    disabled={!shouldToolsShow}
+                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!shouldToolsShow||isPublished}
                   >
                     <AddIcon className="w-2 h-2" />
                     <span className="text-xs font-medium">Add</span>
@@ -261,12 +282,11 @@ const EmbedList = ({ params, searchParams }) => {
                 </>
               ) : (
                 <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-
-
                   <button
                     tabIndex={0}
-                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleTutorial}
+                    disabled={isPublished}
                   >
                     <AddIcon className="w-2 h-2" />
                     <p className="label-text text-sm whitespace-nowrap">Tool</p>
@@ -293,13 +313,25 @@ const EmbedList = ({ params, searchParams }) => {
             <div className="flex flex-col gap-2 w-full">
               {bridgeFunctions.length > 0 && (
                 <div className="flex flex-col gap-2 w-full">
-                  <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" handleRemoveEmbed={handleRemoveFunctionFromBridge} handleOpenDeleteModal={handleOpenDeleteModal} />
+                  <RenderEmbed 
+                    bridgeFunctions={bridgeFunctions} 
+                    integrationData={integrationData} 
+                    getStatusClass={getStatusClass} 
+                    handleOpenModal={handleOpenModal} 
+                    embedToken={embedToken} 
+                    params={params} 
+                    name="function" 
+                    handleRemoveEmbed={handleRemoveFunctionFromBridge} 
+                    handleOpenDeleteModal={handleOpenDeleteModal}
+                    halfLength={1}
+                    isPublished={isPublished}
+                  />
                 </div>
               )}
 
               {/* Render selected Prebuilt Tools below functions */}
               {selectedPrebuiltTools.length > 0 && (
-                <div className="flex flex-col gap-2 w-full">
+                <div className={`grid gap-2 w-full`}>
                   {selectedPrebuiltTools.map((item) => {
                     const missingDesc = !item?.description;
                     const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
@@ -308,37 +340,26 @@ const EmbedList = ({ params, searchParams }) => {
                     return (
                       <div
                         key={item?.value}
-                        className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${hasIssue ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative ${hasIssue ? 'border-error' : ''} hover:bg-base-300 transition-colors duration-200`}
                       >
-                        
-                        <div className="p-2 w-full h-full flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              {GetPreBuiltToolTypeIcon(item?.value, 16, 16)}
+                        <div className="p-2 flex-1 flex items-center gap-2">
+                          {GetPreBuiltToolTypeIcon(item?.value, 14, 14)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center">
                               <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
                                 <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
-                                  <span>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
-                                  <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${
-                                    isNotSupported 
-                                      ? 'bg-orange-100 text-orange-700 border-orange-200' 
-                                      : missingDesc 
-                                        ? 'bg-red-100 text-red-700 border-red-200' 
-                                        : 'bg-green-100 text-green-700 border-green-200'
-                                  }`}>
-                                    {isNotSupported ? 'Not Supported' : missingDesc ? 'Description Required' : 'Active'}
-                                  </span>
+                                  <span className='text-md font-normal'>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
                                 </div>
                               </span>
                             </div>
-                            <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                              {isNotSupported 
-                                ? `Model doesn't support ${item?.name} tool` 
-                                : item?.description || 'A description is required for proper functionality.'
-                              }
-                            </p>
+                            {isNotSupported && (
+                              <p className="text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
+                                Model doesn't support {item?.name} tool
+                              </p>
+                            )}
                           </div>
                         </div>
-                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
                           {item?.value === "web_search" && (
                             <button
                               onClick={(e) => {
@@ -347,6 +368,7 @@ const EmbedList = ({ params, searchParams }) => {
                               }}
                               className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                               title="Config"
+                              disabled={isPublished}
                             >
                               <SettingsIcon size={16} />
                             </button>
@@ -358,6 +380,7 @@ const EmbedList = ({ params, searchParams }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
+                            disabled={isPublished}
                           >
                             <TrashIcon size={16} />
                           </button>

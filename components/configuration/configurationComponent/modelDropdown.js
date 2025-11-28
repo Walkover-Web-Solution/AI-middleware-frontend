@@ -14,8 +14,8 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
     
     const previewStyle = {
         position: 'fixed',
-        top: Math.max(20, dropdownRect?.top-100),
-        left: dropdownRect?.left - 270, // Position to the left of dropdown
+        top: Math.max(20, dropdownRect?.top-50),
+        left: dropdownRect?.right + (-55), // Position to the right of dropdown
         zIndex: 99999,
         maxHeight: `${viewportHeight}px`,
         overflowY: 'auto'
@@ -109,16 +109,25 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
 
 ModelPreview.displayName = 'ModelPreview';
 
-const ModelDropdown = ({ params, searchParams }) => {
+const ModelDropdown = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
-    const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => ({
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
-        fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.fine_tune_model?.current_model,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type,
-        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service],
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    }));
+    const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        
+        return {
+            model: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+            fineTuneModel: isPublished ? (bridgeDataFromState?.configuration?.fine_tune_model?.current_model) : (versionData?.configuration?.fine_tune_model?.current_model),
+            modelType: isPublished ? (bridgeDataFromState?.configuration?.type) : (versionData?.configuration?.type),
+            modelsList: state?.modelReducer?.serviceModels[activeData?.service],
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        };
+    });
 
     const [hoveredModel, setHoveredModel] = useState(null);
     const [modelSpecs, setModelSpecs] = useState();
@@ -183,8 +192,9 @@ const ModelDropdown = ({ params, searchParams }) => {
 
     return (
         <div className="flex flex-col items-start gap-4 relative">
-            <div className="w-full sm:max-w-xs" ref={dropdownRef}>
+            <div className="w-full" ref={dropdownRef}>
                 <Dropdown
+                    disabled={isPublished}
                     options={modelOptions}
                     value={model || ''}
                     onChange={handleSelect}
@@ -192,7 +202,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                     showGroupHeaders
                     placeholder="Select a Model"
                     size="sm"
-                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem] rounded-sm"
+                    className="btn btn-sm w-auto justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem] rounded-sm px-3"
                     menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
                     maxLabelLength={20}
                 />

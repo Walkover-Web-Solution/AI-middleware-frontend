@@ -38,13 +38,11 @@ function OrgSlider() {
     const handleSwitchOrg = async (id, name) => {
         try {
             const response = await switchOrg(id);
-            if (process.env.NEXT_PUBLIC_ENV === 'local') {
-                const localToken = await switchUser({
-                    orgId: id,
-                    orgName: name
-                })
-                setInCookies('local_token', localToken.token);
-            }
+            const localToken = await switchUser({
+                orgId: id,
+                orgName: name
+            })
+            setInCookies('local_token', localToken.token);
             router.push(`/org/${id}/agents`);
             dispatch(setCurrentOrgIdAction(id));
             if (response.status !== 200) {
