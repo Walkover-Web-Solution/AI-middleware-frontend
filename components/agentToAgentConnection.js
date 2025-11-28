@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Handle, Position, ReactFlowProvider, Controls, Background, BackgroundVariant, MiniMap } from '@xyflow/react';
+import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Handle, Position, ReactFlowProvider, Controls, Background, BackgroundVariant } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Plus, PlusIcon, Settings, Bot, X, CircleArrowOutUpRight } from 'lucide-react';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { BRIDGE_TYPES, useAgentLookup, normalizeConnectedRefs, shallowEqual, AgentSidebar, FlowControlPanel, AgentConfigSidebar } from '@/components/flowDataManager';
-import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { closeModal, getFromCookies, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import CreateBridgeCards from './CreateBridgeCards';
 import { useDispatch } from 'react-redux';
@@ -140,7 +140,6 @@ function AgentNode({ id, data }) {
     allAgent: state.bridgeReducer.org?.[orgId]?.orgs || {},
   }));
 
-  const handleRelabel = () => data.openSidebar({ mode: 'select', nodeId: id, title: 'Change agent' });
   const handleAdd = () => data.openSidebar({ mode: 'add', sourceNodeId: id, title: 'Add next agent' });
   const handleOpenConfig = () => data.onOpenConfigSidebar(id);
 
@@ -265,18 +264,6 @@ function AgentNode({ id, data }) {
                 <CircleArrowOutUpRight className="text-base-content" size={16} />
               </div>
             </div>
-
-            {/* Change Agent Button */}
-            {/* <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRelabel();
-              }}
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md hover:shadow-lg hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 hover:scale-105 opacity-0 group-hover:opacity-100"
-              title="Change Agent"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button> */}
           </div>
 
           {functions.length > 0 && (
@@ -329,9 +316,8 @@ const edgeTypes = { default: MakeStyleEdge, smoothstep: MakeStyleEdge, step: Mak
 const defaultEdgeOptions = { type: 'default', style: { animated: true } };
 
 /* ========================= Flow ======================== */
-function Flow({ params, orchestralData, name, description, createdFlow, setIsLoading, searchParams, isDrafted, isEmbedUser, mode = 'orchestral', onConnectedFlowSave }) {
+function Flow({ params, orchestralData, searchParams, mode = 'orchestral' }) {
   const isConnectedMode = mode === 'connected';
-  const router = useRouter();
   const dispatch = useDispatch();
   const initialEdges = useMemo(() => orchestralData?.edges ?? [], [orchestralData]);
   const initialNodes = useMemo(() => {
@@ -349,7 +335,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   useEffect(() => void (edgesRef.current = edges), [edges]);
   const [shouldLayout, setShouldLayout] = useState(false);
   const [masterAgent, setMasterAgent] = useState(null);
-  const [isVariableModified, setIsVariableModified] = useState(false);
   const [isFlowReady, setIsFlowReady] = useState(false);
   const { agents } = useCustomSelector((state) => ({ agents: state.bridgeReducer.org[params.org_id]?.orgs || [] }));
   const [configSidebar, setConfigSidebar] = useState({ isOpen: false, nodeId: null, agent: null });
@@ -425,7 +410,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     // Find child agents for this node
     const childEdges = currentEdges.filter(edge => edge.source === nodeId);
     if (childEdges.length > 0) {
-      childEdges.forEach((edge, index) => {
+      childEdges.forEach((edge) => {
         const childNode = currentNodes.find(n => n.id === edge.target);
         if (childNode?.data?.selectedAgent) {
           const childAgent = childNode.data.selectedAgent;
@@ -670,8 +655,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       toast?.error("Failed to save agent")
       console.error(error)
     }
-    setIsVariableModified(true);
-
     // Always set status to 'draft' when flow is modified (nodes/edges change)
     if (orchestralData) {
       orchestralData.status = 'draft';
@@ -1333,17 +1316,8 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
       <FlowControlPanel
-        bridgeType={selectedBridgeType}
-        mode={mode}
-        name={name}
-        description={description}
-        createdFlow={createdFlow}
-        isModified={isDrafted}
-        setIsLoading={setIsLoading}
         params={params}
         searchParams={searchParams}
-        isVariableModified={isVariableModified}
-        isEmbedUser={isEmbedUser}
       />
 
       <div className="w-full h-full">
@@ -1469,46 +1443,16 @@ const AgentToAgentConnection = ({
   params,
   searchParams,
   orchestralData = [],
-  name,
-  description,
-  createdFlow = false,
-  setIsLoading,
-  discardedData,
-  isEmbedUser,
   mode = 'orchestral',
-  onConnectedFlowSave,
 }) => {
-  const orchestralFlowStatus = useCustomSelector((state) => {
-    if (mode !== 'orchestral' || !params?.org_id || !params?.orchestralId) return null;
-    const orgFlows = state?.orchestralFlowReducer?.orchetralFlowData?.[params.org_id] || [];
-    return orgFlows.find((item) => item._id === params.orchestralId)?.status || null;
-  });
-
-  const [isDrafted, setIsDrafted] = useState(false);
-
-  useEffect(() => {
-    if (mode === 'orchestral') {
-      setIsDrafted(orchestralFlowStatus === 'draft');
-    } else {
-      setIsDrafted(false);
-    }
-  }, [mode, orchestralFlowStatus]);
 
   return (
     <ReactFlowProvider>
       <Flow
         params={params}
         orchestralData={orchestralData}
-        name={name}
-        description={description}
-        createdFlow={createdFlow}
-        setIsLoading={setIsLoading}
-        isDrafted={isDrafted}
-        discardedData={discardedData}
-        isEmbedUser={isEmbedUser}
         mode={mode}
         searchParams={searchParams}
-        onConnectedFlowSave={onConnectedFlowSave}
       />
     </ReactFlowProvider>
   );

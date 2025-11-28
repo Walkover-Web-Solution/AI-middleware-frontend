@@ -5,16 +5,12 @@ import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import {
   initializeVariablesState,
-  createVariableGroup,
-  renameVariableGroup,
-  deleteVariableGroup,
-  setActiveVariableGroup,
   updateVariables,
 } from "@/store/reducer/variableReducer";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { sendDataToParent, toggleSidebar } from "@/utils/utility";
-import { CloseIcon, InfoIcon } from "@/components/Icons";
-import { Edit2, Plus, Trash2, Upload, Play } from "lucide-react";
+import { CloseIcon } from "@/components/Icons";
+import { Trash2, Upload, Play } from "lucide-react";
 
 const SLIDER_ID = "variable-collection-slider";
 const SLIDER_DISABLE_KEY = "variableSliderDisabled";
@@ -52,7 +48,7 @@ const inferType = (value, fallback) => {
 const createLocalId = () =>
   `var_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
 
-const validateAndFormatValue = (rawValue, type, { allowEmpty } = {}) => {
+const validateAndFormatValue = (rawValue, type) => {
   const original = rawValue ?? "";
   if (typeof original === "boolean") {
     return {
@@ -143,12 +139,8 @@ const validateVariables = (variables, options = {}) => {
     const key = (variable.key || "").trim();
     const lowerKey = key.toLowerCase();
 
-    const valueCheck = validateAndFormatValue(variable.value, type, {
-      allowEmpty: false,
-    });
-    const defaultCheck = validateAndFormatValue(variable.defaultValue, type, {
-      allowEmpty: true,
-    });
+    const valueCheck = validateAndFormatValue(variable.value, type);
+    const defaultCheck = validateAndFormatValue(variable.defaultValue, type);
 
     if (!valueCheck.ok && !suppressErrors) {
       errors.push(`Row ${index + 1}: ${valueCheck.error}`);
@@ -213,12 +205,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
     };
   });
 
-  const [groupEditor, setGroupEditor] = useState({
-    mode: "idle",
-    value: "",
-    error: "",
-    groupId: null,
-  });
   const [draftVariables, setDraftVariables] = useState([]);
   const [error, setError] = useState("");
   const [bulkEditMode, setBulkEditMode] = useState(false);
@@ -498,7 +484,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           const rawDefaultValue = pair?.defaultValue ?? "";
 
           // Format the main value
-          const valueCheck = validateAndFormatValue(rawValue, type, { allowEmpty: false });
+          const valueCheck = validateAndFormatValue(rawValue, type);
           let formattedValue = valueCheck.ok ? valueCheck.value : rawValue;
 
           // Convert values to proper types for API
@@ -517,7 +503,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           }
 
           // Format the default value
-          const defaultCheck = validateAndFormatValue(rawDefaultValue, type, { allowEmpty: true });
+          const defaultCheck = validateAndFormatValue(rawDefaultValue, type);
           let formattedDefaultValue = defaultCheck.ok ? defaultCheck.value : rawDefaultValue;
 
           // Convert default values to proper types for API
@@ -737,20 +723,15 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           if (field === "type") {
             const newType = value;
             updated.type = newType;
-            const valueCheck = validateAndFormatValue(updated.value, newType, {
-              allowEmpty: false,
-            });
+            const valueCheck = validateAndFormatValue(updated.value, newType);
             updated.value = valueCheck.ok ? valueCheck.value : fallbackValueForType(newType);
             const defaultCheck = validateAndFormatValue(
               updated.defaultValue,
-              newType,
-              { allowEmpty: true }
+              newType
             );
             updated.defaultValue = defaultCheck.ok ? defaultCheck.value : "";
           } else if (field === "value") {
-            const valueCheck = validateAndFormatValue(value, updated.type, {
-              allowEmpty: false,
-            });
+            const valueCheck = validateAndFormatValue(value, updated.type);
             updated[field] = valueCheck.ok ? valueCheck.value : value;
 
             // Clear missing variable error if value is provided
@@ -764,9 +745,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
               }
             }
           } else if (field === "defaultValue") {
-            const defaultCheck = validateAndFormatValue(value, updated.type, {
-              allowEmpty: true,
-            });
+            const defaultCheck = validateAndFormatValue(value, updated.type);
             updated[field] = defaultCheck.ok ? defaultCheck.value : value;
 
             // Clear missing variable error if default value is provided and no main value exists
@@ -873,81 +852,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   //   );
   // }, [activeGroupId, applyDraftUpdate]);
 
-  const handleGroupSelect = useCallback(
-    (groupId) => {
-      dispatch(
-        setActiveVariableGroup({
-          bridgeId: params.id,
-          versionId,
-          groupId,
-        })
-      );
-    },
-    [dispatch, params.id, versionId]
-  );
-
-  const handleOpenCreateGroup = useCallback(() => {
-    setGroupEditor({
-      mode: "create",
-      value: "",
-      error: "",
-      groupId: null,
-    });
-  }, []);
-
-  const handleOpenRenameGroup = useCallback(() => {
-    if (!activeGroup) return;
-    setGroupEditor({
-      mode: "rename",
-      value: activeGroup.name || "",
-      error: "",
-      groupId: activeGroup.id,
-    });
-  }, [activeGroup]);
-
-  const handleGroupEditorSubmit = useCallback(() => {
-    const trimmed = groupEditor.value.trim();
-    if (!trimmed) {
-      setGroupEditor((prev) => ({ ...prev, error: "Group name is required." }));
-      return;
-    }
-
-    if (groupEditor.mode === "create") {
-      dispatch(
-        createVariableGroup({
-          bridgeId: params.id,
-          versionId,
-          groupName: trimmed,
-        })
-      );
-    } else if (groupEditor.mode === "rename" && groupEditor.groupId) {
-      dispatch(
-        renameVariableGroup({
-          bridgeId: params.id,
-          versionId,
-          groupId: groupEditor.groupId,
-          newName: trimmed,
-        })
-      );
-    }
-    setGroupEditor({ mode: "idle", value: "", error: "", groupId: null });
-  }, [dispatch, groupEditor, params.id, versionId]);
-
-  const handleGroupEditorCancel = useCallback(() => {
-    setGroupEditor({ mode: "idle", value: "", error: "", groupId: null });
-  }, []);
-
-  const handleDeleteGroup = useCallback(() => {
-    if (!activeGroup || variableGroups.length <= 1) return;
-    dispatch(
-      deleteVariableGroup({
-        bridgeId: params.id,
-        versionId,
-        groupId: activeGroup.id,
-      })
-    );
-  }, [activeGroup, dispatch, params.id, variableGroups.length, versionId]);
-
   const parseJsonToKeyValue = useCallback((jsonText) => {
     try {
       const parsed = JSON.parse(jsonText);
@@ -986,7 +890,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       if (jsonVariables) {
         const parsed = jsonVariables.map(({ key, value }) => {
           const type = inferType(value, '');
-          const valueCheck = validateAndFormatValue(value, type, { allowEmpty: false });
+          const valueCheck = validateAndFormatValue(value, type);
 
           return {
             key,
@@ -1043,7 +947,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
         }
 
         const type = inferType(value, '');
-        const valueCheck = validateAndFormatValue(value, type, { allowEmpty: false });
+        const valueCheck = validateAndFormatValue(value, type);
 
         parsed.push({
           key,
@@ -1077,15 +981,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
     commitVariables,
     parseJsonToKeyValue,
   ]);
-
-  useEffect(() => {
-    if (groupEditor.mode === "rename" && groupEditor.groupId === activeGroup?.id) {
-      setGroupEditor((prev) => ({
-        ...prev,
-        value: activeGroup?.name || "",
-      }));
-    }
-  }, [groupEditor.mode, groupEditor.groupId, activeGroup?.name, activeGroup?.id]);
 
   useEffect(() => {
     const slider = document.getElementById(SLIDER_ID);
@@ -1186,131 +1081,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
             <CloseIcon className="w-4 h-4" />
           </button>
         </header>
-
-
-
-        {/* Un comment this section when we have variable groups, this will be the feature for variable groups */}
-
-        {/* <section className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <InfoIcon className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-xs text-base-content/70">
-                Use <span className="font-medium text-primary">{"{{variable_name}}"}</span> inside
-                prompts or payloads. Select a group to activate it for the current session.
-              </span>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary btn-xs gap-1"
-              onClick={handleOpenCreateGroup}
-            >
-              <Plus size={14} />
-              New group
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {variableGroups?.length ? (
-              variableGroups.map((group) => {
-                const isActive = activeGroup?.id === group.id;
-                return (
-                  <button
-                    key={group.id}
-                    type="button"
-                    className={`btn btn-xs ${
-                      isActive ? "btn-primary" : "btn-ghost border border-base-300"
-                    } flex items-center gap-2`}
-                    onClick={() => handleGroupSelect(group.id)}
-                  >
-                    <span className="truncate max-w-[130px]" title={group.name}>
-                      {group.name}
-                    </span>
-                    <span
-                      className={`badge badge-xs ${isActive ? "badge-outline" : "badge-ghost"}`}
-                    >
-                      {group.variables?.length ?? 0}
-                    </span>
-                  </button>
-                );
-              })
-            ) : (
-              <span className="text-xs text-base-content/60">
-                Create your first group to start organising variables.
-              </span>
-            )}
-          </div>
-
-          {groupEditor.mode !== "idle" && (
-            <div className="rounded-lg border border-base-200 bg-base-100 p-3 space-y-2">
-              <div className="text-sm font-medium">
-                {groupEditor.mode === "create" ? "Create group" : "Rename group"}
-              </div>
-              <input
-                type="text"
-                value={groupEditor.value}
-                onChange={(event) =>
-                  setGroupEditor((prev) => ({
-                    ...prev,
-                    value: event.target.value,
-                    error: "",
-                  }))
-                }
-                className="input input-bordered input-sm w-full"
-                placeholder="Environment name"
-                autoFocus
-              />
-              {groupEditor.error && (
-                <p className="text-[11px] text-error">{groupEditor.error}</p>
-              )}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-primary btn-xs"
-                  onClick={handleGroupEditorSubmit}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs"
-                  onClick={handleGroupEditorCancel}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          {activeGroup && (
-            <div className="flex items-center gap-2 pt-1 border-t border-base-200 mt-1">
-              <span className="text-xs text-base-content/70">
-                Active group:{" "}
-                <span className="font-medium text-base-content">{activeGroup.name}</span>
-              </span>
-              <div className="flex items-center gap-2 ml-auto">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs gap-1"
-                  onClick={handleOpenRenameGroup}
-                >
-                  <Edit2 size={12} />
-                  Rename
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs gap-1 text-error"
-                  onClick={handleDeleteGroup}
-                  disabled={variableGroups.length <= 1}
-                >
-                  <Trash2 size={12} />
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
-        </section> */}
-
         <section className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 flex-1 flex flex-col">
           <div className="flex items-center justify-between border-b border-base-200 pb-3">
             <div>
