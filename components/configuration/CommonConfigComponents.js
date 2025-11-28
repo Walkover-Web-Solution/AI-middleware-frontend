@@ -20,17 +20,7 @@ const CommonConfigComponents = ({
 }) => {
     return (
         <>
-            {!isEmbedUser && <RecommendedModal
-                params={params}
-                searchParams={searchParams}
-                apiKeySectionRef={apiKeySectionRef}
-                promptTextAreaRef={promptTextAreaRef}
-                bridgeApiKey={bridgeApiKey}
-                shouldPromptShow={shouldPromptShow}
-                service={service}
-                deafultApiKeys={showDefaultApikeys}
-                isPublished={isPublished}
-            />}
+           
             <div className="flex flex-col sm:flex-row gap-2 items-start w-full max-w-md">
                 <div className="w-auto">
                     <ServiceDropdown
