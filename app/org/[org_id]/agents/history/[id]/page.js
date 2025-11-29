@@ -4,7 +4,7 @@ import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, userFeedbackCountAction, searchMessageHistoryAction } from "@/store/action/historyAction";
+import { getHistoryAction, searchMessageHistoryAction } from "@/store/action/historyAction";
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";

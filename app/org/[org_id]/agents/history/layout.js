@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, use } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getFromCookies } from "@/utils/utility";
-
 export default function layoutHistoryPage({ children, params }) {
     const resolvedParams = use(params);
     
