@@ -316,6 +316,11 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         if (threadId) searchParams.set('thread_id', threadId); 
         if (subThreadId) searchParams.set('sub_thread_id', subThreadId);       
         const url = `${baseUrl}/org/${orgId}/agents/history/${agentId}?${searchParams.toString()}`;
+        if (isEmbedUser) {
+          router.push(`/org/${orgId}/agents/history/${agentId}?${searchParams.toString()}`);
+          return;
+        }
+
         if (typeof window !== 'undefined') {
           window.open(url, '_blank', 'noopener,noreferrer');
         }
@@ -384,110 +389,72 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     setTimeout(() => window.openChatbot(), 100)
   }
 
-  // Render attachments (images / pdf / video) for a message bubble
+  // Render attachments (images / pdf) for a message bubble with simple UI
   const renderAttachments = (attachments = []) => {
     if (!attachments.length) return null;
-
-    const formatAttachmentName = (url = "") => {
-      if (!url) return "Attachment";
-      try {
-        const cleanUrl = decodeURIComponent(url.split("?")[0]);
-        const segments = cleanUrl.split("/");
-        return segments.pop() || "Attachment";
-      } catch (error) {
-        return "Attachment";
-      }
-    };
-
-    const getSourceLabel = (source) => (source && source.toLowerCase() === "user" ? "USER" : "LLM");
-
-    const openAttachment = (url) => {
-      if (!url) return;
-      if (typeof window !== "undefined") {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
-    };
 
     return (
       <div className="mb-4">
         <div className="flex flex-wrap gap-3">
           {attachments.map((attachment, index) => {
-            const attachmentUrl = attachment.resolvedUrl || attachment.permanent_url || attachment.url;
-
-            if (!attachmentUrl) {
+            const url = attachment.resolvedUrl || attachment.permanent_url || attachment.url;
+            if (!url) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
-                  <ImageFallback type="large" error="failed_to_load" />
+                  <ImageFallback type={attachment.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
                 </div>
               );
             }
 
-            const typeLabel = (attachment.normalizedType || "file").toUpperCase();
-            const sourceLabel = getSourceLabel(attachment.source);
-            const overlayLabel = `${typeLabel} - ${sourceLabel}`;
+            const isPdf = url.toLowerCase().endsWith(".pdf");
 
-            if (attachment.normalizedType === "video") {
+            // PDF style chip (same as provided snippet)
+            if (isPdf) {
               return (
-                <div key={`assistant-video-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
-                  <video
-                    src={attachmentUrl}
-                    controls
-                    className="w-full rounded-lg border border-base-300 bg-black max-h-96"
-                    preload="metadata"
-                  />
-                  <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide">
-                    {overlayLabel}
-                  </span>
+                <div key={`attachment-pdf-${index}`} className="pr-4">
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 p-2 text-primary bg-base-200 rounded-lg hover:bg-base-300 group"
+                  >
+                    <PdfIcon height={20} width={20} />
+                    <span className="text-sm font-medium max-w-[5rem] truncate text-primary">
+                      {truncate(url.split('/').pop() || 'PDF', 20)}
+                    </span>
+                    <ExternalLink className="text-primary" size={14} />
+                  </a>
                 </div>
               );
             }
 
-            if (attachment.normalizedType === "pdf" || attachment.normalizedType === "file") {
-              return (
-                <div key={`assistant-doc-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
-                  <div className="bg-base-100 border border-base-300 rounded-lg p-4 h-full flex flex-col gap-3">
-                    <div className="flex items-center justify-between text-xs text-base-content/70">
-                      <div className="flex items-center gap-2">
-                        {attachment.normalizedType === "pdf" ? (
-                          <PdfIcon height={20} width={20} />
-                        ) : (
-                          <FileTextIcon className="w-5 h-5" />
-                        )}
-                        <span className="font-semibold uppercase tracking-wide">{typeLabel}</span>
-                      </div>
-                      <span className="text-[10px] font-semibold uppercase bg-base-200 px-2 py-1 rounded-full tracking-wide text-base-content">
-                        {sourceLabel}
-                      </span>
-                    </div>
-                    <p className="text-sm font-medium break-words text-base-content">
-                      {truncate(formatAttachmentName(attachmentUrl), 40)}
-                    </p>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline w-fit"
-                      onClick={() => openAttachment(attachmentUrl)}
-                    >
-                      <ExternalLink size={14} />
-                      <span>Open</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            }
+            // Image thumbnail style (small for user, large for assistant/LLM)
+            const isUserSource = attachment.source === 'user';
+            const type = isUserSource ? 'small' : 'large';
+            const imgWidth = isUserSource ? 64 : 300;
+            const imgHeight = isUserSource ? 64 : 300;
+            const wrapperClasses = isUserSource
+              ? "pr-4 cursor-pointer"
+              : "relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px] cursor-pointer";
 
             return (
-              <div key={`assistant-img-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
+              <div
+                key={`attachment-img-${index}`}
+                className={wrapperClasses}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && url) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+              >
                 <EnhancedImage
-                  src={attachmentUrl}
+                  src={url}
                   alt={`Assistant attachment ${index + 1}`}
-                  width={280}
-                  height={180}
-                  className="max-w-full max-h-96 w-auto h-auto object-cover"
-                  type="large"
+                  width={imgWidth}
+                  height={imgHeight}
+                  className={`max-w-full ${isUserSource ? 'max-h-16' : 'max-h-96'} w-auto h-auto object-cover`}
+                  type={type}
                 />
-                <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-semibold px-2 py-1 rounded uppercase tracking-wide">
-                  {overlayLabel}
-                </span>
               </div>
             );
           })}
@@ -510,6 +477,9 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               </div>
               <div className="flex justify-start flex-row-reverse items-center gap-1" style={{ width: "-webkit-fill-available" }}>
                 <div className="chat-bubble-primary chat-bubble transition-all ease-in-out duration-300 relative group break-words" style={{ wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
+                  {/* User attachments - shown above message text */}
+                  {renderAttachments(normalizeImageUrls(item?.user_urls, "user"))}
+
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
                       <CodeBlock className={className} {...props}>
@@ -519,9 +489,6 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   }}>
                     {item.user}
                   </ReactMarkdown>
-
-                  {/* User attachments */}
-                  {renderAttachments(normalizeImageUrls(item?.user_urls, "user"))}
                 </div>
               </div>
               
@@ -575,7 +542,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                 </div>
               </div>
             </div>
-
+ 
         {/* 2. Second: Show Tools Call section if exists */}
         {(item?.tools_call_data?.length > 0 || item?.function) && (
           <div className="mb-2 text-sm flex flex-col justify-center items-center">
@@ -583,50 +550,52 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               <span className="flex justify-center items-center gap-2"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
             </h1>
             <div className="flex h-full gap-2 justify-center items-center flex-wrap">
-              {item?.tools_call_data ? item.tools_call_data.map((toolObj, index) => {
-                // Handle the new data structure where each tool is an object with complex keys
-                const toolKey = Object.keys(toolObj)[0]; // Get the first (and likely only) key
-                const tool = toolObj[toolKey]; // Get the tool data
-                
-                return (
-                  <div key={index} 
-                  onClick={(event) => handleToolPrimaryClick(event, tool)}
-                  className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 see">
-                    <div className="cursor-pointer flex items-center justify-center py-4 pl-2">
-                      <div className="text-center">
-                        <div className="font-medium text-sm">{tool?.name || 'Unknown'}</div>
+              {item?.tools_call_data
+                ? item.tools_call_data
+                    // tools_call_data can be an array of objects, each with multiple toolu_* keys
+                    .flatMap((toolObj) => Object.entries(toolObj || {}))
+                    .map(([toolKey, tool], index) => (
+                      <div
+                        key={toolKey || index}
+                        onClick={(event) => handleToolPrimaryClick(event, tool)}
+                        className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 see"
+                      >
+                        <div className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                          <div className="text-center">
+                            <div className="font-medium text-sm">{tool?.name || "Unknown"}</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <div
+                            className="tooltip tooltip-top relative text-base-content"
+                            data-tip="function logs"
+                          >
+                            <SquareFunctionIcon
+                              size={22}
+                              onClick={(event) => handleToolPrimaryClick(event, tool)}
+                              className="opacity-80 cursor-pointer"
+                            />
+                          </div>
+                          <div
+                            className="tooltip tooltip-top pr-2 relative text-base-content"
+                            data-tip="function data"
+                          >
+                            <FileClockIcon
+                              size={22}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setToolsData(tool);
+                                toolsDataModalRef.current?.showModal();
+                              }}
+                              className="opacity-80 bg-inherit cursor-pointer"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
-                        <SquareFunctionIcon size={22}
-                          onClick={(event) => handleToolPrimaryClick(event, tool)}
-                          className="opacity-80 cursor-pointer" />
-                      </div>
-                      <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
-                        <FileClockIcon
-                          size={22}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setToolsData(tool);
-                            toolsDataModalRef.current?.showModal();
-                          }}
-                          className="opacity-80 bg-inherit cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              }) : (item?.function ? Object.keys(item.function).map(renderToolData) : [])}
-              <button
-                className={`btn text-xs font-normal btn-sm  ${isLastMessage() ? '' : 'see-on-hover'}`}
-                onClick={() => handleAddTestCase(item, index)}
-              >
-                <div className="flex items-center gap-1 text-xs font-normal px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                  <AddIcon className="h-3 w-3" />
-                  <span>Test Case</span>
-                </div>
-              </button>
+                    ))
+                : item?.function
+                ? Object.keys(item.function).map(renderToolData)
+                : []}
             </div>
           </div>
         )}

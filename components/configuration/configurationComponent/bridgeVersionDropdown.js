@@ -410,9 +410,11 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                                                         {isPublished && (
                                                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full" title="Published Version"></span>
                                                         )}
-                                                        <span className="text-xs text-base-content/60 truncate max-w-24" title={versionDesc}>
-                                                            {versionDesc}
-                                                        </span>
+                                                        {isActive && (
+                                                            <span className="text-xs text-base-content/60 truncate max-w-24" title={versionDesc}>
+                                                                {versionDesc}
+                                                            </span>)}
+                                                       
                                                     </div>
                                                     
                                                     {/* Delete Button */}
