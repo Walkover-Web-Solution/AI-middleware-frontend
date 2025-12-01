@@ -11,8 +11,10 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
 
-const PreEmbedList = ({ params, searchParams }) => {
+const PreEmbedList = ({ params, searchParams, isPublished }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
@@ -20,24 +22,34 @@ const PreEmbedList = ({ params, searchParams }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken, variables_path } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        const serviceName = activeData?.service;
+        const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+        const modelName = activeData?.configuration?.model;
+        
         return {
             integrationData: orgData?.integrationData || {},
             function_data: orgData?.functionData || {},
-            bridge_pre_tools: versionData?.pre_tools || [],
+            bridge_pre_tools: isPublished ? (bridgeDataFromState?.pre_tools || []) : (versionData?.pre_tools || []),
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
-            variables_path: versionData?.variables_path || {},
+            variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
         };
     });
     const dispatch = useDispatch();
+    
+    // Delete operation hook
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE.DELETE_PRE_TOOL_MODAL);
+    
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
     const handleOpenModal = (functionId) => {
         setPreFunctionId(functionId);
@@ -54,8 +66,9 @@ const PreEmbedList = ({ params, searchParams }) => {
     };
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
-            pre_tools: [id],
-            version_id: searchParams?.version
+            pre_tools: id,
+            version_id: searchParams?.version,
+            status: "1"
         }));
         // Close dropdown after selection
         setTimeout(() => {
@@ -65,12 +78,14 @@ const PreEmbedList = ({ params, searchParams }) => {
         }, 0);
     }
 
-    const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: searchParams?.version
-        }))
-        closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
+    const removePreFunction = async () => {
+        await executeDelete(async () => {
+            return dispatch(updateApiAction(params.id, {
+                pre_tools: preFunctionId,
+                version_id: searchParams?.version,
+                status: "0"
+            }));
+        });
     }
 
     const handleChangePreTool = () => {
@@ -151,6 +166,7 @@ const PreEmbedList = ({ params, searchParams }) => {
         <>
             <div>
                 <FunctionParameterModal
+                    isPublished={isPublished}
                     name="Pre Tool"
                     functionId={preFunctionId}
                     Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
@@ -171,15 +187,18 @@ const PreEmbedList = ({ params, searchParams }) => {
                     title="Are you sure?"
                     description={"This action Remove the selected Pre Tool from the Agent."}
                     buttonTitle="Remove Pre Tool"
-                    modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
+                    modalType={MODAL_TYPE.DELETE_PRE_TOOL_MODAL}
+                    loading={isDeleting}
+                    isAsync={true}
                 />
 
-                <div className="label flex-col items-start w-full">
+                <div className="w-full max-w-md gap-2 flex flex-col px-2 cursor-default">
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {bridge_pre_tools.length > 0 ? (
-                            <div className="flex items-center gap-1 flex-row mb-2">
+                            <div className="flex items-center gap-1 mb-2">
+                                <p className="font-medium whitespace-nowrap">Pre Tool</p>
                                 <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                                    <p className="label-text info font-medium whitespace-nowrap">Pre Tool</p>
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                                 </InfoTooltip>
                             </div>
                         ) : (
@@ -187,12 +206,13 @@ const PreEmbedList = ({ params, searchParams }) => {
 
 
                                 <button
-                                tabIndex={0}
-                                className=" flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
-                            >
-                                <AddIcon className="w-4 h-4" />
-                                <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
-                            </button>
+                                    disabled={isPublished}
+                                    tabIndex={0}
+                                    className={` flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 ${isPublished ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <AddIcon className="w-4 h-4" />
+                                    <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
+                                </button>
                             </InfoTooltip>
                         )}
                         <EmbedListSuggestionDropdownMenu
@@ -208,6 +228,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                     </div>
                     <div className="w-full">
                         <RenderEmbed
+                            isPublished={isPublished}
                             bridgeFunctions={bridgePreFunctions}
                             integrationData={integrationData}
                             getStatusClass={getStatusClass}
@@ -218,6 +239,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                             handleRemoveEmbed={removePreFunction}
                             handleOpenDeleteModal={handleOpenDeleteModal}
                             handleChangePreTool={handleChangePreTool}
+                            halfLength={1}
                         />
                     </div>
 

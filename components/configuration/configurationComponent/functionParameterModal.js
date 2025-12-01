@@ -13,10 +13,11 @@ import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { ChevronsUpDown, PlusCircleIcon } from "lucide-react";
+import { ChevronsUpDown, PlusCircleIcon, CircleQuestionMark } from "lucide-react";
 
 // Parameter Card Component
 const ParameterCard = ({
+  isPublished,
   paramKey,
   param,
   depth = 0,
@@ -60,6 +61,7 @@ const ParameterCard = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 justify-between w-full">
           <input
+            disabled={isPublished}
             type="text"
             value={editingName}
             className="w-1/2 text-xs font-medium bg-transparent p-0 focus:outline-none"
@@ -68,9 +70,9 @@ const ParameterCard = ({
               setEditingName(e.target.value);
             }}
             onBlur={(e) => {
-              if (onParameterNameChange && e.target.value.trim() !== paramKey && e.target.value.trim() !== '') {
+              if (onParameterNameChange && e?.target.value?.trim() !== paramKey && e?.target.value?.trim() !== '') {
                 onParameterNameChange(currentPath, e.target.value.trim(), paramKey);
-              } else if (e.target.value.trim() === '') {
+              } else if (e?.target.value?.trim() === '') {
                 setEditingName(paramKey); // Reset to original if empty
               }
             }}
@@ -116,6 +118,7 @@ const ParameterCard = ({
                   }
                 })()}
                 disabled={(() => {
+                  if (isPublished) return true;
                   const keyParts = currentPath.split(".");
                   if (keyParts.length === 1) {
                     // Top-level parameters are always enabled
@@ -233,7 +236,7 @@ const ParameterCard = ({
                 type="checkbox"
                 className="checkbox checkbox-xs"
                 checked={!(currentPath in variablesPath)}
-                disabled={name === "Pre Tool"}
+                disabled={name === "Pre Tool" || isPublished}
                 onChange={() => {
                   const updatedVariablesPath = { ...variablesPath };
                   if (currentPath in updatedVariablesPath) {
@@ -251,6 +254,7 @@ const ParameterCard = ({
         
         <div className="flex items-center gap-2 text-xs">
           <select
+            disabled={isPublished}
             className="select select-xs select-bordered text-xs"
             value={param.type || "string"}
             onChange={(e) => onTypeChange(currentPath, e.target.value)}
@@ -265,6 +269,7 @@ const ParameterCard = ({
             onClick={() => onDelete(currentPath)}
             className="btn btn-sm btn-ghost text-error text-xs"
             title="Delete parameter"
+            disabled={isPublished}
           >
             <TrashIcon size={14} />
           </button>
@@ -289,6 +294,7 @@ const ParameterCard = ({
       {param.type !== "object" && (
           <div className="flex items-center gap-1 text-xs mb-1">
             <input
+              disabled={isPublished}
               type="checkbox"
               className="checkbox checkbox-xs"
               checked={param.hasOwnProperty('enum')}
@@ -304,6 +310,7 @@ const ParameterCard = ({
           
           {param.hasOwnProperty('enum') && (
             <input
+              disabled={isPublished}
               type="text"
               placeholder="['a','b','c']"
               className="input input-xs input-bordered text-xs"
@@ -327,6 +334,7 @@ const ParameterCard = ({
             <div className="mb-1 flex flex-row ml-1 items-center justify-end">
               <label className="block text-xs mb-0 mr-1">Value Path:</label>
               <input
+                disabled={isPublished}
                 type="text"
                 placeholder="your_path"
                 className={`input input-xs input-bordered text-xs ${
@@ -357,6 +365,7 @@ const ParameterCard = ({
             </button>
             <button
               onClick={() => onAddChild(currentPath)}
+              disabled={isPublished}
               className="btn btn-sm btn-ghost text-primary gap-1"
               title="Add property"
             >
@@ -370,6 +379,7 @@ const ParameterCard = ({
             <div className="space-y-1">
               {Object.entries(param.parameter).map(([childKey, childParam], index) => (
                 <ParameterCard
+                 isPublished={isPublished}
                   key={childKey}
                   paramKey={childKey}
                   param={childParam}
@@ -399,6 +409,7 @@ const ParameterCard = ({
 };
 
 function FunctionParameterModal({
+  isPublished,
   name = "",
   functionId = "",
   Model_Name,
@@ -721,7 +732,7 @@ function FunctionParameterModal({
   }, [updateField]);
 
   const handleParameterNameChange = useCallback((currentPath, newName, oldName) => {
-    if (!newName.trim() || newName === oldName) return;
+    if (!newName?.trim() || newName === oldName) return;
     
     const keyParts = currentPath.split(".");
     const parentPath = keyParts.slice(0, -1);
@@ -790,7 +801,7 @@ function FunctionParameterModal({
   }, [updateField]);
 
   const handleToolNameChange = useCallback(() => {
-    if (toolName.trim() === "") {
+    if (toolName?.trim() === "") {
       toast.error("Agent name cannot be empty");
       return;
     }
@@ -801,7 +812,7 @@ function FunctionParameterModal({
       handleUpdateFlow();
     }
 
-    if ((tool_name.trim() !== toolName.trim())) {
+    if ((tool_name?.trim() !== toolName?.trim())) {
       handleToolNameChange();
     }
     handleSave();
@@ -1075,6 +1086,7 @@ function FunctionParameterModal({
           <h2 className="text-lg font-semibold">Config {name}</h2>
           <div className="flex justify-end gap-2 mt-1">
             <select 
+              disabled={isPublished}
               className="select select-xs select-bordered text-xs min-w-20"
               value={isTextareaVisible ? 'advanced' : 'simple'}
               onChange={(e) => {
@@ -1124,10 +1136,13 @@ function FunctionParameterModal({
             {(name === 'Agent' || (name === 'orchestralAgent' && isMasterAgent)) && (
               <div className="flex items-center justify-between gap-1 mr-12 text-xs">
                 <div className="flex items-center gap-2">
-                  <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
-                    <label className="label p-0 info flex items-center">
-                      <span className="mr-2">Agent's Thread ID</span>
+                  <label className="label p-0 flex items-center gap-1">
+                    <span className="mr-2">Agent's Thread ID</span>
+                    <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
+                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
                       <input
+                        disabled={isPublished}
                         type="checkbox"
                         className="toggle toggle-sm"
                         onChange={(e) => {
@@ -1137,19 +1152,20 @@ function FunctionParameterModal({
                         checked={!!toolData?.thread_id}
                         title="Toggle to include thread_id while calling function"
                       />
-                    </label>
-                  </InfoTooltip>
+                  </label>
                 </div>
 
                 {Array.isArray(versions) && versions.length > 0 && (
                   <div className="flex flex-row ml-2">
                     <div className="form-control flex flex-row w-full max-w-xs items-center">
-                      <label className="label">
+                      <label className="label flex items-center gap-1">
+                        <span className="label-text">Agent's Version</span>
                         <InfoTooltip tooltipContent="Select the version of the agent you want to use.">
-                          <span className="label-text info">Agent's Version</span>
+                          <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
                       </label>
                       <select
+                        disabled={isPublished}
                         className="select select-xs select-bordered ml-2"
                         value={toolData?.version_id || (publishedVersion ? 'published' : '')}
                         onChange={(e) => {
@@ -1192,6 +1208,7 @@ function FunctionParameterModal({
               <div className="flex items-center text-sm gap-3">
                 <p>Check for old data</p>
                 <input
+                  disabled={isPublished}
                   type="checkbox"
                   className="toggle toggle-sm"
                   checked={isOldFieldViewTrue}
@@ -1225,6 +1242,7 @@ function FunctionParameterModal({
             {/* Name and Description Toggle */}
             <div className="mb-3">
               <button
+                disabled={isPublished}
                 onClick={() => setShowNameDescription(!showNameDescription)}
                 className="flex items-center gap-2 text-xs  font-semibold text-base-content transition-colors"
               >
@@ -1254,7 +1272,8 @@ function FunctionParameterModal({
                             setIsModified(true);
                           }}
                           maxLength={50}
-                          placeholder="Enter tool name"></input>
+                          placeholder="Enter tool name"
+                          disabled={isPublished}></input>
                     )}
                   </div>
 
@@ -1264,6 +1283,7 @@ function FunctionParameterModal({
                       Description
                     </label>
                     <textarea
+                      disabled={isPublished}
                       className="textarea bg-white dark:bg-black/15 textarea-sm textarea-bordered w-full resize-y"
                       rows={2}
                       value={toolData?.description || ""}
@@ -1281,6 +1301,7 @@ function FunctionParameterModal({
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold text-xs text-base-content">Parameters</h3>
               <button
+                disabled={isPublished}
                 onClick={handleAddParameter}
                 className="btn btn-sm btn-primary gap-1"
               >
@@ -1292,6 +1313,7 @@ function FunctionParameterModal({
               {Object.entries(toolData?.fields || {}).length > 0 ? (
                 Object.entries(toolData?.fields || {}).map(([key, param]) => (
                   <ParameterCard
+                    isPublished={isPublished}
                     key={key}
                     paramKey={key}
                     param={param}
@@ -1323,6 +1345,7 @@ function FunctionParameterModal({
         ) : (
           <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
             <textarea
+            disabled={isPublished}
               type="input"
               value={objectFieldValue}
               className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
@@ -1332,6 +1355,7 @@ function FunctionParameterModal({
             />
             {isOldFieldViewTrue && (
               <textarea
+              disabled={isPublished}
                 type="text"
                 value={
                   toolData?.old_fields
@@ -1354,7 +1378,7 @@ function FunctionParameterModal({
             <button
               className="btn btn-sm btn-primary"
               onClick={handleSaveData}
-              disabled={!isModified || isLoading}
+              disabled={!isModified || isLoading || isPublished}
             >
               {isLoading && <span className="loading loading-spinner"></span>}
               Save

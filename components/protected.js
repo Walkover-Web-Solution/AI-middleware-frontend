@@ -14,15 +14,15 @@ const Protected = (WrappedComponent) => {
       isEmbedUserFromUserDetails: state?.userDetailsReducer?.userDetails?.meta?.type === 'embed'
     }));
     useEffect(() => {
-      if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && (!isEmbedUser || !isEmbedUserFromUserDetails)) {
+      if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("local_token")) && (!isEmbedUser || !isEmbedUserFromUserDetails)) {
         if (window.location.href !== '/login') {
-          setInCookies("previous_url", window.location.href);
+          // setInCookies("previous_url", window.location.href);
         }
         router.replace('/login');
       }
     }, [router]);
 
-    return <WrappedComponent {...props} isEmbedUser={!!((isEmbedUser|| isEmbedUserFromUserDetails) && sessionStorage.getItem("proxy_token"))} isFocus={isFocus} />;
+    return <WrappedComponent {...props} isEmbedUser={!!((isEmbedUser|| isEmbedUserFromUserDetails) && sessionStorage.getItem("local_token"))} isFocus={isFocus} />;
   };
   return ProtectedComponent;
 };

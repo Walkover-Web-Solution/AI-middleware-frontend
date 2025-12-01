@@ -3,22 +3,26 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false ,isPublished}) => {
     const dispatch = useDispatch();
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
-        const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         const apikeys = state?.apiKeysReducer?.apikeys || {};
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
 
         return {
-            bridge: bridgeMap,
+            bridge: activeData || {},
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
-            bridgeApikey_object_id: bridgeMap?.apikey_object_id,
-            currentService: bridgeMap?.service,
+            bridgeApikey_object_id: isPublished ? (bridgeDataFromState?.apikey_object_id) : (versionData?.apikey_object_id),
+            currentService: isPublished ? (bridgeDataFromState?.service) : (versionData?.service),
         };
     });
 
@@ -49,11 +53,6 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
         return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey?._id;
     }, [apikeydata, bridgeApikey_object_id, bridge?.service]);
 
-    const truncateText = (text, maxLength) => {
-        return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-    };
-    const maxChar = 20;
-
     // Build dropdown options
     const dropdownOptions = useMemo(() => {
         const opts = [];
@@ -72,9 +71,11 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
         return opts;
     }, [filteredApiKeys, bridge.service]);
 
+
     return (
-        <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef}>
+        <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
             <Dropdown
+            disabled={isPublished}
                 options={dropdownOptions}
                 value={selectedValue || ''}
                 onChange={(val) => handleDropdownChange(val)}
@@ -82,10 +83,11 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
                 showSearch
                 searchPlaceholder="Search API keys..."
                 size="sm"
-                className="btn btn-sm border-base-content/20 bg-base-100 w-full justify-between font-normal"
+                className="btn btn-sm border-base-content/20 bg-base-100 w-auto justify-between font-normal px-3 min-w-[150px]"
                 maxLabelLength={20}
-                menuClassName="w-full"
+                menuClassName="w-full min-w-[200px]"
             />
+
             <ApiKeyModal params={params} searchParams={searchParams} service={currentService} bridgeApikey_object_id={bridgeApikey_object_id} />
         </div>
     );

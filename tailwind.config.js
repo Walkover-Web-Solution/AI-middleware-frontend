@@ -49,9 +49,9 @@ module.exports = {
           "color-scheme": "light",
 
           /* Light: canvas soft warm gray, cards white, borders gentle gray */
-          "base-100": "oklch(99% 0.005 95)",  // canvas (very soft gray)
+           "base-100": "oklch(99% 0.005 95)",  // canvas (very soft gray)
           "base-200": "oklch(98% 0 0)",       // cards/panels (white-ish)
-          "base-300": "oklch(93.5% 0 0)",     // borders/dividers
+          "base-300": "oklch(93.5% 0 0)",
           "base-400": "oklch(100% 0 0)",
           "base-content": "oklch(26% 0 0)",   // soft dark gray text
 

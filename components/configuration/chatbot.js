@@ -3,22 +3,66 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import LoadingSpinner from "@/components/loadingSpinner";
 
 const Chatbot = ({ params, searchParams }) => {
-  const [isLoading, setIsLoading] = useState(true); 
-  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => ({
-    bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
-    bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    chatbot_token: state?.ChatBot?.chatbot_token || '',
-    variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
-    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
-    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
-  }));
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Memoize isPublished to make it reactive to searchParams changes
+  const isPublished = useMemo(() => {
+    // Handle both URLSearchParams object and plain object
+    let result;
+    if (searchParams?.get) {
+      // URLSearchParams object
+      result = searchParams.get('isPublished') === 'true';
+    } else {
+      // Plain object
+      result = searchParams?.isPublished === 'true';
+    }
+    return result;
+  }, [searchParams]); 
+  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => {
+    const versionState = state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version] || {};
+    return {
+      bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
+      bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+      bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+      chatbot_token: state?.ChatBot?.chatbot_token || '',
+      variablesKeyValue: versionState?.variables || [],
+      configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
+      service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
+    };
+  });
 
   // Convert variables array to object
   const variables = useMemo(() => {
+    const coerceValue = (rawValue, fallback, type) => {
+      const candidate = rawValue ?? fallback ?? "";
+      const trimmed = typeof candidate === "string" ? candidate.trim() : candidate;
+      if (type === "number") {
+        const parsed = Number(trimmed);
+        return Number.isNaN(parsed) ? trimmed : parsed;
+      }
+      if (type === "boolean") {
+        if (typeof trimmed === "boolean") return trimmed;
+        return String(trimmed).toLowerCase() === "true";
+      }
+      if (type === "object" || type === "array") {
+        try {
+          const parsed = typeof trimmed === "string" ? JSON.parse(trimmed) : trimmed;
+          return parsed;
+        } catch (err) {
+          return trimmed;
+        }
+      }
+      return candidate;
+    };
+
     return variablesKeyValue.reduce((acc, pair) => {
-      if (pair.key && pair.value) {
-        acc[pair.key] = pair.value;
+      if (!pair?.key) {
+        return acc;
+      }
+      const resolved =
+        pair.value && String(pair.value).length > 0 ? pair.value : pair.defaultValue;
+      if (resolved !== undefined) {
+        acc[pair.key] = coerceValue(pair.value, pair.defaultValue, pair.type || "string");
       }
       return acc;
     }, {});
@@ -73,7 +117,15 @@ const Chatbot = ({ params, searchParams }) => {
 
   // Initialize chatbot when all required data is available
   useEffect(() => {
-    if (!bridgeName || !bridgeSlugName || !searchParams?.version) {
+    // Get version from searchParams (handle both formats)
+    const version = searchParams?.get ? searchParams.get('version') : searchParams?.version;
+    
+    if (!bridgeName || !bridgeSlugName) {
+      return;
+    }
+    
+    // For published mode, we don't need a version, for draft mode we do
+    if (!isPublished && !version) {
       return;
     }
 
@@ -87,14 +139,14 @@ const Chatbot = ({ params, searchParams }) => {
           "fullScreen": true,
           "hideCloseButton": false,
           "hideIcon": true,
-          "version_id": searchParams?.version,
+          "version_id": isPublished ? "null" : version,
           "variables": variables || {}
         });
         clearInterval(intervalId);
       }
     }, 300);
 
-  }, [chatbot_token, searchParams?.version, bridgeSlugName, bridgeName, variables]);
+  }, [chatbot_token, searchParams, isPublished, bridgeSlugName, bridgeName, variables]);
 
   return (
     <>

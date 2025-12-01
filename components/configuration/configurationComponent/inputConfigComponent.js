@@ -3,8 +3,6 @@ import { usePromptSelector } from '@/customHooks/useOptimizedSelector';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
-import ToneDropdown from './toneDropdown';
-import ResponseStyleDropdown from './responseStyleDropdown';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 import PromptHeader from './PromptHeader';
 import PromptTextarea from './PromptTextarea';
@@ -23,11 +21,12 @@ const InputConfigComponent = memo(({
     setPromptState,
     handleCloseTextAreaFocus,
     savePrompt,
-    isMobileView
+    isMobileView,
+    closeHelperButtonLocation,
+    isPublished
 }) => {
     // Optimized Redux selector with memoization and shallow comparison
     const { prompt: reduxPrompt } = usePromptSelector(params, searchParams);
-    
     // Refs for zero-render typing experience
     const debounceTimerRef = useRef(null);
     const oldContentRef = useRef(reduxPrompt);
@@ -64,9 +63,9 @@ const InputConfigComponent = memo(({
         }, 500); // Longer debounce since it's just for diff modal
     }, [reduxPrompt, promptState.hasUnsavedChanges, setPromptState]);
     
-    // Optimized save handler using current ref value
+    // Optimized save handler using current editor text (contentEditable div)
     const handleSavePrompt = useCallback(() => {
-        const currentValue = textareaRef.current?.value;
+        const currentValue = (textareaRef.current?.innerText || '').trim();
         savePrompt(currentValue);
         oldContentRef.current = currentValue;
         hasUnsavedChangesRef.current = false;
@@ -94,6 +93,19 @@ const InputConfigComponent = memo(({
             }
         }
     }, [uiState.isPromptHelperOpen, updateUiState]);
+
+    const handleOpenPromptHelper = useCallback(() => {
+        if (!uiState.isPromptHelperOpen && window.innerWidth > 710) {
+            updateUiState({ isPromptHelperOpen: true });
+            if (typeof window.closeTechDoc === 'function') {
+                window.closeTechDoc();
+            }
+        }
+    }, [uiState.isPromptHelperOpen, updateUiState]);
+
+    const handleClosePromptHelper = useCallback(() => {
+        updateUiState({ isPromptHelperOpen: false });
+    }, [updateUiState]);
     
     // Memoized values to prevent recalculation
     const isDisabled = useMemo(() => 
@@ -126,25 +138,24 @@ const InputConfigComponent = memo(({
                 isPromptHelperOpen={uiState.isPromptHelperOpen}
                 isMobileView={isMobileView}
                 onOpenDiff={handleOpenDiffModal}
+                onOpenPromptHelper={handleOpenPromptHelper}
+                onClosePromptHelper={handleClosePromptHelper}
                 disabled={isDisabled}
+                handleCloseTextAreaFocus={handleCloseTextAreaFocus}
+                isPublished={isPublished}
             />
             
-            <div className="form-control h-full relative">
+            <div className="form-control relative">
                 <PromptTextarea
                     textareaRef={textareaRef}
                     initialValue={reduxPrompt}
                     onChange={handlePromptChange}
-                    onFocus={handleTextareaFocus}
                     isPromptHelperOpen={uiState.isPromptHelperOpen}
                     onKeyDown={handleKeyDown}
+                    isPublished={isPublished}
                 />
                 
-                <DefaultVariablesSection />
-            </div>
-
-            <div className='flex flex-row gap-2 mt-8'>
-                <ToneDropdown params={params} searchParams={searchParams} />
-                <ResponseStyleDropdown params={params} searchParams={searchParams} />
+                <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt}/>
             </div>
 
             <Diff_Modal oldContent={oldContentRef.current} newContent={promptState.newContent} />

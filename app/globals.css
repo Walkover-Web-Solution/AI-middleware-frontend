@@ -127,12 +127,10 @@ html {
   }
 }
 
-.show-on-hover{
-  &:hover .see-on-hover{
-    opacity: 1 !important;
-  }
+.show-on-hover:hover .see-on-hover {
+  opacity: 1 !important;
 }
-.see-on-hover{
+.see-on-hover {
   opacity: 0;
 }
 

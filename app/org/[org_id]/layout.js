@@ -3,35 +3,35 @@ import dynamic from "next/dynamic";
 import ErrorPage from "@/app/not-found";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
-import { getSingleMessage, switchOrg } from "@/config";
+import { getSingleMessage, switchOrg, switchUser } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateUserMetaOnboarding } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { MODAL_TYPE } from "@/utils/enums";
-import { getFromCookies, openModal, setInCookies } from "@/utils/utility";
+import { getFromCookies, removeCookie } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
-import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { getAllAuthData } from "@/store/action/authkeyAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
+import { setInCookies } from "@/utils/utility";
+import ServiceInitializer from "@/components/organization/ServiceInitializer";
 
-const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
-const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
-const ChatDetails = dynamic(() => import("@/components/historyPageComponents/chatDetails"), {loading: () => <LoadingSpinner />});
+const Navbar = dynamic(() => import("@/components/navbar"), { loading: () => <LoadingSpinner /> });
+const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), { loading: () => <LoadingSpinner /> });
+const ChatDetails = dynamic(() => import("@/components/historyPageComponents/chatDetails"), { loading: () => <LoadingSpinner /> });
 
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
@@ -42,11 +42,11 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  
+
   const resolvedParams = use(params);
   const resolvedSearchParams = useSearchParams();
 
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token, currrentOrgDetail } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
@@ -55,93 +55,111 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
+    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   }));
   useEffect(() => {
-    dispatch(getTutorialDataAction()); 
+    dispatch(getTutorialDataAction());
+    if (pathName.endsWith("agents")) {
+      dispatch(getFinishReasonsAction());
+    }
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
       dispatch(getDescriptionsAction());
     }
-    if (pathName.endsWith("apikeys")&& !isEmbedUser) {
-      dispatch(getApiKeyGuideAction()); 
+    if (pathName.endsWith("apikeys") && !isEmbedUser) {
+      dispatch(getApiKeyGuideAction());
     }
-    
+
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
-        const utmSource = getFromCookies("utm_source");
-        const utmMedium = getFromCookies("utm_medium");
-        const utmCampaign = getFromCookies("utm_campaign");
-        const utmTerm = getFromCookies("utm_term");
-        const utmContent = getFromCookies("utm_content");
-        let currentUserMeta = currentUser?.meta;
-      
+      const reference_id = getFromCookies("reference_id");
+      const unlimited_access = getFromCookies("unlimited_access");
+      const utmSource = getFromCookies("utm_source");
+      const utmMedium = getFromCookies("utm_medium");
+      const utmCampaign = getFromCookies("utm_campaign");
+      const utmTerm = getFromCookies("utm_term");
+      const utmContent = getFromCookies("utm_content");
+      let currentUserMeta = currentUser?.meta;
+
       // Build UTM object with only present values from URL that are NOT already in user meta
       const utmParams = {};
+      const paramsUpdate = {}
       if (utmSource && !currentUser?.meta?.utm_source) utmParams.utm_source = utmSource;
       if (utmMedium && !currentUser?.meta?.utm_medium) utmParams.utm_medium = utmMedium;
       if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
       if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
       if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
+      if (reference_id && !currentUser?.meta?.reference_id) paramsUpdate.reference_id = reference_id;
+      if (unlimited_access && !currrentOrgDetail?.meta?.unlimited_access) paramsUpdate.unlimited_access = unlimited_access;
 
       // Check if we need to update user meta (either null meta or new UTM params
-
-      if (currentUser?.meta===null) {
-        try {
-          // If UTM params exist, store marketing ref first
-          if (Object.keys(utmParams).length > 0) {
-            await dispatch(
-              storeMarketingRefUserAction({
-                ...utmParams,
-                client_id: currentUser.id,
-                client_email: currentUser.email,
-                client_name: currentUser.name,
-                created_at: currentUser.created_at,
-              })
-            );
-          }
-
-          // Single call to update user meta with all data
-          const updatedUser = {
-            ...currentUser,
-            meta: {
-              // If meta is null, initialize onboarding, otherwise use existing meta
-              ...(currentUser?.meta === null ? {
-                onboarding: {
-                  bridgeCreation: true,
-                  FunctionCreation: true,
-                  knowledgeBase: true,
-                  Addvariables: true,
-                  AdvanceParameter: true,
-                  PauthKey: true,
-                  CompleteBridgeSetup: true,
-                  TestCasesSetup: true
-                }
-              } : currentUserMeta),
-              // Add UTM params if they exist
+      try {
+        // If UTM params exist, store marketing ref first
+        if (Object.keys(utmParams).length > 0 || (Object.keys(utmParams).length === 1 && !utmParams.reference_id)) {
+          await dispatch(
+            storeMarketingRefUserAction({
               ...utmParams,
+              client_id: currentUser.id,
+              client_email: currentUser.email,
+              client_name: currentUser.name,
+              created_at: currentUser.created_at,
+            })
+          );
+        }
+
+        // Single call to update user meta with all data
+        const updatedUser = {
+          ...currentUser,
+          meta: {
+            // If meta is null, initialize onboarding, otherwise use existing meta
+            ...(currentUser?.meta === null ? {
+              onboarding: {
+                bridgeCreation: true,
+                FunctionCreation: true,
+                knowledgeBase: true,
+                Addvariables: true,
+                AdvanceParameter: true,
+                PauthKey: true,
+                CompleteBridgeSetup: true,
+                TestCasesSetup: true
+              }
+            } : currentUserMeta),
+            // Add UTM params if they exist
+            ...utmParams,
+            ...paramsUpdate,
+          },
+        };
+        if (paramsUpdate?.unlimited_access && !currrentOrgDetail?.meta?.unlimited_access) {
+          const updatedOrgDetails = {
+            ...currrentOrgDetail,
+            meta: {
+              ...currrentOrgDetail?.meta,
+              unlimited_access: true,
             },
           };
-
-          const data = await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-          if (data?.data?.status) {
-            currentUserMeta = data?.data?.data?.user?.meta;
-          }
-        } catch (err) {
-          console.error("Error updating user meta:", err);
+          dispatch(updateOrgMetaAction(resolvedParams.org_id, updatedOrgDetails));
+          removeCookie("unlimited_access");
         }
+
+        const data = (currentUserMeta?.meta === null || Object.keys(utmParams).length > 0 || Object.keys(paramsUpdate).length > 0) ? await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser)) : null;
+        if (data?.data?.status) {
+          currentUserMeta = data?.data?.data?.user?.meta;
+        }
+      } catch (err) {
+        console.error("Error updating user meta:", err);
       }
     };
-  
+
     updateUserMeta();
   }, []);
-  
+
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
 
-  
+
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -165,16 +183,14 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   useEffect(() => {
     if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-      dispatch(getServiceAction({ orgid: resolvedParams.orgid }))
+      dispatch(getServiceAction())
     }
   }, [SERVICES]);
 
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data?.length === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
-          openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)
-        }
+
         setLoading(false);
       }))
       dispatch(getAllFunctions())
@@ -188,7 +204,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
       dispatch(getPrebuiltPromptsAction())
       dispatch(getPrebuiltToolsAction())
-      dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
       dispatch(getAllAuthData())
@@ -239,6 +254,10 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         const orgId = getFromCookies("current_org_id");
         if (orgId !== resolvedParams?.org_id) {
           await switchOrg(resolvedParams?.org_id);
+          const currentOrg = organizations[resolvedParams?.org_id];
+          const localToken = await switchUser({ orgId: resolvedParams?.org_id, orgName: currentOrg?.name });
+          setInCookies('local_token', localToken.token);
+
         }
       }
     };
@@ -270,7 +289,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   const docstarScriptId = "docstar-main-script";
   const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
-
   useEffect(() => {
     const existingScript = document.getElementById(docstarScriptId);
     if (existingScript) {
@@ -338,7 +356,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
             {
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
-                  pre_tools: [data?._id],
+                  pre_tools: data?._id,
+                  status:"1",
                   version_id: resolvedSearchParams?.get('version')
                 }))
               )
@@ -387,12 +406,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus && <Navbar resolvedParams={resolvedParams} />}
+              <Navbar params={resolvedParams} searchParams={resolvedSearchParams} />
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              <main className={`px-2 h-full ${path.length > 4&& !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              <main className={`px-2 h-full ${path.length > 4 && !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-2rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
             </div>
           </div>
         </div>
@@ -408,6 +427,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           setIsSliderOpen={setIsSliderOpen}
           isSliderOpen={isSliderOpen}
         />
+        <ServiceInitializer />
       </div>
     );
   }
@@ -415,24 +435,24 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     return (
       <div className="h-screen flex flex-col overflow-hidden">
         <ThemeManager />
-          {/* Main Content Area for Embed Users */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              {!isFocus ? <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/> : null}
-            </div>
-
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <LoadingSpinner />
-                </div>
-              ) : (
-                <main className={`px-2 h-full ${path.length > 4 && !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
-              )}
-            </div>
+        {/* Main Content Area for Embed Users */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Sticky Navbar */}
+          <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
+            <Navbar params={resolvedParams} searchParams={resolvedSearchParams} />
           </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <LoadingSpinner />
+              </div>
+            ) : (
+              <main className={`px-2 h-full ${path.length > 4 && !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-2rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

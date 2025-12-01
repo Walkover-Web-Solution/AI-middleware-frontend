@@ -7,12 +7,18 @@ import ActionModel from './actionModel';
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
+import { CircleQuestionMark } from 'lucide-react';
 
-function ActionList({ params, searchParams }) {
-    const { action, bridgeType } = useCustomSelector((state) => ({
-        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.actions,
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
-    }));
+function ActionList({ params, searchParams , isPublished}) {
+    const { action, bridgeType } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+
+        return {
+            action: isPublished ? (bridgeDataFromState?.actions) : (versionData?.actions),
+            bridgeType: bridgeDataFromState?.bridgeType
+        };
+    });
 
     const dispatch = useDispatch();
     const [selectedKey, setSelectedKey] = useState(null);
@@ -39,10 +45,11 @@ function ActionList({ params, searchParams }) {
 
     return (
         <div className="form-control mb-4">
-            <div className='flex items-start'>
-                    <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
-                        <label className="label font-medium whitespace-nowrap info">Action</label>
-                    </InfoTooltip>
+            <div className='flex items-center gap-1'>
+                <label className="label font-medium whitespace-nowrap">Action</label>
+                <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
             </div>
             <div className='flex flex-wrap gap-4'>
                 {action && Object.entries(action).sort().map(([key, value]) => (
@@ -53,15 +60,16 @@ function ActionList({ params, searchParams }) {
                             setSelectedKey(key);
                             openModal(MODAL_TYPE.ACTION_MODAL)
                         }}
+                        disabled={isPublished}
                     >
                         <div className="p-4 w-full">
                             <div className='flex items-center justify-between'>
                                 <h1 className="inline-flex items-center text-lg font-semibold text-base-content">
                                     {key}
                                 </h1>
-                                <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
-                                    <TrashIcon size={16} className='cursor-pointer text-error' />
-                                </div>
+                                <button disabled={isPublished} onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 disabled:opacity-50 disabled:cursor-not-allowed transition duration-100 ease-in-out'>
+                                    <TrashIcon size={16} className='text-error' />
+                                </button>
                             </div>
                             <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                 Description: {value?.description}
@@ -82,7 +90,7 @@ function ActionList({ params, searchParams }) {
                     </div>
                 ))}
             </div>
-            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} />
+            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} isPublished={isPublished} />
         </div>
     );
 }

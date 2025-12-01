@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon } from '@/components/Icons';
+import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon, SquareFunctionIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { truncate } from '@/components/historyPageComponents/assistFile';
+import useExpandableList from '@/customHooks/useExpandableList';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -11,9 +13,12 @@ const RenderEmbed = ({
   handleRemoveEmbed,
   handleOpenDeleteModal,
   handleChangePreTool,
-  name
+  name,
+  halfLength = 1,
+  isPublished
 }) => {
-  const renderEmbed = useMemo(() => {
+  // Sort functions first
+  const sortedFunctions = useMemo(() => {
     return bridgeFunctions?.slice()
       .sort((a, b) => {
         const aFnName = a?.function_name || a?.endpoint;
@@ -23,8 +28,14 @@ const RenderEmbed = ({
         if (!aTitle) return 1;
         if (!bTitle) return -1;
         return aTitle?.localeCompare(bTitle);
-      })
-      .map((value) => {
+      }) || [];
+  }, [bridgeFunctions, integrationData]);
+
+  // Use expandable list hook
+  const { displayItems, isExpanded, toggleExpanded, shouldShowToggle, hiddenItemsCount } = useExpandableList(sortedFunctions, halfLength);
+
+  const renderEmbed = useMemo(() => {
+    const embedItems = displayItems?.map((value) => {
         const functionName = value?.function_name || value?.endpoint;
         const title = value?.title || integrationData?.[functionName]?.title;
         const status = value?.status || integrationData?.[functionName]?.status;
@@ -33,10 +44,10 @@ const RenderEmbed = ({
           <div
             key={value?._id}
             id={value?._id}
-            className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+            className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
           >
             <div
-              className="p-2 w-full h-full flex flex-col justify-between"
+              className="p-2 flex-1 flex items-center"
               onClick={() => openViasocket(functionName, {
                 embedToken,
                 meta: {
@@ -45,30 +56,24 @@ const RenderEmbed = ({
                 },
               })}
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                    <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
-                      <span>{ title}</span>
-                      <span
-                        className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!(value?.description || value?.api_description || value?.short_description)
-                          ? 'bg-red-100 text-red-700 border-red-200'
-                          : 'bg-green-100 text-green-700 border-green-200'}`}
-                      >
-                        {!(value?.description || value?.api_description || value?.short_description) ? 'Description Required' : 'Active'}
-                      </span>
-                    </div>
+              <div className="flex items-center gap-2 w-full">
+                <SquareFunctionIcon size={16} className="shrink-0" />
+                {title?.length > 24 ? (
+                  <div className="tooltip tooltip-top min-w-0" data-tip={title}>
+                    <span className="min-w-0 text-sm truncate">
+                      <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                    </span>
+                  </div>
+                ) : (
+                  <span className="min-w-0 text-sm truncate">
+                    <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
                   </span>
-                  {value?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
-                </div>
-                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                  {value?.description || value?.api_description || value?.short_description || 'A description is required for proper functionality.'}
-                </p>
+                )}
               </div>
             </div>
 
             {/* Action buttons that appear on hover */}
-            <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -87,6 +92,7 @@ const RenderEmbed = ({
                   }}
                   className="btn btn-ghost btn-sm p-1 hover:text-primary"
                   title="Change Pre Tool"
+                  disabled={isPublished}
                 >
                   <RefreshIcon size={16} />
                 </button>
@@ -98,6 +104,7 @@ const RenderEmbed = ({
                 }}
                 className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
+                disabled={isPublished}
               >
                 <TrashIcon size={16} />
               </button>
@@ -105,9 +112,17 @@ const RenderEmbed = ({
           </div>
         );
       });
-  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name]);
 
-  return <>{renderEmbed}</>;
+    return (
+      <div className="w-full">
+        <div className={`grid gap-2 w-full`}>
+          {embedItems}
+        </div>
+      </div>
+    );
+  }, [displayItems, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed, handleChangePreTool, name, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount]);
+
+  return renderEmbed;
 };
 
 export default RenderEmbed;
