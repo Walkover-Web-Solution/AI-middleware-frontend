@@ -1,10 +1,10 @@
 import { useCustomSelector } from "@/customHooks/customSelector.js";
-import { getHistoryAction, getSubThreadsAction, searchMessageHistoryAction, clearSearchAction } from "@/store/action/historyAction.js";
-import { clearSubThreadData, clearThreadData, setSearchQuery } from "@/store/reducer/historyReducer.js";
+import { getHistoryAction, getSubThreadsAction, searchMessageHistoryAction } from "@/store/action/historyAction.js";
+import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { formatRelativeTime} from "@/utils/utility.js";
 import { ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
-import { useEffect, useState, memo, useCallback, useMemo } from "react";
+import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -13,6 +13,44 @@ import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 import { FileTextIcon } from "lucide-react";
+
+const useDebouncedCallback = (callback, delay, deps = []) => {
+  const callbackRef = useRef(callback);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  const debouncedFn = useMemo(() => {
+    return (...args) => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      timerRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delay, ...deps]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  debouncedFn.cancel = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  return debouncedFn;
+};
 
 const Sidebar = memo(({ 
   historyData = [], 
@@ -33,32 +71,23 @@ const Sidebar = memo(({
   setIsErrorTrue, 
   isErrorTrue 
 }) => {
-  const { 
+  const {
     subThreads,
-    searchResults,
-    searchQuery,
-    searchLoading,
-    isSearchActive,
-    searchDateRange,
     userFeedbackCount,
     bridgeVersionsArray
   } = useCustomSelector(state => ({
     subThreads: Array.isArray(state?.historyReducer?.subThreads) ? state.historyReducer.subThreads : [],
-    searchResults: Array.isArray(state?.historyReducer?.search?.results) ? state.historyReducer.search.results : [],
-    searchQuery: state?.historyReducer?.search?.query || '',
-    searchLoading: state?.historyReducer?.search?.loading || false,
-    searchHasMore: state?.historyReducer?.search?.hasMore || true,
-    isSearchActive: state?.historyReducer?.search?.isActive || false,
-    searchDateRange: state?.historyReducer?.search?.dateRange || { start: null, end: null },
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
     bridgeVersionsArray: Array.isArray(state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions) ? state.bridgeReducer.allBridgesMap[params.id].versions : [],
   }));
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+
   // Memoized display data to ensure it's always an array
   const displayData = useMemo(() => {
-    const data = isSearchActive ? searchResults : historyData;
-    return Array.isArray(data) ? data : [];
-  }, [isSearchActive, searchResults, historyData]);
+    return Array.isArray(historyData) ? historyData : [];
+  }, [historyData]);
 
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
@@ -137,33 +166,23 @@ const Sidebar = memo(({
       setLoadingSubThreads(false);
     }, 1000);
   }, [subThreads]);
-  const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func(...args), delay);
-    };
-  };
-  useEffect(()=>{
-    if(searchParams?.message_id){
-      // Set the search query state and input value
-      dispatch(setSearchQuery(searchParams.message_id));
-      if (searchRef?.current) {
-        searchRef.current.value = searchParams.message_id;
-      }
-      handleChange();
-    }
-  },[searchParams?.message_id, dispatch])
-  const handleChange = useCallback(debounce((e) => {
-    const value = e?.target?.value || searchParams?.message_id || "";
-    dispatch(setSearchQuery(value));
-    handleSearch(e);
-  }, 500), [dispatch, searchParams?.message_id]);
+  const versionOptions = useMemo(() => {
+    return [
+      { value: "all", label: "All Versions" },
+      ...(bridgeVersionsArray?.map((version, index) => ({
+        value: version,
+        label: `Version ${index + 1}`
+      })) || []),
+    ];
+  }, [bridgeVersionsArray]);
 
-  const handleSearch = async (e) => {
-    e?.preventDefault();
-    if (e && e.target && e.target.value === '') {
-      clearInput();
+  const runSearch = useCallback(async (valueOverride) => {
+    const rawValue =
+      typeof valueOverride === "string"
+        ? valueOverride
+        : searchRef?.current?.value || searchParams?.message_id || "";
+
+    if (!rawValue?.trim()) {
       return;
     }
 
@@ -171,48 +190,47 @@ const Sidebar = memo(({
     setHasMore(true);
     setFilterOption("all");
     dispatch(clearSubThreadData());
+    setSearchLoading(true);
 
     try {
       const currentMessageId = searchParams?.message_id;
-      const searchValue = searchRef?.current?.value || searchParams?.message_id || "";
-      
-      // Get date range from search params or current state
-      const startDate = searchParams?.start || searchDateRange?.start;
-      const endDate = searchParams?.end || searchDateRange?.end;
-      
+      const startDate = searchParams?.start;
+      const endDate = searchParams?.end;
+
       const result = await dispatch(
         searchMessageHistoryAction({
-          bridgeId: params?.id, 
-          keyword: searchValue, 
+          bridgeId: params?.id,
+          keyword: rawValue,
           startDate,
-          endDate
+          endDate,
         })
       );
 
-      // Navigate with search parameters
+      setSearchQuery(rawValue);
       const searchUrl = new URL(window.location.href);
-      searchUrl.searchParams.set('version', searchParams?.version || 'all');
-      if (startDate) searchUrl.searchParams.set('start', startDate);
-      if (endDate) searchUrl.searchParams.set('end', endDate);
+      searchUrl.searchParams.set("version", searchParams?.version || "all");
+      if (startDate) searchUrl.searchParams.set("start", startDate);
+      if (endDate) searchUrl.searchParams.set("end", endDate);
       if (currentMessageId) {
-        searchUrl.searchParams.set('message_id', currentMessageId);
+        searchUrl.searchParams.set("message_id", currentMessageId);
       }
-
       router.push(searchUrl.pathname + searchUrl.search, undefined, { shallow: true });
 
       if (result?.data?.length) {
         const firstResult = result.data[0];
-        const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, '%26'));
-        const subThreadId = encodeURIComponent(firstResult.sub_thread?.[0]?.sub_thread_id || threadId.replace(/&/g, '%26'));
+        const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, "%26"));
+        const subThreadId = encodeURIComponent(
+          firstResult.sub_thread?.[0]?.sub_thread_id || threadId
+        );
 
         const resultUrl = new URL(window.location.href);
-        resultUrl.searchParams.set('version', searchParams?.version || 'all');
-        resultUrl.searchParams.set('thread_id', threadId);
-        resultUrl.searchParams.set('subThread_id', subThreadId);
-        if (startDate) resultUrl.searchParams.set('start', startDate);
-        if (endDate) resultUrl.searchParams.set('end', endDate);
+        resultUrl.searchParams.set("version", searchParams?.version || "all");
+        resultUrl.searchParams.set("thread_id", threadId);
+        resultUrl.searchParams.set("subThread_id", subThreadId);
+        if (startDate) resultUrl.searchParams.set("start", startDate);
+        if (endDate) resultUrl.searchParams.set("end", endDate);
         if (currentMessageId) {
-          resultUrl.searchParams.set('message_id', currentMessageId);
+          resultUrl.searchParams.set("message_id", currentMessageId);
         }
 
         router.push(resultUrl.pathname + resultUrl.search, undefined, { shallow: true });
@@ -221,14 +239,26 @@ const Sidebar = memo(({
       }
     } catch (error) {
       console.error("Search error:", error);
+    } finally {
+      setSearchLoading(false);
     }
-  };
+  }, [
+    dispatch,
+    params?.id,
+    router,
+    searchParams,
+    setFilterOption,
+    setHasMore,
+    setPage,
+  ]);
 
-  const clearInput = async () => {
-    // Clear search state using new search slice
-    dispatch(clearSearchAction());
+  const clearInput = useCallback(async () => {
     if (searchRef?.current) searchRef.current.value = "";
-    searchParams.delete('message_id');
+    const currentSearchParams = new URL(window.location.href);
+    currentSearchParams.searchParams.delete("message_id");
+    router.push(currentSearchParams.pathname + currentSearchParams.search, undefined, {
+      shallow: true,
+    });
     
     setPage(1);
     setHasMore(true);
@@ -283,7 +313,64 @@ const Sidebar = memo(({
     } catch (error) {
       console.error("Clear search error:", error);
     }
-  };
+  }, [
+    dispatch,
+    filterOption,
+    isErrorTrue,
+    params?.id,
+    router,
+    searchParams,
+    selectedVersion,
+    setFilterOption,
+    setHasMore,
+    setLoadingSubThreads,
+    setPage,
+    setExpandedThreads,
+  ]);
+
+  const debouncedSearch = useDebouncedCallback(
+    (value) => {
+      runSearch(value);
+    },
+    400,
+    [runSearch]
+  );
+
+  useEffect(() => {
+    if (searchParams?.message_id) {
+      const messageId = searchParams.message_id;
+      setSearchQuery(messageId);
+      if (searchRef?.current) {
+        searchRef.current.value = messageId;
+      }
+      debouncedSearch.cancel();
+      runSearch(messageId);
+    }
+  }, [debouncedSearch, dispatch, runSearch, searchParams?.message_id]);
+
+  const handleInputChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setSearchQuery(value);
+
+      if (!value.trim()) {
+        debouncedSearch.cancel();
+        clearInput();
+        return;
+      }
+      debouncedSearch(value);
+    },
+    [clearInput, debouncedSearch, dispatch]
+  );
+
+  const handleSearchSubmit = useCallback(
+    (e) => {
+      e?.preventDefault();
+      debouncedSearch.cancel();
+      runSearch();
+    },
+    [debouncedSearch, runSearch]
+  );
 
 
   const handleThreadIds = (id) => {
@@ -376,87 +463,117 @@ const Sidebar = memo(({
   return (
     <div className="drawer-side justify-items-stretch text-xs bg-base-200 min-w-[290px] max-w-[290px] border-r border-base-300 relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
-      <div className="p-2 gap-2 flex flex-col">
-        <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg min-h-0">
-          <input type="checkbox" className="peer" />
-          <div className="collapse-title font-semibold min-h-0 py-3 flex items-center">
-            <span className="text-xs">Advance Filter</span>
+      <div className="p-3 gap-3 flex flex-col">
+        <div className="rounded-xl border border-base-300 bg-base-100 shadow-sm p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-base-content/70">Search Threads</p>
+            {searchLoading && <span className="loading loading-spinner loading-xs text-primary" />}
           </div>
-          <div className="collapse-content px-3">
-            <div className="space-y-2">
-              <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue}/>
-              
-              <div className="p-2 bg-base-200 rounded-lg">
-                <p className="text-center mb-2 text-xs font-medium">Filter Response</p>
-                <div className="flex items-center justify-center mb-2 gap-2">
-                  {USER_FEEDBACK_FILTER_OPTIONS?.map((value, index) => (
-                    <label key={index} className="flex items-center gap-1 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="filterOption"
-                        value={value}
-                        checked={filterOption === value}
-                        onChange={() => handleFilterChange(value)}
-                        className={`radio radio-xs ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
-                      />
-                      {value === "all" ? <span className="text-xs">All</span> : value === "1" ? <ThumbsUpIcon size={12} /> : <ThumbsDownIcon size={12} />}
-                    </label>
-                  ))}
-                </div>
-                <p className="text-xs text-base-content mb-2 text-center">
-                  {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the agent is ${userFeedbackCount?.[filterOption === 'all' ? 0 : filterOption === '1' ? 1 : 2]}`}
-                </p>
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <input
+              type="text"
+              ref={searchRef}
+              placeholder="Search by ID or keyword"
+              onChange={handleInputChange}
+              className="input input-bordered input-sm w-full pr-16 text-xs"
+            />
+            <div className="absolute inset-y-0 right-2 flex items-center gap-1.5">
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={clearInput}
+                  className="btn btn-ghost btn-xs px-2 text-[10px] uppercase tracking-wide"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                type="submit"
+                className="btn btn-primary btn-xs px-2"
+                aria-label="Run search"
+              >
+                Go
+              </button>
+            </div>
+          </form>
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              className="select select-bordered select-sm w-full text-xs"
+              value={selectedVersion}
+              onChange={handleVersionChange}
+            >
+              {versionOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <label className="flex items-center justify-between gap-2 border border-base-300 rounded-lg px-3 py-1.5 text-xs bg-base-200/60">
+              <span>Show error chats</span>
+              <input
+                type="checkbox"
+                className="toggle toggle-xs"
+                checked={isErrorTrue}
+                onChange={() => handleCheckError(!isErrorTrue)}
+              />
+            </label>
+          </div>
+        </div>
 
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-xs">Show Error Chat History</span>
-                  <input type="checkbox" className="toggle toggle-xs" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
-                </div>
+        <details className="group rounded-xl border border-dashed border-base-300 bg-base-100/80 p-3 transition-all">
+          <summary className="cursor-pointer flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-base-content/70">
+            <span>Advanced Filters</span>
+            <ChevronDownIcon size={14} className="transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="mt-3 space-y-3">
+            <DateRangePicker
+              params={params}
+              setFilterOption={setFilterOption}
+              setHasMore={setHasMore}
+              setPage={setPage}
+              selectedVersion={selectedVersion}
+              filterOption={filterOption}
+              isErrorTrue={isErrorTrue}
+            />
+
+            <div>
+              <p className="text-xs font-medium text-base-content/80 mb-2">User Feedback</p>
+              <div className="flex flex-wrap gap-2">
+                {USER_FEEDBACK_FILTER_OPTIONS?.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => handleFilterChange(value)}
+                    className={`px-3 py-1 rounded-full text-[11px] border transition-colors ${
+                      filterOption === value
+                        ? "bg-primary text-base-100 border-primary"
+                        : "border-base-300 text-base-content/70 hover:border-base-400"
+                    } flex items-center gap-1`}
+                  >
+                    {value === "all" ? (
+                      "All"
+                    ) : value === "1" ? (
+                      <>
+                        <ThumbsUpIcon size={12} /> Good
+                      </>
+                    ) : (
+                      <>
+                        <ThumbsDownIcon size={12} /> Bad
+                      </>
+                    )}
+                  </button>
+                ))}
               </div>
+              <p className="text-[11px] text-base-content/70 mt-2">
+                {`The ${
+                  filterOption === "all" ? "overall" : filterOption === "1" ? "positive" : "negative"
+                } feedback count is ${
+                  userFeedbackCount?.[filterOption === "all" ? 0 : filterOption === "1" ? 1 : 2] ?? 0
+                }`}
+              </p>
             </div>
           </div>
-        </div>
-        <div className='flex items-center'>
-          <select
-            className="select select-bordered select-sm w-full text-xs"
-            value={selectedVersion}
-            onChange={handleVersionChange}
-          >
-            <option value="all">All Versions</option>
-            {bridgeVersionsArray?.map((version, index) => (
-              <option
-                key={version}
-                value={version}
-              >
-                Version {index + 1}
-              </option>
-            ))}
-          </select>
-        </div>
-        <form onSubmit={handleSearch} className="relative">
-          <input
-            type="text"
-            ref={searchRef}
-            placeholder="Search..."
-            onChange={handleChange}
-            className="input input-bordered input-sm w-full pr-6 text-xs"
-          />
-          {searchQuery && (
-            <svg
-              fill="#000000"
-              width="16px"
-              height="16px"
-              viewBox="0 0 24 24"
-              id="cross"
-              data-name="Flat Line"
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute right-1.5 top-1.5 cursor-pointer"
-              onClick={clearInput}
-              style={{ fill: "none", stroke: "rgb(0, 0, 0)", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2 }}
-            >
-              <path id="primary" d="M19,19,5,5M19,5,5,19"></path>
-            </svg>
-          )}
-        </form>
+        </details>
       </div>
       <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
 

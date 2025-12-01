@@ -102,6 +102,7 @@ function Page({params, searchParams }) {
         result = await dispatch(getHistoryAction(resolvedParams.id, 1, filterOption, isErrorTrue, selectedVersion));
       }
       if(resolvedSearchParams?.thread_id) {
+        debugger
         const threadId = resolvedSearchParams?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
