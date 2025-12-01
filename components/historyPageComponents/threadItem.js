@@ -245,23 +245,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
     }
   }, [])
 
-  const normalizeToolName = useCallback((tool) => {
-    if (typeof tool?.name === 'string') return tool.name;
-    if (tool?.name === undefined || tool?.name === null) return '';
-    return String(tool.name);
-  }, []);
-
   const handleToolPrimaryClick = useCallback(async (event, tool) => {
-    // Normalize name once to avoid runtime errors when tool.name isn't a string
-    const toolName = normalizeToolName(tool);
-    const lowerCaseToolName = toolName.toLowerCase();
-
     // Check if this is a knowledge database tool
-    const isKnowledgeDbTool =
-      lowerCaseToolName === 'get_knowledge_base_data' ||
-      lowerCaseToolName.includes('get knowledge database') ||
-      lowerCaseToolName.includes('knowledge') ||
-      lowerCaseToolName.includes('rag');
+    const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
+                             tool?.name?.toLowerCase().includes('get knowledge database') || 
+                             tool?.name?.toLowerCase().includes('knowledge') ||
+                             tool?.name?.toLowerCase().includes('rag');
 
     if (isKnowledgeDbTool && tool?.args) {
       try {
@@ -346,14 +335,14 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         bridge_id: params?.id,
       }
     });
-  }, [knowledgeBaseData, openSlider, embedToken, params?.id, params?.org_id, orgBridges, allBridgesMap, normalizeToolName, router, isEmbedUser]);
+  }, [knowledgeBaseData, openSlider, embedToken, params?.id, params?.org_id, orgBridges, allBridgesMap]);
 
   const renderToolData = useCallback((tool, index) => (
     <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
       <div onClick={(event) => handleToolPrimaryClick(event, tool)}
         className="cursor-pointer flex items-center justify-center py-4 pl-2">
         <div className="text-center">
-          {truncate(integrationData?.[normalizeToolName(tool)]?.title || normalizeToolName(tool), 20)}
+          {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
         </div>
       </div>
       <div className="flex gap-3">
@@ -374,7 +363,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
         </div>
       </div>
     </div>
-  ), [handleToolPrimaryClick, integrationData, setToolsData, normalizeToolName]);
+  ), [handleToolPrimaryClick, integrationData, setToolsData]);
 
   const handleUserButtonClick = (value) => {
     threadHandler(item.thread_id, item, value)
