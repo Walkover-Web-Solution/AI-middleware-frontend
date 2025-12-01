@@ -7,7 +7,7 @@ import { GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import OnBoarding from '@/components/OnBoarding';
+import OnBoarding from '@/components/onBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/infoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';

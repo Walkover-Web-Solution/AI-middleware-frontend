@@ -22,7 +22,6 @@ const InputConfigComponent = memo(({
     handleCloseTextAreaFocus,
     savePrompt,
     isMobileView,
-    closeHelperButtonLocation,
     isPublished
 }) => {
     // Optimized Redux selector with memoization and shallow comparison
