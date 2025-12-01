@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
+import ConnectedAgentListSuggestion from './connectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -10,8 +10,8 @@ import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
-import InfoTooltip from '@/components/InfoTooltip';
-import DeleteModal from '@/components/UI/DeleteModal';
+import InfoTooltip from '@/components/infoTooltip';
+import DeleteModal from '@/components/modals/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 import { BotIcon } from 'lucide-react';

@@ -2,16 +2,16 @@
 import React, { use, useState } from 'react';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import AddNewModelModal from '@/components/modals/AddNewModal';
+import AddNewModelModal from '@/components/modals/addNewModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import CustomTable from '@/components/customTable/customTable';
-import PageHeader from '@/components/Pageheader';
+import PageHeader from '@/components/pageheader';
 import { TrashIcon } from '@/components/Icons';
 import { deleteModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
-import ModelUsageDetailsModal from '@/components/modals/ModelUsageDetailsModal';
-import DeleteModal from '@/components/UI/DeleteModal';
+import ModelUsageDetailsModal from '@/components/modals/modelUsageDetailsModal';
+import DeleteModal from '@/components/modals/deleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';

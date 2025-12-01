@@ -5,7 +5,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import { addNewModelAction, getModelAction } from '@/store/action/modelAction';

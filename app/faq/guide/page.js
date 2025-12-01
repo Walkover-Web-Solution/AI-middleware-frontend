@@ -1,7 +1,7 @@
 "use client";
 import { DOCUMENT_SECTIONS } from "@/utils/enums";
 import React, { useEffect, useRef, useState } from "react";
-import InfoTooltip from "@/components/InfoTooltip";
+import InfoTooltip from "@/components/infoTooltip";
 
 const ModelDocs = () => {
   const [searchQuery, setSearchQuery] = useState("");

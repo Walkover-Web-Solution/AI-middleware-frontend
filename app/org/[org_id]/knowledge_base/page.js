@@ -3,7 +3,7 @@ import CustomTable from "@/components/customTable/customTable";
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
-import PageHeader from "@/components/Pageheader";
+import PageHeader from "@/components/pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
@@ -11,7 +11,7 @@ import { GetFileTypeIcon, openModal } from "@/utils/utility";
 import { SquarePenIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useState, use } from 'react';
 import { useDispatch } from "react-redux";
-import DeleteModal from "@/components/UI/DeleteModal";
+import DeleteModal from "@/components/modals/deleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
 

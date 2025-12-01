@@ -5,7 +5,7 @@ import { closeModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 
 // Reusable Agent Summary Content Component
 export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId }) => {

@@ -11,7 +11,7 @@ import { getChatBotDetailsAction } from "@/store/action/chatBotAction";
 import { PencilIcon } from "@/components/Icons";
 import { useEffect, use } from "react";
 import { useDispatch } from "react-redux";
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 
 export const runtime = 'edge';
 

@@ -3,7 +3,7 @@ import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal, RequiredItem } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
-import Modal from '@/components/UI/Modal'
+import Modal from '@/components/UI/modal'
 import { toast } from 'react-toastify'
 
 const IntegrationModal = ({ params }) => {

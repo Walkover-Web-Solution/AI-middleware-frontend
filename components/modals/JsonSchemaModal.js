@@ -7,8 +7,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
-import Canvas from "../Canvas";
-import Modal from "../UI/Modal";
+import Canvas from "../canvas";
+import Modal from "../UI/modal";
 import { closeModal } from "@/utils/utility";
 
 function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_id, onResetThreadId=()=>{}}) {

@@ -7,10 +7,10 @@ import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
-import DeleteModal from '@/components/UI/DeleteModal';
+import DeleteModal from '@/components/modals/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 

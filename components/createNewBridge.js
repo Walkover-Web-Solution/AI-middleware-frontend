@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import LoadingSpinner from "./loadingSpinner";
 import Protected from "./protected";
-import CreateBridgeCards from "./CreateBridgeCards";
 import { BotIcon, Info, Lightbulb, Plus } from "lucide-react";
 import { CloseIcon } from "./Icons";
 

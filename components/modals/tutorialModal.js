@@ -3,7 +3,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import React, { useState, useRef, useEffect } from 'react';
 import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon, BotIcon, KeyIcon, WrenchIcon, SettingsIcon } from '@/components/Icons';
 import { closeModal } from '@/utils/utility';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
 const TutorialVideo = ({ videoUrl, title }) => {

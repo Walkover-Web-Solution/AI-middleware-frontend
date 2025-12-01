@@ -11,7 +11,7 @@ import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useDispatch } from 'react-redux';
 import { ChevronDown, ChevronLeft, Plus, Info } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
-import DeleteModal from '@/components/UI/DeleteModal';
+import DeleteModal from '@/components/modals/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions = 2 }) {

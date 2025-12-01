@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { clearChatTestCaseIdAction } from '@/store/action/chatAction';
 
 function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, channelIdentifier }) {

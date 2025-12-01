@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import ActionModel from './actionModel';
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
 function ActionList({ params, searchParams , isPublished}) {

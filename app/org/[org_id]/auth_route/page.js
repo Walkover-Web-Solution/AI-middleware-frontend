@@ -1,6 +1,6 @@
 'use client'
 import MainLayout from '@/components/layoutComponents/MainLayout'
-import PageHeader from '@/components/Pageheader'
+import PageHeader from '@/components/pageheader'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import React, { useState, use } from 'react'
 import { useDispatch } from 'react-redux'
@@ -8,7 +8,7 @@ import { createAuth } from '@/store/action/authAction'
 import CustomTable from "@/components/customTable/customTable"
 import { openModal } from '@/utils/utility'
 import { AUTH_COLUMNS, MODAL_TYPE } from '@/utils/enums'
-import AuthDataModal from '@/components/modals/AuthDataModal'
+import AuthDataModal from '@/components/modals/authDataModal'
 
 export const runtime = 'edge';
 

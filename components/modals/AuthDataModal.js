@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import { CheckIcon, CloseIcon, CopyIcon, ExternalLinkIcon, GlobeIcon, KeyIcon, ShieldIcon } from '../Icons';

@@ -1,4 +1,4 @@
-import ApiKeyModal from '@/components/modals/ApiKeyModal';
+import ApiKeyModal from '@/components/modals/apiKeyModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';

@@ -1,5 +1,5 @@
 'use client'
-import LoginPage from "@/components/LoginPage";
+import LoginPage from "@/components/loginPage";
 import WithAuth from "@/components/withauth";
 
 const page = ({ loading }) => {

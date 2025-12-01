@@ -4,7 +4,7 @@ import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
-import ConnectedAgentFlowPanel from "./ConnectedAgentFlowPanel";
+import ConnectedAgentFlowPanel from "./connectedAgentFlowPanel";
 import { useConfigurationContext } from './ConfigurationContext';
 
 const SetupView = memo(() => {

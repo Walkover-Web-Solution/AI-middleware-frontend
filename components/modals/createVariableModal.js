@@ -4,7 +4,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 
 function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
     const dispatch = useDispatch();

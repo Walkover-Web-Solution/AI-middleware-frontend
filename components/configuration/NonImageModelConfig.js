@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import InputSection from "./InputSection";
+import InputSection from "./inputSection";
 import ToolsSection from "./ToolsSection";
 import CommonConfigComponents from "./CommonConfigComponents";
-import ChatbotConfigSection from "./ChatbotConfigSection";
+import ChatbotConfigSection from "./chatbotConfigSection";
 import { useConfigurationContext } from './ConfigurationContext';
 import AdvancedParameters from './configurationComponent/advancedParamenter';
 import GptMemory from './configurationComponent/gptmemory';

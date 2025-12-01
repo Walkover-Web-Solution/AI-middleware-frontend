@@ -4,7 +4,7 @@ import { InfoIcon } from '@/components/Icons';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
 const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) => {

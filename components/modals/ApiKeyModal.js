@@ -6,7 +6,7 @@ import { closeModal, RequiredItem } from '@/utils/utility';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 
 const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id, selectedService }) => {
     const pathName = usePathname();

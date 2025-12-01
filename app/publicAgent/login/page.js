@@ -1,5 +1,5 @@
 'use client'
-import LoginPage from "@/components/LoginPage";
+import LoginPage from "@/components/loginPage";
 import WithPublicAgentAuth from "@/components/withPublicAgentAuth";
 
 export const runtime = 'edge';

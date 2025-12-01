@@ -12,11 +12,11 @@ import { getThread, updateContentHistory } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
-import AddTestCaseModal from '../modals/AddTestCaseModal';
+import AddTestCaseModal from '../modals/addTestCaseModal';
 import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
 import { ChatLoadingSkeleton } from './ChatLayoutLoader';
 import { clearThreadData } from '@/store/reducer/historyReducer';
-import EditMessageModal from '../modals/EditMessageModal';
+import EditMessageModal from '../modals/editMessageModal';
 import { improvePrompt } from '@/config';
 
 // ------------------------------------

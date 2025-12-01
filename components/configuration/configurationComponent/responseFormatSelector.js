@@ -1,6 +1,6 @@
 "use client";
 
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { isValidJson, validateUrl } from '@/utils/utility';

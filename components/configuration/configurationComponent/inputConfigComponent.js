@@ -2,10 +2,10 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { usePromptSelector } from '@/customHooks/useOptimizedSelector';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import PromptSummaryModal from '../../modals/PromptSummaryModal';
+import PromptSummaryModal from '../../modals/promptSummaryModal';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 import PromptHeader from './PromptHeader';
-import PromptTextarea from './PromptTextarea';
+import PromptTextarea from './promptTextarea';
 import VariablesSuggestions from './VariablesSuggestions';
 import DefaultVariablesSection from './DefaultVariablesSection';
 

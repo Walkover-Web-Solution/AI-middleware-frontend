@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CirclePlusIcon, CloseCircleIcon } from '@/components/Icons';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';

@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import { CircleQuestionMark } from 'lucide-react';
 

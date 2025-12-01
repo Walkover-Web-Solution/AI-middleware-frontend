@@ -1,7 +1,7 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import React from 'react'
-import Modal from '../UI/Modal'
+import Modal from '../UI/modal'
 
 const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description, isAgentToAgentConnect = true }) => {
     return (

@@ -7,7 +7,7 @@ import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
 import { getIconOfService } from "@/utils/utility";
-import InfoTooltip from "@/components/InfoTooltip";
+import InfoTooltip from "@/components/infoTooltip";
 import React from "react";
 import Dropdown from '@/components/UI/Dropdown';
 

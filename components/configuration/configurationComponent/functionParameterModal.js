@@ -10,8 +10,8 @@ import { CopyIcon, InfoIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import Modal from "@/components/UI/Modal";
-import InfoTooltip from "@/components/InfoTooltip";
+import Modal from "@/components/UI/modal";
+import InfoTooltip from "@/components/infoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { ChevronsUpDown, PlusCircleIcon, CircleQuestionMark } from "lucide-react";
 

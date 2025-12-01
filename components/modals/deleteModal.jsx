@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import Modal from './Modal';
+import Modal from '../UI/modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import { ClipboardXIcon } from '../Icons';

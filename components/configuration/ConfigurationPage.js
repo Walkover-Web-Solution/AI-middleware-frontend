@@ -7,7 +7,7 @@ import SetupView from "./SetupView";
 import Protected from "../protected";
 import { Lock } from 'lucide-react';
 import { toggleSidebar } from '@/utils/utility';
-import GuideSlider from '../sliders/IntegrationGuideSlider';
+import GuideSlider from '../sliders/integrationGuideSlider';
 
 const ConfigurationPage = ({
     params,

@@ -53,12 +53,12 @@ import { clearCookie, getFromCookies, openModal, toggleSidebar, setInCookies } f
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
-import DemoModal from '../modals/DemoModal';
+import DemoModal from '../modals/demoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
-import InviteUserModal from '../modals/InviteuserModal';
+import InviteUserModal from '../modals/inviteuserModal';
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */

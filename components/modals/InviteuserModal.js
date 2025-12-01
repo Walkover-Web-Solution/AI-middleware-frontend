@@ -1,6 +1,6 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import React, { useState } from 'react'
-import Modal from '../UI/Modal'
+import Modal from '../UI/modal'
 import { getInvitedUsers, inviteUser } from '@/config';
 import { toast } from 'react-toastify';
 import { closeModal } from '@/utils/utility';

@@ -3,8 +3,8 @@ import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
-import Canvas from '../Canvas';
-import Modal from '../UI/Modal';
+import Canvas from '../canvas';
+import Modal from '../UI/modal';
 
 function OptimiseBaseModal({
   modalType,
