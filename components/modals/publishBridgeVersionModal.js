@@ -11,12 +11,12 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal, openModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
-import Modal from "../UI/Modal";
+import Modal from "../UI/modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
-import { AgentSummaryContent } from "./PromptSummaryModal";
+import { AgentSummaryContent } from "./promptSummaryModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();

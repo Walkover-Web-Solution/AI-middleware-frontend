@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import ActionList from "./configurationComponent/actionList";

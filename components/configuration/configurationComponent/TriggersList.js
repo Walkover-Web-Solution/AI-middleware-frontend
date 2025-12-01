@@ -4,7 +4,7 @@ import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import InfoTooltip from "@/components/InfoTooltip";
+import InfoTooltip from "@/components/infoTooltip";
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {

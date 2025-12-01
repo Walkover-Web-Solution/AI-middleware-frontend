@@ -6,10 +6,10 @@ import { toast } from 'react-toastify';
 import { InfoIcon, TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import DeleteModal from '@/components/UI/DeleteModal';
+import DeleteModal from '@/components/modals/deleteModal';
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';

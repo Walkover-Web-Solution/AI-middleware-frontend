@@ -1,7 +1,7 @@
 import { downloadFineTuneData } from '@/config'
 import { CircleMinusIcon, CirclePlusIcon, GlobeIcon } from '@/components/Icons'
 import React from 'react'
-import Modal from '../UI/Modal'
+import Modal from '../UI/modal'
 import { MODAL_TYPE } from '@/utils/enums'
 
 function CreateFineTuneModal({params, selectedThreadIds}) {

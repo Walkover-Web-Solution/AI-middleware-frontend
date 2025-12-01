@@ -2,7 +2,7 @@
 import Protected from '@/components/protected'
 import RAGEmbedContent from '@/components/ragEmbed/RAGEmbedContent'
 import React from 'react'
-import PageHeader from '@/components/Pageheader'
+import PageHeader from '@/components/pageheader'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import { use } from 'react'
 import { useCustomSelector } from '@/customHooks/customSelector'

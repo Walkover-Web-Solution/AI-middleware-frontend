@@ -6,12 +6,12 @@ import AddNewModelModal from '@/components/modals/AddNewModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import CustomTable from '@/components/customTable/customTable';
-import PageHeader from '@/components/Pageheader';
+import PageHeader from '@/components/pageheader';
 import { TrashIcon } from '@/components/Icons';
 import { deleteModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
 import ModelUsageDetailsModal from '@/components/modals/ModelUsageDetailsModal';
-import DeleteModal from '@/components/UI/DeleteModal';
+import DeleteModal from '@/components/modals/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';

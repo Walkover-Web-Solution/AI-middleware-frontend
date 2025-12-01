@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BookIcon, BrainIcon, CloseIcon } from '../../Icons';
 import { usePathname } from 'next/navigation';
-import Canvas from '@/components/Canvas';
+import Canvas from '@/components/canvas';
 import { useDispatch } from 'react-redux';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
 import { optimizePromptApi } from '@/config';

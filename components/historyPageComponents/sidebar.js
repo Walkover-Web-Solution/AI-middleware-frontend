@@ -8,7 +8,7 @@ import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
+import CreateFineTuneModal from "../modals/createFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';

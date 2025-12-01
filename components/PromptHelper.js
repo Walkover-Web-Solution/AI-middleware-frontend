@@ -3,7 +3,7 @@ import { BookIcon, BrainIcon, CloseIcon } from './Icons';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import { usePathname } from 'next/navigation';
-import Canvas from '@/components/Canvas';
+import Canvas from '@/components/canvas';
 import { useDispatch } from 'react-redux';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
 import { optimizePromptApi } from '@/config';

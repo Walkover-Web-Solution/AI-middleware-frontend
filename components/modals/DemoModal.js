@@ -4,7 +4,7 @@ import { closeModal } from '@/utils/utility';
 import React, { useEffect } from 'react';
 import { CloseCircleIcon, CalendarIcon } from '@/components/Icons';
 import { getCalApi } from "@calcom/embed-react";
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 
 const DemoModal = ({ speakToUs }) => {
 

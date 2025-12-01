@@ -5,7 +5,7 @@ import Header from "./Header";
 import Link from "next/link";
 import { openModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
-import DemoModal from "./modals/DemoModal";
+import DemoModal from "./modals/demoModal";
 
 // Load the font outside the component function
 const inter = Inter({

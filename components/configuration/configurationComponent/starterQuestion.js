@@ -2,7 +2,7 @@ import React from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
 const StarterQuestionToggle = ({ params, searchParams, isPublished }) => {

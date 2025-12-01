@@ -1,6 +1,6 @@
 import React from 'react'
 import { MODAL_TYPE } from '@/utils/enums';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { closeModal } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 

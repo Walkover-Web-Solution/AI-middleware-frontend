@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal, RequiredItem } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { toast } from 'react-toastify';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 

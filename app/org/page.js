@@ -1,8 +1,8 @@
 "use client"
 import CreateOrg from '@/components/createNewOrg';
 import Protected from '@/components/protected';
-import OrganizationHeader from '@/components/organization/OrganizationHeader';
-import OrganizationSearch from '@/components/organization/OrganizationSearch';
+import OrganizationHeader from '@/components/organization/organizationHeader';
+import OrganizationSearch from '@/components/organization/organizationSearch';
 import OrganizationGrid from '@/components/organization/OrganizationGrid';
 import { ThemeManager } from '@/customHooks/useThemeManager';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';

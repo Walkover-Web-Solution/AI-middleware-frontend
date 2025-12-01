@@ -12,8 +12,8 @@ import { useThemeManager } from '@/customHooks/useThemeManager';
 
 // Components
 import DateRangePicker from '@/components/metrics/DateRangePicker';
-import MetricsFilters from '@/components/metrics/MetricsFilters';
-import MetricsChart from '@/components/metrics/MetricsChart';
+import MetricsFilters from '@/components/metrics/metricsFilters';
+import MetricsChart from '@/components/metrics/metricsChart';
 import TokenUsageOverview from '@/components/metrics/TokenUsageOverview';
 
 export const runtime = 'edge';

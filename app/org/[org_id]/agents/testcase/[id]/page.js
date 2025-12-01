@@ -8,7 +8,7 @@ import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, Ext
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
-import PageHeader from '@/components/Pageheader';
+import PageHeader from '@/components/pageheader';
 
 export const runtime = 'edge';
 

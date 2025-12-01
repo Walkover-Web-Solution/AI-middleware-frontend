@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import InfoTooltip from "@/components/InfoTooltip";
+import InfoTooltip from "@/components/infoTooltip";
 import { CircleQuestionMark } from 'lucide-react';
 
 const RESPONSE_STYLES = [

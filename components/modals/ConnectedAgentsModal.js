@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useMemo } from 'react';
-import Modal from '../UI/Modal';
+import Modal from '../UI/modal';
 import { BotIcon } from '../Icons';
 
 const ConnectedAgentsModal = ({ apiKey, orgId }) => {

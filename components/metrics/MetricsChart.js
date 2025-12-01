@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import Chart from '@/components/LazyApexChart';
+import Chart from '@/components/lazyApexChart';
 
 const MetricsChart = memo(({ rawData, currentTheme, factor }) => {
   const FACTOR_OPTIONS = ['Bridges', 'API Keys', 'Models'];

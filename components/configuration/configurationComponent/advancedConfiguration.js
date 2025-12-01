@@ -4,7 +4,7 @@ import { AlertIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import ResponseFormatSelector from './responseFormatSelector';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import ToolCallCount from './toolCallCount';
 import GuardrailSelector from './guardrailSelector';
 import { getIconOfService } from '@/utils/utility';

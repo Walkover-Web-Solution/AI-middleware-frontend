@@ -14,11 +14,11 @@ import { useRouter } from "next/navigation";
 import Chatbot from "@/components/configuration/chatbot";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-const ConfigurationPage = dynamic(() => import("@/components/configuration/ConfigurationPage"));
+const ConfigurationPage = dynamic(() => import("@/components/configuration/configurationPage"));
 const Chat = dynamic(() => import("@/components/configuration/chat"), { loading: () => null, });
 const WebhookForm = dynamic(() => import("@/components/BatchApi"), { ssr: false, });
-const PromptHelper = dynamic(() => import("@/components/PromptHelper"), { ssr: false, });
-const NotesPanel = dynamic(() => import("@/components/NotesPanel"), { ssr: false, });
+const PromptHelper = dynamic(() => import("@/components/promptHelper"), { ssr: false, });
+const NotesPanel = dynamic(() => import("@/components/notesPanel"), { ssr: false, });
 
 export const runtime = 'edge';
 

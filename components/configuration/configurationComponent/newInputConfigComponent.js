@@ -7,7 +7,7 @@ import { openModal } from '@/utils/utility';
 import { ChevronDown, Info } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import PromptSummaryModal from '../../modals/PromptSummaryModal';
+import PromptSummaryModal from '../../modals/promptSummaryModal';
 import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import { Maximize, Minimize } from 'lucide-react';

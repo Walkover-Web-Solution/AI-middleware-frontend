@@ -1,12 +1,12 @@
 import CommentsCards from "@/components/CommentsCards";
-import DisplayCards from "@/components/DisplayCards";
+import DisplayCards from "@/components/displayCards";
 import FeatureRequests from "@/components/FeatureRequests";
 import Footer from "@/components/Footer";
-import HeroPage from "@/components/HeroPage";
+import HeroPage from "@/components/heroPage";
 import PlatformImage from "@/components/PlatformImage";
 import PromptTemplates from "@/components/PromptTemplates";
 import Questions from "@/components/Questions";
-import RoadMapCards from "@/components/RoadMapCards";
+import RoadMapCards from "@/components/roadMapCards";
 import SuggestionTemplates from "@/components/SuggestionTemplate";
 import TrustedBy from "@/components/TrustedBy";
 /*

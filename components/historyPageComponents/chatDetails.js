@@ -5,7 +5,7 @@ import { CloseCircleIcon, CopyIcon } from "@/components/Icons";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import { ChevronDown } from "lucide-react";
-import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
+import ChatAiConfigDeatilViewModal from "../modals/chatAiconfigDeatilViewModal";
 import { truncate, useCloseSliderOnEsc } from "./assistFile";
 
 const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) => {

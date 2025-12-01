@@ -15,7 +15,6 @@ const LoginPage = ({loading}) => {
   const utmCampaign = urlParams.get('utm_campaign');
   const utmTerm = urlParams.get('utm_term');
   const utmContent = urlParams.get('utm_content');
-  
   useEffect(()=>{  
     // Store UTM parameters in cookies
     if(utmSource){

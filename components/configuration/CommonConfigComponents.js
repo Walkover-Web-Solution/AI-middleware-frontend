@@ -3,7 +3,7 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
-import AdvancedSettingsButton from "./configurationComponent/AdvancedSettingsButton";
+import AdvancedSettingsButton from "./configurationComponent/advancedSettingsButton";
 
 const CommonConfigComponents = ({
     params,

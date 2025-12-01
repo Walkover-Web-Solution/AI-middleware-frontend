@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import InfoTooltip from '@/components/InfoTooltip';
+import InfoTooltip from '@/components/infoTooltip';
 import { SparklesIcon } from 'lucide-react';
 
 // Optimized header component with memoization

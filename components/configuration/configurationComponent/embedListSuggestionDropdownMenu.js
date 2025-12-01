@@ -1,4 +1,4 @@
-import OnBoarding from '@/components/OnBoarding';
+import OnBoarding from '@/components/onBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import useTutorialVideos from '@/hooks/useTutorialVideos';

@@ -13,7 +13,7 @@ import CreateBridgeCards from './CreateBridgeCards';
 import { useDispatch } from 'react-redux';
 import FunctionParameterModal from './configuration/configurationComponent/functionParameterModal';
 import { flushSync } from 'react-dom';
-import DeleteModal from './UI/DeleteModal';
+import DeleteModal from './modals/DeleteModal';
 import Protected from './protected';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
