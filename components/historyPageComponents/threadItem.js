@@ -397,16 +397,16 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       <div className="mb-4">
         <div className="flex flex-wrap gap-3">
           {attachments.map((attachment, index) => {
-            const url = attachment.resolvedUrl || attachment.permanent_url || attachment.url;
+            const url = attachment?.resolvedUrl || attachment?.permanent_url || attachment?.url;
             if (!url) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
-                  <ImageFallback type={attachment.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
+                  <ImageFallback type={attachment?.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
                 </div>
               );
             }
 
-            const isPdf = url.toLowerCase().endsWith(".pdf");
+            const isPdf = url?.toLowerCase().endsWith(".pdf");
 
             // PDF style chip (same as provided snippet)
             if (isPdf) {
