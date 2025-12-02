@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CloseIcon, ClockIcon, UserIcon, FileTextIcon, SecurityIcon } from "@/components/Icons";
 import { toggleSidebar } from "@/utils/utility";
 import { getBridgeConfigHistory } from "@/config";

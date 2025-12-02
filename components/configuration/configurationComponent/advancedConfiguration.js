@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { AlertIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -11,34 +11,26 @@ import { getIconOfService } from '@/utils/utility';
 import { CircleQuestionMark } from 'lucide-react';
 
 const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, forceExpanded = false ,isPublished }) => {
-  const [isAccordionOpen, setIsAccordionOpen] = useState(forceExpanded);
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState({});
-  const [tutorialState, setTutorialState] = useState({
-    showTutorial: false,
-    showSuggestion: false
-  });
   const dropdownContainerRef = useRef(null);
 
   const dispatch = useDispatch();
 
-  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
+  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const apikeys = state?.apiKeysReducer?.apikeys || {};
-    const user = state.userDetailsReducer.userDetails;
     
     // Use bridgeData when isPublished=true, otherwise use versionData
     const activeData = isPublished ? bridgeDataFromState : versionData;
     const service = activeData?.service;
-    const model = activeData?.model;
     
     return {
       bridge: activeData || {},
       apikeydata: apikeys[params?.org_id] || [],
       bridgeApikey_object_id: isPublished ? (bridgeDataFromState?.apikey_object_id || {}) : (versionData?.apikey_object_id || {}),
       SERVICES: state?.serviceReducer?.services,
-      isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration,
       serviceModels: state?.modelReducer?.serviceModels || {},
       currentService: service,
       currentModel: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
@@ -68,13 +60,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
       setSelectedApiKeys(bridgeApikey_object_id);
     }
   }, [bridgeApikey_object_id]);
-
-  const handleTutorial = () => {
-    setTutorialState(prev => ({
-      ...prev,
-      showSuggestion: isFirstConfiguration
-    }));
-  };
 
   const filterApiKeysByServiceForFallback = (service) => {
           return Object.keys(bridgeApikey_object_id).filter(key => key === service);
@@ -110,15 +95,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
     return text?.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
-  useEffect(() => {
-    if (forceExpanded) {
-      setIsAccordionOpen(true);
-    }
-  }, [forceExpanded]);
-
-  const toggleAccordion = () => {
-    setIsAccordionOpen((prevState) => !prevState);
-  };
   // Fallback model + service state and handlers
   const [fallbackService, setFallbackService] = useState(fallbackModel?.service || currentService);
   const [fallbackModelName, setFallbackModelName] = useState(fallbackModel?.model ||DefaultModel[currentService]?.model);

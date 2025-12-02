@@ -21,8 +21,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
   const searchParams = useSearchParams();
   
   // Get search state to check if search is active
-  const { isSearchActive, searchQuery } = useCustomSelector(state => ({
-    isSearchActive: state?.historyReducer?.search?.isActive || false,
+  const { searchQuery } = useCustomSelector(state => ({
     searchQuery: state?.historyReducer?.search?.query || ''
   }));
 

@@ -1,4 +1,3 @@
-import { CopyIcon } from '@/components/Icons'
 import React, { useRef } from 'react'
 import { createDiff } from '@/utils/utility'
 

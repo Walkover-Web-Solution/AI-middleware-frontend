@@ -1,5 +1,5 @@
 import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi, runTestCaseApi, updateTestCaseApi, generateAdditionalTestCasesApi } from "@/config";
-import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, runTestCaseReducer, updateTestCaseReducer } from "../reducer/testCasesReducer";
+import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, updateTestCaseReducer } from "../reducer/testCasesReducer";
 import { toast } from "react-toastify";
 
 export const createTestCaseAction = ({ bridgeId, data }) => async (dispatch) => {
@@ -40,7 +40,7 @@ export const deleteTestCaseAction = ({testCaseId, bridgeId}) => async (dispatch)
     }
 }
 
-export const runTestCaseAction = ({ versionId = null, bridgeId=null, testcase_id =null, testCaseData = null }) => async (dispatch) => {
+export const runTestCaseAction = ({ versionId = null, bridgeId=null, testcase_id =null, testCaseData = null }) => async () => {
     try {
         const response = await runTestCaseApi({ versionId, testcase_id, testCaseData, bridgeId });
         if (response?.success) {
@@ -66,7 +66,7 @@ export const updateTestCaseAction = ({ bridge_id, dataToUpdate }) => async (disp
     }
 }
 
-export const generateAdditionalTestCasesAction = ({ bridgeId, versionId }) => async (dispatch) => {
+export const generateAdditionalTestCasesAction = ({ bridgeId, versionId }) => async () => {
     try {
         const response = await generateAdditionalTestCasesApi({ bridgeId, versionId });
         if (response?.success) {

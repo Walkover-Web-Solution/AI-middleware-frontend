@@ -1,9 +1,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import cloneDeep from 'lodash/cloneDeep';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
-import { dryRun } from "@/config";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/assistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
@@ -19,20 +17,12 @@ import ReactMarkdown from "../LazyMarkdown";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import {
   initializeChatChannel,
-  sendUserMessage,
-  addLoadingAssistantMessage,
-  updateAssistantMessageWithResponse,
   editChatMessage,
   setChatLoading,
-  setChatError,
   clearChatMessages,
   loadTestCaseIntoChat,
-  setChatUploadedFiles,
-  setChatUploadedImages,
   clearChatTestCaseIdAction
 } from "@/store/action/chatAction";
-import { removeMessage } from "@/store/reducer/chatReducer";
-import { addUserMessage } from "@/store/reducer/chatReducer";
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
   const messagesContainerRef = useRef(null);
@@ -68,13 +58,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [params, searchParams, publishedVersionId]);
 
   // Redux selectors for chat state
-  const { conversation, messages, loading, errorMessage, uploadedFiles, uploadedImages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({
-    conversation: state?.chatReducer?.conversationsByChannel?.[channelIdentifier] || [],
+  const { messages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({
     messages: state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
-    loading: state?.chatReducer?.loadingByChannel?.[channelIdentifier] || false,
-    errorMessage: state?.chatReducer?.errorsByChannel?.[channelIdentifier] || "",
-    uploadedFiles: state?.chatReducer?.uploadedFilesByChannel?.[channelIdentifier] || [],
-    uploadedImages: state?.chatReducer?.uploadedImagesByChannel?.[channelIdentifier] || [],
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));

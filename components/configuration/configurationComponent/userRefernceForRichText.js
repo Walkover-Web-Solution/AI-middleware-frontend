@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import { AlertIcon, PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon, ShieldIcon } from '@/components/Icons';
+import { PencilIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/infoTooltip';
 import { CircleQuestionMark, Crown } from 'lucide-react';
 
 const UserReferenceForRichText = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
-    const { is_rich_text = true, user_reference } = useCustomSelector((state) => ({
-        is_rich_text: isPublished ? state?.bridgeReducer?.allBridgesMap?.[params?.id]?.is_rich_text : state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text,
+    const { user_reference } = useCustomSelector((state) => ({
         user_reference: isPublished ? state?.bridgeReducer?.allBridgesMap?.[params?.id]?.user_reference : state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.user_reference || "",
     }));
     

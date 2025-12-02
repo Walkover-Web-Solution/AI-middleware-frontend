@@ -6,7 +6,7 @@ import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { generateRandomID, openModal } from '@/utils/utility';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/onBoarding';
@@ -19,7 +19,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
   
-  const [isAccordionOpen, setIsAccordionOpen] = useState(showAccordion ? defaultExpanded : true);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -31,11 +30,10 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
-  const {service,version_function_data,configuration,integrationData,isFirstParameter,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
+  const {service,version_function_data,configuration,integrationData,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    const user = state.userDetailsReducer.userDetails;
     
     // Use bridgeData when isPublished=true, otherwise use versionData
     const activeData = isPublished ? bridgeDataFromState : versionData;
@@ -50,14 +48,13 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       integrationData,
       service,
       configuration,
-      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
       connected_agents: isPublished ? (bridgeDataFromState?.connected_agents) : (versionData?.connected_agents),
       modelInfoData,
       bridge: activeData
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
-  const { tool_choice: tool_choice_data, type, model } = configuration || {};
+  const { tool_choice: tool_choice_data, model } = configuration || {};
   const initialThreadId = bridge?.thread_id || generateRandomID();
   const [thread_id, setThreadId] = useState(initialThreadId);
 
@@ -88,16 +85,8 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     });
   };
 
-  const level0Parameters = getParametersByLevel(0); // Hidden parameters
   const level1Parameters = getParametersByLevel(1); // Regular parameters (not in accordion)
   const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
-
-  const handleTutorial = () => {
-    setTutorialState(prev => ({
-      ...prev,
-      showSuggestion: isFirstParameter
-    }))
-  };
 
   useEffect(() => {
     setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) : null);
@@ -179,7 +168,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       }
       newValue = Objectvalue ? JSON.parse(Objectvalue) : JSON.parse("{}");
       setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
-    } catch (error) {
+    } catch {
       toast.error("Invalid JSON provided");
       return;
     }
@@ -207,13 +196,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     if (e.target.value !== configuration?.[key]) {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
-  };
-  useEffect(() => {
-    setIsAccordionOpen(showAccordion ? defaultExpanded : true);
-  }, [defaultExpanded, showAccordion]);
-
-  const toggleAccordion = () => {
-    setIsAccordionOpen((prevState) => !prevState);
   };
 
   const setSliderValue = (value, key, isDeafaultObject = false) => {

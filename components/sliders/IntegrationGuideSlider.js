@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { CloseIcon } from "@/components/Icons";
-import FormSection from "@/components/chatbotConfiguration/formSection";
 import ApiGuide from "../configuration/configurationComponent/ApiGuide";
 import BatchApiGuide from "../configuration/configurationComponent/BatchApiGuide";
 import SecondStep from "../chatbotConfiguration/secondStep";

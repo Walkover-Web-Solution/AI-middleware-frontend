@@ -33,7 +33,7 @@ const Navbar = dynamic(() => import("@/components/navbar"), { loading: () => <Lo
 const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), { loading: () => <LoadingSpinner /> });
 const ChatDetails = dynamic(() => import("@/components/historyPageComponents/chatDetails"), { loading: () => <LoadingSpinner /> });
 
-function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
+function layoutOrgPage({ children, params, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
   const urlParams = useParams()
@@ -172,7 +172,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         } else {
           setIsValidOrg(false);
         }
-      } catch (error) {
+      } catch {
         setIsValidOrg(false);
       }
     };
@@ -189,7 +189,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
   useEffect(() => {
     if (isValidOrg) {
-      dispatch(getAllBridgesAction((data) => {
+      dispatch(getAllBridgesAction(() => {
 
         setLoading(false);
       }))

@@ -29,7 +29,7 @@ const Page = ({params}) => {
       new URL(value);
       setUrlError('')
       return true
-    } catch (err) {
+    } catch {
       setUrlError('Please enter a valid URL')
       return false
     }

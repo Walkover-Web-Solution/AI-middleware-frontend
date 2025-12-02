@@ -1,10 +1,10 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
 import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
-export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getState) => {
+export const getSingleBridgesAction = ({ id, version }) => async (dispatch) => {
   try {
     dispatch(clearPreviousBridgeDataReducer())
     dispatch(isPending())
@@ -30,7 +30,7 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
   }
 };
 
-export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
+export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch) => {
   try {
     dispatch(clearPreviousBridgeDataReducer())
     const response = await createBridge(dataToSend.dataToSend);
@@ -53,7 +53,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
   }
 };
 
-export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => async (dispatch, getState) => {
+export const createBridgeWithAiAction = ({ dataToSend, orgId }) => async (dispatch) => {
   try {
     dispatch(clearPreviousBridgeDataReducer())
     const data = await createBridge(dataToSend)
@@ -70,7 +70,7 @@ export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => as
   }
 };
 
-export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, getState) => {
+export const createBridgeVersionAction = (data, onSuccess) => async (dispatch) => {
   try {
     const dataToSend = {
       version_id: data?.parentVersionId,
@@ -163,7 +163,7 @@ export const updateFuntionApiAction = ({ function_id, dataToSend }) => async (di
   }
 }
 
-export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) => {
+export const getAllResponseTypesAction = (orgId) => async (dispatch) => {
   try {
     dispatch(isPending())
     const response = await getAllResponseTypesApi(orgId);
@@ -311,7 +311,7 @@ export const archiveBridgeAction = (bridge_id, newStatus = 1) => async (dispatch
   }
 }
 
-export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dispatch) => {
+export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async () => {
   try {
     await discardBridgeVersionApi({ bridgeId, versionId });
   } catch (error) {
@@ -319,7 +319,7 @@ export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dis
   }
 }
 
-export const uploadImageAction = (formData, isVedioOrPdf) => async (dispatch) => {
+export const uploadImageAction = (formData, isVedioOrPdf) => async () => {
   try {
     const response = await uploadImage(formData, isVedioOrPdf);
     return response;
@@ -339,11 +339,11 @@ export const genrateSummaryAction = ({ bridgeId, versionId, orgId }) => async (d
   }
 }
 
-export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
+export const getTestcasesScroreAction = (version_id) => async () => {
   try {
     const reponse = await getTestcasesScrore(version_id);
     return reponse;
-  } catch (error) {
+  } catch {
     toast.error('Failed to genrate testcase score');
   }
 }
@@ -353,7 +353,7 @@ export const deleteFunctionAction = ({ function_name, functionId, orgId }) => as
     const reponse = await deleteFunctionApi(function_name);
     dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
-  } catch (error) {
+  } catch {
     toast.error('Failed to delete function')
   }
 }
@@ -367,7 +367,7 @@ export const getPrebuiltToolsAction = () => async (dispatch) => {
   }
 }
 
-export const publishBulkVersionAction = (version_ids) => async (dispatch) => {
+export const publishBulkVersionAction = (version_ids) => async () => {
   try {
     const response = await publishBulkVersionApi(version_ids);
     return response;

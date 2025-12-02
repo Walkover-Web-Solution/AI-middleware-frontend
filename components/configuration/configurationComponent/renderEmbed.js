@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon, RefreshIcon, SquareFunctionIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { SettingsIcon, TrashIcon, RefreshIcon, SquareFunctionIcon } from '@/components/Icons';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import useExpandableList from '@/customHooks/useExpandableList';
 
@@ -38,7 +38,6 @@ const RenderEmbed = ({
     const embedItems = displayItems?.map((value) => {
         const functionName = value?.function_name || value?.endpoint;
         const title = value?.title || integrationData?.[functionName]?.title;
-        const status = value?.status || integrationData?.[functionName]?.status;
 
         return (
           <div

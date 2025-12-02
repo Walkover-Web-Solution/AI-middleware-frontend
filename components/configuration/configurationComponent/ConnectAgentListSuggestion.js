@@ -1,8 +1,5 @@
 import { getStatusClass } from '@/utils/utility';
-import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
-import { InfoIcon } from 'lucide-react';
-import InfoTooltip from '@/components/infoTooltip';
 
 function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData }) {
     const [searchQuery, setSearchQuery] = useState('');

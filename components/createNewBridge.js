@@ -1,6 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { closeModal, focusDialogWhenOpen, sendDataToParent } from "@/utils/utility";
 import { DEFAULT_PROMPT, MODAL_TYPE } from "@/utils/enums";
@@ -31,24 +30,16 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { modelsList, SERVICES, showAgentType, hideCreateManuallyButton } = useCustomSelector((state) => ({
+  const { modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
     modelsList: state?.modelReducer?.serviceModels[state.selectedService],
-    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent,
-    hideCreateManuallyButton: state.appInfoReducer.embedUserDetails?.hideCreateManuallyButton
+    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent
   }));
 
   // Memoized calculations
   const shouldHideAgentType = useMemo(() => 
     isEmbedUser && !showAgentType, 
     [isEmbedUser, showAgentType]
-  );
-
-  const modalClasses = useMemo(() => 
-    `bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg ${
-      shouldHideAgentType ? "min-w-[70%] md:min-w-[70%]" : "max-w-[90%] md:max-w-[80%]"
-    } overflow-auto max-h-[98vh] mx-auto`,
-    [shouldHideAgentType]
   );
 
   // Generate unique names
@@ -63,13 +54,6 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   }, []);
 
   // Clear validation errors
-  const clearErrors = useCallback(() => {
-    updateState({
-      validationErrors: { bridgeType: "", purpose: "" },
-      globalError: ""
-    });
-  }, [updateState]);
-
   // Clean state
   const cleanState = useCallback(() => {
     setState(INITIAL_STATE);
@@ -104,14 +88,6 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   }, []);
 
   // Handlers
-  const handleBridgeTypeSelection = useCallback((type) => {
-    updateState({
-      selectedBridgeTypeCard: type,
-      validationErrors: { ...state.validationErrors, bridgeType: "" },
-      globalError: ""
-    });
-  }, [updateState, state.validationErrors]);
-
   const handlePurposeInput = useCallback(() => {
     updateState({
       validationErrors: { ...state.validationErrors, purpose: "" },

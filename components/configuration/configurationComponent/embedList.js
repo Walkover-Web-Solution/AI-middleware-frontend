@@ -6,12 +6,12 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
-import { closeModal, openModal } from '@/utils/utility';
+import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/infoTooltip';
-import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, TrashIcon, SettingsIcon } from '@/components/Icons';
+import { AddIcon, TrashIcon, SettingsIcon } from '@/components/Icons';
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import DeleteModal from '@/components/modals/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/prebuiltToolsConfigModal';
@@ -42,7 +42,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
   const dispatch = useDispatch();
-  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
+  const { integrationData, bridge_functions, function_data, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
@@ -59,7 +59,6 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
       integrationData: orgData?.integrationData || {},
       function_data: orgData?.functionData || {},
       bridge_functions: isPublished ? (bridgeDataFromState?.function_ids || []) : (versionData?.function_ids || []),
-      modelType: modelTypeName,
       model: modelName,
       shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
       showInbuiltTools: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.inbuilt_tools,
@@ -72,7 +71,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
     };
   });
   // Use the tutorial videos hook
-  const { getFunctionCreationVideo, tutorialData } = useTutorialVideos();
+  const { getFunctionCreationVideo } = useTutorialVideos();
      const [tutorialState, setTutorialState] = useState({
           showTutorial: false,
           showSuggestion: false

@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction, updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
-import { closeModal, getStatusClass, openModal } from '@/utils/utility';
+import { getStatusClass, openModal } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
@@ -20,7 +20,7 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
     const [preFunctionName, setPreFunctionName] = useState(null);
     const [preToolData, setPreToolData] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
-    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken, variables_path } = useCustomSelector((state) => {
+    const { integrationData, function_data, bridge_pre_tools, model, embedToken, variables_path } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         const isPublished = searchParams?.isPublished === 'true';
@@ -40,7 +40,6 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
             variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
         };

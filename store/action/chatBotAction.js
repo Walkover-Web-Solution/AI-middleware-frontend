@@ -3,7 +3,7 @@ import { createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, up
 import { updateBridgeActionReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
 
 
-export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
+export const getAllChatBotAction = (orgId) => async (dispatch) => {
     try {
         const response = await getAllChatBot(orgId);
         const chatbot_token=response?.data?.chatbot_token
@@ -16,7 +16,7 @@ export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
 
 
 
-export const createNewChatbot = (dataToSend, onSuccess) => async (dispatch, getState) => {
+export const createNewChatbot = (dataToSend, onSuccess) => async (dispatch) => {
     try {
         const response = await createChatBot(dataToSend);
         onSuccess(response);
@@ -27,7 +27,7 @@ export const createNewChatbot = (dataToSend, onSuccess) => async (dispatch, getS
 };
 
 
-export const getChatBotDetailsAction = (botId) => async (dispatch, getState) => {
+export const getChatBotDetailsAction = (botId) => async (dispatch) => {
     try {
         const response = await getChatBotDetails(botId);
         dispatch(getChatBotDetailsReducer({ botId, data: response.data }))
@@ -37,7 +37,7 @@ export const getChatBotDetailsAction = (botId) => async (dispatch, getState) => 
     }
 }
 
-export const addorRemoveBridgeInChatBotAction = (orgId, botId, bridgeId, type) => async (dispatch, getState) => {
+export const addorRemoveBridgeInChatBotAction = (orgId, botId, bridgeId, type) => async (dispatch) => {
     try {
         const response = await addorRemoveBridgeInChatBot(orgId, botId, bridgeId, type);
         dispatch(updateBridgeReducer(response.data.result))
@@ -48,7 +48,7 @@ export const addorRemoveBridgeInChatBotAction = (orgId, botId, bridgeId, type) =
     }
 }
 
-export const updateChatBotAction = (botId, dataToSend) => async (dispatch, getState) => {
+export const updateChatBotAction = (botId, dataToSend) => async (dispatch) => {
     try {
         const response = await updateChatBot(botId, dataToSend);
         dispatch(updateChatBotReducer({ botId, data: response.data }))
@@ -57,7 +57,7 @@ export const updateChatBotAction = (botId, dataToSend) => async (dispatch, getSt
     }
 }
 
-export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch, getState) => {
+export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch) => {
     try {
         const response = await updateChatBotConfig(botId, { config: dataToSend });
         dispatch(updateChatBotConfigReducer({ botId, data: response.data }))

@@ -27,7 +27,6 @@ export const useTutorialVideos = () => {
     const tutorial = tutorialData?.find(tutorial => {
       const title = tutorial?.title?.toLowerCase() || '';
       const type = tutorial?.type?.toLowerCase() || '';
-      const description = tutorial?.description?.toLowerCase() || '';
       
       switch (tutorialType) {
         case 'bridge_creation':

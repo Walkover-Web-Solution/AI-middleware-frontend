@@ -1,7 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction, updateChatBotConfigAction } from "@/store/action/chatBotAction";
 import { RefreshIcon } from "@/components/Icons";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -86,149 +85,12 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
     );
 }
 
-function BridgesToSwitch({ chatBotId, handleSave, orgId }) {
-    let { eligibleBridges, unEligibleBrigdes } = useCustomSelector((state) => ({
-        ...(() => {
-            const eligibleBridges = []
-            const unEligibleBrigdes = []
-            Object.values(state.bridgeReducer.allBridgesMap || {})?.forEach((item) => {
-                if(item?.org_id === orgId){
-                    if (!!item?.slugName && !!item?.published_version_id ) {
-                        const allowedBridge = state?.ChatBot?.ChatBotMap?.[chatBotId]?.config?.bridges?.find(bridge => bridge?.id === item?._id);
-                        const newItem = { ...item };
-                        newItem.displayName = allowedBridge?.displayName || item.name;
-                        if (allowedBridge) {
-                            newItem.checked = true;
-                        }
-                        eligibleBridges?.push(newItem);
-                    } else {
-                        unEligibleBrigdes?.push(item);
-                    }
-                }
-            });
-            return { eligibleBridges, unEligibleBrigdes }
-        })()
-    }));
-
-    const [eligibleBridgesArr, setEligibleBridgesArr] = useState(eligibleBridges)
-
-    const handleBridgeCheck = (e, bridge) => {
-        setEligibleBridgesArr(prevState =>
-            prevState.map(item =>
-                item?._id === bridge?._id ? { ...item, checked: e?.target?.checked } : item
-            )
-        );
-    }
-
-    const handleDisplayNameChange = (e, bridge) => {
-        setEligibleBridgesArr(prevState =>
-            prevState.map(item =>
-                item?._id === bridge?._id ? { ...item, displayName: e?.target?.value } : item
-            )
-        );
-    }
-
-    const pathName = usePathname();
-    const router = useRouter();
-    const path = pathName.split('?')[0].split('/')
-    const handleNavigation = (id, versionId) => {
-        router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
-    }
-
-    return (
-        <div className="border border-base-content/20 p-4 rounded-lg bg-base-200">
-            <div className="overflow-x-auto min-h-20 h-auto max-h-72 overflow-y-auto">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Agent Name</th>
-                            <th>Display Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {eligibleBridgesArr?.map((bridge, index) => (
-                            <tr key={index}>
-                                <th>
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            className="checkbox" 
-                                            onChange={(e) => handleBridgeCheck(e, bridge)} 
-                                            checked={bridge?.checked} 
-                                        />
-                                    </label>
-                                </th>
-                                <td>
-                                    <div 
-                                        className="cursor-pointer hover:text-blue-600" 
-                                        onClick={() => handleNavigation(bridge._id, bridge?.published_version_id || bridge?.versions?.[0])}
-                                    >
-                                        {bridge?.name}
-                                    </div>
-                                </td>
-                                <td>
-                                    <input
-                                        placeholder="Enter Display Name"
-                                        className="input input-bordered w-full max-w-xs input-sm"
-                                        defaultValue={bridge?.displayName || bridge?.name}
-                                        onChange={(e) => handleDisplayNameChange(e, bridge)}
-                                    />
-                                </td>
-                            </tr>
-                        ))}
-                        {unEligibleBrigdes?.map((bridge, index) => (
-                            <tr key={index} className="opacity-50">
-                                <th>
-                                    <label>
-                                        <div className="tooltip tooltip-right cursor-pointer" data-tip="Publish a version and add a slug name to select.">
-                                            <input type="checkbox" className="checkbox" disabled />
-                                        </div>
-                                    </label>
-                                </th>
-                                <td>
-                                    <div 
-                                        className="cursor-pointer" 
-                                        onClick={() => handleNavigation(bridge._id, bridge?.published_version_id || bridge?.versions?.[0])}
-                                    >
-                                        {bridge?.name}
-                                    </div>
-                                </td>
-                                <td>-</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="flex justify-end mt-4">
-                <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => handleSave({
-                        target: {
-                            value: eligibleBridgesArr?.filter((item) => item.checked).map((item) => ({
-                                id: item?._id,
-                                name: item?.name,
-                                displayName: item?.displayName || item?.name,
-                                slugName: item?.slugName
-                            })),
-                            name: "bridges"
-                        }
-                    })}
-                >
-                    Save Changes
-                </button>
-            </div>
-        </div>
-    );
-}
-
 export default function FormSection({ params, chatbotId = null }) {
     const dispatch = useDispatch();
     const { chatbots } = useCustomSelector((state) => ({
         chatbots: state?.ChatBot?.org?.[params?.org_id] || [],
     }));
-    const [chatBotId, setChatBotId] = useState(chatbotId || params?.chatbot_id || chatbots[0]?._id);
+    const [chatBotId] = useState(chatbotId || params?.chatbot_id || chatbots[0]?._id);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const iframeRef = useRef(null);
     const [formData, setFormData] = useState({

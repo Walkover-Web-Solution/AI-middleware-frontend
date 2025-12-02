@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterBridges, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
+import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { CloseIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';

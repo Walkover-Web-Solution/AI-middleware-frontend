@@ -1,7 +1,7 @@
 import React from 'react'
 import { MODAL_TYPE } from '@/utils/enums'
 import Modal from '../UI/modal'
-import { Zap, Eye, RotateCcw } from 'lucide-react'
+import { Zap, Eye } from 'lucide-react'
 
 const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handleImprovePrompt,isImprovingPrompt,hasGeneratedPrompt,handleShowGeneratedPrompt}) => {
   return (

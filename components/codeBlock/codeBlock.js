@@ -7,8 +7,7 @@ import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typesc
 import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
 import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
-import { prism, vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useThemeManager } from '@/customHooks/useThemeManager';
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 SyntaxHighlighter.registerLanguage('jsx', jsx);
@@ -25,7 +24,6 @@ function CodeBlock({
     children,
     isDark,
     ...props }) {
-    const { isDarkTheme } = useThemeManager();
     const match = /language-(\w+)/.exec(className || "");
     const [copyStatus, setCopyStatus] = useState("Copy");
     const resetTimerRef = useRef(null);
@@ -66,7 +64,7 @@ function CodeBlock({
             try {
                 document.execCommand("copy");
                 setCopyStatus("Copied!");
-            } catch (err) {
+            } catch {
                 setCopyStatus("Failed");
             } finally {
                 document.body.removeChild(textarea);
@@ -80,7 +78,7 @@ function CodeBlock({
             } else {
                 fallbackCopy(codeString);
             }
-        } catch (error) {
+        } catch {
             setCopyStatus("Failed");
         }
 

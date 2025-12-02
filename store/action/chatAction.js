@@ -277,7 +277,7 @@ export const clearChatChannelData = (channelId) => (dispatch) => {
 };
 
 // Combined action for sending message and handling RT response
-export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, isOrchestralModel = false, additionalData = {}) => async (dispatch, getState) => {
+export const sendMessageWithRtLayer = (channelId, messageContent, apiCall, additionalData = {}) => async (dispatch) => {
   let userMessage = null;
   let loadingMessage = null;
 

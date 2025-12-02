@@ -4,7 +4,7 @@ import { truncate } from "@/components/historyPageComponents/assistFile";
 import PageHeader from "@/components/pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { MODAL_TYPE } from "@/utils/enums";
-import React, { useCallback, useEffect, useMemo, useState, use, useRef } from 'react';
+import React, { useCallback, useEffect, useState, use } from 'react';
 import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import { openModal, toggleSidebar, closeModal, formatRelativeTime, formatDate } from "@/utils/utility";
@@ -48,7 +48,7 @@ const Page = ({ params }) => {
   }, [integrationData]);
 
 
-  const tableData = (filterIntegration || [])?.map((item, index) => ({
+  const tableData = (filterIntegration || [])?.map((item) => ({
     id: item._id,
     actualName: item?.name,
     name: (

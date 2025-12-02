@@ -9,7 +9,7 @@ import { openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { ChevronDown, ChevronLeft, Plus, Info } from 'lucide-react';
+import { ChevronDown, Plus } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
 import DeleteModal from '@/components/modals/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
@@ -317,7 +317,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
         <div className='flex items-center gap-1'>
             {/* Version Tabs Container */}
             <div className="flex items-center gap-1">
-                {versionsToShow.map((version, index) => {
+                {versionsToShow.map((version) => {
                     const isActive = searchParams.get?.('version') === version;
                     const isPublished = version === publishedVersion;
                     const versionDisplayName = getVersionDisplayName(version);
@@ -383,7 +383,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                             <div className="absolute top-full left-0 mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                                 <div className="p-2">
                                     <div className="text-xs font-medium text-base-content/70 mb-2 px-2">All Versions</div>
-                                    {bridgeVersionsArray.map((version, index) => {
+                                    {bridgeVersionsArray.map((version) => {
                                         const isActive = searchParams?.get?.('version') === version;
                                         const isPublished = version === publishedVersion;
                                         const versionDisplayName = getVersionDisplayName(version);

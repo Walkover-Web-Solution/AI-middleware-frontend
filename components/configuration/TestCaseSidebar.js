@@ -13,9 +13,8 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   const [generatingTestCases, setGeneratingTestCases] = useState(false);
   const dispatch = useDispatch();
 
-  const { testCases, isFirstTestcase, versions } = useCustomSelector((state) => ({
+  const { testCases, versions } = useCustomSelector((state) => ({
     testCases: state?.testCasesReducer?.testCases?.[params?.id] || [],
-    isFirstTestcase: state?.userDetailsReducer?.userDetails?.meta?.onboarding?.TestCasesSetup || false,
     versions: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
   }));
 

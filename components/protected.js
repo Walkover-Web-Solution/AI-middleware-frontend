@@ -2,7 +2,7 @@
 "use client"
 
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getFromCookies, setInCookies } from "@/utils/utility";
+import { getFromCookies } from "@/utils/utility";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from 'react';
 const Protected = (WrappedComponent) => {

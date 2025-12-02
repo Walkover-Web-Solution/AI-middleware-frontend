@@ -1,9 +1,9 @@
 'use client'
 import LoginButton from '@/components/common/LoginButton';
 import { getFromCookies } from '@/utils/utility';
-import { Bot, Search, ArrowRight, Users } from 'lucide-react';
+import { Bot, ArrowRight, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React from 'react';
 
 const PublicAgent = ({ agents, searchTerm, setSearchTerm}) => {
     const router = useRouter();

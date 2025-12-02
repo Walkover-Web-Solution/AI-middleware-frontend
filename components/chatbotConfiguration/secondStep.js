@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import CopyButton from "../copyButton/copyButton";
 import GenericTable from '../table/table';
 import { extractPromptVariables } from '@/utils/utility';

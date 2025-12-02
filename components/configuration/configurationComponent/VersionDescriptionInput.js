@@ -2,7 +2,7 @@ import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { sendDataToParent } from '@/utils/utility';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 

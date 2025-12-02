@@ -89,7 +89,6 @@ const Sidebar = memo(({
     return Array.isArray(historyData) ? historyData : [];
   }, [historyData]);
 
-  const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [expandedThreads, setExpandedThreads] = useState([]);
   const [loadingSubThreads, setLoadingSubThreads] = useState(true);

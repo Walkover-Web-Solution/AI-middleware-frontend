@@ -30,26 +30,20 @@ if (typeof document !== 'undefined') {
 }
 
 import { useDispatch } from 'react-redux';
-import {
-  Building2, ChevronDown,
-  LogOut, Mail,
+import { ChevronDown,
+  LogOut,
   ChevronRight, ChevronLeft,
   User,
   AlignJustify,
-  FileText,
-  MoonIcon,
-  SunIcon,
-  MonitorIcon,
-  Plus,
   ArrowLeft
 } from 'lucide-react';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useThemeManager } from '@/customHooks/useThemeManager';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { clearCookie, getFromCookies, openModal, toggleSidebar, setInCookies } from '@/utils/utility';
+import { clearCookie, getFromCookies, openModal, setInCookies } from '@/utils/utility';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';

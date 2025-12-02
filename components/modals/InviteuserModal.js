@@ -4,7 +4,7 @@ import Modal from '../UI/modal'
 import { getInvitedUsers, inviteUser } from '@/config';
 import { toast } from 'react-toastify';
 import { closeModal } from '@/utils/utility';
-import { X, Mail, UserPlus } from 'lucide-react';
+import { Mail, UserPlus } from 'lucide-react';
 
 const InviteUserModal = () => {
   const [email, setEmail] = useState('');

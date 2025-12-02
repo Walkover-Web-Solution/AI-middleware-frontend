@@ -12,7 +12,7 @@ export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
   }
 }
 
-export const getAllOrgAction = () => async (dispatch, getState) => {
+export const getAllOrgAction = () => async (dispatch) => {
   try {
     const response = await getAllOrg();
     dispatch(organizationsFetched(response.data));

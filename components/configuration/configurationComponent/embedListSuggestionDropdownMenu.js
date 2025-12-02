@@ -3,8 +3,7 @@ import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { getStatusClass } from '@/utils/utility';
-import { current } from '@reduxjs/toolkit';
-import { InfoIcon, AddIcon } from '@/components/Icons';
+import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import { truncate } from '@/components/historyPageComponents/assistFile';
@@ -16,7 +15,6 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
     const { integrationData, function_data, embedToken } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
-        const currentUser = state.userDetailsReducer.userDetails
 
         return {
             integrationData: orgData.integrationData,

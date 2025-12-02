@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import { PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
+import { PencilIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/infoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
@@ -18,7 +18,6 @@ const   GptMemory = ({ params, searchParams, isPublished }) => {
             gpt_memory: isPublished ? (bridgeDataFromState?.gpt_memory || false) : (versionData?.gpt_memory || false),
         };
     });
-    const [memoryContext, setMemoryContext] = useState(gpt_memory_context);
     const [showInput, setShowInput] = useState(gpt_memory_context?.length > 0);
 
     const handleCheckboxChange = (e) => {

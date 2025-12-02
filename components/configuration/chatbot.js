@@ -1,10 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useEffect, useMemo, useRef, useState } from "react";
-import LoadingSpinner from "@/components/loadingSpinner";
+import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params, searchParams }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  
   // Memoize isPublished to make it reactive to searchParams changes
   const isPublished = useMemo(() => {
     // Handle both URLSearchParams object and plain object
@@ -18,13 +15,11 @@ const Chatbot = ({ params, searchParams }) => {
     }
     return result;
   }, [searchParams]); 
-  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => {
+  const { bridgeName, bridgeSlugName, variablesKeyValue, configuration, service } = useCustomSelector((state) => {
     const versionState = state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version] || {};
     return {
       bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
       bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-      bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-      chatbot_token: state?.ChatBot?.chatbot_token || '',
       variablesKeyValue: versionState?.variables || [],
       configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
       service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
@@ -48,7 +43,7 @@ const Chatbot = ({ params, searchParams }) => {
         try {
           const parsed = typeof trimmed === "string" ? JSON.parse(trimmed) : trimmed;
           return parsed;
-        } catch (err) {
+        } catch {
           return trimmed;
         }
       }
@@ -146,7 +141,7 @@ const Chatbot = ({ params, searchParams }) => {
       }
     }, 300);
 
-  }, [chatbot_token, searchParams, isPublished, bridgeSlugName, bridgeName, variables]);
+  }, [searchParams, isPublished, bridgeSlugName, bridgeName, variables]);
 
   return (
     <>

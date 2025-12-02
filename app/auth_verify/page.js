@@ -1,10 +1,10 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations, renderedOrganizations } from '@/utils/utility';
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { renderedOrganizations } from '@/utils/utility';
+import React, { useState, useCallback, useEffect } from 'react';
 import Protected from '@/components/protected';
 import LoadingSpinner from '@/components/loadingSpinner';
-import { Search, Building2, Shield, CheckCircle, Lock, User, Database, Key, Link, AlertCircle, ArrowRight, XCircle } from 'lucide-react';
+import { Search, Building2, Shield, CheckCircle, Lock, User, Database, AlertCircle, ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { getClientInfo, switchOrg, verifyAuth, switchUser } from '@/config';
 import { BuildingIcon } from '@/components/Icons';
@@ -21,8 +21,6 @@ const Page = () => {
         client_name: '',
         isClientVerified: false
     });
-    const [isInitialLoading, setIsInitialLoading] = useState(false);
-    const [isLoading, setisLoading] = useState();
     const [missingParams, setMissingParams] = useState({
         clientId: false,
         redirectionUrl: false
@@ -49,7 +47,7 @@ const Page = () => {
                             client_name: res?.result?.name,
                             isClientVerified: true
                         });
-                    } catch (error) {
+                    } catch {
                         updateFormState({
                             isClientVerified: false
                         });
@@ -80,7 +78,7 @@ const Page = () => {
 
     const handleSwitchOrg = useCallback(async (id,name) => {
         try {
-          const response = await switchOrg(id);
+          await switchOrg(id);
           const localToken = await switchUser({ orgId: id, orgName: name });
           setInCookies('local_token', localToken.token);
         } catch (error) {
@@ -102,12 +100,12 @@ const Page = () => {
             redirection_url: formState?.redirectionUrl,
             state: formState?.state
         }
-        const res = await verifyAuth(data)
+        await verifyAuth(data)
         updateFormState({ isLoading: false });
     }, [formState.selectedOrg, formState.isClientVerified, updateFormState]);
 
 
-    if (formState.isLoading || isInitialLoading) {
+    if (formState.isLoading) {
         return <LoadingSpinner />;
     }
 
@@ -226,7 +224,7 @@ const Page = () => {
                                     disabled={!formState.selectedOrg || !formState.isClientVerified || missingParams.clientId || missingParams.redirectionUrl}
                                     className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
-                                    {isLoading ? (
+                                    {formState.isLoading ? (
                                         <>
                                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                             Authorizing...

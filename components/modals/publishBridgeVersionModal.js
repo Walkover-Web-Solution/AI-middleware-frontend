@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useMemo, useEffect, useRef } from "react";
-import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot, ChevronDown } from "lucide-react";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
+import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot } from "lucide-react";
 import {
   getAllBridgesAction,
   getBridgeVersionAction,
@@ -8,7 +8,7 @@ import {
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal, openModal, sendDataToParent } from "@/utils/utility";
+import { closeModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/modal";

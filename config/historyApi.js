@@ -38,7 +38,6 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
     const encodedThreadId = encodeURIComponent(threadId);
     const encodedBridgeId = encodeURIComponent(bridgeId);
     const encodedSubThreadId = encodeURIComponent(subThreadId || threadId);
-    const encodedVersionId = versionId === 'undefined' ? undefined : encodeURIComponent(versionId);
     
     const getSingleThreadData = await axios.get(`${URL}/history/${encodedBridgeId}/${encodedThreadId}/${encodedSubThreadId}?page=${nextPage}&limit=${pagelimit}`, {
       params: {

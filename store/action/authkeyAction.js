@@ -7,7 +7,7 @@ import { fetchAllAuthData, addAuthData, removeAuthData } from "../reducer/authke
  * and update the authkey reducer with the fetched data
  * @returns {function(*, *)} a thunk action creator
  */
-export const getAllAuthData = () => async (dispatch, getState) => {
+export const getAllAuthData = () => async (dispatch) => {
   // Fetch all auth keys from the server
   try {
     const { data } = await allAuthKey();
@@ -26,7 +26,7 @@ export const getAllAuthData = () => async (dispatch, getState) => {
  * for creating a new auth key
  * @returns {function(*, *)} a thunk action creator
  */
-export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
+export const createNewAuthData = (dataToSend) => async (dispatch) => {
   try {
     // Make a request to the server to create a new auth key
     const { data } = await createAuthKey(dataToSend);
@@ -49,7 +49,7 @@ export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
  * @param {number} data.index - the index of the auth key in the authkeys state
  * @returns {function(*, *)} a thunk action creator
  */
-export const deleteAuthData = (data) => async (dispatch, getState) => {
+export const deleteAuthData = (data) => async (dispatch) => {
   try {
     // Remove the auth key from the authkeys reducer
     dispatch(removeAuthData(data.id));

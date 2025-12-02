@@ -1,11 +1,11 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, BotIcon, Variable, ChevronDown, RotateCcw, RefreshCcw } from 'lucide-react';
+import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, BotIcon, ChevronDown, RefreshCcw } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, dicardBridgeVersionAction, archiveBridgeAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, dicardBridgeVersionAction, archiveBridgeAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, toggleSidebar, sendDataToParent } from '@/utils/utility';
@@ -14,7 +14,6 @@ const ChatBotSlider = dynamic(() => import('./sliders/chatBotSlider'), { ssr: fa
 const ConfigHistorySlider = dynamic(() => import('./sliders/configHistorySlider'), { ssr: false });
 import Protected from './protected';
 const GuideSlider = dynamic(() => import('./sliders/integrationGuideSlider'), { ssr: false });
-import { FilterSliderIcon } from './Icons';
 const DeleteModal = dynamic(() => import('./modals/DeleteModal'), { ssr: false });
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import BridgeVersionDropdown from './configuration/configurationComponent/bridgeVersionDropdown';

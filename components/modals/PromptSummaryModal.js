@@ -1,10 +1,8 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { genrateSummaryAction, updateBridgeAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
 import Modal from '../UI/modal';
 
 // Reusable Agent Summary Content Component

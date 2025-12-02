@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { PencilIcon, SaveIcon, RefreshIcon, CopyIcon } from '@/components/Icons';
+import { RefreshIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { SaveAllIcon } from 'lucide-react';
 import { resetPrebuiltPromptAction, updatePrebuiltPromptAction } from '@/store/action/prebuiltPromptAction';
@@ -108,10 +107,6 @@ export default function PrebuiltPromptsPage() {
     }
   };
 
-  const handleCopy = (agentKey) => {
-    navigator.clipboard.writeText(prompts[agentKey]);
-    toast.success('Prompt copied to clipboard!');
-  };
 
   // Function to estimate token count from text
   const estimateTokenCount = (text) => {
@@ -132,13 +127,6 @@ export default function PrebuiltPromptsPage() {
     const estimatedTokens = Math.ceil(characters / 4) + Math.ceil(words.length * 0.3);
     
     return estimatedTokens;
-  };
-
-  const toggleEdit = (agentKey) => {
-    setIsEditing(prev => ({
-      ...prev,
-      [agentKey]: !prev[agentKey]
-    }));
   };
 
   if (availableKeys.length === 0) {

@@ -1,19 +1,13 @@
 import { MoonIcon, SunIcon, MonitorIcon, ChevronDownIcon } from "lucide-react";
 import { useState, useEffect } from "react";
-import LoadingSpinner from "../loadingSpinner";
 import { useThemeManager } from "@/customHooks/useThemeManager";
 
 export default function ThemeToggle() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { 
     theme, 
-    actualTheme, 
-    loading, 
     changeTheme, 
-    getThemeLabel,
-    isSystemTheme,
-    isDarkTheme,
-    isLightTheme 
+    getThemeLabel
   } = useThemeManager();
 
   // Close dropdown when clicking outside

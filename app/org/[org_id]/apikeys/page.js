@@ -6,7 +6,7 @@ import PageHeader from "@/components/pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, updateApikeyAction  } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, formatDate, formatDateTimeToDisplay, formatRelativeTime, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
+import { formatDate, formatRelativeTime, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { BookIcon, RefreshIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -15,7 +15,6 @@ import DeleteModal from "@/components/modals/deleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/apiKeyGuide";
 import ConnectedAgentsModal from '@/components/modals/connectedAgentsModal';
-import { EllipsisIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
 

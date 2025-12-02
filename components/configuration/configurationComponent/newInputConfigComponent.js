@@ -1,4 +1,3 @@
-import CreateVariableModal from '@/components/modals/createVariableModal';
 import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';

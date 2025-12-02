@@ -58,7 +58,7 @@ export const updateApikeyAction = (dataToSend) => async (dispatch) => {
   }
 }
 
-export const deleteApikeyAction = ({ org_id, name, id }) => async (dispatch, getState) => {
+export const deleteApikeyAction = ({ org_id, name, id }) => async (dispatch) => {
   // Step 1: Create a backup of the current state
   dispatch(backupApiKeysReducer({ org_id })); 
   // Step 2: Optimistically delete from UI immediately

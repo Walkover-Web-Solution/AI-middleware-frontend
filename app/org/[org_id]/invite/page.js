@@ -93,7 +93,7 @@ function InvitePage({ }) {
       } else {
         toast.error('Failed to fetch invited members.');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred while fetching invited members.');
     } finally {
       setIsLoading(false);
@@ -139,7 +139,7 @@ function InvitePage({ }) {
       } else {
         toast.error('Failed to send invitation.');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred while sending the invitation.');
     } finally {
       setIsInviting(false);

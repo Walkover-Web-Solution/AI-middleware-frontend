@@ -2,7 +2,6 @@
 import CreateOrg from '@/components/createNewOrg';
 import Protected from '@/components/protected';
 import OrganizationHeader from '@/components/organization/organizationHeader';
-import OrganizationSearch from '@/components/organization/organizationSearch';
 import OrganizationGrid from '@/components/organization/OrganizationGrid';
 import { ThemeManager } from '@/customHooks/useThemeManager';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
@@ -67,15 +66,6 @@ function Page() {
   useEffect(() => {
     setDisplayedOrganizations(organizationsArray);
   }, [organizationsArray]);
-
-  // Auto-redirect if there's only one organization
-  useEffect(() => {
-    const allowRedirection = searchParams.get('redirection') !== 'false';
-    // if (organizationsArray.length === 1 && allowRedirection) {
-    //   const singleOrg = organizationsArray[0];
-    //   handleSwitchOrg(singleOrg.id, singleOrg.name);
-    // }
-  }, [organizationsArray, handleSwitchOrg, searchParams]);
 
   // Show loader if redirecting
   if (isRedirecting) {

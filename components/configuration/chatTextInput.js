@@ -22,7 +22,6 @@ const VARIABLE_SLIDER_DISABLE_KEY = 'variableSliderDisabled';
 
 function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef }) {
     const [uploading, setUploading] = useState(false);
-    const [uploadedVideos, setUploadedVideos] = useState(null);
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -109,7 +108,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                 try {
                     const parsed = typeof candidate === "string" ? JSON.parse(candidate) : candidate;
                     return parsed;
-                } catch (err) {
+                } catch {
                     return undefined;
                 }
             }
@@ -175,7 +174,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
     }, [prompt, variablesKeyValue]);
 
     const handleSendMessage = async (e, forceRun = false) => {
-        const timestamp = Date.now();
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
         }
@@ -246,7 +244,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     content: newMessage,
                     images: uploadedImages, // Include images in the data
                     files: uploadedFiles,
-                    video_data: uploadedVideos, // Include videos in the data
                     youtube_url: mediaUrls, // Include media URLs in the data
                 };
 
@@ -279,7 +276,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     {
                         images: uploadedImages,
                         files: uploadedFiles,
-                        video_data: uploadedVideos,
                         youtube_url: mediaUrls
                     }
                 ));
@@ -401,7 +397,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             //         icon: () => <AlertIcon size={20} className="text-warning" />
             //     });
 
-        } catch (error) {
+        } catch {
             dispatch(setChatError(channelIdentifier, "Something went wrong. Please try again."));
             dispatch(setChatLoading(channelIdentifier, false)); // Clear loading on error
         }
@@ -460,19 +456,9 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             toast.error('Each file should be less than 35MB.');
             return;
         }
-        const newPdfs = files.filter(file => file.type === 'application/pdf');
-        const newVideos = files.filter(file => file.type.startsWith('video/'));
         const newImages = files.filter(file => file.type.startsWith('image/'));
 
-        const totalPdfs = uploadedFiles.length + newPdfs.length;
         const totalImages = uploadedImages.length + newImages.length;
-        const hasExistingVideo = uploadedVideos !== null;
-        const totalVideos = (hasExistingVideo ? 1 : 0) + newVideos.length;
-
-        if (totalVideos > 1) {
-            toast.error('Only one video is allowed.');
-            return;
-        }
 
         if (totalImages > 4) {
             toast.error('Only four images are allowed.');

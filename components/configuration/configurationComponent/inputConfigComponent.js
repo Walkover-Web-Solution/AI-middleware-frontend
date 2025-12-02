@@ -6,7 +6,6 @@ import PromptSummaryModal from '../../modals/promptSummaryModal';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 import PromptHeader from './PromptHeader';
 import PromptTextarea from './promptTextarea';
-import VariablesSuggestions from './VariablesSuggestions';
 import DefaultVariablesSection from './DefaultVariablesSection';
 
 // Ultra-smooth InputConfigComponent with ref-based approach
@@ -83,15 +82,6 @@ const InputConfigComponent = memo(({
     const handleOpenDiffModal = useCallback(() => {
         openModal(MODAL_TYPE?.DIFF_PROMPT);
     }, []);
-
-    const handleTextareaFocus = useCallback(() => {
-        if (!uiState.isPromptHelperOpen && window.innerWidth > 710) {
-            updateUiState({ isPromptHelperOpen: true });
-            if (typeof window.closeTechDoc === 'function') {
-                window.closeTechDoc();
-            }
-        }
-    }, [uiState.isPromptHelperOpen, updateUiState]);
 
     const handleOpenPromptHelper = useCallback(() => {
         if (!uiState.isPromptHelperOpen && window.innerWidth > 710) {

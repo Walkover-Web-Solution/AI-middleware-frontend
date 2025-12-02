@@ -1,4 +1,3 @@
-import axios from "axios";
 import { addNewModelReducer, deleteModelReducer, fetchModelReducer } from "../reducer/modelReducer";
 import { addNewModel, deleteModel, getAllModels } from "@/config";
 

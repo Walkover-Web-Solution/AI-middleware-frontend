@@ -1,7 +1,7 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations, renderedOrganizations, setInCookies } from '@/utils/utility';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { renderedOrganizations, setInCookies } from '@/utils/utility';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
 import { getModelAction } from '@/store/action/modelAction';
@@ -154,10 +154,6 @@ function Page() {
             selectedModelType: e.target.selectedOptions[0].parentNode.label
         });
     }, [updateFormState]);
-
-    const filteredOrganizations = useMemo(() =>
-        filterOrganizations(organizations, formState.searchQuery),
-        [organizations, formState.searchQuery]);
 
     if (formState.isLoading || isInitialLoading) {
         return <LoadingSpinner />;

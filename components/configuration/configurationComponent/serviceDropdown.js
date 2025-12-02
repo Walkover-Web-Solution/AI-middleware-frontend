@@ -1,9 +1,8 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AlertIcon, ChevronDownIcon } from "@/components/Icons";
+import { AlertIcon } from "@/components/Icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from 'react-redux';
-import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
 import { getIconOfService } from "@/utils/utility";
@@ -47,21 +46,6 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             if (element) {
                 element.style.borderColor = "";
             }
-        }
-    };
-
-    const setErrorBorder = (ref, selector, scrollToView = false) => {
-        if (ref?.current) {
-            if (scrollToView) {
-                ref.current.scrollIntoView({ behavior: 'smooth' });
-            }
-            setTimeout(() => {
-                const element = ref.current.querySelector(selector);
-                if (element) {
-                    element.focus();
-                    element.style.borderColor = "red";
-                }
-            }, 300);
         }
     };
 

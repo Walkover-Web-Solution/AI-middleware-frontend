@@ -1,8 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BookIcon, BrainIcon, CloseIcon } from './Icons';
-import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import { usePathname } from 'next/navigation';
 import Canvas from '@/components/canvas';
 import { useDispatch } from 'react-redux';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
@@ -27,10 +23,6 @@ const PromptHelper = ({
 }) => {
   const dispatch = useDispatch();
   const [optimizedPrompt, setOptimizedPrompt] = useState('');
-
-  const pathname = usePathname();
-  const pathParts = pathname.split('?')[0].split('/');
-  const bridgeId = pathParts[5];
 
   const handleOptimizePrompt = useCallback(async (instructionText) => {
     try {

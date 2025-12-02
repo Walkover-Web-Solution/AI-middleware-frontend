@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { getMetricsDataApi } from '@/config';
 import { METRICS_FACTOR_OPTIONS } from '@/utils/enums';
 
@@ -59,7 +59,6 @@ export const convertApiData = (
   });
 
   let timePoints = [];
-  let intervalType = "day";
   let intervalMs = 24 * 60 * 60 * 1000;
 
   if (range === 10 && customStartDate && customEndDate) {
@@ -74,7 +73,6 @@ export const convertApiData = (
       timePoints.push(new Date(date));
     }
 
-    intervalType = "day";
     intervalMs = 24 * 60 * 60 * 1000;
   } else {
     const now = new Date();
@@ -83,56 +81,48 @@ export const convertApiData = (
 
     switch (range) {
       case 0: // 1 hour → 15 min
-        intervalType = "hour";
         intervalMs = 15 * 60 * 1000;
         timePoints = Array.from({ length: 4 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 1: // 3 hours → 15 min
-        intervalType = "hour";
         intervalMs = 15 * 60 * 1000;
         timePoints = Array.from({ length: 12 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 2: // 6 hours → 30 min
-        intervalType = "hour";
         intervalMs = 15 * 60 * 1000;
         timePoints = Array.from({ length: 24 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 3: // 12 hours → 1 hour
-        intervalType = "hour";
         intervalMs = 15 * 60 * 1000;
         timePoints = Array.from({ length: 48 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 4: // 1 day → 2 hours
-        intervalType = "hour";
         intervalMs = 15 * 60 * 1000;
         timePoints = Array.from({ length: 96 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 5: // 2 days → 4 hours
-        intervalType = "day";
         intervalMs = 24 * 60 * 60 * 1000;
         timePoints = Array.from({ length: 2 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 6: // 7 days
-        intervalType = "day";
         intervalMs = 24 * 60 * 60 * 1000;
         timePoints = Array.from({ length: 7 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
         ).reverse();
         break;
       case 7: // 14 days
-        intervalType = "day";
         intervalMs = 24 * 60 * 60 * 1000;
         timePoints = Array.from({ length: 14 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)
@@ -140,7 +130,6 @@ export const convertApiData = (
         break;
       case 8: // 30 days
       default:
-        intervalType = "day";
         intervalMs = 24 * 60 * 60 * 1000;
         timePoints = Array.from({ length: 30 }, (_, i) =>
           new Date(roundedNow.getTime() - i * intervalMs)

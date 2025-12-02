@@ -16,7 +16,7 @@ import { getIconOfService, openModal, closeModal, formatRelativeTime, formatDate
 
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
@@ -479,7 +479,7 @@ function Home({ params, isEmbedUser }) {
     )
   }
 
-  const deleteBridge = async (item, name) => {
+  const deleteBridge = async (item) => {
     await executeDelete(async () => {
       const bridgeId = item._id;
       const response = await dispatch(deleteBridgeAction({ bridgeId, org_id: resolvedParams.org_id }));

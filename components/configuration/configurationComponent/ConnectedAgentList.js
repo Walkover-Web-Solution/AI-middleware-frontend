@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './connectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, SettingsIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { AddIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -26,7 +26,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_AGENT_MODAL);
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
+    const { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -43,8 +43,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
             connect_agents: isPublished ? (bridgeDataFromState?.connected_agents || {}) : (versionData?.connected_agents || {}),
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
-            variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
-            bridges: state?.bridgeReducer?.allBridgesMap
+            variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {})
 
         };
     });

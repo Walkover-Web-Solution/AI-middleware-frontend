@@ -1,4 +1,4 @@
-import { getHistory, getSingleThreadData, getSubThreadIds, getThreads, searchMessageHistory, updateHistoryMessage, userFeedbackCount } from "@/config";
+import { getSingleThreadData, getSubThreadIds, getThreads, searchMessageHistory, updateHistoryMessage, userFeedbackCount } from "@/config";
 import { 
   fetchAllHistoryReducer, 
   fetchSubThreadReducer, 
@@ -43,10 +43,9 @@ export const updateContentHistory = ({ id, bridge_id, message, index }) => async
   }
 }
 
-export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(dispatch) =>{
+export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async () =>{
   try {
-    const data = await userFeedbackCount({bridge_id,user_feedback});
-    
+    await userFeedbackCount({bridge_id,user_feedback});
   } catch (error) {
     console.error(error)
   }

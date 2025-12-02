@@ -1,10 +1,9 @@
 import { MODAL_TYPE } from '@/utils/enums'
-import { closeModal, generateKeyValuePairs } from '@/utils/utility'
-import { CloseCircleIcon, CloseIcon, CopyIcon } from '@/components/Icons'
+import { closeModal } from '@/utils/utility'
+import { CloseIcon } from '@/components/Icons'
 import React from 'react'
 import Modal from '../UI/modal'
 import CopyButton from '../copyButton/copyButton'
-import { ChevronDown } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 const flattenMessage = (message) => {

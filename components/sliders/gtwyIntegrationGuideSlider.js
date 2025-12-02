@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { CloseIcon } from "@/components/Icons";
 import { Save } from "lucide-react";
 import { generateGtwyAccessTokenAction } from "@/store/action/orgAction";

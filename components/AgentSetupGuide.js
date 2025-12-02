@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
-import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
+import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from './protected';
 

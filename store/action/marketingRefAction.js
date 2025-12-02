@@ -1,6 +1,6 @@
 import { storeMarketingRefUser } from "@/config";
 
-export const storeMarketingRefUserAction = (data) => async (dispatch) => {
+export const storeMarketingRefUserAction = (data) => async () => {
   try {
     const response = await storeMarketingRefUser(data);
     return response.data;

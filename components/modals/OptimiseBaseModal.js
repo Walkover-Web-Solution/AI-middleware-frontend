@@ -1,7 +1,6 @@
 import { closeModal, createDiff, simulateStreaming } from '@/utils/utility';
 import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons';
 import React, { useEffect, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
 import Canvas from '../canvas';
 import Modal from '../UI/modal';

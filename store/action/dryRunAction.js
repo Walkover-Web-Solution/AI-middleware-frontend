@@ -1,9 +1,8 @@
 import axios from "axios";
-import { fetchAllHistoryReducer, fetchThreadReducer } from "../reducer/historyReducer";
 
 
 
-export const dryRunAction = () => async (dispatch, getState) => {
+export const dryRunAction = () => async (dispatch) => {
   try {
     const dataToSend = {
       "configuration": {

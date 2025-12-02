@@ -3,6 +3,9 @@
     "next",
     "next/core-web-vitals"
   ],
+  "plugins": [
+    "unused-imports"
+  ],
   "rules": {
     "react/no-unescaped-entities": "off",
     // Ignore "missing dependency" warnings in useEffect
@@ -12,6 +15,17 @@
     // Ignore missing "key" prop for elements in iterators
     "react/jsx-key": "off",
     // Ignore missing display name for component definitions
-    "react/display-name": "off"
+    "react/display-name": "off",
+    // Automatically remove unused imports and variables while allowing "_" prefixed identifiers
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "none",
+        "ignoreRestSiblings": true
+      }
+    ]
   }
 }

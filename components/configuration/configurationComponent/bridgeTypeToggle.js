@@ -7,7 +7,7 @@ import Protected from '@/components/protected';
 import InfoTooltip from '@/components/infoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) => {
+const BridgeTypeToggle = ({ params, searchParams, isPublished }) => {
     const dispatch = useDispatch();
     const { bridgeType, modelType, service } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,

@@ -152,7 +152,7 @@ export const isValidJson = (jsonString) => {
     try {
         JSON.parse(jsonString);
         return true; // Return true if JSON parses without error
-    } catch (e) {
+    } catch {
         return false; // Return false if an error is thrown
     }
 };

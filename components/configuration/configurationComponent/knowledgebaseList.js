@@ -20,8 +20,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished }) => {
     // Use the tutorial videos hook
     const { getKnowledgeBaseVideo } = useTutorialVideos();
 
-    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
-        const user = state.userDetailsReducer.userDetails || []
+      const { knowledgeBaseData, knowbaseVersionData, shouldToolsShow } = useCustomSelector((state) => {
         const modelReducer = state?.modelReducer?.serviceModels;
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -36,9 +35,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished }) => {
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
             knowbaseVersionData: isPublished ? (bridgeDataFromState?.doc_ids || []) : (versionData?.doc_ids || []),
-            isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
-            model: modelName
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools
         };
     });
     const [selectedKnowledgebase, setSelectedKnowledgebase] = useState(null);

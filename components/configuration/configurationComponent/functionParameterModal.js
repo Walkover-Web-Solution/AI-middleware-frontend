@@ -1,10 +1,8 @@
-import { optimizeJsonApi, updateFlow, updateFlowDescription } from "@/config";
-import { parameterTypes } from "@/jsonFiles/bridgeParameter";
+import { optimizeJsonApi, updateFlow } from "@/config";
 import {
-  updateBridgeAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
-import { closeModal, flattenParameters } from "@/utils/utility";
+import { closeModal } from "@/utils/utility";
 import { isEqual } from "lodash";
 import { CopyIcon, InfoIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
@@ -13,7 +11,7 @@ import { toast } from "react-toastify";
 import Modal from "@/components/UI/modal";
 import InfoTooltip from "@/components/infoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { ChevronsUpDown, PlusCircleIcon, CircleQuestionMark } from "lucide-react";
+import { PlusCircleIcon, CircleQuestionMark } from "lucide-react";
 
 // Parameter Card Component
 const ParameterCard = ({
@@ -52,7 +50,6 @@ const ParameterCard = ({
   
   const currentPath = [...path, paramKey].join(".");
   const hasChildren = param.type === "object" && param.parameter;
-  const childCount = hasChildren ? Object.keys(param.parameter).length : 0;
   const bgColor = depth % 2 === 0 ? "bg-base-100" : "bg-base-200"
   
   return (
@@ -126,7 +123,6 @@ const ParameterCard = ({
                   } else {
                     // For nested parameters, check if all parent parameters are required
                     let isParentRequired = true;
-                    let currentField = toolData?.fields;
                     
                     // Check each level of parent to ensure they are all required
                     for (let i = 0; i < keyParts.length - 1; i++) {
@@ -449,8 +445,6 @@ function FunctionParameterModal({
   }, [toolData, tool_name, isToolNameManuallyChanged]);
 
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
-  const isDataAvailable = useMemo(() => Object.keys(properties).length > 0, [properties]);
-
   const [isModified, setIsModified] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState("");
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);

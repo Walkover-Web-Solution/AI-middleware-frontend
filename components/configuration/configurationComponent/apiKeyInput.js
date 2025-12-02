@@ -3,11 +3,11 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false ,isPublished}) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isPublished }) => {
     const dispatch = useDispatch();
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {

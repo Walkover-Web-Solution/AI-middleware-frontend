@@ -98,7 +98,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       alert('Message cannot be empty.');
       return;
     }
-    const result = dispatch(
+    dispatch(
       updateContentHistory({
         id: modalInput?.Id,
         bridge_id: bridgeId ?? orgId, // prefer explicit bridgeId, fallback to orgId if needed
@@ -241,8 +241,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   // ------------------------------------
   // Fetch logic (debounced + stale guard)
   // ------------------------------------
-  const startDate = search?.start;
-  const endDate = search?.end;
   const pathName = pathNameProp || pathname;
   const availableThreads = useMemo(() => {
     if (isSearchActive) {
@@ -259,21 +257,20 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       error,
       page = 1,
     }) => {
-      const result = await dispatch(
-        getThread({
-          threadId,
-          bridgeId: bridgeId ?? orgId,
-          nextPage: page,
-          user_feedback: filterOption,
-          subThreadId,
-          versionId: selectedVersion === 'all' ? '' : selectedVersion,
-          error: error || isErrorTrue,
-        })
-      );
-      return result;
-    },
-    [dispatch, bridgeId, orgId, filterOption, selectedVersion, isErrorTrue]
-  );
+    return dispatch(
+      getThread({
+        threadId,
+        bridgeId: bridgeId ?? orgId,
+        nextPage: page,
+        user_feedback: filterOption,
+        subThreadId,
+        versionId: selectedVersion === 'all' ? '' : selectedVersion,
+        error: error || isErrorTrue,
+      })
+    );
+  },
+  [dispatch, bridgeId, orgId, filterOption, selectedVersion, isErrorTrue]
+);
 
   // Initial load + handle URL thread_id changes
   useEffect(() => {
