@@ -69,7 +69,7 @@ function OptimiseBaseModal({
       setCurrentIndex(history.length);
 
       return result;
-    } catch (error) {
+    } catch {
       setLoading(false);
       setErrorMessage("Failed to optimize content.");
       return null;
@@ -94,7 +94,7 @@ function OptimiseBaseModal({
       setLoading(true);
       await onApply(contentToApply);
       handleCloseModal();
-    } catch (error) {
+    } catch {
       setErrorMessage("Failed to apply changes.");
     } finally {
       setLoading(false);

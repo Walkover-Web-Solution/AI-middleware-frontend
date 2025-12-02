@@ -101,7 +101,6 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
   // Remove domain at specific index
   const handleRemoveDomain = async (index) => {
     const updatedDomains = domains.filter((_, i) => i !== index);
-    const removedDomain = domains[index];
     setDomains(updatedDomains);
     
     // Cancel edit if the domain being edited is removed

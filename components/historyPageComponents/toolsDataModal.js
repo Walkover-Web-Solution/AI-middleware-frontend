@@ -6,7 +6,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
       try {
         const parsedValue = JSON.parse(value);
         return JSON.stringify(parsedValue, null, 2); 
-      } catch (error) {
+      } catch {
         return value; 
       }
     }

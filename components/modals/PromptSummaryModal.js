@@ -43,13 +43,6 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt, versionId]);
-    const handleClose=()=>{
-        closeModal(modalType); 
-        setErrorMessage("");
-        setSummary(bridge_summary)
-        setAutoGenerateSummary(false); // Reset the flag
-
-    }
     const handleSaveSummary = useCallback(() => {
         const newValue = summary || "";
         const dataToSend = { bridge_summary: newValue };

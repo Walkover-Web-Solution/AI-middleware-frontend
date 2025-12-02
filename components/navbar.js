@@ -42,9 +42,8 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, versionDescription, bridgeVersionsArray, variablesCount } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName } = useCustomSelector(state => {
     return {
-    organizations: state.userDetailsReducer.organizations,
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
@@ -58,9 +57,6 @@ const Navbar = ({ isEmbedUser, params }) => {
     hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
-    versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.version_description || "",
-    bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.versions || [],
-    variablesCount: Object.keys(state?.variableCollectionReducer?.variableCollections?.[bridgeId] || {}).length || 0,
   }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
@@ -694,7 +690,7 @@ const Navbar = ({ isEmbedUser, params }) => {
         <>
           <ChatBotSlider />
           <ConfigHistorySlider versionId={versionId} />
-          {/* <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/> */}
+          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/>
         </>
       )}
 

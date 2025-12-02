@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo, useEffect } from "react";
-import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot } from "lucide-react";
+import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot, Globe } from "lucide-react";
 import {
   getAllBridgesAction,
   getBridgeVersionAction,
@@ -134,7 +134,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     }
     
     // Process each connected agent
-    for (const [agentName, agentInfo] of Object.entries(connectedAgents)) {
+    for (const [ agentInfo] of Object.entries(connectedAgents)) {
       const connectedId = agentInfo?.bridge_id;
       if (!connectedId || visited.has(connectedId)) {
         continue;
@@ -846,7 +846,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
           <div className="flex flex-col gap-4">
             {/* Public Agent Toggle */}
-            {/* <div className="bg-base-200/30 p-4 rounded-lg mb-6">
+            <div className="bg-base-200/30 p-4 rounded-lg mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-primary" />
@@ -868,7 +868,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
               </label>
             </div>
           </div>
-        </div> */}
+        </div>
 
             {/* Public Agent Configuration Form */}
             {isPublicAgent && (

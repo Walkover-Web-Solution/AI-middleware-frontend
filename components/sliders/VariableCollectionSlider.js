@@ -39,7 +39,7 @@ const inferType = (value, fallback) => {
     const parsed = JSON.parse(sample);
     if (Array.isArray(parsed)) return "array";
     if (typeof parsed === "object") return "object";
-  } catch (err) {
+  } catch { {
     /* ignore */
   }
   return "string";
@@ -93,7 +93,7 @@ const validateAndFormatValue = (rawValue, type) => {
           return { ok: false, error: "Value must be a JSON object" };
         }
         return { ok: true, value: JSON.stringify(parsed, null, 2) };
-      } catch (err) {
+      } catch { {
         return { ok: false, error: "Value must be valid JSON" };
       }
     }
@@ -497,7 +497,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           ) {
             try {
               formattedValue = JSON.parse(formattedValue);
-            } catch (err) {
+            } catch { {
               // If parsing fails, keep the string value
             }
           }
@@ -520,7 +520,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           ) {
             try {
               formattedDefaultValue = JSON.parse(formattedDefaultValue);
-            } catch (err) {
+            } catch { {
               // If parsing fails, keep the string value
             }
           }
@@ -972,7 +972,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       setBulkEditMode(false);
       setBulkEditText("");
       setError("");
-    } catch (err) {
+    } catch { {
       setError("Error parsing data. Please verify the format.");
     }
   }, [

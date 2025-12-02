@@ -310,7 +310,6 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   );
 
   const config = integrationData?.config;
-  const rootApiKeys = integrationData?.apikey_object_id;
 
   // Generate initial config from schema
   const generateInitialConfig = () => {
@@ -469,8 +468,8 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       };
       
       // Remove embed_id from comparison as it's just for tracking
-      const { embed_id: currentEmbedId, ...currentForComparison } = normalizedCurrent;
-      const { embed_id: savedEmbedId, ...savedForComparison } = normalizedSaved;
+      const { embed_id: _currentEmbedId, ...currentForComparison } = normalizedCurrent;
+      const { embed_id: _savedEmbedId, ...savedForComparison } = normalizedSaved;
       
       return JSON.stringify(currentForComparison) !== JSON.stringify(savedForComparison);
     }
@@ -492,8 +491,8 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     };
     
     // Remove embed_id from comparison
-    const { embed_id: currentEmbedId, ...currentForComparison } = normalizedCurrent;
-    const { embed_id: baselineEmbedId, ...baselineForComparison } = normalizedBaseline;
+    const { embed_id: _currentEmbedId, ...currentForComparison } = normalizedCurrent;
+    const { embed_id: _baselineEmbedId, ...baselineForComparison } = normalizedBaseline;
 
     return JSON.stringify(currentForComparison) !== JSON.stringify(baselineForComparison);
   };

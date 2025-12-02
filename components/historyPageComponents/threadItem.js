@@ -132,12 +132,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const [messageType, setMessageType] = useState(getInitialMessageType());
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const { embedToken, knowledgeBaseData, isEmbedUser, finishReasonDescription, orgBridges, allBridgesMap } = useCustomSelector((state) => ({
+  const { embedToken, knowledgeBaseData, isEmbedUser, orgBridges, allBridgesMap } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id] || [],
     isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser,
-    finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
     orgBridges: state?.bridgeReducer?.org?.[params?.org_id]?.orgs || [],
+    allBridgesMap: state?.bridgeReducer?.allBridgesMap || {}
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const { sliderState, openSlider, closeSlider } = useSlider();
@@ -261,10 +261,10 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
           try {
             const parsedArgs = JSON.parse(tool.args);
             documentId = parsedArgs.document_id || parsedArgs.documentId || parsedArgs.id;
-          } catch (e) {
-            // If parsing fails, treat as plain text
-            documentId = tool.args;
-          }
+        } catch {
+          // If parsing fails, treat as plain text
+          documentId = tool.args;
+        }
         } else if (typeof tool.args === 'object') {
           documentId = tool.args.document_id || tool.args.documentId || tool.args.id;
         }

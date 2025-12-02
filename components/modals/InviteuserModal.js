@@ -37,16 +37,10 @@ const InviteUserModal = () => {
       } else {
         toast.error('Failed to send invitation.');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred while sending the invitation.');
     } finally {
       setIsInviting(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleInviteSubmit();
     }
   };
 
