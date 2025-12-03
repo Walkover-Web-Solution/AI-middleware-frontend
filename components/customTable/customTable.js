@@ -1,5 +1,6 @@
-import { MoveDownIcon } from "@/components/Icons";
+import { MoveDownIcon, FilterSliderIcon } from "@/components/Icons";
 import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 const CustomTable = ({
     data = [],
@@ -11,7 +12,11 @@ const CustomTable = ({
     keysToWrap = [],
     handleRowClick = () => { },
     handleRowSelection = () => { },
-    endComponent = null
+    endComponent = null,
+    onUsageFilterClick = null,
+    isUsageFilterActive = false,
+    usageFilterLabel = "",
+    usageFilterIsLoading = false
 }) => {
     const keys = useMemo(() => Object.keys(data[0] || {}), [data]);
     const [selectedRows, setSelectedRows] = useState([]);
@@ -20,6 +25,77 @@ const CustomTable = ({
     const [selectAll, setSelectAll] = useState(false);
     const [isSmallScreen, setIsSmallScreen] = useState(false);
     const [viewportWidth, setViewportWidth] = useState(0);
+    const USAGE_TOOLTIP_WIDTH = 260;
+    const [usageTooltip, setUsageTooltip] = useState({
+        visible: false,
+        top: 0,
+        left: 0,
+        usagePercent: 0,
+        usageValue: 0,
+        limitValue: 0,
+        remaining: 0
+    });
+
+    const getColumnLabel = (column) => {
+        switch (column) {
+            case 'averageResponseTime':
+                return 'Average Response Time';
+            case 'totalTokens':
+                return 'Usage';
+            case 'promptDetails':
+                return 'Prompt Details';
+            case 'last_used':
+                return 'Last Used At';
+            case 'created_at':
+            case 'createdAt':
+                return 'Created At';
+            case 'updated_at':
+            case 'updatedAt':
+                return 'Updated At';
+            case 'apikey_usage':
+                return 'Apikey Usage';
+            case 'agent_usage':
+                return 'Agent Usage';
+            case 'embed_usage':
+                return 'Embed Usage';
+            default:
+                return column.replace(/_/g, ' ');
+        }
+    };
+
+    const formatNumber = (value, maximumFractionDigits = 0) => {
+        const numericValue = Number(value);
+        if (!Number.isFinite(numericValue)) return "0";
+        return new Intl.NumberFormat('en-US', {
+            maximumFractionDigits,
+        }).format(numericValue);
+    };
+
+
+    const renderUsageCell = (row) => {
+        const totalTokens = Number(row?.totalTokens ?? 0);
+        const usageCost = Number(row?.usageCost ?? 0);
+
+        // When no usage filter is active, don't show usage numbers
+        if (!isUsageFilterActive) {
+            return (
+                <div className="text-xs text-base-content/40">
+                    -
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex flex-col gap-0.5 text-xs">
+                <span className="font-semibold text-base-content">
+                    {formatNumber(totalTokens)} tokens
+                </span>
+                <span className="text-base-content/70">
+                    {formatNumber(usageCost, 4)} cost
+                </span>
+            </div>
+        );
+    };
 
     // Fallback to all keys if columnsToShow is empty
     const visibleColumns = columnsToShow.length > 0 ? columnsToShow : keys;
@@ -46,29 +122,49 @@ const CustomTable = ({
     const sortedData = useMemo(() => {
         if (sorting && activeColumn) {
             return [...data].sort((a, b) => {
-                const valueA = activeColumn === 'name' ? a.actualName : 
-                              activeColumn === 'createdAt' ? a.createdAt_original : a[activeColumn];
-                const valueB = activeColumn === 'name' ? b.actualName : 
-                              activeColumn === 'createdAt' ? b.createdAt_original : b[activeColumn];
-                
-                if (activeColumn === 'totaltoken') {
-                    // Sort by totaltoken in ascending order
-                    return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
+                const valueA = activeColumn === 'name'
+                    ? a.actualName
+                    : activeColumn === 'createdAt'
+                    ? (a.createdAt_original ?? a.created_at_original)
+                    : activeColumn === 'updatedAt'
+                    ? (a.updatedAt_original ?? a.updated_at_original)
+                    : a[activeColumn];
+                const valueB = activeColumn === 'name'
+                    ? b.actualName
+                    : activeColumn === 'createdAt'
+                    ? (b.createdAt_original ?? b.created_at_original)
+                    : activeColumn === 'updatedAt'
+                    ? (b.updatedAt_original ?? b.updated_at_original)
+                    : b[activeColumn];
+
+                // Explicit numeric sorting for usage column (totalTokens)
+                if (activeColumn === 'totalTokens') {
+                    const usageA = Number(a.totalTokens ?? 0);
+                    const usageB = Number(b.totalTokens ?? 0);
+                    return ascending ? usageA - usageB : usageB - usageA;
                 }
                 
                 // Special handling for date columns (last_used, created_at, createdAt)
-                if (activeColumn === 'last_used' || activeColumn === 'created_at' || activeColumn === 'createdAt') {
+                if (['last_used', 'created_at', 'createdAt', 'updated_at', 'updatedAt'].includes(activeColumn)) {
+                    const getOriginalTimestamp = (row) => {
+                        switch (activeColumn) {
+                            case 'last_used':
+                                return row.last_used_original || row.last_used_orignal;
+                            case 'createdAt':
+                                return row.createdAt_original ?? row.created_at_original;
+                            case 'created_at':
+                                return row.created_at_original;
+                            case 'updatedAt':
+                                return row.updatedAt_original ?? row.updated_at_original;
+                            case 'updated_at':
+                                return row.updated_at_original;
+                            default:
+                                return null;
+                        }
+                    };
                     // Use original timestamp values for sorting if available
-                    const originalA = activeColumn === 'last_used' 
-                        ? (a.last_used_original || a.last_used_orignal)
-                        : activeColumn === 'createdAt' 
-                        ? a.createdAt_original
-                        : a.created_at_original;
-                    const originalB = activeColumn === 'last_used' 
-                        ? (b.last_used_original || b.last_used_orignal)
-                        : activeColumn === 'createdAt' 
-                        ? b.createdAt_original
-                        : b.created_at_original;
+                    const originalA = getOriginalTimestamp(a);
+                    const originalB = getOriginalTimestamp(b);
                     
                     // Handle null/undefined values - put them at the bottom
                     if (!originalA && !originalB) return 0;
@@ -136,8 +232,12 @@ const CustomTable = ({
 
     // Function to get value from row (handling undefined)
     const getDisplayValue = (row, column) => {
+        if (column === 'totalTokens') {
+            return renderUsageCell(row);
+        }
+
         if (row[column] === undefined) return "not available";
-        
+
         if (keysToWrap.includes(column) && row[column] && typeof row[column] === 'string') {
             return row[column].length > 30 ? `${row[column].substring(0, 30)}...` : row[column];
         }
@@ -158,7 +258,7 @@ const CustomTable = ({
                         onClick={() => sortByColumn(column)}
                         className={`btn btn-sm btn-outline capitalize ${activeColumn === column ? 'btn-primary' : ''}`}
                     >
-                        <span>{column}</span>
+                        <span>{getColumnLabel(column)}</span>
                         {activeColumn === column && (
                             <MoveDownIcon 
                                 className={`ml-1 w-4 h-4 ${ascending ? 'rotate-180' : 'rotate-0'}`}
@@ -212,7 +312,7 @@ const CustomTable = ({
                                         <div key={column}>
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-medium text-base-content/70 capitalize">
-                                                    {column}:
+                                                    {getColumnLabel(column)}:
                                                 </span>
                                                 <span className="text-base-content mt-1">
                                                     {getDisplayValue(row, column)}
@@ -246,7 +346,7 @@ const CustomTable = ({
     // Render table view for desktop
     const renderTableView = () => {
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
-        
+
         return (
             <div className="overflow-visible relative z-50 border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
                 <table className={`table ${tableClass} bg-base-100 shadow-md overflow-visible relative z-50 border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
@@ -262,30 +362,34 @@ const CustomTable = ({
                                     />
                                 </th>
                             }
-                            {visibleColumns.map((column) => (
-                                <th
-                                    key={column}
-                                    className="px-4 py-2 text-left whitespace-nowrap capitalize"
-                                >
-                                    <div className={`flex items-center justify-start`}>
-                                        {sorting && sortableColumns.includes(column) && (
-                                            <MoveDownIcon
-                                                className={`w-4 h-4 cursor-pointer mr-1 ${activeColumn === column
-                                                    ? "text-black"
-                                                    : "text-[#BCBDBE] group-hover:text-black"
-                                                } ${ascending ? "rotate-180" : "rotate-0"}`}
-                                                onClick={() => sortByColumn(column)}
-                                            />
-                                        )}
-                                        <span
-                                            className="cursor-pointer"
-                                            onClick={() => sortByColumn(column)}
-                                        >
-                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column==="last_used"?"Last Used At":column==="apikey_usage"?"Apikey Usage":column==="agent_usage"?"Agent Usage":column==="embed_usage"?"Embed Usage":column}
-                                        </span>
-                                    </div>
-                                </th>
-                            ))}
+                            {visibleColumns.map((column) => {
+                                const isSortable = sorting && sortableColumns.includes(column);
+
+                                return (
+                                    <th
+                                        key={column}
+                                        className="px-4 py-2 text-left whitespace-nowrap capitalize"
+                                    >
+                                        <div className="flex items-center justify-start gap-2">
+                                            {isSortable && (
+                                                <MoveDownIcon
+                                                    className={`w-4 h-4 cursor-pointer ${activeColumn === column
+                                                        ? "text-black"
+                                                        : "text-[#BCBDBE] group-hover:text-black"
+                                                    } ${ascending ? "rotate-180" : "rotate-0"}`}
+                                                    onClick={() => sortByColumn(column)}
+                                                />
+                                            )}
+                                            <span
+                                                className={`${isSortable ? "cursor-pointer" : "cursor-default"} capitalize`}
+                                                onClick={() => (isSortable ? sortByColumn(column) : undefined)}
+                                            >
+                                                {getColumnLabel(column)}
+                                            </span>
+                                        </div>
+                                    </th>
+                                );
+                            })}
                             {endComponent && <th className="px-4 py-2 text-center"><div className="flex items-center justify-center">Actions</div></th>}
                         </tr>
                     </thead>
@@ -323,7 +427,9 @@ const CustomTable = ({
                                         <td
                                             key={column}
                                             className={`px-4 py-2 text-left whitespace-nowrap ${
-                                                column === 'last_used' || column === 'createdAt' ? 'w-40 min-w-40 max-w-40' : ''
+                                                ['last_used', 'created_at', 'createdAt', 'updated_at', 'updatedAt'].includes(column)
+                                                    ? 'w-40 min-w-40 max-w-40'
+                                                    : ''
                                             }`}
                                         >
                                             {getDisplayValue(row, column)}
@@ -353,6 +459,8 @@ const CustomTable = ({
             </div>
         );
     };
+
+    
 
     return (
         <div className="bg-base-100 p-2 md:p-4 overflow-x-auto overflow-y-visible">

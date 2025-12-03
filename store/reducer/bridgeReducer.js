@@ -6,6 +6,10 @@ const initialState = {
   org: {},
   loading: false,
   isFocus: false,
+  usageMetrics: {
+    data: [],
+    filters: null
+  },
 };
 
 export const bridgeReducer = createSlice({
@@ -283,6 +287,13 @@ export const bridgeReducer = createSlice({
       const { tools } = action.payload;
       state.prebuiltTools = tools;
     },
+    setBridgeUsageMetricsReducer: (state, action) => {
+      const { data = [], filters = null } = action.payload;
+      state.usageMetrics = { data, filters };
+    },
+    clearBridgeUsageMetricsReducer: (state) => {
+      state.usageMetrics = { data: [], filters: null };
+    },
     
     // Clear previous bridge and version data before fetching new data
     clearPreviousBridgeDataReducer: (state, action) => {
@@ -341,7 +352,9 @@ export const {
   updateAllBridgeReducerAgentVariable,
   setThreadIdForVersionReducer,
   setIsFocusReducer,
-  clearPreviousBridgeDataReducer
+  clearPreviousBridgeDataReducer,
+  setBridgeUsageMetricsReducer,
+  clearBridgeUsageMetricsReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
