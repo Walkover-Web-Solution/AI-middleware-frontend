@@ -17,12 +17,13 @@ import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutside
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
 import SearchItems from "@/components/UI/SearchItems";
 import AgentEmptyState from "@/components/AgentEmptyState";
-import { Archive, ArchiveRestore, Droplet, Pause, Play, Trash2, Undo2 } from "lucide-react";
+import { Archive, ArchiveRestore, Droplet, Funnel, Pause, Play, Settings2, Trash2, Undo2 } from "lucide-react";
 import DeleteModal from "@/components/UI/DeleteModal";
 import UsageLimitModal from "@/components/modals/UsageLimitModal";
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
@@ -78,9 +79,17 @@ const UsageProgressDonut = ({ percent, label }) => (
   </div>
 );
 
-const UsageSummaryPopover = ({ stats, item, isEmbedUser,onSetLimit, onResetUsage }) => {
+const UsageSummaryPopover = ({ stats, item, isEmbedUser, onSetLimit, onResetUsage }) => {
   const { hasLimit, usagePercent, usageValue, limitValue, remaining } = stats;
-  const [limit ,setLimit]=useState(0)
+  const [limit, setLimit] = useState(limitValue ?? "");
+  const [isLimitDirty, setIsLimitDirty] = useState(false);
+
+  const handleLimitChange = (e) => {
+    const value = e.target.value;
+    setLimit(value);
+    const original = limitValue ?? "";
+    setIsLimitDirty(String(value) !== String(original));
+  };
 
   return (
     <div className="w-72 p-4 space-y-4 text-base-content">
@@ -88,7 +97,7 @@ const UsageSummaryPopover = ({ stats, item, isEmbedUser,onSetLimit, onResetUsage
         <div>
           <p className="text-sm font-semibold">Usage &amp; Limits</p>
         </div>
-       
+      
       </div>
 
       <div className="flex items-center gap-4">
@@ -97,14 +106,14 @@ const UsageSummaryPopover = ({ stats, item, isEmbedUser,onSetLimit, onResetUsage
           <div className="flex gap-1 items-center justify-between">
             <span className="text-base-content/60">Limit</span>
             <input
-                type="number"
-                placeholder="Enter limit in $"
-                className="input input-bordered max-w-sm w-full input-sm"
-                defaultValue={limitValue || ''}
-                min="0"
-                step="0.0001"
-                onChange={(e) => setLimit(e.target.value)}
-              />
+              type="number"
+              placeholder="Enter limit in $"
+              className="input input-bordered max-w-sm w-full input-sm"
+              value={limit}
+              min="0"
+              step="0.0001"
+              onChange={handleLimitChange}
+            />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-base-content/60">Used</span>
@@ -119,10 +128,18 @@ const UsageSummaryPopover = ({ stats, item, isEmbedUser,onSetLimit, onResetUsage
 
       {!isEmbedUser && (
         <div className="flex flex-col gap-2">
-          <button className="btn btn-primary btn-sm" onClick={()=>{onSetLimit(item,limit)}}>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => { onSetLimit(item, limit); }}
+            disabled={!isLimitDirty}
+          >
             Set / Update Limit
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={onResetUsage} disabled={!Number(usageValue)}>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={onResetUsage}
+            disabled={!Number(usageValue)}
+          >
             Reset Usage
           </button>
         </div>
@@ -219,7 +236,8 @@ function Home({ params, isEmbedUser }) {
     if (!usageMetrics?.data) return {};
     return usageMetrics.data.reduce((acc, item) => {
       if (item?.bridge_id) {
-        acc[item.bridge_id] = Number(item?.total_tokens ?? 0);
+        // Store full metrics object so we can access both total_tokens and total_cost
+        acc[item.bridge_id] = item;
       }
       return acc;
     }, {});
@@ -250,17 +268,48 @@ function Home({ params, isEmbedUser }) {
   };
 
   const resolveUsageTokens = (bridge) => {
-    if (!bridge) return 0;
-    if (!isUsageFilterActive) {
-      return Number(bridge?.total_tokens ?? 0);
-    }
-    return Number(usageMetricsMap[bridge._id] ?? 0);
+    // Only show usage when a filter is active
+    if (!bridge || !isUsageFilterActive) return 0;
+    const metrics = usageMetricsMap[bridge._id];
+    return Number(metrics?.total_tokens ?? 0);
+  };
+
+  const resolveUsageCost = (bridge) => {
+    // Only show usage cost when a filter is active
+    if (!bridge || !isUsageFilterActive) return 0;
+    const metrics = usageMetricsMap[bridge._id];
+    return Number(metrics?.total_cost ?? 0);
   };
 
   const isUsageResetDisabled = useMemo(
     () => !isUsageFilterActive && !usageFilterDates.start_date && !usageFilterDates.end_date,
     [isUsageFilterActive, usageFilterDates.end_date, usageFilterDates.start_date]
   );
+
+  const applyPresetUsageFilter = async (days) => {
+    const end = new Date();
+    const start = new Date();
+    // Last N days including today
+    start.setDate(end.getDate() - (days - 1));
+
+    const toYMD = (d) => d.toISOString().slice(0, 10);
+    const startDate = toYMD(start);
+    const endDate = toYMD(end);
+
+    setUsageFilterError("");
+    setUsageFilterDates({ start_date: startDate, end_date: endDate });
+    setIsUsageFilterSubmitting(true);
+    try {
+      await dispatch(fetchBridgeUsageMetricsAction({
+        start_date: startDate,
+        end_date: endDate,
+      }));
+    } catch (error) {
+      console.error("Failed to apply preset usage filter:", error);
+    } finally {
+      setIsUsageFilterSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     setFilterBridges(allBridges)
@@ -290,14 +339,22 @@ function Home({ params, isEmbedUser }) {
       setUsageFilterDates({ start_date: "", end_date: "" });
     }
   }, [usageMetrics?.filters]);
-
   
-  const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0 && !item.deletedAt);
+  // Helper function to calculate days remaining for deletion (30 days from deletedAt)
+  const getDaysRemaining = (deletedAt) => {
+    if (!deletedAt) return 0;
+    const deletedDate = new Date(deletedAt);
+    const expiryDate = new Date(deletedDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days from deletion
+    const now = new Date();
+    const diffTime = expiryDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
   const filteredUnArchivedBridges = filterBridges?.filter((item) => (item.status === 1 || item.status === undefined) && !item.deletedAt);
   const filteredDeletedBridges = filterBridges?.filter((item) => item.deletedAt);
 
   const usageFilteredUnArchived = applyUsageFilter(filteredUnArchivedBridges);
-  const usageFilteredArchived = applyUsageFilter(filteredArchivedBridges);
   const usageFilteredDeleted = applyUsageFilter(filteredDeletedBridges);
 
   const UnArchivedBridges = usageFilteredUnArchived
@@ -307,6 +364,7 @@ function Home({ params, isEmbedUser }) {
       const updatedAt = item.updated_at || item.updatedAt;
       const lastUsed = item.last_used;
       const totalTokensValue = resolveUsageTokens(item);
+      const totalCostValue = resolveUsageCost(item);
 
       return ({
         _id: item._id,
@@ -342,6 +400,7 @@ function Home({ params, isEmbedUser }) {
         bridge_status: item.bridge_status,
         versionId: item?.published_version_id || item?.versions?.[0],
         totalTokens: totalTokensValue,
+        usageCost: totalCostValue,
         averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
         agent_limit: item?.bridge_limit,
         agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
@@ -356,87 +415,17 @@ function Home({ params, isEmbedUser }) {
       });
     });
 
-  const ArchivedBridges = usageFilteredArchived
-    .filter((item) => item.status === 0)
-    .map((item) => {
-      const createdAt = item.created_at || item.createdAt;
-      const updatedAt = item.updated_at || item.updatedAt;
-      const lastUsed = item.last_used;
-      const totalTokensValue = resolveUsageTokens(item);
-
-      return ({
-        _id: item._id,
-        model: item.configuration?.model || "",
-        name: <div className="flex gap-3">
-          <div className="flex gap-2 items-center">
-            {loadingAgentId === item._id ? (
-              <div className="loading loading-spinner loading-sm"></div>
-            ) : (
-              getIconOfService(item.service, 20, 20)
-            )}
-          </div>
-          <div className="flex-col">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
-                  {item.name}
-                </span>
-                {loadingAgentId === item._id && (
-                  <span className="text-xs text-primary opacity-70">Loading...</span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                {item.bridge_status === 0 && (
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
-                    <ClockIcon size={12} />
-                    <span className="hidden sm:inline">Paused</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <ModelBadge model={item.configuration?.model} />
-          </div>
-        </div>,
-        actualName: item?.name || "",
-        slugName: item?.slugName || "",
-        service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
-        bridgeType: item.bridgeType,
-        status: item.status,
-        bridge_status: item.bridge_status,
-        versionId: item?.published_version_id || item?.versions?.[0],
-        totalTokens: totalTokensValue,
-        agent_limit: item?.bridge_limit,
-        averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
-        isLoading: loadingAgentId === item._id,
-        last_used: renderTimestampCell(lastUsed),
-        last_used_orignal: lastUsed,
-        last_used_original: lastUsed,
-        created_at: renderTimestampCell(createdAt),
-        created_at_original: createdAt,
-        updated_at: renderTimestampCell(updatedAt),
-        updated_at_original: updatedAt,
-        agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
-
-        });
-    });
+  
 
   // Helper function to calculate days remaining for deletion (30 days from deletedAt)
-  const getDaysRemaining = (deletedAt) => {
-    if (!deletedAt) return 0;
-    const deletedDate = new Date(deletedAt);
-    const expiryDate = new Date(deletedDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days from deletion
-    const now = new Date();
-    const diffTime = expiryDate - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffDays);
-  };
-
+ 
   const DeletedBridges = usageFilteredDeleted
     ?.map((item) => {
       const createdAt = item.created_at || item.createdAt;
       const updatedAt = item.updated_at || item.updatedAt;
       const lastUsed = item.last_used;
       const totalTokensValue = resolveUsageTokens(item);
+      const totalCostValue = resolveUsageCost(item);
 
       return ({
         _id: item._id,
@@ -472,6 +461,7 @@ function Home({ params, isEmbedUser }) {
         daysRemaining: getDaysRemaining(item.deletedAt),
         versionId: item?.published_version_id || item?.versions?.[0],
         totalTokens: totalTokensValue,
+        usageCost: totalCostValue,
         agent_limit: item?.bridge_limit,
         averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
         isLoading: loadingAgentId === item._id,
@@ -512,21 +502,7 @@ function Home({ params, isEmbedUser }) {
       toast.error('Failed to update agent status');
     }
   };
-  const archiveBridge = (bridgeId, newStatus = 0) => {
-    try {
-      dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
-        if (bridgeStatus === 1) {
-          toast.success('Agent Unarchived Successfully');
-        } else {
-          toast.success('Agent Archived Successfully');
-        }
-        router.push(`/org/${resolvedParams.org_id}/agents`);
-      });
-    } catch (error) {
-      console.error('Failed to archive/unarchive agents', error);
-    }
-  }
-  
+ 
   const handleSetBridgeLimit = (item) => {
     const transformedData = {
       ...item,
@@ -556,25 +532,29 @@ function Home({ params, isEmbedUser }) {
   const closeUsageFilterPopover = () => {
     setUsageFilterPopover((prev) => ({ ...prev, open: false }));
   };
-
-  const handleUsageFilterIconClick = (event) => {
+const handleUsageFilterIconClick = (event) => {
+  if (event) {
     event.preventDefault();
     event.stopPropagation();
-    if (typeof window === "undefined") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const top = rect.bottom + window.scrollY + 8;
-    const left = Math.max(16, rect.left + window.scrollX - 220);
-    setUsageFilterError("");
-    setUsageFilterPopover((prev) => {
-      const isSameSpot = Math.abs(prev.top - top) < 2 && Math.abs(prev.left - left) < 2;
-      return {
-        open: isSameSpot ? !prev.open : true,
-        top,
-        left,
-      };
-    });
-  };
+  }
 
+  if (typeof window === "undefined") return;
+
+  const modalWidth = 320;
+  const modalHeight = 220;
+
+  const top =
+    window.scrollY + Math.max(16, (window.innerHeight - modalHeight) / 2);
+  const left =
+    window.scrollX + Math.max(16, (window.innerWidth - modalWidth) / 2);
+
+  setUsageFilterError("");
+  setUsageFilterPopover({
+    open: true,
+    top,
+    left,
+  });
+};
   const handleUsageDateChange = (key, value) => {
     setUsageFilterError("");
     setUsageFilterDates((prev) => ({ ...prev, [key]: value }));
@@ -620,7 +600,59 @@ function Home({ params, isEmbedUser }) {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [usageFilterPopover.open]);
+const handleUsageFilterDropdownClick = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
+  const dropdownContent = (
+    <ul className="menu bg-base-100 rounded-box w-56 p-2 shadow text-sm">
+      <li>
+        <button onClick={() => applyPresetUsageFilter(1)}>Last 1 day</button>
+      </li>
+      <li>
+        <button onClick={() => applyPresetUsageFilter(5)}>Last 5 days</button>
+      </li>
+      <li>
+        <button onClick={() => applyPresetUsageFilter(10)}>Last 10 days</button>
+      </li>
+      <li>
+        <button onClick={() => applyPresetUsageFilter(15)}>Last 15 days</button>
+      </li>
+
+      <li className="mt-1 border-t border-base-200" />
+
+      <li>
+        <button
+          onClick={(ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            handleUsageFilterClear();
+          }}
+          disabled={isUsageResetDisabled}
+        >
+          Reset filter
+        </button>
+      </li>
+
+      <li>
+        <button
+          onClick={(ev) => {
+            // open existing custom date popover anchored near this button
+            ev.preventDefault();
+            ev.stopPropagation();
+            handlePortalCloseImmediate();
+            handleUsageFilterIconClick(ev);
+          }}
+        >
+          Custom date range…
+        </button>
+      </li>
+    </ul>
+  );
+
+  // Uses the same portal hook as the ellipsis EndComponent
+  handlePortalOpen(e.currentTarget, dropdownContent);
+};
   const EndComponent = ({ row }) => {
     const usageStats = getUsageStatsForRow(row);
 
@@ -633,7 +665,10 @@ function Home({ params, isEmbedUser }) {
           stats={usageStats}
           item={row}
           isEmbedUser={isEmbedUser}
-          onSetLimit={handleUpdateBridgeLimit}
+          onSetLimit={(bridge, limit) => {
+            handlePortalCloseImmediate();
+            handleUpdateBridgeLimit(bridge, limit);
+          }}
           onResetUsage={() => {
             handlePortalCloseImmediate();
             resetUsage(row);
@@ -655,16 +690,11 @@ function Home({ params, isEmbedUser }) {
             className="w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2"
             onClick={handleUsageSummaryClick}
           >
-            <Droplet size={14} />
+            <Settings2 size={14} />
             Usage &amp; Limits
           </button>
           </li>
-          <li><button onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handlePortalCloseImmediate();
-              archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</button></li>
+          
             <li> <button
               onClick={(e) => {
                 e.preventDefault();
@@ -820,14 +850,31 @@ function Home({ params, isEmbedUser }) {
                       </div>
                     </MainLayout>
 
-                    <div className="flex flex-row gap-4">
-                      {allBridges.length > 5 && (
-                        <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents" />
-                      )}
-                      <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
-                        <button className="btn btn-primary btn-sm " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
-                      </div>
-                  </div>
+                   <div className="flex flex-row gap-4">
+  {allBridges.length > 5 && (
+    <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents" />
+  )}
+  <div className="flex items-center gap-2 ml-2">
+    <button
+      type="button"
+      className="btn btn-ghost text-sm btn-sm border border-base-300 gap-1"
+      onClick={handleUsageFilterDropdownClick}
+    >
+      <Funnel size={14}/>
+      <span>Usage Filter</span>
+      <span className="text-xs text-base-content/60">
+        {isUsageFilterActive ? usageFilterLabel || '' : 'All time'}
+      </span>
+    </button>
+
+    <button
+      className="btn btn-primary btn-sm"
+      onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}
+    >
+      + Create New Agent
+    </button>
+  </div>
+</div>
                 </div>
                 
                 <div className="w-full overflow-visible">
@@ -835,7 +882,7 @@ function Home({ params, isEmbedUser }) {
                     data={UnArchivedBridges}
                     columnsToShow={['name', 'totalTokens','last_used','created_at','updated_at']}
                     sorting
-                    sortingColumns={['name','last_used','created_at','updated_at']}
+                    sortingColumns={['name','totalTokens','last_used','created_at','updated_at']}
                     handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                     keysToExtractOnRowClick={['_id', 'versionId']} 
                     keysToWrap={['name', 'model']} 
@@ -847,33 +894,7 @@ function Home({ params, isEmbedUser }) {
                   />
                 </div>
                 
-                {filteredArchivedBridges?.length > 0 && (
-                  <div className="">
-                    <div className="flex justify-center items-center my-4">
-                      <p className="border-t border-base-300 w-full"></p>
-                      <p className="bg-base-300 text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                        Archived Agents
-                      </p>
-                      <p className="border-t border-base-300 w-full"></p>
-                    </div>
-                    <div className="opacity-60 overflow-visible">
-                      <CustomTable
-                        data={ArchivedBridges}
-                        columnsToShow={['name', 'totalTokens', 'last_used','created_at','updated_at']}
-                        sorting
-                        sortingColumns={['name','last_used','created_at','updated_at']}
-                        handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
-                        keysToExtractOnRowClick={['_id', 'versionId']} 
-                        keysToWrap={['name', 'prompt', 'model']} 
-                        endComponent={EndComponent}
-                        onUsageFilterClick={handleUsageFilterIconClick}
-                        isUsageFilterActive={isUsageFilterActive}
-                        usageFilterLabel={usageFilterLabel}
-                        usageFilterIsLoading={isUsageFilterSubmitting}
-                      />
-                    </div>
-                  </div>
-                )}
+                
                 
                 {filteredDeletedBridges?.length > 0 && (
                   <div className="">
@@ -889,13 +910,10 @@ function Home({ params, isEmbedUser }) {
                         data={DeletedBridges}
                         columnsToShow={['name', 'totalTokens','last_used','created_at','updated_at']}
                         sorting
-                        sortingColumns={['name','last_used','created_at','updated_at']}
+                        sortingColumns={['name','totalTokens','last_used','created_at','updated_at']}
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent}
-                        onUsageFilterClick={handleUsageFilterIconClick}
                         isUsageFilterActive={isUsageFilterActive}
-                        usageFilterLabel={usageFilterLabel}
-                        usageFilterIsLoading={isUsageFilterSubmitting}
                       />
                     </div>
                   </div>
@@ -909,9 +927,9 @@ function Home({ params, isEmbedUser }) {
           
         </div>
 
-        {usageFilterPopover.open && (
+        {usageFilterPopover.open && typeof document !== 'undefined' && createPortal(
           <div
-            className="fixed z-[70]"
+            className="fixed z-[999999999]"
             style={{ top: usageFilterPopover.top, left: usageFilterPopover.left }}
           >
             <div
@@ -971,7 +989,8 @@ function Home({ params, isEmbedUser }) {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
         
         {/* Single DeleteModal for all delete operations */}

@@ -69,35 +69,28 @@ const CustomTable = ({
         }).format(numericValue);
     };
 
- 
+
     const renderUsageCell = (row) => {
         const totalTokens = Number(row?.totalTokens ?? 0);
-        const usageValue = Number(row?.agent_usage ?? 0);
-        const limitValue = Number(row?.agent_limit ?? 0);
-        const hasLimit = Number.isFinite(limitValue) && limitValue > 0;
-        const usagePercent = hasLimit
-            ? Math.min(100, Math.max(0, (usageValue / limitValue) * 100))
-            : null;
-        const remaining = hasLimit ? Math.max(limitValue - usageValue, 0) : null;
+        const usageCost = Number(row?.usageCost ?? 0);
 
-        const tooltipPayload = {
-            usagePercent,
-            usageValue,
-            limitValue,
-            remaining
-        };
+        // When no usage filter is active, don't show usage numbers
+        if (!isUsageFilterActive) {
+            return (
+                <div className="text-xs text-base-content/40">
+                    -
+                </div>
+            );
+        }
 
         return (
-            <div
-                className="relative flex items-center gap-3"
-            >
-                    <div className="text-sm font-semibold text-base-content">
-                        {formatNumber(totalTokens)}
-                    </div>
-                    <div className="text-[11px] uppercase tracking-wide text-base-content/50">
-                        Tokens
-                    </div>
-               
+            <div className="flex flex-col gap-0.5 text-xs">
+                <span className="font-semibold text-base-content">
+                    {formatNumber(totalTokens)} tokens
+                </span>
+                <span className="text-base-content/70">
+                    {formatNumber(usageCost, 4)} cost
+                </span>
             </div>
         );
     };
@@ -141,10 +134,12 @@ const CustomTable = ({
                     : activeColumn === 'updatedAt'
                     ? (b.updatedAt_original ?? b.updated_at_original)
                     : b[activeColumn];
-                
-                if (activeColumn === 'totaltoken') {
-                    // Sort by totaltoken in ascending order
-                    return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
+
+                // Explicit numeric sorting for usage column (totalTokens)
+                if (activeColumn === 'totalTokens') {
+                    const usageA = Number(a.totalTokens ?? 0);
+                    const usageB = Number(b.totalTokens ?? 0);
+                    return ascending ? usageA - usageB : usageB - usageA;
                 }
                 
                 // Special handling for date columns (last_used, created_at, createdAt)
@@ -366,8 +361,7 @@ const CustomTable = ({
                                 </th>
                             }
                             {visibleColumns.map((column) => {
-                                const isUsageColumn = column === "totalTokens";
-                                const isSortable = sorting && sortableColumns.includes(column) && !isUsageColumn;
+                                const isSortable = sorting && sortableColumns.includes(column);
 
                                 return (
                                     <th
@@ -384,33 +378,12 @@ const CustomTable = ({
                                                     onClick={() => sortByColumn(column)}
                                                 />
                                             )}
-                                            {isUsageColumn && (
-                                                <button
-                                                    type="button"
-                                                    className={`btn btn-ghost btn-xs px-1 h-7 min-h-7 ${isUsageFilterActive ? "text-primary" : "text-base-content/60"}`}
-                                                    onClick={(event) => {
-                                                        event.preventDefault();
-                                                        event.stopPropagation();
-                                                        onUsageFilterClick?.(event);
-                                                    }}
-                                                >
-                                                    <FilterSliderIcon size={15} />
-                                                </button>
-                                            )}
                                             <span
                                                 className={`${isSortable ? "cursor-pointer" : "cursor-default"} capitalize`}
                                                 onClick={() => (isSortable ? sortByColumn(column) : undefined)}
                                             >
                                                 {getColumnLabel(column)}
                                             </span>
-                                            {isUsageColumn && usageFilterIsLoading && (
-                                                <span className="loading loading-spinner loading-xs text-primary" />
-                                            )}
-                                            {isUsageColumn && usageFilterLabel && (
-                                                <span className="text-[11px] uppercase tracking-wide text-base-content/60 hidden xl:inline">
-                                                    {usageFilterLabel}
-                                                </span>
-                                            )}
                                         </div>
                                     </th>
                                 );
