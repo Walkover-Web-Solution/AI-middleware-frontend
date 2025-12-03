@@ -1,7 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { setEmbedUserDetailsAction } from '@/store/action/appInfoAction';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
@@ -26,11 +25,9 @@ const Layout = ({ children }) => {
     return decodedParam ? JSON.parse(decodedParam) : {};
   }, [searchParams]);
 
-  const { allBridges, services, models, userDetailsData } = useCustomSelector((state) => ({
+  const { allBridges, services } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer?.orgs?.[urlParamsObj.org_id]?.orgs || [],
     services: state.serviceReducer?.services || null,
-    models: state.modelReducer?.serviceModels || null,
-    userDetailsData: state.userDetailsReducer?.userDetails || null
   }));
 
   useEffect(() => {

@@ -1,9 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
 import ErrorPage from "@/app/not-found";
-import LoadingSpinner from "@/components/loadingSpinner";
-import Protected from "@/components/protected";
-import { getSingleMessage, switchOrg, switchUser } from "@/config";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import Protected from "@/components/Protected";
+import { getSingleMessage, switchOrg, switchUser } from "@/config/index";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
@@ -12,7 +12,7 @@ import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { getFromCookies, removeCookie } from "@/utils/utility";
+import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -26,12 +26,11 @@ import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { getAllAuthData } from "@/store/action/authkeyAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
-import { setInCookies } from "@/utils/utility";
 import ServiceInitializer from "@/components/organization/ServiceInitializer";
 
-const Navbar = dynamic(() => import("@/components/navbar"), { loading: () => <LoadingSpinner /> });
-const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), { loading: () => <LoadingSpinner /> });
-const ChatDetails = dynamic(() => import("@/components/historyPageComponents/chatDetails"), { loading: () => <LoadingSpinner /> });
+const Navbar = dynamic(() => import("@/components/Navbar"), { loading: () => <LoadingSpinner /> });
+const MainSlider = dynamic(() => import("@/components/sliders/MainSlider"), { loading: () => <LoadingSpinner /> });
+const ChatDetails = dynamic(() => import("@/components/historyPageComponents/ChatDetails"), { loading: () => <LoadingSpinner /> });
 
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
@@ -173,6 +172,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           setIsValidOrg(false);
         }
       } catch (error) {
+        console.error('Failed to validate organization', error);
         setIsValidOrg(false);
       }
     };
@@ -266,27 +266,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       window.removeEventListener('focus', onFocus);
     }
   }, [isValidOrg, resolvedParams])
-
-  // useEffect(() => {
-  //   const updateScript = (token) => {
-  //     const existingScript = document.getElementById("rag-main-script");
-  //     if (existingScript) {
-  //       document.head.removeChild(existingScript);
-  //     }
-  //     if (!token) return;
-  //     const script = document.createElement("script");
-  //     script.id = "rag-main-script";
-  //     script.src = process.env.NEXT_PUBLIC_RAG_EMBED_URL;
-  //     script.setAttribute("embedToken", token);
-  //     document.head.appendChild(script);
-  //   };
-
-  //   dispatch(getKnowledgeBaseTokenAction(resolvedParams.org_id)).then((data) => {
-  //     const token = data?.response;
-  //     updateScript(token);
-  //   });
-  // }, [resolvedParams.org_id]);
-
   const docstarScriptId = "docstar-main-script";
   const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
   useEffect(() => {

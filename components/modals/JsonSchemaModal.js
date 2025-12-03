@@ -1,11 +1,10 @@
 // JsonSchemaModal.jsx
-import { optimizeSchemaApi } from "@/config";
+import { optimizeSchemaApi } from "@/config/index";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useDispatch } from "react-redux";
-import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
 import Canvas from "../Canvas";
 import Modal from "../UI/Modal";
@@ -13,7 +12,6 @@ import { closeModal } from "@/utils/utility";
 
 function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_id, onResetThreadId=()=>{}}) {
   const dispatch = useDispatch();
-  const [errorMessage, setErrorMessage] = useState("");
   const { json_schema } = useCustomSelector((state) => ({
     json_schema: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.response_type?.json_schema,
   }));
@@ -59,19 +57,7 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
       handleCloseModal();
     } catch (error) {
       toast.error("Invalid JSON Schema");
-      setErrorMessage("Invalid JSON Schema");
       console.error("JSON parse error:", error);
-    }
-  };
-
-  const validateJsonSchema = (schema) => {
-    if (!schema) return;
-    try {
-      JSON.parse(schema);
-      setErrorMessage("");
-    } catch (error) {
-      toast.error("Invalid JSON Schema");
-      setErrorMessage("Invalid JSON Schema");
     }
   };
 

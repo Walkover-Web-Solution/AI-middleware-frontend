@@ -1,5 +1,5 @@
-import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi, runTestCaseApi, updateTestCaseApi, generateAdditionalTestCasesApi } from "@/config";
-import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, runTestCaseReducer, updateTestCaseReducer } from "../reducer/testCasesReducer";
+import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi, runTestCaseApi, updateTestCaseApi, generateAdditionalTestCasesApi } from "@/config/index";
+import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, updateTestCaseReducer } from "../reducer/testCasesReducer";
 import { toast } from "react-toastify";
 
 export const createTestCaseAction = ({ bridgeId, data }) => async (dispatch) => {
@@ -44,7 +44,6 @@ export const runTestCaseAction = ({ versionId = null, bridgeId=null, testcase_id
     try {
         const response = await runTestCaseApi({ versionId, testcase_id, testCaseData, bridgeId });
         if (response?.success) {
-            // dispatch(runTestCaseReducer({ data: response?.response, bridgeId, versionId }));
             toast.success("Test case run successfully");
         }
         return response;

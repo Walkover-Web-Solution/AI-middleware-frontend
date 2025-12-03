@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { CloseIcon } from "@/components/Icons";
-import FormSection from "@/components/chatbotConfiguration/formSection";
 import ApiGuide from "../configuration/configurationComponent/ApiGuide";
 import BatchApiGuide from "../configuration/configurationComponent/BatchApiGuide";
-import SecondStep from "../chatbotConfiguration/secondStep";
-import PrivateFormSection from "../chatbotConfiguration/firstStep";
+import SecondStep from "../chatbotConfiguration/SecondStep";
+import PrivateFormSection from "../chatbotConfiguration/FirstStep";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { toggleSidebar } from "@/utils/utility";
-import SlugNameInput from "../configuration/configurationComponent/slugNameInput";
+import SlugNameInput from "../configuration/configurationComponent/SlugNameInput";
 
 function GuideSlider({ params, bridgeType, onClose }) {
   const [activeTab, setActiveTab] = useState(bridgeType != "trigger" ? bridgeType : "chatbot");

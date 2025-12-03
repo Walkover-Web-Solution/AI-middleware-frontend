@@ -152,7 +152,7 @@ export const isValidJson = (jsonString) => {
     try {
         JSON.parse(jsonString);
         return true; // Return true if JSON parses without error
-    } catch (e) {
+    } catch {
         return false; // Return false if an error is thrown
     }
 };
@@ -361,7 +361,7 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
         case 'web_search':
             return <WebSearchIcon height={height} width={width} />;
         case 'image_generation':
-            return <Image height={height} width={width} />;
+            return <Image height={height} width={width} alt="image generation icon" />;
         default:
             return null;
     }

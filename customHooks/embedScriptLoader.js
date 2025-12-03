@@ -1,4 +1,4 @@
-import { getOrCreateNotificationAuthKey } from "@/config";
+import { getOrCreateNotificationAuthKey } from "@/config/index";
 import { useEffect } from "react";
 
 export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {

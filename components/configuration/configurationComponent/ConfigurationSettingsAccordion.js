@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, SettingsIcon } from '@/components/Icons';
 import { useConfigurationContext } from '../ConfigurationContext';
-import BridgeTypeToggle from './bridgeTypeToggle';
-import ToneDropdown from './toneDropdown';
-import ResponseStyleDropdown from './responseStyleDropdown';
-import AdvancedConfiguration from './advancedConfiguration';
-import Protected from '@/components/protected';
+import BridgeTypeToggle from './BridgeTypeToggle';
+import ToneDropdown from './ToneDropdown';
+import ResponseStyleDropdown from './ResponseStyleDropdown';
+import AdvancedConfiguration from './AdvancedConfiguration';
+import Protected from '@/components/Protected';
 
 const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,7 +88,6 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
                     searchParams={searchParams}
                     bridgeType={bridgeType}
                     modelType={modelType}
-                    forceExpanded
                     isPublished={isPublished}
                   />
                 </div>

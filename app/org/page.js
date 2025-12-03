@@ -1,19 +1,18 @@
 "use client"
-import CreateOrg from '@/components/createNewOrg';
-import Protected from '@/components/protected';
+import CreateOrg from '@/components/CreateNewOrg';
+import Protected from '@/components/Protected';
 import OrganizationHeader from '@/components/organization/OrganizationHeader';
-import OrganizationSearch from '@/components/organization/OrganizationSearch';
 import OrganizationGrid from '@/components/organization/OrganizationGrid';
 import { ThemeManager } from '@/customHooks/useThemeManager';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
-import { switchOrg, switchUser } from '@/config';
+import { switchOrg, switchUser } from '@/config/index';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { setInCookies, getFromCookies } from '@/utils/utility';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
-import LoadingSpinner from '@/components/loadingSpinner';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 /**
  * The organizations page that displays all the organizations
@@ -67,15 +66,6 @@ function Page() {
   useEffect(() => {
     setDisplayedOrganizations(organizationsArray);
   }, [organizationsArray]);
-
-  // Auto-redirect if there's only one organization
-  useEffect(() => {
-    const allowRedirection = searchParams.get('redirection') !== 'false';
-    // if (organizationsArray.length === 1 && allowRedirection) {
-    //   const singleOrg = organizationsArray[0];
-    //   handleSwitchOrg(singleOrg.id, singleOrg.name);
-    // }
-  }, [organizationsArray, handleSwitchOrg, searchParams]);
 
   // Show loader if redirecting
   if (isRedirecting) {

@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import PreEmbedList from "./configurationComponent/preEmbedList";
-import InputConfigComponent from "./configurationComponent/inputConfigComponent";
+import PreEmbedList from "./configurationComponent/PreEmbedList";
+import InputConfigComponent from "./configurationComponent/InputConfigComponent";
 import { useConfigurationContext } from './ConfigurationContext';
 import { toggleSidebar } from '@/utils/utility';
 import {BookText } from 'lucide-react';

@@ -1,10 +1,9 @@
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import SetupView from "./SetupView";
-import Protected from "../protected";
+import Protected from "../Protected";
 import { Lock } from 'lucide-react';
 import { toggleSidebar } from '@/utils/utility';
 import GuideSlider from '../sliders/IntegrationGuideSlider';

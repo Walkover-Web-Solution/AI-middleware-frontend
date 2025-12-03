@@ -171,7 +171,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
             ))}
           </div>
         );
-      } catch (e) {
+      } catch {
         // Fallback to JSON string if there's an error in the recursive rendering
         return <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-auto">{JSON.stringify(value, null, 2)}</pre>;
       }

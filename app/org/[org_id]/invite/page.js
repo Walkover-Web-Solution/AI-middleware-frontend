@@ -1,6 +1,6 @@
 "use client";
-import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
-import Protected from '@/components/protected';
+import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config/index';
+import Protected from '@/components/Protected';
 import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { InfoIcon, TrashIcon, UserCircleIcon } from '@/components/Icons';
@@ -94,6 +94,7 @@ function InvitePage({ }) {
         toast.error('Failed to fetch invited members.');
       }
     } catch (error) {
+      console.error('Failed to fetch invited members', error);
       toast.error('An error occurred while fetching invited members.');
     } finally {
       setIsLoading(false);
@@ -140,6 +141,7 @@ function InvitePage({ }) {
         toast.error('Failed to send invitation.');
       }
     } catch (error) {
+      console.error('Failed to send invitation', error);
       toast.error('An error occurred while sending the invitation.');
     } finally {
       setIsInviting(false);

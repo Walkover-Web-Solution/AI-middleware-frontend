@@ -1,5 +1,5 @@
-import CopyButton from '@/components/copyButton/copyButton';
-import GenericTable from '@/components/table/table';
+import CopyButton from '@/components/copyButton/CopyButton';
+import GenericTable from '@/components/table/Table';
 import Link from 'next/link';
 import React from 'react';
 

@@ -51,7 +51,6 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
     return response?.data;
   } catch (error) {
     toast.error('Error updating organization:', error);
-    const errorMessage = error.response?.data?.message || error.message || 'Organization update failed.';
   }
 };
 

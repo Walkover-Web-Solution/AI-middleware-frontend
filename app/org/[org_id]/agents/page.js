@@ -1,29 +1,28 @@
 "use client"
-import CreateNewBridge from "@/components/createNewBridge";
-import CustomTable from "@/components/customTable/customTable";
+import CreateNewBridge from "@/components/CreateNewBridge";
+import CustomTable from "@/components/customTable/CustomTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
-import LoadingSpinner from "@/components/loadingSpinner";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import OnBoarding from "@/components/OnBoarding";
 import PageHeader from "@/components/Pageheader";
-import Protected from "@/components/protected";
-import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
+import Protected from "@/components/Protected";
+import TutorialSuggestionToast from "@/components/TutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, deleteBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import useTutorialVideos from "@/hooks/useTutorialVideos";
-import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick, formatDate } from "@/utils/utility";
+import { getIconOfService, openModal, closeModal, formatRelativeTime, formatDate } from "@/utils/utility";
 
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
 import SearchItems from "@/components/UI/SearchItems";
-import { ClockFading } from "lucide-react";
+import { Archive, ArchiveRestore, ClockFading, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
-import { Archive, ArchiveRestore, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import DeleteModal from "@/components/UI/DeleteModal";
 import UsageLimitModal from "@/components/modals/UsageLimitModal";
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
@@ -60,7 +59,6 @@ function Home({ params, isEmbedUser }) {
   
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const inputRef = useRef(null);
   const router = useRouter();
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};

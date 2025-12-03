@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo, memo, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useCallback, memo, useEffect } from 'react';
 
 // Ultra-smooth textarea component with zero re-renders during typing
 const PromptTextarea = memo(({ 

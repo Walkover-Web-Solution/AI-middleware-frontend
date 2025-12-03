@@ -1,4 +1,4 @@
-import { getConnectedAgentFlowApi } from "@/config";
+import { getConnectedAgentFlowApi } from "@/config/index";
 import { setConnectedAgentFlowData, setConnectedAgentFlowError, setConnectedAgentFlowLoading } from "../reducer/orchestralFlowReducer";
 
 export const getConnectedAgentFlowAction = ({ orgId, bridgeId, versionId }) => async (dispatch) => {

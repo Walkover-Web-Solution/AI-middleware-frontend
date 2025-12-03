@@ -35,7 +35,7 @@ export const getKnowledgeBaseToken = async () => {
 
 export const deleteKnowBaseData = async (data) => {
   try {
-    const { id, orgId } = data;
+    const { id } = data;
     const response = await axios.delete(`${URL}/rag/docs/${id}`, {
       data: { id }
     });

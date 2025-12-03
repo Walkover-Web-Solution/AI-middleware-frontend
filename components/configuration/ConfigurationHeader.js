@@ -1,5 +1,5 @@
 import React from 'react';
-import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
+import BridgeTypeToggle from "./configurationComponent/BridgeTypeToggle";
 
 const ConfigurationHeader = ({ 
     params, 

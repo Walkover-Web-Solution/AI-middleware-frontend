@@ -1,4 +1,4 @@
-import { modelSuggestionApi } from '@/config';
+import { modelSuggestionApi } from '@/config/index';
 import React, { useState, useCallback } from 'react'
 
 const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys, isPublished }) => {

@@ -1,21 +1,20 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Protected from "@/components/protected";
+import Protected from "@/components/Protected";
 import { useConfigurationSelector } from "@/customHooks/useOptimizedSelector";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
+import { getAllBridgesAction, getSingleBridgesAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useEffect, useRef, useState, use, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { setIsFocusReducer, setThreadIdForVersionReducer } from "@/store/reducer/bridgeReducer";
 import { updateTitle, generateRandomID } from "@/utils/utility";
 import { useRouter } from "next/navigation";
-import Chatbot from "@/components/configuration/chatbot";
+import Chatbot from "@/components/configuration/Chatbot";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 const ConfigurationPage = dynamic(() => import("@/components/configuration/ConfigurationPage"));
-const Chat = dynamic(() => import("@/components/configuration/chat"), { loading: () => null, });
+const Chat = dynamic(() => import("@/components/configuration/Chat"), { loading: () => null, });
 const WebhookForm = dynamic(() => import("@/components/BatchApi"), { ssr: false, });
 const PromptHelper = dynamic(() => import("@/components/PromptHelper"), { ssr: false, });
 const NotesPanel = dynamic(() => import("@/components/NotesPanel"), { ssr: false, });

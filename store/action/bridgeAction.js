@@ -1,4 +1,4 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
 import { toast } from "react-toastify";
 import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
@@ -246,7 +246,6 @@ export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) =>
   try {
     markUpdateInitiatedByCurrentTab(dataFromEmbed?.version_id);
     const data = await updateapi(bridge_id, dataFromEmbed);
-    // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
     dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
   } catch (error) {
     console.error(error)
@@ -343,7 +342,7 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   try {
     const reponse = await getTestcasesScrore(version_id);
     return reponse;
-  } catch (error) {
+  } catch (_error) {
     toast.error('Failed to genrate testcase score');
   }
 }
@@ -353,7 +352,7 @@ export const deleteFunctionAction = ({ function_name, functionId, orgId }) => as
     const reponse = await deleteFunctionApi(function_name);
     dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
-  } catch (error) {
+  } catch (_error) {
     toast.error('Failed to delete function')
   }
 }

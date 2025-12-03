@@ -1,6 +1,6 @@
-import CopyButton from '@/components/copyButton/copyButton';
-import Protected from '@/components/protected';
-import GenericTable from '@/components/table/table';
+import CopyButton from '@/components/copyButton/CopyButton';
+import Protected from '@/components/Protected';
+import GenericTable from '@/components/table/Table';
 import Link from 'next/link';
 import React from 'react';
 import { extractPromptVariables } from '@/utils/utility';

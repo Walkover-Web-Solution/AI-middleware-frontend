@@ -4,7 +4,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X, ChevronDown, ChevronRight } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/utils/utility";
-import Protected from "../protected";
+import Protected from "../Protected";
 
 function getOrgIdFromPath(pathname) {
   const parts = (pathname || "").split("/").filter(Boolean);

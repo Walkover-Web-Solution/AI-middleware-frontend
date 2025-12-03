@@ -1,4 +1,4 @@
-import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, updateOrganizationData, updateUser } from "@/config";
+import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, updateOrganizationData, updateUser } from "@/config/index";
 import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
 import {  updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
 

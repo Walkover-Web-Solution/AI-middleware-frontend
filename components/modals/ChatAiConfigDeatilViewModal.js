@@ -1,11 +1,9 @@
 import { MODAL_TYPE } from '@/utils/enums'
-import { closeModal, generateKeyValuePairs } from '@/utils/utility'
-import { CloseCircleIcon, CloseIcon, CopyIcon } from '@/components/Icons'
+import { closeModal } from '@/utils/utility'
+import { CloseIcon } from '@/components/Icons'
 import React from 'react'
 import Modal from '../UI/Modal'
-import CopyButton from '../copyButton/copyButton'
-import { ChevronDown } from 'lucide-react'
-import { toast } from 'react-toastify'
+import CopyButton from '../copyButton/CopyButton'
 
 const flattenMessage = (message) => {
   if (typeof message !== 'object' || message === null) {
@@ -49,18 +47,6 @@ const renderFlattenedMessage = (message) => {
 }
 
 const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
-  const copyToClipboard = (content, message = "Copied to clipboard") => {
-    navigator.clipboard
-      .writeText(typeof content === 'string' ? content : JSON.stringify(content))
-      .then(() => {
-        toast.success(message);
-      })
-      .catch((error) => {
-        toast.error(`Error while copying to clipboard`);
-        console.error(error);
-      });
-  };
-
   return (
     <Modal MODAL_ID={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">

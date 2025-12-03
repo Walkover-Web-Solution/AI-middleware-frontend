@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SettingsIcon } from '@/components/Icons';
-import AdvancedParameters from './advancedParamenter';
+import AdvancedParameters from './AdvancedParamenter';
 
 const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvancedParameters = false, isPublished = false }) => {
     const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
@@ -47,8 +47,6 @@ const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvance
                         hideAdvancedParameters={hideAdvancedParameters}
                         level={1}
                         className="mt-0"
-                        defaultExpanded
-                        showAccordion={false}
                         compact
                         isPublished={isPublished}
                     />

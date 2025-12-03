@@ -1,7 +1,4 @@
 import React, { memo, useCallback } from 'react';
-import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import InfoTooltip from '@/components/InfoTooltip';
 import { SparklesIcon } from 'lucide-react';
 
 // Optimized header component with memoization
@@ -22,10 +19,6 @@ const PromptHeader = memo(({
         onSave?.();
     }, [onSave]);
 
-    const handleOpenPromptSummary = useCallback(() => {
-        openModal(MODAL_TYPE?.PROMPT_SUMMARY);
-    }, []);
-    
     const handleOpenDiff = useCallback(() => {
         onOpenDiff?.();
     }, [onOpenDiff]);

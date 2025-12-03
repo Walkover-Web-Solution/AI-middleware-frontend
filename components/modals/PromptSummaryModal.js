@@ -1,10 +1,8 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { genrateSummaryAction, updateBridgeAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 
 // Reusable Agent Summary Content Component
@@ -45,13 +43,6 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt, versionId]);
-    const handleClose=()=>{
-        closeModal(modalType); 
-        setErrorMessage("");
-        setSummary(bridge_summary)
-        setAutoGenerateSummary(false); // Reset the flag
-
-    }
     const handleSaveSummary = useCallback(() => {
         const newValue = summary || "";
         const dataToSend = { bridge_summary: newValue };

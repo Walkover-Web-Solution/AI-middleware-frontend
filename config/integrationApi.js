@@ -1,7 +1,6 @@
 import axios from "@/utils/interceptor";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
-const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 
 // Integration Management APIs
 export const createIntegrationApi = async (data) => {

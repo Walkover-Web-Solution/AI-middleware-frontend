@@ -3,9 +3,8 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateOrgTimeZone } from '@/store/action/orgAction';
 import timezoneData from '@/utils/timezoneData';
 import { PencilIcon, GlobeIcon, MailIcon, BuildingIcon } from '@/components/Icons';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, use } from 'react';
 import { useDispatch } from 'react-redux';
-import { use } from 'react';
 
 export const runtime = 'edge';
 

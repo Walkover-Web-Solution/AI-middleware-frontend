@@ -5,16 +5,12 @@ import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import {
   initializeVariablesState,
-  createVariableGroup,
-  renameVariableGroup,
-  deleteVariableGroup,
-  setActiveVariableGroup,
   updateVariables,
 } from "@/store/reducer/variableReducer";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { sendDataToParent, toggleSidebar } from "@/utils/utility";
-import { CloseIcon, InfoIcon } from "@/components/Icons";
-import { Edit2, Plus, Trash2, Upload, Play } from "lucide-react";
+import { CloseIcon } from "@/components/Icons";
+import { Trash2, Upload, Play } from "lucide-react";
 
 const SLIDER_ID = "variable-collection-slider";
 const SLIDER_DISABLE_KEY = "variableSliderDisabled";
@@ -43,7 +39,7 @@ const inferType = (value, fallback) => {
     const parsed = JSON.parse(sample);
     if (Array.isArray(parsed)) return "array";
     if (typeof parsed === "object") return "object";
-  } catch (err) {
+  } catch {
     /* ignore */
   }
   return "string";
@@ -97,7 +93,7 @@ const validateAndFormatValue = (rawValue, type, { allowEmpty } = {}) => {
           return { ok: false, error: "Value must be a JSON object" };
         }
         return { ok: true, value: JSON.stringify(parsed, null, 2) };
-      } catch (err) {
+      } catch {
         return { ok: false, error: "Value must be valid JSON" };
       }
     }
@@ -211,13 +207,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       variablesPath: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables_path || {},
       variable_state: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables_state || {},
     };
-  });
-
-  const [groupEditor, setGroupEditor] = useState({
-    mode: "idle",
-    value: "",
-    error: "",
-    groupId: null,
   });
   const [draftVariables, setDraftVariables] = useState([]);
   const [error, setError] = useState("");
@@ -511,7 +500,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           ) {
             try {
               formattedValue = JSON.parse(formattedValue);
-            } catch (err) {
+            } catch {
               // If parsing fails, keep the string value
             }
           }
@@ -534,7 +523,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           ) {
             try {
               formattedDefaultValue = JSON.parse(formattedDefaultValue);
-            } catch (err) {
+            } catch {
               // If parsing fails, keep the string value
             }
           }
@@ -849,105 +838,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
     [applyDraftUpdate, promptKeySet]
   );
 
-  // Auto-add functionality is now handled in handleFieldCommit
-  // const handleAddVariable = useCallback(() => {
-  //   if (!activeGroupId) {
-  //     setError("Create a group before adding variables.");
-  //     return;
-  //   }
-
-  //   setError("");
-  //   applyDraftUpdate(
-  //     (prev) => [
-  //       ...prev,
-  //       {
-  //         id: createLocalId(),
-  //         key: `variable_${prev.length + 1}`,
-  //         value: "",
-  //         defaultValue: "",
-  //         type: "string",
-  //         required: true,
-  //       },
-  //     ],
-  //     { suppressErrors: true }
-  //   );
-  // }, [activeGroupId, applyDraftUpdate]);
-
-  const handleGroupSelect = useCallback(
-    (groupId) => {
-      dispatch(
-        setActiveVariableGroup({
-          bridgeId: params.id,
-          versionId,
-          groupId,
-        })
-      );
-    },
-    [dispatch, params.id, versionId]
-  );
-
-  const handleOpenCreateGroup = useCallback(() => {
-    setGroupEditor({
-      mode: "create",
-      value: "",
-      error: "",
-      groupId: null,
-    });
-  }, []);
-
-  const handleOpenRenameGroup = useCallback(() => {
-    if (!activeGroup) return;
-    setGroupEditor({
-      mode: "rename",
-      value: activeGroup.name || "",
-      error: "",
-      groupId: activeGroup.id,
-    });
-  }, [activeGroup]);
-
-  const handleGroupEditorSubmit = useCallback(() => {
-    const trimmed = groupEditor.value.trim();
-    if (!trimmed) {
-      setGroupEditor((prev) => ({ ...prev, error: "Group name is required." }));
-      return;
-    }
-
-    if (groupEditor.mode === "create") {
-      dispatch(
-        createVariableGroup({
-          bridgeId: params.id,
-          versionId,
-          groupName: trimmed,
-        })
-      );
-    } else if (groupEditor.mode === "rename" && groupEditor.groupId) {
-      dispatch(
-        renameVariableGroup({
-          bridgeId: params.id,
-          versionId,
-          groupId: groupEditor.groupId,
-          newName: trimmed,
-        })
-      );
-    }
-    setGroupEditor({ mode: "idle", value: "", error: "", groupId: null });
-  }, [dispatch, groupEditor, params.id, versionId]);
-
-  const handleGroupEditorCancel = useCallback(() => {
-    setGroupEditor({ mode: "idle", value: "", error: "", groupId: null });
-  }, []);
-
-  const handleDeleteGroup = useCallback(() => {
-    if (!activeGroup || variableGroups.length <= 1) return;
-    dispatch(
-      deleteVariableGroup({
-        bridgeId: params.id,
-        versionId,
-        groupId: activeGroup.id,
-      })
-    );
-  }, [activeGroup, dispatch, params.id, variableGroups.length, versionId]);
-
   const parseJsonToKeyValue = useCallback((jsonText) => {
     try {
       const parsed = JSON.parse(jsonText);
@@ -957,7 +847,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
           value: typeof value === 'object' ? JSON.stringify(value) : String(value)
         }));
       }
-    } catch (error) {
+    } catch {
       // Not valid JSON, return null
     }
     return null;
@@ -1068,7 +958,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       setBulkEditMode(false);
       setBulkEditText("");
       setError("");
-    } catch (err) {
+    } catch {
       setError("Error parsing data. Please verify the format.");
     }
   }, [
@@ -1077,15 +967,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
     commitVariables,
     parseJsonToKeyValue,
   ]);
-
-  useEffect(() => {
-    if (groupEditor.mode === "rename" && groupEditor.groupId === activeGroup?.id) {
-      setGroupEditor((prev) => ({
-        ...prev,
-        value: activeGroup?.name || "",
-      }));
-    }
-  }, [groupEditor.mode, groupEditor.groupId, activeGroup?.name, activeGroup?.id]);
 
   useEffect(() => {
     const slider = document.getElementById(SLIDER_ID);
@@ -1189,140 +1070,9 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
 
 
 
-        {/* Un comment this section when we have variable groups, this will be the feature for variable groups */}
-
-        {/* <section className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <InfoIcon className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-xs text-base-content/70">
-                Use <span className="font-medium text-primary">{"{{variable_name}}"}</span> inside
-                prompts or payloads. Select a group to activate it for the current session.
-              </span>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary btn-xs gap-1"
-              onClick={handleOpenCreateGroup}
-            >
-              <Plus size={14} />
-              New group
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {variableGroups?.length ? (
-              variableGroups.map((group) => {
-                const isActive = activeGroup?.id === group.id;
-                return (
-                  <button
-                    key={group.id}
-                    type="button"
-                    className={`btn btn-xs ${
-                      isActive ? "btn-primary" : "btn-ghost border border-base-300"
-                    } flex items-center gap-2`}
-                    onClick={() => handleGroupSelect(group.id)}
-                  >
-                    <span className="truncate max-w-[130px]" title={group.name}>
-                      {group.name}
-                    </span>
-                    <span
-                      className={`badge badge-xs ${isActive ? "badge-outline" : "badge-ghost"}`}
-                    >
-                      {group.variables?.length ?? 0}
-                    </span>
-                  </button>
-                );
-              })
-            ) : (
-              <span className="text-xs text-base-content/60">
-                Create your first group to start organising variables.
-              </span>
-            )}
-          </div>
-
-          {groupEditor.mode !== "idle" && (
-            <div className="rounded-lg border border-base-200 bg-base-100 p-3 space-y-2">
-              <div className="text-sm font-medium">
-                {groupEditor.mode === "create" ? "Create group" : "Rename group"}
-              </div>
-              <input
-                type="text"
-                value={groupEditor.value}
-                onChange={(event) =>
-                  setGroupEditor((prev) => ({
-                    ...prev,
-                    value: event.target.value,
-                    error: "",
-                  }))
-                }
-                className="input input-bordered input-sm w-full"
-                placeholder="Environment name"
-                autoFocus
-              />
-              {groupEditor.error && (
-                <p className="text-[11px] text-error">{groupEditor.error}</p>
-              )}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-primary btn-xs"
-                  onClick={handleGroupEditorSubmit}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs"
-                  onClick={handleGroupEditorCancel}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          {activeGroup && (
-            <div className="flex items-center gap-2 pt-1 border-t border-base-200 mt-1">
-              <span className="text-xs text-base-content/70">
-                Active group:{" "}
-                <span className="font-medium text-base-content">{activeGroup.name}</span>
-              </span>
-              <div className="flex items-center gap-2 ml-auto">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs gap-1"
-                  onClick={handleOpenRenameGroup}
-                >
-                  <Edit2 size={12} />
-                  Rename
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs gap-1 text-error"
-                  onClick={handleDeleteGroup}
-                  disabled={variableGroups.length <= 1}
-                >
-                  <Trash2 size={12} />
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
-        </section> */}
-
         <section className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 flex-1 flex flex-col">
           <div className="flex items-center justify-between border-b border-base-200 pb-3">
-            <div>
-              {/* <h3 className="text-base font-semibold text-base-content">
-                {activeGroup ? activeGroup.name : "No group selected"}
-              </h3> */}
-              {/* <p className="text-xs text-base-content/60">
-                {activeGroup
-                  ? "Variables in this group are used when the group is selected in the workspace."
-                  : "Select or create a group to start adding variables."}
-              </p> */}
-            </div>
+            <div />
 
             <div className="flex gap-2">
               {!bulkEditMode && (

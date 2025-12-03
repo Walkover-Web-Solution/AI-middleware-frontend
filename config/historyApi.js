@@ -2,7 +2,6 @@ import axios from "@/utils/interceptor";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
-// History and Thread Management APIs
 export const getSingleMessage = async ({ bridge_id, message_id }) => {
   try {
     const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
@@ -13,38 +12,16 @@ export const getSingleMessage = async ({ bridge_id, message_id }) => {
   }
 }
 
-// export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, error, pagelimit = 40) => {
-//   try {
-//     const encodedThreadId = encodeURIComponent(threadId);
-//     const encodedBridgeId = encodeURIComponent(bridgeId);
-//     const encodedSubThreadId = encodeURIComponent(subThreadId || threadId);
-//     const encodedVersionId = versionId === 'undefined' ? undefined : encodeURIComponent(versionId);
-    
-//     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${encodedThreadId}/${encodedBridgeId}?sub_thread_id=${encodedSubThreadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${encodedVersionId}`, {
-//       params: {
-//         user_feedback,
-//         error
-//       }
-//     })
-//     return getSingleThreadData
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }
-
-//new route for the data conversation data
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, error, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, _versionId, error, pagelimit = 40) => {
   try {
     const encodedThreadId = encodeURIComponent(threadId);
     const encodedBridgeId = encodeURIComponent(bridgeId);
     const encodedSubThreadId = encodeURIComponent(subThreadId || threadId);
-    const encodedVersionId = versionId === 'undefined' ? undefined : encodeURIComponent(versionId);
     
     const getSingleThreadData = await axios.get(`${URL}/history/${encodedBridgeId}/${encodedThreadId}/${encodedSubThreadId}?page=${nextPage}&limit=${pagelimit}`, {
       params: {
         user_feedback,
         error,
-        // version_id: encodedVersionId
       }
     })
     return getSingleThreadData
@@ -52,26 +29,6 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
     console.error(error)
   }
 }
-
-// export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue, versionId) => {
-//   try {
-//     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
-//       params: {
-//         pageNo: page,
-//         limit: 40,
-//         startTime: start,
-//         endTime: end,
-//         keyword_search: keyword,
-//         user_feedback: user_feedback,
-//         error: isErrorTrue,
-//         version_id: (versionId === 'all'|| versionId === 'undefined') ? null : versionId
-//       }
-//     });
-//     return getSingleThreadData.data;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
 
 export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue, versionId) => {
   try {

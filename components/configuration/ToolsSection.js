@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import { AlertIcon } from "@/components/Icons";
-import EmbedList from "./configurationComponent/embedList";
+import EmbedList from "./configurationComponent/EmbedList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
-import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
+import KnowledgebaseList from "./configurationComponent/KnowledgebaseList";
 import { useConfigurationContext } from './ConfigurationContext';
 
 const ToolsSection = memo(({ isPublished }) => {
