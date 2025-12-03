@@ -161,7 +161,7 @@ function Canvas({
         </div>
 
       {/* Chat Container */}
-      <div className="flex-1 flex flex-col bg-base-100 border border-base-300 rounded-lg shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col bg-base-100 shadow-sm overflow-hidden">
         {/* Messages Area */}
         <div 
           id="messages" 
@@ -279,7 +279,7 @@ function Canvas({
         </div>
 
         {/* Input Area */}
-        <div className="bg-gradient-to-r from-base-100 to-base-200 border-t border-base-300 px-2 py-2 ">
+        <div className="p-1">
           <div className="flex gap-3 items-center max-w-4xl mx-auto justify-center">
             <div className="flex-1 relative mt-1">
               <textarea

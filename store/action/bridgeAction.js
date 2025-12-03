@@ -190,6 +190,10 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
 
 export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
   try {
+    if(!versionId){
+      toast.error("You cannot update published data");
+      return;
+    }
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
@@ -202,8 +206,6 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
   }
 };
 
-
-
 export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => async (dispatch) => {
   try {
     const response = await deleteBridge(bridgeId, org_id, restore);
@@ -212,8 +214,9 @@ export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => asy
     }
     return response;
   } catch (error) {
+    toast.error(error?.response?.data?.error || error?.message || error || 'Failed to delete agent');
     console.error('Failed to delete bridge:', error);
-    throw error;
+    throw  error;
   }
 };
 

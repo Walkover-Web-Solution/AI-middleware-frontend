@@ -3,12 +3,12 @@ import UserRefernceForRichText from "./configurationComponent/userRefernceForRic
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import ActionList from "./configurationComponent/actionList";
 
-const ChatbotConfigView = ({ params, searchParams }) => {
+const ChatbotConfigView = ({ params, searchParams , isPublished }) => {
     return (
         <>
-            <UserRefernceForRichText params={params} searchParams={searchParams} />
-            <StarterQuestionToggle params={params} searchParams={searchParams} />
-            <ActionList params={params} searchParams={searchParams} />
+            <UserRefernceForRichText params={params} searchParams={searchParams} isPublished={isPublished} />
+            <StarterQuestionToggle params={params} searchParams={searchParams} isPublished={isPublished} />
+            <ActionList params={params} searchParams={searchParams} isPublished={isPublished} />
         </>
     );
 };

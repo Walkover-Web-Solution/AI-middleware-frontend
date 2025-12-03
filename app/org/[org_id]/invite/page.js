@@ -300,7 +300,7 @@ export const runtime = 'edge';
 
 function UserManagementPage({ params }) {
   // MSG91 Proxy Auth Token
-  const PROXY_AUTH_TOKEN = "enJqckorNWNuWDFiK1BXRGgzemRUUjRCNlhGRkwzVkFiSTRqYklmWmtlS1VnZXoxWXpldDF5UlRyVmRKekd2VnRnSlg2TjBWOWU1TEdIR3pjUFJzRnhHWExMRi8vL1dZQTJTSG53U0JaZmxVVzIyRXM3RUZBRHlzbi9VclA1dFNOdUEzajQvc25DSU9rSjU2LzdweVdLQUVuUmpyVElMVmpiYjhRSnc5VHFGa1ZNdjFCbUJHcFhoTllQQ2dmTUUxSzh4ZDVJUW5XMGVYVmVLQVE5bGxxUT09";
+  const PROXY_AUTH_TOKEN = getFromCookies('proxy_token');
 
   // Initialize MSG91 proxy auth configuration
   useEffect(() => {
@@ -325,7 +325,7 @@ function UserManagementPage({ params }) {
       // Load MSG91 Proxy Auth Script
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src = 'https://test.proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
+      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
       script.onload = function() {
         if (typeof initVerification === 'function') {
           initVerification(configuration);

@@ -13,8 +13,9 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
+import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, level = 1, defaultExpanded = false, className = '', showAccordion = true, compact = false }) => {
+const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, defaultExpanded = false, showAccordion = true, compact = false, isPublished = false }) => {
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
   
@@ -31,24 +32,28 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const dispatch = useDispatch();
 
   const {service,version_function_data,configuration,integrationData,isFirstParameter,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
-    const versionData =state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const integrationData =state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     const user = state.userDetailsReducer.userDetails;
-    const bridge=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const service = versionData?.service;
-    const configuration = versionData?.configuration;
+    
+    // Use bridgeData when isPublished=true, otherwise use versionData
+    const activeData = isPublished ? bridgeDataFromState : versionData;
+    const service = activeData?.service;
+    const configuration = activeData?.configuration;
     const type = configuration?.type;
     const model = configuration?.model;
-    const modelInfoData =state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
+    const modelInfoData = state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
+    
     return {
-      version_function_data: versionData?.apiCalls,
+      version_function_data: isPublished ? (bridgeDataFromState?.apiCalls) : (versionData?.apiCalls),
       integrationData,
       service,
       configuration,
       isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
-      connected_agents: versionData?.connected_agents,
+      connected_agents: isPublished ? (bridgeDataFromState?.connected_agents) : (versionData?.connected_agents),
       modelInfoData,
-      bridge
+      bridge: activeData
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
@@ -256,7 +261,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     const buttonSizeClass = 'btn-xs';
     const rangeSizeClass = 'range-xs';
     const toggleSizeClass = 'toggle-xs';
-    const labelTextClass = 'text-sm font-medium capitalizen mb-2';
+    const labelTextClass = 'text-sm font-medium capitalizen';
     const sliderValueId = `sliderValue-${key} h-2`;
 
     let error = false;
@@ -279,9 +284,12 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       </span>
     ) : null;
 
+    // Detect if this is level 2 by checking if we're in compact mode or level 2 context
+    const isLevel2 = level === 2 || compact;
+    
     return (
-      <div key={key} className={`group w-full ${compact ? 'space-y-2' : 'space-y-3'}`}>
-        <div className="flex items-center justify-between gap-2 mb-2">
+      <div key={key} className={`group w-full ${isLevel2 ? 'space-y-1' : 'space-y-3'}`}>
+        <div className={`flex items-center justify-between gap-2 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -297,14 +305,16 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   setSliderValue(fallback, key, isDeafaultObject);
                 }
               }}
+              disabled={isPublished}
             />
-            {description ? (
-              <InfoTooltip tooltipContent={description}>
-                <span className={`${labelTextClass} info`}>{name || key}</span>
-              </InfoTooltip>
-            ) : (
+            <div className="flex items-center gap-1">
               <span className={labelTextClass}>{name || key}</span>
-            )}
+              {description && (
+                <InfoTooltip tooltipContent={description}>
+                  <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {sliderValueNode}
@@ -455,7 +465,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
 
         {field === 'slider' && !isDefaultValue && (
           <div className="flex items-center gap-2">
-            <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
+            <button disabled={isPublished} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
@@ -468,10 +478,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 if (el) el.innerText = e.target.value;
                 debouncedInputChange(e, key, true);
               }}
-              className={`range range-accent h-2 rounded-full ${rangeSizeClass}`}
+              className={`range range-accent disabled:opacity-50 disabled:cursor-not-allowed h-2 rounded-full ${rangeSizeClass}`}
               name={key}
+              disabled={isPublished}
             />
-            <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
+            <button disabled={isPublished} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
 
@@ -488,6 +499,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             }}
             className={`input input-bordered ${inputSizeClass} w-full`}
             name={key}
+            disabled={isPublished}
           />
         )}
 
@@ -507,6 +519,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             onBlur={(e) => handleInputChange(e, key)}
             className={`input input-bordered ${inputSizeClass} w-full`}
             name={key}
+            disabled={isPublished}
           />
         )}
 
@@ -518,6 +531,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               className={`toggle ${toggleSizeClass}`}
               checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
               onChange={(e) => handleInputChange(e, key)}
+              disabled={isPublished}
             />
           </label>
         )}
@@ -528,6 +542,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
               onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
               className={`select ${selectSizeClass} max-w-xs select-bordered capitalize`}
+              disabled={isPublished}
             >
               <option value='default' disabled> Select {key} mode </option>
               {options?.map((service, index) => (
@@ -564,6 +579,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                     handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                   }
                   placeholder="Enter valid JSON object here..."
+                  disabled={isPublished}
                 />
 
                 <JsonSchemaModal
@@ -599,12 +615,17 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     }
 
     return (
-      <div className={`z-very-low mt-4 text-base-content w-full cursor-pointer ${className}`} tabIndex={0}>
-        <div className="w-full gap-3 flex flex-col px-3 py-2 border border-base-content/20 rounded-lg mb-4 cursor-default">
-          {level2Parameters.map(([key, paramConfig]) => (
-            renderParameterField(key, paramConfig)
-          ))}
-        </div>
+      <div className={`z-very-low mt-2 text-base-content w-full ${className}`} tabIndex={0}>
+        {/* Level 2 Parameters - Displayed Outside Accordion */}
+        {level2Parameters.length > 0 && (
+          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-center">
+            {level2Parameters.map(([key, paramConfig]) => (
+              <div key={key} className="compact-parameter w-full max-w-md">
+                {renderParameterField(key, paramConfig)}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -623,9 +644,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
         {tutorialState.showTutorial && (
           <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
         )}
-        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
+        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-center`}>
           {level1Parameters.map(([key, paramConfig]) => (
-            renderParameterField(key, paramConfig)
+            <div key={key} className="w-full max-w-md">
+              {renderParameterField(key, paramConfig)}
+            </div>
           ))}
         </div>
       </div>

@@ -46,12 +46,42 @@ const CustomTable = ({
     const sortedData = useMemo(() => {
         if (sorting && activeColumn) {
             return [...data].sort((a, b) => {
-                const valueA = activeColumn === 'name' ? a.actualName : a[activeColumn];
-                const valueB = activeColumn === 'name' ? b.actualName : b[activeColumn];
+                const valueA = activeColumn === 'name' ? a.actualName : 
+                              activeColumn === 'createdAt' ? a.createdAt_original : a[activeColumn];
+                const valueB = activeColumn === 'name' ? b.actualName : 
+                              activeColumn === 'createdAt' ? b.createdAt_original : b[activeColumn];
+                
                 if (activeColumn === 'totaltoken') {
                     // Sort by totaltoken in ascending order
                     return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
                 }
+                
+                // Special handling for date columns (last_used, created_at, createdAt)
+                if (activeColumn === 'last_used' || activeColumn === 'created_at' || activeColumn === 'createdAt') {
+                    // Use original timestamp values for sorting if available
+                    const originalA = activeColumn === 'last_used' 
+                        ? (a.last_used_original || a.last_used_orignal)
+                        : activeColumn === 'createdAt' 
+                        ? a.createdAt_original
+                        : a.created_at_original;
+                    const originalB = activeColumn === 'last_used' 
+                        ? (b.last_used_original || b.last_used_orignal)
+                        : activeColumn === 'createdAt' 
+                        ? b.createdAt_original
+                        : b.created_at_original;
+                    
+                    // Handle null/undefined values - put them at the bottom
+                    if (!originalA && !originalB) return 0;
+                    if (!originalA) return 1;
+                    if (!originalB) return -1;
+                    
+                    // Convert to Date objects for proper sorting
+                    const dateA = new Date(originalA);
+                    const dateB = new Date(originalB);
+                    
+                    return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+                }
+                
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
                     return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
                 }
@@ -197,7 +227,7 @@ const CustomTable = ({
                                 
                                 {/* Card Actions */}
                                 {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         {endComponent({row: row})}
                                     </div>
                                 )}
@@ -218,8 +248,8 @@ const CustomTable = ({
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
         
         return (
-            <div className="overflow-x-auto border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
-                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-hidden border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
+            <div className="overflow-visible relative z-50 border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
+                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-visible relative z-50 border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
@@ -251,7 +281,7 @@ const CustomTable = ({
                                             className="cursor-pointer"
                                             onClick={() => sortByColumn(column)}
                                         >
-                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column}
+                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column==="last_used"?"Last Used At":column==="apikey_usage"?"Apikey Usage":column==="agent_usage"?"Agent Usage":column==="embed_usage"?"Embed Usage":column}
                                         </span>
                                     </div>
                                 </th>
@@ -264,7 +294,7 @@ const CustomTable = ({
                             sortedData?.map((row, index) => (
                                 <tr 
                                     key={row.id || row?._id || index} 
-                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group ${
+                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors z-40 cursor-pointer group ${
                                         row.isLoading ? 'opacity-60 cursor-wait' : ''
                                     }`}
                                     onClick={() =>
@@ -292,14 +322,16 @@ const CustomTable = ({
                                     {visibleColumns?.map((column) => (
                                         <td
                                             key={column}
-                                            className="px-4 py-2 text-left whitespace-nowrap"
+                                            className={`px-4 py-2 text-left whitespace-nowrap ${
+                                                column === 'last_used' || column === 'createdAt' ? 'w-40 min-w-40 max-w-40' : ''
+                                            }`}
                                         >
                                             {getDisplayValue(row, column)}
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td className="px-4 py-2 text-left">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <td className="px-4 py-2 text-left relative">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative z-50">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
@@ -323,7 +355,7 @@ const CustomTable = ({
     };
 
     return (
-        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto">
+        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto overflow-y-visible">
             {/* Responsive view switching */}
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>

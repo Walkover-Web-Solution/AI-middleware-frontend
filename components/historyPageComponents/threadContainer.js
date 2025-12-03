@@ -45,6 +45,12 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const integrationData = useCustomSelector(
     (state) => state?.bridgeReducer?.org?.[orgId]?.integrationData
   ) || {};
+  const { searchResults, isSearchActive } = useCustomSelector((state) => ({
+    searchResults: Array.isArray(state?.historyReducer?.search?.results)
+      ? state.historyReducer.search.results
+      : [],
+    isSearchActive: state?.historyReducer?.search?.isActive || false,
+  }));
 
   const historyRef = useRef(null);
   const contentRef = useRef(null);
@@ -80,23 +86,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const handleAddTestCase = useCallback((item, index, variables = false) => {
     const conversation = [];
     let AiConfigForVariable = {};
-
-    for (let i = index; i >= 0; i--) {
-      if (thread[i].role === 'user') {
-        // Use AiConfig.input or AiConfig.messages (both exist in different scenarios)
-        const aiConfigConversation = thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages || [];
-        conversation.push(...aiConfigConversation);
-        AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
-        if (thread[i + 1]?.role === 'tools_call') {
-          conversation.push(thread[i + 1])
-        }
-        // Break after processing the first user message with AiConfig (either input or messages)
-        if (thread[i]?.AiConfig && (thread[i]?.AiConfig?.input || thread[i]?.AiConfig?.messages)) {
-          break;
-        }
-      }
-    }
-
+    AiConfigForVariable = thread[index]?.AiConfig ? thread[index]?.AiConfig : {};
     conversation.push(item || {});
     setTestCaseConversation(conversation);
     if (variables) return AiConfigForVariable;
@@ -123,11 +113,10 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const handleImprovePrompt = async () => {
     setIsImprovingPrompt(true);
     try {
-      let prevConv;
       const variables = {};
       thread.forEach((item) => {
-        if (item.Id === modalInput?.Id) {
-          const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
+        if (item.id === modalInput?.Id) {
+          const conversation = item?.AiConfig?.input || item?.AiConfig?.messages
           const filteredConversation = conversation.filter((value) => {
             if (value.role === 'developer') {
               variables['prompt'] = value.content;
@@ -140,7 +129,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
           })
           variables["conversation_history"] = filteredConversation;
         }
-        item.role === 'user' ? prevConv = item : null
       })
       variables["updated_response"] = modalInput.content;
       let data;
@@ -256,6 +244,12 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const startDate = search?.start;
   const endDate = search?.end;
   const pathName = pathNameProp || pathname;
+  const availableThreads = useMemo(() => {
+    if (isSearchActive) {
+      return searchResults;
+    }
+    return Array.isArray(historyData) ? historyData : [];
+  }, [isSearchActive, searchResults, historyData]);
 
   const fetchThread = useCallback(
     async ({
@@ -294,9 +288,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       const error = errorFromURL || isErrorTrue;
       const version = versionFromURL || '';
 
-      // If no thread selected, navigate to the first one from historyData
-      if (!thread_id && Array.isArray(historyData) && historyData.length > 0) {
-        const firstThreadId = historyData[0]?.thread_id;
+      // If no thread selected, navigate to the first one from whichever data source is active
+      if (!thread_id && Array.isArray(availableThreads) && availableThreads.length > 0) {
+        const firstThreadId = availableThreads[0]?.thread_id;
         if (firstThreadId) {
           const params = new URLSearchParams(searchParamsHook.toString());
           params.set('thread_id', firstThreadId);
@@ -310,7 +304,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         }
       }
 
-      if (!thread_id || !historyData?.some((h) => h?.thread_id === thread_id)) {
+      if (!thread_id || !availableThreads?.some((h) => h?.thread_id === thread_id)) {
         setLoadingData(false);
         return;
       }
@@ -345,7 +339,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadIdFromURL, filterOption, historyData, errorFromURL, subThreadIdFromURL]);
+  }, [threadIdFromURL, filterOption, availableThreads, errorFromURL, subThreadIdFromURL]);
 
   // Fetch more (pagination)
   const fetchMoreThreadData = useCallback(async () => {

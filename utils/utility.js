@@ -85,6 +85,32 @@ const updateContent = (obj2, updatedObj1) => {
     }
 };
 
+export const focusDialogWhenOpen = (dialogId, onOpen, delay = 50) => {
+    if (typeof window === "undefined") return () => {};
+
+    const modal = document.getElementById(dialogId);
+
+    const handleOpen = () => {
+        if (modal?.hasAttribute?.("open")) {
+            onOpen?.();
+        }
+    };
+
+    const timer = setTimeout(handleOpen, delay);
+    const observer = modal
+        ? new MutationObserver(() => handleOpen())
+        : null;
+
+    if (observer) {
+        observer.observe(modal, { attributes: true, attributeFilter: ["open"] });
+    }
+
+    return () => {
+        clearTimeout(timer);
+        observer?.disconnect();
+    };
+};
+
 
 
 
@@ -136,8 +162,15 @@ export const toggleSidebar = (sidebarId, direction = "left") => {
     const handleClickOutside = (event) => {
         const sidebar = document.getElementById(sidebarId);
         const button = event.target.closest('button');
+        const withinSidebar = (() => {
+            if (!sidebar) return false;
+            if (typeof event.composedPath === "function") {
+                return event.composedPath().includes(sidebar);
+            }
+            return sidebar.contains(event.target);
+        })();
 
-        if (sidebar && !sidebar.contains(event.target) && !button) {
+        if (sidebar && !withinSidebar && !button) {
             if (direction === "left") {
                 sidebar.classList.add('-translate-x-full');
             } else {
@@ -303,9 +336,7 @@ export const allowedAttributes = {
     ],
     optional: [
         ['message_id', 'Message ID'],
-        ['input_tokens', 'Input Tokens'],
-        ['output_tokens', 'Output Tokens'],
-        ['expected_cost', 'Expected Cost'],
+        ['tokens', 'Tokens'],
         ['createdAt', 'Created At'],
         ['service', 'Service'],
         ['model', 'Model'],
@@ -679,6 +710,29 @@ export function markUpdateInitiatedByCurrentTab(agentId) {
     console.error('Error marking update initiation:', error);
   }
 }
+const normalizeToUTC = (dateString) => {
+  if (!dateString) return null;
+
+  // Case 1: Already valid ISO with Z (UTC)
+  if (dateString.includes("T") && dateString.endsWith("Z")) {
+    return dateString;
+  }
+
+  // Case 2: ISO without Z → treat as UTC, add Z
+  if (dateString.includes("T") && !dateString.endsWith("Z")) {
+    return dateString + "Z";
+  }
+
+  // Case 3: Space format "YYYY-MM-DD HH:MM:SS"
+  if (dateString.includes(" ")) {
+    return dateString.replace(" ", "T") + "Z";
+  }
+
+  // Fallback
+  return null;
+};
+
+
 
 /**
  * Check if the current tab initiated a specific agent update
@@ -754,34 +808,86 @@ export const generateKeyValuePairs = (obj) => {
     return result;
   };
 
+export const formatRelativeTime = (dateString) => {
+  const normalized = normalizeToUTC(dateString);
+  if (!normalized) return 'No records found';
 
- export const formatRelativeTime = (dateString) => {
-  if (!dateString) return '';
-  
-  const date = new Date(dateString);
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return 'No records found';
+
   const now = new Date();
-  const diffInSeconds = Math.floor((now - date) / 1000);
-  
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
   if (diffInSeconds < 60) return 'Just now';
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
   if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+  
   return `${Math.floor(diffInSeconds / 31536000)}y ago`;
 };
 
 export const formatDate = (dateString) => {
-    if (isNaN(Date.parse(dateString))) {
-      return dateString; // Return original string if it's not a valid date
+  const normalized = normalizeToUTC(dateString);
+  if (!normalized) return dateString;
+
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return dateString;
+
+  return new Intl.DateTimeFormat("en-IN", {
+    year: "2-digit",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Kolkata",
+  }).format(date);
+};
+
+/**
+ * Reusable outside click handler utility
+ * @param {React.RefObject} elementRef - Ref to the element that should not trigger close
+ * @param {React.RefObject} triggerRef - Ref to the trigger element that should not trigger close
+ * @param {Function} onOutsideClick - Callback function to execute on outside click
+ * @param {boolean} isActive - Whether the outside click handler should be active
+ */
+export const useOutsideClick = (elementRef, triggerRef, onOutsideClick, isActive = true) => {
+  const handleClickOutside = (event) => {
+    if (!isActive) return;
+    
+    const isClickInsideElement = elementRef.current && elementRef.current.contains(event.target);
+    const isClickInsideTrigger = triggerRef && triggerRef.current && triggerRef.current.contains(event.target);
+    
+    if (!isClickInsideElement && !isClickInsideTrigger) {
+      onOutsideClick();
     }
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
-    }).format(date);
   };
+
+  const handleKeyDown = (event) => {
+    if (isActive && event.key === 'Escape') {
+      onOutsideClick();
+    }
+  };
+
+  const handleScroll = () => {
+    if (isActive) {
+      onOutsideClick();
+    }
+  };
+
+  return { handleClickOutside, handleKeyDown, handleScroll };
+};
+
+export const extractPromptVariables = (prompt) => {
+  if (!prompt) return [];
+  const variableRegex = /\{\{([^}]+)\}\}/g;
+  const matches = [];
+  let match;
+  while ((match = variableRegex.exec(prompt)) !== null) {
+    if (!matches.includes(match[1])) {
+      matches.push(match[1]);
+    }
+  }
+  return matches;
+};

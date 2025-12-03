@@ -11,10 +11,9 @@ import { truncate, useCloseSliderOnEsc } from "./assistFile";
 const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) => {
   if (selectedItem) {
     selectedItem['system Prompt'] = 
-      selectedItem['AiConfig']?.messages?.[0]?.role === 'developer' || 
-      selectedItem['AiConfig']?.messages?.[0]?.role === 'system' 
-        ? selectedItem['AiConfig']?.messages?.[0]?.content 
-          : selectedItem['AiConfig']?.system 
+      selectedItem['AiConfig']?.messages?.[0].role === 'developer' ? selectedItem['AiConfig']?.messages?.[0].content :
+      selectedItem['AiConfig']?.input?.[0].role === 'developer' ? selectedItem['AiConfig']?.input?.[0].content :
+      selectedItem['AiConfig']?.system
   }
   const variablesKeyValue = selectedItem && selectedItem['variables'] ? selectedItem['variables'] : {};
   const [modalContent, setModalContent] = useState(null);
@@ -52,7 +51,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
       })
       .catch((error) => {
         toast.error(`Error while copying to clipboard`);
-        console.log(error);
+        console.error(error);
       });
   };
 
@@ -124,9 +123,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     return (
                       <div 
                         key={key} 
-                        className={`border-b border-base-300 bg-base-100 transition-colors duration-150 ${
-                          selectedItem?.value === key ? 'ring-2 ring-green-500 ring-opacity-75 shadow-lg rounded-md' : ''
-                        }`}
+                        className="border-b border-base-300 bg-base-100 transition-colors duration-150"
                       >
                         <div className="pt-4 px-4 text-sm font-semibold capitalize">
                           {displayKey}
@@ -192,9 +189,9 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               )}
                             </div>
                           ) : (
-                            <span className="text-base-content break-words">
-                              <div dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
-                            </span>
+                            <div className="bg-base-200 p-4 rounded-lg text-sm overflow-auto whitespace-pre-wrap border border-base-200">
+                              <div className="text-base-content break-words" dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -213,6 +210,23 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                       const value = selectedItem[key];
                       if (value === undefined) return null;
 
+                      // If the value is an object, render each property as separate rows
+                      if (typeof value === 'object' && value !== null && key !== 'createdAt') {
+                        return Object.entries(value).map(([objKey, objValue]) => (
+                          <tr key={`${key}-${objKey}`} className="border-b bg-base-100 transition-colors duration-150">
+                            <td className="py-4 px-6 text-sm font-semibold capitalize">
+                              {objKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className="text-gray-600 break-words">
+                                {objValue?.toString()}
+                              </span>
+                            </td>
+                          </tr>
+                        ));
+                      }
+
+                      // Regular single value display
                       return (
                         <tr key={key} className="border-b bg-base-100 transition-colors duration-150">
                           <td className="py-4 px-6 text-sm font-semibold capitalize">
@@ -220,7 +234,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                           </td>
                           <td className="py-4 px-6">
                             <span className="text-gray-600 break-words">
-                              {key === 'createdAt' ? new Date(value).toLocaleString() : value?.toString()}
+                              {key === 'createdAt' 
+                                ? new Date(value).toLocaleString() 
+                                : value?.toString()
+                              }
                             </span>
                           </td>
                         </tr>

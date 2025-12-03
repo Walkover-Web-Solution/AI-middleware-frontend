@@ -8,11 +8,10 @@ import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 
 // Reusable Agent Summary Content Component
-export const AgentSummaryContent = ({ params, searchParams, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false }) => {
+export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId }) => {
     const dispatch = useDispatch();
-    const { bridge_summary, prompt } = useCustomSelector((state) => ({
+    const { bridge_summary } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
     }));
     const [summary, setSummary] = useState(bridge_summary || "");
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -21,7 +20,7 @@ export const AgentSummaryContent = ({ params, searchParams, autoGenerateSummary 
 
     useEffect(() => {
         setSummary(bridge_summary);
-    }, [bridge_summary, params, searchParams]);
+    }, [bridge_summary, params, versionId]);
 
     // Auto-generate summary when flag is true
     useEffect(() => {
@@ -29,7 +28,6 @@ export const AgentSummaryContent = ({ params, searchParams, autoGenerateSummary 
             handleGenerateSummary();
         }
     }, [autoGenerateSummary, setAutoGenerateSummary]);
-
     const handleGenerateSummary = useCallback(async () => {
         if(prompt.trim() === "")
         {
@@ -38,7 +36,7 @@ export const AgentSummaryContent = ({ params, searchParams, autoGenerateSummary 
         }
         setIsGeneratingSummary(true);
         try {
-            const result = await dispatch(genrateSummaryAction({ versionId: searchParams?.version }));
+            const result = await dispatch(genrateSummaryAction({ versionId: versionId }));
             if (result) {
                 setSummary(result);
                 setAutoGenerateSummary(false); // Reset the flag
@@ -46,7 +44,7 @@ export const AgentSummaryContent = ({ params, searchParams, autoGenerateSummary 
         } finally {
             setIsGeneratingSummary(false);
         }
-    }, [dispatch, params, prompt, searchParams]);
+    }, [dispatch, params, prompt, versionId]);
     const handleClose=()=>{
         closeModal(modalType); 
         setErrorMessage("");
@@ -121,7 +119,7 @@ export const AgentSummaryContent = ({ params, searchParams, autoGenerateSummary 
 };
 
 // Original Modal Component
-const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSummary = false, setAutoGenerateSummary = () => {} }) => {
+const PromptSummaryModal = ({ modalType, params, autoGenerateSummary = false, setAutoGenerateSummary = () => {} }) => {
     const handleClose = () => {
         closeModal(modalType); 
         setAutoGenerateSummary(false);
@@ -132,7 +130,6 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
             <div className="modal-box w-11/12 max-w-5xl">
                 <AgentSummaryContent 
                     params={params}
-                    searchParams={searchParams}
                     autoGenerateSummary={autoGenerateSummary}
                     setAutoGenerateSummary={setAutoGenerateSummary}
                     showTitle={true}

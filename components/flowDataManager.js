@@ -1,14 +1,10 @@
 
-import { Save, TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, FileSlidersIcon, CircleArrowOutUpRight, ChevronUp, ChevronDown, ClipboardX, X, ArrowLeft } from 'lucide-react';
+import { TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, CircleArrowOutUpRight, ChevronUp, ChevronDown, X, ArrowLeft } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
-import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
-import Link from 'next/link';
-import GenericTable from './table/table';
-import CopyButton from './copyButton/copyButton';
-import CreateNewOrchestralFlowModal from './modals/CreateNewOrchestralFlowModal';
 import { useRouter } from 'next/navigation';
 /* Global stack to make only the topmost handle ESC/overlay */
 const SlideStack = {
@@ -231,8 +227,9 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
 /* -------------------------------------------------------
    Agent Structure -> React Flow {nodes, edges}
 -------------------------------------------------------- */
-export function createNodesFromAgentDoc(doc) {
-  if (!doc) {
+export function createNodesFromAgentDoc(doc, allBridges = []) {
+  
+  if (!doc || typeof doc !== 'object') {
     throw new Error('No agents found in data');
   }
 
@@ -243,22 +240,49 @@ export function createNodesFromAgentDoc(doc) {
   const VERTICAL_SPACING = 200;
   const BASE_Y = 400;
 
+  // Handle new data structure where doc is the agents object directly
+  const agents = doc;
+  
+  // Find master agent (one with no parentAgents or the first one)
+  const masterAgentKey = Object.keys(agents).find(id => 
+    !agents[id].parentAgents || agents[id].parentAgents.length === 0
+  ) || Object.keys(agents)[0];
+
+
+  // Add bridge node
   nodes.push({
     id: 'bridge-node-root',
     type: 'bridgeNode',
     position: { x: 80, y: BASE_Y },
     data: {
-      bridgeType: doc.bridge_type || 'api',
-      hasMasterAgent: !!doc.master_agent,
+      bridgeType: 'api', // Default bridge type
+      hasMasterAgent: !!masterAgentKey,
     },
   });
 
-  const agents = doc?.agents;
-  const masterAgentKey = doc.master_agent;
-
+  // Build graph from new structure with bridge data
   const graph = new Map();
-  Object.entries(agents).forEach(([id, a]) => {
-    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id: a.thread_id || [] });
+  Object.entries(agents).forEach(([id, agent]) => {
+    // Get bridge data for this agent - try multiple approaches
+    let bridgeInfo = allBridges?.find(bridge => bridge._id === id) || agent.bridgeData;
+    
+    // If not found by _id, try to find by versions array (for version IDs)
+    if (!bridgeInfo) {
+      bridgeInfo = allBridges?.find(bridge => 
+        bridge.versions && bridge.versions.includes(id)
+      );
+    }
+    
+    
+    graph.set(id, { 
+      name: agent.agent_name || bridgeInfo?.name || bridgeInfo?.slugName || `Agent_${id}`, 
+      description: agent.description || bridgeInfo?.description || '', 
+      children: Array.isArray(agent.childAgents) ? 
+        agent.childAgents.map(child => typeof child === 'string' ? child : child.id) : [],
+      variables: agent.variables || bridgeInfo?.variables || [], 
+      thread_id: agent.thread_id || false,
+      bridgeData: bridgeInfo // Include bridge data in the graph node
+    });
   });
 
   const levels = new Map();
@@ -300,16 +324,28 @@ export function createNodesFromAgentDoc(doc) {
     const idx = levelCounters[level] || 0;
     levelCounters[level] = idx + 1;
     const y = (levelPositions[level] && levelPositions[level][idx]) ?? BASE_Y;
+    
+    // Get the graph node which has enriched bridge data
+    const graphNode = graph.get(id);
+    const bridgeInfo = graphNode?.bridgeData;
 
     nodes.push({
       id,
       type: 'agentNode',
       position: { x: 80 + level * HORIZONTAL_SPACING, y },
       data: {
-        selectedAgent: { _id: id, name: a.name, description: a.description, variables_path: a.variables_path, variables: a.variables },
+        selectedAgent: { 
+          _id: id, 
+          name: bridgeInfo?.name || bridgeInfo?.slugName || graphNode?.name || a.agent_name || `Agent_${id}`, 
+          description: bridgeInfo?.description || graphNode?.description || a.description || '', 
+          variables_path: a.variables_path || bridgeInfo?.variables_path || {}, 
+          variables: graphNode?.variables || a.variables || bridgeInfo?.variables || {},
+          bridgeData: bridgeInfo // Include bridge data
+        },
         isFirstAgent: id === masterAgentKey,
-        isLast: (a.childAgents || []).length === 0,
-        thread_id: a.thread_id,
+        isLast: (graphNode?.children || []).length === 0,
+        thread_id: graphNode?.thread_id || a.thread_id || false,
+        bridgeInfo: bridgeInfo // Additional bridge info at node level
       },
     });
   });
@@ -326,10 +362,12 @@ export function createNodesFromAgentDoc(doc) {
 
   Object.entries(agents).forEach(([id, a]) => {
     (a.childAgents || []).forEach((child) => {
+      // Handle both string IDs and enhanced child objects
+      const childId = typeof child === 'string' ? child : child.id;
       edges.push({
-        id: `edge-${id}-${child}`,
+        id: `edge-${id}-${childId}`,
         source: id,
-        target: child,
+        target: childId,
         type: 'smoothstep',
         style: { animated: true },
       });
@@ -465,7 +503,8 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
         const key = a.bridge_id || a.name;
         const matchesSearch = (a?.name || '').toLowerCase().includes(q.toLowerCase());
         const notUsed = !usedAgentIds.has(key);
-        return matchesSearch && notUsed;
+        const isNotDeleted = !a.deletedAt;
+        return matchesSearch && notUsed && isNotDeleted;
       });
   }, [agents, q, usedAgentIds, agents, nodes]);
 
@@ -604,13 +643,13 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             <div className="grid gap-3">
               {list.map((agent, idx) => {
                 const hasPublishedVersion = agent.published_version_id;
-                const doesNotHavePausedStatus = agent.bridge_status !== 1;
+                const doesNotHavePausedStatus = agent.bridge_status !== 0;
                 const doesNotHaveArchivedStatus = agent.status !== 0;
                 const isDisabled = !(hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus);
 
                 const getStatusLabel = () => {
                   if (!hasPublishedVersion) return 'Not Published';
-                  if (agent.bridge_status === 1) return 'Paused';
+                  if (agent.bridge_status === 0) return 'Paused';
                   if (agent.status === 0) return 'Archived';
                   return 'Active';
                 };
@@ -800,67 +839,15 @@ export function FlowControlPanel({
   name,
   description,
   createdFlow,
-  isModified,
   setIsLoading,
   params,
-  isVariableModified,
-  openIntegrationGuide,
+  searchParams,
   isEmbedUser,
+  mode = 'orchestral', // 'orchestral' or 'connected'
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const router = useRouter()
-  const [saveData, setSaveData] = useState({
-    name: name || '',
-    description: description || '',
-    status: 'publish',
-  });
-
-  // Sync saveData with props when they change
-  useEffect(() => {
-    setSaveData(prev => ({
-      ...prev,
-      name: name || '',
-      description: description || '',
-    }));
-  }, [name, description]);
-
-  // Reset function to restore original values
-  const resetSaveData = useCallback(() => {
-    setSaveData({
-      name: name || '',
-      description: description || '',
-      status: 'publish',
-    });
-  }, [name, description]);
-  
-  const handlePublish = () => {
-    if (!saveData.name.trim()) {
-      alert('Please enter a flow name');
-      return;
-    }
-    onSaveAgent?.({
-      ...saveData,
-      saveType: 'agent',
-      bridgeType,
-      publishedAt: saveData.status === 'published' ? new Date().toISOString() : null,
-      createdFlow,
-      setIsLoading
-    });
-    closeModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL);
-  };
-
-  const handleDiscard = async () => {
-    if (typeof onDiscard === 'function') {
-      await onDiscard();
-      return;
-    }
-
-    // If no custom discard handler, just reset local state
-    setIsChatOpen(false);
-    resetSaveData();
-  };
-
   const handleQuickTestKeyDown = (e) => {
     if (e.key === 'Enter') {
       const val = e.currentTarget.value.trim();
@@ -879,45 +866,6 @@ export function FlowControlPanel({
 
   return (
     <div className="relative z-[9990]">
-      {/* Back button */}
-      {isEmbedUser && <button className="btn btn-outline absolute top-4 left-4 cursor-pointer tooltip tooltip-right btn-sm" data-tip="Back to flows list" onClick={() => router.push(`/org/${params?.org_id}/orchestratal_model`)}>
-        <ArrowLeft size={16}/>
-      </button>}
-      {/* Top-right Controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        {/* Discard button: show only when createdFlow && isModified */}
-
-        {createdFlow && !isEmbedUser && <button
-          className="btn btn-sm btn-outline"
-          onClick={openIntegrationGuide}
-          title="Integration Guide"
-        >
-          <FileSlidersIcon size={18}/> Integration Guide
-        </button>}
-
-        {createdFlow && (isModified || isVariableModified) && (
-          <button
-            className="btn btn-sm btn-outline btn-error"
-            onClick={handleDiscard}
-            title="Discard unsaved changes"
-          >
-          <ClipboardX size={18}/> Discard
-          </button>
-        )}
-
-        {/* Publish/Update button */}
-        <button
-          className="btn btn-sm bg-green-200 hover:bg-green-300 shadow-lg text-base-content"
-          disabled={!isModified && !isVariableModified}
-          title="Publish Flow"
-          onClick={() => openModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL)}
-        >
-          <div className="text-black flex items-center gap-2">
-            <Save size={18}/> <span>Publish Flow</span>
-          </div>
-        </button>
-      </div>
-
       {/* Quick Test Input with highlight ring */}
       {!isChatOpen && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
@@ -940,13 +888,6 @@ export function FlowControlPanel({
         </div>
       )}
 
-      <CreateNewOrchestralFlowModal 
-        handleCreateNewFlow={handlePublish} 
-        createdFlow={createdFlow} 
-        saveData={saveData} 
-        setSaveData={setSaveData}
-        resetSaveData={resetSaveData}
-      />
 
       {/* Chat SlideOver */}
       <SlideOver
@@ -975,7 +916,7 @@ export function FlowControlPanel({
         bodyClassName="min-h-0"
       >
         <div className="flex-1 rounded-b-lg">
-          <Chat params={params} userMessage={userMessage} isOrchestralModel={true} />
+          <Chat params={params} searchParams={searchParams} userMessage={userMessage} isOrchestralModel={true} />
         </div>
       </SlideOver>
     </div>
@@ -986,7 +927,7 @@ export function FlowControlPanel({
 /* -------------------------------------------------------
    Agent Config Sidebar (uses SlideOver)
 -------------------------------------------------------- */
-export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
+export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId, onAgentUpdate }) {
   useEffect(() => {
     setTimeout(() => {
       if (window.GtwyEmbed) {
@@ -997,6 +938,24 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
       }
     }, 100)
   }, [agent])
+
+  // Listen for agent updates from the embedded configuration
+  useEffect(() => {
+    const handleAgentUpdate = (event) => {
+      if (event.data?.type === 'agent_updated' && event.data?.agent) {
+        const updatedAgent = event.data.agent;
+        onAgentUpdate?.(agent?._id, updatedAgent);
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('message', handleAgentUpdate);
+    }
+
+    return () => {
+      window.removeEventListener('message', handleAgentUpdate);
+    };
+  }, [isOpen, agent?._id, onAgentUpdate])
   useEffect(() => {
     return () => {
       if (window.closeGtwy) window.closeGtwy();
@@ -1023,131 +982,4 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
       </div>
     </SlideOver>
   );
-}
-
-export function IntegrationGuide({ isOpen, onClose, params }) {
-  const headers = ['Parameter', 'Type', 'Description', 'Required']
-
-  const data = [
-    ['pauthkey', 'string', 'The key used to authenticate the request.', 'true'],
-    ['orchestrator_id', 'string', 'The orchestrator ID of the flow.', 'true'],
-    ['user', 'string', 'The user question.', 'true'],
-  ]
-
-  const orchestratorApi = (p) =>
-  (
-    `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
-    `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
-    `--header 'Content-Type: application/json' \\\n` +
-    `--data '{` +
-    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",` +
-    `    "user": "YOUR_USER_QUESTION"` +
-    `}'`
-  )
-
-  const orchestratorFormat = `
-    "success": true,
-    "response": {
-         "data": {
-            "id": "chatcmpl-785654654v4ew54656",
-            "content": "Response from the AI",
-            "model": "Your selected model",
-            "role": "assistant",
-            "finish_reason": "stop"
-         },
-         "usage": {
-            "input_tokens": 269,
-            "output_tokens": 10,
-            "total_tokens": 279
-         }
-    }
-  }`
-
-  const Section = ({ title, caption, children }) => (
-    <div className="flex items-start flex-col justify-center gap-1">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      {caption && <p className="text-xs text-gray-600">{caption}</p>}
-      {children}
-    </div>
-  )
-
-  return (
-    <SlideOver
-      isOpen={isOpen}
-      onClose={onClose}
-      widthClass="w-[780px] max-w-[50vw]"
-      header={
-        <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
-          <h2 className="text-xl font-semibold textbase">Integration Guide</h2>
-          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
-            <X size={18}/>
-          </button>
-        </div>
-      }
-      bodyClassName="p-6 space-y-4 pb-20"
-    >
-      {/* Step 1 */}
-      <div className="card bg-base-200">
-        <div className="card-body space-y-2">
-          <Section title="Step 1" caption={
-            <span className="text-base-content">
-              Create <code className="px-1 py-0.5 rounded bg-base-100">Auth key</code>
-            </span>
-          } />
-          <p className="text-sm">
-            Follow the on-screen instructions to create a new Auth key. Ignore if already created.
-          </p>
-          <Link
-            href={`/org/${params?.org_id}/pauthkey`}
-            target="_blank"
-            className="link link-primary text-sm"
-          >
-            Create Auth key
-          </Link>
-        </div>
-      </div>
-
-      {/* Step 2 */}
-      <div className="card bg-base-200">
-        <div className="card-body space-y-3">
-          <Section title="Step 2" caption="Use the Chat Completion Orchestrator API" />
-          <div className="mockup-code relative">
-            <CopyButton data={orchestratorApi(params)} />
-            <pre className="break-words whitespace-pre-wrap ml-4">
-              <code>{orchestratorApi(params)}</code>
-            </pre>
-          </div>
-          <GenericTable headers={headers} data={data} />
-          <p className="text-sm">
-            Ensure your backend is ready to receive the asynchronous result on the configured webhook URL (if your orchestration sends callbacks).
-          </p>
-        </div>
-      </div>
-
-      {/* Response Format */}
-      <div className="card bg-base-200">
-        <div className="card-body space-y-3">
-          <Section title="Response Format" />
-          <div className="mockup-code relative">
-            <CopyButton data={orchestratorFormat} />
-            <pre className="break-words whitespace-pre-wrap ml-4">
-              <code>{orchestratorFormat}</code>
-            </pre>
-          </div>
-        </div>
-      </div>
-
-      {/* Helpful Info */}
-      <div className="card bg-base-200">
-        <div className="card-body text-sm space-y-2">
-          <h3 className="card-title text-sm">Notes</h3>
-          <ul className="list-disc ml-5 space-y-1">
-            <li><span className="font-medium">Auth:</span> Pass <code className="px-1 py-0.5 bg-base-100 border rounded">pauthkey</code> in the header.</li>
-            <li><span className="font-medium">IDs:</span> <code className="px-1 py-0.5 bg-base-100 border rounded">orchestrator_id</code> refers to the published flow you want to invoke.</li>
-            <li><span className="font-medium">User input:</span> Send the end-user question in the <code className="px-1 py-0.5 bg-base-100 border rounded">user</code> field.</li>
-          </ul>
-        </div>
-      </div>
-    </SlideOver>
-  )
 }

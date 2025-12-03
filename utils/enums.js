@@ -1,6 +1,6 @@
 import { BookIcon, BotIcon, KeyIcon, SettingsIcon, TestTubeDiagonalIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
-export const API_KEY_COLUMNS = ["name", "apikey", "comment"];
+export const API_KEY_COLUMNS = ["name", "apikey", "comment", 'apikey_usage', "last_used"];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
 export const ALERT_TYPE = ['Error', 'Variable'];
 export const DOCUMENT_SECTIONS = [
@@ -362,12 +362,15 @@ export const MODAL_TYPE = {
   DIFF_PROMPT: "DIFF_PROMPT",
   ORCHESTRAL_AGENT_PARAMETER_MODAL: "ORCHESTRAL_AGENT_PARAMETER_MODAL",
   CREATE_ORCHESTRAL_FLOW_MODAL :"CREATE_ORCHESTRAL_FLOW_MODAL",
+  API_KEY_LIMIT_MODAL: "API_KEY_LIMIT_MODAL",
   PROMPT_SUMMARY_PUBLISH: "PROMPT_SUMMARY_PUBLISH",
   DELETE_VERSION_MODAL: 'DELETE_VERSION_MODAL',
-  PREBUILT_TOOLS_CONFIG_MODAL: 'PREBUILT_TOOLS_CONFIG_MODAL'
+  PREBUILT_TOOLS_CONFIG_MODAL: 'PREBUILT_TOOLS_CONFIG_MODAL',
+  INVITE_USER: 'INVITE_USER',
+  ORCHESTRAL_DELETE_MODAL:"ORCHESTRAL_DELETE_MODAL"
 };
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment', 'apikey_limit'];
 
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 

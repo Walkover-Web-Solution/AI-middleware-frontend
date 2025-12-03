@@ -4,7 +4,7 @@ import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
+import { getHistoryAction, userFeedbackCountAction, searchMessageHistoryAction } from "@/store/action/historyAction";
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
@@ -30,7 +30,6 @@ function Page({params, searchParams }) {
     selectedVersion: state?.historyReducer?.selectedVersion || 'all',
     previousPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version]?.configuration?.prompt || "",
   }));
-
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
@@ -66,7 +65,7 @@ function Page({params, searchParams }) {
   }, []);
 
   useEffect(() => {
-    dispatch(userFeedbackCountAction({ bridge_id: resolvedParams.id, user_feedback: "all" }));
+    // dispatch(userFeedbackCountAction({ bridge_id: resolvedParams.id, user_feedback: "all" }));
   }, [dispatch, resolvedParams.id]);
 
   useEffect(() => {
@@ -84,24 +83,44 @@ function Page({params, searchParams }) {
        dispatch(clearThreadData());
       const startDate = resolvedSearchParams?.start;
       const endDate = resolvedSearchParams?.end;
-     const result =  await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, 1, null, filterOption, isErrorTrue, selectedVersion));
+      
+      // Use searchMessageHistoryAction only if valid date range is provided, otherwise use getHistoryAction
+      let result;
+      const hasValidDateRange = (startDate && startDate !== 'null' && startDate !== 'undefined') || 
+                               (endDate && endDate !== 'null' && endDate !== 'undefined');
+      
+      if (hasValidDateRange) {
+        result = await dispatch(searchMessageHistoryAction({
+          bridgeId: resolvedParams.id,
+          keyword: '', // empty keyword to get all results within date range
+          startDate,
+          endDate,
+          user_feedback: filterOption,
+          version_id: selectedVersion
+        }));
+      } else {
+        result = await dispatch(getHistoryAction(resolvedParams.id, 1, filterOption, isErrorTrue, selectedVersion));
+      }
       if(resolvedSearchParams?.thread_id) {
         const threadId = resolvedSearchParams?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+          const messageId = resolvedSearchParams?.message_id;
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&start=${startDate}&end=${endDate}${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
         }
       }
       else if (!resolvedSearchParams?.thread_id && result?.length > 0) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+          const messageId = resolvedSearchParams?.message_id;
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&start=${startDate}&end=${endDate}${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
         }
       }
       if(isErrorTrue) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true`, undefined, { shallow: true });
+          const messageId = resolvedSearchParams?.message_id;
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
         }
       }
       setLoading(false);
@@ -111,8 +130,22 @@ function Page({params, searchParams }) {
 
   const threadHandler = useCallback(
     async (thread_id, item, value) => {
-      if (item?.role === "assistant") return;
-      if ((item?.role === "user" || item?.role === "tools_call")) {
+      // Determine role based on new data structure
+      const getItemRole = () => {
+        if (item?.tools_call_data && item.tools_call_data.length > 0) return 'tools_call';
+        if (item?.error) return 'error';
+        if (item?.user) return 'user';
+        if (item?.llm_message || item?.chatbot_message || item?.updated_llm_message) return 'assistant';
+        return 'unknown';
+      };
+
+      const currentRole = getItemRole();
+      
+      // Don't handle assistant messages
+      if (currentRole === "assistant") return;
+      
+      // Handle user and tools_call messages
+      if (currentRole === "user" || currentRole === "tools_call" || currentRole === "error") {
         try {
           setSelectedItem({ variables: item.variables, ...item, value});
           if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
@@ -121,10 +154,12 @@ function Page({params, searchParams }) {
           console.error("Failed to fetch single message:", error);
         }
       } else {
+        // Handle other cases (navigation)
         const start = search.get("start");
         const end = search.get("end");
+        const messageId = search.get("message_id");
         const encodedThreadId = encodeURIComponent(thread_id.replace(/&/g, "%26"));
-        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
+        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&start=${start}&end=${end}${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
       }
     },
     [pathName, resolvedParams.id, resolvedSearchParams.version, resolvedSearchParams?.start, resolvedSearchParams?.end]
@@ -133,11 +168,9 @@ function Page({params, searchParams }) {
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    const startDate = search.get("start");
-    const endDate = search.get("end");
-    const result = await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, nextPage));
+    const result = await dispatch(getHistoryAction(resolvedParams.id, nextPage, "all", false, selectedVersion));
     if (result?.length < 40) setHasMore(false);
-  }, [dispatch, page, resolvedParams.id, search]);
+  }, [dispatch, page, resolvedParams.id]);
 
   if (loading || !historyData) return (
     <div>

@@ -3,8 +3,8 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
-import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { AddIcon, SettingsIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
@@ -12,28 +12,38 @@ import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
+import useDeleteOperation from '@/customHooks/useDeleteOperation';
+import { CircleQuestionMark } from 'lucide-react';
+import { BotIcon } from 'lucide-react';
+import useExpandableList from '@/customHooks/useExpandableList';
 
-const ConnectedAgentList = ({ params, searchParams }) => {
+const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
     const [currentVariable, setCurrentVariable] = useState(null);
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
+    const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_AGENT_MODAL);
     const router = useRouter();
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
+        
+        // Use bridgeData when isPublished=true, otherwise use versionData
+        const activeData = isPublished ? bridgeDataFromState : versionData;
+        const serviceName = activeData?.service;
+        const modelTypeName = activeData?.configuration?.type?.toLowerCase();
+        const modelName = activeData?.configuration?.model;
+        
         return {
             bridgeData: bridges,
-            connect_agents: versionData?.connected_agents || {},
+            connect_agents: isPublished ? (bridgeDataFromState?.connected_agents || {}) : (versionData?.connected_agents || {}),
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
-            variables_path: versionData?.variables_path || {},
+            variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
             bridges: state?.bridgeReducer?.allBridgesMap
 
         };
@@ -101,26 +111,27 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools]);
 
-    const handleRemoveAgent = (item,name) => {
-        dispatch(
-            updateBridgeVersionAction({
-                bridgeId: params?.id,
-                versionId: searchParams?.version,
-                dataToSend: {
-                    agents: {
-                        connected_agents: {
-                            [name]: {
-                                "bridge_id": item?.bridge_id
+    const handleRemoveAgent = async (item, name) => {
+        await executeDelete(async () => {
+            await dispatch(
+                updateBridgeVersionAction({
+                    bridgeId: params?.id,
+                    versionId: searchParams?.version,
+                    dataToSend: {
+                        agents: {
+                            connected_agents: {
+                                [name]: {
+                                    "bridge_id": item?.bridge_id
+                                }
                             }
                         }
                     }
-                }
-            })
-        ).then(() => {
-            closeModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
-            setCurrentVariable(null)
-            setSelectedBridge(null)
-        })
+                })
+            );
+            setCurrentVariable(null);
+            setSelectedBridge(null);
+            toast.success('Agent removed successfully');
+        });
     }
 
     const handleSaveAgentVariable = () => {
@@ -136,7 +147,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     agent_status: "1"
                 }
             }
-            if(agentTools?.version_id){
+            if (agentTools?.version_id) {
                 dataToSend.agents.connected_agents[selectedBridge?.name].version_id = agentTools?.version_id
             }
             // on Save the bridge and thread id in version only
@@ -148,8 +159,8 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             dispatch(updateBridgeAction({
                 bridgeId: selectedBridge?._id || selectedBridge?.bridge_id,
                 dataToSend: {
-                    connected_agent_details:{
-                        agent_variables : {
+                    connected_agent_details: {
+                        agent_variables: {
                             fields: agentTools?.fields,
                             required_params: agentTools?.required_params
                         },
@@ -182,37 +193,51 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             if (isCmdOrCtrlClicked) {
                 window.open(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`, "_blank");
             } else {
-            router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
+                router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
+            }
         }
     }
-    }
 
 
-    const renderEmbed = useMemo(() => (
-        connect_agents && Object.entries(connect_agents).map(([name, item]) => {
+    // Convert connect_agents object to array for expandable list
+    const agentEntries = useMemo(() => {
+        return connect_agents ? Object.entries(connect_agents) : [];
+    }, [connect_agents]);
+
+    // Use expandable list hook
+    const { displayItems, isExpanded, toggleExpanded, shouldShowToggle, hiddenItemsCount } = useExpandableList(agentEntries, 1);
+
+    const renderEmbed = useMemo(() => {
+        const agentItems = displayItems.map(([name, item]) => {
             const bridge = bridgeData?.find((bd) => bd?._id === item?.bridge_id)
             return (
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-100 relative ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
                 >
                     <div
                         className="p-2 flex-1 flex items-center"
                         onClick={() => handleAgentClicked(item)}
                     >
-                        <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                            <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                <span className="text-sm font-normal">{name}</span>
-                                {/* <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {(!bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
-                                </span> */}
-                            </div>
-                        </span>
+                        <div className="flex items-center gap-2 w-full">
+                            <BotIcon size={16} className="shrink-0" />
+                            {name?.length > 24 ? (
+                                <div className="tooltip tooltip-top min-w-0" data-tip={name}>
+                                    <span className="min-w-0 text-sm truncate">
+                                        <span className="text-sm font-normal block w-full">{name}</span>
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="min-w-0 text-sm truncate">
+                                    <span className="text-sm font-normal block w-full">{name}</span>
+                                </span>
+                            )}
+                        </div>
                     </div>
-                    
+
                     {/* Action buttons that appear on hover */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -226,64 +251,78 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleOpenDeleteModal(name,item);
+                                handleOpenDeleteModal(name, item);
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
+                            disabled={isPublished}
                         >
                             <TrashIcon size={16} />
                         </button>
                     </div>
                 </div>
             );
-        })
-    ), [connect_agents, bridgeData]);
+        });
+
+        return (
+            <div className="w-full">
+                <div className={`grid gap-2 w-full`}>
+                    {agentItems}
+                </div>
+            </div>
+        );
+    }, [displayItems, bridgeData, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount, handleAgentClicked, handleOpenAgentVariable, handleOpenDeleteModal]);
 
     return (
         <div>
-            <div className="label p-0 flex-col items-start mb-0">
-             
-                    <>
-                        <div className="dropdown dropdown-right w-full flex items-center">
-                            {Object?.entries(connect_agents)?.length > 0 ? (
-                         <>
-                            <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                                <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                            </InfoTooltip>
-                            <button
-                                tabIndex={0}
-                                className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
-                            >
-                                <AddIcon className="w-2 h-2" />
-                                <span className="text-xs">Add</span>
-                            </button>
-                        </>
-                            ):(
-                                <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+            <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
+
+                <>
+                    <div className="dropdown dropdown-right w-full flex items-center">
+                        {Object?.entries(connect_agents)?.length > 0 ? (
+                            <>
+                                <div className="flex items-center gap-1 mb-2">
+                                    <p className="font-medium whitespace-nowrap">Agents</p>
+                                    <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                                    </InfoTooltip>
+                                </div>
                                 <button
                                     tabIndex={0}
-                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                                    disabled={isPublished}
+                                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <AddIcon className="w-2 h-2" />
+                                    <span className="text-xs">Add</span>
+                                </button>
+                            </>
+                        ) : (
+                            <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                <button
+                                    disabled={isPublished}
+                                    tabIndex={0}
+                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <AddIcon className="w-2 h-2" />
                                     <p className="label-text text-sm whitespace-nowrap">Agent</p>
                                 </button>
-                                </InfoTooltip>
-                            )}
-                            <ConnectedAgentListSuggestion 
-                                params={params} 
-                                handleSelectAgents={handleSelectAgents} 
-                                connect_agents={connect_agents} 
-                                shouldToolsShow={shouldToolsShow} 
-                                modelName={model} 
-                                bridges={bridgeData} 
-                                bridgeData={bridgeData}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2 w-full ">
-                            {renderEmbed}
-                        </div>
-                    </>
-               
+                            </InfoTooltip>
+                        )}
+                        <ConnectedAgentListSuggestion
+                            params={params}
+                            handleSelectAgents={handleSelectAgents}
+                            connect_agents={connect_agents}
+                            shouldToolsShow={shouldToolsShow}
+                            modelName={model}
+                            bridges={bridgeData}
+                            bridgeData={bridgeData}
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2 w-full ">
+                        {renderEmbed}
+                    </div>
+                </>
+
             </div>
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <DeleteModal
@@ -294,8 +333,11 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 description={"This action Remove the selected Agent from the Agent."}
                 buttonTitle="Remove Agent"
                 modalType={`${MODAL_TYPE.DELETE_AGENT_MODAL}`}
+                loading={isDeleting}
+                isAsync={true}
             />
             <FunctionParameterModal
+                isPublished={isPublished}
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
                 function_details={currentVariable}

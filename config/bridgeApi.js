@@ -54,8 +54,7 @@ export const deleteBridge = async (bridgeId,org_id,restore=false) => {
     return response;
   } catch (error) {
     console.error(error);
-    toast.error("Failed to delete the agent");
-    throw new Error(error);
+    throw error;
   }
 };
 
@@ -188,6 +187,17 @@ export const genrateSummary = async (version_id) => {
     return response.data.result;
   } catch (error) {
     toast.error(error)
+  }
+};
+
+export const getConnectedAgentFlowApi = async ({ versionId }) => {
+  try {
+    
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/connected-agents/${versionId}?type=version`);
+    return response?.data;
+  } catch (error) {
+    console.error('Failed to fetch connected agent flow', error);
+    throw error;
   }
 };
 

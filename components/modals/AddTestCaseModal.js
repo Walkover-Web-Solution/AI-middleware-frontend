@@ -2,14 +2,15 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { CloseIcon, ChevronDownIcon } from '@/components/Icons';
+import { CloseIcon } from '@/components/Icons';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
+import { clearChatTestCaseIdAction } from '@/store/action/chatAction';
 
-function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
+function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, channelIdentifier }) {
     const params = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
@@ -25,40 +26,91 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
 
         return { mongoIdsOfTools: mongoIds };
     });
-    // Ensure testCaseConversation is not undefined or null
-    const initialTestCases = testCaseConversation && testCaseConversation.length > 0 ? testCaseConversation.map((message) => {
-        if (message.role === "user" || message.sender === "user") {
-            return {
-                role: message.role || message.sender,
-                content: message.content?.[0]?.text || message?.content
-            };
-        } else if ((message.role === "assistant" || message.sender === "assistant") && message.content) {
-            return {
-                role: message.role || message.sender,
-                content: message.content?.[0]?.text || message?.content
-            };
-        } else if (message.role === "tools_call" || message.sender === "tools_call") {
-            const toolCallData = message.tools_call_data;
-          
-            const tools = [];
-          
-            if (toolCallData && typeof toolCallData === 'object') {
-              for (const [toolName, toolDetails] of Object.entries(toolCallData)) {
-                tools.push({
-                  name: toolName,
-                  id: mongoIdsOfTools[toolDetails?.id],
-                  arguments: toolDetails?.args,
-                });
-              }
+    // Process testCaseConversation - handle both array of messages and single object with AiConfig
+    const processTestCaseData = () => {
+        if (!testCaseConversation || testCaseConversation.length === 0) return [];
+
+        const getContentText = (content) => {
+            if (Array.isArray(content)) {
+                return content?.[0]?.text ?? '';
             }
-          
-            return {
-              role: message?.role || message?.sender,
-              tools,
-            };
-          }
-        return null;
-    }).filter(Boolean) : [];
+            return typeof content === 'string' ? content : '';
+        };
+
+        // If it's a single object with AiConfig, extract the conversation from AiConfig input/messages
+        if (testCaseConversation.length === 1 && testCaseConversation[0]?.AiConfig) {
+            const historyItem = testCaseConversation[0];
+            const aiConfigInput = historyItem.AiConfig.input || historyItem.AiConfig.messages;
+
+            if (!Array.isArray(aiConfigInput)) {
+                return [];
+            }
+
+            const processedMessages = [];
+
+            // Create conversation from AiConfig.input - only user and assistant messages
+            aiConfigInput.forEach(msg => {
+                // Only include user, assistant, developer, and system messages
+                if (msg.role === "user" || msg.role === "assistant") {
+                    processedMessages.push({
+                        role: msg.role,
+                        content: getContentText(msg.content)
+                    });
+                }
+                // Skip function calls, reasoning, and other metadata
+            });
+            
+            // Add the expected response from LLM as the final message
+            // This will be treated as the expected response for the test case
+            const expectedResponse = historyItem.llm_message || historyItem.chatbot_message || historyItem.updated_llm_message;
+            if (expectedResponse) {
+                processedMessages.push({
+                    role: "assistant",
+                    content: expectedResponse,
+                    isExpectedResponse: true // Mark this as the expected response
+                });
+            }
+            
+            return processedMessages;
+        }
+        
+        // Handle regular conversation array format
+        return testCaseConversation.map((message) => {
+            if (message.role === "user" || message.sender === "user") {
+                return {
+                    role: message.role || message.sender,
+                    content: getContentText(message.content)
+                };
+            } else if ((message.role === "assistant" || message.sender === "assistant") && message.content) {
+                return {
+                    role: message.role || message.sender,
+                    content: getContentText(message.content)
+                };
+            } else if (message.role === "tools_call" || message.sender === "tools_call") {
+                const toolCallData = message.tools_call_data;
+              
+                const tools = [];
+              
+                if (toolCallData && typeof toolCallData === 'object') {
+                  for (const [toolName, toolDetails] of Object.entries(toolCallData)) {
+                    tools.push({
+                      name: toolName,
+                      id: mongoIdsOfTools[toolDetails?.id],
+                      arguments: toolDetails?.args,
+                    });
+                  }
+                }
+              
+                return {
+                  role: message?.role || message?.sender,
+                  tools,
+                };
+              }
+            return null;
+        }).filter(Boolean);
+    };
+
+    const initialTestCases = processTestCaseData();
 
     const [finalTestCases, setFinalTestCases] = useState(initialTestCases);
     const [responseType, setResponseType] = useState('cosine');
@@ -93,7 +145,14 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
             bridge_id: params?.id,
             matching_type: responseType
         };
-        dispatch(createTestCaseAction({ bridgeId: params?.id, data: payload })).then(() => { handleClose(); setIsLoading(false) });
+        dispatch(createTestCaseAction({ bridgeId: params?.id, data: payload })).then(() => { 
+            // Clear testcase_id from Redux when creating new testcase
+            if (channelIdentifier) {
+                dispatch(clearChatTestCaseIdAction(channelIdentifier));
+            }
+            handleClose(); 
+            setIsLoading(false);
+        });
     };
 
     const handleChange = (newValue, index, childIndex) => {

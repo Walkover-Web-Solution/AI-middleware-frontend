@@ -20,9 +20,10 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
             .filter(bridge => {
                 const isActive = bridge?.status === 1 && (bridge?.bridge_status === 1 || bridge?.bridge_status === undefined);
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
-                const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
+                const isNotConnected = connect_agents && Object.values(connect_agents).some(agent => agent?.bridge_id === bridge?._id);
                 const notSameBridge = bridge?._id !== params?.id
-                return isActive && matchesSearch && !isNotConnected && notSameBridge;
+                const isNotDeleted = !bridge?.deletedAt;
+                return isActive && matchesSearch && !isNotConnected && notSameBridge && isNotDeleted;
             })
             .slice()
             .sort((a, b) => {
@@ -43,9 +44,19 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
                                         unpublished
                                     </span>
                                 ) : (
-                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(bridge?.bridge_status === 0 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
-                                        {bridge?.bridge_status ? (bridge?.bridge_status === 0 && "paused") : (bridge?.status === 0 ? "archived" : "active")}
-                                    </span>
+                                    (() => {
+                                        const statusLabel =
+                                            bridge?.bridge_status === 0
+                                                ? "paused"
+                                                : bridge?.status === 0
+                                                    ? "archived"
+                                                    : "active";
+                                        return (
+                                            <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(statusLabel)}`}>
+                                                {statusLabel}
+                                            </span>
+                                        );
+                                    })()
                                 )}
                             </div>
                         </div>
