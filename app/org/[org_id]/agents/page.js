@@ -365,6 +365,8 @@ function Home({ params, isEmbedUser }) {
       const lastUsed = item.last_used;
       const totalTokensValue = resolveUsageTokens(item);
       const totalCostValue = resolveUsageCost(item);
+      const promptTotalTokens = item?.prompt_total_tokens;
+      const promptEnhancerPercentage = item?.prompt_enhancer_percentage;
 
       return ({
         _id: item._id,
@@ -399,6 +401,22 @@ function Home({ params, isEmbedUser }) {
         status: item.status,
         bridge_status: item.bridge_status,
         versionId: item?.published_version_id || item?.versions?.[0],
+        promptDetails: (promptTotalTokens != null || promptEnhancerPercentage != null)
+          ? (
+            <div className="flex flex-col text-xs">
+              {promptTotalTokens != null && (
+                <span className="font-semibold text-base-content">
+                  {formatUsageNumber(promptTotalTokens)} tokens
+                </span>
+              )}
+              {promptEnhancerPercentage != null && (
+                <span className="text-base-content/70">
+                  {promptEnhancerPercentage}% enhancer
+                </span>
+              )}
+            </div>
+          )
+          : "—",
         totalTokens: totalTokensValue,
         usageCost: totalCostValue,
         averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
@@ -426,6 +444,8 @@ function Home({ params, isEmbedUser }) {
       const lastUsed = item.last_used;
       const totalTokensValue = resolveUsageTokens(item);
       const totalCostValue = resolveUsageCost(item);
+      const promptTotalTokens = item?.prompt_total_tokens;
+      const promptEnhancerPercentage = item?.prompt_enhancer_percentage;
 
       return ({
         _id: item._id,
@@ -460,6 +480,22 @@ function Home({ params, isEmbedUser }) {
         deletedAt: item.deletedAt,
         daysRemaining: getDaysRemaining(item.deletedAt),
         versionId: item?.published_version_id || item?.versions?.[0],
+        promptDetails: (promptTotalTokens != null || promptEnhancerPercentage != null)
+          ? (
+            <div className="flex flex-col text-xs">
+              {promptTotalTokens != null && (
+                <span className="font-semibold text-base-content">
+                  {formatUsageNumber(promptTotalTokens)} tokens
+                </span>
+              )}
+              {promptEnhancerPercentage != null && (
+                <span className="text-base-content/70">
+                  {promptEnhancerPercentage}% To Be Enhanced
+                </span>
+              )}
+            </div>
+          )
+          : "—",
         totalTokens: totalTokensValue,
         usageCost: totalCostValue,
         agent_limit: item?.bridge_limit,
@@ -880,7 +916,7 @@ const handleUsageFilterDropdownClick = (e) => {
                 <div className="w-full overflow-visible">
                   <CustomTable
                     data={UnArchivedBridges}
-                    columnsToShow={['name', 'totalTokens','last_used','created_at','updated_at']}
+                    columnsToShow={['name', 'promptDetails', 'totalTokens','last_used','created_at','updated_at']}
                     sorting
                     sortingColumns={['name','totalTokens','last_used','created_at','updated_at']}
                     handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
@@ -908,7 +944,7 @@ const handleUsageFilterDropdownClick = (e) => {
                     <div className="opacity-60 overflow-visible">
                       <CustomTable
                         data={DeletedBridges}
-                        columnsToShow={['name', 'totalTokens','last_used','created_at','updated_at']}
+                        columnsToShow={['name', 'promptDetails', 'totalTokens','last_used','created_at','updated_at']}
                         sorting
                         sortingColumns={['name','totalTokens','last_used','created_at','updated_at']}
                         keysToWrap={['name', 'model']} 

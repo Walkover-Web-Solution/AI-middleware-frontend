@@ -42,6 +42,8 @@ const CustomTable = ({
                 return 'Average Response Time';
             case 'totalTokens':
                 return 'Usage';
+            case 'promptDetails':
+                return 'Prompt Details';
             case 'last_used':
                 return 'Last Used At';
             case 'created_at':
