@@ -65,7 +65,7 @@ const ConfigurationPage = ({
                     {/* Help Docs */}
                 
                         <a
-                            href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
+                            href="https://gtwy.ai/blogs"
                             className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors"
                             target="_blank"
                             rel="noopener noreferrer"
