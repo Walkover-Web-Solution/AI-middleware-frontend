@@ -22,7 +22,6 @@ const VARIABLE_SLIDER_DISABLE_KEY = 'variableSliderDisabled';
 
 function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef }) {
     const [uploading, setUploading] = useState(false);
-    const [uploadedVideos] = useState(null);
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [urlInput, setUrlInput] = useState('');
@@ -245,7 +244,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     content: newMessage,
                     images: uploadedImages, // Include images in the data
                     files: uploadedFiles,
-                    video_data: uploadedVideos, // Include videos in the data
                     youtube_url: mediaUrls, // Include media URLs in the data
                 };
 
@@ -278,7 +276,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     {
                         images: uploadedImages,
                         files: uploadedFiles,
-                        video_data: uploadedVideos,
                         youtube_url: mediaUrls
                     }
                 ));
@@ -438,14 +435,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
         const newImages = files.filter(file => file.type.startsWith('image/'));
 
         const totalImages = uploadedImages.length + newImages.length;
-        const hasExistingVideo = uploadedVideos !== null;
-        const totalVideos = (hasExistingVideo ? 1 : 0) + newVideos.length;
-
-        if (totalVideos > 1) {
-            toast.error('Only one video is allowed.');
-            return;
-        }
-
         if (totalImages > 4) {
             toast.error('Only four images are allowed.');
             return;
