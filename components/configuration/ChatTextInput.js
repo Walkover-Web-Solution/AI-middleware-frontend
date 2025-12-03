@@ -431,7 +431,6 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             toast.error('Each file should be less than 35MB.');
             return;
         }
-        const newVideos = files.filter(file => file.type.startsWith('video/'));
         const newImages = files.filter(file => file.type.startsWith('image/'));
 
         const totalImages = uploadedImages.length + newImages.length;
