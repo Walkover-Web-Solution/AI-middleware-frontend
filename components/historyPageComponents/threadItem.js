@@ -14,13 +14,25 @@ import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink} from "lucide-react";
 import { GenericSlider, useSlider } from "@/utils/sliderUtility";
 
+// Resolve any possible url shape (string, object with permanent_url, etc.)
+const resolveAttachmentUrl = (rawUrl) => {
+  if (!rawUrl) return null;
+  if (typeof rawUrl === "string") return rawUrl;
+  if (typeof rawUrl === "object") {
+    return rawUrl.permanent_url || rawUrl.url  || null;
+  }
+  return null;
+};
+
 // Helper function to normalize attachment data with enhanced fallback
 const normalizeImageUrls = (imageData, source = "assistant") => {
   if (!Array.isArray(imageData)) return [];
 
   return imageData.reduce((acc, attachment) => {
     if (!attachment) return acc;
-    const resolvedUrl = attachment.permanent_url || attachment.url;
+    const resolvedUrl = resolveAttachmentUrl(
+      attachment.permanent_url || attachment.url
+    );
     if (!resolvedUrl) return acc;
 
     acc.push({
@@ -247,10 +259,11 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
 
   const handleToolPrimaryClick = useCallback(async (event, tool) => {
     // Check if this is a knowledge database tool
-    const isKnowledgeDbTool = tool?.name === 'get_knowledge_base_data' ||
-                             tool?.name?.toLowerCase().includes('get knowledge database') || 
-                             tool?.name?.toLowerCase().includes('knowledge') ||
-                             tool?.name?.toLowerCase().includes('rag');
+    const toolName = typeof tool?.name === 'string' ? tool.name.toLowerCase() : '';
+    const isKnowledgeDbTool = toolName === 'get_knowledge_base_data' ||
+                             toolName.includes('get knowledge database') || 
+                             toolName.includes('knowledge') ||
+                             toolName.includes('rag');
 
     if (isKnowledgeDbTool && tool?.args) {
       try {
@@ -397,7 +410,12 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       <div className="mb-4">
         <div className="flex flex-wrap gap-3">
           {attachments.map((attachment, index) => {
-            const url = attachment.resolvedUrl || attachment.permanent_url || attachment.url;
+            const url =
+              resolveAttachmentUrl(
+                attachment.resolvedUrl ||
+                  attachment.permanent_url ||
+                  attachment.url
+              );
             if (!url) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
@@ -406,7 +424,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               );
             }
 
-            const isPdf = url.toLowerCase().endsWith(".pdf");
+            const isPdf = url?.toLowerCase?.().endsWith(".pdf");
 
             // PDF style chip (same as provided snippet)
             if (isPdf) {
