@@ -18,13 +18,7 @@ import {
   clearChatTestCaseId,
   clearChannelData
 } from '../reducer/chatReducer';
-
-const haveSameItems = (first = [], second = []) => {
-  if (!Array.isArray(first) || !Array.isArray(second)) return false;
-  if (!first.length || !second.length) return false;
-  if (first.length !== second.length) return false;
-  return first.every((item, index) => item === second[index]);
-};
+import { haveSameItems, buildUserUrls, buildLlmUrls } from '@/utils/attachmentUtils';
 
 const getVideoIdentifier = (video) => {
   if (!video) return null;
@@ -43,9 +37,30 @@ export const initializeChatChannel = (channelId) => (dispatch) => {
 // Send user message (for dry run API)
 export const sendUserMessage = (channelId, messageContent, messageId, extraData = {}) => (dispatch) => {
   const timestamp = Date.now();
+
+  // Prefer canonical user_urls structure if provided
+  const baseUserUrls = Array.isArray(extraData.user_urls)
+    ? extraData.user_urls
+    : buildUserUrls(
+        extraData.image_urls || extraData.images || [],
+        extraData.files || []
+      );
+
+  // Derive simple image/file URL arrays for existing UI from user_urls
+  const images = baseUserUrls
+    .filter((item) => item?.type === 'image')
+    .map((item) => item.url)
+    .filter(Boolean);
+
+  const files = baseUserUrls
+    .filter((item) => item?.type === 'pdf')
+    .map((item) => item.url)
+    .filter(Boolean);
+
   const attachments = {
-    image_urls: extraData.image_urls || extraData.images || [],
-    files: extraData.files || [],
+    image_urls: images,
+    files,
+    user_urls: baseUserUrls,
     video_data: extraData.video_data || null,
     youtube_url: extraData.youtube_url || null,
   };
@@ -89,7 +104,6 @@ export const updateAssistantMessageWithResponse = (channelId, messageId, respons
   const additionalData = {
     fallback: responseData?.fallback,
     firstAttemptError: responseData?.firstAttemptError,
-    image_urls: responseData?.image_urls || [],
     model: responseData?.model,
     finish_reason: responseData?.finish_reason,
     role: responseData?.role || "assistant"
@@ -184,7 +198,6 @@ export const setChatUploadedImages = (channelId, images) => (dispatch) => {
 // Add error message as chat message (for RT layer errors only)
 export const addChatErrorMessage = (channelId, error) => (dispatch) => {
   dispatch(addErrorMessage({ channelId, error }));
-  // Clear loading state when error occurs
   dispatch(setChatLoading(channelId, false));
 };
 
@@ -204,7 +217,6 @@ export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch, get
     }),
     content: socketMessage.content || "",
     isLoading: socketMessage.isStreaming || false,
-    // Include additional RT layer data
     ...socketMessage
   };
 
@@ -215,6 +227,8 @@ export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch, get
       : [];
   uiMessage.image_urls = normalizedImages;
   uiMessage.files = Array.isArray(socketMessage.files) ? socketMessage.files : (uiMessage.files || []);
+  const llmUrls = buildLlmUrls(normalizedImages, uiMessage.files || []);
+  uiMessage.llm_urls = llmUrls;
   uiMessage.video_data = socketMessage.video_data || uiMessage.video_data || null;
   uiMessage.youtube_url = socketMessage.youtube_url || uiMessage.youtube_url || null;
 

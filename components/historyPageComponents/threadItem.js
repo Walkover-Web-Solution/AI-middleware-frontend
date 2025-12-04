@@ -697,7 +697,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   </ReactMarkdown>
 
                   {/* Edit button for assistant messages */}
-                  {!item?.image_urls?.length && !item?.fromRTLayer && (
+                  {!item?.llm_urls?.length && !item?.fromRTLayer && (
                     <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Edit message">
                       <button
                         className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
