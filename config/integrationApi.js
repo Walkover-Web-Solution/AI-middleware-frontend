@@ -25,7 +25,7 @@ export const getAllIntegrationApi = async () => {
 
 export const updateIntegrationData = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id, ...dataToSend})
+    const response = await axios.put(`${URL}/gtwyEmbed/`, { folder_id: dataToSend?.folder_id, ...dataToSend })
     return response
   } catch (error) {
     console.error(error)
@@ -42,4 +42,3 @@ export const generateGtwyAccessTokenApi = async () => {
     return error;
   }
 }
-

@@ -7,7 +7,7 @@ const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 // Test Case Management APIs
 export const getAllTestCasesOfBridgeApi = async ({ bridgeId }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/testcases/${bridgeId}`);
+    const response = await axios.get(`${URL}/testcases/${bridgeId}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -60,8 +60,8 @@ export const runTestCaseApi = async ({ versionId, testcase_id, testCaseData, bri
 
 export const generateAdditionalTestCasesApi = async ({ bridgeId, versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridgeId}/generateAdditionalTestCases`, { 
-      "version_id": versionId 
+    const response = await axios.post(`${PYTHON_URL}/bridge/${bridgeId}/generateAdditionalTestCases`, {
+      "version_id": versionId
     });
     return response.data;
   } catch (error) {

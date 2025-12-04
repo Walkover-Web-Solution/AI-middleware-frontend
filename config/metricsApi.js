@@ -31,7 +31,7 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
 // User Feedback and Analytics APIs
 export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   try {
-    const response = await axios.get(`${URL}/api/v1/config/userfeedbackcount/${bridge_id}`, {
+    const response = await axios.get(`${URL}/api/v1/agentConfig/userfeedbackcount/${bridge_id}`, {
       params: {
         user_feedback
       }
@@ -45,6 +45,6 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
 
 // Fine-tuning Data APIs
 export const downloadFineTuneData = async (bridge_id, threadIds, status = [0]) => {
-  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds, user_feedback: status });
+  const response = await axios.post(`${URL}/api/v1/agentConfig/getFineTuneData/${bridge_id}`, { thread_ids: threadIds, user_feedback: status });
   return response?.data;
 }
