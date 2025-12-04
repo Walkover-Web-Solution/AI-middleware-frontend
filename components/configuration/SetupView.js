@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import TriggersList from "./configurationComponent/TriggersList";
-import AdvancedParameters from "./configurationComponent/advancedParamenter";
+import AdvancedParameters from "./configurationComponent/AdvancedParamenter";
 import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";

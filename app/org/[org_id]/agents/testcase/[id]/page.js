@@ -4,9 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, updateTestCaseAction } from '@/store/action/testCasesAction';
-import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@/components/Icons';
+import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/Icons';
 import OnBoarding from '@/components/OnBoarding';
-import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import PageHeader from '@/components/Pageheader';
 

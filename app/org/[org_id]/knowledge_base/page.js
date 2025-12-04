@@ -1,8 +1,8 @@
 'use client';
-import CustomTable from "@/components/customTable/customTable";
-import { truncate } from "@/components/historyPageComponents/assistFile";
+import CustomTable from "@/components/customTable/CustomTable";
+import { truncate } from "@/components/historyPageComponents/AssistFile";
 import MainLayout from "@/components/layoutComponents/MainLayout";
-import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
+import KnowledgeBaseModal from "@/components/modals/KnowledgeBaseModal";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";

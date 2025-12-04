@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
-import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
-import StarterQuestionToggle from "./configurationComponent/starterQuestion";
-import ActionList from "./configurationComponent/actionList";
+import UserRefernceForRichText from "./configurationComponent/UserRefernceForRichText";
+import StarterQuestionToggle from "./configurationComponent/StarterQuestion";
+import ActionList from "./configurationComponent/ActionList";
 import { useConfigurationContext } from './ConfigurationContext';
 
 const ChatbotConfigSection = ( {isPublished} ) => {

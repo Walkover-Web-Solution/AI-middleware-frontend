@@ -1,4 +1,4 @@
-import { getApiKeyGuide, getDescriptions, getFinishReasons, getGuardrailsTemplates, getTutorial } from "@/config";
+import { getApiKeyGuide, getDescriptions, getFinishReasons, getGuardrailsTemplates, getTutorial } from "@/config/index";
 import { getApiKeyGuideData, getDescriptionsData, getFinishReasonsData, getGuardrailsTemplatesData, getTutorialData } from "../reducer/flowDataReducer";
 
 export const getTutorialDataAction = () => {

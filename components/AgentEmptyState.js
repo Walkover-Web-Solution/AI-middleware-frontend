@@ -1,11 +1,10 @@
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { MessageCircleIcon, MessageSquareIcon, PlugIcon, SettingsIcon, MessageCircleMoreIcon } from "./Icons";
-import { PlusIcon, Zap } from "lucide-react";
+import { MessageCircleMoreIcon } from "./Icons";
 import PageHeader from "./Pageheader";
-import CreateNewBridge from "./createNewBridge";
+import CreateNewBridge from "./CreateNewBridge";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import Protected from "./protected";
+import Protected from "./Protected";
 
 const AgentEmptyState = ({ orgid, isEmbedUser }) => {
   const { tutorialData } = useCustomSelector((state) => ({

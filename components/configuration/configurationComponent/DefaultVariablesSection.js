@@ -1,5 +1,5 @@
 import React, { memo, useState, useMemo } from 'react';
-import { ChevronDownIcon, InfoIcon, SettingsIcon } from '@/components/Icons';
+import { ChevronDownIcon, SettingsIcon } from '@/components/Icons';
 import { toggleSidebar, extractPromptVariables } from '@/utils/utility';
 
 // Optimized default variables section with accordion

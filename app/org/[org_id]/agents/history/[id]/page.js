@@ -4,15 +4,15 @@ import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, userFeedbackCountAction, searchMessageHistoryAction } from "@/store/action/historyAction";
+import { getHistoryAction, searchMessageHistoryAction } from "@/store/action/historyAction";
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
-import Protected from "@/components/protected";
-import ChatDetails from "@/components/historyPageComponents/chatDetails";
+import Protected from "@/components/Protected";
+import ChatDetails from "@/components/historyPageComponents/ChatDetails";
 import { ChatLoadingSkeleton } from "@/components/historyPageComponents/ChatLayoutLoader";
 
 // Lazy load the components to reduce initial render time
-const ThreadContainer = React.lazy(() => import('@/components/historyPageComponents/threadContainer'));
-const Sidebar = React.lazy(() => import('@/components/historyPageComponents/sidebar'));
+const ThreadContainer = React.lazy(() => import('@/components/historyPageComponents/ThreadContainer'));
+const Sidebar = React.lazy(() => import('@/components/historyPageComponents/Sidebar'));
 
 export const runtime = "edge";
 function Page({params, searchParams }) {
@@ -63,10 +63,6 @@ function Page({params, searchParams }) {
       dispatch(setSelectedVersion("all"));
     };
   }, []);
-
-  useEffect(() => {
-    // dispatch(userFeedbackCountAction({ bridge_id: resolvedParams.id, user_feedback: "all" }));
-  }, [dispatch, resolvedParams.id]);
 
   useEffect(() => {
     const handleEvents = (action) => {

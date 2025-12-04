@@ -189,7 +189,6 @@ export const bridgeReducer = createSlice({
 
     updateBridgeActionReducer: (state, action) => {
       const { bridgeId, actionData, versionId } = action.payload;
-      // state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
       state.bridgeVersionMapping[bridgeId][versionId].actions = actionData;
     },
     updateBridgeToolsReducer: (state, action) => {

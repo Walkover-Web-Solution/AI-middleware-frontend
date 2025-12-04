@@ -1,7 +1,7 @@
 import React from 'react';
-import ServiceDropdown from "./configurationComponent/serviceDropdown";
-import ModelDropdown from "./configurationComponent/modelDropdown";
-import ApiKeyInput from "./configurationComponent/apiKeyInput";
+import ServiceDropdown from "./configurationComponent/ServiceDropdown";
+import ModelDropdown from "./configurationComponent/ModelDropdown";
+import ApiKeyInput from "./configurationComponent/ApiKeyInput";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
 import AdvancedSettingsButton from "./configurationComponent/AdvancedSettingsButton";
 

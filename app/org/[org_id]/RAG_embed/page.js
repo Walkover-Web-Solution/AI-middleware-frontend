@@ -1,10 +1,9 @@
 "use client"
-import Protected from '@/components/protected'
+import Protected from '@/components/Protected'
 import RAGEmbedContent from '@/components/ragEmbed/RAGEmbedContent'
-import React from 'react'
+import React, { use } from 'react'
 import PageHeader from '@/components/Pageheader'
 import MainLayout from '@/components/layoutComponents/MainLayout'
-import { use } from 'react'
 import { useCustomSelector } from '@/customHooks/customSelector'
 
 const page = ({ params }) => {

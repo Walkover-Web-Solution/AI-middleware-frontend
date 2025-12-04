@@ -84,8 +84,7 @@ export const NAV_SECTIONS = [
   { items: ['agents', 'chatbotConfig', 'knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
-  { title: 'Developer', items: ['integration', 'RAG_embed'] },
-  // { title: 'TEAM & COLLABORATION', items: ['invite'] }
+  { title: 'Developer', items: ['integration', 'RAG_embed'] }
 ];
 
 

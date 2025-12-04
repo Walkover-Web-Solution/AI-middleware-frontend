@@ -1,4 +1,4 @@
-import { getOrCreateNotificationAuthKey } from "@/config";
+import { getOrCreateNotificationAuthKey } from "@/config/index";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { AddIcon } from "@/components/Icons";

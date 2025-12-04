@@ -4,8 +4,8 @@ import ToolsSection from "./ToolsSection";
 import CommonConfigComponents from "./CommonConfigComponents";
 import ChatbotConfigSection from "./ChatbotConfigSection";
 import { useConfigurationContext } from './ConfigurationContext';
-import AdvancedParameters from './configurationComponent/advancedParamenter';
-import GptMemory from './configurationComponent/gptmemory';
+import AdvancedParameters from './configurationComponent/AdvancedParamenter';
+import GptMemory from './configurationComponent/Gptmemory';
 import ConfigurationSettingsAccordion from './configurationComponent/ConfigurationSettingsAccordion';
 
 const NonImageModelConfig = memo(() => {

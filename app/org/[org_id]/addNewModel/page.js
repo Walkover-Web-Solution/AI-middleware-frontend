@@ -5,7 +5,7 @@ import { openModal } from '@/utils/utility';
 import AddNewModelModal from '@/components/modals/AddNewModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import MainLayout from '@/components/layoutComponents/MainLayout';
-import CustomTable from '@/components/customTable/customTable';
+import CustomTable from '@/components/customTable/CustomTable';
 import PageHeader from '@/components/Pageheader';
 import { TrashIcon } from '@/components/Icons';
 import { deleteModelAction } from '@/store/action/modelAction';

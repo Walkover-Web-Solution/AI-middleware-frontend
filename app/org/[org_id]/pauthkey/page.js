@@ -1,23 +1,22 @@
 "use client"
-import CustomTable from '@/components/customTable/customTable'
+import CustomTable from '@/components/customTable/CustomTable'
 import MainLayout from '@/components/layoutComponents/MainLayout'
-import LoadingSpinner from '@/components/loadingSpinner'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
-import Protected from '@/components/protected'
-import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
+import Protected from '@/components/Protected'
+import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast'
 import useTutorialVideos from '@/hooks/useTutorialVideos'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, formatDate, formatRelativeTime, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, use } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
-import { use } from 'react';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
 export const runtime = 'edge';

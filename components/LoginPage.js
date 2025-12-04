@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect } from 'react'
-import LoadingSpinner from "@/components/loadingSpinner";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

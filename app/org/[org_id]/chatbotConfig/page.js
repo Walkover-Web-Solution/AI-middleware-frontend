@@ -1,8 +1,8 @@
 'use client'
-import FormSection from '@/components/chatbotConfiguration/formSection'
+import FormSection from '@/components/chatbotConfiguration/FormSection'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import PageHeader from '@/components/Pageheader'
-import Protected from '@/components/protected'
+import Protected from '@/components/Protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import React, { use } from 'react'
 

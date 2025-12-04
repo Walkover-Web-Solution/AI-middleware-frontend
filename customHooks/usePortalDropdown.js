@@ -10,7 +10,7 @@ import { useOutsideClick } from '@/utils/utility';
  * @param {number} options.hoverDelay - Delay before closing on mouse leave (default: 100ms)
  * @returns {Object} Portal management functions and components
  */
-export const usePortalDropdown = (options = {}) => {
+const usePortalDropdown = (options = {}) => {
   const {
     offsetX = -150,
     offsetY = 5,
@@ -60,7 +60,6 @@ export const usePortalDropdown = (options = {}) => {
     setPortalTriggerElement(triggerElement);
     setShowPortal(true);
     
-    // Add priority class to trigger element
     if (triggerElement) {
       triggerElement.classList.add('portal-active');
     }

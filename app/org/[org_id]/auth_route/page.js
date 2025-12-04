@@ -5,7 +5,7 @@ import { useCustomSelector } from '@/customHooks/customSelector'
 import React, { useState, use } from 'react'
 import { useDispatch } from 'react-redux'
 import { createAuth } from '@/store/action/authAction'
-import CustomTable from "@/components/customTable/customTable"
+import CustomTable from "@/components/customTable/CustomTable"
 import { openModal } from '@/utils/utility'
 import { AUTH_COLUMNS, MODAL_TYPE } from '@/utils/enums'
 import AuthDataModal from '@/components/modals/AuthDataModal'
@@ -29,7 +29,7 @@ const Page = ({params}) => {
       new URL(value);
       setUrlError('')
       return true
-    } catch (err) {
+    } catch {
       setUrlError('Please enter a valid URL')
       return false
     }

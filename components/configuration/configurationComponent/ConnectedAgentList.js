@@ -3,18 +3,17 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, SettingsIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { AddIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
-import FunctionParameterModal from './functionParameterModal';
+import FunctionParameterModal from './FunctionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark } from 'lucide-react';
-import { BotIcon } from 'lucide-react';
+import { BotIcon, CircleQuestionMark } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
 const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
@@ -26,7 +25,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_AGENT_MODAL);
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
+    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -44,8 +43,6 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
-            bridges: state?.bridgeReducer?.allBridgesMap
-
         };
     });
     const handleSaveAgent = (overrideBridge = null, bridgeData) => {

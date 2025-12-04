@@ -1,35 +1,19 @@
-import CommentsCards from "@/components/CommentsCards";
-import DisplayCards from "@/components/DisplayCards";
-import FeatureRequests from "@/components/FeatureRequests";
-import Footer from "@/components/Footer";
-import HeroPage from "@/components/HeroPage";
-import PlatformImage from "@/components/PlatformImage";
-import PromptTemplates from "@/components/PromptTemplates";
-import Questions from "@/components/Questions";
-import RoadMapCards from "@/components/RoadMapCards";
-import SuggestionTemplates from "@/components/SuggestionTemplate";
-import TrustedBy from "@/components/TrustedBy";
-/*
-  This page is the entry point for the user to start the login process.
-  The page checks if the user has already logged in or not.
-  If the user has not logged in, it will redirect the user to the login page.
- * If the user has already logged in, it will redirect the user to the bridges page.
- */
-async function page() {
+import LoginButton from "@/components/common/LoginButton";
+
+const Page = () => {
   return (
-    <div className="bg-black h-full w-full text-white overflow-hidden">
-      <HeroPage />
-      <PlatformImage />
-      <TrustedBy />
-      <DisplayCards />
-      <SuggestionTemplates />
-      <PromptTemplates />
-      <RoadMapCards />
-      <CommentsCards />
-      <Questions />
-      <FeatureRequests />
-      <Footer />
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-base-100 text-base-content">
+      <div className="text-center space-y-6 max-w-md px-6">
+        <h1 className="text-3xl font-bold">Welcome to GTWY AI</h1>
+        <p className="text-base-content/70">
+          Continue to manage your agents and integrations. Click below to sign in.
+        </p>
+        <div className="flex justify-center">
+          <LoginButton />
+        </div>
+      </div>
+    </main>
   );
-}
-export default page;
+};
+
+export default Page;

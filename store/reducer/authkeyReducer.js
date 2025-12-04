@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { cloneDeep } from "lodash";
 
 const initialState = {
  authData : [] ,
