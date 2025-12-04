@@ -2,8 +2,8 @@
 import React, { useEffect } from 'react'
 import LoadingSpinner from "@/components/loadingSpinner";
 import { ChevronLeft } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { setInCookies } from '@/utils/utility';
 
@@ -35,49 +35,93 @@ const LoginPage = ({loading}) => {
     }
   },[utmSource, utmMedium, utmCampaign, utmTerm, utmContent])
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen justify-between items-center px-4 md:px-8 lg:px-16">
-    {/* Left Section */}
-    {loading ? (
-      <LoadingSpinner />
-    ) : (
-      <div className="flex flex-col md:flex-row h-screen w-screen justify-between items-center px-4 md:px-8 lg:px-16">
-        {/* Left Section */}
-        <div className="flex-1 flex flex-col justify-center items-start">
-          <div className="w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-            <Link href="/">
-              <button className="text-lg md:text-xl flex justify-center items-center p-2 text-blue-400">
-                <ChevronLeft />
-                Back
-              </button>
-            </Link>
-            <div className="mt-2 mb-8">
-              <h1 className="text-3xl md:text-5xl font-bold mb-4 mx-2">
-                Login
-              </h1>
-              <h5 className="text-gray-500 text-base md:text-xl my-4 mx-2 opacity-50">
-                Authenticate with Google
-              </h5>
+    <div className="min-h-screen w-full bg-base-100 p-6">
+      {loading ? (
+        <div className="flex items-center justify-center h-screen">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <div className="container mx-auto">
+          
+          {/* Logo and centered secure login label in same row */}
+          <div className="flex items-center mb-8">
+            <div className="w-16 relative">
+              <Link href="/" className="inline-block cursor-pointer relative">
+                <div className="relative w-20 h-20 flex items-center justify-center">
+                  {/* Rotating box that extends beyond the text */}
+                  <div 
+                    className="absolute border border-gray-200 opacity-50" 
+                    style={{ 
+                      width: '120%',
+                      height: '120%',
+                      animation: 'spin 50s linear infinite',
+                      transformOrigin: 'center',
+                      transform: 'rotate(45deg)',
+                      left: '-10%',
+                      top: '-10%'
+                    }}>
+                  </div>
+                  
+                  {/* Logo */}
+                  <div className="relative z-10 opacity-90 hover:opacity-100 transition-opacity">
+                    <Image src="/favIcon.png" alt="favIcon" width={50} height={50} className="ml-1 bg-transparent" />
+                  </div>
+                </div>
+              </Link>
             </div>
-            <div className="w-full flex items-start justify-start">
-              <div id={process.env.NEXT_PUBLIC_REFERENCEID} />
+            
+            {/* Secure Login Label - Centered */}
+            <div className="flex-1 flex justify-center">
+              <div className="inline-flex items-center gap-2 px-6 py-2 bg-white/80 backdrop-blur-sm border border-black/10 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs tracking-wider text-black/60">SECURE LOGIN</span>
+              </div>
+            </div>
+            
+            {/* Empty space to balance the layout */}
+            <div className="w-12"></div>
+          </div>
+          
+          {/* Login card in center */}
+          <div className="flex flex-col items-center justify-center">
+            
+            <div className="w-full max-w-sm px-8 py-10 bg-base-200 shadow-md border border-base-300">
+              {/* Welcome Text */}
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-base-content tracking-tight">Welcome Back</h1>
+                <p className="text-sm text-base-content/70 mt-1">Login to access your AI workspace</p>
+              </div>
+
+              {/* Login Options */}
+              <div className="w-full flex justify-center py-10">
+                <div id={process.env.NEXT_PUBLIC_REFERENCEID} className="w-full mx-14" />
+              </div>
+            </div>
+            
+            {/* Stats Section - Below login card */}
+            <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
+              <div className="text-center border px-2 py-4">
+                <div className="text-sm font-semibold text-base-content">500+</div>
+                <div className="text-xs text-base-content/60">COMPANIES</div>
+              </div>
+              <div className="text-center border px-2 py-4">
+                <div className="text-sm font-semibold text-base-content">99.9%</div>
+                <div className="text-xs text-base-content/60">UPTIME</div>
+              </div>
+              <div className="text-center border px-2 py-4">
+                <div className="text-sm font-semibold text-base-content">24/7</div>
+                <div className="text-xs text-base-content/60">SUPPORT</div>
+              </div>
+            </div>
+            
+            {/* Terms Text */}
+            <div className="text-xs text-base-content/50 mt-6 text-center px-4 max-w-md">
+              By continuing you agree to gtwy's <span className="hover:text-primary cursor-pointer">Terms of Service</span> and acknowledge our <span className="hover:text-primary cursor-pointer">Privacy Policy</span>
             </div>
           </div>
         </div>
-
-        {/* Right Section */}
-        <div className="flex-1 flex justify-center items-center">
-          <Image
-            src="/container.svg"
-            alt="container"
-            width={0}
-            height={0}
-            style={{ maxHeight: "90vh", width: "auto" }}
-            className="max-w-full h-auto"
-          />
-        </div>
-      </div>
-    )}
-  </div>
+      )}
+    </div>
   )
 }
 
