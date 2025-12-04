@@ -99,7 +99,7 @@ const LoginPage = ({loading}) => {
             </div>
             
             {/* Stats Section - Below login card */}
-            <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
+            <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-sm">
               <div className="text-center border px-2 py-4">
                 <div className="text-sm font-semibold text-base-content">500+</div>
                 <div className="text-xs text-base-content/60">COMPANIES</div>
