@@ -590,19 +590,35 @@ function FunctionParameterModal({
         newKey = `new${counter}`;
       }
 
+      const newFields = {
+        ...fields,
+        [newKey]: {
+          type: "string",
+          description: "",
+        },
+      };
+
+      // For Pre Tool, mark new top-level parameters as required by default
+      if (name === "Pre Tool") {
+        const prevRequired = prevToolData.required_params || [];
+        const nextRequired = prevRequired.includes(newKey)
+          ? prevRequired
+          : [...prevRequired, newKey];
+
+        return {
+          ...prevToolData,
+          fields: newFields,
+          required_params: nextRequired,
+        };
+      }
+
       return {
         ...prevToolData,
-        fields: {
-          ...fields,
-          [newKey]: {
-            type: "string",
-            description: "",
-          },
-        },
+        fields: newFields,
       };
     });
     setIsModified(true);
-  }, []);
+  }, [name]);
 
   const handleAddChildParameter = useCallback((parentPath) => {
     setToolData((prevToolData) => {
@@ -626,6 +642,14 @@ function FunctionParameterModal({
             description: "",
           };
 
+          // For Pre Tool, mark new nested parameters as required by default
+          if (name === "Pre Tool") {
+            const prevRequired = field.required_params || [];
+            if (!prevRequired.includes(newKey)) {
+              field.required_params = [...prevRequired, newKey];
+            }
+          }
+
           return field;
         }
       );
@@ -636,7 +660,7 @@ function FunctionParameterModal({
       };
     });
     setIsModified(true);
-  }, [updateField]);
+  }, [updateField, name]);
 
   const handleDeleteParameter = useCallback((path) => {
     setToolData((prevToolData) => {
