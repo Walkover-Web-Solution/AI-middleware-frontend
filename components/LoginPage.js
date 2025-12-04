@@ -48,23 +48,27 @@ const LoginPage = ({loading}) => {
             <div className="w-16 relative">
               <Link href="/" className="inline-block cursor-pointer relative">
                 <div className="relative w-20 h-20 flex items-center justify-center">
-                  {/* Rotating box that extends beyond the text */}
-                  <div 
-                    className="absolute border border-gray-200 opacity-50" 
-                    style={{ 
-                      width: '120%',
-                      height: '120%',
-                      animation: 'spin 50s linear infinite',
-                      transformOrigin: 'center',
-                      transform: 'rotate(45deg)',
-                      left: '-10%',
-                      top: '-10%'
-                    }}>
-                  </div>
-                  
-                  {/* Logo */}
-                  <div className="relative z-10 opacity-90 hover:opacity-100 transition-opacity">
-                    <Image src="/favIcon.png" alt="favIcon" width={50} height={50} className="ml-1 bg-transparent" />
+                  <div className="relative">
+                    {/* Rotating box positioned behind the logo - offset to match reference image */}
+                    <div 
+                      className="absolute border-[0.5px] opacity-40" 
+                      style={{ 
+                        width: '120px',
+                        height: '120px',
+                        animation: 'spin 20s linear infinite',
+                        transformOrigin: 'center',
+                        transform: 'rotate(45deg)',
+                        left: '30px',    /* Position more to the right */
+                        top: '10px'       /* Position at center */
+                      }}>
+                    </div>
+                    
+                    {/* Logo and text on top of the rotating box */}
+                    <div className="relative z-10 opacity-90 hover:opacity-100 transition-opacity">
+                      <div className="flex items-center">
+                        <Image src="/favicon.png" alt="favIcon" width={60} height={60} className="h-16 w-auto cursor-pointer opacity-90 hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -85,7 +89,10 @@ const LoginPage = ({loading}) => {
           {/* Login card in center */}
           <div className="flex flex-col items-center justify-center">
             
-            <div className="w-full max-w-sm px-8 py-10 bg-base-200 shadow-md border border-base-300">
+            <div className="w-full max-w-sm px-8 py-10 bg-base-200 shadow-md relative">
+              {/* Corner borders */}
+              <div className="absolute top-0 left-0 w-[50px] h-[50px] border-t-2 border-l-2 border-gray-400"></div>
+              <div className="absolute bottom-0 right-0 w-[50px] h-[50px] border-b-2 border-r-2 border-gray-400"></div>
               {/* Welcome Text */}
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-base-content tracking-tight">Welcome Back</h1>
