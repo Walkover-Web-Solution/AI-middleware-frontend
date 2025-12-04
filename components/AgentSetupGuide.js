@@ -27,7 +27,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       showDefaultApikeys
    };
   });
-  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
+  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys && prompt!="")? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
   const [isAnimating, setIsAnimating] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
@@ -56,7 +56,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   };
 
   useEffect(() => {
-    if(isEmbedUser && showDefaultApikeys)
+    if(isEmbedUser && showDefaultApikeys && prompt!=="")
     {
       setIsVisible(false);
       return;
@@ -100,7 +100,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   }, [isVisible, onVisibilityChange]);
 
   const handleStart = () => {
-    if(isEmbedUser && showDefaultApikeys)
+    if(isEmbedUser && showDefaultApikeys && prompt!=="")
     {
       setIsVisible(false);
       return;
