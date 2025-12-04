@@ -18,13 +18,7 @@ import {
   clearChatTestCaseId,
   clearChannelData
 } from '../reducer/chatReducer';
-
-const haveSameItems = (first = [], second = []) => {
-  if (!Array.isArray(first) || !Array.isArray(second)) return false;
-  if (!first.length || !second.length) return false;
-  if (first.length !== second.length) return false;
-  return first.every((item, index) => item === second[index]);
-};
+import { haveSameItems, buildUserUrls } from '@/utils/attachmentUtils';
 
 const getVideoIdentifier = (video) => {
   if (!video) return null;
@@ -43,9 +37,12 @@ export const initializeChatChannel = (channelId) => (dispatch) => {
 // Send user message (for dry run API)
 export const sendUserMessage = (channelId, messageContent, messageId, extraData = {}) => (dispatch) => {
   const timestamp = Date.now();
+  const images = extraData.image_urls || extraData.images || [];
+  const files = extraData.files || [];
   const attachments = {
-    image_urls: extraData.image_urls || extraData.images || [],
-    files: extraData.files || [],
+    image_urls: images,
+    files,
+    user_urls: buildUserUrls(images, files),
     video_data: extraData.video_data || null,
     youtube_url: extraData.youtube_url || null,
   };
@@ -184,7 +181,6 @@ export const setChatUploadedImages = (channelId, images) => (dispatch) => {
 // Add error message as chat message (for RT layer errors only)
 export const addChatErrorMessage = (channelId, error) => (dispatch) => {
   dispatch(addErrorMessage({ channelId, error }));
-  // Clear loading state when error occurs
   dispatch(setChatLoading(channelId, false));
 };
 
@@ -204,7 +200,6 @@ export const handleRtLayerMessage = (channelId, socketMessage) => (dispatch, get
     }),
     content: socketMessage.content || "",
     isLoading: socketMessage.isStreaming || false,
-    // Include additional RT layer data
     ...socketMessage
   };
 
