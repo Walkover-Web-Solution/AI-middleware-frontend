@@ -7,7 +7,7 @@ const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 // Bridge Management APIs
 export const getSingleBridge = async (bridgeId) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/${bridgeId}`)
+    const response = await axios.get(`${URL}/api/v1/agentConfig/getbridge/${bridgeId}`)
     return response
   } catch (error) {
     if (error.response) {
@@ -20,7 +20,7 @@ export const getSingleBridge = async (bridgeId) => {
 
 export const getAllBridges = async () => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`)
+    const data = await axios.get(`${URL}/api/v1/agentConfig/getbridges/all`)
     return data;
   } catch (error) {
     console.error(error)
@@ -30,7 +30,7 @@ export const getAllBridges = async () => {
 
 export const createBridge = async (dataToSend) => {
   try {
-    return await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge`, dataToSend)
+    return await axios.post(`${URL}/api/v1/agentConfig/create_bridge`, dataToSend)
   } catch (error) {
     toast.error(error.response.data.error)
     throw error
@@ -39,7 +39,7 @@ export const createBridge = async (dataToSend) => {
 
 export const updateBridge = async ({ bridgeId, dataToSend }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/update_bridge/${bridgeId}`, dataToSend);
+    const response = await axios.post(`${URL}/api/v1/agentConfig/update_bridge/${bridgeId}`, dataToSend);
     return response
   } catch (error) {
     console.error(error)
@@ -48,9 +48,9 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   }
 }
 
-export const deleteBridge = async (bridgeId,org_id,restore=false) => {
+export const deleteBridge = async (bridgeId, org_id, restore = false) => {
   try {
-    const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`,{data:{org_id,restore}});
+    const response = await axios.delete(`${URL}/api/v1/agentConfig/deletebridges/${bridgeId}`, { data: { org_id, restore } });
     return response;
   } catch (error) {
     console.error(error);
@@ -73,7 +73,7 @@ export const createDuplicateBridge = async (bridge_id) => {
 
 export const archiveBridgeApi = async (bridge_id, newStatus) => {
   try {
-    const response = await axios.put(`${URL}/api/v1/config/bridge-status/${bridge_id}`, { status: newStatus });
+    const response = await axios.put(`${URL}/api/v1/agentConfig/bridge-status/${bridge_id}`, { status: newStatus });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -83,7 +83,8 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
 
 export const createBridgeWithAiAPi = async ({ ...dataToSend }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge_using_ai`, dataToSend);
+    // Node uses create_bridge for both AI and normal creation if purpose is present
+    const response = await axios.post(`${URL}/api/v1/agentConfig/create_bridge`, dataToSend);
     return response;
   } catch (error) {
     console.error(error);
@@ -94,7 +95,7 @@ export const createBridgeWithAiAPi = async ({ ...dataToSend }) => {
 // Bridge Version APIs
 export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/bridge/versions/get/${bridgeVersionId}`)
+    const response = await axios.get(`${URL}/bridge/versions/get/${bridgeVersionId}`)
     return response?.data;
   } catch (error) {
     console.error(error)
@@ -104,7 +105,7 @@ export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
 
 export const createBridgeVersionApi = async (dataToSend) => {
   try {
-    const result = await axios.post(`${PYTHON_URL}/bridge/versions/create`, dataToSend)
+    const result = await axios.post(`${URL}/bridge/versions/create`, dataToSend)
     return result?.data;
   } catch (error) {
     toast.error(error.response.data.error)
@@ -114,7 +115,7 @@ export const createBridgeVersionApi = async (dataToSend) => {
 
 export const deleteBridgeVersionApi = async ({ versionId }) => {
   try {
-    const response = await axios.delete(`${PYTHON_URL}/bridge/versions/${versionId}`);
+    const response = await axios.delete(`${URL}/bridge/versions/${versionId}`);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -124,7 +125,7 @@ export const deleteBridgeVersionApi = async ({ versionId }) => {
 
 export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend);
+    const response = await axios.put(`${URL}/bridge/versions/update/${versionId}`, dataToSend);
     return response?.data
   } catch (error) {
     console.error(error)
@@ -134,7 +135,7 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
 
 export const publishBridgeVersionApi = async ({ versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/versions/publish/${versionId}`);
+    const response = await axios.post(`${URL}/bridge/versions/publish/${versionId}`);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -144,7 +145,7 @@ export const publishBridgeVersionApi = async ({ versionId }) => {
 
 export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/versions/discard/${versionId}`, { bridge_id: bridgeId });
+    const response = await axios.post(`${URL}/bridge/versions/discard/${versionId}`, { bridge_id: bridgeId });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -154,7 +155,7 @@ export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
 
 export const publishBulkVersionApi = async (version_ids) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/versions/bulk_publish`, { version_ids });
+    const response = await axios.post(`${URL}/bridge/versions/bulk_publish`, { version_ids });
     return response;
   } catch (error) {
     console.error(error);
@@ -164,7 +165,7 @@ export const publishBulkVersionApi = async (version_ids) => {
 
 export const getTestcasesScrore = async (version_id) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/bridge/versions/testcases/${version_id}`)
+    const response = await axios.get(`${URL}/testcases/score/${version_id}`)
     return response.data;
   } catch (error) {
     console.error("error while getting testcase score", error);
@@ -173,7 +174,7 @@ export const getTestcasesScrore = async (version_id) => {
 
 export const modelSuggestionApi = async ({ versionId }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/bridge/versions/suggest/${versionId}`);
+    const response = await axios.get(`${URL}/bridge/versions/suggest/${versionId}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -192,8 +193,8 @@ export const genrateSummary = async (version_id) => {
 
 export const getConnectedAgentFlowApi = async ({ versionId }) => {
   try {
-    
-    const response = await axios.get(`${PYTHON_URL}/bridge/versions/connected-agents/${versionId}?type=version`);
+
+    const response = await axios.get(`${URL}/bridge/versions/connected-agents/${versionId}?type=version`);
     return response?.data;
   } catch (error) {
     console.error('Failed to fetch connected agent flow', error);
@@ -204,8 +205,8 @@ export const getConnectedAgentFlowApi = async ({ versionId }) => {
 // Bridge Configuration History
 export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30) => {
   try {
-    const response = await axios.get(`${URL}/api/v1/config/getuserupdates/${versionId}?page=${page}&limit=${pageSize}`);
-    return response.data; 
+    const response = await axios.get(`${URL}/api/v1/agentConfig/getuserupdates/${versionId}?page=${page}&limit=${pageSize}`);
+    return response.data;
   } catch (error) {
     console.error("Error fetching bridge config history:", error);
     throw new Error(error);
