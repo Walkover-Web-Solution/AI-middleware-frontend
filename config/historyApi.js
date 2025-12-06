@@ -18,7 +18,7 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
     const encodedBridgeId = encodeURIComponent(bridgeId);
     const encodedSubThreadId = encodeURIComponent(subThreadId || threadId);
     
-    const getSingleThreadData = await axios.get(`${URL}/history/${encodedBridgeId}/${encodedThreadId}/${encodedSubThreadId}?page=${nextPage}&limit=${pagelimit}`, {
+    const getSingleThreadData = await axios.get(`${URL}/api/history/${encodedBridgeId}/${encodedThreadId}/${encodedSubThreadId}?page=${nextPage}&limit=${pagelimit}`, {
       params: {
         user_feedback,
         error,
@@ -32,7 +32,7 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
 
 export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue, versionId) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/history/threads/${bridgeId}`, {
+    const getSingleThreadData = await axios.get(`${URL}/api/history/${bridgeId}`, {
       params: {
         page: page && !isNaN(page) ? page : 1,
         limit: 40,
@@ -49,9 +49,11 @@ export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue,
 
 export const searchMessageHistory = async (bridgeId, keyword, time_range) => {
   try {
-    const searchResult = await axios.post(`${URL}/history/search/${bridgeId}`, {
-      keyword,
-      time_range: time_range || {}
+    const searchResult = await axios.get(`${URL}/api/history/search/${bridgeId}`, {
+      params: {
+        keyword,
+        time_range: time_range || {}
+      }
     })
     return searchResult;
   } catch (error) {
@@ -64,7 +66,7 @@ export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id 
   try {
     const encodedThreadId = encodeURIComponent(thread_id);
 
-    const response = await axios.get(`${URL}/api/v1/agentConfig/history/sub-thread/${encodedThreadId}`, {
+    const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${encodedThreadId}`, {
       params: {
         error,
         bridge_id,
@@ -79,6 +81,6 @@ export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id 
 }
 
 export const updateHistoryMessage = async ({ id, bridge_id, message }) => {
-  const response = await axios.put(`${URL}/api/v1/agentConfig/gethistory/${bridge_id}`, { id: id, message: message })
+  const response = await axios.put(`${URL}/api/v1/config/gethistory/${bridge_id}`, { id: id, message: message })
   return response?.data;
 }

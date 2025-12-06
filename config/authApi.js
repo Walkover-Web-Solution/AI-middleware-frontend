@@ -24,8 +24,8 @@ export const logoutUserFromMsg91 = async (headers) => {
 
 export const loginUser = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/user/localToken`, dataToSend);
-    return response.data;
+    const response = await axios.post(`${URL}/api/user/localToken`, dataToSend);
+    return response.data?.data;
   } catch (error) {
     console.error(error);
     return error;
@@ -34,8 +34,8 @@ export const loginUser = async (dataToSend) => {
 
 export const switchUser = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/user/switchOrg`, dataToSend);
-    return response.data;
+    const response = await axios.post(`${URL}/api/user/switchOrg`, dataToSend);
+    return response.data?.data;
   } catch (error) {
     console.error(error);
     return error;
@@ -109,7 +109,7 @@ export const getOrCreateNotificationAuthKey = async (name) => {
 export const updateUser = async ({ user_id, user }) => {
   const updateObject = { user_id, user: { "meta": user?.meta } };
   try {
-    const response = await axios.put(`${URL}/user/updateDetails`, updateObject);
+    const response = await axios.put(`${URL}/api/user/updateDetails`, updateObject);
     return response?.data;
   } catch (error) {
     console.error('Error updating details:', error.response?.data?.message || error.message);
@@ -119,7 +119,7 @@ export const updateUser = async ({ user_id, user }) => {
 
 export const removeUsersFromOrg = async (user_id) => {
   try {
-    const response = await axios.delete(`${URL}/user/deleteUser`, {
+    const response = await axios.delete(`${URL}/api/user/deleteUser`, {
       data: { user_id }
     });
     return response.data;
@@ -133,7 +133,7 @@ export const removeUsersFromOrg = async (user_id) => {
 // OAuth and Authentication APIs
 export const getAuthData = async () => {
   try {
-    const response = await axios.get(`${URL}/auth/`);
+    const response = await axios.get(`${URL}/api/auth/`);
     return response;
   } catch (error) {
     console.error(error);
@@ -143,7 +143,7 @@ export const getAuthData = async () => {
 
 export const createNewAuth = async (data) => {
   try {
-    const response = await axios.post(`${URL}/auth/`, data);
+    const response = await axios.post(`${URL}/api/auth/`, data);
     return response;
   } catch (error) {
     console.error(error);
@@ -153,7 +153,7 @@ export const createNewAuth = async (data) => {
 
 export const verifyAuth = async (data) => {
   try {
-    const respnse = await axios.post(`${URL}/auth/verify`, data)
+    const respnse = await axios.post(`${URL}/api/auth/verify`, data)
     return respnse
   } catch (error) {
     console.error(error)
@@ -163,7 +163,7 @@ export const verifyAuth = async (data) => {
 
 export const getClientInfo = async (client_id) => {
   try {
-    const respnse = await axios.get(`${URL}/auth/client_info?client_id=${client_id}`)
+    const respnse = await axios.get(`${URL}/api/auth/client_info?client_id=${client_id}`)
     return respnse?.data
   } catch (error) {
     console.error(error)
@@ -174,7 +174,7 @@ export const getClientInfo = async (client_id) => {
 // Public Agent Authentication
 export const publicAgentLoginApi = async (user_id) => {
   try {
-    const repsonse = await axios.post(`${URL}/runagents/public/login`, { user_id })
+    const repsonse = await axios.post(`${URL}/api/runagents/public/login`, { user_id })
     return repsonse;
   } catch (error) {
     console.error(error)
@@ -184,7 +184,7 @@ export const publicAgentLoginApi = async (user_id) => {
 
 export const privateAgentLoginApi = async (user_id) => {
   try {
-    const response = await axios.post(`${URL}/runagents/login`, { user_id })
+    const response = await axios.post(`${URL}/api/runagents/login`, { user_id })
     return response;
   } catch (error) {
     console.error(error)
