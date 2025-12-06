@@ -37,7 +37,7 @@ export const getAllServices = async () => {
 
 export const addNewModel = async (newModelObj) => {
   try {
-    const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
+    const response = await axios.post(`${URL}/api/models/user`, newModelObj)
     return response;
   } catch (error) {
     throw error
@@ -46,7 +46,7 @@ export const addNewModel = async (newModelObj) => {
 
 export const deleteModel = async (dataToSend) => {
   try {
-    const response = await axios.delete(`${URL}/modelConfiguration/user?${new URLSearchParams(dataToSend).toString()}`)
+    const response = await axios.delete(`${URL}/api/models/user?${new URLSearchParams(dataToSend).toString()}`)
     toast.success(response?.data?.message)
     return response;
   } catch (error) {

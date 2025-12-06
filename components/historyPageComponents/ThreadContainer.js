@@ -101,7 +101,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     dispatch(
       updateContentHistory({
         id: modalInput?.Id,
-        bridge_id: bridgeId ?? orgId, // prefer explicit bridgeId, fallback to orgId if needed
+        agent_id: bridgeId ?? orgId, // prefer explicit bridgeId, fallback to orgId if needed
         message: modalInput.content,
         index: modalInput.index,
       })
@@ -260,7 +260,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       return dispatch(
         getThread({
           threadId,
-          bridgeId: bridgeId ?? orgId,
+          agentId: bridgeId ?? orgId,
           nextPage: page,
           user_feedback: filterOption,
           subThreadId,
