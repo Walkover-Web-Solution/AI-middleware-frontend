@@ -105,7 +105,7 @@ const Sidebar = memo(({
       setExpandedThreads([searchParams?.thread_id]);
       dispatch(clearSubThreadData());
       setLoadingSubThreads(true);
-      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, bridge_id: params.id, version_id: selectedVersion}));
+      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, agent_id: params.id, version_id: selectedVersion}));
     }
   }, [  searchParams?.thread_id]);
 
@@ -180,7 +180,7 @@ const Sidebar = memo(({
       
       const result = await dispatch(
         searchMessageHistoryAction({
-          bridgeId: params?.id, 
+          agentId: params?.id, 
           keyword: searchValue, 
           startDate,
           endDate
@@ -266,7 +266,7 @@ const Sidebar = memo(({
             getSubThreadsAction({
               thread_id: nextThreadRawId,
               error: isErrorTrue,
-              bridge_id: params.id,
+              agent_id: params.id,
               version_id: selectedVersion
             })
           );
@@ -297,7 +297,7 @@ const Sidebar = memo(({
     } else {
       setExpandedThreads([threadId]);
       setLoadingSubThreads(true);
-      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue, bridge_id: params.id, version_id: selectedVersion }));
+      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue, agent_id: params.id, version_id: selectedVersion }));
       setLoadingSubThreads(false);
     }
   };

@@ -87,7 +87,7 @@ function Page({params, searchParams }) {
       
       if (hasValidDateRange) {
         result = await dispatch(searchMessageHistoryAction({
-          bridgeId: resolvedParams.id,
+          agentId: resolvedParams.id,
           keyword: '', // empty keyword to get all results within date range
           startDate,
           endDate,

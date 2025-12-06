@@ -101,7 +101,7 @@ export const resetPrebuiltPrompt = async (dataToSend) => {
 // Functions Management APIs
 export const getAllFunctionsApi = async () => {
   try {
-    const data = await axios.get(`${URL}/functions/all`)
+    const data = await axios.get(`${URL}/api/tools/all`)
     return data;
   } catch (error) {
     console.error(error)
@@ -111,7 +111,7 @@ export const getAllFunctionsApi = async () => {
 
 export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   try {
-    const response = await axios.put(`${URL}/functions/${function_id}`, { dataToSend });
+    const response = await axios.put(`${URL}/api/tools/${function_id}`, { dataToSend });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -121,7 +121,7 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
 
 export const deleteFunctionApi = async (function_name) => {
   try {
-    const response = await axios.delete(`${URL}/functions/`, {
+    const response = await axios.delete(`${URL}/api/tools/`, {
       data: { function_name }
     });
     return response.data;

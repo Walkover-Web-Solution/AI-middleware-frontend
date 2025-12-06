@@ -359,7 +359,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     }
     if (e.data?.type === 'MESSAGE_CLICK') {
       try {
-        const systemPromptResponse = await getSingleMessage({ bridge_id: urlParams?.id, message_id: e?.data?.data?.createdAt });
+        const systemPromptResponse = await getSingleMessage({ agent_id: urlParams?.id, message_id: e?.data?.data?.createdAt });
         setSelectedItem({ "System Prompt": systemPromptResponse, ...e?.data?.data });
         setIsSliderOpen(true)
       } catch (error) {

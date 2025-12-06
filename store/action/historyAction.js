@@ -29,9 +29,9 @@ export const getHistoryAction = (id, page = 1, user_feedback, isErrorTrue, selec
   }
 };
 
-export const getThread = ({threadId, bridgeId, subThreadId ,nextPage,user_feedback, versionId, error}) => async (dispatch) => {
+export const getThread = ({threadId, agentId, subThreadId ,nextPage,user_feedback, versionId, error}) => async (dispatch) => {
   try {
-    const data = await getSingleThreadData(threadId, bridgeId, subThreadId, nextPage,user_feedback, versionId, error);
+    const data = await getSingleThreadData(threadId, agentId, subThreadId, nextPage,user_feedback, versionId, error);
     dispatch(fetchThreadReducer({ data: data.data, nextPage }));
     return data.data;
   } catch (error) {
@@ -39,9 +39,9 @@ export const getThread = ({threadId, bridgeId, subThreadId ,nextPage,user_feedba
   }
 };
 
-export const updateContentHistory = ({ id, bridge_id, message, index }) => async (dispatch) => {
+export const updateContentHistory = ({ id, agent_id, message, index }) => async (dispatch) => {
   try {
-    const data = await updateHistoryMessage({ id, bridge_id, message });
+    const data = await updateHistoryMessage({ id, agent_id, message });
     dispatch(updateHistoryMessageReducer({ data: data?.result?.[0], index }));
     return data;
   } catch (error) {
@@ -57,9 +57,9 @@ export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(disp
   }
 }
 
-export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) => async (dispatch) =>{
+export const getSubThreadsAction = ({thread_id, error, agent_id, version_id}) => async (dispatch) =>{
   try {
-    const data = await getSubThreadIds({thread_id, error, bridge_id, version_id});
+    const data = await getSubThreadIds({thread_id, error, agent_id, version_id});
     dispatch(fetchSubThreadReducer({data:data.threads}))
 
   } catch (error) {
@@ -68,7 +68,7 @@ export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) =
 }
 
 export const searchMessageHistoryAction = ({
-  bridgeId, 
+  agentId, 
   keyword, 
   time_range = null, 
   startDate = null,
@@ -83,7 +83,7 @@ export const searchMessageHistoryAction = ({
       dispatch(setSearchDateRange({ start: startDate, end: endDate }));
     }
     const timeRange = time_range || (startDate && endDate ? { start: startDate, end: endDate } : null);
-    const data = await searchMessageHistory(bridgeId, keyword, timeRange);
+    const data = await searchMessageHistory(agentId, keyword, timeRange);
     if (data && data.data) {
       const searchData = Array.isArray(data.data?.data) ? data.data.data : [];
       dispatch(setSearchResults({ data: searchData, page: 1 }));

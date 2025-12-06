@@ -43,14 +43,14 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
     // If there's a search query, call search API with date range
     if (currentSearchQuery) {
       await dispatch(searchMessageHistoryAction({
-        bridgeId: params.id,
+        agentId: params.id,
         keyword: currentSearchQuery,
         startDate: startingDate,
         endDate: endingDate
       }));
     } else {
       await dispatch(searchMessageHistoryAction({
-        bridgeId: params.id,
+        agentId: params.id,
         keyword: '', // empty keyword to get all results within date range
         startDate: startingDate,
         endDate: endingDate
@@ -77,7 +77,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
     
     if (currentSearchQuery) {
       await dispatch(searchMessageHistoryAction({
-        bridgeId: params.id,
+        agentId: params.id,
         keyword: currentSearchQuery,
         startDate: null,
         endDate: null
