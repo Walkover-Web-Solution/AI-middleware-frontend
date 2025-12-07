@@ -2,7 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { getHistoryAction, getSubThreadsAction, searchMessageHistoryAction, clearSearchAction } from "@/store/action/historyAction.js";
 import { clearSubThreadData, clearThreadData, setSearchQuery, setSelectedVersion } from "@/store/reducer/historyReducer.js";
 import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
-import { formatRelativeTime} from "@/utils/utility.js";
+import { formatRelativeTime } from "@/utils/utility.js";
 import { ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -13,26 +13,27 @@ import DateRangePicker from "./DateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
 import { FileTextIcon } from "lucide-react";
 
-const Sidebar = memo(({ 
-  historyData = [], 
-  threadHandler, 
-  fetchMoreData, 
-  hasMore, 
-  loading, 
-  params, 
-  searchParams, 
-  setSearchMessageId, 
-  setPage, 
-  setHasMore, 
-  filterOption, 
-  setFilterOption, 
-  searchRef, 
-  setThreadPage, 
-  selectedVersion, 
-  setIsErrorTrue, 
-  isErrorTrue 
+const Sidebar = memo(({
+  historyData = [],
+  threadHandler,
+  fetchMoreData,
+  hasMore,
+  loading,
+  params,
+  searchParams,
+  setSearchMessageId,
+  setPage,
+  setHasMore,
+  filterOption,
+  setFilterOption,
+  searchRef,
+  setThreadPage,
+  selectedVersion,
+  setIsErrorTrue,
+  isErrorTrue,
+  isThreadSelectable = false
 }) => {
-  const { 
+  const {
     subThreads,
     searchResults,
     searchQuery,
@@ -105,9 +106,9 @@ const Sidebar = memo(({
       setExpandedThreads([searchParams?.thread_id]);
       dispatch(clearSubThreadData());
       setLoadingSubThreads(true);
-      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, bridge_id: params.id, version_id: selectedVersion}));
+      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, bridge_id: params.id, version_id: selectedVersion }));
     }
-  }, [  searchParams?.thread_id]);
+  }, [searchParams?.thread_id]);
 
   useEffect(() => {
     if (subThreads?.length > 0 && searchParams?.thread_id) {
@@ -122,13 +123,13 @@ const Sidebar = memo(({
         );
       }
     }
-    else{
-      if(searchParams?.thread_id){
-      router.push(
-        `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start||''}&end=${searchParams.end||''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
-        undefined,
-        { shallow: true }
-      );
+    else {
+      if (searchParams?.thread_id) {
+        router.push(
+          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start || ''}&end=${searchParams.end || ''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
+          undefined,
+          { shallow: true }
+        );
       }
     }
     setTimeout(() => {
@@ -142,8 +143,8 @@ const Sidebar = memo(({
       timeoutId = setTimeout(() => func(...args), delay);
     };
   };
-  useEffect(()=>{
-    if(searchParams?.message_id){
+  useEffect(() => {
+    if (searchParams?.message_id) {
       // Set the search query state and input value
       dispatch(setSearchQuery(searchParams.message_id));
       if (searchRef?.current) {
@@ -151,7 +152,7 @@ const Sidebar = memo(({
       }
       handleChange();
     }
-  },[searchParams?.message_id, dispatch])
+  }, [searchParams?.message_id, dispatch])
   const handleChange = useCallback(debounce((e) => {
     const value = e?.target?.value || searchParams?.message_id || "";
     dispatch(setSearchQuery(value));
@@ -173,15 +174,15 @@ const Sidebar = memo(({
     try {
       const currentMessageId = searchParams?.message_id;
       const searchValue = searchRef?.current?.value || searchParams?.message_id || "";
-      
+
       // Get date range from search params or current state
       const startDate = searchParams?.start || searchDateRange?.start;
       const endDate = searchParams?.end || searchDateRange?.end;
-      
+
       const result = await dispatch(
         searchMessageHistoryAction({
-          bridgeId: params?.id, 
-          keyword: searchValue, 
+          bridgeId: params?.id,
+          keyword: searchValue,
           startDate,
           endDate
         })
@@ -227,18 +228,18 @@ const Sidebar = memo(({
     dispatch(clearSearchAction());
     if (searchRef?.current) searchRef.current.value = "";
     searchParams.delete('message_id');
-    
+
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
-    
+
     try {
       // Fetch regular history data
       const result = await dispatch(getHistoryAction(
-        params?.id,  
-        1, 
-        filterOption, 
-        isErrorTrue, 
+        params?.id,
+        1,
+        filterOption,
+        isErrorTrue,
         selectedVersion
       ));
       let nextThreadRawId = result?.[0]?.thread_id || searchParams?.thread_id || null;
@@ -275,7 +276,7 @@ const Sidebar = memo(({
           setLoadingSubThreads(false);
         }
       }
-      
+
       if (result?.length < 40) setHasMore(false);
 
     } catch (error) {
@@ -381,8 +382,8 @@ const Sidebar = memo(({
           </div>
           <div className="collapse-content px-3">
             <div className="space-y-2">
-              <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue}/>
-              
+              <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue} />
+
               <div className="p-2 bg-base-200 rounded-lg">
                 <p className="text-center mb-2 text-xs font-medium">Filter Response</p>
                 <div className="flex items-center justify-center mb-2 gap-2">
@@ -469,7 +470,7 @@ const Sidebar = memo(({
         ) : (
           <InfiniteScroll
             dataLength={displayData.length}
-            next={isSearchActive ? () => {} : fetchMoreData}
+            next={isSearchActive ? () => { } : fetchMoreData}
             hasMore={isSearchActive ? false : hasMore}
             loader={<h4></h4>}
             scrollableTarget="sidebar"
@@ -496,7 +497,7 @@ const Sidebar = memo(({
                           } flex-grow cursor-pointer group`}
                         onClick={() => {
                           const isCurrentlySelected = decodeURIComponent(searchParams?.thread_id) === item?.thread_id;
-                          
+
                           if (isCurrentlySelected && !searchQuery) {
                             // If thread is already selected and no search query, toggle dropdown
                             handleToggleThread(item?.thread_id);
@@ -535,55 +536,55 @@ const Sidebar = memo(({
                           )}
                         </a>
                       </li>
-                      {decodeURIComponent(searchParams?.thread_id) === searchParams?.thread_id && !isSearchActive && 
+                      {decodeURIComponent(searchParams?.thread_id) === searchParams?.thread_id && !isSearchActive &&
                         expandedThreads?.includes(item?.thread_id) && (
-                        <>
-                          {loadingSubThreads ? (
-                            <Skeleton />
-                          ) : (
-                            <div className="pl-4 p-1.5 text-base-content text-xs rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
-                              <ul>
-                                {subThreads?.length === 0 ? (
-                                  <li className="text-xs p-1">No sub thread available</li>
-                                ) : (
-                                  [...subThreads]
-                                    .sort((a, b) => {
-                                      const aDate = new Date(a?.created_at || a?.createdAt || a?.updated_at || a?.updatedAt || 0).getTime();
-                                      const bDate = new Date(b?.created_at || b?.createdAt || b?.updated_at || b?.updatedAt || 0).getTime();
-                                      return bDate - aDate; // newest first
-                                    })
-                                    .map((subThreadId, index) => {
-                                      return (
-                                        <li
-                                          key={index}
-                                          className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
-                                            ? "hover:bg-base-primary hover:text-base-100"
-                                            : "hover:bg-base-300 hover:text-base-content"
-                                            } rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
-                                              ? "bg-primary text-base-100"
-                                              : ""
-                                            }`}
-                                          onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, searchParams?.thread_id)}
-                                        >
-                                          <div className="flex items-center justify-between">
-                                            <span className="truncate flex-1 mr-1.5">
-                                              {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 20)}
-                                            </span>
-                                            {(subThreadId?.updatedAt || subThreadId?.created_at || subThreadId?.createdAt || subThreadId?.updated_at) && (
-                                              <span className="text-xs whitespace-nowrap flex-shrink-0 opacity-70">
-                                                {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
+                          <>
+                            {loadingSubThreads ? (
+                              <Skeleton />
+                            ) : (
+                              <div className="pl-4 p-1.5 text-base-content text-xs rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
+                                <ul>
+                                  {subThreads?.length === 0 ? (
+                                    <li className="text-xs p-1">No sub thread available</li>
+                                  ) : (
+                                    [...subThreads]
+                                      .sort((a, b) => {
+                                        const aDate = new Date(a?.created_at || a?.createdAt || a?.updated_at || a?.updatedAt || 0).getTime();
+                                        const bDate = new Date(b?.created_at || b?.createdAt || b?.updated_at || b?.updatedAt || 0).getTime();
+                                        return bDate - aDate; // newest first
+                                      })
+                                      .map((subThreadId, index) => {
+                                        return (
+                                          <li
+                                            key={index}
+                                            className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                              ? "hover:bg-base-primary hover:text-base-100"
+                                              : "hover:bg-base-300 hover:text-base-content"
+                                              } rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                                ? "bg-primary text-base-100"
+                                                : ""
+                                              }`}
+                                            onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, searchParams?.thread_id)}
+                                          >
+                                            <div className="flex items-center justify-between">
+                                              <span className="truncate flex-1 mr-1.5">
+                                                {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 20)}
                                               </span>
-                                            )}
-                                          </div>
-                                        </li>
-                                      );
-                                    })
-                                )}
-                              </ul>
-                            </div>
-                          )}
-                        </>
-                      )}
+                                              {(subThreadId?.updatedAt || subThreadId?.created_at || subThreadId?.createdAt || subThreadId?.updated_at) && (
+                                                <span className="text-xs whitespace-nowrap flex-shrink-0 opacity-70">
+                                                  {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </li>
+                                        );
+                                      })
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                          </>
+                        )}
                       {decodeURIComponent(searchParams?.thread_id) === item?.thread_id && <div className="space-y-3">
                         <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                           {item?.sub_thread && item.sub_thread?.length > 0 && (
@@ -593,9 +594,9 @@ const Sidebar = memo(({
                                   {item?.sub_thread?.map((subThread, index) => (
                                     <div key={index}>
                                       <li className={`ml-4 ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
-                                          ? "cursor-pointer hover:bg-base-primary hover:text-base-100 rounded-md transition-all duration-200 text-xs bg-primary text-base-100"
-                                          : "cursor-pointer hover:bg-base-300 hover:text-base-content rounded-md transition-all duration-200 text-xs"
-                                          } flex-grow group`}
+                                        ? "cursor-pointer hover:bg-base-primary hover:text-base-100 rounded-md transition-all duration-200 text-xs bg-primary text-base-100"
+                                        : "cursor-pointer hover:bg-base-300 hover:text-base-content rounded-md transition-all duration-200 text-xs"
+                                        } flex-grow group`}
                                         onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
                                       >
                                         <a className="w-full h-full flex items-center justify-between relative">
