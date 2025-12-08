@@ -21,11 +21,12 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
 import SearchItems from "@/components/UI/SearchItems";
-import { ClockFading } from "lucide-react";
+import { ClockFading, Users } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
 import { Archive, ArchiveRestore, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import DeleteModal from "@/components/UI/DeleteModal";
 import UsageLimitModal from "@/components/modals/UsageLimitModal";
+import AccessManagementModal from "@/components/modals/AccessManagementModal";
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
 
 export const runtime = 'edge';
@@ -83,6 +84,7 @@ function Home({ params, isEmbedUser }) {
     showTutorial: false
   });
   const [selectedBridgeForLimit, setSelectedBridgeForLimit] = useState(null);
+  const [selectedAgentForAccess, setSelectedAgentForAccess] = useState(null);
   
   // Use portal dropdown hook
   const {
@@ -375,6 +377,17 @@ function Home({ params, isEmbedUser }) {
               resetUsage(row);
             }}><RefreshIcon className="" size={16} />Reset Usage</a></li>
           )}
+          {!isEmbedUser && (
+            <li><a onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handlePortalCloseImmediate();
+              setSelectedAgentForAccess(row);
+              setTimeout(() => {
+                openModal(MODAL_TYPE.ACCESS_MANAGEMENT_MODAL);
+              }, 10);
+            }}><Users size={16}/>Manage Access</a></li>
+          )}
           <li><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -620,6 +633,7 @@ function Home({ params, isEmbedUser }) {
       {/* Powered By Footer pinned to bottom */}
     {isEmbedUser && <PoweredByFooter />}
       <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} item="Agent Name" />
+      <AccessManagementModal agent={selectedAgentForAccess} />
       
       {/* Portal components from hook */}
       <PortalStyles />
