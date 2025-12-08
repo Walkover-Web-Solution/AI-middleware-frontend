@@ -27,7 +27,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       showDefaultApikeys
    };
   });
-  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys && prompt!="")? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
+  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys && shouldPromptShow && prompt!="")? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
   const [isAnimating, setIsAnimating] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
@@ -56,7 +56,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   };
 
   useEffect(() => {
-    if(isEmbedUser && showDefaultApikeys && prompt!=="")
+    if(isEmbedUser && showDefaultApikeys && shouldPromptShow && prompt!=="")
     {
       setIsVisible(false);
       return;
@@ -152,6 +152,9 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
             <div className="space-y-3">
               {AGENT_SETUP_GUIDE_STEPS?.map(({ step, title, detail, optional, icon }, index) => {
                 if ((step === '1'||step==='2') && !shouldPromptShow) {
+                  return null;
+                }
+                if((step==='3'||step==='5') && isEmbedUser){
                   return null;
                 }
 
