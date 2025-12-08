@@ -5,7 +5,7 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 // Knowledge Base Management APIs
 export const createKnowledgeBaseEntry = async (data) => {
   try {
-    const response = await axios.post(`${URL}/rag/`, data);
+    const response = await axios.post(`${URL}/api/rag/`, data);
     return response;
   } catch (error) {
     console.error(error);
@@ -15,7 +15,7 @@ export const createKnowledgeBaseEntry = async (data) => {
 
 export const getAllKnowBaseData = async () => {
   try {
-    const response = await axios.get(`${URL}/rag/docs`);
+    const response = await axios.get(`${URL}/api/rag/docs`);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -25,7 +25,7 @@ export const getAllKnowBaseData = async () => {
 
 export const getKnowledgeBaseToken = async () => {
   try {
-    const response = await axios.get(`${URL}/rag/docs/token`);
+    const response = await axios.get(`${URL}/api/rag/docs/token`);
     return response?.data?.result;
   } catch (error) {
     console.error(error);
@@ -36,7 +36,7 @@ export const getKnowledgeBaseToken = async () => {
 export const deleteKnowBaseData = async (data) => {
   try {
     const { id } = data;
-    const response = await axios.delete(`${URL}/rag/docs/${id}`, {
+    const response = await axios.delete(`${URL}/api/rag/docs/${id}`, {
       data: { id }
     });
     return response?.data;
@@ -49,7 +49,7 @@ export const deleteKnowBaseData = async (data) => {
 export const updateKnowledgeBaseEntry = async (data) => {
   try {
     const { data: dataToUpdate, id } = data?.data;
-    const response = await axios.patch(`${URL}/rag/docs/${id}`, dataToUpdate);
+    const response = await axios.patch(`${URL}/api/rag/docs/${id}`, dataToUpdate);
     return response;
   } catch (error) {
     console.error(error);

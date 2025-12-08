@@ -1,5 +1,5 @@
 // JsonSchemaModal.jsx
-import { optimizeSchemaApi } from "@/config/index";
+import { optimizeSchemaApi } from "@/config/utilityApi";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";

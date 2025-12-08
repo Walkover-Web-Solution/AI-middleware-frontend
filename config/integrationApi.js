@@ -5,7 +5,7 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 // Integration Management APIs
 export const createIntegrationApi = async (data) => {
   try {
-    const response = await axios.post(`${URL}/gtwyEmbed/`, data);
+    const response = await axios.post(`${URL}/api/embed/`, data);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -15,7 +15,7 @@ export const createIntegrationApi = async (data) => {
 
 export const getAllIntegrationApi = async () => {
   try {
-    const response = await axios.get(`${URL}/gtwyEmbed/`);
+    const response = await axios.get(`${URL}/api/embed/`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -25,7 +25,7 @@ export const getAllIntegrationApi = async () => {
 
 export const updateIntegrationData = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/gtwyEmbed/`, { folder_id: dataToSend?.folder_id, ...dataToSend })
+    const response = await axios.put(`${URL}/api/embed/`, { folder_id: dataToSend?.folder_id, ...dataToSend })
     return response
   } catch (error) {
     console.error(error)
@@ -35,7 +35,7 @@ export const updateIntegrationData = async (dataToSend) => {
 
 export const generateGtwyAccessTokenApi = async () => {
   try {
-    const response = await axios.get(`${URL}/gtwyEmbed/token`);
+    const response = await axios.get(`${URL}/api/embed/getToken`);
     return response;
   } catch (error) {
     console.error(error);

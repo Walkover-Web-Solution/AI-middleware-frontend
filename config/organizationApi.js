@@ -43,7 +43,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
     company: orgDetails,
   };
   try {
-    const response = await axios.put(`${URL}/user/updateDetails`, updateObject, {
+    const response = await axios.put(`${URL}/api/user/updateDetails`, updateObject, {
       headers: {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
@@ -65,12 +65,12 @@ export const inviteUser = async (email) => {
   }
 }
 
-export const getInvitedUsers = async ({page, limit, search}) => {
+export const getInvitedUsers = async ({ page, limit, search }) => {
   try {
     const data = await axios.get(`${PROXY_URL}/api/c/getUsers?search=${search}`, {
       params: {
-        pageNo:page,
-        itemsPerPage:limit
+        pageNo: page,
+        itemsPerPage: limit
       }
     });
     return data;
@@ -83,7 +83,7 @@ export const getInvitedUsers = async ({page, limit, search}) => {
 // Organization Token Management
 export const generateAccessKey = async () => {
   try {
-    const response = await axios.get(`${URL}/org/auth_token`);
+    const response = await axios.get(`${URL}/api/org/auth_token`);
     return response;
   } catch (error) {
     console.error(error);

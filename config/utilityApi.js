@@ -69,7 +69,7 @@ export const improvePrompt = async (variables) => {
 // AI Assistant Tools APIs
 export const getPrebuiltPrompts = async () => {
   try {
-    const getPrebuiltPrompts = await axios.get(`${URL}/prebuilt_prompt`)
+    const getPrebuiltPrompts = await axios.get(`${URL}/api/prebuilt_prompt`)
     return getPrebuiltPrompts?.data?.data
   }
   catch (error) {
@@ -80,7 +80,7 @@ export const getPrebuiltPrompts = async () => {
 
 export const updatePrebuiltPrompt = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/prebuilt_prompt`, dataToSend)
+    const response = await axios.put(`${URL}/api/prebuilt_prompt`, dataToSend)
     return response?.data?.data
   } catch (error) {
     console.error(error)
@@ -90,7 +90,7 @@ export const updatePrebuiltPrompt = async (dataToSend) => {
 
 export const resetPrebuiltPrompt = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/prebuilt_prompt/reset`, dataToSend)
+    const response = await axios.post(`${URL}/api/prebuilt_prompt/reset`, dataToSend)
     return response?.data?.data
   } catch (error) {
     console.error(error)
@@ -101,7 +101,7 @@ export const resetPrebuiltPrompt = async (dataToSend) => {
 // Functions Management APIs
 export const getAllFunctionsApi = async () => {
   try {
-    const data = await axios.get(`${URL}/functions/all`)
+    const data = await axios.get(`${URL}/api/tools/`)
     return data;
   } catch (error) {
     console.error(error)
@@ -111,7 +111,7 @@ export const getAllFunctionsApi = async () => {
 
 export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   try {
-    const response = await axios.put(`${URL}/functions/${function_id}`, { dataToSend });
+    const response = await axios.put(`${URL}/api/tools/${function_id}`, { dataToSend });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -121,7 +121,7 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
 
 export const deleteFunctionApi = async (function_name) => {
   try {
-    const response = await axios.delete(`${URL}/functions/`, {
+    const response = await axios.delete(`${URL}/api/tools/`, {
       data: { function_name }
     });
     return response.data;
@@ -133,7 +133,7 @@ export const deleteFunctionApi = async (function_name) => {
 
 export const getPrebuiltToolsApi = async () => {
   try {
-    const response = await axios.get(`${URL}/api/v1/agentConfig/inbuilt/tools`);
+    const response = await axios.get(`${URL}/api/tools/inbuilt`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -144,7 +144,7 @@ export const getPrebuiltToolsApi = async () => {
 // Webhook and Alerting APIs
 export const createWebhookAlert = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/alerting`, dataToSend);
+    const response = await axios.post(`${URL}/api/alerting`, dataToSend);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -154,7 +154,7 @@ export const createWebhookAlert = async (dataToSend) => {
 
 export const updateWebhookAlert = async ({ data, id }) => {
   try {
-    const response = await axios.put(`${URL}/alerting/${id}`, data);
+    const response = await axios.put(`${URL}/api/alerting/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -164,7 +164,7 @@ export const updateWebhookAlert = async ({ data, id }) => {
 
 export const getAllWebhookAlert = async () => {
   try {
-    const response = await axios.get(`${URL}/alerting`);
+    const response = await axios.get(`${URL}/api/alerting`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -174,7 +174,7 @@ export const getAllWebhookAlert = async () => {
 
 export const deleteWebhookAlert = async (id) => {
   try {
-    const response = await axios.delete(`${URL}/alerting`, {
+    const response = await axios.delete(`${URL}/api/alerting`, {
       data: { id: id },
     });
     return response.data;
@@ -226,7 +226,7 @@ export const integration = async (embed_token) => {
 
 export const createapi = async (dataFromEmbed) => {
   try {
-    const response = await axios.post(`${URL}/api/v1/agentConfig/createapi`, dataFromEmbed);
+    const response = await axios.post(`${URL}/api/tools/`, dataFromEmbed);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -236,7 +236,7 @@ export const createapi = async (dataFromEmbed) => {
 
 export const updateapi = async (bridge_id, dataFromEmbed) => {
   try {
-    const response = await axios.post(`${URL}/api/v1/agentConfig/updateapi/${bridge_id}`, dataFromEmbed);
+    const response = await axios.put(`${URL}/api/tools/${bridge_id}`, dataFromEmbed);
     return response;
   } catch (error) {
     console.error(error);
@@ -309,7 +309,7 @@ export const getAllShowCase = async () => {
 
 export const getAllAgentsApi = async () => {
   try {
-    const response = await axios.get(`${URL}/runagents/all`);
+    const response = await axios.get(`${URL}/api/runagents/`);
     return response;
   } catch (error) {
     console.error(error);
