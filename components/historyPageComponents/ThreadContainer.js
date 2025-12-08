@@ -17,7 +17,7 @@ import HistoryPagePromptUpdateModal from '../modals/HistoryPagePromptUpdateModal
 import { ChatLoadingSkeleton } from './ChatLayoutLoader';
 import { clearThreadData } from '@/store/reducer/historyReducer';
 import EditMessageModal from '../modals/EditMessageModal';
-import { improvePrompt } from '@/config/index';
+import { improvePrompt } from '@/config/utilityApi';
 
 // ------------------------------------
 // Constants

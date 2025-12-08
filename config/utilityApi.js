@@ -30,18 +30,18 @@ export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_i
   }
 };
 
-// export const optimizeSchemaApi = async ({ data }) => {
-//   try {
-//     const response = await axios.post(
-//       `${URL}/utils/structured_output`,
-//       data
-//     );
-//     return response.data;
-//   } catch (error) {
-//     console.error(error);
-//     return error;
-//   }
-// };
+export const optimizeSchemaApi = async ({ data }) => {
+  try {
+    const response = await axios.post(
+      `${URL}/utils/structured_output`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
 
 export const optimizeJsonApi = async ({ data }) => {
   try {
@@ -56,15 +56,15 @@ export const optimizeJsonApi = async ({ data }) => {
   }
 };
 
-// export const improvePrompt = async (variables) => {
-//   try {
-//     const response = await axios.post(`${URL}/utils/improve_prompt`, { variables })
-//     return response?.data;
-//   } catch (error) {
-//     console.error(error)
-//     throw new Error(error);
-//   }
-// }
+export const improvePrompt = async (variables) => {
+  try {
+    const response = await axios.post(`${URL}/utils/improve_prompt`, { variables })
+    return response?.data;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}
 
 // AI Assistant Tools APIs
 export const getPrebuiltPrompts = async () => {
