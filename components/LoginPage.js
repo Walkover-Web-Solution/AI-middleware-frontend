@@ -1,8 +1,6 @@
 'use client'
 import React, { useEffect } from 'react'
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { setInCookies } from '@/utils/utility';
@@ -124,11 +122,6 @@ const LoginPage = ({loading}) => {
                 <div className="text-xs text-base-content/60">SUPPORT</div>
               </div>
             </div>
-            
-            {/* Terms Text */}
-            {/* <div className="text-xs text-base-content/50 mt-6 text-center px-4 max-w-md">
-              By continuing you agree to gtwy's <span className="hover:text-primary cursor-pointer">Terms of Service</span> and acknowledge our <span className="hover:text-primary cursor-pointer">Privacy Policy</span>
-            </div> */}
           </div>
         </div>
       )}
