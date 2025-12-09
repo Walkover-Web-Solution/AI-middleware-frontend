@@ -188,7 +188,7 @@ const Page = ({ params }) => {
                 className="btn btn-primary btn-sm mr-2"
                 onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
               >
-                + Create New Integration
+                + Create New Embed
               </button>
             </div>
           </div>

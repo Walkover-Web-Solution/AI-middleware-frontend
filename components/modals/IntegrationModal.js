@@ -11,7 +11,7 @@ const IntegrationModal = ({ params }) => {
   const dispatch = useDispatch();
   const handleCreateNewIntegration = () => {
     if(integrationNameRef?.current?.value?.trim()===""){
-     toast.error("Integration name should not be empty");
+     toast.error("Embed name should not be empty");
       return;
     }
     dispatch(createIntegrationAction({
@@ -39,10 +39,10 @@ const IntegrationModal = ({ params }) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
       <div className='modal-box'>
-        <h3 className="font-bold text-lg mb-4">Enter Integration Name{RequiredItem()}</h3>
+        <h3 className="font-bold text-lg mb-4">Enter Embed Name{RequiredItem()}</h3>
         <input
           type="text"
-          placeholder="Enter integration name"
+          placeholder="Enter embed name"
           className="input input-bordered input-sm w-full mb-2 placeholder-opacity-50"
           maxLength={50}
           ref={integrationNameRef}

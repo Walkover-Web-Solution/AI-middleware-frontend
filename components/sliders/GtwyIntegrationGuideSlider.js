@@ -575,7 +575,7 @@ window.openGtwy({
     >
       <div className="flex flex-col w-full gap-4">
         <div className="flex justify-between items-center border-b border-base-300 pb-4">
-          <h3 className="font-bold text-lg">Integration Setup</h3>
+          <h3 className="font-bold text-lg">Embed Setup</h3>
           <CloseIcon
             className="cursor-pointer hover:text-error transition-colors"
             onClick={handleClose}
@@ -628,7 +628,7 @@ window.openGtwy({
             {/* Script Integration */}
             <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
-                <h4 className="card-title text-base">Step 1: Connect Integration</h4>
+                <h4 className="card-title text-base">Step 1: Generate Embed Token</h4>
                 <div className="space-y-6">
                   {/* JWT Payload */}
                   <div className="form-control">
