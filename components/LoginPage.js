@@ -44,7 +44,7 @@ const LoginPage = ({loading}) => {
         <div className="container mx-auto">
           
           {/* Logo and centered secure login label in same row */}
-          <div className="flex items-center mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div className="w-16 relative">
               <a href={process.env.NEXT_PUBLIC_FRONTEND_URL} className="inline-block cursor-pointer relative">
                 <div className="relative w-20 h-20 flex items-center justify-center">
@@ -73,40 +73,44 @@ const LoginPage = ({loading}) => {
                 </div>
               </a>
             </div>
-            
-            {/* Secure Login Label - Centered */}
+
             <div className="flex-1 flex justify-center">
               <div className="inline-flex items-center gap-2 px-6 py-2 bg-white/80 backdrop-blur-sm border border-black/10 rounded-full shadow-sm">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-xs tracking-wider text-black/60">SECURE LOGIN</span>
               </div>
             </div>
-            
-            {/* Empty space to balance the layout */}
-            <div className="w-12"></div>
+
+            <div className="w-12" />
           </div>
           
           {/* Login card in center */}
           <div className="flex flex-col items-center justify-center">
-            
-            <div className="w-full max-w-sm px-8 py-10 bg-base-200 shadow-md relative">
+
+            <div className="w-full max-w-md">
               {/* Corner borders */}
-              <div className="absolute top-0 left-0 w-[50px] h-[50px] border-t-2 border-l-2 border-gray-400"></div>
-              <div className="absolute bottom-0 right-0 w-[50px] h-[50px] border-b-2 border-r-2 border-gray-400"></div>
+              <div className='bg-white/80 backdrop-blur-xl border border-black/10 shadow-2xl shadow-black/5 p-12 relative animate-[fadeInUp_0.8s_ease-out_0.1s_both]'>
+              <div className="absolute -top-px -left-px w-16 h-16 border-l-2 border-t-2 border-black/20"></div>
+              <div className="absolute -bottom-px -right-px w-16 h-16 border-r-2 border-b-2 border-black/20"></div>
+              
               {/* Welcome Text */}
               <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold text-base-content tracking-tight">Welcome Back</h1>
-                <p className="text-sm text-base-content/70 mt-1">Login to access your AI workspace</p>
+                <h1 className="text-5xl text-black tracking-tight mb-4">Welcome Back</h1>
+                <p className="text-sm text-black/50 tracking-wide">Login to access your AI workspace</p>
               </div>
 
               {/* Login Options */}
-              <div className="w-full flex justify-center py-10">
-                <div id={process.env.NEXT_PUBLIC_REFERENCEID} className="w-full mx-14" />
+              <div className="w-full flex justify-center py-16">
+                <div
+                  id={process.env.NEXT_PUBLIC_REFERENCEID}
+                  className="w-full flex flex-col justify-center items-center"
+                />
               </div>
+            </div>
             </div>
             
             {/* Stats Section - Below login card */}
-            <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-sm">
+            <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
               <div className="text-center border px-2 py-4">
                 <div className="text-sm font-semibold text-base-content">500+</div>
                 <div className="text-xs text-base-content/60">COMPANIES</div>
