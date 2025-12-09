@@ -27,8 +27,8 @@ export const getAllModels = async (service) => {
 
 export const getAllServices = async () => {
   try {
-    // const response = await axios.get(`${URL}/api/service`);
-    // return response.data;
+    const response = await axios.get(`${URL}/api/service`);
+    return response.data;
   } catch (error) {
     console.error(error);
     throw new Error(error);
