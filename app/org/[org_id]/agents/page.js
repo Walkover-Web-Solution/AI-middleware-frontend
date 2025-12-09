@@ -15,6 +15,7 @@ import useTutorialVideos from "@/hooks/useTutorialVideos";
 import { getIconOfService, openModal, closeModal, formatRelativeTime, useOutsideClick, formatDate } from "@/utils/utility";
 
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
+import { Infinity } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -161,6 +162,59 @@ const renderTimestampCell = (timestamp) => {
       <span className="hidden group-hover:inline">
         {formatDate(timestamp)}
       </span>
+    </div>
+  );
+};
+
+const renderCreatedByCell = (createdBy, timestamp) => {
+  if (!createdBy) {
+    return "Unknown";
+  }
+
+  return (
+    <div className="group cursor-help">
+      <span className="group-hover:hidden">
+        {createdBy}
+      </span>
+      <span className="hidden group-hover:inline">
+        {formatDate(timestamp)}
+      </span>
+    </div>
+  );
+};
+
+const renderUpdatedByCell = (updatedBy, timestamp) => {
+  if (!updatedBy) {
+    return "Unknown";
+  }
+
+  return (
+    <div className="group cursor-help">
+      <span className="group-hover:hidden">
+        {updatedBy}
+      </span>
+      <span className="hidden group-hover:inline">
+        {formatDate(timestamp)}
+      </span>
+    </div>
+  );
+};
+
+const renderLimitCell = (limit) => {
+  const limitValue = Number(limit ?? 0);
+  const hasLimit = Number.isFinite(limitValue) && limitValue > 0;
+  
+  if (!hasLimit) {
+    return (
+      <div className="flex items-center justify-center">
+        <Infinity size={20} className="text-primary" />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="text-center font-medium">
+      {formatUsageNumber(limitValue, 4)}
     </div>
   );
 };
@@ -420,15 +474,15 @@ function Home({ params, isEmbedUser }) {
         totalTokens: totalTokensValue,
         usageCost: totalCostValue,
         averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
-        agent_limit: item?.bridge_limit,
+        agent_limit: renderLimitCell(item?.bridge_limit),
         agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
         isLoading: loadingAgentId === item._id,
         last_used: renderTimestampCell(lastUsed),
         last_used_orignal: lastUsed,
         last_used_original: lastUsed,
-        created_at: renderTimestampCell(createdAt),
+        created_by: renderCreatedByCell(item.created_by || "Admin", createdAt),
         created_at_original: createdAt,
-        updated_at: renderTimestampCell(updatedAt),
+        updated_by: renderUpdatedByCell(item.updated_by || "Admin", updatedAt),
         updated_at_original: updatedAt,
       });
     });
@@ -498,15 +552,15 @@ function Home({ params, isEmbedUser }) {
           : "—",
         totalTokens: totalTokensValue,
         usageCost: totalCostValue,
-        agent_limit: item?.bridge_limit,
+        agent_limit: renderLimitCell(item?.bridge_limit),
         averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
         isLoading: loadingAgentId === item._id,
         last_used: renderTimestampCell(lastUsed),
         last_used_original: lastUsed,
         last_used_orignal: lastUsed,
-        created_at: renderTimestampCell(createdAt),
+        created_by: renderCreatedByCell(item.created_by || "Admin", createdAt),
         created_at_original: createdAt,
-        updated_at: renderTimestampCell(updatedAt),
+        updated_by: renderUpdatedByCell(item.updated_by || "Admin", updatedAt),
         updated_at_original: updatedAt,
         agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
 
@@ -916,9 +970,9 @@ const handleUsageFilterDropdownClick = (e) => {
                 <div className="w-full overflow-visible">
                   <CustomTable
                     data={UnArchivedBridges}
-                    columnsToShow={['name', 'promptDetails', 'totalTokens','last_used','created_at','updated_at']}
+                    columnsToShow={['name', 'promptDetails', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                     sorting
-                    sortingColumns={['name','totalTokens','last_used','created_at','updated_at']}
+                    sortingColumns={['name', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                     handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} 
                     keysToExtractOnRowClick={['_id', 'versionId']} 
                     keysToWrap={['name', 'model']} 
@@ -944,9 +998,9 @@ const handleUsageFilterDropdownClick = (e) => {
                     <div className="opacity-60 overflow-visible">
                       <CustomTable
                         data={DeletedBridges}
-                        columnsToShow={['name', 'promptDetails', 'totalTokens','last_used','created_at','updated_at']}
+                        columnsToShow={['name', 'promptDetails', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                         sorting
-                        sortingColumns={['name','totalTokens','last_used','created_at','updated_at']}
+                        sortingColumns={['name', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                         keysToWrap={['name', 'model']} 
                         endComponent={DeletedEndComponent}
                         isUsageFilterActive={isUsageFilterActive}

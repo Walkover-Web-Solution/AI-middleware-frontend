@@ -52,6 +52,12 @@ const CustomTable = ({
             case 'updated_at':
             case 'updatedAt':
                 return 'Updated At';
+            case 'created_by':
+                return 'Created By';
+            case 'updated_by':
+                return 'Updated By';
+            case 'agent_limit':
+                return 'Limit';
             case 'apikey_usage':
                 return 'Apikey Usage';
             case 'agent_usage':
