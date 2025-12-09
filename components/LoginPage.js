@@ -46,7 +46,7 @@ const LoginPage = ({loading}) => {
           {/* Logo and centered secure login label in same row */}
           <div className="flex items-center mb-8">
             <div className="w-16 relative">
-              <a href="https://gtwy.ai" className="inline-block cursor-pointer relative">
+              <a href={process.env.NEXT_PUBLIC_FRONTEND_URL} className="inline-block cursor-pointer relative">
                 <div className="relative w-20 h-20 flex items-center justify-center">
                   <div className="relative">
                     {/* Rotating box positioned behind the logo - offset to match reference image */}
