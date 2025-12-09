@@ -35,7 +35,7 @@ const LoginPage = ({loading}) => {
     }
   },[utmSource, utmMedium, utmCampaign, utmTerm, utmContent])
   return (
-    <div className="min-h-screen w-full bg-base-100 p-6">
+    <div className="min-h-screen w-full bg-base-200 p-6">
       {loading ? (
         <div className="flex items-center justify-center h-screen">
           <LoadingSpinner />
@@ -89,14 +89,14 @@ const LoginPage = ({loading}) => {
 
             <div className="w-full max-w-md">
               {/* Corner borders */}
-              <div className='bg-white/80 backdrop-blur-xl border border-black/10 shadow-2xl shadow-black/5 p-12 relative animate-[fadeInUp_0.8s_ease-out_0.1s_both]'>
-              <div className="absolute -top-px -left-px w-16 h-16 border-l-2 border-t-2 border-black/20"></div>
-              <div className="absolute -bottom-px -right-px w-16 h-16 border-r-2 border-b-2 border-black/20"></div>
+              <div className='bg-base-100/20 backdrop-blur-xl border border-base-content/20 p-12 relative animate-[fadeInUp_0.8s_ease-out_0.1s_both]'>
+              <div className="absolute -top-px -left-px w-16 h-16 border-l-2 border-t-2 border-base-content/30"></div>
+              <div className="absolute -bottom-px -right-px w-16 h-16 border-r-2 border-b-2 border-base-content/30"></div>
               
               {/* Welcome Text */}
               <div className="text-center mb-6">
-                <h1 className="text-5xl text-black tracking-tight mb-4">Welcome Back</h1>
-                <p className="text-sm text-black/50 tracking-wide">Login to access your AI workspace</p>
+                <h1 className="text-5xl text-base-content tracking-tight mb-4">Welcome Back</h1>
+                <p className="text-sm text-base-content tracking-wide">Login to access your AI workspace</p>
               </div>
 
               {/* Login Options */}
