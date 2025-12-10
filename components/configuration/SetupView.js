@@ -32,9 +32,9 @@ const SetupView = memo(() => {
 
     return (
         <>
-            {bridgeType === 'trigger' && !isEmbedUser && (
+            {/* {bridgeType === 'trigger' && !isEmbedUser && (
                 <TriggersList params={params} />
-            )}
+            )} */}
             {modelType === "image" ? (
                 <>
                     <CommonConfigComponents

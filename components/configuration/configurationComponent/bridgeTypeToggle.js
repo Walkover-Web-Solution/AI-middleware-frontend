@@ -114,7 +114,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) =>
                             </InfoTooltip>
                         </div>
                         
-                        {/* {!isEmbedUser && (
+                        {!isEmbedUser && (
                             <div className="flex items-center gap-2 min-w-0">
                                 <InfoTooltip tooltipContent="Triggers allows you to create automated workflows that respond to specific events or conditions. Ideal for creating event-driven applications.">
                                     <label className="flex items-center cursor-pointer min-w-0">
@@ -133,7 +133,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) =>
                                     </label>
                                 </InfoTooltip>
                             </div>
-                        )} */}
+                        )}
                     </div>
                     
                 {/* Alert message */}
