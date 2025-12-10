@@ -1,19 +1,5 @@
 import React from 'react';
-import BridgeTypeToggle from "./configurationComponent/BridgeTypeToggle";
 
-const ConfigurationHeader = ({ 
-    params, 
-    searchParams, 
-    isEmbedUser, 
-    showConfigType 
-}) => {
-    return (
-        <div>
-            {((isEmbedUser && showConfigType) || !isEmbedUser) && (
-                <BridgeTypeToggle params={params} searchParams={searchParams} />
-            )}
-        </div>
-    );
-};
+const ConfigurationHeader = () => null;
 
 export default React.memo(ConfigurationHeader);

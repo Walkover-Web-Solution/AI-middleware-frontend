@@ -10,6 +10,7 @@ import {
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
   Cog,
+  Code2
 } from 'lucide-react';
 import { AddIcon, KeyIcon } from '@/components/Icons';
 import GiftIcon from '@/icons/GiftIcon';
@@ -20,6 +21,7 @@ import React from 'react';
 export const ITEM_ICONS = {
   org: <Building2 size={15} />,
   agents: <Bot size={15} />,
+  api: <Code2 size={15} />,
   chatbotConfig: <FileSliders size={15} />,
   chatbot: <MessageSquare size={15} />,
   pauthkey: <Shield size={15} />,
@@ -47,6 +49,10 @@ export const ITEM_ICONS = {
 
 export const DISPLAY_NAMES = (key) => {
   switch (key) {
+    case 'api':
+      return 'API Agents';
+    case 'chatbot':
+      return 'Chatbot Agents';
     case 'agents':
       return 'Agents';
     case 'knowledge_base':
@@ -79,15 +85,18 @@ export const DISPLAY_NAMES = (key) => {
 };
 
 
-
 export const NAV_SECTIONS = [
-  { items: ['agents', 'chatbotConfig', 'knowledge_base'] },
+  { title: 'AGENT TYPES', items: ['api', 'chatbot'] },
+  { title: 'CONFIGURATION', items: ['chatbotConfig', 'knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'Developer', items: ['integration', 'RAG_embed'] }
 ];
 
-
+export const NAV_ITEM_CONFIG = {
+  api: { path: 'agents', query: { type: 'api' } },
+  chatbot: { path: 'agents', query: { type: 'chatbot' } }
+};
 
 export const HRCollapsed = React.memo(() => (
   <hr className="my-2 w-6 border-base-content/30 mx-auto" />

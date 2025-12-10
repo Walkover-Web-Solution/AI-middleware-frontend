@@ -6,7 +6,7 @@ import CreateNewBridge from "./CreateNewBridge";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "./Protected";
 
-const AgentEmptyState = ({ orgid, isEmbedUser }) => {
+const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = 'api' }) => {
   const { tutorialData } = useCustomSelector((state) => ({
     tutorialData: state.flowDataReducer?.flowData?.tutorialData || []
   }))
@@ -76,7 +76,7 @@ const AgentEmptyState = ({ orgid, isEmbedUser }) => {
 
         {/* Features Section */}
 
-        <CreateNewBridge orgid={orgid} isEmbedUser={isEmbedUser} />
+        <CreateNewBridge orgid={orgid} isEmbedUser={isEmbedUser} defaultBridgeType={defaultBridgeType} />
       </div>
     </div>
   );
