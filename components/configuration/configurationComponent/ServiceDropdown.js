@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AlertIcon } from "@/components/Icons";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, version } from "react";
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/Protected";
@@ -9,7 +9,7 @@ import { getIconOfService } from "@/utils/utility";
 import InfoTooltip from "@/components/InfoTooltip";
 import Dropdown from '@/components/UI/Dropdown';
 
-function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser, isPublished }) {
+function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser, isPublished,activeData ,versionData,bridgeDataFromState}) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -32,10 +32,13 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             bridgeApiKey: isPublished ? (bridgeDataFromState?.apikey_object_id?.[service]) : (versionData?.apikey_object_id?.[service]),
             shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
             apiKeyObjectIdData,
-            showDefaultApikeys
+            showDefaultApikeys,
+            activeData: activeData,
+            versionData: versionData,
+            bridgeDataFromState: bridgeDataFromState
         };
     });
-
+    
     const [selectedService, setSelectedService] = useState(service);
     const dispatch = useDispatch();
 

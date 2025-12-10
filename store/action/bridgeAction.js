@@ -22,6 +22,7 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
   try {
     dispatch(isPending())
     const data = await getBridgeVersionApi({ bridgeVersionId: versionId });
+    console.log("versionData:", data);
     dispatch(fetchSingleBridgeVersionReducer({ bridge: data?.bridge }));
     return data?.bridge;
   } catch (error) {
