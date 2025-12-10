@@ -5,7 +5,7 @@ axios.interceptors.request.use(
     async (config) => {
         // Check if the request is going to PROXY_URL
         const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
-        if (config.url?.includes(PROXY_URL) || config.url?.includes('/api/c/') || config.url?.includes('/localToken')) {
+        if (config.url?.includes(PROXY_URL) || config.url?.includes('/api/c/') || config.url?.includes('/localToken')||config.url?.includes('/switchOrg')) {
             // For PROXY_URL APIs, use proxy_auth_token
             let proxyToken = sessionStorage.getItem("proxy_token") ? sessionStorage.getItem("proxy_token") : getFromCookies("proxy_token");
             config.headers['proxy_auth_token'] = proxyToken;

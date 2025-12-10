@@ -128,8 +128,9 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
     const response = await axios.put(`${URL}/api/versions/${versionId}`, dataToSend);
     return response?.data
   } catch (error) {
+    console.log(error,"hello")
     console.error(error)
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.message || 'Failed to update bridge version');
   }
 }
 

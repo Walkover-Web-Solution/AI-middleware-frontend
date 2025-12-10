@@ -8,12 +8,9 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { UserCircleIcon } from '@/components/Icons';
 import { UserPlus2 } from 'lucide-react';
-
 const AccessManagementModal = ({ agent }) => {
   // agent.users contains the users already added to this agent
   const dispatch = useDispatch();
-  const [members, setMembers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [foundUser, setFoundUser] = useState(null);
@@ -21,11 +18,11 @@ const AccessManagementModal = ({ agent }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [agentMembers, setAgentMembers] = useState([]);
-  
-  // Ref for debounce timer
+  // Refs for debounce timer and input focus
   const debounceTimerRef = useRef(null);
   const isTypingRef = useRef(false);
-
+  const emailInputRef = useRef(null);
+  
 
   // Cleanup function for debounce timer
   useEffect(() => {
@@ -39,39 +36,16 @@ const AccessManagementModal = ({ agent }) => {
   // Load initial data and extract agent members when agent prop changes
   useEffect(() => {
     // Set static members for demonstration
-    const staticMembers = [
-      { id: '1', name: 'John Doe', email: 'john@example.com', role: 'editor' },
-      { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'editor' },
-      { id: '3', name: 'Admin User', email: 'admin@example.com', role: 'admin' }
-    ];
     
     if (agent && agent.users) {
       setAgentMembers(agent.users || []);
     } else {
       // Use static members if no agent users
-      setAgentMembers(staticMembers);
+      setAgentMembers(agent?.users|| []);
     }
     
     // Load initial members list
-    const loadInitialMembers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getInvitedUsers({
-          page: 1,
-          limit: 20
-        });
-        
-        if (response.status === 200 && response.data) {
-          setMembers(response.data.data.data || []);
-        }
-      } catch (error) {
-        console.error('Error loading initial members:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadInitialMembers();
+   
   }, [agent]);
 
   const handleClose = () => {
@@ -123,6 +97,10 @@ const AccessManagementModal = ({ agent }) => {
       toast.error('Failed to search for user');
     } finally {
       setIsSearching(false);
+      // Restore focus to input after search completes
+      if (emailInputRef.current) {
+        emailInputRef.current.focus();
+      }
     }
   };
   
@@ -142,12 +120,10 @@ const AccessManagementModal = ({ agent }) => {
     setIsUpdating(true);
     
     try {
-      // Create payload with user ID and add:false to remove
+      // Create payload with user ID and add_user_id:true to remove (as requested)
       const dataToSend = {
-        users: {
-          "id": userId,
-          "add": false
-        }
+        user_id: userId,
+        add_user_id: false,
       };
       
       const res = await dispatch(updateBridgeAction({ 
@@ -189,12 +165,10 @@ const AccessManagementModal = ({ agent }) => {
     setIsUpdating(true);
     
     try {
-      // Create payload with user ID and add flag
+      // Create payload with user ID and add_user_id:false to add (as requested)
       const dataToSend = {
-        users: {
-          "id": userId,
-          "add": true
-        }
+        user_id: userId,
+        add_user_id: true,
       };
       
       const res = await dispatch(updateBridgeAction({ 
@@ -205,8 +179,13 @@ const AccessManagementModal = ({ agent }) => {
       if (res?.success) {
         toast.success('User added to agent successfully');
         
-        // Update local state to show the new member immediately
-        const newMember = { id: userId, role: 'editor' };
+        // Update local state to show the new member immediately, including name and email
+        const newMember = {
+          id: userId,
+          role: 'editor',
+          name: foundUser?.name,
+          email: foundUser?.email,
+        };
         setAgentMembers(prev => [...prev, newMember]);
         
         setEmailInput('');
@@ -286,7 +265,7 @@ const AccessManagementModal = ({ agent }) => {
         // Clear results if less than 3 characters
         setSearchResults([]);
       }
-    }, 800); // Longer timeout to ensure user has stopped typing
+    }, 2000); // Increased timeout to ensure user has fully stopped typing
   };
   
   // Search for members as user types
@@ -368,21 +347,6 @@ const AccessManagementModal = ({ agent }) => {
   };
 
 
-  // Map role name to display text
-  const getRoleDisplayText = (roleName) => {
-    switch(roleName?.toLowerCase()) {
-      case 'owner':
-        return 'Admin';
-      case 'admin':
-        return 'Admin';
-      case 'member':
-        return 'Editor';
-      case 'view only':
-        return 'View Only';
-      default:
-        return 'View Only';
-    }
-  };
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.ACCESS_MANAGEMENT_MODAL}>
@@ -392,20 +356,12 @@ const AccessManagementModal = ({ agent }) => {
             <h2 className="text-lg font-semibold">
               Manage Access for {agent?.name || 'Agent'}
             </h2>
-            <p className="text-sm text-base-content/70">
-              Team Members
-            </p>
           </div>
-          <button onClick={handleClose} className="btn btn-sm btn-circle btn-ghost">✕</button>
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-base-content/70 mb-4">
-            Control who can access and modify this agent by assigning roles to team members.
-          </p>
-          
-          {/* Email input with Add/Invite button */}
-          <div className="bg-base-200 p-4 rounded-lg mb-4">
+          {/* Email input with contextual Add/Invite actions */}
+          <div className="bg-base-200 rounded-lg mb-4">
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
@@ -414,39 +370,53 @@ const AccessManagementModal = ({ agent }) => {
                   onChange={handleEmailChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter user email..."
-                  className="input input-bordered w-full pr-10"
-                  disabled={isSearching || isInviting || isUpdating}
+                  className="input input-sm input-bordered w-full pr-10"
+                  ref={emailInputRef}
+                  // Keep enabled during search to avoid losing focus
+                  disabled={isInviting || isUpdating}
                 />
               </div>
-              
-              {isSearching ? (
-                <button className="btn btn-primary" disabled>
-                  <span className="loading loading-spinner loading-xs"></span>
-                  Searching...
-                </button>
-              ) : foundUser ? (
-                <button 
-                  className="btn btn-primary" 
-                  onClick={() => addUserToAgent(foundUser.id)}
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? (
-                    <span className="loading loading-spinner loading-xs"></span>
+
+              {/* Initially: no button. Once search starts or finishes, show Add/Invite based on results. */}
+              {emailInput.trim().length >= 3 && (isSearching || searchResults.length > 0) && (
+                <div className="flex items-center">
+                  {isSearching ? (
+                    <button className="btn btn-primary btn-sm" disabled>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Searching...
+                    </button>
+                  ) : searchResults.length > 0 ? (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => {
+                        const targetUser = foundUser || searchResults[0];
+                        if (targetUser?.id) addUserToAgent(targetUser.id);
+                      }}
+                      disabled={isUpdating}
+                    >
+                      {isUpdating ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                      ) : (
+                        <>
+                          <UserPlus2 size={16} className="mr-1" />
+                          Add
+                        </>
+                      )}
+                    </button>
                   ) : (
-                    <>
-                      <UserPlus2 size={16} className="mr-1" />
-                      Add
-                    </>
+                    <button
+                      className="btn btn-outline btn-sm btn-primary"
+                      onClick={handleInviteUser}
+                      disabled={isInviting || !emailInput.trim()}
+                    >
+                      {isInviting ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                      ) : (
+                        'Invite'
+                      )}
+                    </button>
                   )}
-                </button>
-              ) : (
-                <button 
-                  className="btn" 
-                  onClick={searchUserByEmail}
-                  disabled={!emailInput.trim()}
-                >
-                  Search
-                </button>
+                </div>
               )}
             </div>
             
@@ -514,7 +484,7 @@ const AccessManagementModal = ({ agent }) => {
                   {agentMembers.map((agentMember) => (
                     <div
                       key={agentMember.id}
-                      className="flex items-center gap-2 px-3 py-2 border border-base-200 rounded-full bg-base-100 hover:bg-base-200"
+                      className="flex items-center gap-2 px-2 py-1 border border-base-200 rounded-full bg-base-100 hover:bg-base-200"
                     >
                       <UserCircleIcon size={18} className="text-base-content/70" />
                       <div className="flex flex-col">
@@ -522,7 +492,6 @@ const AccessManagementModal = ({ agent }) => {
                         <div className="text-xs text-base-content/70">{agentMember.email || agentMember.id}</div>
                       </div>
                       {/* Don't show remove button for admin/owner */}
-                      {agentMember.role !== 'admin' && (
                         <button 
                           className="btn btn-ghost btn-xs btn-circle text-error ml-1" 
                           onClick={() => removeUserFromAgent(agentMember.id)}
@@ -532,14 +501,14 @@ const AccessManagementModal = ({ agent }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
-                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <UserCircleIcon size={48} className="text-base-content/30 mx-auto mb-4" />
-                  <p className="text-base-content/70">No members have been added to this agent yet</p>
+                  <p className="text-base-content/70 text-sm max-w-md mx-auto">
+                 Without members, this agent is editable by all except viewers.                  </p>
                 </div>
               )}
             </div>
