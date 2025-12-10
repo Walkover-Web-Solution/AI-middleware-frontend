@@ -5,6 +5,7 @@ import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import InfoTooltip from "@/components/InfoTooltip";
+import { CircleQuestionMark } from "lucide-react";
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -98,13 +99,14 @@ export default function TriggersList({ params, isEmbedUser}) {
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full max-w-md gap-2 flex flex-col px-2 cursor-default">
             <div className="flex items-start flex-col gap-2">
                 <div className='flex gap-5 ml-1  items-start just'>
                     {triggers?.length > 0 ? (
-                        <div className="flex items-center gap-1 flex-row mb-2">
+                        <div className="flex items-center gap-1 mb-2">
+                            <p className=" font-medium  whitespace-nowrap">Trigger</p>
                             <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
-                            <p className="label-text info font-medium  whitespace-nowrap">Trigger</p>
+                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                             </InfoTooltip>
                             <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4" onClick={() => { openTrigger() }}>
                                 <AddIcon className="w-2 h-2" />
@@ -125,8 +127,8 @@ export default function TriggersList({ params, isEmbedUser}) {
                 {triggers?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.map(trigger => {
                     return (
                         <div key={trigger?.id} onClick={() => { openTrigger(trigger?.id) }}
-                            className="group flex h-full p-2 w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200 transition-colors duration-200">
-                            <div className="flex items-center gap-2">
+                            className="group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full  hover:bg-base-300 transition-colors duration-200">
+                            <div className="flex px-2 items-center gap-2">
                                 <div className="flex-1 min-w-0 text-[9px] sm:text-[5px] md:text-[12px] lg:text-[13px] font-bold truncate">
                                     <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
                                         {trigger?.title}

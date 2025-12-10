@@ -113,6 +113,27 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) =>
                                 </label>
                             </InfoTooltip>
                         </div>
+                        
+                        {!isEmbedUser && (
+                            <div className="flex items-center gap-2 min-w-0">
+                                <InfoTooltip tooltipContent="Triggers allows you to create automated workflows that respond to specific events or conditions. Ideal for creating event-driven applications.">
+                                    <label className="flex items-center cursor-pointer min-w-0">
+                                        <input
+                                            type="radio"
+                                            name="bridgeType"
+                                            value="trigger"
+                                            className="radio radio-sm sm:radio"
+                                            checked={bridgeType?.toString()?.toLowerCase() === "trigger"}
+                                            onChange={(e) => handleInputChange(e, "bridgeType")}
+                                            disabled={modelType === 'embedding'}
+                                        />
+                                        <div className="group relative inline-block">
+                                            <span className="label-text text-sm sm:text-base ml-2 cursor-pointer">Triggers</span>
+                                        </div>
+                                    </label>
+                                </InfoTooltip>
+                            </div>
+                        )}
                     </div>
                     
                 {/* Alert message */}
