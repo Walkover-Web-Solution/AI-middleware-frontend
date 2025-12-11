@@ -72,6 +72,40 @@ const PromptTextarea = memo(({
         onKeyDown?.(e);
     }, [onKeyDown]);
 
+    // Force plain-text pastes so theme colors stay consistent and deletion stays snappy
+    const handlePaste = useCallback((e) => {
+        if (isPublished) {
+            e.preventDefault();
+            return;
+        }
+
+        const editor = textareaRef.current;
+        if (!editor || typeof window === 'undefined') {
+            return;
+        }
+
+        e.preventDefault();
+        const text = e.clipboardData?.getData('text/plain') ?? '';
+        const selection = window.getSelection();
+
+        if (!selection || selection.rangeCount === 0) {
+            editor.focus();
+            return;
+        }
+
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        range.setStartAfter(textNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        editor.normalize();
+        onChange(editor.innerText);
+    }, [isPublished, onChange, textareaRef]);
+
     return (
     <div
   ref={textareaRef}
@@ -84,6 +118,7 @@ const PromptTextarea = memo(({
   onInput={handleChange}
   onFocus={handleFocus}
   onKeyDown={handleKeyDown}
+  onPaste={handlePaste}
   onCompositionStart={handleCompositionStart}
   onCompositionEnd={handleCompositionEnd}
   placeholder={placeholder}
