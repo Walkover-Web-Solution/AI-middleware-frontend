@@ -265,7 +265,8 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                             user: data.content,
                             user_urls: userUrls,
                             variables,
-                            orchestrator_flag: isOrchestralModel
+                            orchestrator_flag: isOrchestralModel,
+                            stream:true
                         },
                         bridge_id: params?.id,
                     });
@@ -312,7 +313,8 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                                 type: modelType
                             },
                             text: newMessage,
-                            orchestrator_flag: isOrchestralModel
+                            orchestrator_flag: isOrchestralModel,
+                            stream:true
                         },
                         bridge_id: params?.id,
                     });
@@ -349,7 +351,8 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                                 ...localDataToSend.configuration
                             },
                             input: bridge?.inputConfig?.input?.input,
-                            orchestrator_flag: isOrchestralModel
+                            orchestrator_flag: isOrchestralModel,
+                            stream:true
                         },
                         bridge_id: params?.id,
                     });
