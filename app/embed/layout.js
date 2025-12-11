@@ -9,6 +9,7 @@ import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
+import { ThemeManager } from '@/customHooks/useThemeManager';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -265,11 +266,17 @@ const Layout = ({ children }) => {
   ), []);
 
   if (isLoading) {
-    return LoadingComponent;
+    return (
+      <>
+        <ThemeManager userType="embed" />
+        {LoadingComponent}
+      </>
+    );
   }
 
   return (
     <>
+      <ThemeManager userType="embed" />
       {children}
     </>
   );
