@@ -10,6 +10,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 import ServiceInitializer from '@/components/organization/ServiceInitializer';
 import { ThemeManager } from '@/customHooks/useThemeManager';
+import { ThemeManager } from '@/customHooks/useThemeManager';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -26,9 +27,10 @@ const Layout = ({ children }) => {
     return decodedParam ? JSON.parse(decodedParam) : {};
   }, [searchParams]);
 
-  const { allBridges, services } = useCustomSelector((state) => ({
+  const { allBridges, services, embedThemeConfig } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer?.orgs?.[urlParamsObj.org_id]?.orgs || [],
     services: state.serviceReducer?.services || null,
+    embedThemeConfig: state.appInfoReducer?.embedUserDetails?.theme_config || null,
   }));
 
   useEffect(() => {
@@ -141,9 +143,24 @@ const Layout = ({ children }) => {
 
         if (urlParamsObj.config) {
           Object.entries(urlParamsObj.config).forEach(([key, value]) => {
-            if (value !== undefined) {
-             key === "apikey_object_id" ? dispatch(setEmbedUserDetailsAction({ [key]: value })) : dispatch(setEmbedUserDetailsAction({ [key]: toBoolean(value)}));
+            if (value === undefined) return;
+            if (key === "apikey_object_id") {
+              dispatch(setEmbedUserDetailsAction({ [key]: value }));
+              return;
             }
+            if (key === "theme_config") {
+              let parsedTheme = value;
+              if (typeof value === "string") {
+                try {
+                  parsedTheme = JSON.parse(value);
+                } catch (err) {
+                  console.error("Invalid theme_config JSON in embed params", err);
+                }
+              }
+              dispatch(setEmbedUserDetailsAction({ theme_config: parsedTheme }));
+              return;
+            }
+            dispatch(setEmbedUserDetailsAction({ [key]: toBoolean(value) }));
           });
         }
         if (urlParamsObj?.agent_name) {
@@ -231,6 +248,17 @@ const Layout = ({ children }) => {
       if (messageData?.hideHomeButton !== undefined) uiUpdates.hideHomeButton = messageData.hideHomeButton;
       if (messageData?.showGuide !== undefined) uiUpdates.showGuide = messageData.showGuide;
       if (messageData?.showConfigType !== undefined) uiUpdates.showConfigType = messageData.showConfigType;
+      if (messageData?.theme_config) {
+        let incomingTheme = messageData.theme_config;
+        if (typeof incomingTheme === "string") {
+          try {
+            incomingTheme = JSON.parse(incomingTheme);
+          } catch (err) {
+            console.error("Invalid theme_config JSON from message data", err);
+          }
+        }
+        dispatch(setEmbedUserDetailsAction({ theme_config: incomingTheme }));
+      }
 
       if (Object.keys(uiUpdates).length > 0) {
         dispatch(setEmbedUserDetailsAction(uiUpdates));
@@ -268,7 +296,7 @@ const Layout = ({ children }) => {
   if (isLoading) {
     return (
       <>
-        <ThemeManager userType="embed" />
+        <ThemeManager userType="embed" customTheme={embedThemeConfig} />
         {LoadingComponent}
       </>
     );
@@ -276,7 +304,7 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <ThemeManager userType="embed" />
+      <ThemeManager userType="embed" customTheme={embedThemeConfig} />
       {children}
     </>
   );

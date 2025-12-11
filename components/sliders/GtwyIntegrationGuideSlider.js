@@ -8,6 +8,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
 import GenericTable from "../table/Table";
 import CopyButton from "../copyButton/CopyButton";
+import defaultUserTheme from "@/public/themes/default-user-theme.json";
 
 // Configuration Schema - easily extensible
 // ---------------------------------------------
@@ -138,6 +139,22 @@ const CONFIG_SCHEMA = [
     section: "Display Settings",
   }, 
 ];
+
+const cloneTheme = (theme) =>
+  JSON.parse(JSON.stringify(theme || defaultUserTheme));
+const stringifyTheme = (theme) => JSON.stringify(theme, null, 2);
+const normalizeThemeConfig = (value) => {
+  if (!value) return cloneTheme(defaultUserTheme);
+  if (typeof value === "string") {
+    try {
+      return cloneTheme(JSON.parse(value));
+    } catch (error) {
+      console.error("Invalid stored theme_config JSON", error);
+      return cloneTheme(defaultUserTheme);
+    }
+  }
+  return cloneTheme(value);
+};
 
 // ---------------------------------------------
 // API Keys Input Component
@@ -312,13 +329,14 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const config = integrationData?.config;
 
   // Generate initial config from schema
-  const generateInitialConfig = () => {
-    const initialConfig = {};
-    CONFIG_SCHEMA.forEach((item) => {
-      initialConfig[item.key] = item.defaultValue;
-    });
-    return initialConfig;
-  };
+const generateInitialConfig = () => {
+  const initialConfig = {};
+  CONFIG_SCHEMA.forEach((item) => {
+    initialConfig[item.key] = item.defaultValue;
+  });
+  initialConfig.theme_config = cloneTheme(defaultUserTheme);
+  return initialConfig;
+};
 
   // Initialize configuration state
   const [configuration, setConfiguration] = useState(() => {
@@ -331,8 +349,20 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       ? integrationData.apikey_object_id 
       : {};
 
-    return { ...merged, apikey_object_id: apiKeyIds, embed_id: data?.embed_id };
+    const resolvedTheme = normalizeThemeConfig(merged.theme_config);
+
+    return {
+      ...merged,
+      theme_config: resolvedTheme,
+      apikey_object_id: apiKeyIds,
+      embed_id: data?.embed_id,
+    };
   });
+
+  const [themeEditorValue, setThemeEditorValue] = useState(
+    stringifyTheme(cloneTheme(defaultUserTheme))
+  );
+  const [themeError, setThemeError] = useState("");
 
   useEffect(() => {
     setConfiguration((prevConfig) => {
@@ -352,7 +382,13 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       }
       // Otherwise, keep empty object (no API keys)
   
-      const newConfig = { ...merged, apikey_object_id: finalApiKeyIds, embed_id: data?.embed_id };
+      const resolvedTheme = normalizeThemeConfig(merged.theme_config);
+      const newConfig = {
+        ...merged,
+        theme_config: resolvedTheme,
+        apikey_object_id: finalApiKeyIds,
+        embed_id: data?.embed_id,
+      };
       
       // Set this as the last saved config if we have integration data (meaning it's saved)
       if (integrationData && config) {
@@ -362,6 +398,14 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       return newConfig;
     })
   }, [integrationData, config, data?.embed_id]);
+
+  useEffect(() => {
+    const themeSource = configuration?.theme_config
+      ? cloneTheme(configuration.theme_config)
+      : cloneTheme(defaultUserTheme);
+    setThemeEditorValue(stringifyTheme(themeSource));
+    setThemeError("");
+  }, [configuration?.theme_config]);
 
   const gtwyAccessToken = useCustomSelector((state) =>
     state?.userDetailsReducer?.organizations?.[data?.org_id]?.meta?.gtwyAccessToken || ""
@@ -398,14 +442,71 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     dispatch(generateGtwyAccessTokenAction(data?.org_id))
   };
 
+  const parseThemeEditorValue = () => {
+    try {
+      const parsed = JSON.parse(themeEditorValue);
+      if (typeof parsed !== "object" || !parsed.light || !parsed.dark) {
+        throw new Error("Theme JSON must include both 'light' and 'dark' objects");
+      }
+      setThemeError("");
+      return parsed;
+    } catch (error) {
+      setThemeError(error?.message || "Invalid theme JSON");
+      return null;
+    }
+  };
+
+  const handleThemeApply = () => {
+    const parsed = parseThemeEditorValue();
+    if (!parsed) return;
+    setConfiguration((prev) => ({
+      ...prev,
+      theme_config: cloneTheme(parsed),
+    }));
+  };
+
+  const handleThemeFormat = () => {
+    const parsed = parseThemeEditorValue();
+    if (!parsed) return;
+    setThemeEditorValue(stringifyTheme(parsed));
+  };
+
+  const handleThemeReset = () => {
+    const resetTheme = cloneTheme(defaultUserTheme);
+    setThemeEditorValue(stringifyTheme(resetTheme));
+    setThemeError("");
+    setConfiguration((prev) => ({
+      ...prev,
+      theme_config: resetTheme,
+    }));
+  };
+
   const handleConfigurationSave = async () => {
     setIsSaving(true);
     try {
+      const parsedTheme = parseThemeEditorValue();
+      if (!parsedTheme) {
+        return;
+      }
+
+      if (
+        JSON.stringify(parsedTheme) !==
+        JSON.stringify(configuration?.theme_config || {})
+      ) {
+        setConfiguration((prev) => ({
+          ...prev,
+          theme_config: parsedTheme,
+        }));
+      }
+
       const {
         apikey_object_id, // move to root
         ...restConfig
       } = configuration;
-      const cleanedConfig = { ...restConfig }; // strictly visual/config flags
+      const cleanedConfig = {
+        ...restConfig,
+        theme_config: parsedTheme,
+      }; // strictly visual/config flags
 
       const dataToSend = {
         folder_id: data?.embed_id,
@@ -428,6 +529,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
       // Store the saved configuration for change detection
       setLastSavedConfig({
         ...configuration,
+        theme_config: parsedTheme,
         apikey_object_id: configuration.addDefaultApiKeys ? (apikey_object_id || {}) : {}
       });
       
@@ -617,6 +719,64 @@ window.openGtwy({
                   >
                     <Save size={14} />
                     {isSaving ? 'Saving...' : isConfigChanged() ? 'Save Configuration' : 'No Changes'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow-sm">
+              <div className="card-body p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 className="card-title text-primary text-base mb-0">Theme JSON</h4>
+                    <p className="text-xs text-base-content/70">
+                      Provide DaisyUI-compatible light and dark palettes to match your brand.
+                    </p>
+                  </div>
+                  <button
+                    className="btn btn-ghost btn-xs"
+                    onClick={handleThemeReset}
+                    type="button"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <textarea
+                  className="textarea textarea-bordered font-mono text-xs mt-3 min-h-[260px] w-full"
+                  value={themeEditorValue}
+                  onChange={(e) => setThemeEditorValue(e.target.value)}
+                  spellCheck={false}
+                />
+                {themeError ? (
+                  <p className="text-error text-xs mt-2">{themeError}</p>
+                ) : (
+                  <p className="text-xs text-base-content/60 mt-2">
+                    Tip: include both <code>light</code> and <code>dark</code> keys with DaisyUI color tokens.
+                  </p>
+                )}
+
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <button
+                    className="btn btn-primary btn-xs"
+                    type="button"
+                    onClick={handleThemeApply}
+                  >
+                    Apply Theme JSON
+                  </button>
+                  <button
+                    className="btn btn-outline btn-xs"
+                    type="button"
+                    onClick={handleThemeFormat}
+                  >
+                    Format JSON
+                  </button>
+                  <button
+                    className="btn btn-outline btn-xs"
+                    type="button"
+                    onClick={handleThemeReset}
+                  >
+                    Reset to Default
                   </button>
                 </div>
               </div>

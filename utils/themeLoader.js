@@ -71,6 +71,14 @@ const injectThemeCss = (theme) => {
   styleEl.textContent = blocks.join("\n");
 };
 
+export const applyThemeObject = (theme) => {
+  if (!theme || typeof theme !== "object") {
+    throw new Error("Invalid theme object supplied");
+  }
+  injectThemeCss(theme);
+  return theme;
+};
+
 const loadThemeFromFile = async (path) => {
   if (typeof window === "undefined") return null;
   const response = await fetch(path);
@@ -78,8 +86,7 @@ const loadThemeFromFile = async (path) => {
     throw new Error(`Failed to fetch theme file: ${path} (${response.status})`);
   }
   const theme = await response.json();
-  injectThemeCss(theme);
-  return theme;
+  return applyThemeObject(theme);
 };
 
 export const loadDefaultTheme = () =>
@@ -98,5 +105,6 @@ export const initTheme = async ({ userType = "default", customThemePath = null }
 export default {
   loadDefaultTheme,
   loadEmbedTheme,
-  initTheme
+  initTheme,
+  applyThemeObject,
 };

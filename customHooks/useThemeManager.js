@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFromCookies, setInCookies } from '@/utils/utility';
-import { loadDefaultTheme, loadEmbedTheme } from '@/utils/themeLoader';
+import { loadDefaultTheme, loadEmbedTheme, applyThemeObject } from '@/utils/themeLoader';
 
-const useThemeVariables = (userType = 'default', customThemePath = null) => {
+const useThemeVariables = (userType = 'default', customThemePath = null, customTheme = null) => {
   useEffect(() => {
     let cancelled = false;
 
     const loadTheme = async () => {
       try {
+        if (customTheme) {
+          applyThemeObject(customTheme);
+          return;
+        }
         if (userType === 'embed') {
           await loadEmbedTheme(customThemePath || undefined);
         } else {
@@ -23,7 +27,7 @@ const useThemeVariables = (userType = 'default', customThemePath = null) => {
     return () => {
       cancelled = true;
     };
-  }, [userType, customThemePath]);
+  }, [userType, customThemePath, customTheme]);
 };
 
 /**
@@ -154,8 +158,8 @@ export const useThemeManager = () => {
  * Theme Manager Component
  * Use this component at the root level to initialize theme management
  */
-export const ThemeManager = ({ userType = 'default', customThemePath = null } = {}) => {
-  useThemeVariables(userType, customThemePath);
+export const ThemeManager = ({ userType = 'default', customThemePath = null, customTheme = null } = {}) => {
+  useThemeVariables(userType, customThemePath, customTheme);
   useThemeManager();
   return null; // This component doesn't render anything
 };
