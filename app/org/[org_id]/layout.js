@@ -206,8 +206,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getPrebuiltToolsAction())
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-      dispatch(getAllAuthData())
-    }
+      if(currrentOrgDetail?.role_name!=="Viewer")
+        dispatch(getAllAuthData())
+      }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
   const scriptId = "chatbot-main-script";

@@ -18,7 +18,7 @@ import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-
+import { Lock } from 'lucide-react';
 export const runtime = 'edge';
 
 function Page({ params }) {
@@ -27,14 +27,24 @@ function Page({ params }) {
 
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, descriptions } = useCustomSelector((state) => {
+  const { authData, isFirstPauthCreation, descriptions, orgRole } = useCustomSelector((state) => {
     const user = state.userDetailsReducer.userDetails || [];
     return {
       authData: state?.authDataReducer?.authData || [],
       isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
       descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+      orgRole: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]?.role_name,
     };
   });
+ if(orgRole === "Viewer") return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center">
+        <Lock size={48} className="text-error mb-4" />
+        <h2 className="text-xl font-bold text-center">Access Restricted</h2>
+        <p className="text-center mt-2">This page is locked for viewers</p>
+      </div>
+    </div>
+  );
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
