@@ -1053,6 +1053,7 @@ function FunctionParameterModal({
       const result = await optimizeJsonApi({
         data: {
           example_json: reqJson,
+          type: "structured_output"
         },
       });
       setObjectFieldValue(JSON.stringify(result?.result, undefined, 4));
