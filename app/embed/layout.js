@@ -50,7 +50,7 @@ const Layout = ({ children }) => {
     dispatch(isPending())
     dispatch(
       createBridgeAction({ dataToSend, orgid: orgId }, response => {
-        if (response?.data?.bridge) {
+        if (response?.data?.agent) {
           sendDataToParent(
             'drafted',
             {

@@ -66,7 +66,7 @@ export const bridgeReducer = createSlice({
       }
     },
     createBridgeReducer: (state, action) => {
-      state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
+      state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.agent);
     },
     createBridgeVersionReducer: (state, action) => {
       const { newVersionId, parentVersionId, bridgeId, version_description, orgId } = action.payload;

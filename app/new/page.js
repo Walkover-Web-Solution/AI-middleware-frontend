@@ -120,7 +120,7 @@ function Page() {
                 dataToSend: bridgeData,
                 orgid: selectedOrg.id
             }, (data) => {
-                route.push(`/org/${selectedOrg.id}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+                route.push(`/org/${selectedOrg.id}/agents/configure/${data.data.bridge._id}?version=${data.data.agent.versions[0]}`);
             }));
 
         } catch (error) {
