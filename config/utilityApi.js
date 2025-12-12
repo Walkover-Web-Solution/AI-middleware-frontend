@@ -20,9 +20,9 @@ export const uploadImage = async (formData, isVedioOrPdf) => {
   }
 };
 
-export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = { query, thread_id, version_id } }) => {
+export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = {type:"optimize_prompt",query, thread_id, version_id ,bridge_id} }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, data);
     return response.data.result;
   } catch (error) {
     console.error(error);
@@ -46,7 +46,7 @@ export const optimizeSchemaApi = async ({ data }) => {
 export const optimizeJsonApi = async ({ data }) => {
   try {
     const response = await axios.post(
-      `${PYTHON_URL}/bridge/genrate/rawjson`,
+      `${URL}/api/utils/call-gtwy`,
       data
     );
     return response.data;
