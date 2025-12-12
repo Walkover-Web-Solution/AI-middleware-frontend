@@ -128,11 +128,11 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           if (isEmbedUser) {
             sendDataToParent("drafted", {
               name: data?.name, 
-              agent_id: data?.bridge?._id
+              agent_id: data?.agent?._id
             }, "Agent created Successfully");
           }
           
-          router.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
+          router.push(`/org/${orgid}/agents/configure/${data.agent._id}?version=${data.agent.versions[0]}`);
           updateState({ isAiLoading: false });
           cleanState();
         })
@@ -162,12 +162,12 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
         dispatch(createBridgeAction({ dataToSend, orgid }, (data) => {
           if (isEmbedUser) {
             sendDataToParent("drafted", {
-              name: data?.bridge?.name, 
-              agent_id: data?.bridge?._id
+              name: data?.agent?.name, 
+              agent_id: data?.agent?._id
             }, "Agent created Successfully");
           }
           
-          router.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+          router.push(`/org/${orgid}/agents/configure/${data.data.agent._id}?version=${data.data.agent.versions[0]}`);
           updateState({ isLoading: false });
           cleanState();
         })).catch(() => {

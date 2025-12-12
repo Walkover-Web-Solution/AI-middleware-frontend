@@ -9,8 +9,8 @@ export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getS
     dispatch(clearPreviousBridgeDataReducer())
     dispatch(isPending())
     const data = await getSingleBridge(id);
-    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
-    getBridgeVersionAction({ versionId: version || data.data?.bridge?.published_version_id })(dispatch);
+    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.agent }));
+    getBridgeVersionAction({ versionId: version || data.data?.agent?.published_version_id })(dispatch);
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -22,8 +22,8 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
   try {
     dispatch(isPending())
     const data = await getBridgeVersionApi({ bridgeVersionId: versionId });
-    dispatch(fetchSingleBridgeVersionReducer({ bridge: data?.bridge }));
-    return data?.bridge;
+    dispatch(fetchSingleBridgeVersionReducer({ bridge: data?.agent }));
+    return data?.agent;
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -117,9 +117,8 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const average_response_time = response?.data?.avg_response_time;
     const doctstar_embed_token=response?.data?.doctstar_embed_token;
 
-
     if (onSuccess) onSuccess(response?.data?.bridge)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.agent, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
@@ -179,7 +178,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(bridgeId);
     const data = await updateBridge({ bridgeId, dataToSend });
-    dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
+    dispatch(updateBridgeReducer({ bridges: data.data.agent, functionData: dataToSend?.functionData || null }));
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -246,7 +245,7 @@ export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) =>
   try {
     markUpdateInitiatedByCurrentTab(dataFromEmbed?.version_id);
     const data = await updateapi(bridge_id, dataFromEmbed);
-    dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
+    dispatch(updateBridgeVersionReducer({ bridges: data?.data?.agent }));
   } catch (error) {
     console.error(error)
   }
