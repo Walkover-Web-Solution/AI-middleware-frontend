@@ -50,16 +50,20 @@ const Layout = ({ children }) => {
     dispatch(isPending())
     dispatch(
       createBridgeAction({ dataToSend, orgid: orgId }, response => {
-        if (response?.data?.agent) {
+        const createdAgent = response?.data?.agent;
+        if (createdAgent) {
+          const targetVersion = createdAgent?.published_version_id || createdAgent?.versions?.[0];
           sendDataToParent(
             'drafted',
             {
-              name: response.data.bridge.name,
-              agent_id: response.data.bridge._id,
+              name: createdAgent.name,
+              agent_id: createdAgent._id,
             },
             'Agent created Successfully'
           );
-          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}?version=${response.data.bridge.published_version_id || response.data.bridge.versions[0]}`);
+          if (targetVersion) {
+            router.push(`/org/${orgId}/agents/configure/${createdAgent._id}?version=${targetVersion}`);
+          }
         }
         setIsLoading(false);
         setProcessedAgentName(agent_name);
@@ -219,11 +223,13 @@ const Layout = ({ children }) => {
         dispatch(updateBridgeAction({
           dataToSend: { meta: messageData.meta },
           bridgeId: messageData.agent_id
-        }, response => {
-          if(response?.data?.bridge){
-            router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
-          }
         }))
+        .then(() => {
+          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        })
+        .catch(() => {
+          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        });
       }
 
       const uiUpdates = {};
