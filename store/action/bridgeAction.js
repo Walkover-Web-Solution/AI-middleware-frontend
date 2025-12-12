@@ -116,9 +116,10 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const triggerEmbedToken = response?.data?.trigger_embed_token;
     const average_response_time = response?.data?.avg_response_time;
     const doctstar_embed_token=response?.data?.doctstar_embed_token;
+    const bridgesPayload = response?.data?.agent || [];
 
-    if (onSuccess) onSuccess(response?.data?.bridge)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.agent, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
+    if (onSuccess) onSuccess(bridgesPayload)
+    dispatch(fetchAllBridgeReducer({ bridges: bridgesPayload, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
@@ -196,8 +197,9 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
-    if (data?.success) {
-      dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
+    const updatedVersion = data?.agent;
+    if (data?.success && updatedVersion) {
+      dispatch(updateBridgeVersionReducer({ bridges: updatedVersion, functionData: dataToSend?.functionData || null }));
     }
   } catch (error) {
     console.error(error);

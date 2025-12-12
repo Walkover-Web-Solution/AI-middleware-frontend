@@ -120,7 +120,16 @@ function Page() {
                 dataToSend: bridgeData,
                 orgid: selectedOrg.id
             }, (data) => {
-                route.push(`/org/${selectedOrg.id}/agents/configure/${data.data.bridge._id}?version=${data.data.agent.versions[0]}`);
+                const createdAgent = data?.data?.agent;
+                const agentId = createdAgent?._id;
+                const targetVersion = createdAgent?.published_version_id || createdAgent?.versions?.[0];
+
+                if (agentId && targetVersion) {
+                    route.push(`/org/${selectedOrg.id}/agents/configure/${agentId}?version=${targetVersion}`);
+                } else {
+                    toast.error('Unable to open the newly created agent. Please try again.');
+                    updateFormState({ isLoading: false });
+                }
             }));
 
         } catch (error) {
