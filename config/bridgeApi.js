@@ -184,7 +184,10 @@ export const modelSuggestionApi = async ({ versionId }) => {
 
 export const genrateSummary = async (version_id) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id: version_id.versionId })
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'generate_summary',
+      version_id: version_id.versionId
+    });
     return response.data.result;
   } catch (error) {
     toast.error(error)

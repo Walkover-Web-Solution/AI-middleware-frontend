@@ -96,7 +96,9 @@ export const createReponseTypeInOrg = async (orgId) => {
 
 export const createOrgToken = async (orgId) => {
   try {
-    const data = await axios.post(`${URL}/chatbot/${orgId}/createtoken`)
+    const data = await axios.post(`${URL}/api/utils/token`, {
+      type: 'org_token'
+    });
     return data;
   } catch (error) {
     toast.error(error.response.data.error)

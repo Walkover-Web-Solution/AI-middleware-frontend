@@ -35,7 +35,9 @@ export const updateIntegrationData = async (dataToSend) => {
 
 export const generateGtwyAccessTokenApi = async () => {
   try {
-    const response = await axios.get(`${URL}/api/embed/getToken`);
+    const response = await axios.post(`${URL}/api/utils/token`, {
+      type: 'embed'
+    });
     return response;
   } catch (error) {
     console.error(error);

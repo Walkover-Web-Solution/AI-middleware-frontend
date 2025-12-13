@@ -58,8 +58,10 @@ export const runTestCaseApi = async ({ versionId, testcase_id, testCaseData, bri
 
 export const generateAdditionalTestCasesApi = async ({ bridgeId, versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridgeId}/generateAdditionalTestCases`, {
-      "version_id": versionId
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'generate_test_cases',
+      bridge_id: bridgeId,
+      version_id: versionId
     });
     return response.data;
   } catch (error) {

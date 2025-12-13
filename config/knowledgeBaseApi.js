@@ -25,7 +25,9 @@ export const getAllKnowBaseData = async () => {
 
 export const getKnowledgeBaseToken = async () => {
   try {
-    const response = await axios.get(`${URL}/api/rag/docs/token`);
+    const response = await axios.post(`${URL}/api/utils/token`, {
+      type: 'knowledge_base'
+    });
     return response?.data?.result;
   } catch (error) {
     console.error(error);
