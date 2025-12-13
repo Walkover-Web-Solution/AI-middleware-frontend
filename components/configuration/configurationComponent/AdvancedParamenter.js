@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, template as RESPONSE_TEMPLATES } from '@/utils/enums';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { generateRandomID, openModal } from '@/utils/utility';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
@@ -12,13 +12,13 @@ import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
-import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
+import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import { CircleQuestionMark } from 'lucide-react';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false }) => {
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
-  
+
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -30,11 +30,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
-  const {service,version_function_data,configuration,integrationData,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, connected_agents, modelInfoData, bridge } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    
+
     // Use bridgeData when isPublished=true, otherwise use versionData
     const activeData = isPublished ? bridgeDataFromState : versionData;
     const service = activeData?.service;
@@ -42,7 +42,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     const type = configuration?.type;
     const model = configuration?.model;
     const modelInfoData = state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
-    
+
     return {
       version_function_data: isPublished ? (bridgeDataFromState?.apiCalls) : (versionData?.apiCalls),
       integrationData,
@@ -58,19 +58,19 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const initialThreadId = bridge?.thread_id || generateRandomID();
   const [thread_id, setThreadId] = useState(initialThreadId);
 
-    useEffect(() => {
-          if (!bridge?.thread_id && initialThreadId) {
-            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                  bridgeId: params?.id,
-                  versionId: searchParams?.version,
-                  thread_id: initialThreadId,
-              }));
-          }
-      }, []);
+  useEffect(() => {
+    if (!bridge?.thread_id && initialThreadId) {
+      setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+        bridgeId: params?.id,
+        versionId: searchParams?.version,
+        thread_id: initialThreadId,
+      }));
+    }
+  }, []);
   useEffect(() => {
     setInputConfiguration(configuration);
   }, [configuration]);
-  
+
   // Filter parameters by level
   const getParametersByLevel = (level) => {
     if (!modelInfoData) return [];
@@ -108,19 +108,19 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           id: value?._id
         }))
       : [];
-      const selectedAgentData = connected_agents && typeof connected_agents === 'object'
-        ? Object.entries(connected_agents)
-          .filter(([name, item]) => {
-            const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
-            return toolChoice === item.bridge_id;
-          })
-          .map(([name, item]) => ({
-            name,
-            id: item.bridge_id
-          }))
-        : [];
-      setSelectedOptions(selectedAgentData?.length > 0 ? selectedAgentData : selectedFunctiondata);
-    
+    const selectedAgentData = connected_agents && typeof connected_agents === 'object'
+      ? Object.entries(connected_agents)
+        .filter(([name, item]) => {
+          const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
+          return toolChoice === item.bridge_id;
+        })
+        .map(([name, item]) => ({
+          name,
+          id: item.bridge_id
+        }))
+      : [];
+    setSelectedOptions(selectedAgentData?.length > 0 ? selectedAgentData : selectedFunctiondata);
+
   }, [tool_choice_data]);
 
   const debounce = (func, delay) => {
@@ -204,7 +204,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     }))
     let updatedDataToSend = (isDeafaultObject && value !== "default") ? {
       configuration: {
-        [key]:{
+        [key]: {
           [value?.key]: value[value?.key]
         }
       }
@@ -227,7 +227,80 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     };
     dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
   }, [dispatch, params?.id, searchParams?.version]);
-  
+
+  // State for selected templates (indices)
+  const [selectedTemplates, setSelectedTemplates] = useState([]);
+
+  useEffect(() => {
+    if (configuration?.response_type?.template_id && Array.isArray(configuration.response_type.template_id)) {
+      setSelectedTemplates(configuration.response_type.template_id);
+    }
+  }, [configuration?.response_type?.template_id]);
+
+  // Function to generate the schema from selected templates
+  const generateCombinedSchema = useCallback((selectedIndices) => {
+    if (selectedIndices.length === 0) return null;
+
+    const anyOfSchemas = selectedIndices.map(index => {
+      const templateObj = RESPONSE_TEMPLATES[index];
+      if (templateObj?.json_schema?.schema) {
+        // We use the schema directly from the template
+        return templateObj.json_schema.schema;
+      }
+      return null;
+    }).filter(Boolean);
+
+    if (anyOfSchemas.length === 0) return null;
+
+    return {
+      name: "event_schema",
+      schema: {
+        type: "object",
+        properties: {
+          item: {
+            anyOf: anyOfSchemas
+          }
+        },
+        additionalProperties: false,
+        required: [
+          "item"
+        ]
+      },
+      strict: true
+    };
+  }, []);
+
+  // Function to handle applying selected templates
+  const handleApplyTemplates = useCallback(() => {
+    const combinedSchema = generateCombinedSchema(selectedTemplates);
+
+    if (combinedSchema) {
+      const schemaString = JSON.stringify(combinedSchema, null, 4);
+      setObjectFieldValue(schemaString);
+
+      const updatedDataToSend = {
+        configuration: {
+          response_type: {
+            type: "json_schema", // Ensure type is json_schema
+            json_schema: combinedSchema,
+            is_template: true,
+            template_id: selectedTemplates
+          }
+        }
+      };
+
+      dispatch(updateBridgeVersionAction({
+        bridgeId: params?.id,
+        versionId: searchParams?.version,
+        dataToSend: updatedDataToSend
+      }));
+
+      toast.success(`Applied ${selectedTemplates.length} templates`);
+    } else {
+      toast.error("No valid templates selected");
+    }
+  }, [selectedTemplates, generateCombinedSchema, dispatch, params?.id, searchParams?.version]);
+
   // Helper function to render parameter fields
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
     const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
@@ -267,7 +340,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
 
     // Detect if this is level 2 by checking if we're in compact mode or level 2 context
     const isLevel2 = level === 2 || compact;
-    
+
     return (
       <div key={key} className={`group w-full ${isLevel2 ? 'space-y-1' : 'space-y-3'}`}>
         <div className={`flex items-center justify-between gap-2 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
@@ -520,8 +593,52 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
         {field === 'select' && !isDefaultValue && (
           <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
-              value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
-              onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
+              value={(() => {
+                const currentVal = configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key]);
+                if (key === 'response_type' && currentVal === 'json_schema' && configuration?.[key]?.is_template) {
+                  return 'template';
+                }
+                return currentVal;
+              })()}
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                if (key === 'response_type') {
+                  if (selectedValue === 'template') {
+                    // Set type to json_schema AND is_template to true
+                    const updatedDataToSend = {
+                      configuration: {
+                        response_type: {
+                          type: "json_schema", // Ensure type is json_schema
+                          json_schema: configuration?.response_type?.json_schema || {},
+                          is_template: true,
+                          template_id: configuration?.response_type?.template_id || []
+                        }
+                      }
+                    };
+                    dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
+                    return;
+                  } else if (selectedValue === 'json_schema') {
+                    // Set type to json_schema AND is_template to false
+                    const updatedDataToSend = {
+                      configuration: {
+                        [key]: {
+                          type: 'json_schema',
+                          is_template: false,
+                          json_schema: configuration?.[key]?.json_schema || {}
+                        }
+                      }
+                    };
+                    dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
+                    return;
+                  } else if (selectedValue === 'default') {
+                    // Handle default case if needed or fall through
+                    setSliderValue("default", key, isDeafaultObject);
+                    return;
+                  }
+                }
+                // Fallback for other keys or normal types
+                handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)
+              }}
               className={`select ${selectSizeClass} max-w-xs select-bordered capitalize`}
               disabled={isPublished}
             >
@@ -529,11 +646,72 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               {options?.map((service, index) => (
                 <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
               ))}
+              {key === 'response_type' && (
+                <option value="template">Template</option>
+              )}
             </select>
 
-            {configuration?.[key]?.type === "json_schema" && (
+            {/* Template UI - Only show if mode is template */}
+            {key === 'response_type' && configuration?.[key]?.type === "json_schema" && configuration?.[key]?.is_template && (
               <>
-                <div className="flex justify-end mb-2">
+                <div className="mb-3 p-3 bg-base-200 rounded-lg mt-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="text-sm font-medium">Available Templates:</div>
+                    {selectedTemplates.length > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-primary"
+                        onClick={handleApplyTemplates}
+                        disabled={isPublished}
+                      >
+                        Apply Selected ({selectedTemplates.length})
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {RESPONSE_TEMPLATES.map((templateObj, index) => {
+                      const templateKeys = Object.keys(templateObj).filter(key =>
+                        key !== 'json_schema' && key !== 'html'
+                      );
+                      const templateName = templateKeys[0] || `Template ${index + 1}`;
+                      const isSelected = selectedTemplates.includes(index);
+
+                      return (
+                        <div key={index} className="flex items-center p-2 bg-base-100 rounded border cursor-pointer" onClick={() => {
+                          if (isPublished) return;
+                          setSelectedTemplates(prev => {
+                            if (prev.includes(index)) {
+                              return prev.filter(i => i !== index);
+                            }
+                            return [...prev, index];
+                          });
+                        }}>
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-xs mr-3"
+                            checked={isSelected}
+                            onChange={() => { }} // Handled by div click
+                            disabled={isPublished}
+                          />
+                          <div>
+                            <span className="text-sm font-medium capitalize">{templateName.replace('_', ' ')}</span>
+                            {templateObj.json_schema?.name && (
+                              <span className="text-xs text-base-content/70 ml-2">({templateObj.json_schema.name})</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* We do NOT show the textarea or modal for template mode as requested */}
+              </>
+            )}
+
+            {/* JSON Schema UI - Only show if mode is json_schema AND NOT template */}
+            {configuration?.[key]?.type === "json_schema" && !configuration?.[key]?.is_template && (
+              <>
+                <div className="flex justify-between items-center mb-2 mt-2">
                   <span
                     className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => {
@@ -543,6 +721,59 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                     Response Builder
                   </span>
                 </div>
+
+                {key === 'response_type' && RESPONSE_TEMPLATES.length > 0 && (
+                  <div className="mb-3 p-3 bg-base-200 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-sm font-medium">Available Templates:</div>
+                      {selectedTemplates.length > 0 && (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-primary"
+                          onClick={handleApplyTemplates}
+                          disabled={isPublished}
+                        >
+                          Apply Selected ({selectedTemplates.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {RESPONSE_TEMPLATES.map((templateObj, index) => {
+                        const templateKeys = Object.keys(templateObj).filter(key =>
+                          key !== 'json_schema' && key !== 'html'
+                        );
+                        const templateName = templateKeys[0] || `Template ${index + 1}`;
+                        const isSelected = selectedTemplates.includes(index);
+
+                        return (
+                          <div key={index} className="flex items-center p-2 bg-base-100 rounded border cursor-pointer" onClick={() => {
+                            if (isPublished) return;
+                            setSelectedTemplates(prev => {
+                              if (prev.includes(index)) {
+                                return prev.filter(i => i !== index);
+                              }
+                              return [...prev, index];
+                            });
+                          }}>
+                            <input
+                              type="checkbox"
+                              className="checkbox checkbox-xs mr-3"
+                              checked={isSelected}
+                              onChange={() => { }} // Handled by div click
+                              disabled={isPublished}
+                            />
+                            <div>
+                              <span className="text-sm font-medium capitalize">{templateName.replace('_', ' ')}</span>
+                              {templateObj.json_schema?.name && (
+                                <span className="text-xs text-base-content/70 ml-2">({templateObj.json_schema.name})</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <textarea
                   key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
