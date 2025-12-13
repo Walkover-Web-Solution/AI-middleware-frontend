@@ -275,7 +275,7 @@ const Navbar = ({ isEmbedUser, params }) => {
 
       {showEllipsisMenu && (
         <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-[9999]">
-          <div className="py-1">
+          <div className="">
             <button
               onMouseDown={async (e) => {
                 e.preventDefault();
@@ -300,7 +300,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               )}
             </button>
           </div>
-          <div className="py-1">
+          <div className="">
             <button
               onMouseDown={async (e) => {
                 e.preventDefault();
@@ -309,20 +309,15 @@ const Navbar = ({ isEmbedUser, params }) => {
                 setShowEllipsisMenu(false);
               }}
               disabled={isUpdatingBridge}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 cursor-pointer ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+              className={`w-full px-4 text-left text-sm hover:bg-base-200 flex items-center gap-1 cursor-pointer ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+                } ${isArchived ? 'hidden' : ''}`}
             >
-              {isArchived ? (
-                <>
-                  <Archive size={14} className="text-green-600" />
-                  Archive Agent
-                </>
-              ) : (
+              {!isArchived ?
                 <>
                   <ArchiveRestore size={14} className="text-red-600" />
                   Unarchive Agent
                 </>
-              )}
+              : null}
             </button>
           </div>
         </div>

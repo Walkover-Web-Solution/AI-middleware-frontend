@@ -6,7 +6,7 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 export const createKnowledgeBaseEntry = async (data) => {
   try {
     const response = await axios.post(`${URL}/api/rag/`, data);
-    return response;
+    return response?.data;
   } catch (error) {
     console.error(error);
     return error;

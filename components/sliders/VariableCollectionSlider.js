@@ -215,6 +215,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   const [missingVariables, setMissingVariables] = useState([]);
   const [blockedDeleteKey, setBlockedDeleteKey] = useState("");
   const [blockedDeleteMessage, setBlockedDeleteMessage] = useState("");
+  const [groupEditor, setGroupEditor] = useState({ mode: "idle", value: "", error: "", groupId: null });
 
   const activeGroupId = activeGroup?.id;
 

@@ -282,8 +282,6 @@ function Home({ params, isEmbedUser }) {
     agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
 
   }));
-
-  // Helper function to calculate days remaining for deletion (30 days from deletedAt)
  
   const onClickConfigure = (id, versionId) => {
     // Prevent multiple clicks while loading
@@ -373,12 +371,12 @@ function Home({ params, isEmbedUser }) {
               resetUsage(row);
             }}><RefreshIcon className="" size={16} />Reset Usage</a></li>
           )}
-          <li><button onClick={(e) => {
+          <li className={`${row.status === 1 ? `hidden` : ''}`}><button onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               handlePortalCloseImmediate();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : <><Archive size={14} className=" text-red-600" />Archive Agent</>}</button></li>
+            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : null}</button></li>
             <li> <button
               onClick={(e) => {
                 e.preventDefault();

@@ -302,8 +302,8 @@ export const archiveBridgeAction = (bridge_id, newStatus = 1) => async (dispatch
   try {
     dispatch(isPending());
     const response = await archiveBridgeApi(bridge_id, newStatus);
-    dispatch(updateBridgeReducer({ bridges: response.data, functionData: null }))
-    return response?.data?.status;
+    dispatch(updateBridgeReducer({ bridges: response?.agent, functionData: null }))
+    return response?.agent?.status;
   } catch (error) {
     dispatch(isError());
     toast.error('Failed to Archive the bridge');

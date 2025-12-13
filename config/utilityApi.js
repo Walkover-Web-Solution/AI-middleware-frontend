@@ -250,7 +250,7 @@ export const createapi = async (dataFromEmbed) => {
 
 export const updateapi = async (bridge_id, dataFromEmbed) => {
   try {
-    const response = await axios.put(`${URL}/api/tools/${bridge_id}`, dataFromEmbed);
+    const response = await axios.put(`${URL}/api/tools/pre_tool/${bridge_id}`, dataFromEmbed);
     return response;
   } catch (error) {
     console.error(error);
