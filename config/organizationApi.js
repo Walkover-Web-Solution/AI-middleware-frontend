@@ -83,7 +83,9 @@ export const getInvitedUsers = async ({ page, limit, search }) => {
 // Organization Token Management
 export const generateAccessKey = async () => {
   try {
-    const response = await axios.get(`${URL}/api/org/auth_token`);
+    const response = await axios.post(`${URL}/api/utils/token`, {
+      type: 'rag'
+    });
     return response;
   } catch (error) {
     console.error(error);

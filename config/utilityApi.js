@@ -22,7 +22,12 @@ export const uploadImage = async (formData, isVedioOrPdf) => {
 
 export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = { query, thread_id, version_id } }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'optimize_prompt',
+      ...data,
+      bridge_id: bridge_id || data.bridge_id,
+      version_id: version_id || data.version_id
+    });
     return response.data.result;
   } catch (error) {
     console.error(error);
@@ -33,8 +38,11 @@ export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_i
 export const optimizeSchemaApi = async ({ data }) => {
   try {
     const response = await axios.post(
-      `${URL}/utils/structured_output`,
-      data
+      `${URL}/api/utils/call-gtwy`,
+      {
+        type: 'structured_output',
+        ...data
+      }
     );
     return response.data;
   } catch (error) {
@@ -46,8 +54,11 @@ export const optimizeSchemaApi = async ({ data }) => {
 export const optimizeJsonApi = async ({ data }) => {
   try {
     const response = await axios.post(
-      `${PYTHON_URL}/bridge/genrate/rawjson`,
-      data
+      `${URL}/api/utils/call-gtwy`,
+      {
+        type: 'generate_json',
+        ...data
+      }
     );
     return response.data;
   } catch (error) {
@@ -58,7 +69,10 @@ export const optimizeJsonApi = async ({ data }) => {
 
 export const improvePrompt = async (variables) => {
   try {
-    const response = await axios.post(`${URL}/utils/improve_prompt`, { variables })
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'improve_prompt',
+      variables
+    });
     return response?.data;
   } catch (error) {
     console.error(error)
