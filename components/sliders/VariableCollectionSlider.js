@@ -215,7 +215,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   const [missingVariables, setMissingVariables] = useState([]);
   const [blockedDeleteKey, setBlockedDeleteKey] = useState("");
   const [blockedDeleteMessage, setBlockedDeleteMessage] = useState("");
-  const [groupEditor, setGroupEditor] = useState({ mode: "idle", value: "", error: "", groupId: null });
 
   const activeGroupId = activeGroup?.id;
 
@@ -450,7 +449,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   const resetLocalState = useCallback(
     (sourceList) => {
       // Clear all local state to prevent stale data
-      setGroupEditor({ mode: "idle", value: "", error: "", groupId: null });
       setError("");
       setBulkEditMode(false);
       setBulkEditText("");

@@ -21,7 +21,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
 import SearchItems from "@/components/UI/SearchItems";
-import { Archive, ArchiveRestore, ClockFading, Pause, Play, Trash2, Undo2 } from "lucide-react";
+import { ArchiveRestore, ClockFading, Pause, Play, Trash2, Undo2 } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
 import DeleteModal from "@/components/UI/DeleteModal";
 import UsageLimitModal from "@/components/modals/UsageLimitModal";

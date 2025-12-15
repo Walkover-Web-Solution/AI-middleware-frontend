@@ -97,7 +97,7 @@ export const createReponseTypeInOrg = async (orgId) => {
 export const createOrgToken = async (orgId) => {
   try {
     const data = await axios.post(`${URL}/api/utils/token`, {
-      type: 'org_token'
+      type: 'org'
     });
     return data;
   } catch (error) {
