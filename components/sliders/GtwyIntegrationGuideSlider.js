@@ -245,7 +245,7 @@ const ThemePaletteEditor = ({ theme, onColorChange }) => {
         return (
           <div
             key={mode}
-            className="border border-base-300 rounded-lg bg-base-100/80"
+            className=" rounded bg-base-200"
           >
             <button
               type="button"
@@ -253,16 +253,13 @@ const ThemePaletteEditor = ({ theme, onColorChange }) => {
               onClick={() => toggleMode(mode)}
             >
               <div>
-                <p className="text-sm font-semibold text-primary">
+                <p className="text-sm text-base-content/70">
                   {MODE_TITLES[mode]}
-                </p>
-                <p className="text-xs text-base-content/60">
-                  {isOpen ? "Click to hide palette" : "Click to view palette"}
                 </p>
               </div>
               <ChevronDown
                 size={16}
-                className={`text-base-content transition-transform ${
+                className={`text-base-content/70 transition-transform ${
                   isOpen ? "rotate-180" : ""
                 }`}
               />
@@ -1026,12 +1023,9 @@ window.openGtwy({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h4 className="card-title text-primary text-base mb-0">Theme Palette</h4>
-                    <p className="text-xs text-base-content/70">
-                      Pick colors for each token. We will automatically convert them to OKLCH to match the embed.
-                    </p>
                   </div>
                   <button
-                    className="btn btn-outline btn-sm"
+                    className="btn btn-outline btn-xs"
                     onClick={handleThemeReset}
                     type="button"
                   >
