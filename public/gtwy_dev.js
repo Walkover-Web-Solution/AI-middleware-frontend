@@ -384,7 +384,7 @@
             try {
                 const embedToken = document.getElementById('gtwy-main-script')?.getAttribute('embedToken');
                 const options = embedToken ? {
-                    method: 'GET',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: embedToken }
                 } : undefined;
                 return (await fetch(this.urls.login, options)).json();
