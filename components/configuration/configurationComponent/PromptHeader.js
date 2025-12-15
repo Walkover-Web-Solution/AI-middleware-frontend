@@ -6,7 +6,7 @@ const PromptHeader = memo(({
     hasUnsavedChanges, 
     onSave, 
     isPromptHelperOpen, 
-    isMobileView,
+    isMobileView, 
     onOpenDiff,
     onOpenPromptHelper,
     onClosePromptHelper,

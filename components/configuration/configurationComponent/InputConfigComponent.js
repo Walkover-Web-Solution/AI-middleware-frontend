@@ -64,7 +64,8 @@ const InputConfigComponent = memo(({
     
     // Optimized save handler using current editor text (contentEditable div)
     const handleSavePrompt = useCallback(() => {
-        const currentValue = (textareaRef.current?.innerText || '').trim();
+        const currentValue = (textareaRef.current?.value || '').trim();
+        console.log("Saving prompt: ", currentValue);
         savePrompt(currentValue);
         oldContentRef.current = currentValue;
         hasUnsavedChangesRef.current = false;
