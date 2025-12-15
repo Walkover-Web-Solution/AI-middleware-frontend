@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { CloseIcon } from "@/components/Icons";
-import { Save } from "lucide-react";
+import { Save, ChevronDown } from "lucide-react";
 import { generateGtwyAccessTokenAction } from "@/store/action/orgAction";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -226,49 +226,80 @@ const enforceThemeStructure = (theme) => {
 };
 
 const ThemePaletteEditor = ({ theme, onColorChange }) => {
+  const [openModes, setOpenModes] = useState(() =>
+    Object.keys(MODE_TITLES).reduce(
+      (acc, mode) => ({ ...acc, [mode]: false }),
+      {}
+    )
+  );
+
+  const toggleMode = (mode) => {
+    setOpenModes((prev) => ({ ...prev, [mode]: !prev[mode] }));
+  };
+
   return (
-    <div className="space-y-6 mt-4">
+    <div className="space-y-3 mt-4">
       {Object.keys(MODE_TITLES).map((mode) => {
         const tokens = Object.keys(defaultUserTheme?.[mode] || {});
+        const isOpen = openModes[mode];
         return (
-          <div key={mode} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h5 className="text-sm font-semibold text-primary">
-                {MODE_TITLES[mode]}
-              </h5>
-              <span className="text-xs uppercase tracking-wide text-base-content/60">
-                {mode}
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {tokens.map((token) => {
-                const value = theme?.[mode]?.[token] || "";
-                const hexValue = oklchToHex(value, "#000000");
-                return (
-                  <div
-                    key={`${mode}-${token}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-base-300 p-2"
-                  >
-                    <div className="flex-1">
-                      <p className="text-xs font-semibold">
-                        {COLOR_LABEL_MAP[token] || token}
-                      </p>
-                      <p className="text-[10px] font-mono text-base-content/60 break-all">
-                        {value || "—"}
-                      </p>
-                    </div>
-                    <input
-                      type="color"
-                      className="w-10 h-10 border border-base-300 rounded cursor-pointer bg-transparent shrink-0"
-                      value={hexValue}
-                      onChange={(e) =>
-                        onColorChange(mode, token, e.target.value)
-                      }
-                    />
-                  </div>
-                );
-              })}
-            </div>
+          <div
+            key={mode}
+            className="border border-base-300 rounded-lg bg-base-100/80"
+          >
+            <button
+              type="button"
+              className="w-full flex items-center justify-between px-3 py-2 text-left"
+              onClick={() => toggleMode(mode)}
+            >
+              <div>
+                <p className="text-sm font-semibold text-primary">
+                  {MODE_TITLES[mode]}
+                </p>
+                <p className="text-xs text-base-content/60">
+                  {isOpen ? "Click to hide palette" : "Click to view palette"}
+                </p>
+              </div>
+              <ChevronDown
+                size={16}
+                className={`text-base-content transition-transform ${
+                  isOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {isOpen && (
+              <div className="px-3 pb-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {tokens.map((token) => {
+                    const value = theme?.[mode]?.[token] || "";
+                    const hexValue = oklchToHex(value, "#000000");
+                    return (
+                      <div
+                        key={`${mode}-${token}`}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-base-200 p-2"
+                      >
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold">
+                            {COLOR_LABEL_MAP[token] || token}
+                          </p>
+                          <p className="text-[10px] font-mono text-base-content/60 break-all">
+                            {value || "—"}
+                          </p>
+                        </div>
+                        <input
+                          type="color"
+                          className="w-10 h-10 border border-base-300 rounded cursor-pointer bg-transparent shrink-0"
+                          value={hexValue}
+                          onChange={(e) =>
+                            onColorChange(mode, token, e.target.value)
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         );
       })}
@@ -410,14 +441,14 @@ const cloneTheme = (theme) =>
   JSON.parse(JSON.stringify(theme || defaultUserTheme));
 const stringifyTheme = (theme) => JSON.stringify(theme, null, 2);
 const normalizeThemeConfig = (value) => {
-  if (!value) return cloneTheme(defaultUserTheme);
-  if (typeof value === "string") {
+    if (!value) return cloneTheme(defaultUserTheme);
+    if (typeof value === "string") {
     try {
       return cloneTheme(JSON.parse(value));
-    } catch (error) {
-      console.error("Invalid stored theme_config JSON", error);
-      return cloneTheme(defaultUserTheme);
-    }
+  } catch (error) {
+    console.error("Invalid stored theme_config JSON", error);
+    return cloneTheme(defaultUserTheme);
+  }
   }
   return cloneTheme(value);
 };

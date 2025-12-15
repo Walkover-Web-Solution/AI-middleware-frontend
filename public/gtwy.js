@@ -13,7 +13,7 @@
             };
             this.urls = {
                 gtwyUrl: 'https://embed.gtwy.ai/embed',
-                login: 'https://db.gtwy.ai/gtwyEmbed/login'
+                login: 'https://db.gtwy.ai/api/embed/login'
             };
             this.state = {
                 bodyLoaded: false, fullscreen: false, isInitialized: false, hasParentContainer: false,
