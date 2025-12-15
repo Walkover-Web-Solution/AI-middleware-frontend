@@ -136,7 +136,7 @@ const InputConfigComponent = memo(({
                 isPublished={isPublished}
             />
             
-            <div className="form-control relative">
+            <div className="form-control relative flex flex-col min-h-0">
                 <PromptTextarea
                     textareaRef={textareaRef}
                     initialValue={reduxPrompt}

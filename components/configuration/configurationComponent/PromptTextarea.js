@@ -34,26 +34,26 @@ const PromptTextarea = memo(({
     }
   }, [initialValue, textareaRef]);
 
-  useLayoutEffect(() => {
-  if (!isPromptHelperOpen) return;
+//   useLayoutEffect(() => {
+//   if (!isPromptHelperOpen) return;
 
-  const wrapper = textareaRef.current?.parentElement;
-  if (!wrapper) return;
+//   const wrapper = textareaRef.current?.parentElement;
+//   if (!wrapper) return;
 
-  // Force browser to apply final height BEFORE paint
-  wrapper.style.height = 'calc(100vh - 80px)';
-  // force synchronous layout flush
-  wrapper.offsetHeight;
-}, [isPromptHelperOpen]);
+//   // Force browser to apply final height BEFORE paint
+//   wrapper.style.height = 'calc(100vh - 80px)';
+//   // force synchronous layout flush
+//   wrapper.offsetHeight;
+// }, [isPromptHelperOpen]);
 
-useEffect(() => {
-  const wrapper = textareaRef.current?.parentElement;
-  if (!wrapper) return;
+// useEffect(() => {
+//   const wrapper = textareaRef.current?.parentElement;
+//   if (!wrapper) return;
 
-  wrapper.style.height = isPromptHelperOpen
-    ? 'calc(100vh - 80px)'
-    : '24rem';
-}, [isPromptHelperOpen]);
+//   wrapper.style.height = isPromptHelperOpen
+//     ? 'calc(100vh - 80px)'
+//     : '24rem';
+// }, [isPromptHelperOpen]);
 
   // 🔹 Change handler (textarea version)
   const handleChange = useCallback((e) => {
@@ -83,22 +83,23 @@ useEffect(() => {
 
   return (
     
-    <div
-      className={`textarea bg-white dark:bg-black/15 border border-base-content/20
-        w-full resize-y overflow-auto relative z-low rounded-b-none
-        transition-none !duration-0 flex
-        ${isPromptHelperOpen 
-          ? "min-h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] w-[700px] border-primary shadow-md pb-8"
-          : "h-96 min-h-96"
-        }
-      `}
-    >
+   <div
+  className={`
+    textarea bg-white dark:bg-black/15 border border-base-content/20
+    w-full resize-y overflow-y-auto relative z-low rounded-b-none
+    transition-none flex p-0 m-0
+    ${isPromptHelperOpen
+      ? "h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] w-[700px] border-primary shadow-md pb-8"
+      : "h-96"
+    }
+  `}
+>
     
       <textarea
         ref={textareaRef}
         disabled={isPublished}
-        className={`w-full h-full resize-none bg-transparent
-    caret-base-content outline-none overflow-auto
+        className={`w-full h-full p-2 resize-none bg-transparent
+    caret-base-content outline-hidden overflow-auto
     [&::-webkit-scrollbar]:hidden
     [scrollbar-width:none]
     [-ms-overflow-style:none]
