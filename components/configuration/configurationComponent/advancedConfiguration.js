@@ -82,7 +82,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, fo
 
   // Check if a service has available API keys
   const hasApiKeysForService = (service) => {
-    if(service==='ai_ml') return true;
     return filterApiKeysByServiceForFallback(service).length > 0;
   };
 
