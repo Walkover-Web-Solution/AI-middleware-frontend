@@ -724,7 +724,8 @@ const generateInitialConfig = () => {
       }
       enforceThemeStructure(parsed);
       return cloneTheme(parsed);
-    } catch (error) {
+    } catch (err) {
+      console.error("Failed to parse theme JSON:", err);
       return null;
     }
   };

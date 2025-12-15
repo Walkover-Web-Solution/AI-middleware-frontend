@@ -61,7 +61,6 @@ const Layout = ({ children }) => {
 
   const createNewAgent = useCallback((agent_name, orgId, agent_purpose) => {
     // Reset theme config when creating a new agent
-    resetEmbedThemeConfig();
     const dataToSend = agent_purpose ? {purpose: agent_purpose.trim()} : {
       service: 'openai',
       model: 'gpt-4o',
@@ -99,7 +98,6 @@ const Layout = ({ children }) => {
 
   const navigateToExistingAgent = useCallback((agent, orgId) => {
     // Reset theme config when navigating to a different agent
-    resetEmbedThemeConfig();
     const version = agent?.published_version_id || agent?.versions?.[0];
     if(agent?._id && orgId && version){
       router.push(
@@ -157,7 +155,6 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const initialize = () => {
       // Reset theme config on initialization
-      resetEmbedThemeConfig();
       if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.hideHomeButton) {
         setIsLoading(true);
         
