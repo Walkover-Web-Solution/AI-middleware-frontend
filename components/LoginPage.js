@@ -4,6 +4,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { setInCookies } from '@/utils/utility';
+import FavIcon from '@/icons/FavIcon';
 
 const LoginPage = ({loading}) => {
   const urlParams = useSearchParams();  
@@ -64,7 +65,7 @@ const LoginPage = ({loading}) => {
                     {/* Logo and text on top of the rotating box */}
                     <div className="relative z-10 opacity-90 hover:opacity-100 transition-opacity">
                       <div className="flex items-center">
-                        <Image src="/favicon.png" alt="favIcon" width={60} height={60} className="h-16 w-auto cursor-pointer opacity-90 hover:opacity-100 transition-opacity" />
+                        <FavIcon height={100} width={100}/>
                       </div>
                     </div>
                   </div>
@@ -87,18 +88,18 @@ const LoginPage = ({loading}) => {
 
             <div className="w-full max-w-md">
               {/* Corner borders */}
-              <div className='bg-base-100/20 backdrop-blur-xl border border-base-content/20 p-12 relative animate-[fadeInUp_0.8s_ease-out_0.1s_both]'>
-              <div className="absolute -top-px -left-px w-16 h-16 border-l-2 border-t-2 border-base-content/30"></div>
-              <div className="absolute -bottom-px -right-px w-16 h-16 border-r-2 border-b-2 border-base-content/30"></div>
+              <div className='bg-base-100/20 backdrop-blur-xl border border-base-content/10 shadow-lg p-12 relative animate-[fadeInUp_0.8s_ease-out_0.1s_both]'>
+              <div className="absolute -top-px -left-px w-16 h-16 border-l-2 border-t-2 border-base-content/20"></div>
+              <div className="absolute -bottom-px -right-px w-16 h-16 border-r-2 border-b-2 border-base-content/20"></div>
               
               {/* Welcome Text */}
               <div className="text-center mb-6">
-                <h1 className="text-5xl text-base-content tracking-tight mb-4">Welcome Back</h1>
-                <p className="text-sm text-base-content tracking-wide">Login to access your AI workspace</p>
+                <h1 className="text-4xl font-semibold text-base-content tracking-tight mb-4">Welcome Back</h1>
+                <p className="text-base-content tracking-wide">Login to access your AI workspace</p>
               </div>
 
               {/* Login Options */}
-              <div className="w-full flex justify-center py-16">
+              <div className="w-full flex flex-col items-center justify-center py-16 gap-4 [&_[data-create-account='true']]:whitespace-nowrap">
                 <div
                   id={process.env.NEXT_PUBLIC_REFERENCEID}
                   className="w-full flex flex-col justify-center items-center"
@@ -109,19 +110,41 @@ const LoginPage = ({loading}) => {
             
             {/* Stats Section - Below login card */}
             <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
-              <div className="text-center border px-2 py-4">
+              <div className="text-center border border-base-content/20 px-2 py-4">
                 <div className="text-sm font-semibold text-base-content">500+</div>
                 <div className="text-xs text-base-content/60">COMPANIES</div>
               </div>
-              <div className="text-center border px-2 py-4">
+              <div className="text-center border border-base-content/20 px-2 py-4">
                 <div className="text-sm font-semibold text-base-content">99.9%</div>
                 <div className="text-xs text-base-content/60">UPTIME</div>
               </div>
-              <div className="text-center border px-2 py-4">
+              <div className="text-center border border-base-content/20 px-2 py-4">
                 <div className="text-sm font-semibold text-base-content">24/7</div>
                 <div className="text-xs text-base-content/60">SUPPORT</div>
               </div>
             </div>
+            <p className="mt-6 text-center text-xs text-base-content/30 tracking-wide leading-relaxed">
+              By continuing, you agree to gtwy&apos;s{' '}
+              <a
+                href="https://gtwy.ai/terms/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-base-content/60 font-medium decoration-base-content/40 hover:text-base-content/80 transition-colors"
+              >
+                Terms of Service
+              </a>
+              <br />
+              and acknowledge our{' '}
+              <a
+                href="https://gtwy.ai/privacy/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-base-content/60 font-medium decoration-base-content/40 hover:text-base-content/80 transition-colors"
+              >
+                Privacy Policy
+              </a>
+              .
+            </p>
           </div>
         </div>
       )}
