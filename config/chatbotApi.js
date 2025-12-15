@@ -116,9 +116,9 @@ export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseOb
 }
 
 // Chatbot Action Management APIs
-export const createOrRemoveAction = async ({ orgId, bridgeId, versionId, type, dataToSend }) => {
+export const createOrRemoveAction = async ({ bridgeId, versionId, type, dataToSend }) => {
   try {
-    const response = await axios.post(`${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`, { ...dataToSend, version_id: versionId });
+    const response = await axios.post(`${URL}/api/chatbot/agent/${bridgeId}/action?type=${type}`, { ...dataToSend, version_id: versionId });
     return response.data;
   } catch (error) {
     console.error(error);
