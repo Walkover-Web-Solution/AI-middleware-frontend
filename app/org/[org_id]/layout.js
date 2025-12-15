@@ -370,10 +370,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     return <ErrorPage></ErrorPage>;
   }
 
+  const themeUserType = isEmbedUser ? 'embed' : 'default';
+
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <ThemeManager />
+        <ThemeManager userType={themeUserType} />
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="flex flex-col h-full z-high">
@@ -411,7 +413,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   else {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <ThemeManager />
+        <ThemeManager userType={themeUserType} />
         {/* Main Content Area for Embed Users */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Sticky Navbar */}
