@@ -21,10 +21,11 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
 import SearchItems from "@/components/UI/SearchItems";
-import { ArchiveRestore, ClockFading, Pause, Play, Trash2, Undo2 } from "lucide-react";
+import { Archive, ArchiveRestore, ClockFading, Pause, Play, Trash2, Undo2, Users } from "lucide-react";
 import AgentEmptyState from "@/components/AgentEmptyState";
 import DeleteModal from "@/components/UI/DeleteModal";
 import UsageLimitModal from "@/components/modals/UsageLimitModal";
+import AccessManagementModal from "@/components/modals/AccessManagementModal";
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
 
 export const runtime = 'edge';
@@ -60,9 +61,14 @@ function Home({ params, isEmbedUser }) {
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory, isAdminOrOwner, currentOrgRole, currentUser } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
-    const user = state.userDetailsReducer.userDetails
+    const user = state.userDetailsReducer.userDetails;
+    const orgRole = state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]?.role_name;
+    
+    // Check if user is admin or owner
+    const isAdminOrOwner = orgRole === "Admin" || orgRole === "Owner";
+    
     return {
       allBridges: (orgData.orgs || []).slice().reverse(),
       averageResponseTime: orgData.average_response_time || [],
@@ -71,6 +77,9 @@ function Home({ params, isEmbedUser }) {
       descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions || {},
       bridgeStatus: state.bridgeReducer.allBridgesMap,
       showHistory: state.appInfoReducer.embedUserDetails?.showHistory || false,
+      isAdminOrOwner,
+      currentUser: state.userDetailsReducer.userDetails,
+      currentOrgRole: orgRole || "Viewer",
     };
   });
   const [filterBridges, setFilterBridges] = useState(allBridges);
@@ -81,6 +90,7 @@ function Home({ params, isEmbedUser }) {
     showTutorial: false
   });
   const [selectedBridgeForLimit, setSelectedBridgeForLimit] = useState(null);
+  const [selectedAgentForAccess, setSelectedAgentForAccess] = useState(null);
   
   // Use portal dropdown hook
   const {
@@ -164,6 +174,7 @@ function Home({ params, isEmbedUser }) {
                         </span>
                       </div> ,
     last_used_orignal: item.last_used,
+    users:item.users
     
   }));
 
@@ -349,6 +360,7 @@ function Home({ params, isEmbedUser }) {
   }
 
   const EndComponent = ({ row }) => {
+    const isEditor = ((currentOrgRole === "Editor" && (row.users?.length === 0 || !row.users || (row.users?.length > 0 && row.users?.some(user => user.id === currentUser.id))))||((currentOrgRole==="Viewer")&&(row.users?.some(user => user.id === currentUser.id)))||currentOrgRole==="Creator");
     const handleDropdownClick = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -371,12 +383,18 @@ function Home({ params, isEmbedUser }) {
               resetUsage(row);
             }}><RefreshIcon className="" size={16} />Reset Usage</a></li>
           )}
-          <li className={`${row.status === 1 ? `hidden` : ''}`}><button onClick={(e) => {
+          {/* Only show Manage Access button for Admin or Owner roles */}
+          {!isEmbedUser && isAdminOrOwner && (
+            <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               handlePortalCloseImmediate();
-              archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className=" text-green-600" />Un-archive Agent</> : null}</button></li>
+              setSelectedAgentForAccess(row);
+              setTimeout(() => {
+                openModal(MODAL_TYPE.ACCESS_MANAGEMENT_MODAL);
+              }, 10);
+            }}><Users size={16}/>Manage Access</a></li>
+          )}
             <li> <button
               onClick={(e) => {
                 e.preventDefault();
@@ -398,19 +416,22 @@ function Home({ params, isEmbedUser }) {
                 </>
               )}
             </button></li>
-            <li><button onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handlePortalCloseImmediate();
-              setItemToDelete(row);
-              // Small delay to ensure state is set before opening modal
-              setTimeout(() => {
-                openModal(MODAL_TYPE.DELETE_MODAL);
-              }, 10);
-            }}>
-              <Trash2 size={14} className="text-red-600" />
-              Delete Agent
-            </button></li> 
+            {/* Only show Delete button for Admin or Owner roles */}
+            {isAdminOrOwner && (
+              <li><button onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePortalCloseImmediate();
+                setItemToDelete(row);
+                // Small delay to ensure state is set before opening modal
+                setTimeout(() => {
+                  openModal(MODAL_TYPE.DELETE_MODAL);
+                }, 10);
+              }}>
+                <Trash2 size={14} className="text-red-600" />
+                Delete Agent
+              </button></li>
+            )} 
         </ul>
       );
       
@@ -433,6 +454,7 @@ function Home({ params, isEmbedUser }) {
           </div> 
         ) : null}
         </div>
+        {isEditor && (
         <div className="bg-transparent">
           <div 
             role="button" 
@@ -442,6 +464,7 @@ function Home({ params, isEmbedUser }) {
             <EllipsisIcon className="rotate-90" size={16} />
           </div>
         </div>
+        )}
       </div>
       </div>
     )
@@ -616,6 +639,7 @@ function Home({ params, isEmbedUser }) {
       {/* Powered By Footer pinned to bottom */}
     {isEmbedUser && <PoweredByFooter />}
       <UsageLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeLimit} item="Agent Name" />
+      <AccessManagementModal agent={selectedAgentForAccess} />
       
       {/* Portal components from hook */}
       <PortalStyles />

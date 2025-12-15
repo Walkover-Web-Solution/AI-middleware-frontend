@@ -154,8 +154,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     updateUserMeta();
   }, []);
 
-
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+   if(currrentOrgDetail?.role_name!=="Viewer") {
+    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  }
   useRtLayerEventHandler();
 
 
@@ -206,8 +207,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getPrebuiltToolsAction())
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-      dispatch(getAllAuthData())
-    }
+      }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
   const scriptId = "chatbot-main-script";
