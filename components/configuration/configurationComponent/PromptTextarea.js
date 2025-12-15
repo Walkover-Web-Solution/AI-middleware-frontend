@@ -2,96 +2,112 @@ import React, { useRef, useCallback, memo, useEffect } from 'react';
 
 // Ultra-smooth textarea component with zero re-renders during typing
 const PromptTextarea = memo(({ 
-    textareaRef,
-    initialValue = "",
-    onChange, 
-    onFocus, 
-    onKeyDown,
-    isPromptHelperOpen,
-    className = "",
-    placeholder = "",
-    isPublished = false
+  textareaRef,
+  initialValue = "",
+  onChange, 
+  onFocus, 
+  onKeyDown,
+  isPromptHelperOpen,
+  className = "",
+  placeholder = "",
+  isPublished = false
 }) => {
-    const isComposingRef = useRef(false);
-    const lastExternalValueRef = useRef(initialValue);
-    const hasInitializedRef = useRef(false);
-    
-    // Update editor content when external value changes (like from Redux)
-    useEffect(() => {
-        const editor = textareaRef.current;
-        if (!editor || isComposingRef.current) return;
+  const isComposingRef = useRef(false);
+  const lastExternalValueRef = useRef(initialValue);
+  const hasInitializedRef = useRef(false);
 
-        // On first mount, always hydrate with initialValue even if it equals the ref
-        if (!hasInitializedRef.current) {
-            editor.innerText = initialValue || "";
-            lastExternalValueRef.current = initialValue;
-            hasInitializedRef.current = true;
-            return;
-        }
+  // Sync external value
+  useEffect(() => {
+    const editor = textareaRef.current;
+    if (!editor || isComposingRef.current) return;
 
-        // After first mount, only update when external value actually changes
-        if (initialValue !== lastExternalValueRef.current) {
-            editor.innerText = initialValue || "";
-            lastExternalValueRef.current = initialValue;
-        }
-    }, [initialValue, textareaRef]);
-    
-    // Manage textarea height based on PromptHelper state
-    useEffect(() => {
-        if(!isPromptHelperOpen){
-            textareaRef.current.style.height = '24rem';
-        }
-    }, [isPromptHelperOpen]);
-    // Zero-render change handler - no state updates
-    const handleChange = useCallback((e) => {
-        const value = e.target.innerText;
-        // Only call parent onChange if not composing (for IME support)
-        if (!isComposingRef.current) {
-            onChange(value);
-        }
-    }, [onChange]);
-    
-    // Handle composition events for better IME support
-    const handleCompositionStart = useCallback(() => {
-        isComposingRef.current = true;
-    }, []);
-    
-    const handleCompositionEnd = useCallback((e) => {
-        isComposingRef.current = false;
-        const value = e.target.innerText;
-        onChange(value);
-    }, [onChange]);
+    if (!hasInitializedRef.current) {
+      editor.value = initialValue || "";
+      lastExternalValueRef.current = initialValue;
+      hasInitializedRef.current = true;
+      return;
+    }
 
-    // Optimized focus handler
-    const handleFocus = useCallback((e) => {
-        onFocus?.(e);
-    }, [onFocus]);
+    if (initialValue !== lastExternalValueRef.current) {
+      editor.value = initialValue || "";
+      lastExternalValueRef.current = initialValue;
+    }
+  }, [initialValue, textareaRef]);
 
-    // Optimized keydown handler
-    const handleKeyDown = useCallback((e) => {
-        onKeyDown?.(e);
-    }, [onKeyDown]);
+  // 🔹 Force textarea to recalculate height when prompt helper opens/closes
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
 
-    return (
-    <div
-  ref={textareaRef}
-  contentEditable={!isPublished}
-  className={`textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y overflow-auto relative z-low caret-base-content p-2 rounded-b-none transition-none !duration-0
-    ${isPromptHelperOpen 
-      ? "min-h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] w-[700px] border-primary shadow-md pb-8"
-      : "h-96 min-h-96"
-    }`}
-  onInput={handleChange}
-  onFocus={handleFocus}
-  onKeyDown={handleKeyDown}
-  onCompositionStart={handleCompositionStart}
-  onCompositionEnd={handleCompositionEnd}
-  placeholder={placeholder}
-  title={isPublished ? "Cannot edit in published mode" : ""}
-/>
-);
+    // Force reflow by toggling height
+    textarea.style.height = '0px';
+    // Trigger reflow
+    textarea.offsetHeight;
+    // Reset to full height
+    textarea.style.height = '100%';
+  }, [isPromptHelperOpen, textareaRef]);
+
+  // Change handler
+  const handleChange = useCallback((e) => {
+    const value = e.target.value;
+    if (!isComposingRef.current) {
+      onChange(value);
+    }
+  }, [onChange]);
+
+  // IME support
+  const handleCompositionStart = useCallback(() => {
+    isComposingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback((e) => {
+    isComposingRef.current = false;
+    onChange(e.target.value);
+  }, [onChange]);
+
+  const handleFocus = useCallback((e) => {
+    onFocus?.(e);
+  }, [onFocus]);
+
+  const handleKeyDown = useCallback((e) => {
+    onKeyDown?.(e);
+  }, [onKeyDown]);
+
+  return (
+   <div
+  className={`
+    textarea bg-white dark:bg-black/15 border
+    w-full resize-y overflow-hidden relative z-low rounded-b-none
+    transition-none !duration-0 flex p-0 m-0
+    ring-2 ring-transparent
+    focus-within:ring-2 focus-within:ring-base-content/20
+    ${isPromptHelperOpen
+      ? "h-[calc(100vh-80px)] w-[700px] border-primary shadow-md"
+      : "h-96 border-base-content/20"
+    }
+  `}
+>
+
+        
+      <textarea
+        ref={textareaRef}
+        disabled={isPublished}
+        className={`
+          w-full h-full p-2 resize-none bg-transparent border-none 
+          caret-base-content outline-none overflow-auto
+          ${className}
+        `}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        placeholder={placeholder}
+        title={isPublished ? "Cannot edit in published mode" : ""}
+      />
+    </div>
+  );
 });
 
 PromptTextarea.displayName = 'PromptTextarea';
-
 export default PromptTextarea;
