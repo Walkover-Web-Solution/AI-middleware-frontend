@@ -162,9 +162,18 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
                 const modelName = cfg?.configuration?.model?.default;
                 if (!modelName) return;
                 const specs = cfg?.validationConfig?.specification;
+                const displayLabel = modelName === 'gpt-5-nano' && bridgeType === 'chatbot'
+                    ? (
+                        <div className="flex items-center gap-2">
+                            <span>{modelName}</span>
+                            <span className="badge badge-success badge-sm text-xs">FREE</span>
+                        </div>
+                    )
+                    : modelName;
+                
                 opts.push({
                     value: modelName,
-                    label: modelName,
+                    label: displayLabel,
                     // pass meta to use in onChange and onOptionHover
                     meta: { group, modelName, specs }
                 });
