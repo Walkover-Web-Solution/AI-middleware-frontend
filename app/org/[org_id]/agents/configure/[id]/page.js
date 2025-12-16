@@ -13,18 +13,21 @@ import { useRouter } from "next/navigation";
 import Chatbot from "@/components/configuration/Chatbot";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { RefreshIcon } from "@/components/Icons";
+import { CircleAlert } from "lucide-react";
 const ConfigurationPage = dynamic(() => import("@/components/configuration/ConfigurationPage"));
 const Chat = dynamic(() => import("@/components/configuration/Chat"), { loading: () => null, });
 const WebhookForm = dynamic(() => import("@/components/BatchApi"), { ssr: false, });
 const PromptHelper = dynamic(() => import("@/components/PromptHelper"), { ssr: false, });
 const NotesPanel = dynamic(() => import("@/components/NotesPanel"), { ssr: false, });
+const ConfigurationSkeleton = dynamic(() => import("@/components/skeletons/ConfigurationSkeleton"), { ssr: false });
 
 export const runtime = 'edge';
 
 // Bundle Components for collapsed panels (5px min width)
 const ConfigBundle = () => {
   return (
-    <div 
+    <div
       className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Configuration Panel"
       style={{ minWidth: '15px' }}
@@ -38,7 +41,7 @@ const ConfigBundle = () => {
 
 const ChatBundle = () => {
   return (
-    <div 
+    <div
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Chat Panel"
       style={{ minWidth: '20px' }}
@@ -52,7 +55,7 @@ const ChatBundle = () => {
 
 const PromptHelperBundle = () => {
   return (
-    <div 
+    <div
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Prompt Helper Panel"
       style={{ minWidth: '20px' }}
@@ -66,7 +69,7 @@ const PromptHelperBundle = () => {
 
 const NotesBundle = () => {
   return (
-    <div 
+    <div
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Notes Panel"
       style={{ minWidth: '20px' }}
@@ -105,7 +108,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const containerRef = useRef(null);
 
   // Optimized selector with better memoization
-  const { bridgeType, versionService, bridgeName, isFocus, reduxPrompt, bridge } = useConfigurationSelector(resolvedParams, resolvedSearchParams);
+  const { bridgeType, versionService, bridgeName, isFocus, reduxPrompt, bridge, isLoading, hasError, hasData } = useConfigurationSelector(resolvedParams, resolvedSearchParams);
 
   // Separate selector for allbridges to prevent unnecessary re-renders
   const allbridges = useCustomSelector(
@@ -162,7 +165,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   // Determine where the Close Helper button should appear
   const closeHelperButtonLocation = useMemo(() => {
     if (!uiState.isPromptHelperOpen) return null;
-    
+
     if (!uiState.isConfigCollapsed) {
       return 'config'; // Show in Config panel (PromptHeader)
     } else if (!uiState.isPromptHelperCollapsed) {
@@ -211,7 +214,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
         block: 'start',
         inline: 'nearest'
       });
-      
+
     }
   };
   useEffect(() => {
@@ -349,13 +352,44 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     mountRef.current = true;
   }, [bridgeType]);
 
+  // Show skeleton loading state only for initial load (when no data exists)
+  if (isLoading && !hasData && !hasError) {
+    return (
+      <div className="w-full h-full">
+        <ConfigurationSkeleton />
+      </div>
+    );
+  }
+
+  // Show error state with retry option
+  if (hasError && !hasData) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-base-100">
+        <div className="text-center p-8">
+          <div className="mb-4">
+            <CircleAlert className="w-16 h-16 mx-auto text-error" />
+          </div>
+          <h3 className="text-lg font-semibold text-base-content mb-2">Unable to load agent configuration</h3>
+          <p className="text-base-content/60 mb-4">There was an error loading the agent data. Please try again.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn btn-primary"
+          >
+            <RefreshIcon className="w-4 h-4 mr-2" />
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
       className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
     >
       {/* Debug Panel States */}
-      
+
       {uiState.isDesktop ? (
         isAgentFlowView ? (
           <div className="w-full h-full">
@@ -379,214 +413,214 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             </div>
           </div>
         ) : (
-        // Desktop: Use react-resizable-panels for smooth resizing
-        <PanelGroup direction="horizontal" className="w-full h-full">
-          {/* Configuration Panel */}
-          <Panel
-            defaultSize={panelSizes.config}
-            minSize={3}
-            maxSize={100}
-            className="bg-base-100"
-            collapsible={false}
-            onResize={(size) => {
-              const isCollapsed = size <= 5;
-              if (uiState.isConfigCollapsed !== isCollapsed) {
-                updateUiState({ isConfigCollapsed: isCollapsed });
-              }
-            }}
-          >
-            {/* Bundle - Show when collapsed */}
-            {uiState.isConfigCollapsed && (
-              <ConfigBundle />
-            )}
-            
-            {/* Configuration Content - Always in DOM, just hidden when collapsed */}
-            <div 
-              className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
-            >
-              {/* Configuration Content */}
-              <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : 'px-4'}`}>
-                <ConfigurationPage
-                  promptTextAreaRef={promptTextAreaRef}
-                  params={resolvedParams}
-                  searchParams={resolvedSearchParams}
-                  isEmbedUser={isEmbedUser}
-                  uiState={uiState}
-                  updateUiState={updateUiState}
-                  promptState={promptState}
-                  setPromptState={setPromptState}
-                  handleCloseTextAreaFocus={handleCloseTextAreaFocus}
-                  savePrompt={savePrompt}
-                  isMobileView={isMobileView}
-                  closeHelperButtonLocation={closeHelperButtonLocation}
-                  bridgeName={bridgeName}
-                  onViewChange={handleViewChange}
-                />
-              </div>
-            </div>
-          </Panel>
-
-          {/* Resizer Handle with Custom Line */}
-          <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-primary/80 transition-colors duration-200 rounded-full" />
-            </div>
-          </PanelResizeHandle>
-
-          {/* Chat/PromptHelper Panel - Conditional based on focus mode */}
-          {!uiState.isPromptHelperOpen || !isFocus ? (
-            // Chat Panel (Two-panel mode)
-            <Panel 
-              defaultSize={panelSizes.chat} 
+          // Desktop: Use react-resizable-panels for smooth resizing
+          <PanelGroup direction="horizontal" className="w-full h-full">
+            {/* Configuration Panel */}
+            <Panel
+              defaultSize={panelSizes.config}
               minSize={3}
-              className="bg-base-50"
+              maxSize={100}
+              className="bg-base-100"
               collapsible={false}
               onResize={(size) => {
                 const isCollapsed = size <= 5;
-                if (uiState.isChatCollapsed !== isCollapsed) {
-                  updateUiState({ isChatCollapsed: isCollapsed });
+                if (uiState.isConfigCollapsed !== isCollapsed) {
+                  updateUiState({ isConfigCollapsed: isCollapsed });
                 }
               }}
             >
-              {uiState.isChatCollapsed ? (
-                <ChatBundle />
-              ) : (
-                <div className="h-full flex flex-col" id="parentChatbot">
-                  <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
-                    <div className="h-full flex flex-col">
-                      <AgentSetupGuide
-                        promptTextAreaRef={promptTextAreaRef}
-                        params={resolvedParams}
-                        searchParams={resolvedSearchParams}
-                        onVisibilityChange={setIsGuideVisible}
-                      />
-                      {!sessionStorage.getItem('orchestralUser') ? (
-                        <div className="flex-1 min-h-0">
-                          {bridgeType === 'batch' && versionService === 'openai' ? (
-                            <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
-                          ) : (
-                            <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex-1 min-h-0">
-                          <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
-                </div>
+              {/* Bundle - Show when collapsed */}
+              {uiState.isConfigCollapsed && (
+                <ConfigBundle />
               )}
+
+              {/* Configuration Content - Always in DOM, just hidden when collapsed */}
+              <div
+                className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
+              >
+                {/* Configuration Content */}
+                <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : 'px-4'}`}>
+                  <ConfigurationPage
+                    promptTextAreaRef={promptTextAreaRef}
+                    params={resolvedParams}
+                    searchParams={resolvedSearchParams}
+                    isEmbedUser={isEmbedUser}
+                    uiState={uiState}
+                    updateUiState={updateUiState}
+                    promptState={promptState}
+                    setPromptState={setPromptState}
+                    handleCloseTextAreaFocus={handleCloseTextAreaFocus}
+                    savePrompt={savePrompt}
+                    isMobileView={isMobileView}
+                    closeHelperButtonLocation={closeHelperButtonLocation}
+                    bridgeName={bridgeName}
+                    onViewChange={handleViewChange}
+                  />
+                </div>
+              </div>
             </Panel>
-          ) : (
-            // Three-panel mode: PromptHelper + Notes
-            <>
-              {/* PromptHelper Panel */}
-              <Panel 
-                defaultSize={panelSizes.promptHelper} 
+
+            {/* Resizer Handle with Custom Line */}
+            <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-primary/80 transition-colors duration-200 rounded-full" />
+              </div>
+            </PanelResizeHandle>
+
+            {/* Chat/PromptHelper Panel - Conditional based on focus mode */}
+            {!uiState.isPromptHelperOpen || !isFocus ? (
+              // Chat Panel (Two-panel mode)
+              <Panel
+                defaultSize={panelSizes.chat}
                 minSize={3}
-                maxSize={100} 
                 className="bg-base-50"
                 collapsible={false}
                 onResize={(size) => {
                   const isCollapsed = size <= 5;
-                  if (uiState.isPromptHelperCollapsed !== isCollapsed) {
-                    updateUiState({ isPromptHelperCollapsed: isCollapsed });
+                  if (uiState.isChatCollapsed !== isCollapsed) {
+                    updateUiState({ isChatCollapsed: isCollapsed });
                   }
                 }}
               >
-                {uiState.isPromptHelperCollapsed ? (
-                  <PromptHelperBundle />
+                {uiState.isChatCollapsed ? (
+                  <ChatBundle />
                 ) : (
-                  <PromptHelper
-                    isVisible={uiState.isPromptHelperOpen && !isMobileView}
-                    params={resolvedParams}
-                    searchParams={resolvedSearchParams}
-                    onClose={handleCloseTextAreaFocus}
-                    savePrompt={savePrompt}
-                    setPrompt={(value) => {
-                      // Update prompt state for diff/summary
-                      setPromptState(prev => ({ ...prev, newContent: value }));
-
-                      // Sync the contentEditable prompt editor DOM with the new value
-                      const container = promptTextAreaRef.current;
-                      if (container) {
-                        const editor = container.querySelector('[contenteditable="true"]');
-                        if (editor) {
-                          editor.innerText = value || "";
-                        }
-                      }
-                    }}
-                    showCloseButton={closeHelperButtonLocation === 'promptHelper'}
-                    messages={promptState.messages}
-                    setMessages={(value) => {
-                      if (typeof value === 'function') {
-                        setPromptState(prev => ({ ...prev, messages: value(prev.messages) }));
-                      } else {
-                        setPromptState(prev => ({ ...prev, messages: value }));
-                      }
-                    }}
-                    thread_id={promptState.thread_id}
-                    onResetThreadId={() => {
-                      const newId = generateRandomID();
-                      setPromptState(prev => ({ ...prev, thread_id: newId }));
-                      setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                        bridgeId: resolvedParams?.id,
-                        versionId: resolvedSearchParams?.version,
-                        thread_id: newId,
-                      }));
-                    }}
-                    prompt={promptState.prompt}
-                    hasUnsavedChanges={promptState.hasUnsavedChanges}
-                    setHasUnsavedChanges={(value) => setPromptState(prev => ({ ...prev, hasUnsavedChanges: value }))}
-                    setNewContent={(value) => setPromptState(prev => ({ ...prev, newContent: value }))}
-                    isEmbedUser={isEmbedUser}
-                  />
+                  <div className="h-full flex flex-col" id="parentChatbot">
+                    <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
+                      <div className="h-full flex flex-col">
+                        <AgentSetupGuide
+                          promptTextAreaRef={promptTextAreaRef}
+                          params={resolvedParams}
+                          searchParams={resolvedSearchParams}
+                          onVisibilityChange={setIsGuideVisible}
+                        />
+                        {!sessionStorage.getItem('orchestralUser') ? (
+                          <div className="flex-1 min-h-0">
+                            {bridgeType === 'batch' && versionService === 'openai' ? (
+                              <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                            ) : (
+                              <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex-1 min-h-0">
+                            <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+                  </div>
                 )}
               </Panel>
-
-              {/* Resizer Handle between PromptHelper and Notes with Custom Line */}
-              {uiState.showNotes && !isEmbedUser && (
-                <PanelResizeHandle className="w-2 bg-base-300 hover:bg-success/50 transition-colors duration-200 relative flex items-center justify-center group">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
-                  </div>
-                </PanelResizeHandle>
-              )}
-
-              {/* Notes Panel */}
-              {uiState.showNotes && !isEmbedUser && (
-                <Panel 
-                  defaultSize={panelSizes.notes} 
+            ) : (
+              // Three-panel mode: PromptHelper + Notes
+              <>
+                {/* PromptHelper Panel */}
+                <Panel
+                  defaultSize={panelSizes.promptHelper}
                   minSize={3}
-                  maxSize={100} 
+                  maxSize={100}
                   className="bg-base-50"
                   collapsible={false}
                   onResize={(size) => {
                     const isCollapsed = size <= 5;
-                    if (uiState.isNotesCollapsed !== isCollapsed) {
-                      updateUiState({ isNotesCollapsed: isCollapsed });
+                    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
+                      updateUiState({ isPromptHelperCollapsed: isCollapsed });
                     }
                   }}
                 >
-                  {uiState.isNotesCollapsed ? (
-                    <NotesBundle />
+                  {uiState.isPromptHelperCollapsed ? (
+                    <PromptHelperBundle />
                   ) : (
-                    <NotesPanel
-                      isVisible={true}
+                    <PromptHelper
+                      isVisible={uiState.isPromptHelperOpen && !isMobileView}
                       params={resolvedParams}
-                      isEmbedUser={isEmbedUser}
+                      searchParams={resolvedSearchParams}
                       onClose={handleCloseTextAreaFocus}
-                      showCloseButton={closeHelperButtonLocation === 'notes'}
+                      savePrompt={savePrompt}
+                      setPrompt={(value) => {
+                        // Update prompt state for diff/summary
+                        setPromptState(prev => ({ ...prev, newContent: value }));
+
+                        // Sync the contentEditable prompt editor DOM with the new value
+                        const container = promptTextAreaRef.current;
+                        if (container) {
+                          const editor = container.querySelector('[contenteditable="true"]');
+                          if (editor) {
+                            editor.innerText = value || "";
+                          }
+                        }
+                      }}
+                      showCloseButton={closeHelperButtonLocation === 'promptHelper'}
+                      messages={promptState.messages}
+                      setMessages={(value) => {
+                        if (typeof value === 'function') {
+                          setPromptState(prev => ({ ...prev, messages: value(prev.messages) }));
+                        } else {
+                          setPromptState(prev => ({ ...prev, messages: value }));
+                        }
+                      }}
+                      thread_id={promptState.thread_id}
+                      onResetThreadId={() => {
+                        const newId = generateRandomID();
+                        setPromptState(prev => ({ ...prev, thread_id: newId }));
+                        setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                          bridgeId: resolvedParams?.id,
+                          versionId: resolvedSearchParams?.version,
+                          thread_id: newId,
+                        }));
+                      }}
+                      prompt={promptState.prompt}
+                      hasUnsavedChanges={promptState.hasUnsavedChanges}
+                      setHasUnsavedChanges={(value) => setPromptState(prev => ({ ...prev, hasUnsavedChanges: value }))}
+                      setNewContent={(value) => setPromptState(prev => ({ ...prev, newContent: value }))}
+                      isEmbedUser={isEmbedUser}
                     />
                   )}
                 </Panel>
-              )}
-            </>
-          )}
 
-        </PanelGroup>
+                {/* Resizer Handle between PromptHelper and Notes with Custom Line */}
+                {uiState.showNotes && !isEmbedUser && (
+                  <PanelResizeHandle className="w-2 bg-base-300 hover:bg-success/50 transition-colors duration-200 relative flex items-center justify-center group">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
+                    </div>
+                  </PanelResizeHandle>
+                )}
+
+                {/* Notes Panel */}
+                {uiState.showNotes && !isEmbedUser && (
+                  <Panel
+                    defaultSize={panelSizes.notes}
+                    minSize={3}
+                    maxSize={100}
+                    className="bg-base-50"
+                    collapsible={false}
+                    onResize={(size) => {
+                      const isCollapsed = size <= 5;
+                      if (uiState.isNotesCollapsed !== isCollapsed) {
+                        updateUiState({ isNotesCollapsed: isCollapsed });
+                      }
+                    }}
+                  >
+                    {uiState.isNotesCollapsed ? (
+                      <NotesBundle />
+                    ) : (
+                      <NotesPanel
+                        isVisible={true}
+                        params={resolvedParams}
+                        isEmbedUser={isEmbedUser}
+                        onClose={handleCloseTextAreaFocus}
+                        showCloseButton={closeHelperButtonLocation === 'notes'}
+                      />
+                    )}
+                  </Panel>
+                )}
+              </>
+            )}
+
+          </PanelGroup>
         )
       ) : (
         isAgentFlowView ? (
@@ -612,53 +646,53 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             </div>
           </div>
         ) : (
-        // Mobile: Simple stacked layout
-        <div className="overflow-y-auto">
-          {/* Configuration Panel */}
-          <div className="min-h-screen border-b border-base-300 bg-base-100">
-            <div className="py-4 px-4">
-              <ConfigurationPage
-                promptTextAreaRef={promptTextAreaRef}
-                params={resolvedParams}
-                searchParams={resolvedSearchParams}
-                isEmbedUser={isEmbedUser}
-                uiState={uiState}
-                updateUiState={updateUiState}
-                promptState={promptState}
-                setPromptState={setPromptState}
-                handleCloseTextAreaFocus={handleCloseTextAreaFocus}
-                savePrompt={savePrompt}
-                isMobileView={isMobileView}
-                bridgeName={bridgeName}
-                onViewChange={handleViewChange}
-              />
+          // Mobile: Simple stacked layout
+          <div className="overflow-y-auto">
+            {/* Configuration Panel */}
+            <div className="min-h-screen border-b border-base-300 bg-base-100">
+              <div className="py-4 px-4">
+                <ConfigurationPage
+                  promptTextAreaRef={promptTextAreaRef}
+                  params={resolvedParams}
+                  searchParams={resolvedSearchParams}
+                  isEmbedUser={isEmbedUser}
+                  uiState={uiState}
+                  updateUiState={updateUiState}
+                  promptState={promptState}
+                  setPromptState={setPromptState}
+                  handleCloseTextAreaFocus={handleCloseTextAreaFocus}
+                  savePrompt={savePrompt}
+                  isMobileView={isMobileView}
+                  bridgeName={bridgeName}
+                  onViewChange={handleViewChange}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Chat Panel */}
-          <div className="min-h-screen" id="parentChatbot">
-            <div className="h-full flex flex-col">
-              <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
-              {!sessionStorage.getItem('orchestralUser') ? (
-                <div className="flex-1 min-h-0">
-                  {bridgeType === 'batch' && versionService === 'openai' ? (
-                    <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
-                  ) : (
+            {/* Chat Panel */}
+            <div className="min-h-screen" id="parentChatbot">
+              <div className="h-full flex flex-col">
+                <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
+                {!sessionStorage.getItem('orchestralUser') ? (
+                  <div className="flex-1 min-h-0">
+                    {bridgeType === 'batch' && versionService === 'openai' ? (
+                      <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                    ) : (
+                      <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex-1 min-h-0">
                     <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                  )}
-                </div>
-              ) : (
-                <div className="flex-1 min-h-0">
-                  <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
+              <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
             </div>
-            <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
           </div>
-        </div>
         )
       )}
-      
+
     </div>
   );
 };

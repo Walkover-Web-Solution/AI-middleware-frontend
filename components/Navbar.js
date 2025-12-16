@@ -16,6 +16,7 @@ import Protected from './Protected';
 const DeleteModal = dynamic(() => import('./UI/DeleteModal'), { ssr: false });
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import BridgeVersionDropdown from './configuration/configurationComponent/BridgeVersionDropdown';
+const NavbarSkeleton = dynamic(() => import('./skeletons/NavbarSkeleton'), { ssr: false });
 const VariableCollectionSlider = dynamic(() => import('./sliders/VariableCollectionSlider'), { ssr: false });
 
 const BRIDGE_STATUS = {
@@ -41,7 +42,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, isLoading, hasError } = useCustomSelector(state => {
     return {
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -56,6 +57,8 @@ const Navbar = ({ isEmbedUser, params }) => {
     hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
+    isLoading: state?.bridgeReducer?.loading || false,
+    hasError: state?.bridgeReducer?.error || false,
   }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
@@ -326,6 +329,11 @@ const Navbar = ({ isEmbedUser, params }) => {
   );
   if (!shouldShowNavbar()) return null;
 
+  // Show navbar skeleton only during initial load when no bridge name exists
+  if (isLoading && !bridgeName && !hasError) {
+    return <NavbarSkeleton />;
+  }
+
   return (
     <div className="bg-base-100 z-medium">
       {/* Main navigation header */}
@@ -406,11 +414,18 @@ const Navbar = ({ isEmbedUser, params }) => {
 
                   {/* Bridge Version Dropdown - Desktop Only */}
                   <div className="hidden sm:flex min-w-0 flex-1">
-                    <BridgeVersionDropdown 
-                      params={{ org_id: orgId, id: bridgeId }} 
-                      searchParams={searchParams}
-                      maxVersions={2}
-                    />
+                    {orgId && bridgeId ? (
+                      <BridgeVersionDropdown 
+                        params={{ org_id: orgId, id: bridgeId }} 
+                        searchParams={searchParams}
+                        maxVersions={2}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <div className="h-6 bg-base-200 animate-pulse rounded w-8"></div>
+                        <div className="h-6 bg-base-200 animate-pulse rounded w-8"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -601,12 +616,19 @@ const Navbar = ({ isEmbedUser, params }) => {
 
               {/* Version Dropdown */}
               <div className="min-w-0">
-                <BridgeVersionDropdown 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={searchParams}
-                  maxVersions={2}
-                  showDropdownOnly={true}
-                />
+                {orgId && bridgeId ? (
+                  <BridgeVersionDropdown 
+                    params={{ org_id: orgId, id: bridgeId }} 
+                    searchParams={searchParams}
+                    maxVersions={2}
+                    showDropdownOnly={true}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <div className="h-6 bg-base-200 animate-pulse rounded w-6"></div>
+                    <div className="h-6 bg-base-200 animate-pulse rounded w-6"></div>
+                  </div>
+                )}
               </div>
             </>
           )}

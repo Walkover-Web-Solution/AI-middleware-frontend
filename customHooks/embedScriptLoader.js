@@ -47,10 +47,19 @@ export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {
       embedMaker()
 
       return () => {
-        const script = document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID)
-        if (script) document.body.removeChild(script);
-        const embedContainer = document.getElementById("iframe-viasocket-embed-parent-container")
-        if (embedContainer) document.body.removeChild(embedContainer)
+        try {
+          const script = document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID);
+          if (script && script.parentNode === document.body) {
+            document.body.removeChild(script);
+          }
+          
+          const embedContainer = document.getElementById("iframe-viasocket-embed-parent-container");
+          if (embedContainer && embedContainer.parentNode === document.body) {
+            document.body.removeChild(embedContainer);
+          }
+        } catch (error) {
+          console.warn('Error removing embed scripts:', error);
+        }
       };
     }
   }, [embedToken]);
