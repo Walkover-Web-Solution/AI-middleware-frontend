@@ -16,7 +16,6 @@ import Protected from './Protected';
 const DeleteModal = dynamic(() => import('./UI/DeleteModal'), { ssr: false });
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import BridgeVersionDropdown from './configuration/configurationComponent/BridgeVersionDropdown';
-const NavbarSkeleton = dynamic(() => import('./skeletons/NavbarSkeleton'), { ssr: false });
 const VariableCollectionSlider = dynamic(() => import('./sliders/VariableCollectionSlider'), { ssr: false });
 
 const BRIDGE_STATUS = {
@@ -328,11 +327,6 @@ const Navbar = ({ isEmbedUser, params }) => {
     </div>
   );
   if (!shouldShowNavbar()) return null;
-
-  // Show navbar skeleton only during initial load when no bridge name exists
-  if (isLoading && !bridgeName && !hasError) {
-    return <NavbarSkeleton />;
-  }
 
   return (
     <div className="bg-base-100 z-medium">

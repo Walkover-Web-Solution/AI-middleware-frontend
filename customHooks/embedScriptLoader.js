@@ -1,7 +1,7 @@
 import { getOrCreateNotificationAuthKey } from "@/config/index";
 import { useEffect } from "react";
 
-export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {
+export const useEmbedScriptLoader = (embedToken = null, isEmbedUser = false) => {
 
   async function embedMaker() {
     const pAuthKey = !isEmbedUser ? await getOrCreateNotificationAuthKey('gtwy_bridge_trigger').then(res => res?.authkey) : null
@@ -43,7 +43,8 @@ export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {
     };
   }
   useEffect(() => {
-    if (embedToken) {
+    // Ensure embedToken is a valid string before proceeding
+    if (embedToken && typeof embedToken === 'string' && embedToken.trim() !== '') {
       embedMaker()
 
       return () => {
@@ -62,5 +63,5 @@ export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {
         }
       };
     }
-  }, [embedToken]);
+  }, [embedToken, isEmbedUser]);
 };
