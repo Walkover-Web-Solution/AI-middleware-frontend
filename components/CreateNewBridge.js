@@ -12,35 +12,30 @@ import { BotIcon, Info, Lightbulb, Plus } from "lucide-react";
 import { CloseIcon } from "./Icons";
 import { getModelAction } from "@/store/action/modelAction";
 
-const INITIAL_STATE = {
+const buildInitialState = () => ({
   selectedService: 'openai',
   selectedModel: "gpt-4o",
   selectedType: "chat",
-  bridgeType: "api",
   isManualMode: false,
-  selectedBridgeTypeCard: "api",
-  validationErrors: { bridgeType: "", purpose: "" },
+  validationErrors: { purpose: "" },
   globalError: "",
   isLoading: false,
   isAiLoading: false
-};
+});
 
-function CreateNewBridge({ orgid, isEmbedUser }) {
-  const [state, setState] = useState(INITIAL_STATE);
+function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
+  const [state, setState] = useState(buildInitialState);
   const textAreaPurposeRef = useRef();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
+  const { modelsList, SERVICES } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
-    modelsList: state?.modelReducer?.serviceModels[state.selectedService],
-    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent,
+    modelsList: state?.modelReducer?.serviceModels[state.selectedService]
   }));
-
-  // Memoized calculations
-  const shouldHideAgentType = useMemo(() => 
-    isEmbedUser && !showAgentType, 
-    [isEmbedUser, showAgentType]
+  const bridgeTypeForContext = useMemo(
+    () => defaultBridgeType?.toLowerCase() === 'chatbot' ? 'chatbot' : 'api',
+    [defaultBridgeType]
   );
 
   // Generate unique names
@@ -56,7 +51,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   // Clean state
   const cleanState = useCallback(() => {
-    setState(INITIAL_STATE);
+    setState(buildInitialState());
     if (textAreaPurposeRef?.current) {
       textAreaPurposeRef.current.value = '';
     }
@@ -97,28 +92,19 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   const handleCreateAgent = useCallback(() => {
     const purpose = textAreaPurposeRef?.current?.value?.trim();
-    const newValidationErrors = { bridgeType: "", purpose: "" };
-    let hasErrors = false;
+    updateState({
+      validationErrors: { purpose: "" },
+      globalError: ""
+    });
 
-    // Validate bridge type if not hidden
-    if (!state.selectedBridgeTypeCard && !shouldHideAgentType) {
-      newValidationErrors.bridgeType = "Select Agent Type";
-      hasErrors = true;
-    }
+    const resolvedBridgeType = bridgeTypeForContext;
 
-    if (hasErrors) {
-      updateState({ validationErrors: newValidationErrors, globalError: "" });
-      return;
-    }
-
-    // If purpose exists, create with AI, otherwise create manually
     if (purpose) {
-      // Create with AI using purpose
       updateState({ isAiLoading: true });
       
       const dataToSend = { 
         purpose, 
-        bridgeType: shouldHideAgentType ? "api" : state.selectedBridgeTypeCard 
+        bridgeType: resolvedBridgeType 
       };
 
       dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
@@ -143,7 +129,6 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           });
         });
     } else {
-      // Create manually without purpose
       const name = generateUniqueName();
       const slugname = generateUniqueName();
 
@@ -155,7 +140,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           model: state.selectedModel,
           name,
           slugName: slugname,
-          bridgeType: shouldHideAgentType ? "api" : state.selectedBridgeTypeCard || state.bridgeType,
+          bridgeType: resolvedBridgeType,
           type: state.selectedType,
         };
 
@@ -176,9 +161,17 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
       }
     }
   }, [
-    state.selectedBridgeTypeCard, state.selectedModel, state.selectedService, 
-    state.bridgeType, state.selectedType, shouldHideAgentType, updateState, 
-    dispatch, orgid, isEmbedUser, router, cleanState, generateUniqueName
+    state.selectedModel,
+    state.selectedService,
+    state.selectedType,
+    updateState,
+    dispatch,
+    orgid,
+    isEmbedUser,
+    router,
+    cleanState,
+    generateUniqueName,
+    bridgeTypeForContext
   ]);
 
   const handleCloseModal = useCallback(() => {

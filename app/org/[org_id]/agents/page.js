@@ -16,7 +16,7 @@ import { getIconOfService, openModal, closeModal, formatRelativeTime, formatDate
 
 import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import usePortalDropdown from "@/customHooks/usePortalDropdown";
@@ -54,11 +54,12 @@ const PoweredByFooter = () => {
   );
 };
 
-function Home({ params, isEmbedUser }) {
+function Home({ params, searchParams, isEmbedUser }) {
   // Use the tutorial videos hook
   const { getBridgeCreationVideo } = useTutorialVideos();
   
   const resolvedParams = use(params);
+  const resolvedSearchParams = use(searchParams);
   const dispatch = useDispatch();
   const router = useRouter();
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory, isAdminOrOwner, currentOrgRole, currentUser } = useCustomSelector((state) => {
@@ -82,7 +83,33 @@ function Home({ params, isEmbedUser }) {
       currentOrgRole: orgRole || "Viewer",
     };
   });
-  const [filterBridges, setFilterBridges] = useState(allBridges);
+  const bridgeTypeFilter = resolvedSearchParams?.type?.toLowerCase() === 'chatbot' ? 'chatbot' : 'api';
+  const typeFilteredBridges = useMemo(() => {
+    if (!Array.isArray(allBridges)) return [];
+    return allBridges.filter((bridge) => {
+      const type = bridge?.bridgeType?.toLowerCase?.();
+      if (bridgeTypeFilter === 'chatbot') {
+        return type === 'chatbot';
+      }
+      return type !== 'chatbot';
+    });
+  }, [allBridges, bridgeTypeFilter]);
+  const pageHeaderContent = useMemo(() => {
+    if (bridgeTypeFilter === 'chatbot') {
+      return {
+        title: 'Chatbot Agents',
+        description: descriptions?.Chatbot || "Design, deploy, and monitor conversational agents tailored for your end users."
+      };
+    }
+    return {
+      title: 'API Agents',
+      description: descriptions?.Agents || "Build and manage API-powered AI agents for workflows, automations, and integrations."
+    };
+  }, [bridgeTypeFilter, descriptions]);
+  const archivedSectionTitle = bridgeTypeFilter === 'chatbot' ? 'Archived Chatbots' : 'Archived Agents';
+  const deletedSectionTitle = bridgeTypeFilter === 'chatbot' ? 'Deleted Chatbots' : 'Deleted Agents';
+  const createButtonLabel = bridgeTypeFilter === 'chatbot' ? 'Chatbot Agent' : 'API Agent';
+  const [filterBridges, setFilterBridges] = useState(typeFilteredBridges);
   const [loadingAgentId, setLoadingAgentId] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [tutorialState, setTutorialState] = useState({
@@ -105,8 +132,8 @@ function Home({ params, isEmbedUser }) {
   const { isDeleting, executeDelete } = useDeleteOperation();
 
   useEffect(() => {
-    setFilterBridges(allBridges)
-  }, [allBridges]);
+    setFilterBridges(typeFilteredBridges)
+  }, [typeFilteredBridges]);
 
   // Reset loading state when component unmounts or navigation completes
   useEffect(() => {
@@ -538,23 +565,23 @@ function Home({ params, isEmbedUser }) {
 
           />
         )}
-        <CreateNewBridge orgid={resolvedParams.org_id} />
-        {!allBridges.length && isLoading && <LoadingSpinner />}
+        <CreateNewBridge orgid={resolvedParams.org_id} defaultBridgeType={bridgeTypeFilter} />
+        {!typeFilteredBridges.length && isLoading && <LoadingSpinner />}
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
           <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
 
             <div className="w-full">
-              {allBridges.length === 0 ? (
-                <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser} />
+              {typeFilteredBridges.length === 0 ? (
+                <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser} defaultBridgeType={bridgeTypeFilter} />
               ) : (
                 <div className="flex flex-col lg:mx-0">
                   <div className="px-2 pt-4">
                     <MainLayout>
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
                         <PageHeader
-                          title="Agents"
-                          description={descriptions?.Agents || "Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."}
+                          title={pageHeaderContent.title}
+                          description={pageHeaderContent.description}
                           docLink="https://gtwy.ai/blogs/features/bridge"
                           isEmbedUser={isEmbedUser}
                         />
@@ -563,11 +590,11 @@ function Home({ params, isEmbedUser }) {
                     </MainLayout>
 
                     <div className="flex flex-row gap-4">
-                      {allBridges.length > 5 && (
-                        <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents" />
+                      {typeFilteredBridges.length > 5 && (
+                        <SearchItems data={typeFilteredBridges} setFilterItems={setFilterBridges} item={pageHeaderContent.title} />
                       )}
-                      <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
-                        <button className="btn btn-primary btn-sm " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                      <div className={`${typeFilteredBridges.length > 5 ? 'mr-2' : 'ml-2'}`}>
+                        <button className="btn btn-primary btn-sm " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create {createButtonLabel}</button>
                       </div>
                   </div>
                 </div>
@@ -590,7 +617,7 @@ function Home({ params, isEmbedUser }) {
                     <div className="flex justify-center items-center my-4">
                       <p className="border-t border-base-300 w-full"></p>
                       <p className="bg-base-300 text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                        Archived Agents
+                        {archivedSectionTitle}
                       </p>
                       <p className="border-t border-base-300 w-full"></p>
                     </div>
@@ -614,7 +641,7 @@ function Home({ params, isEmbedUser }) {
                     <div className="flex justify-center items-center my-4">
                       <p className="border-t border-base-300 w-full"></p>
                       <p className="bg-error text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                        Deleted Agents
+                        {deletedSectionTitle}
                       </p>
                       <p className="border-t border-base-300 w-full"></p>
                     </div>
