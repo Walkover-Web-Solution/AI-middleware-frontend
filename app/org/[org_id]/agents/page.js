@@ -326,7 +326,8 @@ function Home({ params, searchParams, isEmbedUser }) {
     if (loadingAgentId) return;
     
     setLoadingAgentId(id);
-    router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
+    // Include the type parameter to maintain sidebar selection
+    router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}&type=${bridgeTypeFilter}`);
   };
   const handlePauseBridge = async (bridgeId) => {
     const newStatus = bridgeStatus[bridgeId]?.bridge_status === BRIDGE_STATUS.PAUSED
