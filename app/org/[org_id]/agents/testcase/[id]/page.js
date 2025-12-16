@@ -47,15 +47,22 @@ function TestCases({ params }) {
 
   useEffect(() => {
     if (selectedVersion) {
-      router.push(`?version=${bridgeVersion}&versionId=${selectedVersion}`);
+      // Preserve the type parameter when updating URL
+      const typeParam = searchParams.get('type');
+      const typeQueryPart = typeParam ? `&type=${typeParam}` : '';
+      router.push(`?version=${bridgeVersion}&versionId=${selectedVersion}${typeQueryPart}`);
     }
-  }, [selectedVersion, router]);
+  }, [selectedVersion, router, searchParams]);
 
   const handleRunTestCase = (versionId) => {
     setIsLoading(true);
     dispatch(runTestCaseAction({ versionId, bridgeId: resolvedParams?.id }))
       .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: resolvedParams?.id })); setIsLoading(false); setSelectedVersion(versionId) });
-    router.push(`?version=${bridgeVersion}&versionId=${versionId}`);
+    
+    // Preserve the type parameter when updating URL
+    const typeParam = searchParams.get('type');
+    const typeQueryPart = typeParam ? `&type=${typeParam}` : '';
+    router.push(`?version=${bridgeVersion}&versionId=${versionId}${typeQueryPart}`);
   }
 
   const toggleRow = (index) => {
