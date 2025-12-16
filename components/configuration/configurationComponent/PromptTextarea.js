@@ -1,61 +1,82 @@
-import React, { useRef, useCallback, memo, useEffect } from 'react';
+import React, {
+  useRef,
+  useCallback,
+  memo,
+  useEffect,
+} from "react";
 
-// Ultra-smooth textarea component with zero re-renders during typing
-const PromptTextarea = memo(({ 
+const DEFAULT_SMALL_HEIGHT = 384; // h-96 = 24rem = 384px
+
+const PromptTextarea = memo(({
   textareaRef,
   initialValue = "",
-  onChange, 
-  onFocus, 
+  onChange,
+  onFocus,
   onKeyDown,
   isPromptHelperOpen,
   className = "",
   placeholder = "",
-  isPublished = false
+  isPublished = false,
 }) => {
   const isComposingRef = useRef(false);
   const lastExternalValueRef = useRef(initialValue);
   const hasInitializedRef = useRef(false);
-
-  // Sync external value
+  const wrapperRef = useRef(null);
+  const smallHeightRef = useRef(DEFAULT_SMALL_HEIGHT);
   useEffect(() => {
-    const editor = textareaRef.current;
-    if (!editor || isComposingRef.current) return;
+    const textarea = textareaRef.current;
+    if (!textarea || isComposingRef.current) return;
 
     if (!hasInitializedRef.current) {
-      editor.value = initialValue || "";
+      textarea.value = initialValue || "";
       lastExternalValueRef.current = initialValue;
       hasInitializedRef.current = true;
       return;
     }
 
     if (initialValue !== lastExternalValueRef.current) {
-      editor.value = initialValue || "";
+      textarea.value = initialValue || "";
       lastExternalValueRef.current = initialValue;
     }
   }, [initialValue, textareaRef]);
 
-  // 🔹 Force textarea to recalculate height when prompt helper opens/closes
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
 
-    // Force reflow by toggling height
-    textarea.style.height = '0px';
-    // Trigger reflow
-    textarea.offsetHeight;
-    // Reset to full height
-    textarea.style.height = '100%';
-  }, [isPromptHelperOpen, textareaRef]);
+    const observer = new ResizeObserver(() => {
+      if (!isPromptHelperOpen) {
+        smallHeightRef.current = wrapper.offsetHeight;
+      }
+    });
 
-  // Change handler
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [isPromptHelperOpen]);
+
+ 
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    if (isPromptHelperOpen) {
+      // Helper → ALWAYS full height, disable resize
+      wrapper.style.height = "calc(100vh - 80px)";
+      wrapper.style.resize = "none";
+    } else {
+      // Small mode → restore last resize, enable resize
+      wrapper.style.height = `${smallHeightRef.current}px`;
+      wrapper.style.resize = "vertical";
+    }
+  }, [isPromptHelperOpen]);
+
+  
   const handleChange = useCallback((e) => {
-    const value = e.target.value;
     if (!isComposingRef.current) {
-      onChange(value);
+      onChange(e.target.value);
     }
   }, [onChange]);
 
-  // IME support
   const handleCompositionStart = useCallback(() => {
     isComposingRef.current = true;
   }, []);
@@ -74,27 +95,26 @@ const PromptTextarea = memo(({
   }, [onKeyDown]);
 
   return (
-   <div
-  className={`
-    textarea bg-white dark:bg-black/15 border
-    w-full resize-y overflow-hidden relative z-low rounded-b-none
-    transition-none !duration-0 flex p-0 m-0
-    ring-2 ring-transparent
-    focus-within:ring-2 focus-within:ring-base-content/20
-    ${isPromptHelperOpen
-      ? "h-[calc(100vh-80px)] w-[700px] border-primary shadow-md"
-      : "h-96 border-base-content/20"
-    }
-  `}
->
-
-        
+    <div
+      ref={wrapperRef}
+      className={`
+        bg-white dark:bg-black/15 border flex
+        w-full relative rounded-b-none
+        transition-none p-0 m-0 overflow-hidden
+        ring-2 ring-transparent
+        focus-within:ring-2 focus-within:ring-base-content/20
+        ${isPromptHelperOpen
+          ? "h-[calc(100vh-80px)] w-[700px] border-primary shadow-md resize-none"
+          : "h-96 border-base-content/20 resize-y"
+        }
+      `}
+    >
       <textarea
         ref={textareaRef}
         disabled={isPublished}
         className={`
-          w-full h-full p-2 resize-none bg-transparent border-none 
-          caret-base-content outline-none overflow-auto
+          w-full h-full min-h-full max-h-full resize-none bg-transparent border-none
+          caret-base-content outline-none overflow-auto p-2
           ${className}
         `}
         onChange={handleChange}
@@ -109,5 +129,5 @@ const PromptTextarea = memo(({
   );
 });
 
-PromptTextarea.displayName = 'PromptTextarea';
+PromptTextarea.displayName = "PromptTextarea";
 export default PromptTextarea;
