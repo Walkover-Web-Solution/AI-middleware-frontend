@@ -13,3 +13,4 @@ export const userDetails = () => async (dispatch, getState) => {
     console.error(error);
   }
 };
+

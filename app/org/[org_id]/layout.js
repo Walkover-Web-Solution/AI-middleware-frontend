@@ -10,7 +10,7 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding, updateOrgMetaAction, getUsersAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
@@ -153,8 +153,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     updateUserMeta();
   }, []);
 
-
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+   if(currrentOrgDetail?.role_name!=="Viewer") {
+    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  }
   useRtLayerEventHandler();
 
 
@@ -205,7 +206,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getPrebuiltToolsAction())
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-    }
+      dispatch(getUsersAction());
+      }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
   const scriptId = "chatbot-main-script";
