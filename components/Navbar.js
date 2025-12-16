@@ -41,7 +41,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, isLoading, hasError } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName } = useCustomSelector(state => {
     return {
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -56,8 +56,6 @@ const Navbar = ({ isEmbedUser, params }) => {
     hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
-    isLoading: state?.bridgeReducer?.loading || false,
-    hasError: state?.bridgeReducer?.error || false,
   }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
