@@ -138,7 +138,7 @@ const AccessManagementModal = ({ agent }) => {
     try {
       // Create payload with user ID and add_user_id:false to remove
       const dataToSend = {
-        user_id: userId?.id,
+        user_id: userId,
         add_user_id: false,
       };
       
