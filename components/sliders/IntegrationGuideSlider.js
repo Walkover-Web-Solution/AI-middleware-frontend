@@ -9,19 +9,41 @@ import { toggleSidebar } from "@/utils/utility";
 import SlugNameInput from "../configuration/configurationComponent/SlugNameInput";
 
 function GuideSlider({ params, bridgeType, onClose }) {
+  // Initialize activeTab state
   const [activeTab, setActiveTab] = useState(bridgeType != "trigger" ? bridgeType : "chatbot");
-  useEffect(()=>{
-    setActiveTab(bridgeType != "trigger" ? bridgeType : "chatbot");
-  },[bridgeType])
-  const { slugName, prompt } = useCustomSelector((state) => ({
+  
+  // Get bridge data from Redux
+  const { slugName, prompt, bridgeTypeFromRedux } = useCustomSelector((state) => ({
     slugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-    prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt
-}));
-  const tabs = [
-    { id: "api", label: "API" },
-    { id: "chatbot", label: "Chatbot" },
-    { id: "batch", label: "Batch API" }
-  ];
+    prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt,
+    bridgeTypeFromRedux: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.toLowerCase()
+  }));
+  
+  useEffect(() => {
+    // Set initial active tab based on the bridge type from props
+    let initialTab = bridgeType != "trigger" ? bridgeType : "chatbot";
+    
+    // If the bridge type is chatbot from Redux, force chatbot tab
+    if (bridgeTypeFromRedux === "chatbot") {
+      initialTab = "chatbot";
+    } 
+    // If bridge type is not chatbot (api or batch), make sure we don't show chatbot tab
+    else if (initialTab === "chatbot") {
+      initialTab = "api"; // Default to API tab for non-chatbot agents
+    }
+    
+    setActiveTab(initialTab);
+  }, [bridgeType, bridgeTypeFromRedux]);
+
+  // Determine which tabs to show based on the bridge type
+  const tabs = bridgeTypeFromRedux === "chatbot" ?
+    // If it's a chatbot, only show the chatbot tab
+    [{ id: "chatbot", label: "Chatbot" }] :
+    // If it's API or batch, show both API and Batch API tabs
+    [
+      { id: "api", label: "API" },
+      { id: "batch", label: "Batch API" }
+    ];
 
   const renderTabContent = () => {
     switch(activeTab) {

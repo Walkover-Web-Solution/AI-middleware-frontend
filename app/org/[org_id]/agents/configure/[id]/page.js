@@ -303,15 +303,40 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           })
         );
       }
-      const agentName = Array.isArray(bridges)
+      const agentBridge = Array.isArray(bridges)
         ? bridges.find((bridge) => bridge?._id === resolvedParams?.id)
         : null;
-      if (!agentName) {
-        router.push(`/org/${resolvedParams?.org_id}/agents`);
+      
+      if (!agentBridge) {
+        // Include the type parameter when navigating back to maintain sidebar selection
+        const agentType = resolvedSearchParams?.type || 'api';
+        router.push(`/org/${resolvedParams?.org_id}/agents?type=${agentType}`);
         return
       }
+      
       try {
         await dispatch(getSingleBridgesAction({ id: resolvedParams.id, version: resolvedSearchParams.version }));
+        
+        // After getting the bridge, ensure type query parameter matches the bridge type
+        const currentType = resolvedSearchParams?.type;
+        const bridgeTypeFromRedux = agentBridge.bridgeType?.toLowerCase();
+        let correctType;
+        
+        // Determine the correct type based on bridge type from Redux
+        if (bridgeTypeFromRedux === 'chatbot') {
+          correctType = 'chatbot';
+        } else {
+          // For 'api', 'batch', or any other type, default to 'api'
+          correctType = 'api';
+        }
+        
+        // If type is missing or doesn't match, update the URL
+        if (!currentType || currentType !== correctType) {
+          const url = new URL(window.location);
+          url.searchParams.set('type', correctType);
+          // Use replaceState to avoid creating a new history entry
+          window.history.replaceState({}, '', url.toString());
+        }
       } catch (error) {
         console.error("Error in getSingleBridgesAction:", error);
       }

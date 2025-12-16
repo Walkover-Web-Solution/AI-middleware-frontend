@@ -56,7 +56,14 @@ function Page({params, searchParams }) {
     return () => {
       const cleanUrl = new URL(window.location.href);
       const version = search.get("version");
-      cleanUrl.search = version ? `version=${version}` : '';
+      const type = search.get("type");
+      
+      // Preserve both version and type parameters
+      let params = [];
+      if (version) params.push(`version=${version}`);
+      if (type) params.push(`type=${type}`);
+      
+      cleanUrl.search = params.length ? `?${params.join('&')}` : '';
       window.history.replaceState({}, '', cleanUrl);
       dispatch(clearThreadData());
       dispatch(clearHistoryData());
