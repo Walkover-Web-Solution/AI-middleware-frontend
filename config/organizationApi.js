@@ -92,3 +92,13 @@ export const generateAccessKey = async () => {
     throw error;
   }
 }
+
+export const getUsers = async () => {
+  try {
+    const response = await axios.get(`${URL}/api/utils/users-details`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
