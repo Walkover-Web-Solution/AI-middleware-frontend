@@ -38,7 +38,7 @@ import { ChevronDown,
   ArrowLeft
 } from 'lucide-react';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config/index';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/AssistFile';
@@ -50,7 +50,7 @@ import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../Protected';
 import BridgeSlider from './BridgeSlider';
-import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
+import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_ITEM_CONFIG, NAV_SECTIONS } from '@/utils/mainSliderHelper';
 import InviteUserModal from '../modals/InviteuserModal';
 
 /* -------------------------------------------------------------------------- */
@@ -60,6 +60,7 @@ import InviteUserModal from '../modals/InviteuserModal';
 function MainSlider({ isEmbedUser }) {
   /* --------------------------- Router & selectors ------------------------- */
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -501,7 +502,22 @@ function MainSlider({ isEmbedUser }) {
 
   // Fixed sidebar width - always 64px collapsed, 256px expanded
   const spacerW = isMobile ? '50px' : isOpen ? '256px' : '50px';
-  const activeKey = pathParts[3];
+  const sidebarAgentType = searchParams?.get('type')?.toLowerCase();
+  const activeKey = useMemo(() => {
+    if (pathParts[3] === 'agents') {
+      if (sidebarAgentType === 'chatbot') return 'chatbot';
+      return 'api';
+    }
+    return pathParts[3];
+  }, [pathParts, sidebarAgentType]);
+  const buildNavUrl = useCallback((key) => {
+    const config = NAV_ITEM_CONFIG[key];
+    if (config) {
+      const query = config.query ? `?${new URLSearchParams(config.query).toString()}` : '';
+      return `/org/${orgId}/${config.path}${query}`;
+    }
+    return `/org/${orgId}/${key}`;
+  }, [orgId]);
   
   // Determine positioning based on mode
   const sidebarPositioning = isSideBySideMode ? 'relative' : 'fixed';
@@ -690,7 +706,7 @@ function MainSlider({ isEmbedUser }) {
                             <button
                               key={key}
                               onClick={() => {
-                                  router.push(`/org/${orgId}/${key}`);
+                                router.push(buildNavUrl(key));
                                 if (isMobile) setIsMobileVisible(false);
                               }}
                               onMouseEnter={e => onItemEnter(key, e)}

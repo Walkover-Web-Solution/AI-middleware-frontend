@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { CloseIcon } from '@/components/Icons';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../CreateNewBridge';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -10,9 +10,11 @@ import SearchItems from '../UI/SearchItems';
 function BridgeSlider() {
     const router = useRouter();
     const pathName = usePathname();
+    const searchParams = useSearchParams();
     const path = pathName.split('?')[0].split('/')
 
     const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[path[2]]?.orgs) || [];
+    const defaultBridgeType = (searchParams?.get('type')?.toLowerCase() === 'chatbot') ? 'chatbot' : 'api';
 
   
    const [filteredBridgesList, setFilteredBridgesList] = useState(bridgesList);
@@ -91,7 +93,7 @@ function BridgeSlider() {
                     </>
                 )}
             </div>
-            <CreateNewBridge orgid={path[2]} Heading="Create New Agent" />
+            <CreateNewBridge orgid={path[2]} Heading="Create New Agent" defaultBridgeType={defaultBridgeType} />
         </aside>
     )
 }
