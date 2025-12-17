@@ -187,14 +187,13 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'csv'];
-
+    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/csv', 'csv'];
     if (selectedFile && validFileTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
       // Pass the selected file directly to validation to avoid state timing issues
       handleFormChange(event, selectedFile);
     } else {
-      alert('Please upload a valid file (PDF, Word, or CSV).');
+      toast.error('Please upload a valid file (PDF, Word, or CSV).');
       setFile(null);
       // Trigger validation with null file
       handleFormChange(event, null);
