@@ -1,5 +1,6 @@
 import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
 import { toast } from "react-toastify";
+import posthog from "@/utils/posthog";
 import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
@@ -42,6 +43,12 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
     };
     onSuccess(serializableData);
     dispatch(createBridgeReducer({ data: serializableData, orgId: dataToSend.orgid }));
+    if (response?.data?._id) {
+      posthog.capture('agent_created', {
+        agent_id: response.data._id,
+        org_id: dataToSend.orgid
+      });
+    }
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
       toast.error("Agent Name can't be duplicate");
@@ -57,7 +64,7 @@ export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => as
   try {
     dispatch(clearPreviousBridgeDataReducer())
     const data = await createBridge(dataToSend)
-    dispatch(createBridgeReducer({data, orgId: orgId}));
+    dispatch(createBridgeReducer({ data, orgId: orgId }));
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
@@ -80,6 +87,11 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     if (result?.success) {
       onSuccess(result);
       dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description, orgId: data?.orgId }));
+      posthog.capture('agent_version_created', {
+        agent_id: data?.bridgeId,
+        version_id: result?.version_id,
+        parent_version_id: data?.parentVersionId
+      });
       toast.success('New version created successfully');
     }
   } catch (error) {
@@ -115,11 +127,11 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const history_page_chatbot_token = response?.data?.history_page_chatbot_token
     const triggerEmbedToken = response?.data?.trigger_embed_token;
     const average_response_time = response?.data?.avg_response_time;
-    const doctstar_embed_token=response?.data?.doctstar_embed_token;
+    const doctstar_embed_token = response?.data?.doctstar_embed_token;
     const bridgesPayload = response?.data?.agent || [];
 
     if (onSuccess) onSuccess(bridgesPayload)
-    dispatch(fetchAllBridgeReducer({ bridges: bridgesPayload, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
+    dispatch(fetchAllBridgeReducer({ bridges: bridgesPayload, orgId: response?.data?.org_id, embed_token, doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
@@ -180,6 +192,10 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
     markUpdateInitiatedByCurrentTab(bridgeId);
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.agent, functionData: dataToSend?.functionData || null }));
+    posthog.capture('agent_updated', {
+      agent_id: bridgeId,
+      update_type: 'metadata'
+    });
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -190,7 +206,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
 
 export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
   try {
-    if(!versionId){
+    if (!versionId) {
       toast.error("You cannot update published data");
       return;
     }
@@ -200,6 +216,10 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     const updatedVersion = data?.agent;
     if (data?.success && updatedVersion) {
       dispatch(updateBridgeVersionReducer({ bridges: updatedVersion, functionData: dataToSend?.functionData || null }));
+      posthog.capture('agent_version_updated', {
+        version_id: versionId,
+        has_function_data: !!dataToSend?.functionData
+      });
     }
   } catch (error) {
     console.error(error);
@@ -212,12 +232,17 @@ export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => asy
     const response = await deleteBridge(bridgeId, org_id, restore);
     if (response?.data?.success) {
       dispatch(deleteBridgeReducer({ bridgeId, orgId: org_id, restore }));
+      posthog.capture('agent_deleted', {
+        agent_id: bridgeId,
+        org_id: org_id,
+        restore: restore
+      });
     }
     return response;
   } catch (error) {
     toast.error(error?.response?.data?.error || error?.message || error || 'Failed to delete agent');
     console.error('Failed to delete bridge:', error);
-    throw  error;
+    throw error;
   }
 };
 
