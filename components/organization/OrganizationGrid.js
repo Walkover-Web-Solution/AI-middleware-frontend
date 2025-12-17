@@ -12,7 +12,7 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
                 name: org?.name || 'Unnamed Workspace',
                 createdAt: formatRelativeTime(org?.created_at),
                 createdAtRaw: formatDate(org?.created_at),
-                role: org?.created_by === currentUserId ? 'Owner' : 'Member',
+                role: org?.role_name
             }));
     }, [displayedOrganizations, currentUserId]);
 

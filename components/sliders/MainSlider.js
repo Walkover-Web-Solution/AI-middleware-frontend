@@ -347,17 +347,6 @@ function MainSlider({ isEmbedUser }) {
       }
     },
     {
-      id: 'userDetails',
-      label: 'User Details',
-      icon: ITEM_ICONS.userDetails,
-      onClick: () => {
-        setIsOrgDropdownExpanded(false);
-        setIsOrgDropdownOpen(false);
-        if (isMobile) setIsMobileVisible(false);
-        router.push(`/org/${orgId}/userDetails`);
-      }
-    },
-    {
       id: 'Members',
       label: 'Members',
       icon: ITEM_ICONS.invite,
@@ -480,6 +469,20 @@ function MainSlider({ isEmbedUser }) {
           
           <hr className="border-base-300 my-2" />
           
+          {/* User Details button */}
+          <button
+            onClick={() => {
+              router.push(`/org/${orgId}/userDetails`);
+              setIsOrgDropdownOpen(false);
+              setIsOrgDropdownExpanded(false);
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left mb-1"
+          >
+            <User size={14} className="flex-shrink-0" />
+            <div className="font-medium text-sm">User Details</div>
+          </button>
+          
+          {/* Logout button */}
           <button
             onClick={() => {
               handleLogout();

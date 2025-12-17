@@ -2,7 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { getHistoryAction, getSubThreadsAction, searchMessageHistoryAction, clearSearchAction } from "@/store/action/historyAction.js";
 import { clearSubThreadData, clearThreadData, setSearchQuery, setSelectedVersion } from "@/store/reducer/historyReducer.js";
 import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
-import { formatRelativeTime } from "@/utils/utility.js";
+import { formatDate, formatRelativeTime } from "@/utils/utility.js";
 import { ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -509,8 +509,11 @@ const Sidebar = memo(({
                       >
                         <a className="w-full h-full flex items-center justify-between relative">
                           <span className="truncate flex-1 mr-1.5 text-xs">{truncate(item?.thread_id, 30)}</span>
-                          <span className="text-xs whitespace-nowrap flex-shrink-0 mr-2 transition-opacity duration-200">
+                          <span className="group-hover:hidden">
                             {formatRelativeTime(item?.updated_at)}
+                          </span>
+                          <span className="hidden group-hover:inline">
+                            {formatDate(item?.updated_at)}
                           </span>
                           {/* Tooltip for full thread ID on hover */}
                           {item?.thread_id?.length > 35 && (
@@ -557,7 +560,7 @@ const Sidebar = memo(({
                                         return (
                                           <li
                                             key={index}
-                                            className={`cursor-pointer ${searchParams?.subThread_id === subThreadId?.sub_thread_id
+                                            className={`cursor-pointer group ${searchParams?.subThread_id === subThreadId?.sub_thread_id
                                               ? "hover:bg-base-primary hover:text-base-100"
                                               : "hover:bg-base-300 hover:text-base-content"
                                               } rounded-md transition-all duration-200 text-xs ${searchParams?.subThread_id === subThreadId?.sub_thread_id
@@ -571,9 +574,14 @@ const Sidebar = memo(({
                                                 {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 20)}
                                               </span>
                                               {(subThreadId?.updatedAt || subThreadId?.created_at || subThreadId?.createdAt || subThreadId?.updated_at) && (
-                                                <span className="text-xs whitespace-nowrap flex-shrink-0 opacity-70">
-                                                  {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
-                                                </span>
+                                                <div>
+                                                  <span className="group-hover:hidden">
+                                                    {formatRelativeTime(subThreadId?.updated_at || subThreadId?.created_at)}
+                                                  </span>
+                                                  <span className="hidden group-hover:inline">
+                                                    {formatDate(subThreadId?.updated_at || subThreadId?.created_at)}
+                                                  </span>
+                                                </div>
                                               )}
                                             </div>
                                           </li>
@@ -606,9 +614,14 @@ const Sidebar = memo(({
                                             {truncate(subThread?.display_name || subThread?.sub_thread_id, 20)}
                                           </span>
                                           {(subThread?.updated_at || subThread?.created_at) && (
-                                            <span className="text-xs whitespace-nowrap flex-shrink-0 mr-2 transition-opacity duration-200">
-                                              {formatRelativeTime(subThread?.updated_at || subThread?.created_at)}
-                                            </span>
+                                            <>
+                                              <span className="group-hover:hidden">
+                                                {formatRelativeTime(subThread?.updated_at)}
+                                              </span>
+                                              <span className="hidden group-hover:inline">
+                                                {formatDate(subThread?.created_at || subThread?.created_at)}
+                                              </span>
+                                            </>
                                           )}
                                         </a>
                                       </li>
