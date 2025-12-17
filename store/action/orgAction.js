@@ -1,12 +1,19 @@
 import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, getUsers, updateOrganizationData, updateUser } from "@/config/index";
 import { organizationCreated, organizationsFetched, setCurrentOrgId, usersFetched } from "../reducer/orgReducer";
-import {  updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
+import { updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
+import posthog from "@/utils/posthog";
 
 export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
   try {
     const data = await createOrg(dataToSend);
     onSuccess(data.data.data);
     dispatch(organizationCreated(data));
+    if (data?.data?.data?.id) {
+      posthog.capture('org_created', {
+        org_id: data.data.data.id,
+        org_name: dataToSend?.name
+      });
+    }
   } catch (error) {
     console.error(error);
   }
@@ -84,7 +91,7 @@ export const updateOrgMetaAction = (orgId, orgDetails) => async (dispatch) => {
     throw error;
   }
 }
- 
+
 export const getUsersAction = () => async (dispatch) => {
   try {
     const response = await getUsers();
