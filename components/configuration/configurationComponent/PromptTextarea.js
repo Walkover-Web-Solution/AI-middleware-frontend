@@ -105,7 +105,7 @@ const PromptTextarea = memo(({
         focus-within:ring-2 focus-within:ring-base-content/20
         ${isPromptHelperOpen
           ? "h-[calc(100vh-80px)] w-[700px] border-primary shadow-md resize-none"
-          : "h-96 border-base-content/20 resize-y"
+          : "h-96 min-h-96 border-base-content/20 resize-y"
         }
       `}
     >
