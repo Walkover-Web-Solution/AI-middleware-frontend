@@ -14,14 +14,25 @@ const UserReferenceForRichText = ({ params, searchParams, isPublished }) => {
     }));
     
     // Disable rich text functionality - force to false for premium feature
-    const isRichText = false; // Disabled for premium feature
+    const [isRichText, setIsRichText] = useState(is_rich_text);
     const [userReference, setUserReference] = useState(user_reference);
-    const [showInput, setShowInput] = useState(false); // Always false since feature is disabled
+    const [showInput, setShowInput] = useState(false);
 
-    const handleCheckboxChange = (e) => {
+    useEffect(() => {
+        setIsRichText(is_rich_text);
+    }, [is_rich_text]);
+
+    const handleCheckboxChange = () => {
+        if(isRichText){
+            const newValue=false;
+            setIsRichText(newValue);
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { configuration: {is_rich_text: newValue } } }));
+        }
+       else{
+            return false;
+       }
         // Prevent any changes - show premium upgrade message
-        e.preventDefault();
-        return false;
+    
     };
 
     const handleUserReferenceChange = (e) => {
@@ -45,9 +56,11 @@ const UserReferenceForRichText = ({ params, searchParams, isPublished }) => {
                 
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <InfoTooltip tooltipContent="Rich Text support is available in the Premium version. Upgrade to unlock advanced formatting with buttons, tables, cards, and markdown.">
+                        {!isRichText && (
+                            <InfoTooltip tooltipContent="Rich Text support is available in the Premium version. Upgrade to unlock advanced formatting with buttons, tables, cards, and markdown.">
                             <Crown size={16} className="text-amber-500 flex-shrink-0 cursor-help" />
                         </InfoTooltip>
+                        )}
                         <span className="text-base-content text-sm ml-0">Rich Text Supported</span>
                         <InfoTooltip tooltipContent="Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content. This is a premium feature available in the Pro version.">
                             <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
@@ -58,8 +71,8 @@ const UserReferenceForRichText = ({ params, searchParams, isPublished }) => {
                         type="checkbox"
                         checked={isRichText}
                         onChange={handleCheckboxChange}
-                        disabled={true}
-                        className="toggle toggle-xs opacity-50 cursor-not-allowed"
+                        disabled={!isRichText}
+                        className="toggle toggle-xs disabled:cursor-not-allowed "
                     />
                 </div>
 
