@@ -8,7 +8,9 @@ import { CircleQuestionMark } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
+const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const { response_format } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -114,7 +116,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                 <div className="form-control w-fit" key={value}>
                     <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
                         <input
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                             type="radio"
                             name="radio-10"
                             className="radio radio-sm"
@@ -130,7 +132,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                     <label className="form-control w-full mb-4">
                         <span className="text-sm block mb-2">Webhook URL</span>
                         <input
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                             type="text"
                             placeholder="https://example.com/webhook"
                             className="input input-bordered max-w-xs input-sm w-full"
@@ -143,7 +145,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                     <label className="form-control mb-4">
                         <span className="text-sm block mb-2">Headers (JSON format)</span>
                         <textarea
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                             className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"
                             id="headers"
                             defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
@@ -158,7 +160,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                         disabled={
                             errors.webhook !== '' || 
                             errors.headers !== '' || 
-                            isPublished || 
+                            isReadOnly || 
                             // Check if there are any changes to apply compared to initial values
                             (webhookData.url === initialValues.url && 
                              JSON.stringify(webhookData.headers) === JSON.stringify(initialValues.headers))

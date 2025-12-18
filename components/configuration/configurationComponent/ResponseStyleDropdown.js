@@ -35,7 +35,9 @@ const RESPONSE_STYLES = [
   },
 ];
 
-const ResponseStyleDropdown = ({ params, searchParams ,isPublished }) => {
+const ResponseStyleDropdown = ({ params, searchParams, isPublished, isEditor = true }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   const { reduxResponseStyle } = useCustomSelector((state) => ({
     reduxResponseStyle:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
@@ -101,7 +103,7 @@ const ResponseStyleDropdown = ({ params, searchParams ,isPublished }) => {
       
       {/* Response Style Dropdown */}
       <select
-        disabled={isPublished}
+        disabled={isReadOnly}
         value={selectedStyle}
         onChange={handleStyleChange}
         className="select select-sm select-bordered capitalize w-full"

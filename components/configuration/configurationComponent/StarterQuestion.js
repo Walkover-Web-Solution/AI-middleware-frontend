@@ -5,7 +5,9 @@ import { useDispatch } from 'react-redux';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const StarterQuestionToggle = ({ params, searchParams, isPublished }) => {
+const StarterQuestionToggle = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const IsstarterQuestionEnable = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
@@ -36,7 +38,7 @@ const StarterQuestionToggle = ({ params, searchParams, isPublished }) => {
                 onChange={handleToggle}
                 className="toggle mr-2 toggle-xs"
                 defaultValue={IsstarterQuestionEnable ? "true" : "false"}
-                disabled={isPublished}
+                disabled={isReadOnly}
             />
         </div>
     );

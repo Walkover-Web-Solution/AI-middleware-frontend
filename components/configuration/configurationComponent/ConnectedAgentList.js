@@ -16,7 +16,9 @@ import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { BotIcon, CircleQuestionMark } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
-const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
+const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
@@ -242,6 +244,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                             title="Config"
+                            disabled={isReadOnly}
                         >
                             <SettingsIcon size={16} />
                         </button>
@@ -252,7 +255,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                         >
                             <TrashIcon size={16} />
                         </button>
@@ -286,7 +289,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                                 </div>
                                 <button
                                     tabIndex={0}
-                                    disabled={isPublished}
+                                    disabled={isReadOnly}
                                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <AddIcon className="w-2 h-2" />
@@ -296,7 +299,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                         ) : (
                             <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
                                 <button
-                                    disabled={isPublished}
+                                    disabled={isReadOnly}
                                     tabIndex={0}
                                     className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
@@ -313,6 +316,8 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             modelName={model}
                             bridges={bridgeData}
                             bridgeData={bridgeData}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
                         />
                     </div>
                     <div className="flex flex-col gap-2 w-full ">

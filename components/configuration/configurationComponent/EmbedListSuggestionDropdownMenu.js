@@ -7,7 +7,8 @@ import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { truncate } from '@/components/historyPageComponents/AssistFile';
 
-function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => { }, connectedFunctions = [], shouldToolsShow, modelName, prebuiltToolsData, toolsVersionData, showInbuiltTools = {}, tutorialState, setTutorialState }) {
+function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => { }, connectedFunctions = [], shouldToolsShow, modelName, prebuiltToolsData, toolsVersionData, showInbuiltTools = {}, tutorialState, setTutorialState, isPublished = false, isEditor = true }) {
+    // Determine if content is read-only (either published or user is not an editor)
     // Use the tutorial videos hook
     const { getFunctionCreationVideo } = useTutorialVideos();
      

@@ -7,7 +7,9 @@ import Protected from '@/components/Protected';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) => {
+const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const { bridgeType, modelType, service } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
@@ -61,7 +63,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) =>
                             <InfoTooltip tooltipContent="The API allows users to connect with AI models to perform tasks like generating responses or processing information.">
                                 <label className="flex items-center cursor-pointer min-w-0">
                                     <input
-                                        disabled={isPublished}
+                                        disabled={isReadOnly}
                                         type="radio"
                                         name="bridgeType"
                                         value="api"
@@ -85,7 +87,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished }) =>
                                         className="radio radio-sm sm:radio"
                                         checked={bridgeType?.toString()?.toLowerCase() === "batch"}
                                         onChange={(e) => handleInputChange(e, "bridgeType")}
-                                        disabled={modelType === 'embedding' || service?.toLowerCase() !== 'openai' || modelType === 'image'||isPublished}
+                                        disabled={modelType === 'embedding' || service?.toLowerCase() !== 'openai' || modelType === 'image' || isReadOnly}
                                     />
                                     <div className="group relative inline-block">
                                         <span className="label-text text-sm sm:text-base ml-2 cursor-pointer whitespace-nowrap">Batch API</span>
