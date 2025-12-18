@@ -1,10 +1,9 @@
 'use client'
 import React, { useEffect } from 'react'
 import LoadingSpinner from "@/components/LoadingSpinner";
-import Image from "next/image";
 import { useSearchParams } from 'next/navigation';
 import { setInCookies } from '@/utils/utility';
-import FavIcon from '@/icons/FavIcon';
+import FavIconSVG from '@/public/favicon';
 
 const LoginPage = ({loading}) => {
   const urlParams = useSearchParams();  
@@ -65,7 +64,7 @@ const LoginPage = ({loading}) => {
                     {/* Logo and text on top of the rotating box */}
                     <div className="relative z-10 opacity-90 hover:opacity-100 transition-opacity">
                       <div className="flex items-center">
-                        <FavIcon height={100} width={100}/>
+                        <FavIconSVG height={100} width={100}/>
                       </div>
                     </div>
                   </div>
@@ -111,8 +110,8 @@ const LoginPage = ({loading}) => {
             {/* Stats Section - Below login card */}
             <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">500+</div>
-                <div className="text-xs text-base-content/60">COMPANIES</div>
+                <div className="text-sm font-semibold text-base-content">5000+</div>
+                <div className="text-xs text-base-content/60">INTEGRATIONS</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
                 <div className="text-sm font-semibold text-base-content">99.9%</div>
