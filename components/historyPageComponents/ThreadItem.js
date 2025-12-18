@@ -132,9 +132,10 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
 const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   // Determine message type based on new data structure
   const getInitialMessageType = () => {
-    // Prioritize in order of importance
+    if (item?.user === 'user') {
+      return 'user';
+    }
     if (item?.llm_message) return 'llm_message';
-    if (item?.user) return 'user';
     if (item?.updated_llm_message) return 'updated_llm_message';
     if (item?.chatbot_message) return 'chatbot_message';
     if (item?.error) return 'error';
@@ -181,12 +182,23 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   };
 
   const handleEdit = () => {
-    setModalInput({
-      content: item.updated_llm_message || item.llm_message || item.chatbot_message || item.user,
-      originalContent: item.llm_message || item.user,
-      index,
-      Id: item.id || item.Id
-    });
+    // For user messages, use user content
+    if (getMessageRole() === 'user') {
+      setModalInput({
+        content: item.user || "",
+        originalContent: item.user || "",
+        index,
+        Id: item.id || item.Id
+      });
+    } else {
+      // For assistant messages, don't fall back to user content
+      setModalInput({
+        content: item.updated_llm_message || item.llm_message || item.chatbot_message || "",
+        originalContent: item.llm_message || "",
+        index,
+        Id: item.id || item.Id
+      });
+    }
     openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   };
 
