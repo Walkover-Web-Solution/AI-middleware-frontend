@@ -4,6 +4,8 @@ import ModelDropdown from "./configurationComponent/ModelDropdown";
 import ApiKeyInput from "./configurationComponent/ApiKeyInput";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
 import AdvancedSettingsButton from "./configurationComponent/AdvancedSettingsButton";
+import { useConfigurationSelector } from "../../customHooks/useOptimizedSelector";
+import { AlertIcon } from '@/components/Icons';
 
 const CommonConfigComponents = ({
     params,
@@ -18,6 +20,7 @@ const CommonConfigComponents = ({
     hideAdvancedParameters = false,
     isPublished = false
 }) => {
+    const { bridge } = useConfigurationSelector(params, searchParams);
     return (
         <>
             {!isEmbedUser && <RecommendedModal
@@ -64,6 +67,14 @@ const CommonConfigComponents = ({
                     isPublished={isPublished}
                 />
             </div>}
+            {!bridge?.fall_back?.is_enable && (
+                <div className="alert alert-warning mb-1 py-2 px-2 max-w-md">
+                    <div className="flex items-center gap-2">
+                        <AlertIcon size={12} />
+                        <span className="text-xs">Enable fallback model from the settings</span>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

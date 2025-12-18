@@ -1,97 +1,133 @@
-import React, { useRef, useCallback, memo, useEffect } from 'react';
+import React, {
+  useRef,
+  useCallback,
+  memo,
+  useEffect,
+} from "react";
 
-// Ultra-smooth textarea component with zero re-renders during typing
-const PromptTextarea = memo(({ 
-    textareaRef,
-    initialValue = "",
-    onChange, 
-    onFocus, 
-    onKeyDown,
-    isPromptHelperOpen,
-    className = "",
-    placeholder = "",
-    isPublished = false
+const DEFAULT_SMALL_HEIGHT = 384; // h-96 = 24rem = 384px
+
+const PromptTextarea = memo(({
+  textareaRef,
+  initialValue = "",
+  onChange,
+  onFocus,
+  onKeyDown,
+  isPromptHelperOpen,
+  className = "",
+  placeholder = "",
+  isPublished = false,
 }) => {
-    const isComposingRef = useRef(false);
-    const lastExternalValueRef = useRef(initialValue);
-    const hasInitializedRef = useRef(false);
-    
-    // Update editor content when external value changes (like from Redux)
-    useEffect(() => {
-        const editor = textareaRef.current;
-        if (!editor || isComposingRef.current) return;
+  const isComposingRef = useRef(false);
+  const lastExternalValueRef = useRef(initialValue);
+  const hasInitializedRef = useRef(false);
+  const wrapperRef = useRef(null);
+  const smallHeightRef = useRef(DEFAULT_SMALL_HEIGHT);
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || isComposingRef.current) return;
 
-        // On first mount, always hydrate with initialValue even if it equals the ref
-        if (!hasInitializedRef.current) {
-            editor.innerText = initialValue || "";
-            lastExternalValueRef.current = initialValue;
-            hasInitializedRef.current = true;
-            return;
-        }
+    if (!hasInitializedRef.current) {
+      textarea.value = initialValue || "";
+      lastExternalValueRef.current = initialValue;
+      hasInitializedRef.current = true;
+      return;
+    }
 
-        // After first mount, only update when external value actually changes
-        if (initialValue !== lastExternalValueRef.current) {
-            editor.innerText = initialValue || "";
-            lastExternalValueRef.current = initialValue;
-        }
-    }, [initialValue, textareaRef]);
-    
-    // Manage textarea height based on PromptHelper state
-    useEffect(() => {
-        if(!isPromptHelperOpen){
-            textareaRef.current.style.height = '24rem';
-        }
-    }, [isPromptHelperOpen]);
-    // Zero-render change handler - no state updates
-    const handleChange = useCallback((e) => {
-        const value = e.target.innerText;
-        // Only call parent onChange if not composing (for IME support)
-        if (!isComposingRef.current) {
-            onChange(value);
-        }
-    }, [onChange]);
-    
-    // Handle composition events for better IME support
-    const handleCompositionStart = useCallback(() => {
-        isComposingRef.current = true;
-    }, []);
-    
-    const handleCompositionEnd = useCallback((e) => {
-        isComposingRef.current = false;
-        const value = e.target.innerText;
-        onChange(value);
-    }, [onChange]);
+    if (initialValue !== lastExternalValueRef.current) {
+      textarea.value = initialValue || "";
+      lastExternalValueRef.current = initialValue;
+    }
+  }, [initialValue, textareaRef]);
 
-    // Optimized focus handler
-    const handleFocus = useCallback((e) => {
-        onFocus?.(e);
-    }, [onFocus]);
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
 
-    // Optimized keydown handler
-    const handleKeyDown = useCallback((e) => {
-        onKeyDown?.(e);
-    }, [onKeyDown]);
+    const observer = new ResizeObserver(() => {
+      if (!isPromptHelperOpen) {
+        smallHeightRef.current = wrapper.offsetHeight;
+      }
+    });
 
-    return (
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [isPromptHelperOpen]);
+
+ 
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    if (isPromptHelperOpen) {
+      // Helper → ALWAYS full height, disable resize
+      wrapper.style.height = "calc(100vh - 110px)";
+      wrapper.style.resize = "none";
+    } else {
+      // Small mode → restore last resize, enable resize
+      wrapper.style.height = `${smallHeightRef.current}px`;
+      wrapper.style.resize = "vertical";
+    }
+  }, [isPromptHelperOpen]);
+
+  
+  const handleChange = useCallback((e) => {
+    if (!isComposingRef.current) {
+      onChange(e.target.value);
+    }
+  }, [onChange]);
+
+  const handleCompositionStart = useCallback(() => {
+    isComposingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback((e) => {
+    isComposingRef.current = false;
+    onChange(e.target.value);
+  }, [onChange]);
+
+  const handleFocus = useCallback((e) => {
+    onFocus?.(e);
+  }, [onFocus]);
+
+  const handleKeyDown = useCallback((e) => {
+    onKeyDown?.(e);
+  }, [onKeyDown]);
+
+  return (
     <div
-  ref={textareaRef}
-  contentEditable={!isPublished}
-  className={`textarea bg-white dark:bg-black/15 border border-base-content/20 w-full resize-y overflow-auto relative z-low caret-base-content p-2 rounded-b-none transition-none !duration-0
-    ${isPromptHelperOpen 
-      ? "min-h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] w-[700px] border-primary shadow-md pb-8"
-      : "h-96 min-h-96"
-    }`}
-  onInput={handleChange}
-  onFocus={handleFocus}
-  onKeyDown={handleKeyDown}
-  onCompositionStart={handleCompositionStart}
-  onCompositionEnd={handleCompositionEnd}
-  placeholder={placeholder}
-  title={isPublished ? "Cannot edit in published mode" : ""}
-/>
-);
+      ref={wrapperRef}
+      className={`
+        bg-white dark:bg-black/15 border flex
+        w-full relative rounded-b-none
+        transition-none p-0 m-0 overflow-hidden
+        ring-2 ring-transparent
+        focus-within:ring-2 focus-within:ring-base-content/20 box-border
+        ${isPromptHelperOpen
+          ? "h-[calc(100vh-110px)] w-[700px] border-primary shadow-md resize-none"
+          : "h-96 min-h-96 border-base-content/20 resize-y"
+        }
+      `}
+    >
+      <textarea
+        ref={textareaRef}
+        disabled={isPublished}
+        className={`
+          w-full h-full min-h-full max-h-full resize-none bg-transparent border-none
+          caret-base-content outline-none overflow-auto p-2
+          ${className}
+        `}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        placeholder={placeholder}
+        title={isPublished ? "Cannot edit in published mode" : ""}
+      />
+    </div>
+  );
 });
 
-PromptTextarea.displayName = 'PromptTextarea';
-
+PromptTextarea.displayName = "PromptTextarea";
 export default PromptTextarea;
