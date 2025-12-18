@@ -10,7 +10,9 @@ import GuardrailSelector from './GuardrailSelector';
 import { getIconOfService } from '@/utils/utility';
 import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, isPublished }) => {
+const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, isPublished, isEditor = true }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState({});
   const dropdownContainerRef = useRef(null);
@@ -188,7 +190,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
   const renderContent = () => (
     <div className="flex flex-col gap-6">
       <div className="bg-base-100 rounded-lg">
-        <GuardrailSelector params={params} searchParams={searchParams} isPublished={isPublished} />
+        <GuardrailSelector params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
       </div>
 
       <div className="bg-base-100 rounded-lg">
@@ -201,7 +203,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
               </InfoTooltip>
             </div>
             <input
-            disabled={isPublished}
+            disabled={isReadOnly}
               type="checkbox"
               className="toggle toggle-sm"
               checked={isFallbackEnabled}
@@ -221,11 +223,11 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
                     if (modelDropdown) modelDropdown.removeAttribute("open");
                   }
                 }}
-                disabled={bridgeType === 'batch' || isPublished}
+                disabled={bridgeType === 'batch' || isReadOnly}
               >
                 <summary
                   tabIndex={0}
-                  disabled={isPublished}
+                  disabled={isReadOnly}
                   role="button"
                   className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${bridgeType === 'batch' ? 'btn-disabled cursor-not-allowed opacity-50' : ''}`}
                 >
@@ -294,7 +296,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
             <details id="model-dropdown" className="dropdown w-full">
               <summary
                 tabIndex={0}
-                disabled={isPublished}
+                disabled={isReadOnly}
                 role="button"
                 className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
               >
@@ -349,7 +351,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
 
       {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
         <div className="bg-base-100 rounded-lg">
-          <ResponseFormatSelector isPublished={isPublished} params={params} searchParams={searchParams} />
+          <ResponseFormatSelector isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} />
         </div>
       )}
 
@@ -393,7 +395,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
                         >
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
-                              disabled={isPublished}
+                              disabled={isReadOnly}
                               type="radio"
                               name={`apiKey-${service?.value}`}
                               value={apiKey?._id}
@@ -422,7 +424,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
       </div>
 
       <div className="bg-base-100 rounded-lg">
-        <ToolCallCount params={params} searchParams={searchParams} isPublished={isPublished}/>
+        <ToolCallCount params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor}/>
       </div>
     </div>
   );

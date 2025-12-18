@@ -388,7 +388,7 @@ function Home({ params, searchParams, isEmbedUser }) {
   }
 
   const EndComponent = ({ row }) => {
-    const isEditor = ((currentOrgRole === "Editor" && (row.users?.length === 0 || !row.users || (row.users?.length > 0 && row.users?.some(user => user.id === currentUser.id))))||((currentOrgRole==="Viewer")&&(row.users?.some(user => user.id === currentUser.id)))||currentOrgRole==="Creator")||isAdminOrOwner;
+    const isEditor = ((currentOrgRole === "Editor" && (row.users?.length === 0 || !row.users || (row.users?.length > 0 && row.users?.some(user => user === currentUser.id))))||((currentOrgRole==="Viewer")&&(row.users?.some(user => user === currentUser.id)))||currentOrgRole==="Creator")||isAdminOrOwner;
     const handleDropdownClick = (e) => {
       e.preventDefault();
       e.stopPropagation();

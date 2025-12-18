@@ -18,7 +18,8 @@ const CommonConfigComponents = ({
     showDefaultApikeys,
     isEmbedUser,
     hideAdvancedParameters = false,
-    isPublished = false
+    isPublished = false,
+    isEditor = true
 }) => {
     const { bridge } = useConfigurationSelector(params, searchParams);
     return (
@@ -33,6 +34,7 @@ const CommonConfigComponents = ({
                 service={service}
                 deafultApiKeys={showDefaultApikeys}
                 isPublished={isPublished}
+                isEditor={isEditor}
             />}
             <div className="flex flex-col sm:flex-row gap-2 items-start w-full max-w-md">
                 <div className="w-auto">
@@ -42,11 +44,12 @@ const CommonConfigComponents = ({
                         promptTextAreaRef={promptTextAreaRef}
                         searchParams={searchParams}
                         isPublished={isPublished}
+                        isEditor={isEditor}
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full">
                     <div className="w-full">
-                        <ModelDropdown isPublished={isPublished} params={params} searchParams={searchParams} />
+                        <ModelDropdown isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} />
                     </div>
                     <AdvancedSettingsButton
                         params={params}
@@ -54,6 +57,7 @@ const CommonConfigComponents = ({
                         isEmbedUser={isEmbedUser}
                         hideAdvancedParameters={hideAdvancedParameters}
                         isPublished={isPublished}
+                        isEditor={isEditor}
                     />
                 </div>
             </div>
@@ -65,6 +69,7 @@ const CommonConfigComponents = ({
                     isEmbedUser={isEmbedUser}
                     hideAdvancedParameters={hideAdvancedParameters}
                     isPublished={isPublished}
+                    isEditor={isEditor}
                 />
             </div>}
             {!bridge?.fall_back?.is_enable && (

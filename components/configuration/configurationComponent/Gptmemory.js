@@ -6,7 +6,9 @@ import { PencilIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-const   GptMemory = ({ params, searchParams, isPublished }) => {
+const GptMemory = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
 
     const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => {
@@ -55,7 +57,7 @@ const   GptMemory = ({ params, searchParams, isPublished }) => {
                         checked={gpt_memory}
                         onChange={handleCheckboxChange}
                         className="toggle toggle-xs"
-                        disabled={isPublished}
+                        disabled={isReadOnly}
                     />
                 </div>
                 
@@ -99,7 +101,7 @@ const   GptMemory = ({ params, searchParams, isPublished }) => {
                             </p>
                         </div>
                         <textarea
-                        disabled={isPublished}
+                        disabled={isReadOnly}
                             className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-[3.5rem] resize-y border-base-300 focus:border-base-content/30 focus:outline-none transition-colors text-xs leading-relaxed placeholder:text-base-content/40"
                            defaultValue={gpt_memory_context}
                            onBlur={handleUserReferenceChange}

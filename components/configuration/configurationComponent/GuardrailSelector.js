@@ -7,7 +7,9 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { CircleQuestionMark } from 'lucide-react';
 
 
-const GuardrailSelector = ({ params, searchParams ,isPublished }) => {  
+const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
         (state) => {
             const versionData = state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version];
@@ -159,7 +161,7 @@ const GuardrailSelector = ({ params, searchParams ,isPublished }) => {
                 </div>
                 <label className="swap">
                     <input 
-                        disabled={isPublished}
+                        disabled={isReadOnly}
                         type="checkbox" 
                         checked={guardrailsEnabled} 
                         onChange={handleToggleGuardrails}
@@ -194,74 +196,74 @@ const GuardrailSelector = ({ params, searchParams ,isPublished }) => {
                     <div className="m-2 mb-4">
                         {!showOptions ? (
                             <button
-                                disabled={isPublished}
-                                onClick={handleToggleOptions}
-                                className="btn btn-sm btn-outline w-full flex items-center gap-2"
-                            >
-                                <CirclePlusIcon size={16} />
-                                <span>Add Guardrail Types</span>
-                            </button>
-                        ) : (
-                            <div className="bg-base-100 border border-base-300 rounded-md">
-                                <div className="p-3">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm font-medium">Available Guards</span>
-                                        <button
-                                            disabled={isPublished}
-                                            onClick={handleToggleOptions}
-                                            className="btn btn-ghost btn-sm btn-circle"
-                                        >
-                                            <CloseCircleIcon size={16} />
-                                        </button>
-                                    </div>
-                                    
+                                disabled={isReadOnly}
+                            onClick={handleToggleOptions}
+                            className="btn btn-sm btn-outline w-full flex items-center gap-2"
+                        >
+                            <CirclePlusIcon size={16} />
+                            <span>Add Guardrail Types</span>
+                        </button>
+                    ) : (
+                        <div className="bg-base-100 border border-base-300 rounded-md">
+                            <div className="p-3">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium">Available Guards</span>
+                                    <button
+                                        disabled={isReadOnly}
+                                        onClick={handleToggleOptions}
+                                        className="btn btn-ghost btn-sm btn-circle"
+                                    >
+                                        <CloseCircleIcon size={16} />
+                                    </button>
+                                </div>
+                                
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-2">
                                         {/* Predefined Guardrails */}
                                         {Object.entries(GUARDRAILS_TEMPLATES || {}).map(([key, { name, description }]) => (
                                             <div key={key} className="form-control">
-                                                <div className="label cursor-pointer justify-start gap-2">
-                                                    <input 
-                                                        disabled={isPublished}
-                                                        type="checkbox" 
-                                                        className="checkbox checkbox-sm" 
-                                                        checked={selectedGuardrails.includes(key)} 
-                                                        onChange={() => handleGuardrailChange(key)} 
-                                                        />
-                                                    <InfoTooltip tooltipContent={description}>
-                                                    <span className="label-text">{name}</span>
-                                                    </InfoTooltip>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        
-                                        {/* Custom Guardrail */}
-                                        <div className="form-control col-span-full">
                                             <div className="label cursor-pointer justify-start gap-2">
                                                 <input 
-                                                    disabled={isPublished}
+                                                    disabled={isReadOnly}
                                                     type="checkbox" 
                                                     className="checkbox checkbox-sm" 
-                                                    checked={showCustomInput || customPrompt.trim() !== ''} 
-                                                    onChange={() => handleGuardrailChange('custom')} 
+                                                    checked={selectedGuardrails.includes(key)} 
+                                                    onChange={() => handleGuardrailChange(key)} 
                                                     />
-                                                <InfoTooltip tooltipContent="Add your own custom guardrail specification">
-                                                <span className="label-text">Custom Guard</span>
+                                                <InfoTooltip tooltipContent={description}>
+                                                <span className="label-text">{name}</span>
                                                 </InfoTooltip>
                                             </div>
-                                            
-                                            {showCustomInput && (
-                                                <div className="mt-2">
-                                                    <textarea
-                                                        disabled={isPublished}
-                                                        placeholder="Write your custom guardrail prompt here..."
-                                                        className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
-                                                        onBlur={handleCustomPromptChange}
-                                                        onChange={(e) => setCustomPrompt(e.target.value)}
-                                                        value={customPrompt}
-                                                    ></textarea>
-                                                    <p className="text-xs text-gray-500 mt-1">Specify instructions for your custom guardrail</p>
-                                                </div>
-                                            )}
+                                        </div>
+                                    ))}
+                                    
+                                    {/* Custom Guardrail */}
+                                    <div className="form-control col-span-full">
+                                        <div className="label cursor-pointer justify-start gap-2">
+                                            <input 
+                                                disabled={isReadOnly}
+                                                type="checkbox" 
+                                                className="checkbox checkbox-sm" 
+                                                checked={showCustomInput || customPrompt.trim() !== ''} 
+                                                onChange={() => handleGuardrailChange('custom')} 
+                                                />
+                                            <InfoTooltip tooltipContent="Add your own custom guardrail specification">
+                                            <span className="label-text">Custom Guard</span>
+                                            </InfoTooltip>
+                                        </div>
+                                        
+                                        {showCustomInput && (
+                                            <div className="mt-2">
+                                                <textarea
+                                                    disabled={isReadOnly}
+                                                    placeholder="Write your custom guardrail prompt here..."
+                                                    className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"
+                                                    onBlur={handleCustomPromptChange}
+                                                    onChange={(e) => setCustomPrompt(e.target.value)}
+                                                    value={customPrompt}
+                                                ></textarea>
+                                                <p className="text-xs text-gray-500 mt-1">Specify instructions for your custom guardrail</p>
+                                            </div>
+                                        )}
                                         </div>
                                     </div>
                                 </div>

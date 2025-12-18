@@ -1,7 +1,8 @@
 import { getStatusClass } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 
-function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData }) {
+function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData, isPublished = false, isEditor = true }) {
+    // Determine if content is read-only (either published or user is not an editor)
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
