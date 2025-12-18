@@ -129,7 +129,7 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
     return response?.data
   } catch (error) {
     console.error(error)
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.message || 'Failed to update bridge version');
   }
 }
 

@@ -1,9 +1,21 @@
 import { modelSuggestionApi } from '@/config/index';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import React, { useState, useCallback } from 'react'
 
-const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys, isPublished }) => {
+const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys, isPublished,isEditor }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const [modelRecommendations, setModelRecommendations] = useState(null);
+    const { prompt, } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+        const isPublished = searchParams?.isPublished === 'true';
+        
+              // Use published data if isPublished=true, otherwise use version data
+       
+        return {
+          prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionData?.configuration?.prompt || ""),
+         
+ } });
     const setErrorBorder = (ref, selector, scrollToView = false) => {
         if (ref?.current) {
             if (scrollToView) {
@@ -21,8 +33,8 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
     const handleGetRecommendations = useCallback(async () => {
         setIsLoadingRecommendations(true);
 
-        try {
-            const currentPrompt = promptTextAreaRef.current?.querySelector('textarea')?.value?.trim() || "";
+        try { 
+            const currentPrompt = promptTextAreaRef.current?.querySelector('textarea')?.value?.trim() || prompt.trim();
             if (((bridgeApiKey || deafultApiKeys) && currentPrompt !== "") || service === "ai_ml") {
                 const response = await modelSuggestionApi({ versionId: searchParams?.version });
                 if (response?.success) {
@@ -63,7 +75,7 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
                                 <button
                                     className="flex items-center gap-2  rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                                     onClick={handleGetRecommendations}
-                                    disabled={isLoadingRecommendations||isPublished}
+                                    disabled={isLoadingRecommendations||isPublished||!isEditor}
                                 >
                                     {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
                                 </button>

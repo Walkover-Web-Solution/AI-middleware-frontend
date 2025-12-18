@@ -13,7 +13,8 @@ const PromptHeader = memo(({
     handleCloseTextAreaFocus,
     showCloseHelperButton = false,
     disabled = false,
-    isPublished = false
+    isPublished = false,
+    isEditor = true
 }) => {
     const handleSave = useCallback(() => {
         onSave?.();
@@ -80,7 +81,7 @@ const PromptHeader = memo(({
                         className="btn btn-xs btn-primary"
                         onClick={onOpenPromptHelper}
                         title={isPublished ? "Prompt Helper: Cannot edit in published mode" : "Open Prompt Helper"}
-                        disabled={isPublished}
+                        disabled={isPublished||!isEditor}
                     >
                         <SparklesIcon size={12} className="" />
                         Prompt Helper

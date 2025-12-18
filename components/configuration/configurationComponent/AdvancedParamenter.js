@@ -15,7 +15,9 @@ import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false }) => {
+const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false, isEditor = true }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
   
@@ -286,7 +288,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   setSliderValue(fallback, key, isDeafaultObject);
                 }
               }}
-              disabled={isPublished}
+              disabled={isReadOnly}
             />
             <div className="flex items-center gap-1">
               <span className={labelTextClass}>{name || key}</span>
@@ -446,7 +448,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
 
         {field === 'slider' && !isDefaultValue && (
           <div className="flex items-center gap-2">
-            <button disabled={isPublished} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
+            <button disabled={isReadOnly} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
@@ -461,9 +463,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               }}
               className={`range range-accent disabled:opacity-50 disabled:cursor-not-allowed h-2 rounded-full ${rangeSizeClass}`}
               name={key}
-              disabled={isPublished}
+              disabled={isReadOnly}
             />
-            <button disabled={isPublished} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
+            <button disabled={isReadOnly} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
 
@@ -480,7 +482,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             }}
             className={`input input-bordered ${inputSizeClass} w-full`}
             name={key}
-            disabled={isPublished}
+            disabled={isReadOnly}
           />
         )}
 
@@ -500,7 +502,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             onBlur={(e) => handleInputChange(e, key)}
             className={`input input-bordered ${inputSizeClass} w-full`}
             name={key}
-            disabled={isPublished}
+            disabled={isReadOnly}
           />
         )}
 
@@ -512,7 +514,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               className={`toggle ${toggleSizeClass}`}
               checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
               onChange={(e) => handleInputChange(e, key)}
-              disabled={isPublished}
+              disabled={isReadOnly}
             />
           </label>
         )}
@@ -523,7 +525,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
               onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
               className={`select ${selectSizeClass} max-w-xs select-bordered capitalize`}
-              disabled={isPublished}
+              disabled={isReadOnly}
             >
               <option value='default' disabled> Select {key} mode </option>
               {options?.map((service, index) => (
@@ -560,7 +562,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                     handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                   }
                   placeholder="Enter valid JSON object here..."
-                  disabled={isPublished}
+                  disabled={isReadOnly}
                 />
 
                 <JsonSchemaModal

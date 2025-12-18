@@ -109,7 +109,9 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
 
 ModelPreview.displayName = 'ModelPreview';
 
-const ModelDropdown = ({ params, searchParams, isPublished }) => {
+const ModelDropdown = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => {
@@ -162,9 +164,18 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
                 const modelName = cfg?.configuration?.model?.default;
                 if (!modelName) return;
                 const specs = cfg?.validationConfig?.specification;
+                const displayLabel = modelName === 'gpt-5-nano' && bridgeType === 'chatbot'
+                    ? (
+                        <div className="flex items-center gap-2">
+                            <span>{modelName}</span>
+                            <span className="badge badge-success badge-sm text-xs">FREE</span>
+                        </div>
+                    )
+                    : modelName;
+                
                 opts.push({
                     value: modelName,
-                    label: modelName,
+                    label: displayLabel,
                     // pass meta to use in onChange and onOptionHover
                     meta: { group, modelName, specs }
                 });
@@ -194,7 +205,7 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
         <div className="flex flex-col items-start gap-4 relative">
             <div className="w-full" ref={dropdownRef}>
                 <Dropdown
-                    disabled={isPublished}
+                    disabled={isReadOnly}
                     options={modelOptions}
                     value={model || ''}
                     onChange={handleSelect}
@@ -223,6 +234,7 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
                         defaultValue={fineTuneModel}
                         onBlur={handleFinetuneModelChange}
                         placeholder="Fine-tune model Name"
+                        disabled={isReadOnly}
                         className="input input-bordered input-sm w-full bg-base-100 text-base-content focus:border-primary focus:ring-1 focus:ring-primary min-h-[2.5rem] sm:min-h-[2rem]"
                     />
                 </div>

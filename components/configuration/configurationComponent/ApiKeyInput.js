@@ -7,10 +7,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false ,isPublished}) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
 
-    const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
+    const { bridge, apikeydata, bridgeApikey_object_id, currentService, bridgeType } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         const apikeys = state?.apiKeysReducer?.apikeys || {};
@@ -23,6 +25,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: isPublished ? (bridgeDataFromState?.apikey_object_id) : (versionData?.apikey_object_id),
             currentService: isPublished ? (bridgeDataFromState?.service) : (versionData?.service),
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         };
     });
 
@@ -37,7 +40,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
         if (selectedApiKeyId === 'add_new') {
             openModal(MODAL_TYPE.API_KEY_MODAL);
         }
-        else if (selectedApiKeyId !== 'AI_ML_DEFAULT_KEY') {
+        else if (selectedApiKeyId !== 'GPT5_NANO_DEFAULT_KEY') {
             const service = bridge?.service;
             const updated = { ...bridgeApikey_object_id, [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
@@ -50,15 +53,24 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
             ? bridgeApikey_object_id?.[bridge?.service]
             : bridgeApikey_object_id;
         const currentApiKey = apikeydata.find(apiKey => apiKey?._id === serviceApiKeyId);
-        return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey?._id;
-    }, [apikeydata, bridgeApikey_object_id, bridge?.service]);
+        
+        // Special handling for gpt-5-nano model - show default key if no API key is added and bridge type is chatbot
+        if (bridge?.configuration?.model === 'gpt-5-nano' && bridgeType === 'chatbot' && !serviceApiKeyId) {
+            return 'GPT5_NANO_DEFAULT_KEY';
+        }
+        
+        return currentApiKey?._id;
+    }, [apikeydata, bridgeApikey_object_id, bridge?.service, bridge?.configuration?.model, bridgeType]);
 
     // Build dropdown options
     const dropdownOptions = useMemo(() => {
         const opts = [];
-        if (bridge.service === 'ai_ml') {
-            opts.push({ value: 'AI_ML_DEFAULT_KEY', label: 'AI ML Default Key' });
+        
+        // Add default key for gpt-5-nano model only when bridge type is chatbot (like old ai_ml case)
+        if (bridge?.configuration?.model === 'gpt-5-nano' && bridgeType === 'chatbot') {
+            opts.push({ value: 'GPT5_NANO_DEFAULT_KEY', label: 'GPT-5-Nano Default Key' });
         }
+        
         if (filteredApiKeys.length > 0) {
             filteredApiKeys.forEach((apiKey) => {
                 opts.push({ value: apiKey._id, label: apiKey.name });
@@ -69,13 +81,13 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
         // Add new key action
         opts.push({ value: 'add_new', label: '+  Add new API Key' });
         return opts;
-    }, [filteredApiKeys, bridge.service]);
+    }, [filteredApiKeys, bridge.service, bridge?.configuration?.model, bridgeType]);
 
 
     return (
         <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
             <Dropdown
-            disabled={isPublished}
+            disabled={isReadOnly}
                 options={dropdownOptions}
                 value={selectedValue || ''}
                 onChange={(val) => handleDropdownChange(val)}

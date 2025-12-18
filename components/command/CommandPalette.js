@@ -139,7 +139,6 @@ const CommandPalette = ({isEmbedUser}) => {
         fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
       );
     };
-
     const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id","last_used","total_tokens"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,

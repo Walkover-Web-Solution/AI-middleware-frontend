@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, BotIcon, ChevronDown, RefreshCcw } from 'lucide-react';
+import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Edit2, BotIcon, ChevronDown, RefreshCcw } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -213,15 +213,25 @@ const Navbar = ({ isEmbedUser, params }) => {
   const handleTabChange = useCallback((tabId) => {
     const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
     
+    // Get bridge type from Redux and determine correct type parameter
+    let typeValue;
+    if (bridgeType && bridgeType.toLowerCase() === 'chatbot') {
+      typeValue = 'chatbot';
+    } else {
+      // For 'api', 'batch', or any other type, default to 'api'
+      typeValue = 'api';
+    }
+    const typeQueryPart = `&type=${typeValue}`;
+    
     // If currently in published mode and navigating to testcase or history
     if (isPublished && (tabId === 'testcase' || tabId === 'history')) {
       // Use published version ID and remove isPublished parameter
-      router.push(base + (publishedVersion ? `?version=${publishedVersion}` : ''));
+      router.push(base + (publishedVersion ? `?version=${publishedVersion}${typeQueryPart}` : `?type=${typeValue}`));
     } else {
       // Normal navigation with current version
-      router.push(base + (versionId ? `?version=${versionId}` : ''));
+      router.push(base + (versionId ? `?version=${versionId}${typeQueryPart}` : `?type=${typeValue}`));
     }
-  }, [router, orgId, bridgeId, versionId, isPublished, publishedVersion]);
+  }, [router, orgId, bridgeId, versionId, isPublished, publishedVersion, bridgeType]);
 
   const handlePublishedClick = useCallback(() => {
     if (!publishedVersion) {
@@ -233,8 +243,19 @@ const Navbar = ({ isEmbedUser, params }) => {
     // Don't push versionId when isPublished=true, just set isPublished flag
     currentUrl.searchParams.delete('version'); // Remove version parameter
     currentUrl.searchParams.set('isPublished', 'true');
+    
+    // Ensure the type parameter is set based on the bridge type from Redux
+    let typeValue;
+    if (bridgeType && bridgeType.toLowerCase() === 'chatbot') {
+      typeValue = 'chatbot';
+    } else {
+      // For 'api', 'batch', or any other type, default to 'api'
+      typeValue = 'api';
+    }
+    currentUrl.searchParams.set('type', typeValue);
+    
     router.push(currentUrl.pathname + currentUrl.search);
-  }, [router, publishedVersion]);
+  }, [router, publishedVersion, bridgeType]);
 
   const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
@@ -406,11 +427,18 @@ const Navbar = ({ isEmbedUser, params }) => {
 
                   {/* Bridge Version Dropdown - Desktop Only */}
                   <div className="hidden sm:flex min-w-0 flex-1">
-                    <BridgeVersionDropdown 
-                      params={{ org_id: orgId, id: bridgeId }} 
-                      searchParams={searchParams}
-                      maxVersions={2}
-                    />
+                    {orgId && bridgeId ? (
+                      <BridgeVersionDropdown 
+                        params={{ org_id: orgId, id: bridgeId }} 
+                        searchParams={searchParams}
+                        maxVersions={2}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <div className="h-6 bg-base-200 animate-pulse rounded w-8"></div>
+                        <div className="h-6 bg-base-200 animate-pulse rounded w-8"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -601,12 +629,19 @@ const Navbar = ({ isEmbedUser, params }) => {
 
               {/* Version Dropdown */}
               <div className="min-w-0">
-                <BridgeVersionDropdown 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={searchParams}
-                  maxVersions={2}
-                  showDropdownOnly={true}
-                />
+                {orgId && bridgeId ? (
+                  <BridgeVersionDropdown 
+                    params={{ org_id: orgId, id: bridgeId }} 
+                    searchParams={searchParams}
+                    maxVersions={2}
+                    showDropdownOnly={true}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <div className="h-6 bg-base-200 animate-pulse rounded w-6"></div>
+                    <div className="h-6 bg-base-200 animate-pulse rounded w-6"></div>
+                  </div>
+                )}
               </div>
             </>
           )}

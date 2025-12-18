@@ -77,7 +77,7 @@ function Page() {
   return (
     <div className="flex flex-col justify-start items-center min-h-screen bg-base-100 px-2 md:px-0">
       <ServiceInitializer />
-      <ThemeManager />
+      <ThemeManager userType="default" />
       <div className="w-full max-w-4xl mt-4 flex flex-col gap-3">
         <OrganizationHeader 
           organizationsArray={organizationsArray}

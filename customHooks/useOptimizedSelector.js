@@ -25,6 +25,9 @@ export const useConfigurationSelector = (params, searchParams) => {
         isFocus: state?.bridgeReducer?.isFocus,
         modelType: isPublished ? (bridgeData?.configuration?.type?.toLowerCase()) : (versionData?.configuration?.type?.toLowerCase()),
         modelName: isPublished ? (bridgeData?.configuration?.model) : (versionData?.configuration?.model),
+        isLoading: state?.bridgeReducer?.loading,
+        hasError: state?.bridgeReducer?.error,
+        hasData: !!(bridgeData || versionData),
       };
     }, [paramsId, version, isPublished]),
     shallowEqual

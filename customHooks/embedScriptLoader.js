@@ -1,7 +1,7 @@
 import { getOrCreateNotificationAuthKey } from "@/config/index";
 import { useEffect } from "react";
 
-export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {
+export const useEmbedScriptLoader = (embedToken = null, isEmbedUser = false) => {
 
   async function embedMaker() {
     const pAuthKey = !isEmbedUser ? await getOrCreateNotificationAuthKey('gtwy_bridge_trigger').then(res => res?.authkey) : null
@@ -43,15 +43,25 @@ export const useEmbedScriptLoader = (embedToken, isEmbedUser) => {
     };
   }
   useEffect(() => {
-    if (embedToken) {
+    // Ensure embedToken is a valid string before proceeding
+    if (embedToken && typeof embedToken === 'string' && embedToken.trim() !== '') {
       embedMaker()
 
       return () => {
-        const script = document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID)
-        if (script) document.body.removeChild(script);
-        const embedContainer = document.getElementById("iframe-viasocket-embed-parent-container")
-        if (embedContainer) document.body.removeChild(embedContainer)
+        try {
+          const script = document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID);
+          if (script && script.parentNode === document.body) {
+            document.body.removeChild(script);
+          }
+          
+          const embedContainer = document.getElementById("iframe-viasocket-embed-parent-container");
+          if (embedContainer && embedContainer.parentNode === document.body) {
+            document.body.removeChild(embedContainer);
+          }
+        } catch (error) {
+          console.warn('Error removing embed scripts:', error);
+        }
       };
     }
-  }, [embedToken]);
+  }, [embedToken, isEmbedUser]);
 };

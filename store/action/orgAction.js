@@ -1,5 +1,5 @@
-import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, updateOrganizationData, updateUser } from "@/config/index";
-import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
+import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, getUsers, updateOrganizationData, updateUser } from "@/config/index";
+import { organizationCreated, organizationsFetched, setCurrentOrgId, usersFetched } from "../reducer/orgReducer";
 import {  updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
 
 export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
@@ -82,5 +82,15 @@ export const updateOrgMetaAction = (orgId, orgDetails) => async (dispatch) => {
   } catch (error) {
     console.error('Error updating organization meta:', error);
     throw error;
+  }
+}
+ 
+export const getUsersAction = () => async (dispatch) => {
+  try {
+    const response = await getUsers();
+    dispatch(usersFetched(response.data));
+    return response;
+  } catch (error) {
+    console.error("Error fetching users:", error);
   }
 }

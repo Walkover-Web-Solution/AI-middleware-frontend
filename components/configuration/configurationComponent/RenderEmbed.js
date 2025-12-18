@@ -15,8 +15,11 @@ const RenderEmbed = ({
   handleChangePreTool,
   name,
   halfLength = 1,
-  isPublished
+  isPublished,
+  isEditor = true
 }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   // Sort functions first
   const sortedFunctions = useMemo(() => {
     return bridgeFunctions?.slice()
@@ -91,7 +94,7 @@ const RenderEmbed = ({
                   }}
                   className="btn btn-ghost btn-sm p-1 hover:text-primary"
                   title="Change Pre Tool"
-                  disabled={isPublished}
+                  disabled={isReadOnly}
                 >
                   <RefreshIcon size={16} />
                 </button>
@@ -103,7 +106,7 @@ const RenderEmbed = ({
                 }}
                 className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
-                disabled={isPublished}
+                disabled={isReadOnly}
               >
                 <TrashIcon size={16} />
               </button>

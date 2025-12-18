@@ -8,25 +8,23 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+
+// Global tracking to prevent duplicate calls across component instances
+const globalFetchTracker = {
+    inProgress: new Set()
+};
 import { useDispatch } from 'react-redux';
 import { ChevronDown, Plus } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 
-function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions = 2 }) {
+function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions = 2, shouldFetch = true }) {
     const router = useRouter();
     const dispatch = useDispatch();
-    
-    // Memoize isPublished to make it reactive to searchParams changes
-    const isPublished = useMemo(() => {
-        const result = searchParams?.get?.('isPublished') === 'true';
-        return result;
-    }, [searchParams]);
+
     const versionDescriptionRef = useRef('');
     const hasInitialized = useRef(false);
-    const lastFetchedVersion = useRef(null);
-    const isProcessing = useRef(false);
     const [showVersionDropdown, setShowVersionDropdown] = useState(false);
     const [maxVisibleVersions, setMaxVisibleVersions] = useState(maxVersions);
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
@@ -41,12 +39,15 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
         bridgeVersionMapping: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id] || {},
     }));
 
-    // Update maxVisibleVersions when maxVersions prop changes
+    const bridgeVersionMappingRef = useRef(bridgeVersionMapping);
+    useEffect(() => {
+        bridgeVersionMappingRef.current = bridgeVersionMapping;
+    }, [bridgeVersionMapping]);
+
     useEffect(() => {
         setMaxVisibleVersions(maxVersions);
     }, [maxVersions]);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -55,21 +56,38 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            debounceTimers.current.forEach(timerId => clearTimeout(timerId));
+            debounceTimers.current.clear();
+        };
     }, []);
 
-    // Memoized function to fetch version data only when needed
+    const debounceTimers = useRef(new Map());
     const fetchVersionData = useCallback((versionId) => {
-        if (!versionId || lastFetchedVersion.current === versionId || isProcessing.current) {
+        if (!versionId || !params?.id || !shouldFetch) return;
+        if (globalFetchTracker.inProgress.has(versionId)) {
             return;
         }
-        isProcessing.current = true;
-        lastFetchedVersion.current = versionId;
-        dispatch(getBridgeVersionAction({ versionId, version_description: versionDescriptionRef }))
-            .finally(() => {
-                isProcessing.current = false;
-            });
-    }, [dispatch]);
+        if (debounceTimers.current.has(versionId)) {
+            clearTimeout(debounceTimers.current.get(versionId));
+        }
+
+        const timerId = setTimeout(() => {
+            if (globalFetchTracker.inProgress.has(versionId)) {
+                return;
+            }
+            globalFetchTracker.inProgress.add(versionId);
+            dispatch(getBridgeVersionAction({ versionId, version_description: versionDescriptionRef }))
+                .finally(() => {
+                    globalFetchTracker.inProgress.delete(versionId);
+                });
+
+            debounceTimers.current.delete(versionId);
+        }, 100);
+
+        debounceTimers.current.set(versionId, timerId);
+    }, [dispatch, params?.id, shouldFetch]);
 
     // Helper function to get version description
     const getVersionDescription = useCallback((versionId) => {
@@ -80,7 +98,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
     const getVersionDisplayName = useCallback((version) => {
         // Find the index in the original array (this maintains consistent numbering)
         const originalIndex = bridgeVersionsArray.indexOf(version);
-        
+
         if (version === publishedVersion) {
             // For published version, show "V{number} Published"
             return `V${originalIndex + 1} `;
@@ -90,32 +108,32 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
         }
     }, [bridgeVersionsArray, publishedVersion]);
 
+    // Memoize current version and isPublished to prevent unnecessary re-renders
+    const currentVersion = useMemo(() => searchParams?.get?.('version'), [searchParams]);
+    const currentIsPublished = useMemo(() => searchParams?.get?.('isPublished') === 'true', [searchParams]);
+
     // SendDataToChatbot effect - only runs when version changes
     useEffect(() => {
-        const currentVersion = searchParams?.get?.('version');
         if (!currentVersion) return;
 
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined') {
-                SendDataToChatbot( isPublished ? { "version_id": "null"} : { "version_id": currentVersion});
+                SendDataToChatbot(currentIsPublished ? { "version_id": "null" } : { "version_id": currentVersion });
                 clearInterval(timer);
             }
         }, 300);
 
         return () => clearInterval(timer);
-    }, [searchParams, isPublished]);
+    }, [currentVersion, currentIsPublished]);
 
     // Initialize version only once on mount or when versions become available
     useEffect(() => {
-        if (hasInitialized.current) {
+        if (hasInitialized.current || !params?.id || !shouldFetch) {
             return;
         }
-        
-        const currentVersion = searchParams?.get?.('version');
-        const isPublished = searchParams?.get?.('isPublished') === 'true';
-        
+
         // If isPublished=true, don't push version ID - just return
-        if (isPublished) {
+        if (currentIsPublished) {
             hasInitialized.current = true;
             return;
         }
@@ -129,19 +147,19 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                 router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${defaultVersion}`);
             }
         }
-        // If version exists in URL, fetch its data
-        else if (currentVersion) {
+        else if (currentVersion && !bridgeVersionMapping?.[currentVersion] && shouldFetch) {
             hasInitialized.current = true;
             fetchVersionData(currentVersion);
+        } else if (currentVersion && bridgeVersionMapping?.[currentVersion]) {
+            hasInitialized.current = true;
         }
-    }, [bridgeVersionsArray.length, publishedVersion, searchParams?.get?.('version'), params.id, params.org_id, bridgeName]);
+    }, [bridgeVersionsArray.length, publishedVersion, currentVersion, currentIsPublished, params.id, params.org_id, router, fetchVersionData, bridgeVersionMapping, shouldFetch]);
 
     const handleVersionChange = useCallback((version) => {
-        const currentVersion = searchParams?.get?.('version');
         if (currentVersion === version) return;
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${version}`);
         fetchVersionData(version);
-    }, [searchParams?.get?.('version'), params.org_id, params.id, router, fetchVersionData]);
+    }, [currentVersion, params.org_id, params.id, router, fetchVersionData]);
 
     const handleCreateNewVersion = () => {
         // create new version
@@ -168,9 +186,6 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
             alert("No parent version available. Please ensure there's at least one existing version.");
             return;
         }
-        
-      
-        
         dispatch(createBridgeVersionAction({ 
             parentVersionId: parentVersionId, 
             bridgeId: params.id, 

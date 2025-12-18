@@ -5,6 +5,7 @@ const initialState = {
   bridgeVersionMapping: {},
   org: {},
   loading: false,
+  error: false,
   isFocus: false,
 };
 
@@ -14,9 +15,11 @@ export const bridgeReducer = createSlice({
   reducers: {
     isPending: (state) => {
       state.loading = true;
+      state.error = false;
     },
     isError: (state) => {
       state.loading = false;
+      state.error = true;
     },
     addorRemoveResponseIdInBridgeReducer: (state, action) => {
       const { response } = action.payload;
@@ -31,6 +34,7 @@ export const bridgeReducer = createSlice({
       const { _id } = bridge;
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
       state.loading = false;
+      state.error = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {
       const { bridge } = action.payload;
@@ -40,6 +44,7 @@ export const bridgeReducer = createSlice({
       }
       state.bridgeVersionMapping[parent_id][_id] = { ...(state.bridgeVersionMapping[parent_id][_id] || {}), ...bridge };
       state.loading = false;
+      state.error = false;
     },
     fetchAllBridgeReducer: (state, action) => {
       const { orgId, bridges, ...restPayload } = action.payload;

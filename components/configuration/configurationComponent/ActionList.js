@@ -9,7 +9,9 @@ import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark } from 'lucide-react';
 
-function ActionList({ params, searchParams , isPublished}) {
+function ActionList({ params, searchParams, isPublished, isEditor = true }) {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const { action } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -59,14 +61,14 @@ function ActionList({ params, searchParams , isPublished}) {
                             setSelectedKey(key);
                             openModal(MODAL_TYPE.ACTION_MODAL)
                         }}
-                        disabled={isPublished}
+                        disabled={isReadOnly}
                     >
                         <div className="p-4 w-full">
                             <div className='flex items-center justify-between'>
                                 <h1 className="inline-flex items-center text-lg font-semibold text-base-content">
                                     {key}
                                 </h1>
-                                <button disabled={isPublished} onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 disabled:opacity-50 disabled:cursor-not-allowed transition duration-100 ease-in-out'>
+                                <button disabled={isReadOnly} onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 disabled:opacity-50 disabled:cursor-not-allowed transition duration-100 ease-in-out'>
                                     <TrashIcon size={16} className='text-error' />
                                 </button>
                             </div>
@@ -89,7 +91,7 @@ function ActionList({ params, searchParams , isPublished}) {
                     </div>
                 ))}
             </div>
-            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} isPublished={isPublished} />
+            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} isPublished={isPublished} isEditor={isEditor} />
         </div>
     );
 }

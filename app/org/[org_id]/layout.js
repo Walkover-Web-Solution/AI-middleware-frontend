@@ -10,7 +10,7 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding, updateOrgMetaAction, getUsersAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
@@ -24,7 +24,6 @@ import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
-import { getAllAuthData } from "@/store/action/authkeyAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import ServiceInitializer from "@/components/organization/ServiceInitializer";
 
@@ -154,8 +153,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     updateUserMeta();
   }, []);
 
-
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+   if(currrentOrgDetail?.role_name!=="Viewer") {
+    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  }
   useRtLayerEventHandler();
 
 
@@ -206,8 +206,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getPrebuiltToolsAction())
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-      dispatch(getAllAuthData())
-    }
+      dispatch(getUsersAction());
+      }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
   const scriptId = "chatbot-main-script";
@@ -372,10 +372,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     return <ErrorPage></ErrorPage>;
   }
 
+  const themeUserType = isEmbedUser ? 'embed' : 'default';
+
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <ThemeManager />
+        <ThemeManager userType={themeUserType} />
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="flex flex-col h-full z-high">
@@ -413,7 +415,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   else {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <ThemeManager />
+        <ThemeManager userType={themeUserType} />
         {/* Main Content Area for Embed Users */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Sticky Navbar */}

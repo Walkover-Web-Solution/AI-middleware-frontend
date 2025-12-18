@@ -13,7 +13,7 @@
             };
             this.urls = {
                 gtwyUrl: 'https://embed.gtwy.ai/embed',
-                login: 'https://db.gtwy.ai/gtwyEmbed/login'
+                login: 'https://db.gtwy.ai/api/embed/login'
             };
             this.state = {
                 bodyLoaded: false, fullscreen: false, isInitialized: false, hasParentContainer: false,
@@ -384,7 +384,7 @@
             try {
                 const embedToken = document.getElementById('gtwy-main-script')?.getAttribute('embedToken');
                 const options = embedToken ? {
-                    method: 'GET',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: embedToken }
                 } : undefined;
                 return (await fetch(this.urls.login, options)).json();

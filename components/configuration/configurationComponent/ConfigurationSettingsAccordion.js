@@ -7,7 +7,9 @@ import ResponseStyleDropdown from './ResponseStyleDropdown';
 import AdvancedConfiguration from './AdvancedConfiguration';
 import Protected from '@/components/Protected';
 
-const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
+const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = true }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   const [isOpen, setIsOpen] = useState(false);
   const {
     params,
@@ -44,9 +46,9 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
       >
         {/* Settings Content */}
         <div className="flex flex-col gap-6">
-          {shouldShowAgentType && (
+          {shouldShowAgentType && bridgeType?.toString()?.toLowerCase() !== "chatbot" &&(
             <div className="bg-base-100 rounded-lg">
-              <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} />
+              <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} isEditor={isEditor} />
             </div>
           )}
 
@@ -62,7 +64,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
                   <span className="text-xs font-semibold">{currentView === 'agent-flow' ? 'On' : 'Off'}</span>
                   <input
                     type="checkbox"
-                    disabled={isPublished}
+                    disabled={isReadOnly}
                     className="toggle toggle-primary toggle-sm"
                     checked={currentView === 'agent-flow'}
                     onChange={() => {
@@ -74,10 +76,10 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
               </div>}
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="bg-base-100 rounded-lg">
-                  <ToneDropdown params={params} searchParams={searchParams} isPublished={isPublished} />
+                  <ToneDropdown params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
                 </div>
                 <div className="bg-base-100 rounded-lg">
-                  <ResponseStyleDropdown params={params} searchParams={searchParams} isPublished={isPublished} />
+                  <ResponseStyleDropdown params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
                 </div>
               </div>
 
@@ -89,6 +91,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished }) => {
                     bridgeType={bridgeType}
                     modelType={modelType}
                     isPublished={isPublished}
+                    isEditor={isEditor}
                   />
                 </div>
               )}

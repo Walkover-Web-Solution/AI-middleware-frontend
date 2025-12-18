@@ -34,7 +34,9 @@ function getStatusClass(status) {
   }
 };
 
-const EmbedList = ({ params, searchParams, isPublished }) => {
+const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   const [functionId, setFunctionId] = useState(null);
   const [functionData, setfunctionData] = useState({});
   const [toolData, setToolData] = useState({});
@@ -243,7 +245,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
         isAsync={true}
       />
       <FunctionParameterModal
-        isPublished={isPublished}
+        isPublished={isReadOnly}
         name="Tool"
         functionId={functionId}
         Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}
@@ -272,7 +274,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
                   <button
                     tabIndex={0}
                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={!shouldToolsShow||isPublished}
+                    disabled={!shouldToolsShow || isReadOnly}
                   >
                     <AddIcon className="w-2 h-2" />
                     <span className="text-xs font-medium">Add</span>
@@ -284,7 +286,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
                     tabIndex={0}
                     className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleTutorial}
-                    disabled={isPublished}
+                    disabled={isReadOnly}
                   >
                     <AddIcon className="w-2 h-2" />
                     <p className="label-text text-sm whitespace-nowrap">Tool</p>
@@ -306,6 +308,8 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
                 showInbuiltTools={showInbuiltTools}
                 tutorialState={tutorialState}
                 setTutorialState={setTutorialState}
+                isPublished={isPublished}
+                isEditor={isEditor}
               />
             </div>
             <div className="flex flex-col gap-2 w-full">
@@ -323,6 +327,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
                     handleOpenDeleteModal={handleOpenDeleteModal}
                     halfLength={1}
                     isPublished={isPublished}
+                    isEditor={isEditor}
                   />
                 </div>
               )}
@@ -366,7 +371,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
                               }}
                               className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                               title="Config"
-                              disabled={isPublished}
+                              disabled={isReadOnly}
                             >
                               <SettingsIcon size={16} />
                             </button>
@@ -378,7 +383,7 @@ const EmbedList = ({ params, searchParams, isPublished }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                           >
                             <TrashIcon size={16} />
                           </button>
