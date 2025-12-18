@@ -1,6 +1,7 @@
 import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi, runTestCaseApi, updateTestCaseApi, generateAdditionalTestCasesApi } from "@/config/index";
 import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, updateTestCaseReducer } from "../reducer/testCasesReducer";
 import { toast } from "react-toastify";
+import { Dawning_of_a_New_Day } from "next/font/google";
 
 export const createTestCaseAction = ({ bridgeId, data }) => async (dispatch) => {
     try {
@@ -52,11 +53,12 @@ export const runTestCaseAction = ({ versionId = null, bridgeId=null, testcase_id
     }
 }
 
-export const updateTestCaseAction = ({ bridge_id, dataToUpdate }) => async (dispatch) => {
+export const updateTestCaseAction = ({ testCaseId, dataToUpdate }) => async (dispatch) => {
     try {
-        const response = await updateTestCaseApi({ bridge_id, dataToUpdate });
+        const response = await updateTestCaseApi({ testCaseId, dataToUpdate });
         if (response?.success) {
-            dispatch(updateTestCaseReducer({bridge_id, dataToUpdate}));
+            // Pass testCaseId and update data to the reducer
+            dispatch(updateTestCaseReducer({testCaseId, dataToUpdate}));
             toast.success("Test case updated successfully");
         }
         return;

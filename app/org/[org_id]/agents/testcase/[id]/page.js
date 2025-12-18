@@ -94,7 +94,7 @@ function TestCases({ params }) {
         ? { tool_calls: JSON.parse(editExpectedOutput) }
         : { response: editExpectedOutput }
     };
-    dispatch?.(updateTestCaseAction({ bridge_id: resolvedParams?.id, dataToUpdate: updatedTestCase }))
+    dispatch?.(updateTestCaseAction({ testCaseId: testCase?._id, dataToUpdate: updatedTestCase }))
     setEditingIndex(null);
   };
 
@@ -219,7 +219,7 @@ function TestCases({ params }) {
                                   <textarea
                                     value={editUserInput}
                                     onChange={(e) => setEditUserInput(e.target.value)}
-                                    className="textarea bg-white dark:bg-black/15/10 textarea-bordered w-full min-h-20"
+                                    className="textarea bg-base-200 dark:bg-black/15/10 textarea-bordered w-full min-h-20"
                                   />
                                 ) : (
                                   <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content overflow-auto max-h-40">

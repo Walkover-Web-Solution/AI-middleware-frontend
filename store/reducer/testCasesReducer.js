@@ -29,11 +29,13 @@ const testCasesReducer = createSlice({
             return state;
         },
         updateTestCaseReducer: (state, action) => {
-            const { bridge_id, dataToUpdate } = action.payload;
-            if (state.testCases[bridge_id]) {
-                const index = state.testCases[bridge_id].findIndex(testCase => testCase._id === dataToUpdate._id);
+            const { testCaseId, dataToUpdate } = action.payload;
+            const bridgeId=dataToUpdate?.bridge_id  
+            if (bridgeId && state.testCases[bridgeId]) {
+                const index = state.testCases[bridgeId].findIndex(testCase => testCase._id === testCaseId);
                 if (index !== -1) {
-                    state.testCases[bridge_id][index] = dataToUpdate;
+                    // Update the test case with new data while preserving the _id
+                    state.testCases[bridgeId][index] = dataToUpdate;
                 }
             }
             return state;
