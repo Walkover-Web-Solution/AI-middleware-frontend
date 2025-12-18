@@ -49,7 +49,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.pre_tools || {},
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.pre_tools || [],
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
@@ -153,7 +153,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     updateUserMeta();
   }, []);
 
-   if(currrentOrgDetail?.role_name!=="Viewer") {
+  if (currrentOrgDetail?.role_name !== "Viewer") {
     useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   }
   useRtLayerEventHandler();
@@ -207,7 +207,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
       dispatch(getUsersAction());
-      }
+    }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
   const scriptId = "chatbot-main-script";
@@ -317,6 +317,11 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               }
             }));
           }
+            dispatch(updateApiAction(path[5], {
+              pre_tools: preTools[0],
+              version_id: resolvedSearchParams?.get('version'),
+              status: "0"
+            }));
           dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
         }
       }
@@ -336,7 +341,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
                   pre_tools: data?._id,
-                  status:"1",
+                  status: "1",
                   version_id: resolvedSearchParams?.get('version')
                 }))
               )
