@@ -16,7 +16,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         const apikeys = state?.apiKeysReducer?.apikeys || {};
-        
+
         // Use bridgeData when isPublished=true, otherwise use versionData
         const activeData = isPublished ? bridgeDataFromState : versionData;
 
@@ -45,6 +45,14 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
             const updated = { ...bridgeApikey_object_id, [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
         }
+        if (selectedApiKeyId === 'GPT5_NANO_DEFAULT_KEY') {
+            dispatch(updateBridgeVersionAction({
+                bridgeId: params?.id,
+                versionId: searchParams?.version,
+                dataToSend: { apikey_object_id: {} } // clear key
+            }));
+            return;
+        }
     }, [params.id, searchParams?.version, bridge?.service, bridgeApikey_object_id]);
 
     // Determine the currently selected value
@@ -53,24 +61,24 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
             ? bridgeApikey_object_id?.[bridge?.service]
             : bridgeApikey_object_id;
         const currentApiKey = apikeydata.find(apiKey => apiKey?._id === serviceApiKeyId);
-        
+
         // Special handling for gpt-5-nano model - show default key if no API key is added and bridge type is chatbot
         if (bridge?.configuration?.model === 'gpt-5-nano' && bridgeType === 'chatbot' && !serviceApiKeyId) {
             return 'GPT5_NANO_DEFAULT_KEY';
         }
-        
+
         return currentApiKey?._id;
     }, [apikeydata, bridgeApikey_object_id, bridge?.service, bridge?.configuration?.model, bridgeType]);
 
     // Build dropdown options
     const dropdownOptions = useMemo(() => {
         const opts = [];
-        
+
         // Add default key for gpt-5-nano model only when bridge type is chatbot (like old ai_ml case)
         if (bridge?.configuration?.model === 'gpt-5-nano' && bridgeType === 'chatbot') {
             opts.push({ value: 'GPT5_NANO_DEFAULT_KEY', label: 'GPT-5-Nano Default Key' });
         }
-        
+
         if (filteredApiKeys.length > 0) {
             filteredApiKeys.forEach((apiKey) => {
                 opts.push({ value: apiKey._id, label: apiKey.name });
@@ -87,7 +95,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
     return (
         <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
             <Dropdown
-            disabled={isReadOnly}
+                disabled={isReadOnly}
                 options={dropdownOptions}
                 value={selectedValue || ''}
                 onChange={(val) => handleDropdownChange(val)}
