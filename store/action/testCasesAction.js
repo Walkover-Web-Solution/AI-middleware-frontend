@@ -31,7 +31,7 @@ export const getAllTestCasesOfBridgeAction = ({ bridgeId }) => async (dispatch) 
 export const deleteTestCaseAction = ({testCaseId, bridgeId}) => async (dispatch) => {
     try {
         const response = await deleteTestCaseApi({ testCaseId });
-        if (response?.result?.success) {
+        if (response?.success) {
             dispatch(deleteTestCaseReducer({ testCaseId, bridgeId }));
             toast.success("Test case deleted successfully");
         }
