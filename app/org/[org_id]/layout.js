@@ -291,6 +291,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     }
   }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
   async function handleMessage(e) {
+    console.log("Received message:", e?.data);
     if (e.data?.metadata?.type !== 'tool') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
@@ -305,6 +306,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
             fn => fn.function_name === e?.data?.id
           );
           if (selectedVersionData) {
+            //This condition will delete the tools and preTools..
             await dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: resolvedSearchParams?.get('version'),
@@ -315,16 +317,22 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 }
               }
             }));
-            dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
-          }    
-            if(preTools.includes(selectedVersionData?._id)){
+            if (preTools.includes(selectedVersionData?._id)) {
               dispatch(updateApiAction(path[5], {
                 pre_tools: selectedVersionData?._id,
                 status: "0",
                 version_id: resolvedSearchParams?.get('version')
               }))
             }
-          
+          }else {
+              dispatch(updateApiAction(path[5], {
+                pre_tools: preTools[0],
+                status: "0",
+                version_id: resolvedSearchParams?.get('version')
+              }))
+          }
+            // dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+
         }
       }
 
