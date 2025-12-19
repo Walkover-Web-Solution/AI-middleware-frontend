@@ -20,13 +20,14 @@ const NonImageModelConfig = memo(() => {
         showDefaultApikeys, 
         isEmbedUser,
         hideAdvancedParameters,
-        isPublished
+        isPublished,
+        isEditor
     } = useConfigurationContext();
 
     return (
         <>
-            <InputSection isPublished={isPublished} />
-            <ToolsSection isPublished={isPublished} />
+            <InputSection isPublished={isPublished} isEditor={isEditor} />
+            <ToolsSection isPublished={isPublished} isEditor={isEditor} />
             <CommonConfigComponents
                 params={params}
                 searchParams={searchParams}
@@ -39,6 +40,7 @@ const NonImageModelConfig = memo(() => {
                 isEmbedUser={isEmbedUser}
                 hideAdvancedParameters={hideAdvancedParameters}
                 isPublished={isPublished}
+                isEditor={isEditor}
             />
             <AdvancedParameters
                 params={params}
@@ -48,12 +50,13 @@ const NonImageModelConfig = memo(() => {
                 level={2}
                 className="max-w-md"
                 isPublished={isPublished}
+                isEditor={isEditor}
             />
 
             <div className="flex gap-4 mt-2 flex-col w-full max-w-md">
-            <GptMemory params={params} searchParams={searchParams} isPublished={isPublished} />
-            <ChatbotConfigSection isPublished={isPublished} />
-            <ConfigurationSettingsAccordion isPublished={isPublished} />
+            <GptMemory params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
+            <ChatbotConfigSection isPublished={isPublished} isEditor={isEditor} />
+            <ConfigurationSettingsAccordion isPublished={isPublished} isEditor={isEditor} />
             </div>
         </>
     );

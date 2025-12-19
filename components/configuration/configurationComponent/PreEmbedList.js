@@ -14,7 +14,9 @@ import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 
-const PreEmbedList = ({ params, searchParams, isPublished }) => {
+const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const [preFunctionData, setPreFunctionData] = useState(null);
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
@@ -164,7 +166,7 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
         <>
             <div>
                 <FunctionParameterModal
-                    isPublished={isPublished}
+                    isPublished={isReadOnly}
                     name="Pre Tool"
                     functionId={preFunctionId}
                     Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
@@ -204,9 +206,9 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
 
 
                                 <button
-                                    disabled={isPublished}
+                                    disabled={isReadOnly}
                                     tabIndex={0}
-                                    className={` flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 ${isPublished ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={` flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <AddIcon className="w-4 h-4" />
                                     <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
@@ -222,11 +224,14 @@ const PreEmbedList = ({ params, searchParams, isPublished }) => {
                             connectedFunctions={bridge_pre_tools}
                             shouldToolsShow={true}
                             modelName={model}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
                         />
                     </div>
                     <div className="w-full">
                         <RenderEmbed
                             isPublished={isPublished}
+                            isEditor={isEditor}
                             bridgeFunctions={bridgePreFunctions}
                             integrationData={integrationData}
                             getStatusClass={getStatusClass}

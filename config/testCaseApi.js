@@ -25,15 +25,15 @@ export const createTestCaseApi = async ({ bridgeId, data }) => {
   }
 }
 
-// export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
-//   try {
-//     const response = await axios.put(`${URL}/testcases/`, { bridge_id, ...dataToUpdate });
-//     return response.data;
-//   } catch (error) {
-//     console.error(error);
-//     return error;
-//   }
-// }
+export const updateTestCaseApi = async ({ testCaseId, dataToUpdate }) => {
+  try {
+    const response = await axios.put(`${URL}/api/testcases/${testCaseId}`, dataToUpdate);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 
 export const deleteTestCaseApi = async ({ testCaseId }) => {
   try {

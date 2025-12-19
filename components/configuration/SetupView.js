@@ -22,7 +22,8 @@ const SetupView = memo(() => {
         service,
         showDefaultApikeys,
         currentView,
-        isPublished
+        isPublished,
+        isEditor
     } = useConfigurationContext();
 
     // Render agent flow panel when view is 'agent-flow'
@@ -49,6 +50,7 @@ const SetupView = memo(() => {
                         isEmbedUser={isEmbedUser}
                         hideAdvancedParameters={hideAdvancedParameters}
                         isPublished={isPublished}
+                        isEditor={isEditor}
                     />
                     <AdvancedParameters 
                         params={params} 
@@ -58,6 +60,7 @@ const SetupView = memo(() => {
                         isPublished={isPublished}
                         className="max-w-md"
                         level={2}
+                        isEditor={isEditor}
                     />
                     <ConfigurationSettingsAccordion />
                 </>

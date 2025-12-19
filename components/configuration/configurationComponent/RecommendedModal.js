@@ -2,7 +2,7 @@ import { modelSuggestionApi } from '@/config/index';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import React, { useState, useCallback } from 'react'
 
-const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys, isPublished }) => {
+const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys, isPublished,isEditor }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const { prompt, } = useCustomSelector((state) => {
@@ -75,7 +75,7 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
                                 <button
                                     className="flex items-center gap-2  rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                                     onClick={handleGetRecommendations}
-                                    disabled={isLoadingRecommendations||isPublished}
+                                    disabled={isLoadingRecommendations||isPublished||!isEditor}
                                 >
                                     {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
                                 </button>

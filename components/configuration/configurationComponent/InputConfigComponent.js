@@ -22,7 +22,8 @@ const InputConfigComponent = memo(({
     savePrompt,
     isMobileView,
     closeHelperButtonLocation,
-    isPublished
+    isPublished,
+    isEditor
 }) => {
     // Optimized Redux selector with memoization and shallow comparison
     const { prompt: reduxPrompt } = usePromptSelector(params, searchParams);
@@ -133,6 +134,7 @@ const InputConfigComponent = memo(({
                 disabled={isDisabled}
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
                 isPublished={isPublished}
+                isEditor={isEditor}
             />
             
             <div className="form-control relative">
@@ -143,9 +145,10 @@ const InputConfigComponent = memo(({
                     isPromptHelperOpen={uiState.isPromptHelperOpen}
                     onKeyDown={handleKeyDown}
                     isPublished={isPublished}
+                    isEditor={isEditor}
                 />
                 
-                <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt}/>
+                <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt} isEditor={isEditor}/>
             </div>
 
             <Diff_Modal oldContent={oldContentRef.current} newContent={promptState.newContent} />

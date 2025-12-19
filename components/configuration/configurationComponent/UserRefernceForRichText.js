@@ -6,7 +6,8 @@ import { PencilIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 import { CircleQuestionMark, Crown } from 'lucide-react';
 
-const UserReferenceForRichText = ({ params, searchParams, isPublished }) => {
+const UserReferenceForRichText = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
     const dispatch = useDispatch();
     const { user_reference ,is_rich_text } = useCustomSelector((state) => ({
         is_rich_text:isPublished ? state.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text : state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text||false,

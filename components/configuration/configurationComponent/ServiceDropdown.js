@@ -9,7 +9,9 @@ import { getIconOfService } from "@/utils/utility";
 import InfoTooltip from "@/components/InfoTooltip";
 import Dropdown from '@/components/UI/Dropdown';
 
-function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser, isPublished }) {
+const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser, isPublished = false, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -125,7 +127,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
 
     const renderServiceDropdown = () => (
         <Dropdown
-            disabled={isPublished}
+            disabled={isReadOnly}
             options={serviceOptions}
             value={selectedService || ''}
             onChange={handleServiceChange}

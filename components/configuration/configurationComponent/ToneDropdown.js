@@ -68,7 +68,9 @@ const TONES = [
   },
 ];
 
-const ToneDropdown = ({ params, searchParams ,isPublished }) => {
+const ToneDropdown = ({ params, searchParams, isPublished, isEditor = true }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   const { reduxTone } = useCustomSelector((state) => ({
     reduxTone:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
@@ -134,7 +136,7 @@ const ToneDropdown = ({ params, searchParams ,isPublished }) => {
       
       {/* Tone Dropdown */}
       <select
-        disabled={isPublished}
+        disabled={isReadOnly}
         value={selectedTone}
         onChange={handleToneChange}
         className="select select-sm select-bordered capitalize w-full"

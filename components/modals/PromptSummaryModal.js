@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
 
 // Reusable Agent Summary Content Component
-export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId }) => {
+export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId,isEditor }) => {
     const dispatch = useDispatch();
     const { bridge_summary } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
@@ -99,7 +99,7 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
                     <button 
                         className="btn btn-primary btn-sm"
                         onClick={handleSaveSummary}
-                        disabled={isGeneratingSummary || bridge_summary === summary}
+                        disabled={isGeneratingSummary || bridge_summary === summary|| !isEditor}
                     >
                         Save
                     </button>

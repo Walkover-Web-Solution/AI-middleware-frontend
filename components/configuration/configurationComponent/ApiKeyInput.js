@@ -7,7 +7,9 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false ,isPublished}) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService, bridgeType } = useCustomSelector((state) => {
@@ -85,7 +87,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
     return (
         <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
             <Dropdown
-            disabled={isPublished}
+            disabled={isReadOnly}
                 options={dropdownOptions}
                 value={selectedValue || ''}
                 onChange={(val) => handleDropdownChange(val)}
