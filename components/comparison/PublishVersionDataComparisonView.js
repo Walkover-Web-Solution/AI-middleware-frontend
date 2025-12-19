@@ -192,13 +192,13 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
     const categories = {};
     
     flattenedDifferences.forEach(diff => {
+      if (diff.path === 'configuration.system_prompt_version_id') return;
       const category = diff.path.split('.')[0];
       if (!categories[category]) {
         categories[category] = [];
       }
       categories[category].push(diff);
     });
-    
     return categories;
   }, [flattenedDifferences]);
 
