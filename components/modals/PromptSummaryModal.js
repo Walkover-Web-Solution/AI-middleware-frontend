@@ -114,12 +114,6 @@ export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, 
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt, versionId]);
-    const handleClose=()=>{
-        closeModal(modalType); 
-        setErrorMessage("");
-        setDisplayValue(bridge_summary || "");
-        setAutoGenerateSummary(false); // Reset the flag
-    }
     const handleSaveSummary = useCallback(() => {
         // Ensure we save the latest value from displayValue
         const newValue = displayValue || "";
