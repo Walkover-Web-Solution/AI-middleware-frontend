@@ -41,19 +41,19 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   const [testCaseConversation, setTestCaseConversation] = useState([]);
 
   // Get published version ID from Redux store
-  const publishedVersionId = useCustomSelector((state) => 
+  const publishedVersionId = useCustomSelector((state) =>
     state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id
   );
 
   const channelIdentifier = useMemo(() => {
     const isPublished = searchParams?.isPublished === 'true';
-    
+
     if (isPublished) {
       // For published version, use published version ID in channel identifier
-      return (params.org_id + '_'+ params?.id + '_' + publishedVersionId).replace(/ /g, "_");
+      return (params.org_id + '_' + params?.id + '_' + publishedVersionId).replace(/ /g, "_");
     } else {
       // For draft versions, include the version
-      return (params.org_id + '_'+ params?.id + '_' + searchParams?.version).replace(/ /g, "_");
+      return (params.org_id + '_' + params?.id + '_' + searchParams?.version).replace(/ /g, "_");
     }
   }, [params, searchParams, publishedVersionId]);
 
@@ -221,6 +221,62 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     }, 200);
   };
 
+  // ----------------- RICH UI ACTIONS -----------------
+  const handleRichUIActions = (event) => {
+    // Event delegation: find closest element with data-action
+    const target = event.target.closest('[data-action]');
+    if (!target) return;
+
+    event.preventDefault();
+
+    const actionDataStr = target.getAttribute('data-action');
+    const elementId = target.getAttribute('id');
+    try {
+      const actionPayload = JSON.parse(actionDataStr);
+
+      // 1. Show loading state
+      target.classList.add('loading', 'loading-spinner', 'btn-disabled'); // DaisyUI classes
+
+      // 2. Send to parent
+      if (typeof window !== 'undefined') {
+        window.parent.postMessage({
+          type: 'GTWY_ACTION',
+          payload: actionPayload,
+          elementId: elementId
+        }, '*');
+      }
+
+    } catch (e) {
+      console.error("Failed to parse action data", e);
+    }
+  };
+
+  // Listen for ACK from parent to update UI
+  useEffect(() => {
+    const handleMessage = (event) => {
+      const data = event.data;
+      if (data && data.type === 'GTWY_ACTION_ACK' && data.elementId) {
+        const element = document.getElementById(data.elementId);
+        if (element) {
+          // Remove loading
+          element.classList.remove('loading', 'loading-spinner', 'btn-disabled');
+
+          // Optional: visual success feedback
+          const checkIcon = document.createElement('span');
+          checkIcon.innerHTML = '✔';
+          checkIcon.className = 'ml-2 text-success font-bold';
+          element.appendChild(checkIcon);
+
+          // Optional: Disable after success?
+          // element.setAttribute('disabled', 'true');
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const renderMessageAttachments = (message) => {
     const hasImages = Array.isArray(message?.image_urls) && message.image_urls.length > 0;
     const hasFiles = Array.isArray(message?.files) && message.files.length > 0;
@@ -386,7 +442,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
           )}
 
           <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
-            <div ref={messagesContainerRef} className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
+            <div
+              ref={messagesContainerRef}
+              className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
+              onClick={handleRichUIActions}
+            >
               {messages.map((message, index) => {
 
                 return (
@@ -585,7 +645,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                           ) : (
                             /* Regular Assistant/User/Expected/Error Message - Show model answer if testcase was run */
                             <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" :
-                                message.sender === "error" ? "bg-error/10 border border-error/30 text-error" : ""
+                              message.sender === "error" ? "bg-error/10 border border-error/30 text-error" : ""
                               }`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
@@ -678,6 +738,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                         ? message.testCaseResult.actual_result || message.content
                                         : message.content}
                                     </ReactMarkdown>
+                                  )}
+
+                                  {/* Render Template HTML */}
+                                  {message?.type === 'template' && message?.html && (
+                                    <div
+                                      className="mt-4 template-html-container w-full"
+                                      dangerouslySetInnerHTML={{ __html: message.html }}
+                                    />
                                   )}
                                   {renderMessageAttachments(message)}
                                 </div>
