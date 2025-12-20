@@ -141,7 +141,6 @@ const Chatbot = ({ params, searchParams }) => {
 
     setTimeout(() => {
       if (typeof window !== 'undefined' && typeof window.openChatbot === 'function'&& bridgeType==='chatbot') {
-        console.log("openChatbot")
         window.openChatbot();
       }
     }, 1500);

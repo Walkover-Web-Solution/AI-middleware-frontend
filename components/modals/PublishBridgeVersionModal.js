@@ -61,7 +61,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       isEditor: canEdit,
     };
   });
-  console.log(isEditor,'hello')
+
   // Flag to determine if the UI should be in read-only mode
   const isReadOnly = !isEditor;
   // Memoized form data initialization

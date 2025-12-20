@@ -6,8 +6,6 @@ import { closeModal } from '@/utils/utility';
 import { CloseIcon } from '@/components/Icons';
 
 const Diff_Modal = ({oldContent,newContent}) => {
-  console.log(oldContent,'oldContent')
-  console.log(newContent,'newContent')
   return (
     <Modal MODAL_ID={MODAL_TYPE.DIFF_PROMPT}>
       <div className='modal-box max-w-[80%]' >
