@@ -1,24 +1,95 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { genrateSummaryAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { closeModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo, memo } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
 
+// Optimized Textarea Component
+const OptimizedTextarea = memo(({ value, onChange, className, disabled, placeholder }) => {
+    const divRef = useRef(null);
+    const contentRef = useRef(null);
+    
+    const handleInput = useCallback((e) => {
+        const newValue = e.target.textContent || '';
+        onChange({ target: { value: newValue } });
+    }, [onChange]);
+
+    const handlePaste = useCallback((e) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+    }, []);
+
+    useEffect(() => {
+        if (contentRef.current && contentRef.current.textContent !== value) {
+            contentRef.current.textContent = value;
+        }
+    }, [value]);
+    
+    return (
+       <div ref={divRef}>
+         <div
+            ref={contentRef}
+            contentEditable={!disabled}
+            onInput={handleInput}
+            onPaste={handlePaste}
+            className={className}
+            data-placeholder={placeholder}
+            suppressContentEditableWarning={true}
+            style={{
+                minHeight: '8rem',
+                maxWidth: '100%',
+                width: '100%',
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                wordBreak: 'break-all',
+                overflowWrap: 'break-word',
+                overflow: 'hidden',
+                overflowX: 'hidden',
+                boxSizing: 'border-box'
+            }}
+        />
+       </div>
+    );
+});
+
+OptimizedTextarea.displayName = 'OptimizedTextarea';
+
 // Reusable Agent Summary Content Component
-export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId,isEditor }) => {
+export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId,isEditor }) => {
     const dispatch = useDispatch();
     const { bridge_summary } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
     }));
-    const [summary, setSummary] = useState(bridge_summary || "");
+    const [displayValue, setDisplayValue] = useState(bridge_summary || ""); // Immediate display value
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-    const textareaRef = useRef(null);
     const [errorMessage, setErrorMessage] = useState("");
+    const debounceTimerRef = useRef(null);
 
     useEffect(() => {
-        setSummary(bridge_summary);
+        setDisplayValue(bridge_summary || "");
     }, [bridge_summary, params, versionId]);
+
+    // Ultra-fast textarea change handler with minimal processing
+    const handleTextareaChange = useCallback((e) => {
+        const value = e.target.value;
+        setDisplayValue(value); // Only update display value immediately
+        
+        // Clear existing timer
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+    }, []);
+
+    // Cleanup debounce timer
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
 
     // Auto-generate summary when flag is true
     useEffect(() => {
@@ -36,22 +107,41 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
         try {
             const result = await dispatch(genrateSummaryAction({ versionId: versionId }));
             if (result) {
-                setSummary(result);
+                setDisplayValue(result); // Update display value immediately
                 setAutoGenerateSummary(false); // Reset the flag
             }
         } finally {
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt, versionId]);
+    const handleClose=()=>{
+        closeModal(modalType); 
+        setErrorMessage("");
+        setDisplayValue(bridge_summary || "");
+        setAutoGenerateSummary(false); // Reset the flag
+    }
     const handleSaveSummary = useCallback(() => {
-        const newValue = summary || "";
+        // Ensure we save the latest value from displayValue
+        const newValue = displayValue || "";
         const dataToSend = { bridge_summary: newValue };
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend })).then((data) => {
             if (data.success) {
                 onSave(newValue); // Call the callback for external handling
             }
         });
-    }, [dispatch, params.id, summary, onSave]);
+    }, [dispatch, params.id, displayValue, onSave]);
+
+    // Memoized validation values with reduced computation
+    const validationProps = useMemo(() => {
+        const isEmpty = !displayValue || displayValue.trim() === "";
+        return {
+            hasValidationError: showValidationError && isEmpty,
+            isDisabled: isGeneratingSummary || bridge_summary === displayValue,
+            textareaClassName: `textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-32 resize-y focus:border-primary caret-base-content p-2 ${
+                showValidationError && isEmpty ? 'border-red-500 focus:border-red-500' : ''
+            }`
+        };
+    }, [showValidationError, displayValue, isGeneratingSummary, bridge_summary]);
 
     return (
         <div className="space-y-4">
@@ -80,18 +170,15 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
             )}
             
             {errorMessage && <span className="text-red-500 text-sm block">{errorMessage}</span>}
-            {showValidationError && (!summary || summary.trim() === "") && (
+            {validationProps.hasValidationError && (
                 <span className="text-red-500 text-sm block">Summary is required before publishing</span>
             )}
             
             <div className="space-y-2">
-                <textarea
-                    ref={textareaRef}
-                    value={summary}
-                    onChange={(e) => setSummary(e.target.value)}
-                    className={`textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-32 resize-y focus:border-primary caret-base-content p-2 ${
-                        showValidationError && (!summary || summary.trim() === "") ? 'border-red-500 focus:border-red-500' : ''
-                    }`}
+                <OptimizedTextarea
+                    value={displayValue}
+                    onChange={handleTextareaChange}
+                    className={validationProps.textareaClassName}
                     placeholder="Enter agent summary..."
                     disabled={isGeneratingSummary}
                 />
@@ -99,7 +186,7 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
                     <button 
                         className="btn btn-primary btn-sm"
                         onClick={handleSaveSummary}
-                        disabled={isGeneratingSummary || bridge_summary === summary|| !isEditor}
+                        disabled={validationProps.isDisabled|| !isEditor}
                     >
                         Save
                     </button>
@@ -107,7 +194,9 @@ export const AgentSummaryContent = ({ params, autoGenerateSummary = false, setAu
             </div>
         </div>
     );
-};
+});
+
+AgentSummaryContent.displayName = 'AgentSummaryContent';
 
 // Original Modal Component
 const PromptSummaryModal = ({ modalType, params, autoGenerateSummary = false, setAutoGenerateSummary = () => {} }) => {
