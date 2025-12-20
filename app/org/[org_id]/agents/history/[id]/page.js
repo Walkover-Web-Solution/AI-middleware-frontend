@@ -109,21 +109,21 @@ function Page({params, searchParams }) {
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
           const messageId = resolvedSearchParams?.message_id;
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&start=${startDate}&end=${endDate}${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&start=${startDate}&end=${endDate}${messageId ? `&message_id=${messageId}` : ''}&type=${resolvedSearchParams.type}`, undefined, { shallow: true });
         }
       }
       else if (!resolvedSearchParams?.thread_id && result?.length > 0) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
           const messageId = resolvedSearchParams?.message_id;
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&start=${startDate}&end=${endDate}${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&start=${startDate}&end=${endDate}${messageId ? `&message_id=${messageId}` : ''}&type=${resolvedSearchParams.type}`, undefined, { shallow: true });
         }
       }
       if(isErrorTrue) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
           const messageId = resolvedSearchParams?.message_id;
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true${messageId ? `&message_id=${messageId}` : ''}&type=${resolvedSearchParams.type}`, undefined, { shallow: true });
         }
       }
       setLoading(false);
@@ -162,7 +162,7 @@ function Page({params, searchParams }) {
         const end = search.get("end");
         const messageId = search.get("message_id");
         const encodedThreadId = encodeURIComponent(thread_id.replace(/&/g, "%26"));
-        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&start=${start}&end=${end}${messageId ? `&message_id=${messageId}` : ''}`, undefined, { shallow: true });
+        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&start=${start}&end=${end}${messageId ? `&message_id=${messageId}` : ''}&type=${resolvedSearchParams.type}`, undefined, { shallow: true });
       }
     },
     [pathName, resolvedParams.id, resolvedSearchParams.version, resolvedSearchParams?.start, resolvedSearchParams?.end]

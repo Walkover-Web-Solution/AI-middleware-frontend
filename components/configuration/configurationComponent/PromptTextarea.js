@@ -17,7 +17,8 @@ const PromptTextarea = memo(({
   className = "",
   placeholder = "",
   isPublished = false,
-    isEditor = true
+  isEditor = true,
+  onSave
 }) => {
   const isComposingRef = useRef(false);
   const lastExternalValueRef = useRef(initialValue);
@@ -95,6 +96,10 @@ const PromptTextarea = memo(({
     onKeyDown?.(e);
   }, [onKeyDown]);
 
+  const handleSave = useCallback(() => {
+    onSave?.();
+  }, [onSave]);
+
   return (
     <div
       ref={wrapperRef}
@@ -118,6 +123,7 @@ const PromptTextarea = memo(({
           caret-base-content outline-none overflow-auto p-2
           ${className}
         `}
+        onBlur={handleSave}
         onChange={handleChange}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}

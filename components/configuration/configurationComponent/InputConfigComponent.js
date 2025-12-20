@@ -26,15 +26,15 @@ const InputConfigComponent = memo(({
     isEditor
 }) => {
     // Optimized Redux selector with memoization and shallow comparison
-    const { prompt: reduxPrompt } = usePromptSelector(params, searchParams);
+    const { prompt: reduxPrompt, oldContent } = usePromptSelector(params, searchParams);
     // Refs for zero-render typing experience
     const debounceTimerRef = useRef(null);
-    const oldContentRef = useRef(reduxPrompt);
+    const oldContentRef = useRef(oldContent );
     const hasUnsavedChangesRef = useRef(false);
     const textareaRef = useRef(null);
     // Update refs when redux prompt changes (external updates)
     if (oldContentRef.current !== reduxPrompt) {
-        oldContentRef.current = reduxPrompt;
+        oldContentRef.current = oldContent || reduxPrompt;
         hasUnsavedChangesRef.current = false;
     }
     // Zero-render prompt change handler using refs only
@@ -82,8 +82,15 @@ const InputConfigComponent = memo(({
 
     // Memoized handlers to prevent unnecessary re-renders
     const handleOpenDiffModal = useCallback(() => {
+        // Get the current value from the textarea before opening the modal
+        const currentValue = textareaRef.current?.value || '';
+        // Update the newContent in promptState
+        setPromptState(prev => ({
+            ...prev,
+            newContent: currentValue
+        }));
         openModal(MODAL_TYPE?.DIFF_PROMPT);
-    }, []);
+    }, [setPromptState]);
 
     const handleOpenPromptHelper = useCallback(() => {
         if (!uiState.isPromptHelperOpen && window.innerWidth > 710) {
@@ -146,12 +153,13 @@ const InputConfigComponent = memo(({
                     onKeyDown={handleKeyDown}
                     isPublished={isPublished}
                     isEditor={isEditor}
+                    onSave={handleSavePrompt}
                 />
                 
                 <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt} isEditor={isEditor}/>
             </div>
 
-            <Diff_Modal oldContent={oldContentRef.current} newContent={promptState.newContent} />
+            <Diff_Modal oldContent={oldContentRef.current} newContent={textareaRef.current?.value || reduxPrompt} />
             <PromptSummaryModal modalType={MODAL_TYPE.PROMPT_SUMMARY} params={params} searchParams={searchParams} />
         </div>
     );

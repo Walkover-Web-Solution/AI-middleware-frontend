@@ -1,6 +1,6 @@
 import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
 import { toast } from "react-toastify";
-import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, setSavingStatus, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -194,16 +194,43 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
       toast.error("You cannot update published data");
       return;
     }
+    
+    // Show saving indication in navbar
+    dispatch(setSavingStatus({ status: 'saving' }));
+    
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
     const updatedVersion = data?.agent;
+    
     if (data?.success && updatedVersion) {
       dispatch(updateBridgeVersionReducer({ bridges: updatedVersion, functionData: dataToSend?.functionData || null }));
+      // Update status to show success
+      dispatch(setSavingStatus({ status: 'saved' }));
+      
+      // Clear the status after 3 seconds
+      setTimeout(() => {
+        dispatch(setSavingStatus({ status: null }));
+      }, 3000);
+    } else {
+      // Update status to show warning
+      dispatch(setSavingStatus({ status: 'warning' }));
+      
+      // Clear the status after 3 seconds
+      setTimeout(() => {
+        dispatch(setSavingStatus({ status: null }));
+      }, 3000);
     }
   } catch (error) {
     console.error(error);
     dispatch(isError());
+    // Show error status
+    dispatch(setSavingStatus({ status: 'failed' }));
+    
+    // Clear the status after 3 seconds
+    setTimeout(() => {
+      dispatch(setSavingStatus({ status: null }));
+    }, 3000);
   }
 };
 

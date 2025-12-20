@@ -5,7 +5,7 @@ import ChatTextInput from "./ChatTextInput";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/AssistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
-import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot, AlertTriangle } from "lucide-react";
+import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, AlertTriangle } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
@@ -58,12 +58,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [params, searchParams, publishedVersionId]);
 
   // Redux selectors for chat state
-  const { messages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({
+  const { messages, finishReasonDescription } = useCustomSelector((state) => ({
     messages: state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
-
+ 
   // Initialize channel and RT layer
   useEffect(() => {
     if (channelIdentifier) {
@@ -207,19 +206,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   };
 
   // Opens the embedded chatbot panel and sends any necessary data beforehand
-  const handleOpenChatbot = () => {
-    // Send data first (if host page exposes the bridge functions)
-    if (typeof window !== 'undefined' && typeof window.sendDataToChatbot === 'function') {
-      window.sendDataToChatbot({ parentId: 'parentChatbot' });
-    }
-
-    // Then open after a short delay to ensure data is processed
-    setTimeout(() => {
-      if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
-        window.openChatbot();
-      }
-    }, 200);
-  };
+ 
 
   const renderMessageAttachments = (message) => {
     const hasImages = Array.isArray(message?.image_urls) && message.image_urls.length > 0;
@@ -343,15 +330,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Add Test Case</button>
             </div>
           )}
-          {!isOrchestralModel && !isEmbedUser && bridgeType === 'chatbot' && <button
-            className="btn btn-sm btn-primary"
-            onClick={handleOpenChatbot}
-            title="Open Chatbot"
-          >
-            <div className="tooltip tooltip-left" data-tip="Open Chatbot">
-              <Bot size={14} />
-            </div>
-          </button>}
           {/* Test Cases Toggle Button */}
         </div>
 
