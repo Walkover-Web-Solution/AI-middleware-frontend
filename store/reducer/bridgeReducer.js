@@ -336,6 +336,8 @@ export const {
   setIsFocusReducer,
   fetchSingleBridgeReducer,
   fetchSingleBridgeVersionReducer,
+  fetchAllBridgeReducer,
+  fetchAllFunctionsReducer,
   createBridgeVersionReducer,
   deleteBridgeVersionReducer,
   createBridgeReducer,
