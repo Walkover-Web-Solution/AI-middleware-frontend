@@ -33,14 +33,14 @@ const PromptHeader = memo(({
                 </div>
                 
                 <div className="flex items-center gap-2">
-                    <button
+                    {/* <button
                         className={`btn btn-xs ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
                         onClick={handleSave}
                         disabled={disabled || !hasUnsavedChanges}
                         title="Save Prompt"
                     >
                         Save
-                    </button>
+                    </button> */}
                     <button
                         className="btn btn-xs"
                         onClick={handleOpenDiff}
@@ -68,14 +68,20 @@ const PromptHeader = memo(({
             </div>
 
             <div className="label cursor-pointer gap-1 sm:gap-2">
-                <button
+                {/* <button
                     className={`btn btn-xs ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
                     onClick={handleSave}
                     disabled={disabled || !hasUnsavedChanges}
                 >
                     Save
-                </button>
-              
+                </button> */}
+                  <button
+                        className="btn btn-xs"
+                        onClick={handleOpenDiff}
+                        title="View Diff"
+                    >
+                        Diff
+                    </button>
                     {!isPromptHelperOpen ? (
                     <button
                         className="btn btn-xs btn-primary"
