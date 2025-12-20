@@ -315,15 +315,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 }
               }
             }));
-          }
-          if (e?.data?.metadata?.createFrom == "preFunction" ) {
-            dispatch(updateApiAction(path[5], {
-              pre_tools: preTools[0],
-              version_id: resolvedSearchParams?.get('version'),
-              status: "0"
-            }));
-          }
-          if (e?.data?.metadata?.createFrom == "Function" ) {
+            dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+          }    
             if(preTools.includes(selectedVersionData?._id)){
               dispatch(updateApiAction(path[5], {
                 pre_tools: selectedVersionData?._id,
@@ -331,8 +324,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 version_id: resolvedSearchParams?.get('version')
               }))
             }
-            dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
-          }
+          
         }
       }
 
