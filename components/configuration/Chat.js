@@ -5,7 +5,7 @@ import ChatTextInput from "./ChatTextInput";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/AssistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
-import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot, AlertTriangle } from "lucide-react";
+import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, AlertTriangle } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
@@ -58,9 +58,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [params, searchParams, publishedVersionId]);
 
   // Redux selectors for chat state
-  const { messages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({
+  const { messages, finishReasonDescription } = useCustomSelector((state) => ({
     messages: state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
  
