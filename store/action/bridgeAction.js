@@ -155,7 +155,7 @@ export const getAllFunctions = () => async (dispatch) => {
 export const updateFuntionApiAction = ({ function_id, dataToSend }) => async (dispatch) => {
   try {
     const response = await updateFunctionApi({ function_id, dataToSend });
-    dispatch(updateFunctionReducer({ org_id: response.data.data.org_id, data: response.data.data }))
+    dispatch(updateFunctionReducer({ org_id: response.data.org_id, data: response.data }))
   } catch (error) {
     dispatch(isError())
     console.error(error);
