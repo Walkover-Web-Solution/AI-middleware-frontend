@@ -46,10 +46,14 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
         }
         if (selectedApiKeyId === 'GPT5_NANO_DEFAULT_KEY') {
+            console.log(bridge)
+            const service = bridge?.service;
+            const updated = { ...bridgeApikey_object_id };
+            delete updated[service]; // ✅ remove only OpenAI (or current service)
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
-                dataToSend: { apikey_object_id: {} } // clear key
+                dataToSend: { apikey_object_id: updated }
             }));
             return;
         }
