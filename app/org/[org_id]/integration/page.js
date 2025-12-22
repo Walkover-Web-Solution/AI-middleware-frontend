@@ -1,6 +1,5 @@
 'use client';
 import CustomTable from "@/components/customTable/CustomTable";
-import { truncate } from "@/components/historyPageComponents/AssistFile";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { MODAL_TYPE } from "@/utils/enums";
@@ -55,7 +54,7 @@ const Page = ({ params }) => {
     name: (
       <div className="flex gap-2">
         <div className="tooltip" data-tip={item.name}>
-          {truncate(item.name, 50)}
+          {item.name}
         </div>
       </div>
     ),
