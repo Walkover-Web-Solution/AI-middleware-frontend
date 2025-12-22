@@ -331,7 +331,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 version_id: resolvedSearchParams?.get('version')
               }))
           }
-            // dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+          dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
 
         }
       }
