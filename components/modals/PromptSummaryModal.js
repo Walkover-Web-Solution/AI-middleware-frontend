@@ -22,36 +22,37 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
     }, []);
 
     useEffect(() => {
-        if (contentRef.current && contentRef.current.textContent !== value) {
-            contentRef.current.textContent = value;
-        }
-    }, [value]);
-    
-    return (
-       <div ref={divRef}>
-         <div
-            ref={contentRef}
-            contentEditable={!disabled}
-            onInput={handleInput}
-            onPaste={handlePaste}
-            className={className}
-            data-placeholder={placeholder}
-            suppressContentEditableWarning={true}
-            style={{
-                minHeight: '8rem',
-                maxWidth: '100%',
-                width: '100%',
-                whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word',
-                wordBreak: 'break-all',
-                overflowWrap: 'break-word',
-                overflow: 'hidden',
-                overflowX: 'hidden',
-                boxSizing: 'border-box'
-            }}
-        />
-       </div>
-    );
+    if (contentRef.current && contentRef.current.value !== value) {
+      contentRef.current.value = value;
+    }
+  }, [value]);
+
+
+  return (
+    <div ref={divRef}>
+      <textarea
+        ref={contentRef}
+        disabled={disabled}
+        onInput={handleInput}
+        onPaste={handlePaste}
+        className={className}
+        placeholder={placeholder}
+        style={{
+          minHeight: '8rem',
+          maxWidth: '100%',
+          width: '100%',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          wordBreak: 'break-all',
+          overflowWrap: 'break-word',
+          overflow: 'hidden',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          boxSizing: 'border-box'
+        }}
+      />
+    </div>
+  );
 });
 
 OptimizedTextarea.displayName = 'OptimizedTextarea';
