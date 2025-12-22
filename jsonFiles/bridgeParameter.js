@@ -48,7 +48,6 @@ export const KEYS_TO_COMPARE = [
     "gpt_memory",
     "function_ids",
     "tool_call_count",
-    "version_description",
     "IsstarterQuestionEnable",
     "actions",
     "apikey",
@@ -58,6 +57,10 @@ export const KEYS_TO_COMPARE = [
     "guardrails",
     'gpt_memory_context',
     'fall_back'
+  ]
+
+export const CONFIGURATION_KEYS_TO_EXCLUDE = [
+    "system_prompt_version_id"
   ]
 
 export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {

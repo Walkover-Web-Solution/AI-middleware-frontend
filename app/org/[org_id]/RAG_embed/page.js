@@ -8,9 +8,10 @@ import { useCustomSelector } from '@/customHooks/customSelector'
 
 const page = ({ params }) => {
   const resolvedParams = use(params)
-const {descriptions} = useCustomSelector((state)=>{
+const {descriptions , linksData} = useCustomSelector((state)=>{
   return {
     descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+    linksData: state.flowDataReducer.flowData.linksData || [],
   }
 })
   return (
@@ -18,7 +19,7 @@ const {descriptions} = useCustomSelector((state)=>{
       <MainLayout>
         <PageHeader
           title=" RAG Embed Integration"
-          docLink="https://gtwy.ai/blogs/features/rag-as-embed"
+          docLink={linksData?.find(link => link.title === 'RAG as Embed')?.blog_link}
           description={descriptions?.['RAG Embed'] || "Embedded RAG allows you to seamlessly integrate the full RAG AI interface directly into any product or website."}
         />
       </MainLayout>

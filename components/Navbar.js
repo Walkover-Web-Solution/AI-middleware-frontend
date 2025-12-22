@@ -41,7 +41,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, savingStatus } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, savingStatus , publishedVersionId } = useCustomSelector(state => {
     return {
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -56,6 +56,7 @@ const Navbar = ({ isEmbedUser, params }) => {
     hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
+    publishedVersionId: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || null,
     savingStatus: state?.bridgeReducer?.savingStatus || { status: null, timestamp: null },
   }});
   // Define tabs based on user type
@@ -572,7 +573,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                           <span>Configure and Publish</span>
                         </button>
                       </li>
-                      {isDrafted && (
+                      {isDrafted && publishedVersionId != null &&(
                         <li>
                           <button
                             onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}

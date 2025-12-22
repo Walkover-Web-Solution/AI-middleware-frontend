@@ -20,9 +20,10 @@ export const runtime = 'edge';
 const Page = ({ params }) => {
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const { knowledgeBaseData, descriptions } = useCustomSelector((state) => ({
+  const { knowledgeBaseData, descriptions, linksData } = useCustomSelector((state) => ({
     knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[resolvedParams?.org_id] || [],
     descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions || {},
+    linksData: state.flowDataReducer.flowData.linksData || [],
   }));
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData);
@@ -99,7 +100,7 @@ const Page = ({ params }) => {
             <PageHeader
               title="Knowledge Base"
               description={descriptions?.['Knowledge Base'] || "A knowledge Base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}
-              docLink="https://gtwy.ai/blogs/features/knowledgebase"
+              docLink={linksData?.find(link => link.title === 'Knowledge Base')?.blog_link}
             />
 
           </div>
