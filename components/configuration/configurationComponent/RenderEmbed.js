@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { SettingsIcon, TrashIcon, RefreshIcon, SquareFunctionIcon } from '@/components/Icons';
-import { truncate } from '@/components/historyPageComponents/AssistFile';
 import useExpandableList from '@/customHooks/useExpandableList';
 
 const RenderEmbed = ({
@@ -63,12 +62,12 @@ const RenderEmbed = ({
                 {title?.length > 24 ? (
                   <div className="tooltip tooltip-top min-w-0" data-tip={title}>
                     <span className="min-w-0 text-sm truncate">
-                      <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                      <span className="truncate text-sm font-normal block w-[300px]">{title}</span>
                     </span>
                   </div>
                 ) : (
                   <span className="min-w-0 text-sm truncate">
-                    <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                    <span className="truncate text-sm font-normal block w-[300px]">{title}</span>
                   </span>
                 )}
               </div>
