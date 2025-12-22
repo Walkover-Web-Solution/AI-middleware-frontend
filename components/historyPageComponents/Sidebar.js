@@ -44,7 +44,7 @@ const Sidebar = memo(({
 
 
 
-  const [selectedThreadIds, setSelectedThreadIds] = useState([]);
+  const [selectedThreadIds, _setSelectedThreadIds] = useState([]);
   const [expandedThreads, setExpandedThreads] = useState([]);
   const [loadingSubThreads, setLoadingSubThreads] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -264,11 +264,6 @@ const Sidebar = memo(({
   };
 
 
-  const handleThreadIds = (id) => {
-    setSelectedThreadIds((prevIds) =>
-      prevIds?.includes(id) ? prevIds?.filter((threadId) => threadId !== id) : [...prevIds, id]
-    );
-  };
 
   const handleToggleThread = async (threadId) => {
     const isExpanded = expandedThreads?.includes(threadId);
