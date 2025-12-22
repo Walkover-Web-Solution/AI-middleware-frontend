@@ -93,7 +93,6 @@ export default function FormSection({ params, chatbotId = null }) {
         () => chatbotId || params?.chatbot_id || chatbots[0]?._id,
         [chatbotId, params?.chatbot_id, chatbots]
     );
-    const [isRefreshing, setIsRefreshing] = useState(false);
     const iframeRef = useRef(null);
     const [formData, setFormData] = useState({
         buttonName: '',

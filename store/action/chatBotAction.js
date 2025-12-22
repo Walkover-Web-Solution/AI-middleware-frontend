@@ -6,7 +6,6 @@ import { updateBridgeActionReducer, updateBridgeReducer } from "../reducer/bridg
 export const getAllChatBotAction = (orgId) => async (dispatch) => {
     try {
         const response = await getAllChatBot(orgId);
-        debugger
         const chatbot_token=response?.data?.chatbot_token
         dispatch(getAllChatBotReducer({ chatbots: response.data.result.chatbots, orgId, chatbot_token }));
         return { chatbot_token }
