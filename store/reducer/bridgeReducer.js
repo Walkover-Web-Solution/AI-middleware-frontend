@@ -10,7 +10,14 @@ const initialState = {
   savingStatus: {
     status: null, // 'saving', 'saved', 'failed'
     timestamp: null
-  }
+  },
+  usageMetrics: {
+    data: [],
+    filters: null,
+    // Separate flag to track if filter is user-applied
+    filterActive: false,
+    loading: false // Track loading state for metrics API
+  },
 };
 
 export const bridgeReducer = createSlice({
@@ -297,6 +304,13 @@ export const bridgeReducer = createSlice({
       const { tools } = action.payload;
       state.prebuiltTools = tools;
     },
+    setBridgeUsageMetricsReducer: (state, action) => {
+      const { data = [], filters = null, filterActive = false, loading = false } = action.payload;
+      state.usageMetrics = { data, filters, filterActive, loading };
+    },
+    clearBridgeUsageMetricsReducer: (state) => {
+      state.usageMetrics = { data: [], filters: null, filterActive: false, loading: false };
+    },
     
     // Clear previous bridge and version data before fetching new data
     clearPreviousBridgeDataReducer: (state, action) => {
@@ -357,7 +371,9 @@ export const {
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
   setThreadIdForVersionReducer,
-  clearPreviousBridgeDataReducer
+  clearPreviousBridgeDataReducer,
+  setBridgeUsageMetricsReducer,
+  clearBridgeUsageMetricsReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
