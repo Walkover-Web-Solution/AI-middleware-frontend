@@ -56,7 +56,7 @@ export const getChatBotDetails = async (botId) => {
 
 export const updateChatBotConfig = async (botId, dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/chatbot/${botId}/updateconfig`, dataToSend);
+    const response = await axios.post(`${URL}/api/chatbot/${botId}/updateconfig`, dataToSend);
     return response;
   } catch (error) {
     console.error(error);
@@ -66,7 +66,11 @@ export const updateChatBotConfig = async (botId, dataToSend) => {
 
 export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) => {
   try {
-    const response = await axios.put(`${URL}/api/chatbot/${orgId}/${botId}/bridge/${bridgeId}?type=${type}`);
+    const response = await axios.put(`${URL}/api/chatbot/agent`, {
+      botId,
+      agentId: bridgeId,
+      action: type
+    });
     return response;
   } catch (error) {
     console.error(error);
