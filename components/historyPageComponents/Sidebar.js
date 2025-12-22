@@ -85,7 +85,7 @@ const Sidebar = memo(({
           const thread_id = encodeURIComponent(searchParams?.thread_id?.replace(/&/g, '%26'));
           const firstSubThreadIdEncoded = encodeURIComponent(subThreads[0]?.sub_thread_id?.replace(/&/g, '%26'));
           router.push(
-            `${pathName}?version=${searchParams?.version}&thread_id=${thread_id}&subThread_id=${firstSubThreadIdEncoded}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
+            `${pathName}?version=${searchParams?.version}&thread_id=${thread_id}&subThread_id=${firstSubThreadIdEncoded}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}&type=${searchParams?.type || ''}`,
             undefined,
             { shallow: true }
           );
@@ -117,7 +117,7 @@ const Sidebar = memo(({
         const start = searchParams?.start;
         const end = searchParams?.end;
         router.push(
-          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
+          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}&type=${searchParams?.type || ''}`,
           undefined,
           { shallow: true }
         );
@@ -126,7 +126,7 @@ const Sidebar = memo(({
     else {
       if (searchParams?.thread_id) {
         router.push(
-          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start || ''}&end=${searchParams.end || ''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`,
+          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start || ''}&end=${searchParams.end || ''}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}&type=${searchParams?.type || ''}`,
           undefined,
           { shallow: true }
         );
@@ -196,6 +196,7 @@ const Sidebar = memo(({
       if (currentMessageId) {
         searchUrl.searchParams.set('message_id', currentMessageId);
       }
+      if (searchParams?.type) searchUrl.searchParams.set('type', searchParams.type);
 
       router.push(searchUrl.pathname + searchUrl.search, undefined, { shallow: true });
 
@@ -213,6 +214,7 @@ const Sidebar = memo(({
         if (currentMessageId) {
           resultUrl.searchParams.set('message_id', currentMessageId);
         }
+        if (searchParams?.type) resultUrl.searchParams.set('type', searchParams.type);
 
         router.push(resultUrl.pathname + resultUrl.search, undefined, { shallow: true });
       } else {
@@ -255,6 +257,7 @@ const Sidebar = memo(({
         clearUrl.searchParams.set('subThread_id', subThreadId);
         if (searchParams?.start) clearUrl.searchParams.set('start', searchParams.start);
         if (searchParams?.end) clearUrl.searchParams.set('end', searchParams.end);
+        if (searchParams?.type) clearUrl.searchParams.set('type', searchParams.type);
 
         router.push(clearUrl.pathname + clearUrl.search, undefined, { shallow: true });
       }
@@ -315,7 +318,7 @@ const Sidebar = memo(({
     setExpandedThreads([threadId]);
     const start = searchParams?.start;
     const end = searchParams?.end;
-    router.push(`${pathName}?version=${searchParams?.version}&thread_id=${encodeURIComponent(threadId ? threadId : searchParams?.thread_id.replace(/&/g, '%26'))}&subThread_id=${encodeURIComponent(subThreadId.replace(/&/g, '%26'))}&start=${start}&end=${end}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}`, undefined, { shallow: true });
+    router.push(`${pathName}?version=${searchParams?.version}&thread_id=${encodeURIComponent(threadId ? threadId : searchParams?.thread_id.replace(/&/g, '%26'))}&subThread_id=${encodeURIComponent(subThreadId.replace(/&/g, '%26'))}&start=${start}&end=${end}${searchParams?.message_id ? `&message_id=${searchParams.message_id}` : ''}&type=${searchParams?.type || ''}`, undefined, { shallow: true });
   };
 
   const handleFilterChange = async user_feedback => {

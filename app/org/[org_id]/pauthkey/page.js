@@ -27,13 +27,14 @@ function Page({ params }) {
 
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, descriptions, orgRole } = useCustomSelector((state) => {
+  const { authData, isFirstPauthCreation, descriptions, orgRole , linksData } = useCustomSelector((state) => {
     const user = state.userDetailsReducer.userDetails || [];
     return {
       authData: state?.authDataReducer?.authData || [],
       isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
       descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
       orgRole: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]?.role_name,
+      linksData: state.flowDataReducer.flowData.linksData || [],
     };
   });
  
@@ -163,7 +164,7 @@ function Page({ params }) {
               <PageHeader
                 title="Auth Key"
                 description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
-                docLink="https://gtwy.ai/blogs/features/pauthkey"
+                docLink={linksData?.find(link => link.title === 'Auth Key')?.blog_link}
               />
 
             </div>

@@ -45,7 +45,18 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
             const updated = { ...bridgeApikey_object_id, [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
         }
-    }, [params.id, searchParams?.version, bridge?.service, bridgeApikey_object_id]);
+        if (selectedApiKeyId === 'GPT5_NANO_DEFAULT_KEY' && bridge?.configuration?.model === 'gpt-5-nano' && bridgeType === 'chatbot') {
+            const service = bridge?.service;
+            const updated = { ...bridgeApikey_object_id };
+            delete updated[service]; // Remove only the current service's key
+            dispatch(updateBridgeVersionAction({
+                bridgeId: params?.id,
+                versionId: searchParams?.version,
+                dataToSend: { apikey_object_id: updated }
+            }));
+            return;
+        }
+    }, [params.id, searchParams?.version, bridge?.service, bridge, bridgeType, bridgeApikey_object_id]);
 
     // Determine the currently selected value
     const selectedValue = useMemo(() => {
@@ -87,7 +98,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
     return (
         <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
             <Dropdown
-            disabled={isReadOnly}
+                disabled={isReadOnly}
                 options={dropdownOptions}
                 value={selectedValue || ''}
                 onChange={(val) => handleDropdownChange(val)}

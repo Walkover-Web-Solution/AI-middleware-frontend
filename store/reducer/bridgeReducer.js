@@ -7,6 +7,10 @@ const initialState = {
   loading: false,
   error: false,
   isFocus: false,
+  savingStatus: {
+    status: null, // 'saving', 'saved', 'failed'
+    timestamp: null
+  }
 };
 
 export const bridgeReducer = createSlice({
@@ -20,6 +24,12 @@ export const bridgeReducer = createSlice({
     isError: (state) => {
       state.loading = false;
       state.error = true;
+    },
+    setSavingStatus: (state, action) => {
+      state.savingStatus = {
+        status: action.payload.status,
+        timestamp: Date.now()
+      };
     },
     addorRemoveResponseIdInBridgeReducer: (state, action) => {
       const { response } = action.payload;
@@ -321,10 +331,13 @@ export const bridgeReducer = createSlice({
 export const {
   isPending,
   isError,
-  fetchAllBridgeReducer,
-  fetchAllFunctionsReducer,
+  setSavingStatus,
+  addorRemoveResponseIdInBridgeReducer,
+  setIsFocusReducer,
   fetchSingleBridgeReducer,
   fetchSingleBridgeVersionReducer,
+  fetchAllBridgeReducer,
+  fetchAllFunctionsReducer,
   createBridgeVersionReducer,
   deleteBridgeVersionReducer,
   createBridgeReducer,
@@ -344,7 +357,6 @@ export const {
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
   setThreadIdForVersionReducer,
-  setIsFocusReducer,
   clearPreviousBridgeDataReducer
 } = bridgeReducer.actions;
 

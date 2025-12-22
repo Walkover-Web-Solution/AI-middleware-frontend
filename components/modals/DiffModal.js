@@ -11,7 +11,7 @@ const Diff_Modal = ({oldContent,newContent}) => {
       <div className='modal-box max-w-[80%]' >
         <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold">
-              Compare Original and Optimized Prompt
+              Compare Published Prompt and Current  Prompt
             </h3>
             <button
                 onClick={()=>closeModal(MODAL_TYPE.DIFF_PROMPT)}

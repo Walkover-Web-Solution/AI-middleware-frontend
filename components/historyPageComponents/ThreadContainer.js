@@ -294,8 +294,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
           params.set('subThread_id', firstThreadId);
           if (version) params.set('version', version);
           if (error) params.set('error', String(error));
+          if (search?.type) params.set('type', search.type);
           params.set('navigated', 'true');
-          router.push(`${pathName}?${params.toString()}`, { scroll: false });
+          router.push(`${pathName}?${params.toString()}`, undefined, { scroll: false });
           setLoadingData(false);
           return;
         }

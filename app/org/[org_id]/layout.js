@@ -153,9 +153,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     updateUserMeta();
   }, []);
 
-  if (currrentOrgDetail?.role_name !== "Viewer") {
-    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
-  }
+
+    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser,currrentOrgDetail?.role_name==="Viewer");
+  
   useRtLayerEventHandler();
 
 
