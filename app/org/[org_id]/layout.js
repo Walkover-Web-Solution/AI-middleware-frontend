@@ -291,7 +291,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     }
   }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
   async function handleMessage(e) {
-    console.log("Received message:", e?.data);
     if (e.data?.metadata?.type !== 'tool') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
