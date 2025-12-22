@@ -44,12 +44,11 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     
     // Determine if user is allowed to edit based on role and agent access
     const isAdminOrOwner = currentOrgRole === "Admin" || currentOrgRole === "Owner";
-    const isCreator = currentOrgRole === "Creator";
-    const isEditorRole = currentOrgRole === "Editor";
-    const hasAgentAccess = agentUsers.length === 0 || agentUsers.some(user => user.id === currentUser?.id);
-    
-    // Admin/Owner can always edit, Creator can always edit, Editor can edit only if they have access to the agent
-    const canEdit = isAdminOrOwner || isCreator || (isEditorRole && hasAgentAccess);
+    // Updated canEdit condition
+    const canEdit = ((currentOrgRole === "Editor" && (agentUsers?.length === 0 || !agentUsers || (agentUsers?.length > 0 && agentUsers?.some(user => user.id === currentUser?.id))))||
+                  ((currentOrgRole === "Viewer") && (agentUsers?.some(user => user === currentUser?.id))) ||
+                  currentOrgRole === "Creator") ||
+                  isAdminOrOwner;
     
     return {
       bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
@@ -62,7 +61,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       isEditor: canEdit,
     };
   });
-  
+
   // Flag to determine if the UI should be in read-only mode
   const isReadOnly = !isEditor;
   // Memoized form data initialization

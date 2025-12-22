@@ -41,7 +41,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName , publishedVersionId } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, savingStatus , publishedVersionId } = useCustomSelector(state => {
     return {
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -57,6 +57,7 @@ const Navbar = ({ isEmbedUser, params }) => {
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
     publishedVersionId: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || null,
+    savingStatus: state?.bridgeReducer?.savingStatus || { status: null, timestamp: null },
   }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
@@ -444,7 +445,39 @@ const Navbar = ({ isEmbedUser, params }) => {
                 </div>
               )}
               
-              {/* Status Indicator */}
+              {/* Saving Status Indicator */}
+              {savingStatus?.status && (
+                <div className="flex-shrink-0 ml-2 mr-2">
+                  <div className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 ${savingStatus.status === 'saving' ? 'bg-blue-100 text-blue-800' : savingStatus.status === 'saved' ? 'bg-green-100 text-green-800' : savingStatus.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {savingStatus.status === 'saving' && (
+                      <>
+                        <div className="loading loading-spinner loading-xs"></div>
+                        <span>Saving</span>
+                      </>
+                    )}
+                    {savingStatus.status === 'saved' && (
+                      <>
+                        <BookCheck size={14} />
+                        <span>Saved</span>
+                      </>
+                    )}
+                    {savingStatus.status === 'failed' && (
+                      <>
+                        <ClipboardX size={14} />
+                        <span>Failed</span>
+                      </>
+                    )}
+                    {savingStatus.status === 'warning' && (
+                      <>
+                        <Clock size={14} />
+                        <span>Warning</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Bridge Status Indicator */}
               {bridgeStatus !== BRIDGE_STATUS.ACTIVE && (
                 <div className="flex-shrink-0">
                   <StatusIndicator status={bridgeStatus} />

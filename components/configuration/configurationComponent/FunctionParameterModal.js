@@ -38,7 +38,7 @@ const ParameterCard = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [editingName, setEditingName] = useState(paramKey);
   const [editingEnum, setEditingEnum] = useState(JSON.stringify(param.enum || []));
-  
+  const isReadOnly = isPublished || !isEditor;
   // Update editingName when paramKey changes (after successful rename)
   useEffect(() => {
     setEditingName(paramKey);
