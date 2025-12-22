@@ -423,7 +423,7 @@ export const fetchBridgeUsageMetricsAction = ({ start_date, end_date, filterActi
 
 export const clearBridgeUsageMetricsAction = () => (dispatch) => {
   dispatch(clearBridgeUsageMetricsReducer());
-  dispatch(fetchBridgeUsageMetricsAction({}));
+  dispatch(fetchBridgeUsageMetricsAction({start_date: null, end_date: null, filterActive: true}));
 };
 
 export const publishBulkVersionAction = (version_ids) => async (dispatch) => {

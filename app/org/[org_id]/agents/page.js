@@ -419,15 +419,25 @@ function Home({ params, searchParams, isEmbedUser }) {
     });
   }, [processedBridges, bridgeTypeFilter]);
 
-  // Show all bridges by default, but filter when date range is applied
+  // Show all bridges but always prioritize metrics API agents
   const applyUsageFilter = (list) => {
     if (!Array.isArray(list)) return list;
-    // When filter is active, only show bridges from API response
-    if (isUsageFilterActive) {
-      return list.filter((item) => usageFilterIds.has(item._id));
-    }
-    // Otherwise show all bridges
-    return list;
+    
+    // Add hasMetrics property to each item
+    const listWithMetricsFlag = list.map(item => ({
+      ...item,
+      hasMetrics: usageFilterIds.has(item._id)
+    }));
+    
+    // Always prioritize bridges with metrics, regardless of filter status
+    return [...listWithMetricsFlag].sort((a, b) => {
+      // Put bridges with metrics first
+      if (a.hasMetrics && !b.hasMetrics) return -1;
+      if (!a.hasMetrics && b.hasMetrics) return 1;
+      
+      // If both have metrics or both don't have metrics, maintain original order
+      return 0;
+    });
   };
   
   // Simplified function to return metrics data for the table
@@ -492,9 +502,11 @@ function Home({ params, searchParams, isEmbedUser }) {
   };
 
   const loadInitialMetrics = async () => {
-      try {      
+      try {
         await dispatch(fetchBridgeUsageMetricsAction({
-          filterActive: false 
+          start_date: null,
+          end_date: null,
+          filterActive: true // Set to true to prioritize bridges with metrics
         }));
         
       } catch (error) {
@@ -529,8 +541,10 @@ function Home({ params, searchParams, isEmbedUser }) {
   const filteredDeletedBridges = filterBridges?.filter((item) => item.deletedAt);
   const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0 && !item.deletedAt);
   
+  // Apply usage filter to prioritize metrics API agents
   const usageFilteredUnArchived = applyUsageFilter(filteredUnArchivedBridges);
   const usageFilteredDeleted = applyUsageFilter(filteredDeletedBridges);
+  const usageFilteredArchived = applyUsageFilter(filteredArchivedBridges);
   
   
   useEffect(() => {
@@ -554,7 +568,7 @@ function Home({ params, searchParams, isEmbedUser }) {
     return Math.max(0, diffDays);
   };
 
-  const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
+  const ArchivedBridges = usageFilteredArchived.filter((item) => item.status === 0).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
     name: <div className="flex gap-3">
@@ -635,7 +649,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                 )}
               </div>
             </div>
-            <ModelBadge model={item.configuration?.model} />
+              <ModelBadge model={item.configuration?.model} />
           </div>
         </div>,
         actualName: item?.name || "",
@@ -715,7 +729,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                 )}
               </div>
             </div>
-            <ModelBadge model={item.configuration?.model} />
+              <ModelBadge model={item.configuration?.model} />
           </div>
         </div>,
         actualName: item?.name || "",
@@ -906,6 +920,9 @@ const handleUsageFilterDropdownClick = (e) => {
       </li>
       <li>
         <button onClick={() => applyPresetUsageFilter(15)}>Last 15 days</button>
+      </li>
+      <li>
+        <button onClick={() => applyPresetUsageFilter(30)}>Last 30 days</button>
       </li>
 
       <li className="mt-1 border-t border-base-200" />
