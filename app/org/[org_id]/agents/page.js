@@ -41,9 +41,9 @@ const PoweredByFooter = () => {
     <footer className="w-full py-4 border-t border-base-300">
       <div className="flex justify-center items-center gap-2  font-medium opacity-50 text-sm text-base-content/70">
         <span>Powered by</span>
-        <a 
-          href="https://gtwy.ai" 
-          target="_blank" 
+        <a
+          href="https://gtwy.ai"
+          target="_blank"
           rel="noopener noreferrer"
           className="font-semibold text-primary hover:text-primary-focus transition-colors"
         >
@@ -62,7 +62,7 @@ function Home({ params, searchParams, isEmbedUser }) {
   const resolvedSearchParams = use(searchParams);
   const dispatch = useDispatch();
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory, isAdminOrOwner, currentOrgRole, currentUser } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory, isAdminOrOwner, currentOrgRole, currentUser, linksData } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails;
     const orgRole = state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]?.role_name;
@@ -79,6 +79,7 @@ function Home({ params, searchParams, isEmbedUser }) {
       bridgeStatus: state.bridgeReducer.allBridgesMap,
       showHistory: state.appInfoReducer.embedUserDetails?.showHistory || false,
       isAdminOrOwner,
+      linksData: state.appInfoReducer.appInfo.linksData || [],
       currentUser: state.userDetailsReducer.userDetails,
       currentOrgRole: orgRole || "Viewer",
     };
@@ -583,7 +584,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                         <PageHeader
                           title={pageHeaderContent.title}
                           description={pageHeaderContent.description}
-                          docLink="https://gtwy.ai/blogs/features/bridge"
+                          docLink={linksData?.find(link => link.title === 'Agents')?.blog_link}
                           isEmbedUser={isEmbedUser}
                         />
 

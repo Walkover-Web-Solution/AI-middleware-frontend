@@ -67,7 +67,7 @@ const ConfigurationPage = ({
 
     const renderHelpSection = useMemo(() => () => {
         return (
-            <div className="z-very-low mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
+            <div className="mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
                 <div className="flex flex-row gap-6 mt-4 items-center">
                     {/* Speak to us */}
                     {!isEmbedUser && (
