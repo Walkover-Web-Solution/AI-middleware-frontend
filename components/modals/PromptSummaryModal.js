@@ -11,7 +11,7 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
     const contentRef = useRef(null);
     
     const handleInput = useCallback((e) => {
-        const newValue = e.target.textContent || '';
+        const newValue = e.target.value || '';
         onChange({ target: { value: newValue } });
     }, [onChange]);
 
