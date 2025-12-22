@@ -117,7 +117,8 @@ const PromptTextarea = memo(({
     >
       <textarea
         ref={textareaRef}
-        disabled={isPublished||!isEditor}
+        disabled={isPublished}
+        contentEditable={!isPublished}
         className={`
           w-full h-full min-h-full max-h-full resize-none bg-transparent border-none
           caret-base-content outline-none overflow-auto p-2

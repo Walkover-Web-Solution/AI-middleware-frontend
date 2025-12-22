@@ -573,7 +573,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                         if (container) {
                           const editor = container.querySelector('[contenteditable="true"]');
                           if (editor) {
-                            editor.innerText = value || "";
+                            editor.value = value || "";
                           }
                         }
                       }}
