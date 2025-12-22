@@ -215,3 +215,13 @@ export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30)
     throw new Error(error);
   }
 };
+
+export const fetchBridgeUsageMetricsApi = async ({ start_date, end_date }) => {
+  try {
+    const response = await axios.post(`${URL}/api/metrics/agent`, { start_date, end_date });
+    return response?.data;
+  } catch (error) {
+    console.error("Failed to fetch bridge usage metrics", error);
+    throw error?.response || error;
+  }
+};
