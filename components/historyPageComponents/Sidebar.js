@@ -1,17 +1,17 @@
 import { useCustomSelector } from "@/customHooks/customSelector.js";
-import { getHistoryAction, getSubThreadsAction, searchMessageHistoryAction, clearSearchAction } from "@/store/action/historyAction.js";
-import { clearSubThreadData, clearThreadData, setSearchQuery, setSelectedVersion } from "@/store/reducer/historyReducer.js";
+import { getHistoryAction, getSubThreadsAction } from "@/store/action/historyAction.js";
+import { clearSubThreadData, clearThreadData, setSelectedVersion } from "@/store/reducer/historyReducer.js";
 import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { formatDate, formatRelativeTime } from "@/utils/utility.js";
 import { ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
-import { useEffect, useState, memo, useCallback, useMemo } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./DateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
-import { FileTextIcon } from "lucide-react";
+import { FileTextIcon, X } from "lucide-react";
 
 const Sidebar = memo(({
   historyData = [],
@@ -30,39 +30,25 @@ const Sidebar = memo(({
   setThreadPage,
   selectedVersion,
   setIsErrorTrue,
-  isErrorTrue,
-  isThreadSelectable = false
+  isErrorTrue
 }) => {
   const {
     subThreads,
-    searchResults,
-    searchQuery,
-    searchLoading,
-    isSearchActive,
-    searchDateRange,
     userFeedbackCount,
-    bridgeVersionsArray
+    bridgeVersionsArray,
   } = useCustomSelector(state => ({
     subThreads: Array.isArray(state?.historyReducer?.subThreads) ? state.historyReducer.subThreads : [],
-    searchResults: Array.isArray(state?.historyReducer?.search?.results) ? state.historyReducer.search.results : [],
-    searchQuery: state?.historyReducer?.search?.query || '',
-    searchLoading: state?.historyReducer?.search?.loading || false,
-    searchHasMore: state?.historyReducer?.search?.hasMore || true,
-    isSearchActive: state?.historyReducer?.search?.isActive || false,
-    searchDateRange: state?.historyReducer?.search?.dateRange || { start: null, end: null },
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
     bridgeVersionsArray: Array.isArray(state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions) ? state.bridgeReducer.allBridgesMap[params.id].versions : [],
   }));
 
-  // Memoized display data to ensure it's always an array
-  const displayData = useMemo(() => {
-    const data = isSearchActive ? searchResults : historyData;
-    return Array.isArray(data) ? data : [];
-  }, [isSearchActive, searchResults, historyData]);
 
-  const [selectedThreadIds, setSelectedThreadIds] = useState([]);
+
+  const [selectedThreadIds, _setSelectedThreadIds] = useState([]);
   const [expandedThreads, setExpandedThreads] = useState([]);
   const [loadingSubThreads, setLoadingSubThreads] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchQuery = (searchRef?.current && searchRef.current.value) || searchParams?.message_id || "";
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
@@ -146,23 +132,25 @@ const Sidebar = memo(({
   useEffect(() => {
     if (searchParams?.message_id) {
       // Set the search query state and input value
-      dispatch(setSearchQuery(searchParams.message_id));
       if (searchRef?.current) {
         searchRef.current.value = searchParams.message_id;
       }
       handleChange();
     }
-  }, [searchParams?.message_id, dispatch])
+  }, [searchParams?.message_id])
   const handleChange = useCallback(debounce((e) => {
     const value = e?.target?.value || searchParams?.message_id || "";
-    dispatch(setSearchQuery(value));
-    handleSearch(e);
-  }, 500), [dispatch, searchParams?.message_id]);
+    handleSearch(e, value);
+  }, 500), [searchParams?.message_id]);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e, directValue) => {
     e?.preventDefault();
-    if (e && e.target && e.target.value === '') {
-      clearInput();
+    const searchValue = directValue !== undefined ? directValue : (searchRef?.current?.value || "");
+
+    if (!searchValue && !searchParams?.start && !searchParams?.end) {
+      if (searchParams?.message_id || searchParams?.start || searchParams?.end) {
+        clearInput();
+      }
       return;
     }
 
@@ -170,23 +158,27 @@ const Sidebar = memo(({
     setHasMore(true);
     setFilterOption("all");
     dispatch(clearSubThreadData());
+    setSearchLoading(true);
 
     try {
       const currentMessageId = searchParams?.message_id;
-      const searchValue = searchRef?.current?.value || searchParams?.message_id || "";
 
-      // Get date range from search params or current state
-      const startDate = searchParams?.start || searchDateRange?.start;
-      const endDate = searchParams?.end || searchDateRange?.end;
+      // Get date range from search params
+      const startDate = searchParams?.start;
+      const endDate = searchParams?.end;
 
-      const result = await dispatch(
-        searchMessageHistoryAction({
-          bridgeId: params?.id,
-          keyword: searchValue,
-          startDate,
-          endDate
-        })
-      );
+      const result = await dispatch(getHistoryAction(
+        params?.id,
+        1,
+        "all",
+        isErrorTrue,
+        selectedVersion,
+        searchValue,
+        startDate,
+        endDate
+      ));
+
+      setThreadPage(1);
 
       // Navigate with search parameters
       const searchUrl = new URL(window.location.href);
@@ -222,65 +214,49 @@ const Sidebar = memo(({
       }
     } catch (error) {
       console.error("Search error:", error);
+    } finally {
+      setSearchLoading(false);
     }
   };
 
   const clearInput = async () => {
-    // Clear search state using new search slice
-    dispatch(clearSearchAction());
     if (searchRef?.current) searchRef.current.value = "";
-    searchParams.delete('message_id');
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('message_id');
 
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
 
     try {
-      // Fetch regular history data
-      const result = await dispatch(getHistoryAction(
+      // Fetch regular history data (empty keyword)
+      const startDate = searchParams?.start;
+      const endDate = searchParams?.end;
+
+      await dispatch(getHistoryAction(
         params?.id,
         1,
-        filterOption,
+        "all",
         isErrorTrue,
-        selectedVersion
+        selectedVersion,
+        "", // empty keyword
+        startDate,
+        endDate
       ));
-      let nextThreadRawId = result?.[0]?.thread_id || searchParams?.thread_id || null;
-      if (result?.length) {
-        const firstResult = result[0];
-        const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, '%26'));
-        const subThreadId = encodeURIComponent(firstResult.sub_thread?.[0]?.sub_thread_id || threadId.replace(/&/g, '%26'));
+      setThreadPage(1);
 
-        // Navigate to first result without search parameters
-        const clearUrl = new URL(window.location.href);
-        clearUrl.searchParams.set('version', searchParams?.version || 'all');
-        clearUrl.searchParams.set('thread_id', threadId);
-        clearUrl.searchParams.set('subThread_id', subThreadId);
-        if (searchParams?.start) clearUrl.searchParams.set('start', searchParams.start);
-        if (searchParams?.end) clearUrl.searchParams.set('end', searchParams.end);
+      // Update URL
+      const clearUrl = new URL(window.location.href);
+      clearUrl.searchParams.set('version', searchParams?.version || 'all');
+      if (startDate) clearUrl.searchParams.set('start', startDate);
+      if (endDate) clearUrl.searchParams.set('end', endDate);
+      // Remove message_id 
+      clearUrl.searchParams.delete('message_id');
         if (searchParams?.type) clearUrl.searchParams.set('type', searchParams.type);
 
-        router.push(clearUrl.pathname + clearUrl.search, undefined, { shallow: true });
-      }
+      router.push(clearUrl.pathname + clearUrl.search, undefined, { shallow: true });
 
-      if (nextThreadRawId) {
-        setLoadingSubThreads(true);
-        dispatch(clearSubThreadData());
-        try {
-          await dispatch(
-            getSubThreadsAction({
-              thread_id: nextThreadRawId,
-              error: isErrorTrue,
-              bridge_id: params.id,
-              version_id: selectedVersion
-            })
-          );
-          setExpandedThreads([nextThreadRawId]);
-        } finally {
-          setLoadingSubThreads(false);
-        }
-      }
-
-      if (result?.length < 40) setHasMore(false);
+      setHasMore(true);
 
     } catch (error) {
       console.error("Clear search error:", error);
@@ -288,11 +264,6 @@ const Sidebar = memo(({
   };
 
 
-  const handleThreadIds = (id) => {
-    setSelectedThreadIds((prevIds) =>
-      prevIds?.includes(id) ? prevIds?.filter((threadId) => threadId !== id) : [...prevIds, id]
-    );
-  };
 
   const handleToggleThread = async (threadId) => {
     const isExpanded = expandedThreads?.includes(threadId);
@@ -442,20 +413,7 @@ const Sidebar = memo(({
             className="input input-bordered input-sm w-full pr-6 text-xs"
           />
           {searchQuery && (
-            <svg
-              fill="#000000"
-              width="16px"
-              height="16px"
-              viewBox="0 0 24 24"
-              id="cross"
-              data-name="Flat Line"
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute right-1.5 top-1.5 cursor-pointer"
-              onClick={clearInput}
-              style={{ fill: "none", stroke: "rgb(0, 0, 0)", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2 }}
-            >
-              <path id="primary" d="M19,19,5,5M19,5,5,19"></path>
-            </svg>
+            <X onClick={clearInput} size={18} className="absolute right-2 top-2 cursor-pointer"/>
           )}
         </form>
       </div>
@@ -463,35 +421,24 @@ const Sidebar = memo(({
 
       {/* Fixed: Render search loader at the top level, not inside InfiniteScroll */}
       <div className="flex-1 overflow-hidden">
-        {searchLoading ? (
-          <Skeleton count={8} />
-        ) : loading ? (
+        {loading || searchLoading ? (
           <div className="flex justify-center items-center bg-base-200 h-full">
+            <span className="loading loading-spinner loading-md"></span>
           </div>
-        ) : displayData.length === 0 ? (
+        ) : historyData.length === 0 ? (
           <NoDataFound />
         ) : (
           <InfiniteScroll
-            dataLength={displayData.length}
-            next={isSearchActive ? () => { } : fetchMoreData}
-            hasMore={isSearchActive ? false : hasMore}
+            dataLength={historyData.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
             loader={<h4></h4>}
             scrollableTarget="sidebar"
           >
             <div className="slider-container min-w-[45%] w-full overflow-x-auto pb-20">
               <ul className="menu min-h-full text-base-content flex flex-col space-y-1">
-                {displayData.map((item) => (
-                  <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
-                    {isThreadSelectable && (
-                      <div onClick={(e) => e?.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm mr-1.5 bg-base-100"
-                          checked={selectedThreadIds?.includes(item?.thread_id)}
-                          onChange={() => handleThreadIds(item?.thread_id)}
-                        />
-                      </div>
-                    )}
+                {historyData.map((item) => (
+                  <div className={`${"flex-col"}`} key={item?.thread_id}>
                     <div className="flex flex-col">
                       <li
                         className={`${decodeURIComponent(searchParams?.thread_id) === item?.thread_id
@@ -542,7 +489,7 @@ const Sidebar = memo(({
                           )}
                         </a>
                       </li>
-                      {decodeURIComponent(searchParams?.thread_id) === searchParams?.thread_id && !isSearchActive &&
+                      {decodeURIComponent(searchParams?.thread_id) === searchParams?.thread_id && !searchQuery &&
                         expandedThreads?.includes(item?.thread_id) && (
                           <>
                             {loadingSubThreads ? (
