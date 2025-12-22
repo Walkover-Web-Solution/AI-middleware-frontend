@@ -79,7 +79,7 @@ function Home({ params, searchParams, isEmbedUser }) {
       bridgeStatus: state.bridgeReducer.allBridgesMap,
       showHistory: state.appInfoReducer.embedUserDetails?.showHistory || false,
       isAdminOrOwner,
-      linksData: state.appInfoReducer.appInfo.linksData || [],
+      linksData: state.flowDataReducer.flowData.linksData || [],
       currentUser: state.userDetailsReducer.userDetails,
       currentOrgRole: orgRole || "Viewer",
     };
