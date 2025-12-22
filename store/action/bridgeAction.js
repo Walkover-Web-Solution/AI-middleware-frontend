@@ -1,6 +1,6 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, fetchBridgeUsageMetricsApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
 import { toast } from "react-toastify";
-import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, setSavingStatus, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { clearBridgeUsageMetricsReducer, clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, setSavingStatus, setBridgeUsageMetricsReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -393,6 +393,38 @@ export const getPrebuiltToolsAction = () => async (dispatch) => {
     console.error(error)
   }
 }
+
+export const fetchBridgeUsageMetricsAction = ({ start_date, end_date, filterActive = false }) => async (dispatch) => {
+  try {
+    // Set loading to true before API call
+    dispatch(setBridgeUsageMetricsReducer({
+      loading: true,
+      data: [],
+      filters: { start_date, end_date },
+      filterActive
+    }));
+    
+    const response = await fetchBridgeUsageMetricsApi({ start_date, end_date });
+    
+    // Set loading to false after API call completes
+    dispatch(setBridgeUsageMetricsReducer({
+      loading: false,
+      data: response?.data || [],
+      filters: { start_date, end_date },
+      filterActive // Pass filter activation status to reducer
+    }));
+    return response?.data;
+  } catch (error) {
+    toast.error(error?.data?.message || error?.response?.data?.message || "Failed to fetch usage metrics");
+    console.error('Failed to fetch bridge usage metrics:', error);
+    throw error;
+  }
+};
+
+export const clearBridgeUsageMetricsAction = () => (dispatch) => {
+  dispatch(clearBridgeUsageMetricsReducer());
+  dispatch(fetchBridgeUsageMetricsAction({}));
+};
 
 export const publishBulkVersionAction = (version_ids) => async (dispatch) => {
   try {
