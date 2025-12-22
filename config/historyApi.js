@@ -12,16 +12,18 @@ export const getSingleMessage = async ({ bridge_id, message_id }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, _versionId, error, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, error, pagelimit = 40) => {
   try {
     const encodedThreadId = encodeURIComponent(threadId);
     const encodedBridgeId = encodeURIComponent(bridgeId);
     const encodedSubThreadId = encodeURIComponent(subThreadId || threadId);
-    
+    const encodedVersionId = (versionId && versionId !== 'undefined' && versionId !== 'all') ? encodeURIComponent(versionId) : undefined;
+
     const getSingleThreadData = await axios.get(`${URL}/api/history/${encodedBridgeId}/${encodedThreadId}/${encodedSubThreadId}?page=${nextPage}&limit=${pagelimit}`, {
       params: {
         user_feedback,
         error,
+        version_id: encodedVersionId
       }
     })
     return getSingleThreadData
@@ -30,37 +32,36 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
   }
 }
 
-export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue, versionId) => {
+export const getThreads = async (bridgeId, page = 1, user_feedback, isErrorTrue, versionId, keyword, startDate, endDate) => {
   try {
+    const params = {
+      page: page && !isNaN(page) ? page : 1,
+      limit: 40,
+      user_feedback: !user_feedback || user_feedback === "undefined" ? "all" : user_feedback,
+      version_id: (versionId === 'all' || versionId === 'undefined') ? null : versionId,
+      error: isErrorTrue ? 'true' : 'false'
+    };
+
+    if (keyword) {
+      params.keyword = keyword;
+    }
+
+    if (startDate) {
+      params.start_date = startDate;
+    }
+
+    if (endDate) {
+      params.end_date = endDate;
+    }
+
     const getSingleThreadData = await axios.get(`${URL}/api/history/${bridgeId}`, {
-      params: {
-        page: page && !isNaN(page) ? page : 1,
-        limit: 40,
-        user_feedback: !user_feedback || user_feedback === "undefined" ? "all" : user_feedback,
-        version_id: (versionId === 'all' || versionId === 'undefined') ? null : versionId
-      }
+      params
     });
     return getSingleThreadData.data;
   } catch (error) {
     console.error(error);
   }
 };
-
-
-export const searchMessageHistory = async (bridgeId, keyword, time_range) => {
-  try {
-    const searchResult = await axios.get(`${URL}/api/history/search/${bridgeId}`, {
-      params: {
-        keyword,
-        time_range: time_range || {}
-      }
-    })
-    return searchResult;
-  } catch (error) {
-    console.error('Search API error:', error);
-    throw error;
-  }
-}
 
 export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id }) => {
   try {
