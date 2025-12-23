@@ -11,7 +11,7 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
     const contentRef = useRef(null);
     
     const handleInput = useCallback((e) => {
-        const newValue = e.target.textContent || '';
+        const newValue = e?.target?.value || '';
         onChange({ target: { value: newValue } });
     }, [onChange]);
 
@@ -22,36 +22,37 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
     }, []);
 
     useEffect(() => {
-        if (contentRef.current && contentRef.current.textContent !== value) {
-            contentRef.current.textContent = value;
-        }
-    }, [value]);
-    
-    return (
-       <div ref={divRef}>
-         <div
-            ref={contentRef}
-            contentEditable={!disabled}
-            onInput={handleInput}
-            onPaste={handlePaste}
-            className={className}
-            data-placeholder={placeholder}
-            suppressContentEditableWarning={true}
-            style={{
-                minHeight: '8rem',
-                maxWidth: '100%',
-                width: '100%',
-                whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word',
-                wordBreak: 'break-all',
-                overflowWrap: 'break-word',
-                overflow: 'hidden',
-                overflowX: 'hidden',
-                boxSizing: 'border-box'
-            }}
-        />
-       </div>
-    );
+    if (contentRef.current && contentRef.current.value !== value) {
+      contentRef.current.value = value;
+    }
+  }, [value]);
+
+
+  return (
+    <div ref={divRef}>
+      <textarea
+        ref={contentRef}
+        disabled={disabled}
+        onInput={handleInput}
+        onPaste={handlePaste}
+        className={className}
+        placeholder={placeholder}
+        style={{
+          minHeight: '8rem',
+          maxWidth: '100%',
+          width: '100%',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          wordBreak: 'break-all',
+          overflowWrap: 'break-word',
+          overflow: 'hidden',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          boxSizing: 'border-box'
+        }}
+      />
+    </div>
+  );
 });
 
 OptimizedTextarea.displayName = 'OptimizedTextarea';
@@ -62,32 +63,24 @@ export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, 
     const { bridge_summary } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
     }));
-    const [summary, setSummary] = useState(bridge_summary || "");
     const [displayValue, setDisplayValue] = useState(bridge_summary || ""); // Immediate display value
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-    const textareaRef = useRef(null);
     const [errorMessage, setErrorMessage] = useState("");
     const debounceTimerRef = useRef(null);
 
     useEffect(() => {
-        setSummary(bridge_summary || "");
         setDisplayValue(bridge_summary || "");
     }, [bridge_summary, params, versionId]);
 
     // Ultra-fast textarea change handler with minimal processing
     const handleTextareaChange = useCallback((e) => {
-        const value = e.target.value;
+        const value = e.target.value || "";
         setDisplayValue(value); // Only update display value immediately
         
         // Clear existing timer
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
         }
-        
-        // Set new timer with longer debounce for heavy operations
-        debounceTimerRef.current = setTimeout(() => {
-            setSummary(value);
-        }, 500); // Increased to 500ms for better performance
     }, []);
 
     // Cleanup debounce timer
@@ -115,7 +108,6 @@ export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, 
         try {
             const result = await dispatch(genrateSummaryAction({ versionId: versionId }));
             if (result) {
-                setSummary(result);
                 setDisplayValue(result); // Update display value immediately
                 setAutoGenerateSummary(false); // Reset the flag
             }
@@ -123,17 +115,9 @@ export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, 
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt, versionId]);
-    const handleClose=()=>{
-        closeModal(modalType); 
-        setErrorMessage("");
-        setSummary(bridge_summary || "");
-        setDisplayValue(bridge_summary || "");
-        setAutoGenerateSummary(false); // Reset the flag
-    }
     const handleSaveSummary = useCallback(() => {
         // Ensure we save the latest value from displayValue
         const newValue = displayValue || "";
-        setSummary(newValue); // Sync summary state
         const dataToSend = { bridge_summary: newValue };
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend })).then((data) => {
             if (data.success) {
