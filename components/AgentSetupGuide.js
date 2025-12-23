@@ -133,7 +133,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   }
 
   return (
-    <div className={`w-full h-full z-very-high bg-base-100 overflow-hidden relative transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+    <div className={`w-full h-full z-high bg-base-100 overflow-hidden relative transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">

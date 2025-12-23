@@ -712,7 +712,9 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   </div>
                 )}
               </div>
+              <div className="z-medium">
               <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+                </div>
             </div>
           </div>
         )
