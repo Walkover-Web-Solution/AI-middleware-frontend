@@ -590,7 +590,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                       </div>
                     </MainLayout>
 
-                    <div className="flex flex-row gap-4">
+                    <div className="flex flex-row gap-4 mb-2">
                       {typeFilteredBridges.length > 5 && (
                         <SearchItems data={typeFilteredBridges} setFilterItems={setFilterBridges} item={pageHeaderContent.title} />
                       )}

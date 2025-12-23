@@ -296,7 +296,7 @@ const Navbar = ({ isEmbedUser, params }) => {
       </button>
 
       {showEllipsisMenu && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-[9999]">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-very-high">
           <div className="">
             <button
               onMouseDown={async (e) => {
@@ -561,7 +561,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                       <span className="text-white text-sm truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
                       {!isPublishing && <ChevronDown size={12} className="text-white" />}
                     </button>
-                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
+                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow border border-base-200">
                       <li>
                         <button
                           onClick={handlePublish}
@@ -704,7 +704,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
                 {!isPublishing && <ChevronDown size={10} className="text-black" />}
               </div>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-48 p-2 shadow border border-base-200">
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-48 p-2 shadow border border-base-200">
                 <li>
                   <button
                     onClick={handlePublish}

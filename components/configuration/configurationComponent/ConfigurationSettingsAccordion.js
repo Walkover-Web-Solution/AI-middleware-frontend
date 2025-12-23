@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, SettingsIcon } from '@/components/Icons';
 import { useConfigurationContext } from '../ConfigurationContext';
-import BridgeTypeToggle from './BridgeTypeToggle';
 import ToneDropdown from './ToneDropdown';
 import ResponseStyleDropdown from './ResponseStyleDropdown';
 import AdvancedConfiguration from './AdvancedConfiguration';
@@ -14,18 +13,12 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
   const {
     params,
     searchParams,
-    showConfigType,
     hideAdvancedConfigurations,
     bridgeType,
     modelType,
     currentView,
     switchView
   } = useConfigurationContext();
-
-  const shouldShowAgentType = useMemo(
-    () => ((isEmbedUser && showConfigType) || !isEmbedUser),
-    [isEmbedUser, showConfigType]
-  );
   return (
     <div className="z-very-low text-base-content w-full max-w-md cursor-pointer" tabIndex={0}>
       <div
@@ -46,11 +39,6 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
       >
         {/* Settings Content */}
         <div className="flex flex-col gap-6">
-          {shouldShowAgentType && bridgeType?.toString()?.toLowerCase() !== "chatbot" &&(
-            <div className="bg-base-100 rounded-lg">
-              <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} isEditor={isEditor} />
-            </div>
-          )}
 
           {/* Only show tone, response style, and advanced config if modelType is NOT image */}
           {modelType !== 'image' && (

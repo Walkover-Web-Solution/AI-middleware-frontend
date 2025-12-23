@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { CloseIcon } from "@/components/Icons";
-import { Save, ChevronDown } from "lucide-react";
+import { Save, ChevronDown, AlertTriangle } from "lucide-react";
+import ConfirmationModal from "../UI/ConfirmationModal";
 import { generateGtwyAccessTokenAction } from "@/store/action/orgAction";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -9,6 +10,8 @@ import { updateIntegrationDataAction } from "@/store/action/integrationAction";
 import GenericTable from "../table/Table";
 import CopyButton from "../copyButton/CopyButton";
 import defaultUserTheme from "@/public/themes/default-user-theme.json";
+import { closeModal, openModal } from "@/utils/utility";
+import {  MODAL_TYPE } from "@/utils/enums";
 
 const COLOR_LABEL_MAP = {
   "base-100": "Page Background",
@@ -722,8 +725,54 @@ const generateInitialConfig = () => {
       }
     }
   }, [data]);
-
+  
+  // Update the data-unsaved-changes attribute whenever configChanged or themeEditorDiffers changes
+ 
   const handleClose = () => {
+    // Check if there are unsaved changes
+    if (configChanged || themeEditorDiffers) {
+      openModal(MODAL_TYPE.UNSAVED_CHANGES_MODAL)
+    } else {
+      // No changes, close directly
+      setIsOpen(false);
+      handleCloseSlider();
+    }
+  };
+  
+  const handleConfirmClose = () => {
+    // Completely reset the configuration state to its original values
+    if (lastSavedConfig) {
+      // Directly set the entire configuration state back to lastSavedConfig
+      setConfiguration(JSON.parse(JSON.stringify(lastSavedConfig)));
+    } else if (integrationData) {
+      // If no lastSavedConfig, fall back to the original data from Redux
+      const defaults = generateInitialConfig();
+      const merged = integrationData.config ? { ...defaults, ...integrationData.config } : defaults;
+      
+      // Use root-level apikey_object_id if available, otherwise empty object
+      const apiKeyIds = (merged.addDefaultApiKeys && integrationData.apikey_object_id) 
+        ? integrationData.apikey_object_id 
+        : {};
+      
+      const resolvedTheme = normalizeThemeConfig(merged.theme_config);
+      
+      // Set the entire configuration state
+      setConfiguration({
+        ...merged,
+        apikey_object_id: apiKeyIds,
+        theme_config: resolvedTheme
+      });
+    }
+    
+    // Close modal and slider
+    closeModal(MODAL_TYPE.UNSAVED_CHANGES_MODAL);
+    setIsOpen(false);
+    handleCloseSlider();
+  };
+  const handleSaveAndClose = async () => {
+    // Save changes then close
+    await handleConfigurationSave();
+    closeModal(MODAL_TYPE.UNSAVED_CHANGES_MODAL)
     setIsOpen(false);
     handleCloseSlider();
   };
@@ -910,8 +959,16 @@ const generateInitialConfig = () => {
 
   const configChanged = isConfigChanged();
   const themeSaveDisabled = isSaving || (!configChanged && !themeEditorDiffers);
+  useEffect(() => {
+    const sidebar = document.getElementById("gtwy-integration-slider");
+    if (sidebar) {
+      sidebar.setAttribute('data-unsaved-changes', (configChanged || themeEditorDiffers).toString());
+      sidebar.setAttribute('data-confirmation-modal', MODAL_TYPE.UNSAVED_CHANGES_MODAL);
+    }
+  }, [configChanged, themeEditorDiffers]);
 
-
+  // Add event listener for outside clicks AFTER configChanged is defined
+ 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
   "folder_id": "${data?.embed_id}",
@@ -973,13 +1030,14 @@ window.openGtwy({
   const tableHeaders = ["Key", "Description"];
 
   return (
-    <aside
-      id="gtwy-integration-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300  ${isOpen ? "" : "translate-x-full"
-        }`}
-      aria-label="Integration Guide Slider"
-    >
-      <div className="flex flex-col w-full gap-4">
+    <>
+      <aside
+        id="gtwy-integration-slider"
+        className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300  ${isOpen ? "" : "translate-x-full"
+          }`}
+        aria-label="Integration Guide Slider"
+      >
+        <div className="flex flex-col w-full gap-4">
         <div className="flex justify-between items-center border-b border-base-300 pb-4">
           <h3 className="font-bold text-lg">Embed Setup</h3>
           <CloseIcon
@@ -1288,7 +1346,20 @@ window.openGtwy({
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+
+      {/* Confirmation Modal using the reusable component */}
+      <ConfirmationModal
+        modalType={MODAL_TYPE.UNSAVED_CHANGES_MODAL}
+        onConfirm={handleSaveAndClose}
+        onCancel={handleConfirmClose}
+        title="Unsaved Changes"
+        message="You have unsaved changes. Would you like to save your changes before closing?"
+        confirmText="Save & Close"
+        cancelText="Discard Changes"
+        icon={<AlertTriangle className="w-6 h-6" />}
+      />
+    </>
   );
 }
 

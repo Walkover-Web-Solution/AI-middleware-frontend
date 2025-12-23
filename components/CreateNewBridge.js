@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import LoadingSpinner from "./LoadingSpinner";
 import Protected from "./Protected";
-import { BotIcon, Info, Lightbulb, Plus } from "lucide-react";
+import { BotIcon, Info, Plus } from "lucide-react";
 import { CloseIcon } from "./Icons";
 import { getModelAction } from "@/store/action/modelAction";
 
@@ -211,11 +211,8 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
 
           {/* Agent Purpose Section */}
           <div className="space-y-4">
-            <div className="bg-base-100 p-6 rounded-xl border border-base-300 shadow-sm">
+            <div className=" rounded-xl shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
-                  <Lightbulb size={20} className="text-primary" />
-                </div>
                 <h4 className="text-lg font-semibold text-base-content">Agent Purpose</h4>
                 <span className="text-xs bg-info/20 text-info px-2 py-1 rounded-full">Optional</span>
               </div>
