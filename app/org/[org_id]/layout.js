@@ -56,7 +56,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     currrentOrgDetail: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   }));
   useEffect(() => {
-    dispatch(getTutorialDataAction());
+    if (!isEmbedUser) {
+      dispatch(getTutorialDataAction());
+    }
     if (pathName.endsWith("agents")) {
       dispatch(getFinishReasonsAction());
     }
@@ -73,6 +75,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
+      // Skip user meta updates for embed users
+      if (isEmbedUser) return;
+      
       const reference_id = getFromCookies("reference_id");
       const unlimited_access = getFromCookies("unlimited_access");
       const utmSource = getFromCookies("utm_source");
@@ -196,7 +201,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       }))
       dispatch(getAllFunctions())
     }
-  }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
+  }, [isValidOrg, !isEmbedUser ? currentUser?.meta?.onboarding?.bridgeCreation : true]);
 
 
   useEffect(() => {
@@ -218,7 +223,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
 
   useEffect(() => {
-    if (isValidOrg) {
+    if (isValidOrg && !isEmbedUser) {
       const updateScript = (token) => {
         const existingScript = document.getElementById(scriptId);
         if (existingScript) {
@@ -264,9 +269,14 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         }
       }
     };
-    window.addEventListener('focus', onFocus);
+    // Only add focus listener for non-embed users
+    if (!isEmbedUser) {
+      window.addEventListener('focus', onFocus);
+    }
     return () => {
-      window.removeEventListener('focus', onFocus);
+      if (!isEmbedUser) {
+        window.removeEventListener('focus', onFocus);
+      }
     }
   }, [isValidOrg, resolvedParams])
   const docstarScriptId = "docstar-main-script";
