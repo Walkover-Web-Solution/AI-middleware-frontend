@@ -203,11 +203,13 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
-      dispatch(getPrebuiltPromptsAction())
       dispatch(getPrebuiltToolsAction())
-      dispatch(getAuthDataAction(resolvedParams?.org_id))
-      dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-      dispatch(getUsersAction());
+      if(!isEmbedUser){
+        dispatch(getAuthDataAction(resolvedParams?.org_id))
+        dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
+        dispatch(getPrebuiltPromptsAction())
+        dispatch(getUsersAction());
+      }
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 

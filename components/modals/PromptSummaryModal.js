@@ -74,7 +74,7 @@ export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, 
 
     // Ultra-fast textarea change handler with minimal processing
     const handleTextareaChange = useCallback((e) => {
-        const value = e.target.value;
+        const value = e.target.value || "";
         setDisplayValue(value); // Only update display value immediately
         
         // Clear existing timer
