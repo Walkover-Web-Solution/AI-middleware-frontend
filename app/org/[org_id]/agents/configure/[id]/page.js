@@ -114,7 +114,26 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const allbridges = useCustomSelector(
     useCallback((state) => state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [], [resolvedParams?.org_id])
   );
+  const { hasPrompt, hasApiKey } = useCustomSelector((state) => {
+    const versionData =
+      state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
 
+    const bridgeData =
+      state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
+
+    const isPublished = resolvedSearchParams?.isPublished === 'true';
+    const dataSource = isPublished ? bridgeData : versionData;
+
+    const prompt = dataSource?.configuration?.prompt || "";
+    const service = dataSource?.service;
+    const bridgeApiKey = dataSource?.apikey_object_id?.[service];
+
+    return {
+      hasPrompt: prompt.trim() !== "",
+      hasApiKey: !!bridgeApiKey
+    };
+  });
+  const canShowChatbot = hasPrompt && hasApiKey;
   // Consolidated prompt state - reduced from 8 individual states
   const [promptState, setPromptState] = useState(() => ({
     prompt: "",
@@ -306,22 +325,22 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       const agentBridge = Array.isArray(bridges)
         ? bridges.find((bridge) => bridge?._id === resolvedParams?.id)
         : null;
-      
+
       if (!agentBridge) {
         // Include the type parameter when navigating back to maintain sidebar selection
         const agentType = resolvedSearchParams?.type || 'api';
         router.push(`/org/${resolvedParams?.org_id}/agents?type=${agentType}`);
         return
       }
-      
+
       try {
         await dispatch(getSingleBridgesAction({ id: resolvedParams.id, version: resolvedSearchParams.version }));
-        
+
         // After getting the bridge, ensure type query parameter matches the bridge type
         const currentType = resolvedSearchParams?.type;
         const bridgeTypeFromRedux = agentBridge.bridgeType?.toLowerCase();
         let correctType;
-        
+
         // Determine the correct type based on bridge type from Redux
         if (bridgeTypeFromRedux === 'chatbot') {
           correctType = 'chatbot';
@@ -329,7 +348,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           // For 'api', 'batch', or any other type, default to 'api'
           correctType = 'api';
         }
-        
+
         // If type is missing or doesn't match, update the URL
         if (!currentType || currentType !== correctType) {
           const url = new URL(window.location);
@@ -376,6 +395,16 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     }
     mountRef.current = true;
   }, [bridgeType]);
+  useEffect(() => {
+    // skip first render
+    if (!mountRef.current) return;
+
+    if (!canShowChatbot) {
+      if (typeof closeChatbot !== 'undefined') {
+        closeChatbot();
+      }
+    }
+  }, [canShowChatbot]);
 
   // Show skeleton loading state only for initial load (when no data exists)
   if (isLoading && !hasData && !hasError) {
@@ -534,7 +563,10 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                         )}
                       </div>
                     </div>
-                    <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+                    {canShowChatbot && (
+                      <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+                    )}
+
                   </div>
                 )}
               </Panel>
@@ -712,9 +744,10 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   </div>
                 )}
               </div>
-              <div className="z-medium">
-              <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
-                </div>
+              {canShowChatbot && (
+                <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+              )}
+
             </div>
           </div>
         )
