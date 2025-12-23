@@ -4,6 +4,7 @@ import InputConfigComponent from "./configurationComponent/InputConfigComponent"
 import { useConfigurationContext } from './ConfigurationContext';
 import { toggleSidebar } from '@/utils/utility';
 import {BookText } from 'lucide-react';
+import TriggersList from './configurationComponent/TriggersList';
 
 const InputSection = memo(() => {
     const { 
@@ -12,7 +13,6 @@ const InputSection = memo(() => {
         promptTextAreaRef, 
         isEmbedUser, 
         hidePreTool,
-        // Consolidated state props
         uiState,
         updateUiState,
         promptState,
@@ -21,11 +21,18 @@ const InputSection = memo(() => {
         savePrompt,
         isMobileView,
         isPublished,
-        isEditor
+        isEditor,
+        bridgeType,
     } = useConfigurationContext();
-
     return (
         <>
+          {!isEmbedUser && bridgeType === 'trigger' &&
+          <div className="w-full pt-4 cursor-default flex flex-wrap justify-between items-start gap-2">
+            <div className="flex-1 min-w-[220px] max-w-md">
+                 <TriggersList params={params} />
+                 </div>
+           </div>}
+        
             {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
                 <div className="w-full pt-4 cursor-default flex flex-wrap justify-between items-start gap-2">
                     <div className="flex-1 min-w-[220px] max-w-md">

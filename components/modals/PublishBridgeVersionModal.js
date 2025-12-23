@@ -58,7 +58,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
       allBridgesMap: state.bridgeReducer.allBridgesMap || {},
       prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionDataFromState?.configuration?.prompt || ""),
-      isEditor: canEdit,
+      isEditor: isEmbedUser ? true : canEdit,
     };
   });
 

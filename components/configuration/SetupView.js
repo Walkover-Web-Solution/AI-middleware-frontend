@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import TriggersList from "./configurationComponent/TriggersList";
 import AdvancedParameters from "./configurationComponent/AdvancedParamenter";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
@@ -8,7 +7,6 @@ import { useConfigurationContext } from './ConfigurationContext';
 
 const SetupView = memo(() => {
     const { 
-        bridgeType, 
         modelType, 
         params, 
         searchParams, 
@@ -32,9 +30,6 @@ const SetupView = memo(() => {
 
     return (
         <>
-            {bridgeType === 'trigger' && !isEmbedUser && (
-                <TriggersList params={params} />
-            )}
             {modelType === "image" ? (
                 <>
                     <CommonConfigComponents

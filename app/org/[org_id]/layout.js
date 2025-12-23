@@ -18,7 +18,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction, getLinksAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
@@ -49,14 +49,16 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.pre_tools || {},
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.pre_tools || [],
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
     currrentOrgDetail: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   }));
   useEffect(() => {
-    dispatch(getTutorialDataAction());
+    if (!isEmbedUser) {
+      dispatch(getTutorialDataAction());
+    }
     if (pathName.endsWith("agents")) {
       dispatch(getFinishReasonsAction());
     }
@@ -64,6 +66,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
       dispatch(getDescriptionsAction());
+      dispatch(getLinksAction());
     }
     if (pathName.endsWith("apikeys") && !isEmbedUser) {
       dispatch(getApiKeyGuideAction());
@@ -72,6 +75,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
+      // Skip user meta updates for embed users
+      if (isEmbedUser) return;
+      
       const reference_id = getFromCookies("reference_id");
       const unlimited_access = getFromCookies("unlimited_access");
       const utmSource = getFromCookies("utm_source");
@@ -195,19 +201,21 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       }))
       dispatch(getAllFunctions())
     }
-  }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
+  }, [isValidOrg, !isEmbedUser ? currentUser?.meta?.onboarding?.bridgeCreation : true]);
 
 
   useEffect(() => {
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
-      dispatch(getPrebuiltPromptsAction())
       dispatch(getPrebuiltToolsAction())
-      dispatch(getAuthDataAction(resolvedParams?.org_id))
-      dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-      dispatch(getUsersAction());
+      if(!isEmbedUser){
+        dispatch(getAuthDataAction(resolvedParams?.org_id))
+        dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
+        dispatch(getPrebuiltPromptsAction())
+        dispatch(getUsersAction());
       }
+    }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
   const scriptId = "chatbot-main-script";
@@ -215,7 +223,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
 
   useEffect(() => {
-    if (isValidOrg) {
+    if (isValidOrg && !isEmbedUser) {
       const updateScript = (token) => {
         const existingScript = document.getElementById(scriptId);
         if (existingScript) {
@@ -261,9 +269,14 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         }
       }
     };
-    window.addEventListener('focus', onFocus);
+    // Only add focus listener for non-embed users
+    if (!isEmbedUser) {
+      window.addEventListener('focus', onFocus);
+    }
     return () => {
-      window.removeEventListener('focus', onFocus);
+      if (!isEmbedUser) {
+        window.removeEventListener('focus', onFocus);
+      }
     }
   }, [isValidOrg, resolvedParams])
   const docstarScriptId = "docstar-main-script";
@@ -290,7 +303,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       };
     }
   }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
-
   async function handleMessage(e) {
     if (e.data?.metadata?.type !== 'tool') return;
     // todo: need to make api call to update the name & description
@@ -306,6 +318,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
             fn => fn.function_name === e?.data?.id
           );
           if (selectedVersionData) {
+            //This condition will delete the tools and preTools..
             await dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: resolvedSearchParams?.get('version'),
@@ -316,8 +329,22 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 }
               }
             }));
+            if (preTools.includes(selectedVersionData?._id)) {
+              dispatch(updateApiAction(path[5], {
+                pre_tools: selectedVersionData?._id,
+                status: "0",
+                version_id: resolvedSearchParams?.get('version')
+              }))
+            }
+          }else {
+              dispatch(updateApiAction(path[5], {
+                pre_tools: preTools[0],
+                status: "0",
+                version_id: resolvedSearchParams?.get('version')
+              }))
           }
           dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+
         }
       }
 
@@ -336,7 +363,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
                   pre_tools: data?._id,
-                  status:"1",
+                  status: "1",
                   version_id: resolvedSearchParams?.get('version')
                 }))
               )

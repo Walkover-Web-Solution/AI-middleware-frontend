@@ -340,3 +340,12 @@ export const getFinishReasons = async () => {
     throw new Error(error);
   }
 }
+export const getLinks = async () => {
+  try{
+    const response = await axios.get("https://flow.sokt.io/func/scriiS7RkdxI");
+    return response;
+  }catch(error){
+    console.error(error);
+    throw new Error(error);
+  }
+}

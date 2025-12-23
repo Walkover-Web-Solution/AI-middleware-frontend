@@ -46,11 +46,17 @@ const ConfigurationPage = ({
     // Determine if user has edit permissions for this agent
     const bridge = useCustomSelector(state => state?.bridgeReducer?.allBridgesMap?.[params?.id]);
     const isEditor = useMemo(() => {
+        // For embed users, only check agent access (not org role)
+        if (isEmbedUser) {
+            return true
+        }
+        
+        // Original logic for non-embed users
         return ((currentOrgRole === "Editor" && (bridge?.users?.length === 0 || !bridge?.users || (bridge?.users?.length > 0 && bridge?.users?.some(user => user === currentUser.id))))
             || ((currentOrgRole === "Viewer") && (bridge?.users?.some(user => user === currentUser.id)))
             || currentOrgRole === "Creator"
             || isAdminOrOwner);
-    }, [currentOrgRole, currentUser, bridge?.users, isAdminOrOwner]);
+    }, [currentOrgRole, currentUser, bridge?.users, isAdminOrOwner, isEmbedUser]);
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -67,7 +73,7 @@ const ConfigurationPage = ({
 
     const renderHelpSection = useMemo(() => () => {
         return (
-            <div className="z-very-low mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
+            <div className="mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
                 <div className="flex flex-row gap-6 mt-4 items-center">
                     {/* Speak to us */}
                     {!isEmbedUser && (

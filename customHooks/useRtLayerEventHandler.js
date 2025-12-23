@@ -9,6 +9,7 @@ import WebSocketClient from 'rtlayer-client';
 import { toast } from 'react-toastify';
 import { didCurrentTabInitiateUpdate } from '@/utils/utility';
 import { RefreshIcon } from "@/components/Icons";
+import { buildLlmUrls } from '@/utils/attachmentUtils';
 
 function useRtLayerEventHandler(channelIdentifier="") {
     const [client, setClient] = useState(null);
@@ -124,6 +125,8 @@ function useRtLayerEventHandler(channelIdentifier="") {
           bridge_id: response.bridge_id
         };
 
+        const llmUrls = buildLlmUrls(response.image_urls || [], []);
+
         // Create message data from response
         const messageData = {
           id: response.message_id,
@@ -133,7 +136,7 @@ function useRtLayerEventHandler(channelIdentifier="") {
           updated_llm_message: response.updated_llm_message,
           error: response.error,
           tools_call_data: response.tools_call_data || [],
-          image_urls: response.image_urls || [],
+          llm_urls: llmUrls,
           urls: response.urls || [],
           user_feedback: response.user_feedback,
           version_id: response.version_id,
@@ -178,6 +181,8 @@ function useRtLayerEventHandler(channelIdentifier="") {
         const channelId = channelIdentifier;        
         if (response.data) {
           // Process the response data structure you provided
+          const rawImages = Array.isArray(response.data.images) ? response.data.images : [];
+          const llmUrls = buildLlmUrls(rawImages, []);
           const messageData = {
             id: response.data.id || response.data.message_id,
             content: response.data.content,
@@ -186,7 +191,8 @@ function useRtLayerEventHandler(channelIdentifier="") {
             finish_reason: response.data.finish_reason,
             fallback: response.data.fall_back,
             firstAttemptError: response.data.firstAttemptError,
-            image_urls: response.data.images || [],
+            images: rawImages,
+            llm_urls: llmUrls,
             tools_data: response.data.tools_data || {},
             annotations: response.data.annotations,
             fromRTLayer: true,

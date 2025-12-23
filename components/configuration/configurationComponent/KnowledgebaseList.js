@@ -106,12 +106,12 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                             {item?.name?.length > 24 ? (
                                 <div className="tooltip tooltip-top min-w-0" data-tip={item?.name}>
                                     <span className="min-w-0 text-sm truncate">
-                                            <span className="text-sm font-normal block w-full">{truncate(item?.name, 24)}</span>
+                                            <span className="truncate text-sm font-normal block w-[300px]">{item?.name}</span>
                                         </span>
                                     </div>
                                 ) : (
                                     <span className="min-w-0 text-sm truncate">
-                                        <span className="text-sm font-normal block w-full">{truncate(item?.name, 24)}</span>
+                                        <span className="truncate text-sm font-normal block w-[300px]">{item?.name}</span>
                                     </span>
                                 )}
                             </div>

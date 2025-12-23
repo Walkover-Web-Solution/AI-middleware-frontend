@@ -25,9 +25,10 @@ const Page = () => {
   const dispatch = useDispatch();
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
-  const { apikeyData, descriptions } = useCustomSelector((state) => ({
+  const { apikeyData, descriptions, linksData } = useCustomSelector((state) => ({
     apikeyData: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions || {},
+    linksData: state.flowDataReducer.flowData.linksData || [],
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
 
@@ -161,7 +162,7 @@ const Page = () => {
             <PageHeader
               title="API Keys"
               description={descriptions?.['Provider Keys'] || "Add your model-specific API keys to enable and use different AI models in your chat."}
-              docLink="https://techdoc.walkover.in/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
+              docLink={linksData?.find(link => link.title === 'API Key')?.blog_link}
             />
 
           </div>

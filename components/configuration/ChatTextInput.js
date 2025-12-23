@@ -17,6 +17,7 @@ import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon, CloseCircleIcon } f
 import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
 import { toggleSidebar } from '@/utils/utility';
+import { buildUserUrls } from '@/utils/attachmentUtils';
 
 const VARIABLE_SLIDER_DISABLE_KEY = 'variableSliderDisabled';
 
@@ -238,6 +239,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
         try {
             let responseData;
             let data;
+            const userUrls = buildUserUrls(uploadedImages, uploadedFiles);
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
@@ -258,8 +260,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                                 type: modelType
                             },
                             user: data.content,
-                            images: uploadedImages,
-                            files: uploadedFiles,
+                            user_urls: userUrls,
                             variables,
                             orchestrator_flag: isOrchestralModel
                         },
@@ -274,8 +275,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     apiCall,
                     isOrchestralModel,
                     {
-                        images: uploadedImages,
-                        files: uploadedFiles,
+                        user_urls: userUrls,
                         youtube_url: mediaUrls
                     }
                 ));

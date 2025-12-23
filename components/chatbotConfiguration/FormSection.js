@@ -1,6 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction, updateChatBotConfigAction } from "@/store/action/chatBotAction";
-import { RefreshIcon } from "@/components/Icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -94,7 +93,6 @@ export default function FormSection({ params, chatbotId = null }) {
         () => chatbotId || params?.chatbot_id || chatbots[0]?._id,
         [chatbotId, params?.chatbot_id, chatbots]
     );
-    const [isRefreshing, setIsRefreshing] = useState(false);
     const iframeRef = useRef(null);
     const [formData, setFormData] = useState({
         buttonName: '',
@@ -116,7 +114,9 @@ export default function FormSection({ params, chatbotId = null }) {
     }));
 
     useEffect(() => {
-        dispatch(getChatBotDetailsAction(chatBotId))
+        if (chatbotId !== undefined) {
+            dispatch(getChatBotDetailsAction(chatBotId))
+        }
     }, [chatBotId])
 
     const handleInputChange = useCallback((event) => {
@@ -172,20 +172,24 @@ export default function FormSection({ params, chatbotId = null }) {
         return () => {
             clearInterval(intervalId);
         };
-    }, [chatBotId]);
+    }, [chatBotId, chatBotConfig]);
 
-    const handleRefreshConfiguration = () => {
-        setIsRefreshing(true);
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-            iframeRef.current.contentWindow.postMessage(
-                { type: 'chatbotConfig', data: chatBotConfig },
-                '*'
-            );
-        }
-        setTimeout(() => {
-            setIsRefreshing(false);
-        }, 1000);
-    }
+    // Auto-refresh when formData changes (for real-time preview updates)
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (iframeRef.current && iframeRef.current.contentWindow && Object.keys(formData).length > 0) {
+                iframeRef.current.contentWindow.postMessage(
+                    { type: 'chatbotConfig', data: formData },
+                    '*'
+                );
+            }
+        }, 500); // Shorter delay for more responsive updates
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [formData]);
+
 
     return (
         <div className="space-y-6">
@@ -329,38 +333,12 @@ export default function FormSection({ params, chatbotId = null }) {
                                 <p className="text-sm text-base-content">See how your chatbot will appear to users</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <button 
-                                className={`btn btn-sm gap-2 transition-all duration-200 ${
-                                    isRefreshing 
-                                        ? 'bg-base-200 text-blue-600' 
-                                        : 'hover:bg-base-200 hover:text-blue-600'
-                                }`}
-                                onClick={handleRefreshConfiguration}
-                                disabled={isRefreshing}
-                            >
-                                <RefreshIcon 
-                                    className={`transition-transform duration-500 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} 
-                                    size={16} 
-                                />
-                                {isRefreshing ? 'Refreshing...' : 'Refresh Preview'}
-                            </button>
-                        </div>
                     </div>
                 </div>
 
                 {/* Preview Content */}
                 <div className="p-6">
                     <div className="relative">
-                        {/* Loading Overlay */}
-                        {isRefreshing && (
-                            <div className="absolute inset-0 bg-base-100 bg-opacity-90 flex items-center justify-center z-10 rounded-b-lg">
-                                <div className="flex flex-col items-center gap-3">
-                                    <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                    <p className="text-sm text-base-content font-medium">Updating preview...</p>
-                                </div>
-                            </div>
-                        )}
 
                         {/* Iframe Container */}
                         <div className="relative bg-base-200 rounded-b-lg overflow-hidden shadow-inner h-[80vh]">
@@ -368,7 +346,6 @@ export default function FormSection({ params, chatbotId = null }) {
                                 ref={iframeRef}
                                 src={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/chatbotPreview`}
                                 className="w-full h-full border-none transition-opacity duration-300 bg-transparent"
-                                style={{ opacity: isRefreshing ? 0.5 : 1 }}
                             />
                         </div>
                     </div>
