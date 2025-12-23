@@ -208,11 +208,11 @@ const renderCreatedByCell = (createdBy, timestamp) => {
   }
 
   return (
-    <div className="group cursor-help">
-      <span className="group-hover:hidden">
+    <div className="group cursor-help w-[120px]">
+      <span title={createdBy} className="group-hover:hidden  truncate block flex-1">
         {createdBy}
       </span>
-      <span className="hidden group-hover:inline">
+      <span title={createdBy} className="hidden group-hover:inline">
         {formatDate(timestamp)}
       </span>
     </div>
@@ -225,11 +225,11 @@ const renderUpdatedByCell = (updatedBy, timestamp) => {
   }
 
   return (
-    <div className="group cursor-help">
-      <span className="group-hover:hidden">
+    <div className="group cursor-help w-[120px]">
+      <span title={updatedBy} className="group-hover:hidden truncate block flex-1">
         {updatedBy}
       </span>
-      <span className="hidden group-hover:inline">
+      <span title={updatedBy} className="hidden group-hover:inline">
         {formatDate(timestamp)}
       </span>
     </div>
@@ -582,7 +582,7 @@ function Home({ params, searchParams, isEmbedUser }) {
       <div className="flex-col">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
+            <span className={loadingAgentId === item._id ? "opacity-50 truncate block flex-1" : "truncate block flex-1"}>
               {item.name}
             </span>
             {loadingAgentId === item._id && (
@@ -639,8 +639,10 @@ function Home({ params, searchParams, isEmbedUser }) {
           </div>
           <div className="flex-col" title={item.name}>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-[300px]">
+                <span className="truncate block flex-1">
                 {item.name}
+                </span>
                 {item.bridge_status === 0 && (
                   <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
                     <ClockIcon size={12} />
@@ -720,8 +722,8 @@ function Home({ params, searchParams, isEmbedUser }) {
           </div>
           <div className="flex-col">
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
+              <div className="flex items-center gap-2 w-[300px]">
+                <span className={loadingAgentId === item._id ? "opacity-50 truncate block flex-1" : "truncate block flex-1"}>
                   {item.name}
                 </span>
                 {loadingAgentId === item._id && (
