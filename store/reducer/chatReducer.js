@@ -48,8 +48,7 @@ export const chatReducer = createSlice({
         const conversationMessage = {
           role: "user",
           content: message.content,
-          image_urls: message.image_urls || [],
-          files: message.files || [],
+          user_urls: message.user_urls || [],
           video_data: message.video_data || null,
           youtube_url: message.youtube_url || null
         };
@@ -69,7 +68,7 @@ export const chatReducer = createSlice({
           content: message.content,
           fallback: message.fallback,
           firstAttemptError: message.firstAttemptError,
-          image_urls: message.image_urls || [],
+          llm_urls: message.llm_urls || [],
           model: message.model,
           finish_reason: message.finish_reason
         };
@@ -233,7 +232,7 @@ export const chatReducer = createSlice({
           ...(messageType === 'assistant' && {
             fallback: message.fallback,
             firstAttemptError: message.firstAttemptError,
-            image_urls: message.image_urls || [],
+            llm_urls: message.llm_urls || [],
             model: message.model,
             finish_reason: message.finish_reason
           })

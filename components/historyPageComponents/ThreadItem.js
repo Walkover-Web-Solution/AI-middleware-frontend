@@ -429,7 +429,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
             if (!url) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
-                  <ImageFallback type={attachment.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
+                  <ImageFallback type={attachment?.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
                 </div>
               );
             }
@@ -725,7 +725,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   </ReactMarkdown>
 
                   {/* Edit button for assistant messages */}
-                  {!item?.image_urls?.length && !item?.fromRTLayer && (
+                  {!item?.llm_urls?.length && !item?.fromRTLayer && (
                     <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Edit message">
                       <button
                         className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
