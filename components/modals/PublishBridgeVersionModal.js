@@ -6,6 +6,7 @@ import {
   publishBridgeVersionAction,
   publishBulkVersionAction,
   updateBridgeAction,
+  updateBridgeVersionAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal, sendDataToParent } from "@/utils/utility";
@@ -457,6 +458,207 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     setShowComparison(prev => !prev);
   }, []);
 
+  // Handle reverting a specific change back to published version
+  const handleRevertChange = useCallback(async (path, publishedValue) => {
+    if (!params?.id || !searchParams?.get("version")) {
+      toast.error("Missing required parameters for revert operation");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const pathParts = path.split('.');
+      const rootKey = pathParts[0];
+      const finalKey = pathParts[pathParts.length - 1];
+      
+      // Get current version value for comparison
+      let currentValue = versionData;
+      for (const part of pathParts) {
+        currentValue = currentValue?.[part];
+      }
+
+      let dataToSend = {};
+
+      // Handle special cases based on the field type
+      switch (rootKey) {
+        case 'function_ids':
+          // Calculate incremental changes for function_ids array using proper functionData method
+          const currentFunctions = Array.isArray(currentValue) ? currentValue : [];
+          const publishedFunctions = Array.isArray(publishedValue) ? publishedValue : [];
+          
+          // Find functions to remove (added in version) and functions to add back (removed from published)
+          const functionsToRemove = currentFunctions.filter(id => !publishedFunctions.includes(id));
+          const functionsToAdd = publishedFunctions.filter(id => !currentFunctions.includes(id));
+          
+          // Use the proper functionData method for each operation
+          const functionOperations = [];
+          
+          // Remove functions that were added in version
+          functionsToRemove.forEach(functionId => {
+            functionOperations.push({
+              functionData: {
+                function_id: functionId,
+                function_operation: false // false = remove
+              }
+            });
+          });
+          
+          // Add back functions that were removed from published
+          functionsToAdd.forEach(functionId => {
+            functionOperations.push({
+              functionData: {
+                function_id: functionId,
+                function_operation: true // true = add
+              }
+            });
+          });
+          
+          // Execute all function operations sequentially
+          if (functionOperations.length > 0) {
+            for (const operation of functionOperations) {
+              await dispatch(updateBridgeVersionAction({
+                bridgeId: params?.id,
+                versionId: searchParams.get("version"),
+                dataToSend: operation
+              }));
+            }
+            // Skip the main update since we've already processed everything
+            return;
+          }
+          break;
+
+        case 'connected_agents':
+          // Calculate incremental changes for connected_agents using proper agents method
+          const currentAgents = (currentValue && typeof currentValue === 'object') ? currentValue : {};
+          const publishedAgents = (publishedValue && typeof publishedValue === 'object') ? publishedValue : {};
+          
+          const agentOperations = [];
+          
+          // Remove agents that were added in version (exist in current but not in published)
+          Object.keys(currentAgents).forEach(agentName => {
+            if (!publishedAgents.hasOwnProperty(agentName)) {
+              agentOperations.push({
+                agents: {
+                  connected_agents: {
+                    [agentName]: {
+                      "bridge_id": currentAgents[agentName]?.bridge_id
+                    }
+                  }
+                }
+              });
+            }
+          });
+          
+          // Add back agents that were removed from published (exist in published but not in current)
+          Object.keys(publishedAgents).forEach(agentName => {
+            if (!currentAgents.hasOwnProperty(agentName)) {
+              agentOperations.push({
+                agents: {
+                  connected_agents: {
+                    [agentName]: {
+                      "bridge_id": publishedAgents[agentName]?.bridge_id,
+                      "thread_id": publishedAgents[agentName]?.thread_id || false,
+                      ...(publishedAgents[agentName]?.version_id && { version_id: publishedAgents[agentName].version_id })
+                    }
+                  },
+                  agent_status: "1"
+                }
+              });
+            }
+          });
+          
+          // Execute all agent operations sequentially
+          if (agentOperations.length > 0) {
+            for (const operation of agentOperations) {
+              await dispatch(updateBridgeVersionAction({
+                bridgeId: params?.id,
+                versionId: searchParams.get("version"),
+                dataToSend: operation
+              }));
+            }
+            // Skip the main update since we've already processed everything
+            return;
+          }
+          break;
+
+        case 'doc_ids':
+          // Calculate incremental changes for doc_ids using proper method
+          const currentDocs = Array.isArray(currentValue) ? currentValue : [];
+          const publishedDocs = Array.isArray(publishedValue) ? publishedValue : [];
+          
+          // Find docs to remove (added in version) and docs to add back (removed from published)
+          const docsToRemove = currentDocs.filter(id => !publishedDocs.includes(id));
+          const docsToAdd = publishedDocs.filter(id => !currentDocs.includes(id));
+          
+          const docOperations = [];
+          
+          // Remove docs that were added in version
+          if (docsToRemove.length > 0) {
+            const filteredDocs = currentDocs.filter(id => !docsToRemove.includes(id));
+            docOperations.push({
+              doc_ids: filteredDocs
+            });
+          }
+          
+          // Add back docs that were removed from published
+          if (docsToAdd.length > 0) {
+            const currentAfterRemoval = docsToRemove.length > 0 
+              ? currentDocs.filter(id => !docsToRemove.includes(id))
+              : currentDocs;
+            const finalDocs = [...currentAfterRemoval, ...docsToAdd];
+            docOperations.push({
+              doc_ids: finalDocs
+            });
+          }
+          
+          // Execute doc operations sequentially
+          if (docOperations.length > 0) {
+            for (const operation of docOperations) {
+              await dispatch(updateBridgeVersionAction({
+                bridgeId: params?.id,
+                versionId: searchParams.get("version"),
+                dataToSend: operation
+              }));
+            }
+            // Skip the main update since we've already processed everything
+            return;
+          }
+          break;
+
+        default:
+          // For regular fields, build the nested structure
+          let current = dataToSend;
+          for (let i = 0; i < pathParts.length - 1; i++) {
+            current[pathParts[i]] = {};
+            current = current[pathParts[i]];
+          }
+          current[finalKey] = publishedValue;
+          break;
+      }
+      
+      // Update the version data with the appropriate structure
+      await dispatch(updateBridgeVersionAction({
+        bridgeId: params?.id,
+        versionId: searchParams.get("version"),
+        dataToSend
+      }));
+      
+      // Refresh the version data to reflect changes
+      await dispatch(getBridgeVersionAction({
+        versionId: searchParams.get("version")
+      }));
+          
+      toast.success(`Successfully reverted ${DIFFERNCE_DATA_DISPLAY_NAME(finalKey)} to published version`);
+      
+    } catch (error) {
+      console.error('Error reverting change:', error);
+      toast.error("Failed to revert change. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dispatch, params?.id, searchParams, versionData]);
+
   const getVersionIndexToPublish = useCallback((agentId, isPublishedVersion = false) => {
     // For agents that need to be published (version data)
     if (!isPublishedVersion) {
@@ -858,6 +1060,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                   showOnlyDifferences={true}
                   onClose={toggleComparison}
                   params={params}
+                  onRevertChange={handleRevertChange}
                 />
               </div>
             </div>

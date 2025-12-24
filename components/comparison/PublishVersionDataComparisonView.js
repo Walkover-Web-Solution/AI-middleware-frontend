@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { Check, X, AlertCircle } from 'lucide-react';
+import { Check, X, AlertCircle, Undo2 } from 'lucide-react';
 import { isEqual } from 'lodash';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { DIFFERNCE_DATA_DISPLAY_NAME, CONFIGURATION_KEYS_TO_EXCLUDE } from '@/jsonFiles/bridgeParameter';
 
-const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
+const PublishVersionDataComparisonView = ({ oldData, newData, params, onRevertChange }) => {
 
   const {apikeyData, functionData, knowledgeBaseData} = useCustomSelector((state) => ({
     apikeyData: state?.apiKeysReducer?.apikeys[params.org_id] || [],
@@ -28,7 +28,20 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
 
   // Function to deeply compare objects and find differences
   const findDifferences = (obj1, obj2, path = '') => {
+    // Handle null/undefined cases
+    if (!obj1 && !obj2) {
+      return {}; // Both are null/undefined, no difference
+    }
+    
     if (!obj1 || !obj2) {
+      // Only show as difference if one has actual content
+      const hasContent1 = obj1 && ((Array.isArray(obj1) && obj1.length > 0) || (typeof obj1 === 'object' && Object.keys(obj1).length > 0) || (typeof obj1 !== 'object'));
+      const hasContent2 = obj2 && ((Array.isArray(obj2) && obj2.length > 0) || (typeof obj2 === 'object' && Object.keys(obj2).length > 0) || (typeof obj2 !== 'object'));
+      
+      if (!hasContent1 && !hasContent2) {
+        return {}; // Both are empty, no difference
+      }
+      
       return { [path]: { oldValue: obj1, newValue: obj2, status: 'changed' } };
     }
 
@@ -39,8 +52,13 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       return {};
     }
 
-    // Handle arrays
+    // Handle arrays - check if both are empty
     if (Array.isArray(obj1) && Array.isArray(obj2)) {
+      // If both arrays are empty, no difference
+      if (obj1.length === 0 && obj2.length === 0) {
+        return {};
+      }
+      
       if (isEqual(obj1, obj2)) {
         return {};
       }
@@ -246,6 +264,20 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Revert Button */}
+                      {onRevertChange && status === 'changed' && (
+                        <div className="mt-3 flex justify-end">
+                          <button
+                            onClick={() => onRevertChange(path, oldValue)}
+                            className="btn btn-sm btn-outline btn-warning flex items-center gap-2"
+                            title="Revert this change to published version"
+                          >
+                            <Undo2 size={14} />
+                            Revert to Published
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
