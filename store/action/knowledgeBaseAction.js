@@ -18,7 +18,6 @@ export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) 
       return response?.data
     }
   } catch (error) {
-    toast.error('something went wrong')
     console.error(error);
   }
 };
@@ -56,7 +55,6 @@ export const deleteKnowBaseDataAction = ({data}) => async (dispatch) => {
     }
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId: data?.orgId }));
-    toast.error('something went wrong')
     console.error(error);
   }
 };
@@ -80,7 +78,6 @@ export const updateKnowledgeBaseAction = (data, orgId) => async (dispatch) => {
     }
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId }));
-    toast.error('Something went wrong');
     console.error(error);
   }
 };

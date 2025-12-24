@@ -10,7 +10,6 @@ import LoadingSpinner from "./LoadingSpinner";
 import Protected from "./Protected";
 import { BotIcon, Info, Plus } from "lucide-react";
 import { CloseIcon } from "./Icons";
-import { getModelAction } from "@/store/action/modelAction";
 
 const buildInitialState = () => ({
   selectedService: 'openai',
@@ -29,9 +28,8 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { modelsList, SERVICES } = useCustomSelector((state) => ({
+  const { SERVICES } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
-    modelsList: state?.modelReducer?.serviceModels[state.selectedService]
   }));
   const bridgeTypeForContext = useMemo(
     () => defaultBridgeType?.toLowerCase() === 'chatbot' ? 'chatbot' : 'api',
@@ -64,12 +62,6 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
       dispatch(getServiceAction({ orgid }));
     }
   }, [SERVICES, dispatch, orgid]);
-
-  useEffect(() => {
-    if (state.selectedService && !modelsList) {
-      dispatch(getModelAction({ service: state.selectedService }));
-    }
-  }, [state.selectedService, modelsList, dispatch]);
 
   useEffect(() => () => {
     closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);

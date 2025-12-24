@@ -272,9 +272,6 @@ const Layout = ({ children }) => {
         .then(() => {
           router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
         })
-        .catch(() => {
-          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
-        });
       }
 
       const uiUpdates = {};

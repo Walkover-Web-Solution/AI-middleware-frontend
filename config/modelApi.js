@@ -62,7 +62,7 @@ export const saveApiKeys = async (data) => {
     return response;
   } catch (error) {
     console.error(error);
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.message);
     return error;
   }
 }
@@ -73,6 +73,7 @@ export const updateApikey = async (dataToSend) => {
     return response;
   } catch (error) {
     console.error(error)
+    toast.error(error?.response?.data?.message);
     return error;
   }
 }
@@ -84,7 +85,9 @@ export const deleteApikey = async (id) => {
     });
     return response;
   } catch (error) {
+    
     console.error(error);
+    toast.error(error?.response?.data?.message);
     return error;
   }
 };

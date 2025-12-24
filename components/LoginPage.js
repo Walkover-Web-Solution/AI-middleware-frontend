@@ -49,15 +49,15 @@ const LoginPage = ({loading}) => {
                   <div className="relative">
                     {/* Rotating box positioned behind the logo - offset to match reference image */}
                     <div 
-                      className="absolute border-[0.5px] border-base-content/20 opacity-80" 
+                      className="absolute border-[0.5px] border-base-content/20 opacity-30" 
                       style={{ 
                         width: '100px',
                         height: '100px',
                         animation: 'spin 20s linear infinite',
                         transformOrigin: 'center',
                         transform: 'rotate(45deg)',
-                        left: '60px',    /* Position more to the right */
-                        top: '30px'       /* Position at center */
+                        left: '80px',    /* Position more to the right */
+                        top: '150px'       /* Position at center */
                       }}>
                     </div>
                       
@@ -74,7 +74,7 @@ const LoginPage = ({loading}) => {
                 </div>
               </a>
               <div 
-                      className="absolute border-[0.5px] border-base-content/20 opacity-80" 
+                      className="absolute border-[0.5px] border-base-content/20 opacity-30" 
                       style={{ 
                         width: '80px',
                         height: '80px',
@@ -86,7 +86,7 @@ const LoginPage = ({loading}) => {
                       }}>
                     </div>
                       <div 
-                      className="absolute border-[0.5px] border-base-content/20 opacity-80" 
+                      className="absolute border-[0.5px] border-base-content/20 opacity-30" 
                       style={{ 
                         width: '50px',
                         height: '50px',
@@ -137,7 +137,7 @@ const LoginPage = ({loading}) => {
             {/* Stats Section - Below login card */}
             <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">5000+</div>
+                <div className="text-sm font-semibold text-base-content">2000+</div>
                 <div className="text-xs text-base-content/60">INTEGRATIONS</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
