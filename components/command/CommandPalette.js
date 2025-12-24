@@ -548,7 +548,7 @@ const CommandPalette = ({isEmbedUser}) => {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search agents, bridges, API keys, docs, functions..."
+            placeholder="Search agents, bridges, API keys, docs..."
             className="flex-1 bg-transparent outline-none"
           />
           <button className="btn btn-sm" onClick={closePalette}><X className="w-4 h-4" /></button>
