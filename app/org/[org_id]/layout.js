@@ -95,13 +95,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
       if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
       if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
-      if (reference_id && !currentUser?.meta?.reference_id) paramsUpdate.reference_id = reference_id;
       if (unlimited_access && !currrentOrgDetail?.meta?.unlimited_access) paramsUpdate.unlimited_access = unlimited_access;
 
       // Check if we need to update user meta (either null meta or new UTM params
       try {
         // If UTM params exist, store marketing ref first
-        if (Object.keys(utmParams).length > 0 || (Object.keys(utmParams).length === 1 && !utmParams.reference_id)) {
+        if (!currentUser?.meta) {
           await dispatch(
             storeMarketingRefUserAction({
               ...utmParams,
