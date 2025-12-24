@@ -78,7 +78,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       // Skip user meta updates for embed users
       if (isEmbedUser) return;
       
-      const reference_id = getFromCookies("reference_id");
       const unlimited_access = getFromCookies("unlimited_access");
       const utmSource = getFromCookies("utm_source");
       const utmMedium = getFromCookies("utm_medium");
