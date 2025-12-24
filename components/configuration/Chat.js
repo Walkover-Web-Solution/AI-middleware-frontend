@@ -605,7 +605,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                 /* Display Mode */
                                 <div className="relative group">
                                   {/* Edit Button for Assistant Messages */}
-                                  {message.sender === "assistant" && !message.isLoading && (
+                                  {message.sender === "assistant" && !message.isStreaming && !message.isLoading && (
                                     <button
                                       onClick={() => handleEditMessage(message.id, message.content)}
                                       className="absolute -top-2 -right-5 opacity-0 group-hover:opacity-100 transition-opacity btn btn-sm btn-circle btn-ghost"
@@ -615,11 +615,38 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                     </button>
                                   )}
 
-                                  {/* Loading state for assistant message */}
-                                  {message.isLoading ? (
+                                  {/* Loading / Streaming state for assistant message */}
+                                  {message.isStreaming ? (
                                     <div className="py-1">
-                                      <span className="loading loading-dots loading-sm"></span>
+                                      {message.content ? (
+                                        <ReactMarkdown
+                                          components={{
+                                            code: ({
+                                              node,
+                                              inline,
+                                              className,
+                                              children,
+                                              ...props
+                                            }) => (
+                                              <CodeBlock
+                                                inline={inline}
+                                                className={className}
+                                                isDark={true}
+                                                {...props}
+                                              >
+                                                {children}
+                                              </CodeBlock>
+                                            ),
+                                          }}
+                                        >
+                                          {message.content}
+                                        </ReactMarkdown>
+                                      ) : (
+                                        <span className="text-xs text-base-content/50">Generating response…</span>
+                                      )}
                                     </div>
+                                  ) : message.isLoading ? (
+                                    <div className="py-1 text-xs text-base-content/50">Preparing response…</div>
                                   ) : message.sender === "expected" ? (
                                     /* Expected Response - Plain text display with label */
                                     <div className="whitespace-pre-wrap">{message.content}</div>

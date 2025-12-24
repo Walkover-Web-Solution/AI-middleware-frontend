@@ -2,7 +2,7 @@
 'use client';
 import { addThreadNMessageUsingRtLayer, addThreadUsingRtLayer } from "@/store/reducer/historyReducer";
 import { handleRtLayerMessage, setChatTestCaseIdAction, addChatErrorMessage } from "@/store/action/chatAction";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import WebSocketClient from 'rtlayer-client';
@@ -19,6 +19,10 @@ function useRtLayerEventHandler(channelIdentifier="") {
     const pathName = usePathname();
     const listenerRef = useRef(null);
     const reconnectTimeoutRef = useRef(null);
+    const streamingBufferRef = useRef({});
+    const activeStreamingMessageIdRef = useRef(null);
+    const pendingSkipCountRef = useRef(0);
+    const messagesByChannel = useSelector(state => state.chatReducer?.messagesByChannel || {});
     
     // Extract path parameters with error handling
     const { bridgeId, orgId } = useMemo(() => {
@@ -42,6 +46,7 @@ function useRtLayerEventHandler(channelIdentifier="") {
     if (!bridgeId || !orgId) return null;
     return (orgId + bridgeId).replace(/ /g, "_");
   }, [bridgeId, orgId, channelIdentifier]);
+  const chatChannelId = channelIdentifier || channelId;
 
   // Helper function to show toast notification
   const showAgentUpdatedToast = useCallback(() => {
@@ -85,23 +90,97 @@ function useRtLayerEventHandler(channelIdentifier="") {
     }
   }, []);
 
+  const findLatestLoadingMessageId = useCallback(() => {
+    if (!chatChannelId) return null;
+    const channelMessages = messagesByChannel?.[chatChannelId];
+    if (!Array.isArray(channelMessages) || !channelMessages.length) return null;
+    for (let i = channelMessages.length - 1; i >= 0; i--) {
+      const msg = channelMessages[i];
+      if (msg?.sender === 'assistant' && msg?.isLoading) {
+        return msg.id;
+      }
+    }
+    return null;
+  }, [chatChannelId, messagesByChannel]);
+
+  const handleStreamingPayload = useCallback((payload) => {
+    if (!chatChannelId) return;
+    const chunk = payload?.chunk || null;
+    const delta = typeof chunk?.delta === 'string' ? chunk.delta : '';
+
+    const channelMessages = messagesByChannel?.[chatChannelId] || [];
+    let targetMessageId = null;
+    if (chunk?.item_id) {
+      const hasMatchingId = channelMessages.some(msg => msg.id === chunk.item_id);
+      if (hasMatchingId) {
+        targetMessageId = chunk.item_id;
+      }
+    }
+    if (!targetMessageId) {
+      targetMessageId = activeStreamingMessageIdRef.current || findLatestLoadingMessageId();
+    }
+    if (!targetMessageId) return;
+
+    activeStreamingMessageIdRef.current = targetMessageId;
+
+    if (chunk?.type === 'delta' && delta) {
+      const previous = streamingBufferRef.current[targetMessageId] || '';
+      const updated = previous + delta;
+      streamingBufferRef.current[targetMessageId] = updated;
+      dispatch(handleRtLayerStreamingUpdate(chatChannelId, targetMessageId, updated, false));
+    }
+
+    if (payload?.done) {
+      const finalContent = streamingBufferRef.current[targetMessageId] || '';
+      dispatch(handleRtLayerStreamingUpdate(chatChannelId, targetMessageId, finalContent, true));
+      delete streamingBufferRef.current[targetMessageId];
+      activeStreamingMessageIdRef.current = null;
+      pendingSkipCountRef.current += 1;
+    }
+  }, [chatChannelId, dispatch, findLatestLoadingMessageId, messagesByChannel]);
+
+  const shouldSkipFinalResponse = useCallback(() => {
+    if (pendingSkipCountRef.current > 0) {
+      pendingSkipCountRef.current -= 1;
+      return true;
+    }
+    return false;
+  }, []);
+
   // ---------- History data processor (socket messages) ----------
   const processHistoryData = useCallback((message) => {
     try {
       const parsedData = typeof message === 'string' ? JSON.parse(message) : message;
-      const { response, error } = parsedData;
-      if (!response && !error) {
+      const {
+        streaming = false,
+        response: responsePayload,
+        success = true,
+        error: rootError
+      } = parsedData || {};
+
+      if (rootError && chatChannelId) {
+        dispatch(addChatErrorMessage(chatChannelId, rootError?.error || rootError?.message || 'Unable to process response'));
+        return;
+      }
+
+      if (streaming) {
+        handleStreamingPayload(parsedData);
+        return;
+      }
+
+      const response = responsePayload || parsedData || {};
+      const { Thread, Messages, type } = response || {};
+
+      if (!success && !responsePayload) {
         console.error("No response found in data");
-        return { success: false, error: "No response found" };
+        return;
       }
-      if(error)
-      {
-        dispatch(addChatErrorMessage(channelIdentifier, error?.error));
-        return
+
+      if (response?.error && chatChannelId) {
+        dispatch(addChatErrorMessage(chatChannelId, response.error?.message || response.error));
+        return;
       }
-      const { Thread, Messages, type } = response;
       
-      // Handle agent_updated type
       if (type === 'agent_updated') {
         const agentId = response.version_id || response.bridge_id;
         const currentTabInitiated = didCurrentTabInitiateUpdate(String(agentId));
@@ -116,9 +195,10 @@ function useRtLayerEventHandler(channelIdentifier="") {
         return;
       }
 
-      // Handle new history data format (direct message in response)
       if (response.message_id) {
-        // Create thread data from response
+        if (shouldSkipFinalResponse()) {
+          return;
+        }
         const threadData = {
           thread_id: response.thread_id,
           sub_thread_id: response.sub_thread_id || response.thread_id,
@@ -127,7 +207,6 @@ function useRtLayerEventHandler(channelIdentifier="") {
 
         const llmUrls = buildLlmUrls(response.image_urls || [], []);
 
-        // Create message data from response
         const messageData = {
           id: response.message_id,
           user: response.user,
@@ -155,32 +234,29 @@ function useRtLayerEventHandler(channelIdentifier="") {
           parent_id: response.parent_id,
           child_id: response.child_id,
           fromRTLayer: true,
-          created_at: new Date().toISOString() // Add timestamp
+          created_at: new Date().toISOString()
         };
 
-        // Dispatch to history reducer
         if (threadData.thread_id) {
           dispatch(addThreadUsingRtLayer({ Thread: threadData }));
-          
-          // Create Messages object in the format expected by the reducer
-          const Messages = {
+          const messageMap = {
             [response.message_id]: messageData
           };
           
           dispatch(addThreadNMessageUsingRtLayer({
             thread_id: threadData.thread_id, 
             sub_thread_id: threadData.sub_thread_id, 
-            Messages
+            Messages: messageMap
           }));
         }
         return;
       }
 
-      // Handle chat messages for dry run (non-orchestral)
       if (response.data) {
-        const channelId = channelIdentifier;        
+        if (shouldSkipFinalResponse()) {
+          return;
+        }
         if (response.data) {
-          // Process the response data structure you provided
           const rawImages = Array.isArray(response.data.images) ? response.data.images : [];
           const llmUrls = buildLlmUrls(rawImages, []);
           const messageData = {
@@ -196,33 +272,26 @@ function useRtLayerEventHandler(channelIdentifier="") {
             tools_data: response.data.tools_data || {},
             annotations: response.data.annotations,
             fromRTLayer: true,
-            usage: parsedData.response?.usage // Include usage data if available
+            usage: parsedData.response?.usage
           };
-          if (channelId) {
-            // Dispatch to chat reducer - this will clear loading
-            dispatch(handleRtLayerMessage(channelId, messageData));
+          if (chatChannelId) {
+            dispatch(handleRtLayerMessage(chatChannelId, messageData));
           }
         } else if (Messages && Array.isArray(Messages)) {
-          // Fallback for old message format
-          if (channelId) {
+          if (chatChannelId) {
             Messages.forEach(msg => {
               msg.fromRTLayer = true;
-              dispatch(handleRtLayerMessage(channelId, msg));
+              dispatch(handleRtLayerMessage(chatChannelId, msg));
             });
           }
         }
         return;
       }
 
-      // Handle testcase_id from RT layer response
-      if (response.testcase_id) {
-        const channelId = channelIdentifier;
-        if (channelId) {
-          dispatch(setChatTestCaseIdAction(channelId, response.testcase_id));
-        }
+      if (response.testcase_id && chatChannelId) {
+        dispatch(setChatTestCaseIdAction(chatChannelId, response.testcase_id));
       }
    
-      // Handle legacy history data format (existing functionality)
       if (!Thread || !Messages) {
         return;
       }
@@ -230,21 +299,19 @@ function useRtLayerEventHandler(channelIdentifier="") {
         Messages[key].fromRTLayer = true;
       });
       
-      // Clean the data to reduce serialization overhead
       const cleanThread = {
         thread_id: Thread.thread_id,
         sub_thread_id: Thread.sub_thread_id,
         bridge_id: Thread.bridge_id
       };
 
-      // Dispatch actions to Redux store (existing history functionality)
       dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
       dispatch(addThreadNMessageUsingRtLayer({thread_id:cleanThread.thread_id, sub_thread_id:cleanThread.sub_thread_id, Messages}))
             
     } catch (error) {
       console.error("Error parsing message data:", error);
     }
-  }, [dispatch, channelIdentifier, pathName, showAgentUpdatedToast]);
+  }, [chatChannelId, dispatch, handleStreamingPayload, pathName, shouldSkipFinalResponse, showAgentUpdatedToast]);
     
     // WebSocket client initialization with retry logic
     const initializeWebSocketClient = useCallback(async () => {
