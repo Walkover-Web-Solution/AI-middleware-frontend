@@ -5,6 +5,7 @@ import ToneDropdown from './ToneDropdown';
 import ResponseStyleDropdown from './ResponseStyleDropdown';
 import AdvancedConfiguration from './AdvancedConfiguration';
 import Protected from '@/components/Protected';
+import BridgeTypeToggle from './BridgeTypeToggle';
 
 const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = true }) => {
   // Determine if content is read-only (either published or user is not an editor)
@@ -17,7 +18,8 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
     bridgeType,
     modelType,
     currentView,
-    switchView
+    switchView,
+    shouldShowAgentType,
   } = useConfigurationContext();
   return (
     <div className="z-very-low text-base-content w-full max-w-md cursor-pointer" tabIndex={0}>
@@ -39,6 +41,11 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
       >
         {/* Settings Content */}
         <div className="flex flex-col gap-6">
+           {shouldShowAgentType && bridgeType?.toString()?.toLowerCase() !== "chatbot" &&(
+            <div className="bg-base-100 rounded-lg">
+              <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} isEditor={isEditor} />
+            </div>
+          )}
 
           {/* Only show tone, response style, and advanced config if modelType is NOT image */}
           {modelType !== 'image' && (
