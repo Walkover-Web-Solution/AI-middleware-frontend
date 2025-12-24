@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, SettingsIcon } from '@/components/Icons';
 import { useConfigurationContext } from '../ConfigurationContext';
 import ToneDropdown from './ToneDropdown';
@@ -9,6 +9,7 @@ import BridgeTypeToggle from './BridgeTypeToggle';
 
 const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = true }) => {
   // Determine if content is read-only (either published or user is not an editor)
+
   const isReadOnly = isPublished || !isEditor;
   const [isOpen, setIsOpen] = useState(false);
   const {
@@ -19,8 +20,12 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
     modelType,
     currentView,
     switchView,
-    shouldShowAgentType,
+    showConfigType,
   } = useConfigurationContext();
+ const shouldShowAgentType = useMemo(
+    () => ((isEmbedUser && showConfigType) || !isEmbedUser),
+    [isEmbedUser, showConfigType]
+  );
   return (
     <div className="z-very-low text-base-content w-full max-w-md cursor-pointer" tabIndex={0}>
       <div
