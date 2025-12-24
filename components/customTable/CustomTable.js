@@ -58,6 +58,12 @@ const CustomTable = ({
                     ? (a.createdAt_original ?? a.created_at_original)
                     : activeColumn === 'updatedAt'
                     ? (a.updatedAt_original ?? a.updated_at_original)
+                    : activeColumn === 'agent_limit'
+                    ? a.agent_limit_original
+                    : activeColumn === 'created_by'
+                    ? a.created_by_original
+                    : activeColumn === 'updated_by'
+                    ? a.updated_by_original
                     : a[activeColumn];
                 const valueB = activeColumn === 'name'
                     ? b.actualName
@@ -65,13 +71,19 @@ const CustomTable = ({
                     ? (b.createdAt_original ?? b.created_at_original)
                     : activeColumn === 'updatedAt'
                     ? (b.updatedAt_original ?? b.updated_at_original)
+                    : activeColumn === 'agent_limit'
+                    ? b.agent_limit_original
+                    : activeColumn === 'created_by'
+                    ? b.created_by_original
+                    : activeColumn === 'updated_by'
+                    ? b.updated_by_original
                     : b[activeColumn];
 
                 // Explicit numeric sorting for usage or cost
                 if (activeColumn === 'usage') {
                     // Sort by cost value when usage column is active
-                    const costA = a.cost ? Number(a.cost.replace(/[^0-9.-]+/g, '')) : 0;
-                    const costB = b.cost ? Number(b.cost.replace(/[^0-9.-]+/g, '')) : 0;
+                    const costA = (a.cost && typeof a.cost === 'string') ? Number(a.cost.replace(/[^0-9.-]+/g, '')) : 0;
+                    const costB = (b.cost && typeof b.cost === 'string') ? Number(b.cost.replace(/[^0-9.-]+/g, '')) : 0;
                     return ascending ? costA - costB : costB - costA;
                 }
                 
@@ -80,6 +92,13 @@ const CustomTable = ({
                     const usageA = Number(a.totalTokens ?? 0);
                     const usageB = Number(b.totalTokens ?? 0);
                     return ascending ? usageA - usageB : usageB - usageA;
+                }
+                
+                // Numeric sorting for agent_limit column
+                if (activeColumn === 'agent_limit') {
+                    const limitA = Number(a.agent_limit_original ?? 0);
+                    const limitB = Number(b.agent_limit_original ?? 0);
+                    return ascending ? limitA - limitB : limitB - limitA;
                 }
                 
                 // Special handling for date columns (last_used, created_at, createdAt)
