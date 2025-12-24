@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import AdvancedParameters from "./configurationComponent/AdvancedParamenter";
-import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
 import ConnectedAgentFlowPanel from "./ConnectedAgentFlowPanel";
@@ -57,7 +56,7 @@ const SetupView = memo(() => {
                         level={2}
                         isEditor={isEditor}
                     />
-                    <ConfigurationSettingsAccordion />
+                  
                 </>
             ) : (
                 <NonImageModelConfig />

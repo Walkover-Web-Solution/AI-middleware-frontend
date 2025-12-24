@@ -1,28 +1,28 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, SettingsIcon } from '@/components/Icons';
 import { useConfigurationContext } from '../ConfigurationContext';
-import BridgeTypeToggle from './BridgeTypeToggle';
 import ToneDropdown from './ToneDropdown';
 import ResponseStyleDropdown from './ResponseStyleDropdown';
 import AdvancedConfiguration from './AdvancedConfiguration';
 import Protected from '@/components/Protected';
+import BridgeTypeToggle from './BridgeTypeToggle';
 
 const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = true }) => {
   // Determine if content is read-only (either published or user is not an editor)
+
   const isReadOnly = isPublished || !isEditor;
   const [isOpen, setIsOpen] = useState(false);
   const {
     params,
     searchParams,
-    showConfigType,
     hideAdvancedConfigurations,
     bridgeType,
     modelType,
     currentView,
-    switchView
+    switchView,
+    showConfigType,
   } = useConfigurationContext();
-
-  const shouldShowAgentType = useMemo(
+ const shouldShowAgentType = useMemo(
     () => ((isEmbedUser && showConfigType) || !isEmbedUser),
     [isEmbedUser, showConfigType]
   );
@@ -46,7 +46,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
       >
         {/* Settings Content */}
         <div className="flex flex-col gap-6">
-          {shouldShowAgentType && bridgeType?.toString()?.toLowerCase() !== "chatbot" &&(
+           {shouldShowAgentType && bridgeType?.toString()?.toLowerCase() !== "chatbot" &&(
             <div className="bg-base-100 rounded-lg">
               <BridgeTypeToggle params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isPublished={isPublished} isEditor={isEditor} />
             </div>

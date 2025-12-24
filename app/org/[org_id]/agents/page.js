@@ -1181,7 +1181,7 @@ const handleUsageFilterDropdownClick = (e) => {
                       </div>
                     </MainLayout>
 
-                   <div className="flex flex-row gap-4">
+                   <div className="flex flex-row gap-4 mb-2">
   {allBridges.length > 5 && (
     <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents" />
   )}

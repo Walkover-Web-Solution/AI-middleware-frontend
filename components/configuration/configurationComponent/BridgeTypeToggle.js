@@ -112,4 +112,3 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished, isEd
 };
 
 export default Protected(BridgeTypeToggle);
-

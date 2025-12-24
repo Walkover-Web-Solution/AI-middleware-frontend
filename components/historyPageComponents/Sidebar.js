@@ -157,6 +157,7 @@ const Sidebar = memo(({
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
+    setExpandedThreads([]); // Collapse all threads when searching
     dispatch(clearSubThreadData());
     setSearchLoading(true);
 
@@ -227,6 +228,9 @@ const Sidebar = memo(({
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
+    
+    // Reset expanded threads state when clearing search - keep threads collapsed
+    setExpandedThreads([]);
 
     try {
       // Fetch regular history data (empty keyword)
