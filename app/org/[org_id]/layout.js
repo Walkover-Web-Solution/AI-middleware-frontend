@@ -145,7 +145,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           removeCookie("unlimited_access");
         }
 
-        const data = (currentUserMeta?.meta === null || Object.keys(utmParams).length > 0 || Object.keys(paramsUpdate).length > 0) ? await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser)) : null;
+        const data = (currentUserMeta === null || Object.keys(utmParams).length > 0 || Object.keys(paramsUpdate).length > 0) ? await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser)) : null;
         if (data?.data?.status) {
           currentUserMeta = data?.data?.data?.user?.meta;
         }
