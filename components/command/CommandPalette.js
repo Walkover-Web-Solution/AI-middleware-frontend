@@ -4,7 +4,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X, ChevronDown, ChevronRight } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/utils/utility";
-import Protected from "../protected";
+import Protected from "../Protected";
 
 function getOrgIdFromPath(pathname) {
   const parts = (pathname || "").split("/").filter(Boolean);
@@ -139,7 +139,6 @@ const CommandPalette = ({isEmbedUser}) => {
         fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
       );
     };
-
     const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id","last_used","total_tokens"]).map((a) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
@@ -549,7 +548,7 @@ const CommandPalette = ({isEmbedUser}) => {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search agents, bridges, API keys, docs, functions..."
+            placeholder="Search agents, bridges, API keys, docs..."
             className="flex-1 bg-transparent outline-none"
           />
           <button className="btn btn-sm" onClick={closePalette}><X className="w-4 h-4" /></button>

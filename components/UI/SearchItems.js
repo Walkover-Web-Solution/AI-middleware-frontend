@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import Protected from '../protected';
+import Protected from '../Protected';
 
 const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,4 +1,4 @@
-import { batchApi } from '@/config';
+import { batchApi } from '@/config/index';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { webhookURLForBatchAPIReducer } from '@/store/reducer/bridgeReducer';
 import React, { useState, useCallback, useMemo } from 'react';

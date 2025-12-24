@@ -1,7 +1,7 @@
-import CopyButton from '@/components/copyButton/copyButton';
+import CopyButton from '@/components/copyButton/CopyButton';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { generateAccessKeyAction } from '@/store/action/orgAction';
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 
 function RAGEmbedContent({ params }) {
@@ -9,22 +9,6 @@ function RAGEmbedContent({ params }) {
     const access_key = useCustomSelector((state) =>
         state?.userDetailsReducer?.organizations?.[params.org_id]?.meta?.auth_token || ""
     );
-
-    const [copied, setCopied] = useState({
-        accessKey: false,
-    });
-
-    const handleCopy = async (text, key) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopied(prev => ({ ...prev, [key]: true }));
-            setTimeout(() => {
-                setCopied(prev => ({ ...prev, [key]: false }));
-            }, 2000);
-        } catch (error) {
-            console.error('Failed to copy:', error);
-        }
-    };
 
     const handleGenerateAccessKey = () => {
         dispatch(generateAccessKeyAction(params?.org_id))

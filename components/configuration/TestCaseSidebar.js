@@ -13,9 +13,8 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   const [generatingTestCases, setGeneratingTestCases] = useState(false);
   const dispatch = useDispatch();
 
-  const { testCases, isFirstTestcase, versions } = useCustomSelector((state) => ({
+  const { testCases, versions } = useCustomSelector((state) => ({
     testCases: state?.testCasesReducer?.testCases?.[params?.id] || [],
-    isFirstTestcase: state?.userDetailsReducer?.userDetails?.meta?.onboarding?.TestCasesSetup || false,
     versions: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
   }));
 
@@ -356,29 +355,6 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
           })
         )}
       </div>
-
-      {/* Footer Actions - Generate More Test Cases */}
-      {/* {testCaseArray.length === 0 && (
-        <div className="p-4 border-t border-base-content/20 mt-auto">
-          <button
-            className="w-full btn btn-outline btn-sm gap-2 hover:btn-primary transition-all duration-200"
-            onClick={generateMoreTestCases}
-            disabled={generatingTestCases}
-          >
-            {generatingTestCases ? (
-              <>
-                <Clock className="w-4 h-4 animate-spin" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                <span>Generate More Test Cases</span>
-              </>
-            )}
-          </button>
-        </div>
-      )} */}
     </div>
   );
 };

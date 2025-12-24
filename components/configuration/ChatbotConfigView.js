@@ -1,7 +1,7 @@
 import React from 'react';
-import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
-import StarterQuestionToggle from "./configurationComponent/starterQuestion";
-import ActionList from "./configurationComponent/actionList";
+import UserRefernceForRichText from "./configurationComponent/UserRefernceForRichText";
+import StarterQuestionToggle from "./configurationComponent/StarterQuestion";
+import ActionList from "./configurationComponent/ActionList";
 
 const ChatbotConfigView = ({ params, searchParams , isPublished }) => {
     return (

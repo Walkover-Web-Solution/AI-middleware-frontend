@@ -1,32 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-
-/**
- * Global Dropdown component
- * Modes:
- * - Default (select-like): Renders a button trigger with label/value and a menu of options
- * - Wrapper: Wraps any custom trigger (e.g., an input field) via children and shows a menu below it
- *
- * Props:
- * - options: Array<{ value: string, label: React.ReactNode, description?: React.ReactNode, icon?: React.ComponentType<any> }>
- * - value: string | null
- * - onChange: (value: string, option?: any) => void
- * - placeholder: string
- * - disabled: boolean
- * - searchable: boolean (adds a filter input at top of menu)
- * - showSearch: boolean (alias for `searchable`)
- * - searchPlaceholder: string (placeholder for search input)
- * - onSearchChange: function (receives the current query)
- * - size: 'sm' | 'md' | 'lg'
- * - maxLabelLength: number (truncate selected label in trigger if label is string)
- * - className: string for trigger wrapper
- * - menuClassName: string for menu container
- * - placement: 'bottom-start' | 'bottom-end'
- * - onOptionHover: (option|null) => void (called when hovering an option; null on leave)
- * - onMenuClose: () => void (called when the menu closes)
- * - showGroupHeaders: boolean (if options contain meta.group, render section headers)
- * - children: custom trigger (for wrapper mode). If provided, acts as wrapper-mode.
- */
 const Dropdown = ({
   options = [],
   value = null,

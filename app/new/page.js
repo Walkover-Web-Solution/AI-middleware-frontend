@@ -1,18 +1,17 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations, renderedOrganizations, setInCookies } from '@/utils/utility';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { renderedOrganizations, setInCookies } from '@/utils/utility';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import Protected from '@/components/protected';
+import Protected from '@/components/Protected';
 import { getModelAction } from '@/store/action/modelAction';
-import { switchOrg } from '@/config';
+import { switchOrg, switchUser } from '@/config/index';
 import { toast } from 'react-toastify';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter, useSearchParams } from 'next/navigation';
-import LoadingSpinner from '@/components/loadingSpinner';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
-import { switchUser } from '@/config';
 
 const INITIAL_FORM_STATE = {
     bridgeName: '',
@@ -121,7 +120,16 @@ function Page() {
                 dataToSend: bridgeData,
                 orgid: selectedOrg.id
             }, (data) => {
-                route.push(`/org/${selectedOrg.id}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+                const createdAgent = data?.data?.agent;
+                const agentId = createdAgent?._id;
+                const targetVersion = createdAgent?.published_version_id || createdAgent?.versions?.[0];
+
+                if (agentId && targetVersion) {
+                    route.push(`/org/${selectedOrg.id}/agents/configure/${agentId}?version=${targetVersion}`);
+                } else {
+                    toast.error('Unable to open the newly created agent. Please try again.');
+                    updateFormState({ isLoading: false });
+                }
             }));
 
         } catch (error) {
@@ -154,10 +162,6 @@ function Page() {
             selectedModelType: e.target.selectedOptions[0].parentNode.label
         });
     }, [updateFormState]);
-
-    const filteredOrganizations = useMemo(() =>
-        filterOrganizations(organizations, formState.searchQuery),
-        [organizations, formState.searchQuery]);
 
     if (formState.isLoading || isInitialLoading) {
         return <LoadingSpinner />;
@@ -193,31 +197,10 @@ function Page() {
 
                     <form onSubmit={handleSubmit} className="space-y-6 border border-base-300 rounded p-6">
                         <div className="space-y-4">
-                            {/* Bridge Type Selection */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">
                                     Agent Type
                                 </label>
-                                {/* <div className="flex gap-4">
-                                    {['api'].map((type) => (
-                                        <label
-                                            key={type}
-                                            className="flex items-center space-x-2 cursor-pointer"
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="bridgeType"
-                                                value={type}
-                                                checked={formState.bridgeType === type}
-                                                onChange={() => updateFormState({ bridgeType: type })}
-                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <span className="text-gray-700 capitalize">
-                                                {type === 'api' ? 'API' : 'Chat Bot'}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div> */}
                             </div>
 
                             {/* Name Fields */}

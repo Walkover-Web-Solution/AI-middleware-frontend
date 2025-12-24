@@ -1,7 +1,6 @@
 import { closeModal, createDiff, simulateStreaming } from '@/utils/utility';
 import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons';
 import React, { useEffect, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
 import Canvas from '../Canvas';
 import Modal from '../UI/Modal';
@@ -70,7 +69,7 @@ function OptimiseBaseModal({
       setCurrentIndex(history.length);
 
       return result;
-    } catch (error) {
+    } catch {
       setLoading(false);
       setErrorMessage("Failed to optimize content.");
       return null;
@@ -95,7 +94,7 @@ function OptimiseBaseModal({
       setLoading(true);
       await onApply(contentToApply);
       handleCloseModal();
-    } catch (error) {
+    } catch {
       setErrorMessage("Failed to apply changes.");
     } finally {
       setLoading(false);

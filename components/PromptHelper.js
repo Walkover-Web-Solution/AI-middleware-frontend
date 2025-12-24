@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BookIcon, BrainIcon, CloseIcon } from './Icons';
-import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import { usePathname } from 'next/navigation';
 import Canvas from '@/components/Canvas';
 import { useDispatch } from 'react-redux';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
-import { optimizePromptApi } from '@/config';
-import Protected from './protected';
+import { optimizePromptApi } from '@/config/index';
+import Protected from './Protected';
 
 const PromptHelper = ({
   isVisible,
@@ -27,10 +23,6 @@ const PromptHelper = ({
 }) => {
   const dispatch = useDispatch();
   const [optimizedPrompt, setOptimizedPrompt] = useState('');
-
-  const pathname = usePathname();
-  const pathParts = pathname.split('?')[0].split('/');
-  const bridgeId = pathParts[5];
 
   const handleOptimizePrompt = useCallback(async (instructionText) => {
     try {
@@ -69,14 +61,11 @@ const PromptHelper = ({
 
   const modalRef = React.createRef();
 
-  // Handle click outside and ESC key for auto-close
   useEffect(() => {
     if (!autoCloseOnBlur) return;
 
     const handleClickOutside = (event) => {
-      // Check if the click is outside our modal content
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        // Check if the clicked element has the modal-backdrop class or is a parent of it
         const isBackdrop = event.target.classList.contains('modal-backdrop') ||
           event.target.closest('.modal-backdrop');
 

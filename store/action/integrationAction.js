@@ -1,4 +1,4 @@
-import { createIntegrationApi, getAllIntegrationApi, updateIntegrationData } from "@/config";
+import { createIntegrationApi, getAllIntegrationApi, updateIntegrationData } from "@/config/index";
 import { toast } from "react-toastify";
 import { addIntegrationDataReducer, fetchAllIntegrationData, updateIntegrationDataReducer } from "../reducer/integrationReducer";
 

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
+import AdvancedConfiguration from "./configurationComponent/AdvancedConfiguration";
 import { useConfigurationContext } from './ConfigurationContext';
 
 const AdvancedSection = memo(() => {

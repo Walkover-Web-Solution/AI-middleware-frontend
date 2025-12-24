@@ -1,4 +1,4 @@
-import { createNewAuth, getAuthData } from "@/config";
+import { createNewAuth, getAuthData } from "@/config/index";
 import { toast } from "react-toastify";
 import { addAuthenticationData, fetchAllAuthenticationData } from "../reducer/authReducer";
 

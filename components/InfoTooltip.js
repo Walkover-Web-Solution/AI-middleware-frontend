@@ -7,9 +7,9 @@ import {
   autoUpdate,
 } from '@floating-ui/react';
 import { createPortal } from 'react-dom';
-import Tutorial from './tutorial';
+import Tutorial from './Tutorial';
 import { ExternalLinkIcon } from './Icons';
-import SmartLink from './smartLink';
+import SmartLink from './SmartLink';
 
 const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
   const [open, setOpen] = useState(false); // for hover state

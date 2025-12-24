@@ -1,7 +1,7 @@
 // PageHeader.js
 import React from 'react';
 import { ExternalLinkIcon } from './Icons';
-import SmartLink from './smartLink';
+import SmartLink from './SmartLink';
 
 /**
  * Reusable page header component

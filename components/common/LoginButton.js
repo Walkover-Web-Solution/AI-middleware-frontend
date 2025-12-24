@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import WithPublicAgentAuth from '../withPublicAgentAuth';
 
 const LoginButton = () => {
   const router = useRouter();

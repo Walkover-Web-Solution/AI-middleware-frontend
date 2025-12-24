@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Canvas from '@/components/Canvas';
 import { useDispatch } from 'react-redux';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
-import { optimizePromptApi } from '@/config';
+import { optimizePromptApi } from '@/config/index';
 
 const PromptHelper = ({ 
   isVisible, 
@@ -120,24 +120,21 @@ const PromptHelper = ({
   };
   
   const getPromptBuilderHeight = () => {
-    if (focusedSection === 'promptBuilder') return 'h-3/4'; // 75% when focused
-    if (focusedSection === 'notes') return 'h-1/4'; // 25% when notes is focused
-    return 'h-1/2'; // 50% when nothing is focused (default state)
+    if (focusedSection === 'promptBuilder') return 'h-3/4';
+    if (focusedSection === 'notes') return 'h-1/4';
+    return 'h-1/2';
   };
   
   const modalRef = React.createRef();
 
-  // Handle click outside and ESC key for auto-close
   useEffect(() => {
     if (!autoCloseOnBlur) return;
 
     const handleClickOutside = (event) => {
-      // Check if the click is outside our modal content
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        // Check if the clicked element has the modal-backdrop class or is a parent of it
         const isBackdrop = event.target.classList.contains('modal-backdrop') || 
                            event.target.closest('.modal-backdrop');
-        
+
         if (isBackdrop) {
           onClose();
         }

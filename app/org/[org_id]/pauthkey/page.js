@@ -1,25 +1,24 @@
 "use client"
-import CustomTable from '@/components/customTable/customTable'
+import CustomTable from '@/components/customTable/CustomTable'
 import MainLayout from '@/components/layoutComponents/MainLayout'
-import LoadingSpinner from '@/components/loadingSpinner'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
-import Protected from '@/components/protected'
-import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
+import Protected from '@/components/Protected'
+import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast'
 import useTutorialVideos from '@/hooks/useTutorialVideos'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, formatDate, formatRelativeTime, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, use } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
-import { use } from 'react';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-
+import { Lock } from 'lucide-react';
 export const runtime = 'edge';
 
 function Page({ params }) {
@@ -28,14 +27,17 @@ function Page({ params }) {
 
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, descriptions } = useCustomSelector((state) => {
+  const { authData, isFirstPauthCreation, descriptions, orgRole , linksData } = useCustomSelector((state) => {
     const user = state.userDetailsReducer.userDetails || [];
     return {
       authData: state?.authDataReducer?.authData || [],
       isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
       descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+      orgRole: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]?.role_name,
+      linksData: state.flowDataReducer.flowData.linksData || [],
     };
   });
+ 
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -129,7 +131,15 @@ function Page({ params }) {
       </div>
     );
   };
-
+ if(orgRole === "Viewer") return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center">
+        <Lock size={48} className="text-error mb-4" />
+        <h2 className="text-xl font-bold text-center">Access Restricted</h2>
+        <p className="text-center mt-2">This page is locked for viewers</p>
+      </div>
+    </div>
+  );
   return (
     <div className="h-auto">
       <div className="w-full">
@@ -154,7 +164,7 @@ function Page({ params }) {
               <PageHeader
                 title="Auth Key"
                 description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
-                docLink="https://gtwy.ai/blogs/features/pauthkey"
+                docLink={linksData?.find(link => link.title === 'Auth Key')?.blog_link}
               />
 
             </div>

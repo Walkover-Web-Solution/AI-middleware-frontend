@@ -9,10 +9,6 @@ import CommandPalette from "@/components/command/CommandPalette";
 import { usePathname } from "next/navigation";
 import { useThemeManager } from "@/customHooks/useThemeManager";
 
-export const metadata = {
-  title: "Login | Student",
-};
-
 /**
  * The Wrapper component is the top level component of our application
  * It provides the Redux store to all the child components

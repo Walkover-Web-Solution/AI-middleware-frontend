@@ -5,6 +5,7 @@ const initialState = {
   currentOrgId: null,
   loading: false,
   error: null,
+  users: []
 };
 
 const orgReducer = createSlice({
@@ -33,10 +34,13 @@ const orgReducer = createSlice({
     clearCurrentOrgId: (state) => {
       state.currentOrgId = null;
     },
+    usersFetched: (state, action) => {
+      state.users = action.payload.data;
+    },
   },
 });
 
 
-export const { organizationCreated, organizationsFetched, setCurrentOrgId, clearCurrentOrgId } = orgReducer.actions;
+export const { organizationCreated, organizationsFetched, setCurrentOrgId, clearCurrentOrgId, usersFetched } = orgReducer.actions;
 
 export default orgReducer.reducer;

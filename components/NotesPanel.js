@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
-import { BookIcon, CloseIcon } from './Icons';
 import { usePathname } from 'next/navigation';
-import Protected from './protected';
+import Protected from './Protected';
 
 const NotesPanel = ({
   isVisible,

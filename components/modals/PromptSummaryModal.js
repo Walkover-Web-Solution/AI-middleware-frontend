@@ -11,7 +11,7 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
     const contentRef = useRef(null);
     
     const handleInput = useCallback((e) => {
-        const newValue = e?.target?.value || '';
+        const newValue = e.target.value || '';
         onChange({ target: { value: newValue } });
     }, [onChange]);
 
@@ -58,7 +58,7 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
 OptimizedTextarea.displayName = 'OptimizedTextarea';
 
 // Reusable Agent Summary Content Component
-export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId }) => {
+export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, setAutoGenerateSummary = () => {}, showTitle = true, showButtons = true, onSave = () => {}, isMandatory = false, showValidationError = false, prompt, versionId,isEditor=true }) => {
     const dispatch = useDispatch();
     const { bridge_summary } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
@@ -181,7 +181,7 @@ export const AgentSummaryContent = memo(({ params, autoGenerateSummary = false, 
                     <button 
                         className="btn btn-primary btn-sm"
                         onClick={handleSaveSummary}
-                        disabled={validationProps.isDisabled}
+                        disabled={validationProps.isDisabled|| !isEditor}
                     >
                         Save
                     </button>

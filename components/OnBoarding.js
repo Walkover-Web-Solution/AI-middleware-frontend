@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateUserMetaOnboarding } from '@/store/action/orgAction';
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useDispatch } from 'react-redux';
 import { createPortal } from 'react-dom';
 

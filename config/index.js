@@ -13,4 +13,3 @@ export * from './utilityApi';
 export * from './historyApi';
 export * from './integrationApi';
 
-export const runtime = 'edge';

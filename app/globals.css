@@ -53,15 +53,9 @@ body {
   /* Firefox */
 }
 
-/* Hide the button container by default */
-.button-container {
-  visibility: hidden;
-  white-space: nowrap;
-  /* Ensure buttons don't wrap */
-}
 
 /* Show the button container when the row is hovered */
-.hover-row:hover .button-container {
+.hover-row:hover {
   visibility: visible;
 }
 
@@ -179,7 +173,7 @@ html {
     font-size: 1.125rem; /* 18px if base is 16px */
   }
   
-  p, span, div, button, input, select, textarea {
+  p, span, div, input, select, textarea {
     font-size: 0.875rem; /* 14px if base is 16px */
   }
 }
@@ -204,4 +198,14 @@ html {
 
 .animate-slideIn {
   animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Custom spin animation for logo box */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

@@ -15,16 +15,12 @@
     "@reduxjs/toolkit": "^2.2.0",
     "@xyflow/react": "^12.8.2",
     "axios": "^1.6.7",
-    "debounce": "^2.0.0",
-    "interface-chatbot": "^1.0.14",
     "lodash": "^4.17.21",
-    "lodash.clonedeep": "^4.5.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.2",
     "react": "^19.1.1",
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.1.1",
-    "react-dropzone": "^14.2.3",
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^9.0.1",
     "react-redux": "^9.1.0",
@@ -32,7 +28,6 @@
     "react-syntax-highlighter": "^15.5.0",
     "react-toastify": "^10.0.4",
     "redux-persist": "^6.0.0",
-    "redux-thunk": "^3.1.0",
     "rtlayer-client": "^1.5.5"
   },
   "devDependencies": {
@@ -41,6 +36,10 @@
     "daisyui": "^4.7.0",
     "eslint": "^8",
     "eslint-config-next": "^15.5.2",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-no-commented-code": "^1.0.10",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "npm-check": "^6.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.3.0"
   }

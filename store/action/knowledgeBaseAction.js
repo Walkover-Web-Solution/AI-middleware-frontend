@@ -1,7 +1,7 @@
-import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData, getKnowledgeBaseToken, updateKnowledgeBaseEntry } from "@/config";
+import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData, getKnowledgeBaseToken, updateKnowledgeBaseEntry } from "@/config/index";
 
 import { toast } from "react-toastify";
-import { addKnowbaseDataReducer, backupKnowledgeBaseReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData, fetchKnowlegdeBaseToken, knowledgeBaseRollBackReducer, updateKnowledgeBaseReducer } from "../reducer/knowledgeBaseReducer";
+import { addKnowbaseDataReducer, backupKnowledgeBaseReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData, knowledgeBaseRollBackReducer, updateKnowledgeBaseReducer } from "../reducer/knowledgeBaseReducer";
 
 
 
@@ -18,7 +18,6 @@ export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) 
       return response?.data
     }
   } catch (error) {
-    toast.error('something went wrong')
     console.error(error);
   }
 };
@@ -56,7 +55,6 @@ export const deleteKnowBaseDataAction = ({data}) => async (dispatch) => {
     }
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId: data?.orgId }));
-    toast.error('something went wrong')
     console.error(error);
   }
 };
@@ -80,7 +78,6 @@ export const updateKnowledgeBaseAction = (data, orgId) => async (dispatch) => {
     }
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId }));
-    toast.error('Something went wrong');
     console.error(error);
   }
 };

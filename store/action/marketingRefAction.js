@@ -1,4 +1,4 @@
-import { storeMarketingRefUser } from "@/config";
+import { storeMarketingRefUser } from "@/config/index";
 
 export const storeMarketingRefUserAction = (data) => async (dispatch) => {
   try {

@@ -1,10 +1,10 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import React, { useState } from 'react'
 import Modal from '../UI/Modal'
-import { getInvitedUsers, inviteUser } from '@/config';
+import { getInvitedUsers, inviteUser } from '@/config/index';
 import { toast } from 'react-toastify';
 import { closeModal } from '@/utils/utility';
-import { X, Mail, UserPlus } from 'lucide-react';
+import { Mail, UserPlus } from 'lucide-react';
 
 const InviteUserModal = () => {
   const [email, setEmail] = useState('');
@@ -37,16 +37,10 @@ const InviteUserModal = () => {
       } else {
         toast.error('Failed to send invitation.');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred while sending the invitation.');
     } finally {
       setIsInviting(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleInviteSubmit();
     }
   };
 

@@ -5,7 +5,7 @@ import { getServiceAction } from '@/store/action/serviceAction';
 import { getModelAction } from '@/store/action/modelAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import Protected from '../protected';
+import Protected from '../Protected';
 
 const ServiceInitializer = ({isEmbedUser}) => {
     const dispatch = useDispatch();

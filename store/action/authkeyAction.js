@@ -1,4 +1,4 @@
-import { allAuthKey, createAuthKey, deleteAuthkey } from "@/config";
+import { allAuthKey, createAuthKey, deleteAuthkey } from "@/config/index";
 import { fetchAllAuthData, addAuthData, removeAuthData } from "../reducer/authkeyReducer";
 
 

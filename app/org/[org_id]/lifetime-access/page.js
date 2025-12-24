@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { useRouter } from 'next/navigation';
 import { setInCookies } from '@/utils/utility';
 
 const LifetimeAccessPage = () => {

@@ -1,4 +1,4 @@
-import { downloadFineTuneData } from '@/config'
+import { downloadFineTuneData } from '@/config/index'
 import { CircleMinusIcon, CirclePlusIcon, GlobeIcon } from '@/components/Icons'
 import React from 'react'
 import Modal from '../UI/Modal'

@@ -1,13 +1,15 @@
 import axios from "@/utils/interceptor";
+import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 // Knowledge Base Management APIs
 export const createKnowledgeBaseEntry = async (data) => {
   try {
-    const response = await axios.post(`${URL}/rag/`, data);
-    return response;
+    const response = await axios.post(`${URL}/api/rag/`, data);
+    return response?.data;
   } catch (error) {
+    toast.error(error?.response?.data?.message || 'Failed to create knowledge base entry');
     console.error(error);
     return error;
   }
@@ -15,7 +17,7 @@ export const createKnowledgeBaseEntry = async (data) => {
 
 export const getAllKnowBaseData = async () => {
   try {
-    const response = await axios.get(`${URL}/rag/docs`);
+    const response = await axios.get(`${URL}/api/rag/docs`);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -25,7 +27,9 @@ export const getAllKnowBaseData = async () => {
 
 export const getKnowledgeBaseToken = async () => {
   try {
-    const response = await axios.get(`${URL}/rag/docs/token`);
+    const response = await axios.post(`${URL}/api/utils/token`, {
+      type: 'knowledge_base'
+    });
     return response?.data?.result;
   } catch (error) {
     console.error(error);
@@ -35,13 +39,14 @@ export const getKnowledgeBaseToken = async () => {
 
 export const deleteKnowBaseData = async (data) => {
   try {
-    const { id, orgId } = data;
-    const response = await axios.delete(`${URL}/rag/docs/${id}`, {
+    const { id } = data;
+    const response = await axios.delete(`${URL}/api/rag/docs/${id}`, {
       data: { id }
     });
     return response?.data;
   } catch (error) {
     console.error(error);
+    toast.error(error?.response?.data?.message || 'Failed to delete knowledge base entry');
     throw error;
   }
 };
@@ -49,10 +54,11 @@ export const deleteKnowBaseData = async (data) => {
 export const updateKnowledgeBaseEntry = async (data) => {
   try {
     const { data: dataToUpdate, id } = data?.data;
-    const response = await axios.patch(`${URL}/rag/docs/${id}`, dataToUpdate);
+    const response = await axios.patch(`${URL}/api/rag/docs/${id}`, dataToUpdate);
     return response;
   } catch (error) {
     console.error(error);
+    toast.error(error?.response?.data?.message || 'Failed to update knowledge base entry');
     throw error;
   }
 };

@@ -161,7 +161,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
             if (childIndex) {
                 try {
                     JSON.parse(newValue);
-                } catch (error) {
+                } catch {
                     toast.error('InValid JSON');
                     return prevTestCases;
                 }

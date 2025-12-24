@@ -1,9 +1,32 @@
 {
   "extends": [
     "next",
-    "next/core-web-vitals"
+    "next/core-web-vitals",
+    "plugin:import/recommended"
   ],
+  "plugins": [
+    "unused-imports",
+    "import",
+    "no-commented-code"
+  ],
+  "settings": {
+    "import/resolver": {
+      "alias": {
+        "map": [
+          ["@", "."]
+        ],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
   "rules": {
+    "import/no-unresolved": [
+      "error",
+      {
+        "commonjs": true,
+        "caseSensitive": false
+      }
+    ],
     "react/no-unescaped-entities": "off",
     // Ignore "missing dependency" warnings in useEffect
     "react-hooks/exhaustive-deps": "off",
@@ -12,6 +35,55 @@
     // Ignore missing "key" prop for elements in iterators
     "react/jsx-key": "off",
     // Ignore missing display name for component definitions
-    "react/display-name": "off"
-  }
+    "react/display-name": "off",
+    // Surface unused imports/vars to help clean dead code
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "none",
+        "ignoreRestSiblings": true
+      }
+    ],
+    // Flag modules/packages that are exported or imported but never consumed
+    "import/no-unused-modules": [
+      "error",
+      {
+        "unusedExports": true,
+        "missingExports": false,
+        "ignoreExports": [
+          "app/**/*",
+          "components/**/*",
+          "hooks/**/*",
+          "customHooks/**/*",
+          "store/**/*",
+          "utils/**/*"
+        ]
+      }
+    ],
+    // Prevent leaving commented-out code in the repo
+    "no-commented-code/no-commented-code": "error"
+  },
+  "overrides": [
+    {
+      "files": ["app/**/*.{js,jsx,ts,tsx}"],
+      "rules": {
+        "import/no-unused-modules": "off"
+      }
+    },
+    {
+      "files": [
+        "components/**/*.{js,jsx,ts,tsx}",
+        "hooks/**/*.{js,jsx,ts,tsx}",
+        "customHooks/**/*.{js,jsx,ts,tsx}",
+        "store/**/*.{js,jsx,ts,tsx}",
+        "utils/**/*.{js,jsx,ts,tsx}"
+      ],
+      "rules": {
+        "import/no-unused-modules": "off"
+      }
+    }
+  ]
 }

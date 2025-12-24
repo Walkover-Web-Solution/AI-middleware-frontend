@@ -1,31 +1,29 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { combineReducers } from 'redux';
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
 import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
-import authDataReducer from "./reducer/authkeyReducer";
-import bridgeReducer from "./reducer/bridgeReducer";
-import ChatBot from "./reducer/ChatBotReducer";
-import dryRunReducer from "./reducer/dryRunReducer";
-import historyReducer from "./reducer/historyReducer";
-import knowledgeBaseReducer from "./reducer/knowledgeBaseReducer";
-import modelReducer from "./reducer/modelReducer";
-import orgReducer from "./reducer/orgReducer";
-import responseTypeReducer from "./reducer/responseTypeReducer";
-import userDetailsReducer from "./reducer/userDetailsReducer";
-import webhookAlertReducer from "./reducer/webhookAlertReducer";
-import testCasesReducer from "./reducer/testCasesReducer";
-import serviceReducer from "./reducer/serviceReducer";
-import flowDataReducer from "./reducer/flowDataReducer";
-import integrationReducer from "./reducer/integrationReducer";
-import authReducer from "./reducer/authReducer";
-import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
-import orchestralFlowReducer from "./reducer/orchestralFlowReducer";
-import prebuiltPromptReducer from "./reducer/prebuiltPromptReducer";
-import apiKeysReducer from "./reducer/apiKeysReducer";
-import variableReducer from "./reducer/variableReducer";
-import chatReducer from "./reducer/chatReducer";
-import appInfoReducer from "./reducer/appInfoReducer";
+import authDataSliceReducer from "./reducer/authkeyReducer";
+import bridgeSliceReducer from "./reducer/bridgeReducer";
+import chatBotSliceReducer from "./reducer/ChatBotReducer";
+import dryRunSliceReducer from "./reducer/dryRunReducer";
+import historySliceReducer from "./reducer/historyReducer";
+import knowledgeBaseSliceReducer from "./reducer/knowledgeBaseReducer";
+import modelSliceReducer from "./reducer/modelReducer";
+import orgSliceReducer from "./reducer/orgReducer";
+import responseTypeSliceReducer from "./reducer/responseTypeReducer";
+import userDetailsSliceReducer from "./reducer/userDetailsReducer";
+import testCasesSliceReducer from "./reducer/testCasesReducer";
+import serviceSliceReducer from "./reducer/serviceReducer";
+import flowDataSliceReducer from "./reducer/flowDataReducer";
+import integrationSliceReducer from "./reducer/integrationReducer";
+import authSliceReducer from "./reducer/authReducer";
+import gtwyAgentSliceReducer from "./reducer/gwtyAgentReducer";
+import orchestralFlowSliceReducer from "./reducer/orchestralFlowReducer";
+import prebuiltPromptSliceReducer from "./reducer/prebuiltPromptReducer";
+import apiKeysSliceReducer from "./reducer/apiKeysReducer";
+import variableSliceReducer from "./reducer/variableReducer";
+import chatSliceReducer from "./reducer/chatReducer";
+import appInfoSliceReducer from "./reducer/appInfoReducer";
 const createNoopStorage = () => {
     return {
         getItem(_key) {
@@ -66,29 +64,28 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-    bridgeReducer,
-    modelReducer,
-    historyReducer,
-    dryRunReducer,
-    userDetailsReducer,
-    authDataReducer,
-    orgReducer,
-    responseTypeReducer,
-    ChatBot,
-    webhookAlertReducer,
-    knowledgeBaseReducer,
-    testCasesReducer,
-    serviceReducer,
-    gtwyAgentReducer,
-    flowDataReducer,
-    integrationReducer,
-    authReducer,
-    orchestralFlowReducer,
-    prebuiltPromptReducer,
-    apiKeysReducer,
-    variableReducer,
-    chatReducer,
-    appInfoReducer
+    bridgeReducer: bridgeSliceReducer,
+    modelReducer: modelSliceReducer,
+    historyReducer: historySliceReducer,
+    dryRunReducer: dryRunSliceReducer,
+    userDetailsReducer: userDetailsSliceReducer,
+    authDataReducer: authDataSliceReducer,
+    orgReducer: orgSliceReducer,
+    responseTypeReducer: responseTypeSliceReducer,
+    ChatBot: chatBotSliceReducer,
+    knowledgeBaseReducer: knowledgeBaseSliceReducer,
+    testCasesReducer: testCasesSliceReducer,
+    serviceReducer: serviceSliceReducer,
+    gtwyAgentReducer: gtwyAgentSliceReducer,
+    flowDataReducer: flowDataSliceReducer,
+    integrationReducer: integrationSliceReducer,
+    authReducer: authSliceReducer,
+    orchestralFlowReducer: orchestralFlowSliceReducer,
+    prebuiltPromptReducer: prebuiltPromptSliceReducer,
+    apiKeysReducer: apiKeysSliceReducer,
+    variableReducer: variableSliceReducer,
+    chatReducer: chatSliceReducer,
+    appInfoReducer: appInfoSliceReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

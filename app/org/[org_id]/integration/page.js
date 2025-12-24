@@ -1,15 +1,14 @@
 'use client';
-import CustomTable from "@/components/customTable/customTable";
-import { truncate } from "@/components/historyPageComponents/assistFile";
+import CustomTable from "@/components/customTable/CustomTable";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { MODAL_TYPE } from "@/utils/enums";
-import React, { useCallback, useEffect, useMemo, useState, use, useRef } from 'react';
+import React, { useCallback, useEffect, useState, use } from 'react';
 import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import { openModal, toggleSidebar, closeModal, formatRelativeTime, formatDate } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
-import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
+import GtwyIntegrationGuideSlider from "@/components/sliders/GtwyIntegrationGuideSlider";
 import SearchItems from "@/components/UI/SearchItems";
 import { EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { ClockFading } from "lucide-react";
@@ -24,10 +23,11 @@ const Page = ({ params }) => {
   const resolvedParams = use(params);
   
   const dispatch = useDispatch();
-  const { integrationData, descriptions } = useCustomSelector((state) =>
+  const { integrationData, descriptions , linksData} = useCustomSelector((state) =>
   ({
     integrationData: state?.integrationReducer?.integrationData?.[resolvedParams?.org_id] || [],
     descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+    linksData: state.flowDataReducer.flowData.linksData || [],
   })
   );
   const [selectedIntegration, setSelectedIntegration] = useState(null);
@@ -54,7 +54,7 @@ const Page = ({ params }) => {
     name: (
       <div className="flex gap-2">
         <div className="tooltip" data-tip={item.name}>
-          {truncate(item.name, 50)}
+          {item.name}
         </div>
       </div>
     ),
@@ -168,7 +168,7 @@ const Page = ({ params }) => {
           <div className="flex flex-col sm:flex-row">
             <PageHeader
               title=" GTWY Embed Integration"
-              docLink="https://gtwy.ai/blogs/features/gtwy-embed--1"
+              docLink={linksData?.find(link => link.title === 'GTWY as Embed')?.blog_link || "https://gtwy.ai/blogs/features/gtwy-embed--1"}
               description={descriptions?.['Gtwy as Embed'] || "Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."}
             />
 
@@ -188,7 +188,7 @@ const Page = ({ params }) => {
                 className="btn btn-primary btn-sm mr-2"
                 onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
               >
-                + Create New Integration
+                + Create New Embed
               </button>
             </div>
           </div>

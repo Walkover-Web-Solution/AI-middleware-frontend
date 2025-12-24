@@ -1,6 +1,5 @@
-import axios from "axios";
 import { addNewModelReducer, deleteModelReducer, fetchModelReducer } from "../reducer/modelReducer";
-import { addNewModel, deleteModel, getAllModels } from "@/config";
+import { addNewModel, deleteModel, getAllModels } from "@/config/index";
 
 
 export const getModelAction = ({ service }) => async (dispatch) => {
