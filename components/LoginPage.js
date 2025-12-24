@@ -110,7 +110,7 @@ const LoginPage = ({loading}) => {
             {/* Stats Section - Below login card */}
             <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">5000+</div>
+                <div className="text-sm font-semibold text-base-content">2000+</div>
                 <div className="text-xs text-base-content/60">INTEGRATIONS</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
