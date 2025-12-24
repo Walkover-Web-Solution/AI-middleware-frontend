@@ -46,12 +46,10 @@ export const updateApikeyAction = (dataToSend) => async (dispatch) => {
       return response.data.success;
     }
     else{
-      toast.error('Failed to update API key');
       dispatch(apikeyRollBackReducer({ org_id: dataToSend.org_id }));
     }
   } catch (error) {
     // API call failed with exception
-    toast.error(error?.message || 'Error updating API key');
     console.error(error);
     // Roll back to the original state
     dispatch(apikeyRollBackReducer({ org_id: dataToSend.org_id }));
@@ -70,12 +68,10 @@ export const deleteApikeyAction = ({ org_id, name, id }) => async (dispatch, get
       dispatch(apikeyDeleteReducer({ org_id, name }));
     }
     else{
-      toast.error('Failed to delete API key');
       dispatch(apikeyRollBackReducer({ org_id }));
     }
   } catch (error) {
     // API call failed with exception
-    toast.error(error?.message || 'Error deleting API key');
     console.error(error);
     // Roll back to original state
     dispatch(apikeyRollBackReducer({ org_id }));

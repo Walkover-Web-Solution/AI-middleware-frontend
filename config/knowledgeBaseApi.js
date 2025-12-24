@@ -1,4 +1,5 @@
 import axios from "@/utils/interceptor";
+import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
@@ -8,6 +9,7 @@ export const createKnowledgeBaseEntry = async (data) => {
     const response = await axios.post(`${URL}/api/rag/`, data);
     return response?.data;
   } catch (error) {
+    toast.error(error?.response?.data?.message || 'Failed to create knowledge base entry');
     console.error(error);
     return error;
   }
@@ -44,6 +46,7 @@ export const deleteKnowBaseData = async (data) => {
     return response?.data;
   } catch (error) {
     console.error(error);
+    toast.error(error?.response?.data?.message || 'Failed to delete knowledge base entry');
     throw error;
   }
 };
@@ -55,6 +58,7 @@ export const updateKnowledgeBaseEntry = async (data) => {
     return response;
   } catch (error) {
     console.error(error);
+    toast.error(error?.response?.data?.message || 'Failed to update knowledge base entry');
     throw error;
   }
 };

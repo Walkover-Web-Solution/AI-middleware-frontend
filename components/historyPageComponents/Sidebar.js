@@ -146,10 +146,15 @@ const Sidebar = memo(({
   const handleSearch = async (e, directValue) => {
     e?.preventDefault();
     const searchValue = directValue !== undefined ? directValue : (searchRef?.current?.value || "");
-
+    if (!searchValue.trim()) {
+       clearInput();
+       setSearchLoading(false);
+       return;
+    }
     if (!searchValue && !searchParams?.start && !searchParams?.end) {
       if (searchParams?.message_id || searchParams?.start || searchParams?.end) {
         clearInput();
+        setSearchLoading(false);
       }
       return;
     }

@@ -24,11 +24,12 @@ function getStatusClass(status) {
     }
 };
 
-export default function TriggersList({ params, isEmbedUser}) {
+export default function TriggersList({ params, isEmbedUser }) {
     const dispatch = useDispatch();
-    const { triggerEmbedToken, triggerData } = useCustomSelector((state) => ({
+    const { triggerEmbedToken, triggerData, isViewer } = useCustomSelector((state) => ({
         triggerEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.triggerEmbedToken,
-        triggerData: state?.bridgeReducer?.org?.[params?.org_id]?.triggerData
+        triggerData: state?.bridgeReducer?.org?.[params?.org_id]?.triggerData,
+        isViewer: state?.userDetailsReducer?.organizations?.[params?.org_id]?.role_name === 'Viewer' || false
     }));
     const [triggers, setTriggers] = useState([]);
     const [authkey, setAuthkey] = useState('')
@@ -43,8 +44,8 @@ export default function TriggersList({ params, isEmbedUser}) {
             setTriggers(filteredTriggers);
             if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
         }
-        if (!isEmbedUser) getAndSetAuthKey()
-    }, [params?.org_id, authkey]);
+        if (!isEmbedUser && !isViewer) getAndSetAuthKey()
+    }, [params?.org_id, authkey, isEmbedUser, isViewer]);
 
     function openTrigger(triggerId) {
         openViasocket(triggerId, {

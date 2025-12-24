@@ -2,7 +2,6 @@ import { getOrCreateNotificationAuthKey } from "@/config/index";
 import { useEffect } from "react";
 
 export const useEmbedScriptLoader = (embedToken = null, isEmbedUser = false, isViewer = false) => {
-
   async function embedMaker() {
     
     const pAuthKey = !isEmbedUser && !isViewer ? await getOrCreateNotificationAuthKey('gtwy_bridge_trigger').then(res => res?.authkey) : null

@@ -1235,7 +1235,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                           className="btn btn-primary btn-sm"
                           onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}
                         >
-                          {searchParams?.type === "agents" ? " + Create New Agent" : " + Create New Chatbot"}
+                          {searchParams?.type === "api" ? " + Create New API Agent" : " + Create New Chatbot Agent"}
                         </button>
                       </div>
                     </div>
