@@ -49,17 +49,20 @@ const LoginPage = ({loading}) => {
                   <div className="relative">
                     {/* Rotating box positioned behind the logo - offset to match reference image */}
                     <div 
-                      className="absolute border-[0.5px] opacity-40" 
+                      className="absolute border-[0.5px] border-base-content/20 opacity-80" 
                       style={{ 
-                        width: '120px',
-                        height: '120px',
+                        width: '100px',
+                        height: '100px',
                         animation: 'spin 20s linear infinite',
                         transformOrigin: 'center',
                         transform: 'rotate(45deg)',
-                        left: '30px',    /* Position more to the right */
-                        top: '10px'       /* Position at center */
+                        left: '60px',    /* Position more to the right */
+                        top: '30px'       /* Position at center */
                       }}>
                     </div>
+                      
+                    
+                    
                     
                     {/* Logo and text on top of the rotating box */}
                     <div className="relative z-10 opacity-90 hover:opacity-100 transition-opacity">
@@ -70,6 +73,30 @@ const LoginPage = ({loading}) => {
                   </div>
                 </div>
               </a>
+              <div 
+                      className="absolute border-[0.5px] border-base-content/20 opacity-80" 
+                      style={{ 
+                        width: '80px',
+                        height: '80px',
+                        animation: 'spin 20s linear infinite',
+                        transformOrigin: 'center',
+                        transform: 'rotate(45deg)',
+                        left: '1200px',    /* Position more to the right */
+                        top: '600px'       /* Position at center */
+                      }}>
+                    </div>
+                      <div 
+                      className="absolute border-[0.5px] border-base-content/20 opacity-80" 
+                      style={{ 
+                        width: '50px',
+                        height: '50px',
+                        animation: 'spin 20s linear infinite',
+                        transformOrigin: 'center',
+                        transform: 'rotate(45deg)',
+                        left: '1100px',    /* Position more to the right */
+                        top: '300px'       /* Position at center */
+                      }}>
+                        </div>
             </div>
 
             <div className="flex-1 flex justify-center">
@@ -144,6 +171,7 @@ const LoginPage = ({loading}) => {
               </a>
               .
             </p>
+            
           </div>
         </div>
       )}
