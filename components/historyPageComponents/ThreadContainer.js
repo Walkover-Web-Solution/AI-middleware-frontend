@@ -138,11 +138,10 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         console.error(error)
       }
       if (data) {
-        setPromptToUpdate(data?.updated_prompt)
-        // Store the generated prompt for this message
+        setPromptToUpdate(JSON.parse(data)?.updated_prompt)
         setGeneratedPrompts(prev => ({
           ...prev,
-          [modalInput?.Id]: data?.updated_prompt
+          [modalInput?.Id]: JSON.parse(data)?.updated_prompt
         }));
         openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
       }

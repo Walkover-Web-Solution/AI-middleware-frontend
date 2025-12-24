@@ -73,7 +73,7 @@ export const improvePrompt = async (variables) => {
       type: 'improve_prompt',
       variables
     });
-    return response?.data;
+    return response?.data?.result;
   } catch (error) {
     console.error(error)
     throw new Error(error);
