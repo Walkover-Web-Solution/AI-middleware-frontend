@@ -1,6 +1,8 @@
-import { useState } from "react";
-
-export function BatchUI({ batches , onToolClick }) {
+export function BatchUI({ batches, onToolClick }) {
+  const handleToolClick = (tool) => {
+    if (!onToolClick) return;
+    onToolClick(tool);
+  };
 
   return (
     <>
@@ -36,7 +38,7 @@ export function BatchUI({ batches , onToolClick }) {
                         return (
                           <div
                             key={tool}
-                            onClick={() => onToolClick(tool)}
+                            onClick={() => handleToolClick(tool)}
                             className={`cursor-pointer flex items-center justify-between border px-2 py-1 text-xs text-black
                               hover:border-orange-400 hover:bg-orange-50
                               ${isLastOdd ? "col-span-2" : ""}`}

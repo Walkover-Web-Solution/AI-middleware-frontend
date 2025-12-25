@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import ReactFlow from "reactflow";
+import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
 
 import { UserPromptUI } from "./UserPromptUi.js";
@@ -18,7 +18,7 @@ const nodeTypes = {
 
 
 export default function Page() {
-   const [activeTool, setActiveTool] = useState(null);
+  const [selectedTool, setSelectedTool] = useState(null);
   const nodes = useMemo(() => [
     {
       id: "1",
@@ -48,6 +48,7 @@ export default function Page() {
             <AgentUI
               label="MAIN AGENT"
               name="untitled_agent_4"
+              onToolClick={(tool) => setSelectedTool(tool)}
               status="PROCESSING"
               statusClass="text-blue-500"
             />
@@ -67,7 +68,6 @@ export default function Page() {
           containerClass: "border p-3 bg-gray-100",
           render: () => (
             <BatchUI
-            onToolClick={setActiveTool}
               batches={[
                 {
                   title: "BATCH 1",
@@ -104,14 +104,13 @@ export default function Page() {
                     },
                   ],
                 },
-              ]
-              }
+              ]}
+              onToolClick={(tool) => setSelectedTool(tool)}
             />
           ),
         },
       },
-    }
-    ,
+    },
     {
       id: "4",
       type: "generic",
@@ -126,15 +125,14 @@ export default function Page() {
             <AgentUI
               label="MAIN AGENT"
               name="finalizing_agent"
+              onToolClick={(tool) => setSelectedTool(tool)}
               status="FINALIZING"
               statusClass="text-blue-500"
             />
           ),
         },
       },
-    }
-    ,
-
+    },
     {
       id: "5",
       type: "generic",
@@ -158,19 +156,24 @@ export default function Page() {
     { id: "e4-5", source: "4", target: "5" },
   ];
 
-
   return (
-    <div className="h-screen w-screen bg-gray-50">
+    <div className="h-screen w-full relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-      />
-      <ToolFullSlider
-        tool={activeTool}
-        onClose={() => setActiveTool(null)}
-      />
+      >
+        {/* <Background /> */}
+      </ReactFlow>
+
+      {selectedTool && (
+        <ToolFullSlider
+          tool={selectedTool}
+          onClose={() => setSelectedTool(null)}
+          onBack={() => setSelectedTool(null)}
+        />
+      )}
     </div>
   );
 }
