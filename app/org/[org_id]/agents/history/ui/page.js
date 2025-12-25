@@ -157,7 +157,7 @@ export default function Page() {
   ];
 
   return (
-    <div className="h-screen w-full relative">
+    <div className="h-screen w-full relative bg-gray-200">
       <ReactFlow
         nodes={nodes}
         edges={edges}
