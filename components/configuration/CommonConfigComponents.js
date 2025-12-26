@@ -36,7 +36,16 @@ const CommonConfigComponents = ({
                 isPublished={isPublished}
                 isEditor={isEditor}
             />}
+            {!bridge?.fall_back?.is_enable && (
+                <div className="alert alert-warning mb-1 py-2 px-2 max-w-md">
+                    <div className="flex items-center gap-2">
+                        <AlertIcon size={12} />
+                        <span className="text-xs">Enable fallback model from the settings</span>
+                    </div>
+                </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-2 items-start w-full max-w-md">
+                
                 <div className="w-auto">
                     <ServiceDropdown
                         params={params}
@@ -72,14 +81,6 @@ const CommonConfigComponents = ({
                     isEditor={isEditor}
                 />
             </div>}
-            {!bridge?.fall_back?.is_enable && (
-                <div className="alert alert-warning mb-1 py-2 px-2 max-w-md">
-                    <div className="flex items-center gap-2">
-                        <AlertIcon size={12} />
-                        <span className="text-xs">Enable fallback model from the settings</span>
-                    </div>
-                </div>
-            )}
         </>
     );
 };

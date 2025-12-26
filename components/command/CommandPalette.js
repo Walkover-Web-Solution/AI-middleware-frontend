@@ -56,34 +56,36 @@ const CommandPalette = ({isEmbedUser}) => {
     authData: state?.authDataReducer?.authData || [],
   }));
 
+  const apiAgents = agentList.filter(agent => !agent.deletedAt && agent.bridgeType === 'api');
+  const chatbotAgents = agentList.filter(agent => !agent.deletedAt && agent.bridgeType === 'chatbot');
+
   const functions = useMemo(() => Object.values(functionData || {}), [functionData]);
 
   // Build category items with proper formatting
   const buildCategoryItems = useCallback((categoryKey) => {
     switch(categoryKey) {
-      case 'agents':
-        return agentList.filter(agent => !agent.deletedAt).map((a) => ({
+      case 'api-agents':
+        return apiAgents.map(a => ({
           id: a._id,
           title: a.name || a.slugName || a._id,
-          subtitle: (
-            <div className="flex items-center gap-2">
-              <span>{a.service || ""}{a.configuration?.model ? " · " + a.configuration?.model : ""}{a.total_tokens ? " · " + a.total_tokens + " tokens" : ""}</span>
-              {a.last_used && (
-                <>
-                  <span>•</span>
-                  <span className="text-xs opacity-70">Last used:</span>
-                  <div className="group cursor-help inline-flex">
-                    <span className="group-hover:hidden">{formatRelativeTime(a.last_used)}</span>
-                    <span className="hidden group-hover:inline text-xs">{formatDate(a.last_used)}</span>
-                  </div>
-                </>
-              )}
-            </div>
-          ),
-          type: "agents",
+          subtitle: 'API Agent',
+          type: 'agents',
+          bridgeType: 'api',
           published_version_id: a.published_version_id,
-          versions: a.versions
+          versions: a.versions,
         }));
+
+      case 'chatbot-agents':
+        return chatbotAgents.map(a => ({
+          id: a._id,
+          title: a.name || a.slugName || a._id,
+          subtitle: 'Chatbot Agent',
+          type: 'agents',
+          bridgeType: 'chatbot',
+          published_version_id: a.published_version_id,
+          versions: a.versions,
+        }));
+
       case 'apikeys':
         return apikeys.map((k) => ({
           id: k._id,
@@ -105,6 +107,7 @@ const CommandPalette = ({isEmbedUser}) => {
           ),
           type: "apikeys",
         }));
+
       case 'docs':
         return knowledgeBase.map((d) => ({
           id: d._id,
@@ -112,6 +115,7 @@ const CommandPalette = ({isEmbedUser}) => {
           subtitle: "Knowledge Base",
           type: "docs",
         }));
+
       case 'integrations':
         return integrationData.map((d) => ({
           id: d._id,
@@ -119,6 +123,7 @@ const CommandPalette = ({isEmbedUser}) => {
           subtitle: "Integration",
           type: "integrations",
         }));
+
       case 'Auths':
         return authData.map((d) => ({
           id: d.id,
@@ -126,110 +131,128 @@ const CommandPalette = ({isEmbedUser}) => {
           subtitle: "Auth Key",
           type: "Auths",
         }));
+
       default:
         return [];
     }
   }, [agentList, apikeys, knowledgeBase, integrationData, authData]);
 
-  const items = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filterBy = (list, fields) => {
-      if (!q) return [];
-      return list.filter((it) =>
-        fields.some((f) => String(it?.[f] || "").toLowerCase().includes(q))
-      );
-    };
-    const agentsGroup = filterBy(agentList.filter(agent => !agent.deletedAt), ["name", "slugName", "service", "_id","last_used","total_tokens"]).map((a) => ({
+  const createAgentItem = (a, type) => ({
+    id: a._id,
+    title: a.name || a.slugName || a._id,
+    subtitle: (
+      <div className="flex items-center gap-2">
+        <span>{a.service || ""}{a.configuration?.model ? " · " + a.configuration?.model : ""}{a.total_tokens ? " · " + a.total_tokens + " tokens" : ""}</span>
+        {a.last_used && (
+          <>
+            <span>•</span>
+            <span className="text-xs opacity-70">Last used:</span>
+            <div className="group cursor-help inline-flex">
+              <span className="group-hover:hidden">{formatRelativeTime(a.last_used)}</span>
+              <span className="hidden group-hover:inline text-xs">{formatDate(a.last_used)}</span>
+            </div>
+          </>
+        )}
+      </div>
+    ),
+    type: "agents",
+    bridgeType: type,
+    published_version_id: a.published_version_id,
+    versions: a.versions
+  });
+
+  const filterBy = (list, fields) => {
+    if (!query) return [];
+    return list.filter((it) =>
+      fields.some((f) => String(it?.[f] || "").toLowerCase().includes(query))
+    );
+  };
+
+  const apiAgentsGroup = filterBy(
+    apiAgents,
+    ["name", "slugName", "service", "_id", "last_used", "total_tokens"]
+  ).map(a => createAgentItem(a, 'api'));
+
+  const chatbotAgentsGroup = filterBy(
+    chatbotAgents,
+    ["name", "slugName", "service", "_id", "last_used", "total_tokens"]
+  ).map(a => createAgentItem(a, 'chatbot'));
+
+  const agentsVersionMatches = !query ? [] : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => {
+    const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
+    const published = a?.published_version_id ? [a.published_version_id] : [];
+    const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
+    const matches = candidates.filter((v) => v.toLowerCase() === query.toLowerCase());
+    const unique = Array.from(new Set(matches));
+    return unique.map((v) => ({
       id: a._id,
       title: a.name || a.slugName || a._id,
-      subtitle: (
-        <div className="flex items-center gap-2">
-          <span>{a.service || ""}{a.configuration?.model ? " · " + a.configuration?.model : ""}{a.total_tokens ? " · " + a.total_tokens + " tokens" : ""}</span>
-          {a.last_used && (
-            <>
-              <span>•</span>
-              <span className="text-xs opacity-70">Last used:</span>
-              <div className="group cursor-help inline-flex">
-                <span className="group-hover:hidden">{formatRelativeTime(a.last_used)}</span>
-                <span className="hidden group-hover:inline text-xs">{formatDate(a.last_used)}</span>
-              </div>
-            </>
-          )}
-        </div>
-      ),
+      subtitle: `Version ${v}`,
       type: "agents",
-      published_version_id: a.published_version_id,
-      versions: a.versions
+      versionId: v,
     }));
+  });
 
-    const agentsVersionMatches = !q ? [] : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => {
-      const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
-      const published = a?.published_version_id ? [a.published_version_id] : [];
-      const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
-      const matches = candidates.filter((v) => v.toLowerCase() === q.toLowerCase());
-      const unique = Array.from(new Set(matches));
-      return unique.map((v) => ({
-        id: a._id,
-        title: a.name || a.slugName || a._id,
-        subtitle: `Version ${v}`,
-        type: "agents",
-        versionId: v,
-      }));
-    });
+  const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
+    id: k._id,
+    title: k.name || k._id,
+    subtitle: (
+      <div className="flex items-center gap-2">
+        <span>{k.service || "API Key"}</span>
+        {k.last_used && (
+          <>
+            <span>•</span>
+            <span className="text-xs opacity-70">Last used:</span>
+            <div className="group cursor-help inline-flex">
+              <span className="group-hover:hidden">{formatRelativeTime(k.last_used)}</span>
+              <span className="hidden group-hover:inline text-xs">{formatDate(k.last_used)}</span>
+            </div>
+          </>
+        )}
+      </div>
+    ),
+    type: "apikeys",
+  }));
 
-    const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
-      id: k._id,
-      title: k.name || k._id,
-      subtitle: (
-        <div className="flex items-center gap-2">
-          <span>{k.service || "API Key"}</span>
-          {k.last_used && (
-            <>
-              <span>•</span>
-              <span className="text-xs opacity-70">Last used:</span>
-              <div className="group cursor-help inline-flex">
-                <span className="group-hover:hidden">{formatRelativeTime(k.last_used)}</span>
-                <span className="hidden group-hover:inline text-xs">{formatDate(k.last_used)}</span>
-              </div>
-            </>
-          )}
-        </div>
-      ),
-      type: "apikeys",
-    }));
+  const kbGroup = filterBy(knowledgeBase, ["name", "_id"]).map((d) => ({
+    id: d._id,
+    title: d.name || d._id,
+    subtitle: "Knowledge Base",
+    type: "docs",
+  }));
 
-    const kbGroup = filterBy(knowledgeBase, ["name", "_id"]).map((d) => ({
-      id: d._id,
-      title: d.name || d._id,
-      subtitle: "Knowledge Base",
-      type: "docs",
-    }));
+  const integrationGroup = filterBy(integrationData, ["name", "service", "_id"]).map((d) => ({
+    id: d._id,
+    title: d.name || d._id,
+    subtitle: "Integration",
+    type: "integrations",
+  }));
 
-    const integrationGroup = filterBy(integrationData, ["name", "service", "_id"]).map((d) => ({
-      id: d._id,
-      title: d.name || d._id,
-      subtitle: "Integration",
-      type: "integrations",
-    }));
+  const authGroup = filterBy(authData, ["name", "service", "_id"]).map((d) => ({
+    id: d._id,
+    title: d.name || d._id,
+    subtitle: "Auth Key",
+    type: "Auths",
+  }));
 
-    const authGroup = filterBy(authData, ["name", "service", "_id"]).map((d) => ({
-      id: d._id,
-      title: d.name || d._id,
-      subtitle: "Auth Key",
-      type: "Auths",
-    }));
-
-    return {
-      agents: [...new Set([...agentsGroup, ...agentsVersionMatches])],
-      apikeys: apikeysGroup,
-      docs: kbGroup,
-      integrations: integrationGroup,
-      auths: authGroup,
-    };
-  }, [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
+  const items = useMemo(() => ({
+    agents: [
+      ...apiAgentsGroup,
+      ...chatbotAgentsGroup,
+      ...agentsVersionMatches,
+    ],
+    chatbotAgents: chatbotAgentsGroup,
+    apikeys: apikeysGroup,
+    docs: kbGroup,
+    integrations: integrationGroup,
+    auths: authGroup,
+  }), [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
 
   const allResults = useMemo(() => [
-    ...items.agents.map((it) => ({ group: "Agents", ...it })),
+    ...items.agents.map((it) => ({ 
+      group: it.bridgeType === 'api' ? 'API Agents' : 'Chatbot Agents', 
+      ...it 
+    })),
     ...items.apikeys.map((it) => ({ group: "API Keys", ...it })),
     ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
     ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
@@ -274,7 +297,20 @@ const CommandPalette = ({isEmbedUser}) => {
   // Categories array for landing navigation
   const categories = useMemo(() => {
     const allCategories = [
-      { key: 'agents', label: 'Agents', desc: 'Manage and configure agents' },
+      {
+        key: 'api-agents',
+        label: 'API Agents',
+        desc: 'Manage API-based agents',
+        type: 'agents',
+        filter: 'api',
+      },
+      {
+        key: 'chatbot-agents',
+        label: 'Chatbot Agents',
+        desc: 'Manage chatbot agents',
+        type: 'agents',
+        filter: 'chatbot',
+      },
       { key: 'apikeys', label: 'API Keys', desc: 'Credentials and providers' },
       { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
       { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
@@ -394,7 +430,8 @@ const CommandPalette = ({isEmbedUser}) => {
       return;
     }
     const routes = {
-      'agents': `/org/${orgId}/agents`,
+       'api-agents': `/org/${orgId}/agents?type=api`,
+    'chatbot-agents': `/org/${orgId}/agents?type=chatbot`,
       'apikeys': `/org/${orgId}/apikeys`,
       'docs': `/org/${orgId}/knowledge_base`,
       'integrations': `/org/${orgId}/integration`,

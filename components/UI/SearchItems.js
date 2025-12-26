@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Protected from '../Protected';
-
+import { useRef } from 'react';
 const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const isWorkspaceItem = item === 'Organizations' || item === 'Workspaces' || (item === 'Agents' && isEmbedUser);
   const itemLabel = item === 'Organizations' ? 'Workspaces' : item;
-  
+  const searchInputRef = useRef(null);
   // Detect platform for keyboard shortcut display
   const isMac = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -15,7 +15,9 @@ const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
   }, []);
   
   const shortcutText = isMac ? '⌘K' : 'Ctrl+K';
-  
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
   // Function to open command palette (disabled for workspace search to allow typing)
   const openCommandPalette = () => {
     if (isWorkspaceItem) return; // Don't open command palette for Workspaces
@@ -52,6 +54,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
       <div className="relative">
         <input
           type="text"
+          ref={searchInputRef}
           aria-label={`Search ${itemLabel} by Name, SlugName, Service, or ID`}
           placeholder="Search"
           value={searchTerm}

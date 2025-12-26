@@ -519,18 +519,23 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                           searchParams={resolvedSearchParams}
                           onVisibilityChange={setIsGuideVisible}
                         />
-                        {!sessionStorage.getItem('orchestralUser') ? (
-                          <div className="flex-1 min-h-0">
-                            {bridgeType === 'batch' && versionService === 'openai' ? (
-                              <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                        {/* Only show experimental Chat for non-chatbot types */}
+                        {bridgeType !== 'chatbot' && (
+                          <>
+                            {!sessionStorage.getItem('orchestralUser') ? (
+                              <div className="flex-1 min-h-0">
+                                {bridgeType === 'batch' && versionService === 'openai' ? (
+                                  <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                                ) : (
+                                  <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                                )}
+                              </div>
                             ) : (
-                              <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                              <div className="flex-1 min-h-0">
+                                <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                              </div>
                             )}
-                          </div>
-                        ) : (
-                          <div className="flex-1 min-h-0">
-                            <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                          </div>
+                          </>
                         )}
                       </div>
                     </div>
@@ -697,19 +702,25 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             {/* Chat Panel */}
             <div className="min-h-screen" id="parentChatbot">
               <div className="h-full flex flex-col">
-                <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
-                {!sessionStorage.getItem('orchestralUser') ? (
-                  <div className="flex-1 min-h-0">
-                    {bridgeType === 'batch' && versionService === 'openai' ? (
-                      <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                  <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
+                
+                {/* Only show experimental Chat for non-chatbot types */}
+                {bridgeType !== 'chatbot' && (
+                  <>
+                    {!sessionStorage.getItem('orchestralUser') ? (
+                      <div className="flex-1 min-h-0">
+                        {bridgeType === 'batch' && versionService === 'openai' ? (
+                          <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                        ) : (
+                          <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                        )}
+                      </div>
                     ) : (
-                      <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                      <div className="flex-1 min-h-0">
+                        <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                      </div>
                     )}
-                  </div>
-                ) : (
-                  <div className="flex-1 min-h-0">
-                    <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                  </div>
+                  </>
                 )}
               </div>
               <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
