@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { usePathname, useRouter } from "next/navigation";
-import { Search, X, ChevronDown, ChevronRight } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Search, X, ChevronDown, ChevronRight, Filter } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/utils/utility";
 import Protected from "../Protected";
 
@@ -27,14 +27,17 @@ function getCurrentCategoryGroup(currentCategory) {
 const CommandPalette = ({isEmbedUser}) => {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [collapsedLandingCategories, setCollapsedLandingCategories] = useState(new Set());
   const [collapsedSearchCategories, setCollapsedSearchCategories] = useState(new Set());
+  
+  const filterParam = searchParams.get('filter');
 
   const orgId = useMemo(() => getOrgIdFromPath(pathname), [pathname]);
-  
+
   const currentCategory = useMemo(() => {
     if (!pathname) return null;
     const parts = pathname.split("/").filter(Boolean);
@@ -364,6 +367,13 @@ const CommandPalette = ({isEmbedUser}) => {
 
   const closePalette = useCallback(() => setOpen(false), []);
 
+  const clearCurrentFilter = useCallback(() => {
+    const url = new URL(window.location);
+    url.searchParams.delete('filter');
+    router.push(url.pathname + url.search);
+    closePalette();
+  }, [router, closePalette]);
+
   const toggleLandingCategory = useCallback((categoryKey) => {
     lastNavigationMethod.current = 'click';
     setCollapsedLandingCategories(prev => {
@@ -394,38 +404,42 @@ const CommandPalette = ({isEmbedUser}) => {
   }, []);
 
   const navigateTo = useCallback((item) => {
-    if (!orgId) {
+    if(!orgId) {
       router.push("/");
       return;
     }
     switch (item.type) {
       case "agents":
-        if (item.versionId) {
+                if (item.versionId) {
           router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.versionId}`);
         } else {
           router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.published_version_id || item.versions?.[0]}`);
         }
         break;
       case "apikeys":
-        router.push(`/org/${orgId}/apikeys`);
+        // Always navigate to apikeys page with filter parameter
+        router.push(`/org/${orgId}/apikeys?filter=${item.id}`);
         break;
       case "docs":
-        router.push(`/org/${orgId}/knowledge_base`);
+        // Always navigate to knowledge base page with filter parameter
+        router.push(`/org/${orgId}/knowledge_base?filter=${item.id}`);
         break;
       case "integrations":
-        router.push(`/org/${orgId}/integration`);
+        // Always navigate to integrations page with filter parameter
+        router.push(`/org/${orgId}/integration?filter=${item.id}`);
         break;
       case "Auths":
-        router.push(`/org/${orgId}/pauthkey`);
+        // Always navigate to auth keys page with filter parameter
+        router.push(`/org/${orgId}/pauthkey?filter=${item.id}`);
         break;
       default:
         router.push("/");
     }
     closePalette();
-  }, [router, orgId, closePalette]);
+  }, [router, orgId, closePalette, currentCategory]);
 
   const navigateCategory = useCallback((key) => {
-    if (!orgId) {
+        if (!orgId) {
       router.push("/");
       return;
     }
@@ -579,16 +593,33 @@ const CommandPalette = ({isEmbedUser}) => {
   return (
     <div className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closePalette} style={{zIndex: 999999}}>
       <div className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-2 border-b border-base-300 p-3">
-          <Search className="w-4 h-4 opacity-70" />
-          <input
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search agents, bridges, API keys, docs..."
-            className="flex-1 bg-transparent outline-none"
-          />
-          <button className="btn btn-sm" onClick={closePalette}><X className="w-4 h-4" /></button>
+        <div className="border-b border-base-300">
+          {filterParam && (
+            <div className="flex items-center justify-between bg-warning/10 px-3 py-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-warning" />
+                <span>Filter active on current page</span>
+              </div>
+              <button 
+                onClick={clearCurrentFilter}
+                className="btn btn-xs btn-ghost hover:bg-error hover:text-error-content"
+                title="Clear filter"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-2 p-3">
+            <Search className="w-4 h-4 opacity-70" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search agents, bridges, API keys, docs..."
+              className="flex-1 bg-transparent outline-none"
+            />
+            <button className="btn btn-sm" onClick={closePalette}><X className="w-4 h-4" /></button>
+          </div>
         </div>
         <div className="max-h-[60vh] overflow-auto p-2">
           {showLanding ? (
