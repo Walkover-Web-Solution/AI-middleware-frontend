@@ -8,7 +8,7 @@ export function BatchUI({ batches, onToolClick }) {
   const rowRefs = useRef({});
   const handleToolClick = (tool) => {
     if (!onToolClick) return;
-    onToolClick(tool);
+    onToolClick(tool?.functionData ?? tool);
   };
 
   const handleAgentClick = (agentKey, functionData) => {
@@ -102,16 +102,20 @@ export function BatchUI({ batches, onToolClick }) {
                         const isLastOdd =
                           agent.parallelTools.length % 2 !== 0 &&
                           index === agent.parallelTools.length - 1;
+                        const toolName =
+                          typeof tool === "string"
+                            ? tool
+                            : tool?.name || tool?.id || `tool_${index + 1}`;
 
                         return (
                           <div
-                            key={tool}
+                            key={`${toolName}-${index}`}
                             onClick={() => handleToolClick(tool)}
                             className={`cursor-pointer flex items-center justify-between border px-2 py-1 text-xs text-black
                               hover:border-orange-400 hover:bg-orange-50
                               ${isLastOdd ? "col-span-2" : ""}`}
                           >
-                            <span>{tool}</span>
+                            <span>{toolName}</span>
                             <span className="text-green-500">✔</span>
                           </div>
                         );

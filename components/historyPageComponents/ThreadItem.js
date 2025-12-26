@@ -155,6 +155,14 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const { sliderState, openSlider, closeSlider } = useSlider();
   const dropupRef = useRef(null);
   const router = useRouter();
+  const handleAgentHistoryClick = () => {
+    if (!params?.org_id || !params?.id) return;
+    const messageId = item?.message_id
+      ? encodeURIComponent(item.message_id)
+      : "";
+    const messageQuery = messageId ? `?message_id=${messageId}` : "";
+    router.push(`/org/${params.org_id}/agents/history/${params.id}/ui${messageQuery}`);
+  };
 
   useEffect(() => {
     setMessageType(getInitialMessageType());
@@ -566,6 +574,15 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   >
                     <AddIcon className="h-3 w-3" />
                     <span>More...</span>
+                  </button>
+                  <button
+                    className={`btn text-xs font-normal btn-sm hover:btn-primary ${
+                      isLastMessage() ? '' : 'see-on-hover'
+                    }`}
+                    onClick={handleAgentHistoryClick}
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    <span>Agent History</span>
                   </button>
                 </div>
               </div>

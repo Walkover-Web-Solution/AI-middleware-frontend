@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
+import { useCustomSelector } from "@/customHooks/customSelector";
 
 import { UserPromptUI } from "./UserPromptUi.js";
 import { AgentUI } from "./AgentUi.js";
@@ -17,8 +18,103 @@ const nodeTypes = {
 
 
 
-export default function Page() {
+export default function Page({ searchParams }) {
   const [selectedTool, setSelectedTool] = useState(null);
+  const thread = useCustomSelector(
+    (state) => state?.historyReducer?.thread || []
+  );
+  const selectedThreadItem = useMemo(() => {
+    if (!searchParams?.message_id) return null;
+    return thread.find((item) => item?.message_id === searchParams.message_id) || null;
+  }, [searchParams?.message_id, thread]);
+
+  useEffect(() => {
+    if (selectedThreadItem) {
+      console.log("Thread data:", selectedThreadItem);
+      console.log("Thread data:", selectedThreadItem.tools_call_data[0]);
+
+    }
+  }, [selectedThreadItem]);
+
+ 
+  const toolCalls = useMemo(() => {
+    const toolData = selectedThreadItem?.tools_call_data;
+    if (!Array.isArray(toolData) || toolData.length === 0) return [];
+
+    return toolData.flatMap((toolSet) =>
+      Object.keys(toolSet).map((key) => toolSet[key])
+    );
+  }, [selectedThreadItem?.tools_call_data]);
+
+  const derivedBatches = useMemo(() => {
+    if (toolCalls.length === 0) return [];
+
+    const orderedTools = toolCalls;
+    const agents = [];
+    let currentAgent = null;
+
+    orderedTools.forEach((tool) => {
+      const toolType = tool?.data?.metadata?.type;
+      const functionData = {
+        id: tool?.id ?? null,
+        args: tool?.args ?? {},
+        data: tool?.data ?? {},
+      };
+
+      if (toolType === "agent") {
+        currentAgent = {
+          name: tool?.name || "Unknown Agent",
+          functionData,
+          parallelTools: [],
+        };
+        agents.push(currentAgent);
+        return;
+      }
+
+      if (toolType === "function") {
+        if (!currentAgent) {
+          currentAgent = {
+            name: "FUNCTIONS",
+            functionData: null,
+            parallelTools: [],
+          };
+          agents.push(currentAgent);
+        }
+        currentAgent.parallelTools.push({
+          name: tool?.name || "Unknown Tool",
+          functionData,
+        });
+      }
+    });
+
+    return [
+      {
+        title: "BATCH 1",
+        agents,
+      },
+    ];
+  }, [toolCalls]);
+
+  const mainAgentTools = useMemo(() => {
+    if (toolCalls.length === 0) return [];
+
+    const data = toolCalls.map((tool) => ({
+      name: tool?.name || "Unknown Tool",
+      functionData: {
+        id: tool?.id ?? null,
+        args: tool?.args ?? {},
+        data: tool?.data ?? {},
+      },
+    }));
+    console.log("Main agent tools:", data);
+    return data;
+  }, [toolCalls]);
+   useEffect(() => {
+    if (derivedBatches.length) {
+      console.log("Derived batches:", derivedBatches);
+    }
+  }, [derivedBatches]);
+
   const nodes = useMemo(() => [
     {
       id: "1",
@@ -30,7 +126,7 @@ export default function Page() {
           width: 260,
           containerClass: "p-4",
           render: () => (
-            <UserPromptUI text="i want to create a action for testing purpose so get a curl those no need to auth and create it's action" />
+            <UserPromptUI text={selectedThreadItem?.user || ""} />
           ),
         },
       },
@@ -68,43 +164,7 @@ export default function Page() {
           containerClass: "border p-3 bg-gray-100",
           render: () => (
             <BatchUI
-              batches={[
-                {
-                  title: "BATCH 1",
-                  agents: [
-                    {
-                      name: "Websearch Agent",
-                      parallelTools: ["tool_1", "tool_2"],
-                    },
-                    {
-                      name: "Data Validator",
-                    },
-                  ],
-                },
-                {
-                  title: "BATCH 2",
-                  agents: [
-                    {
-                      name: "String Formatter",
-                    },
-                    {
-                      name: "Date Parser",
-                      parallelTools: ["tool_1", "tool_2", "tool_3"],
-                    },
-                  ],
-                },
-                {
-                  title: "BATCH 3",
-                  agents: [
-                    {
-                      name: "Number Converter",
-                    },
-                    {
-                      name: "API Authenticator",
-                    },
-                  ],
-                },
-              ]}
+              batches={derivedBatches}
               onToolClick={(tool) => setSelectedTool(tool)}
             />
           ),
@@ -128,6 +188,7 @@ export default function Page() {
               onToolClick={(tool) => setSelectedTool(tool)}
               status="FINALIZING"
               statusClass="text-blue-500"
+              tools={mainAgentTools}
             />
           ),
         },

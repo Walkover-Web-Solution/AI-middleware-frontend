@@ -56,30 +56,7 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
     onBack?.(); // Call the onBack handler if provided
     onClose();   // Also close the slider
   };
-  // Sample data - replace with actual tool data
-  const toolData = tool || {
-    payload: {
-      endpoint: "https://api.example.com/v1/websearch-agent/action",
-      method: "GET",
-      params: {}
-    },
-    tool_2: {
-      time: 387,
-      output: {
-        success: true,
-        results: "Tool 2 executed successfully",
-        timestamp: new Date().toISOString()
-      }
-    },
-    response: {
-      success: true,
-      results: "Tool 2 executed successfully",
-      timestamp: new Date().toISOString()
-    },
-    metadata: {
-      tool_id: "tool_xegnttc"
-    }
-  };
+  const toolData = tool || {};
 
   const handleExportLogs = () => {
     // Implement export logs functionality
@@ -127,9 +104,23 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        <CollapsibleSection title="Payload">
-          <JsonViewer data={toolData.payload} />
-        </CollapsibleSection>
+        {toolData.args && (
+          <CollapsibleSection title="Args">
+            <JsonViewer data={toolData.args} />
+          </CollapsibleSection>
+        )}
+
+        {toolData.data && (
+          <CollapsibleSection title="Data">
+            <JsonViewer data={toolData.data} />
+          </CollapsibleSection>
+        )}
+
+        {toolData.payload && (
+          <CollapsibleSection title="Payload">
+            <JsonViewer data={toolData.payload} />
+          </CollapsibleSection>
+        )}
 
         {toolData.tool_2 && (
           <CollapsibleSection title={`tool_2 (${toolData.tool_2.time}ms)`}>
@@ -137,13 +128,17 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
           </CollapsibleSection>
         )}
 
-        <CollapsibleSection title="Response">
-          <JsonViewer data={toolData.response} />
-        </CollapsibleSection>
+        {toolData.response && (
+          <CollapsibleSection title="Response">
+            <JsonViewer data={toolData.response} />
+          </CollapsibleSection>
+        )}
 
-        <CollapsibleSection title="Metadata">
-          <JsonViewer data={toolData.metadata} />
-        </CollapsibleSection>
+        {toolData.metadata && (
+          <CollapsibleSection title="Metadata">
+            <JsonViewer data={toolData.metadata} />
+          </CollapsibleSection>
+        )}
       </div>
 
           {/* Footer */}
