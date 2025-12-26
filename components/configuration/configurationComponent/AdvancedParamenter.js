@@ -106,7 +106,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           return toolChoice === value?._id;
         })
         .map(value => ({
-          name: value?.function_name || value?.endpoint_name,
+          name: value?.script_id || value?.title,
           id: value?._id
         }))
       : [];
@@ -366,20 +366,20 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   {version_function_data && typeof version_function_data === 'object' && (
                     Object.values(version_function_data)
                       .filter(value => {
-                        const functionName = value?.function_name || value?.endpoint_name;
-                        const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                        const functionName = value?.script_id || value?.title;
+                        const title = integrationData?.[functionName]?.title || value?.title || 'Untitled';
                         return title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                       })
                       .sort((a, b) => {
-                        const aName = a?.function_name || a?.endpoint_name;
-                        const bName = b?.function_name || b?.endpoint_name;
+                        const aName = a?.script_id || a?.title;
+                        const bName = b?.script_id || b?.title;
                         const aTitle = integrationData?.[aName]?.title || aName || 'Untitled';
                         const bTitle = integrationData?.[bName]?.title || bName || 'Untitled';
                         return aTitle?.localeCompare(bTitle);
                       })
                       .map((value) => {
-                        const functionName = value?.function_name || value?.endpoint_name;
-                        const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                        const functionName = value?.script_id || value?.title;
+                        const title = integrationData?.[functionName]?.title || value?.title || 'Untitled';
                         const isSelected = selectedOptions?.some(opt => opt?.id === value?._id);
                         return (
                           <div

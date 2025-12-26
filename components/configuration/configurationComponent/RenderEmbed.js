@@ -23,8 +23,8 @@ const RenderEmbed = ({
   const sortedFunctions = useMemo(() => {
     return bridgeFunctions?.slice()
       .sort((a, b) => {
-        const aFnName = a?.function_name || a?.endpoint;
-        const bFnName = b?.function_name || b?.endpoint;
+        const aFnName = a?.script_id;
+        const bFnName = b?.script_id;
         const aTitle = a?.title || integrationData?.[aFnName]?.title;
         const bTitle = b?.title || integrationData?.[bFnName]?.title;
         if (!aTitle) return 1;
@@ -38,7 +38,7 @@ const RenderEmbed = ({
 
   const renderEmbed = useMemo(() => {
     const embedItems = displayItems?.map((value) => {
-        const functionName = value?.function_name || value?.endpoint;
+        const functionName = value?.script_id;
         const title = value?.title || integrationData?.[functionName]?.title;
 
         return (
@@ -101,7 +101,7 @@ const RenderEmbed = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleOpenDeleteModal(value?._id, value?.function_name);
+                  handleOpenDeleteModal(value?._id, value?.script_id);
                 }}
                 className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
