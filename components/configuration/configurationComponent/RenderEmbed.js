@@ -61,12 +61,12 @@ const RenderEmbed = ({
                 <SquareFunctionIcon size={16} className="shrink-0" />
                 {title?.length > 24 ? (
                   <div className="tooltip tooltip-top min-w-0" data-tip={title}>
-                    <span className="min-w-0 text-sm truncate">
+                    <span className="min-w-0 text-sm truncate text-left">
                       <span className="truncate text-sm font-normal block w-[300px]">{title}</span>
                     </span>
                   </div>
                 ) : (
-                  <span className="min-w-0 text-sm truncate">
+                  <span className="min-w-0 text-sm truncate text-left">
                     <span className="truncate text-sm font-normal block w-[300px]">{title}</span>
                   </span>
                 )}

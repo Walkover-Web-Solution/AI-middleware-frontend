@@ -64,9 +64,9 @@ const Navbar = ({ isEmbedUser, params }) => {
     const baseTabs = [
       {
         id: 'configure',
-        label: ' Agent Config',
+        label: `${bridgeData.bridgeType === 'api' ? 'Agent' : 'Chatbot'} Config`,
         icon: BotIcon,
-        shortLabel: 'Agent Config'
+        shortLabel: `${bridgeData.bridgeType === 'api' ? 'Agent' : 'Chatbot'} Config`
       },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
@@ -518,7 +518,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                             isActive ? 'opacity-100' : 'opacity-60'
                           }`}
                         />
-                        <span className="truncate text-xs">
+                        <span className="truncate text-xs pr-2">
                           {isMobile ? tab.shortLabel : tab.label}
                         </span>
                       </button>
