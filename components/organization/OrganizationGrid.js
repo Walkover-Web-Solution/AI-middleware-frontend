@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { formatDate, formatRelativeTime } from '@/utils/utility';
 
 const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, currentUserId }) => {
     const [loadingOrgId, setLoadingOrgId] = useState(null);
+    const [selectedIndex, setSelectedIndex] = useState(0);
     const formattedOrganizations = useMemo(() => {
         return displayedOrganizations
             .slice()
@@ -16,6 +17,19 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
             }));
     }, [displayedOrganizations, currentUserId]);
 
+    useEffect(() => {
+        if (!formattedOrganizations.length) {
+            setSelectedIndex(-1);
+            return;
+        }
+
+        setSelectedIndex((prev) => {
+            if (prev < 0) return 0;
+            if (prev >= formattedOrganizations.length) return formattedOrganizations.length - 1;
+            return prev;
+        });
+    }, [formattedOrganizations.length]);
+
     const handleOrgClick = async (orgId, orgName) => {
         if (!orgId) return;
         
@@ -27,10 +41,59 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
         }
     };
 
+    const handleKeyDown = (event) => {
+        if (!formattedOrganizations.length) return;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            setSelectedIndex((prev) => Math.min(prev + 1, formattedOrganizations.length - 1));
+            return;
+        }
+
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            setSelectedIndex((prev) => Math.max(prev - 1, 0));
+            return;
+        }
+
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const selectedOrg = formattedOrganizations[selectedIndex];
+            if (selectedOrg) {
+                handleOrgClick(selectedOrg.id, selectedOrg.name);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const handleWindowKeyDown = (event) => {
+            const target = event.target;
+            const isEditableTarget =
+                target instanceof HTMLElement &&
+                (target.isContentEditable ||
+                    target.tagName === 'INPUT' ||
+                    target.tagName === 'TEXTAREA' ||
+                    target.tagName === 'SELECT');
+
+            if (isEditableTarget) {
+                const allowOrgNav = target instanceof HTMLElement && target.dataset.allowOrgNav === 'true';
+                if (!allowOrgNav) return;
+            }
+            handleKeyDown(event);
+        };
+
+        window.addEventListener('keydown', handleWindowKeyDown);
+        return () => window.removeEventListener('keydown', handleWindowKeyDown);
+    }, [formattedOrganizations.length, selectedIndex]);
+
     return (
         <div className="mb-8">
             <div className="overflow-x-auto rounded-lg shadow-lg border border-base-300 bg-base-100">
-                <table className="table  bg-base-100 shadow-md overflow-visible relative z-50 border-collapse">
+                <table
+                    className="table bg-base-100 shadow-md overflow-visible relative z-50 border-collapse focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    tabIndex={0}
+                    onKeyDown={handleKeyDown}
+                >
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs uppercase tracking-wide text-base-content">
@@ -48,13 +111,17 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
                         {formattedOrganizations.length ? (
                             formattedOrganizations.map((org, index) => {
                                 const isLoading = loadingOrgId === org.id;
+                                const isSelected = index === selectedIndex;
                                 return (
                                     <tr
                                         key={org.id ?? index}
-                                        onClick={() => handleOrgClick(org.id, org.name)}
+                                        onClick={() => {
+                                            setSelectedIndex(index);
+                                            handleOrgClick(org.id, org.name);
+                                        }}
                                         className={`cursor-pointer transition-colors hover:bg-base-200 group ${
                                             isLoading ? 'opacity-60 cursor-wait' : ''
-                                        }`}
+                                        } ${isSelected ? 'bg-base-200' : ''}`}
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
