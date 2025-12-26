@@ -122,7 +122,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       if (Array.isArray(value) && value.length > 0) {
         const functionItems = Object.values(functionData || {}).filter(item => value.includes(item?._id));
         if (functionItems.length > 0) {
-          return functionItems.map(item => item?.endpoint_name || item?._id).join(', ');
+          return functionItems.map(item => item?.title || item?._id).join(', ');
         }
       }
       return JSON.stringify(value);

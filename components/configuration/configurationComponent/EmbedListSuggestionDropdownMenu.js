@@ -37,15 +37,15 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
     const renderEmbedSuggestions = useMemo(() => (
         function_data && (Object.values(function_data))
             .filter(value => {
-                const fnName = value?.function_name || value?.endpoint;
+                const fnName = value?.script_id 
                 const title = value?.title || integrationData?.[fnName]?.title;
                 return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
                     !(connectedFunctions || [])?.includes(value?._id);
             })
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
-                const aFnName = a?.function_name || a?.endpoint;
-                const bFnName = b?.function_name || b?.endpoint;
+                const aFnName = a?.script_id;
+                const bFnName = b?.script_id;
                 const aTitle = a?.title || integrationData?.[aFnName]?.title;
                 const bTitle = b?.title || integrationData?.[bFnName]?.title;
                 if (!aTitle) return 1;
@@ -54,7 +54,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                 return aTitle?.localeCompare(bTitle); // Sort alphabetically based on title
             })
             .map((value) => {
-                const functionName = value?.function_name || value?.endpoint;
+                const functionName = value?.script_id;
                 const status = value?.status || integrationData?.[functionName]?.status;
                 const title = value?.title || integrationData?.[functionName]?.title || 'Untitled';
                 return (
