@@ -7,7 +7,6 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
     const leftScrollRef = useRef(null);
     const rightScrollRef = useRef(null);
     const syncingRef = useRef(false);
-    console.log("DIFF DATA:", diffData);
     const syncScroll = (source, target) => {
         if (syncingRef.current) return;
         syncingRef.current = true;
