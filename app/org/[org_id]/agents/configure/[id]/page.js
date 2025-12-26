@@ -25,12 +25,13 @@ const ConfigurationSkeleton = dynamic(() => import("@/components/skeletons/Confi
 export const runtime = 'edge';
 
 // Bundle Components for collapsed panels (5px min width)
-const ConfigBundle = () => {
+const ConfigBundle = ({onClick}) => {
   return (
     <div
       className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Configuration Panel"
       style={{ minWidth: '15px' }}
+      onClick={onClick}
     >
       <div className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Config
@@ -39,12 +40,13 @@ const ConfigBundle = () => {
   );
 };
 
-const ChatBundle = () => {
+const ChatBundle = ({onClick}) => {
   return (
     <div
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Chat Panel"
       style={{ minWidth: '20px' }}
+      onClick={onClick}
     >
       <div className=" font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Chat
@@ -53,12 +55,13 @@ const ChatBundle = () => {
   );
 };
 
-const PromptHelperBundle = () => {
+const PromptHelperBundle = ({onClick}) => {
   return (
     <div
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Prompt Helper Panel"
       style={{ minWidth: '20px' }}
+      onClick={onClick}
     >
       <div className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Helper
@@ -67,12 +70,13 @@ const PromptHelperBundle = () => {
   );
 };
 
-const NotesBundle = () => {
+const NotesBundle = ({onClick}) => {
   return (
     <div
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
       title="Expand Notes Panel"
       style={{ minWidth: '20px' }}
+      onClick={onClick}
     >
       <div className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Notes
@@ -88,6 +92,10 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const router = useRouter();
   const mountRef = useRef(false);
   const dispatch = useDispatch();
+  const configAndChatPanelRef = useRef(null);
+  const promptHelperPanelRef = useRef(null);
+  const notesPanelRef = useRef(null);
+
 
   // Simplified UI state for react-resizable-panels with collapse states
   const [uiState, setUiState] = useState(() => ({
@@ -102,6 +110,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     isNotesCollapsed: false
   }));
 
+  
   const [isGuideVisible, setIsGuideVisible] = useState(false);
 
   // Ref for the main container to calculate percentage-based width
@@ -145,6 +154,64 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const updateUiState = useCallback((updates) => {
     setUiState(prev => ({ ...prev, ...updates }));
   }, []);
+
+  const openConfigPanelAndChatPanel = () => {
+  configAndChatPanelRef.current?.resize(panelSizes.config); // choose width you want
+  updateUiState({ isConfigCollapsed: false });
+  };
+
+const COLLAPSED = 5;
+const OPEN_MIN = 25;
+
+const openPromptHelperPanel = () => {
+  const promptSize = Math.max(OPEN_MIN, panelSizes.promptHelper || 33.33);
+
+  // ALWAYS keep notes closed at 5 when it's collapsed
+  const notesSize = uiState.isNotesCollapsed ? COLLAPSED : Math.max(OPEN_MIN, panelSizes.notes || 33.33);
+
+  // config = remaining, but if notes is collapsed keep it EXACT 5 by reducing config only
+  let configSize = 100 - promptSize - notesSize;
+
+  // if config goes too small, steal only from prompt (NOT from notes)
+  if (configSize < OPEN_MIN) {
+    const need = OPEN_MIN - configSize;
+    configSize = OPEN_MIN;
+    // reduce prompt, keep notes fixed
+    const newPrompt = Math.max(OPEN_MIN, promptSize - need);
+    promptHelperPanelRef.current?.resize(newPrompt);
+  } else {
+    promptHelperPanelRef.current?.resize(promptSize);
+  }
+
+  configAndChatPanelRef.current?.resize(configSize);
+  notesPanelRef.current?.resize(notesSize);
+
+  updateUiState({ isPromptHelperCollapsed: false, isNotesCollapsed: uiState.isNotesCollapsed });
+};
+
+const openNotesPanel = () => {
+  const notesSize = Math.max(OPEN_MIN, panelSizes.notes || 33.33);
+
+  // ALWAYS keep prompt closed at 5 when it's collapsed
+  const promptSize = uiState.isPromptHelperCollapsed ? COLLAPSED : Math.max(OPEN_MIN, panelSizes.promptHelper || 33.33);
+
+  let configSize = 100 - notesSize - promptSize;
+
+  // if config goes too small, steal only from notes (NOT from prompt)
+  if (configSize < OPEN_MIN) {
+    const need = OPEN_MIN - configSize;
+    configSize = OPEN_MIN;
+    const newNotes = Math.max(OPEN_MIN, notesSize - need);
+    notesPanelRef.current?.resize(newNotes);
+  } else {
+    notesPanelRef.current?.resize(notesSize);
+  }
+
+  configAndChatPanelRef.current?.resize(configSize);
+  promptHelperPanelRef.current?.resize(promptSize);
+
+  updateUiState({ isNotesCollapsed: false, isPromptHelperCollapsed: uiState.isPromptHelperCollapsed });
+};
 
 
   const leftPanelScrollRef = useRef(null);
@@ -377,6 +444,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     mountRef.current = true;
   }, [bridgeType]);
 
+  
   // Show skeleton loading state only for initial load (when no data exists)
   if (isLoading && !hasData && !hasError) {
     return (
@@ -443,6 +511,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             {/* Configuration Panel */}
             <Panel
               defaultSize={panelSizes.config}
+              ref={configAndChatPanelRef}
               minSize={3}
               maxSize={100}
               className="bg-base-100"
@@ -456,7 +525,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             >
               {/* Bundle - Show when collapsed */}
               {uiState.isConfigCollapsed && (
-                <ConfigBundle />
+                <ConfigBundle  onClick={openConfigPanelAndChatPanel}/>
               )}
 
               {/* Configuration Content - Always in DOM, just hidden when collapsed */}
@@ -508,7 +577,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 }}
               >
                 {uiState.isChatCollapsed ? (
-                  <ChatBundle />
+                  <ChatBundle onClick={openConfigPanelAndChatPanel}/>
                 ) : (
                   <div className="h-full flex flex-col" id="parentChatbot">
                     <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
@@ -544,6 +613,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 {/* PromptHelper Panel */}
                 <Panel
                   defaultSize={panelSizes.promptHelper}
+                  ref={promptHelperPanelRef}
                   minSize={3}
                   maxSize={100}
                   className="bg-base-50"
@@ -556,7 +626,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   }}
                 >
                   {uiState.isPromptHelperCollapsed ? (
-                    <PromptHelperBundle />
+                    <PromptHelperBundle onClick={openPromptHelperPanel}  />
                   ) : (
                     <PromptHelper
                       isVisible={uiState.isPromptHelperOpen && !isMobileView}
@@ -617,6 +687,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 {/* Notes Panel */}
                 {uiState.showNotes && !isEmbedUser && (
                   <Panel
+                    ref={notesPanelRef}
                     defaultSize={panelSizes.notes}
                     minSize={3}
                     maxSize={100}
@@ -630,7 +701,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                     }}
                   >
                     {uiState.isNotesCollapsed ? (
-                      <NotesBundle />
+                      <NotesBundle onClick={openNotesPanel}/>
                     ) : (
                       <NotesPanel
                         isVisible={true}
