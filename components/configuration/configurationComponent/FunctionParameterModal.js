@@ -684,6 +684,16 @@ if (!isEqual(toolData, function_details)) {
         fields: newFields,
       };
     });
+    setVariablesPath((prev) => {
+      const updatedPath = { ...prev };
+      delete updatedPath[path];
+      const remainingPaths = Object.entries(updatedPath);
+      const formattedPaths = {};
+      remainingPaths.forEach(([key, value]) => {
+        formattedPaths[key] = value;
+      });
+      return formattedPaths;
+    });
     setIsModified(true);
   }, []);
 
