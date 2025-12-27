@@ -375,9 +375,9 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   }
 }
 
-export const deleteFunctionAction = ({ function_name, functionId, orgId }) => async (dispatch) => {
+export const deleteFunctionAction = ({ script_id, functionId, orgId }) => async (dispatch) => {
   try {
-    const reponse = await deleteFunctionApi(function_name);
+    const reponse = await deleteFunctionApi(script_id);
     dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
   } catch (_error) {
