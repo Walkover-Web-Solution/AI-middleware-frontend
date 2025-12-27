@@ -1,6 +1,6 @@
 import { getOrCreateNotificationAuthKey } from "@/config/index";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
+import { updateTriggerDataReducer, removeTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -40,7 +40,9 @@ export default function TriggersList({ params, isEmbedUser }) {
     }
     useEffect(() => {
         if (triggerData) {
-            const filteredTriggers = triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
+            const filteredTriggers = triggerData.filter(flow => 
+                flow?.metadata?.bridge_id === params?.id && flow?.status !== 'deleted'
+            ) || []
             setTriggers(filteredTriggers);
             if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
         }
@@ -86,14 +88,24 @@ export default function TriggersList({ params, isEmbedUser }) {
             const existingIndex = prevTriggers.findIndex(trigger => trigger.id === newTrigger.id);
 
             if (existingIndex !== -1) {
-                // Update existing trigger
-                const updatedTriggers = [...prevTriggers];
-                updatedTriggers[existingIndex] = { ...prevTriggers[existingIndex], ...newTrigger };
-                return updatedTriggers;
+                // If trigger is deleted, remove it permanently from the array and Redux store
+                if (newTrigger.status === 'deleted') {
+                    dispatch(removeTriggerDataReducer({ triggerId: newTrigger.id, orgId: params?.org_id }));
+                    const updatedTriggers = prevTriggers.filter(trigger => trigger.id !== newTrigger.id);
+                    return updatedTriggers;
+                } else {
+                    // Update existing trigger
+                    const updatedTriggers = [...prevTriggers];
+                    updatedTriggers[existingIndex] = { ...prevTriggers[existingIndex], ...newTrigger };
+                    return updatedTriggers;
+                }
             } else {
-                // Add new trigger to the beginning
-                dispatch(updateTriggerDataReducer({ dataToSend: newTrigger, orgId: params?.org_id }));
-                return [newTrigger, ...prevTriggers];
+                // Add new trigger to the beginning (only if not deleted)
+                if (newTrigger.status !== 'deleted') {
+                    dispatch(updateTriggerDataReducer({ dataToSend: newTrigger, orgId: params?.org_id }));
+                    return [newTrigger, ...prevTriggers];
+                }
+                return prevTriggers;
             }
         });
     }
@@ -123,7 +135,7 @@ export default function TriggersList({ params, isEmbedUser }) {
                 
                 </div>
             <div className="flex flex-wrap gap-4">
-                {triggers?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.map(trigger => {
+                {triggers?.length ? (triggers?.map(trigger => {
                     return (
                         <div key={trigger?.id} onClick={() => { openTrigger(trigger?.id) }}
                             className="group flex h-full p-2 w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200 transition-colors duration-200">
@@ -141,7 +153,7 @@ export default function TriggersList({ params, isEmbedUser }) {
                             </div>
                         </div>
                     )
-                })) : null) : null}
+                })) : null}
             </div>
         </div>
     )
