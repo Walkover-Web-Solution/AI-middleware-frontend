@@ -80,7 +80,7 @@ const orgId = currentOrgId || orgIdFromUrl; // ✅ MOVE UP
                         </button>
                     </div>
                    
-                      <div className="shrink-0 w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer" >
+                      <div className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
   <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
     {getInitials(userdetails?.name || orgName)}
   </span>
@@ -99,7 +99,7 @@ const orgId = currentOrgId || orgIdFromUrl; // ✅ MOVE UP
                             + Create New Workspace
                         </button>
                     </div>
-                     <div className="shrink-0 w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer" >
+                     <div className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
   <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
     {getInitials(userdetails?.name || orgName)}
   </span>
