@@ -98,17 +98,20 @@ export default function Page({ searchParams }) {
   const mainAgentTools = useMemo(() => {
     if (toolCalls.length === 0) return [];
 
-    const data = toolCalls.map((tool) => ({
-      name: tool?.name || "Unknown Tool",
-      functionData: {
-        id: tool?.id ?? null,
-        args: tool?.args ?? {},
-        data: tool?.data ?? {},
-      },
-    }));
+    const data = toolCalls
+  .filter(tool => tool?.data?.metadata?.type === "function")
+  .map((tool) => ({
+    name: tool?.name || "Unknown Tool",
+    functionData: {
+      id: tool?.id ?? null,
+      args: tool?.args ?? {},
+      data: tool?.data ?? {},
+    },
+  }));
     console.log("Main agent tools:", data);
     return data;
   }, [toolCalls]);
+
    useEffect(() => {
     if (derivedBatches.length) {
       console.log("Derived batches:", derivedBatches);
@@ -164,9 +167,16 @@ export default function Page({ searchParams }) {
           containerClass: "border p-3 bg-gray-100",
           render: () => (
             <BatchUI
-              batches={derivedBatches}
-              onToolClick={(tool) => setSelectedTool(tool)}
-            />
+  batches={derivedBatches.map(batch => ({
+    ...batch,
+    agents: batch.agents.map(agent => ({
+      name: agent.name,
+      functionData: agent.functionData
+      // ⛔ remove parallelTools
+    }))
+  }))}
+  onToolClick={(agent) => setSelectedTool(agent)}
+/>
           ),
         },
       },

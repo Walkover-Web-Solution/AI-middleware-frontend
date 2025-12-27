@@ -10,7 +10,7 @@ export function BatchUI({ batches, onToolClick }) {
     if (!onToolClick) return;
     onToolClick(tool?.functionData ?? tool);
   };
-
+  console.log("BatchUI props:", batches);
   const handleAgentClick = (agentKey, functionData) => {
     const nextOpen = openAgentKey === agentKey ? null : agentKey;
     setOpenAgentKey(nextOpen);
