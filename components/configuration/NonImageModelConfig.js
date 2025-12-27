@@ -1,64 +1,36 @@
-import { memo } from 'react';
-import InputSection from "./InputSection";
-import ToolsSection from "./ToolsSection";
-import CommonConfigComponents from "./CommonConfigComponents";
-import ChatbotConfigSection from "./ChatbotConfigSection";
+"use client";
+
+import React, { memo, useMemo, useState } from 'react';
+import TabsLayout from './sections/TabsLayout';
+import PromptTab from './sections/PromptTab';
+import ModelTab from './sections/ModelTab';
+import ConnectorsTab from './sections/ConnectorsTab';
+import MemoryTab from './sections/MemoryTab';
+import SettingsTab from './sections/SettingsTab';
+import { SparklesIcon, BotIcon, LinkIcon, BrainIcon, SettingsIcon } from '@/components/Icons';
 import { useConfigurationContext } from './ConfigurationContext';
-import AdvancedParameters from './configurationComponent/AdvancedParamenter';
-import GptMemory from './configurationComponent/Gptmemory';
-import ConfigurationSettingsAccordion from './configurationComponent/ConfigurationSettingsAccordion';
 
 const NonImageModelConfig = memo(() => {
-    const { 
-        params, 
-        searchParams, 
-        apiKeySectionRef, 
-        promptTextAreaRef, 
-        bridgeApiKey, 
-        shouldPromptShow, 
-        service, 
-        showDefaultApikeys, 
-        isEmbedUser,
-        hideAdvancedParameters,
+     const { 
         isPublished,
         isEditor
     } = useConfigurationContext();
+    const [activeTab, setActiveTab] = useState('prompt');
+
+    const tabs = useMemo(() => ([
+        { id: 'prompt', label: 'Prompt', icon: SparklesIcon, content: <PromptTab isPublished={isPublished}  /> },
+        { id: 'model', label: 'Model', icon: BotIcon, content: <ModelTab isPublished={isPublished} /> },
+        { id: 'connectors', label: 'Connectors', icon: LinkIcon, content: <ConnectorsTab isPublished={isPublished} /> },
+        { id: 'memory', label: 'Memory', icon: BrainIcon, content: <MemoryTab isPublished={isPublished} /> },
+        { id: 'settings', label: 'Settings', icon: SettingsIcon, content: <SettingsTab isPublished={isPublished} /> },
+    ]), []);
 
     return (
-        <>
-            <InputSection isPublished={isPublished} isEditor={isEditor} />
-            <ToolsSection isPublished={isPublished} isEditor={isEditor} />
-            <CommonConfigComponents
-                params={params}
-                searchParams={searchParams}
-                apiKeySectionRef={apiKeySectionRef}
-                promptTextAreaRef={promptTextAreaRef}
-                bridgeApiKey={bridgeApiKey}
-                shouldPromptShow={shouldPromptShow}
-                service={service}
-                showDefaultApikeys={showDefaultApikeys}
-                isEmbedUser={isEmbedUser}
-                hideAdvancedParameters={hideAdvancedParameters}
-                isPublished={isPublished}
-                isEditor={isEditor}
-            />
-            <AdvancedParameters
-                params={params}
-                searchParams={searchParams}
-                isEmbedUser={isEmbedUser}
-                hideAdvancedParameters={hideAdvancedParameters}
-                level={2}
-                className="max-w-md"
-                isPublished={isPublished}
-                isEditor={isEditor}
-            />
-
-            <div className="flex gap-4 mt-2 flex-col w-full max-w-md">
-            <GptMemory params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
-            <ChatbotConfigSection isPublished={isPublished} isEditor={isEditor} />
-            <ConfigurationSettingsAccordion isPublished={isPublished} isEditor={isEditor} />
-            </div>
-        </>
+        <TabsLayout
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+        />
     );
 });
 

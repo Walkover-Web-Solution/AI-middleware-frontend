@@ -272,11 +272,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     
     return (
       <div key={key} className={`group w-full ${isLevel2 ? 'space-y-1' : 'space-y-3'}`}>
-        <div className={`flex items-center justify-between gap-2 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
-          <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-4 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
+          <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
             <input
               type="checkbox"
-              className={`checkbox ${checkboxSizeClass} cursor-pointer`}
+              className={`toggle ${toggleSizeClass} cursor-pointer`}
               title={isDefaultValue ? 'Use default value' : 'Use custom value'}
               checked={!isDefaultValue}
               onChange={(e) => {
@@ -299,12 +299,30 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {sliderValueNode}
-            {isDefaultValue && (
-              <span className="badge badge-info badge-xs p-2">Default</span>
-            )}
-          </div>
+          
+          {/* Slider inline with label */}
+          {field === 'slider' && !isDefaultValue && (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
+              
+              <input
+                type="range"
+                min={min || 0}
+                max={max || 100}
+                step={step || 1}
+                key={`${key}-${configuration?.[key]}-${service}-${model}`}
+                defaultValue={sliderDisplayValue ?? ''}
+                onChange={(e) => {
+                  const el = document.getElementById(sliderValueId);
+                  if (el) el.innerText = e.target.value;
+                  debouncedInputChange(e, key, true);
+                }}
+                className={`range range-accent h-2 rounded-full ${rangeSizeClass} flex-1`}
+                name={key}
+              />
+              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
+            </div>
+          )}
         </div>
 
         {field === 'dropdown' && !isDefaultValue && (
@@ -446,29 +464,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           </div>
         )}
 
-        {field === 'slider' && !isDefaultValue && (
-          <div className="flex items-center gap-2">
-            <button disabled={isReadOnly} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
-            <input
-              type="range"
-              min={min || 0}
-              max={max || 100}
-              step={step || 1}
-              key={`${key}-${configuration?.[key]}-${service}-${model}`}
-              defaultValue={sliderDisplayValue ?? ''}
-              onChange={(e) => {
-                const el = document.getElementById(sliderValueId);
-                if (el) el.innerText = e.target.value;
-                debouncedInputChange(e, key, true);
-              }}
-              className={`range range-accent disabled:opacity-50 disabled:cursor-not-allowed h-2 rounded-full ${rangeSizeClass}`}
-              name={key}
-              disabled={isReadOnly}
-            />
-            <button disabled={isReadOnly} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
-          </div>
-        )}
-
         {field === 'text' && !isDefaultValue && (
           <input
             type="text"
@@ -601,9 +596,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       <div className={`z-very-low mt-2 text-base-content w-full ${className}`} tabIndex={0}>
         {/* Level 2 Parameters - Displayed Outside Accordion */}
         {level2Parameters.length > 0 && (
-          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-center">
+          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-start">
             {level2Parameters.map(([key, paramConfig]) => (
-              <div key={key} className="compact-parameter w-full max-w-md">
+              <div key={key} className="compact-parameter w-full">
                 {renderParameterField(key, paramConfig)}
               </div>
             ))}
@@ -627,9 +622,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
         {tutorialState.showTutorial && (
           <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
         )}
-        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-center`}>
+        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-start`}>
           {level1Parameters.map(([key, paramConfig]) => (
-            <div key={key} className="w-full max-w-md">
+            <div key={key} className="w-full">
               {renderParameterField(key, paramConfig)}
             </div>
           ))}

@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction, updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
-import { getStatusClass, openModal } from '@/utils/utility';
+import { getStatusClass, openModal, toggleSidebar } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './EmbedListSuggestionDropdownMenu';
@@ -12,9 +12,9 @@ import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark } from 'lucide-react';
+import { BookText, CircleQuestionMark } from 'lucide-react';
 
-const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
+const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEmbedUser = false }) => {
     // Determine if content is read-only (either published or user is not an editor)
     const isReadOnly = isPublished || !isEditor;
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -192,7 +192,8 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true }) =>
                     isAsync={true}
                 />
 
-                <div className="w-full max-w-md gap-2 flex flex-col px-2 cursor-default">
+                <div className="w-full gap-2 flex flex-col px-2 cursor-default mt-4">
+                    <div className="flex w-full justify-between items-center">
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {bridge_pre_tools.length > 0 ? (
                             <div className="flex items-center gap-1 mb-2">
@@ -224,9 +225,19 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true }) =>
                             connectedFunctions={bridge_pre_tools}
                             shouldToolsShow={true}
                             modelName={model}
-                            isPublished={isPublished}
-                            isEditor={isEditor}
                         />
+                        
+                    </div>
+                     {!isEmbedUser && (
+                        <button
+                            type="button"
+                            className="btn btn-xs btn-outline gap-1 mt-1 whitespace-nowrap shrink-0"
+                            onClick={() => toggleSidebar('integration-guide-slider', 'right')}
+                        >
+                            <BookText className="w-3 h-3" />
+                            <span>Integration Guide</span>
+                        </button>
+                    )}
                     </div>
                     <div className="w-full">
                         <RenderEmbed

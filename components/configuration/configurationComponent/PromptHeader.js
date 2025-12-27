@@ -23,9 +23,9 @@ const PromptHeader = memo(({
     // Conditional styling based on isPromptHelperOpen
     if (isPromptHelperOpen && !isMobileView) {
         return (
-            <div className={`flex items-center justify-between mb-4 p-3 border-b border-base-300 bg-base-50 ${!isEditor ? 'mt-8' : ''}`}>
+            <div className={`flex z-very-high items-center justify-between mb-4 p-3 border-b border-base-300 bg-base-50 ${!isEditor ? 'mt-8' : ''}`}>
                 <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-base-content">Prompt</h3>
+                    <h3 className="text-base font-semibold text-base-content">System Prompt</h3>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ const PromptHeader = memo(({
     return (
         <div className="flex justify-between items-center">
             <div className="label flex items-center gap-2">
-                <span className="label-text capitalize font-medium">Prompt</span>
+                <span className="label-text capitalize font-medium">System Prompt</span>
             </div>
 
             <div className="label cursor-pointer gap-1 sm:gap-2">

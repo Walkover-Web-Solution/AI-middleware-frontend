@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import AdvancedParameters from "./configurationComponent/AdvancedParamenter";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
@@ -20,7 +20,8 @@ const SetupView = memo(() => {
         showDefaultApikeys,
         currentView,
         isPublished,
-        isEditor
+        isEditor,
+        bridgeType,
     } = useConfigurationContext();
 
     // Render agent flow panel when view is 'agent-flow'
@@ -28,8 +29,16 @@ const SetupView = memo(() => {
         return <ConnectedAgentFlowPanel />;
     }
 
+    const shouldRenderStandaloneTriggers = useMemo(
+        () => bridgeType === 'trigger' && !isEmbedUser && modelType === 'image',
+        [bridgeType, isEmbedUser, modelType]
+    );
+
     return (
         <>
+            {shouldRenderStandaloneTriggers && (
+                <TriggersList params={params} />
+            )}
             {modelType === "image" ? (
                 <>
                     <CommonConfigComponents

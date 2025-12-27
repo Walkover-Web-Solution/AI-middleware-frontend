@@ -21,8 +21,8 @@ const InputSection = memo(() => {
         savePrompt,
         isMobileView,
         isPublished,
-        isEditor,
         bridgeType,
+        isEditor
     } = useConfigurationContext();
     return (
         <>
@@ -35,19 +35,9 @@ const InputSection = memo(() => {
         
             {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
                 <div className="w-full pt-4 cursor-default flex flex-wrap justify-between items-start gap-2">
-                    <div className="flex-1 min-w-[220px] max-w-md">
-                        <PreEmbedList isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} />
+                    <div className="flex-1">
+                        <PreEmbedList isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} isEmbedUser={isEmbedUser}   />
                     </div>
-                    {!isEmbedUser && (
-                        <button
-                            type="button"
-                            className="btn btn-xs btn-outline gap-1 mt-1 whitespace-nowrap shrink-0"
-                            onClick={() => toggleSidebar('integration-guide-slider', 'right')}
-                        >
-                            <BookText className="w-3 h-3" />
-                            <span>Integration Guide</span>
-                        </button>
-                    )}
                 </div>
             )}
             <InputConfigComponent
