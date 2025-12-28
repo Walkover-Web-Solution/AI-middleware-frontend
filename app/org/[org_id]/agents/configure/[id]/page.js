@@ -25,10 +25,10 @@ const ConfigurationSkeleton = dynamic(() => import("@/components/skeletons/Confi
 export const runtime = 'edge';
 
 // Bundle Components for collapsed panels (5px min width)
-const ConfigBundle = ({onClick}) => {
+const ConfigBundle = ({ onClick }) => {
   return (
     <div
-      className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Configuration Panel"
       style={{ minWidth: '15px' }}
       onClick={onClick}
@@ -40,10 +40,10 @@ const ConfigBundle = ({onClick}) => {
   );
 };
 
-const ChatBundle = ({onClick}) => {
+const ChatBundle = ({ onClick }) => {
   return (
     <div
-      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Chat Panel"
       style={{ minWidth: '20px' }}
       onClick={onClick}
@@ -55,10 +55,10 @@ const ChatBundle = ({onClick}) => {
   );
 };
 
-const PromptHelperBundle = ({onClick}) => {
+const PromptHelperBundle = ({ onClick }) => {
   return (
     <div
-      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Prompt Helper Panel"
       style={{ minWidth: '20px' }}
       onClick={onClick}
@@ -70,10 +70,10 @@ const PromptHelperBundle = ({onClick}) => {
   );
 };
 
-const NotesBundle = ({onClick}) => {
+const NotesBundle = ({ onClick }) => {
   return (
     <div
-      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Notes Panel"
       style={{ minWidth: '20px' }}
       onClick={onClick}
@@ -92,11 +92,15 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const router = useRouter();
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const configAndChatPanelRef = useRef(null);
+
+  // Panel refs for programmatic resizing
+  const configPanelRef = useRef(null);
+  const chatPanelRef = useRef(null);
   const promptHelperPanelRef = useRef(null);
   const notesPanelRef = useRef(null);
 
-
+// Add this new ref
+const isManualResizeRef = useRef(false);
   // Simplified UI state for react-resizable-panels with collapse states
   const [uiState, setUiState] = useState(() => ({
     isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 710 : false,
@@ -110,7 +114,6 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     isNotesCollapsed: false
   }));
 
-  
   const [isGuideVisible, setIsGuideVisible] = useState(false);
 
   // Ref for the main container to calculate percentage-based width
@@ -155,66 +158,113 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     setUiState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const openConfigPanelAndChatPanel = () => {
-  configAndChatPanelRef.current?.resize(panelSizes.config); // choose width you want
+  const handleExpandChat = useCallback(() => {
+    if (chatPanelRef.current) {
+      chatPanelRef.current.resize(panelSizes.chat);
+    }
+  }, [panelSizes.chat]);
+
+const handleExpandConfig = useCallback(() => {
+  // Check if we're in two-panel or three-panel mode
+  const isThreePanelMode = uiState.isPromptHelperOpen && isFocus;
+  
+  if (isThreePanelMode) {
+    // THREE-PANEL MODE (33-33-33)
+    const openPanelsCount = [
+      !uiState.isConfigCollapsed,
+      !uiState.isPromptHelperCollapsed,
+      !uiState.isNotesCollapsed
+    ].filter(Boolean).length;
+
+    if (openPanelsCount === 2) {
+      // 2 panels open → make all 3 equal
+      configPanelRef.current?.resize(33.33);
+      promptHelperPanelRef.current?.resize(33.33);
+      notesPanelRef.current?.resize(33.33);
+    } else if (openPanelsCount === 1) {
+      // Only 1 panel open
+      if (!uiState.isPromptHelperCollapsed) {
+        // PromptHelper is open → Config takes from PromptHelper
+        configPanelRef.current?.resize(50);
+        promptHelperPanelRef.current?.resize(50);
+      } else if (!uiState.isNotesCollapsed) {
+        // Notes is open → Config takes from Notes
+        configPanelRef.current?.resize(50);
+        notesPanelRef.current?.resize(50);
+      }
+    }
+  } else {
+    // TWO-PANEL MODE (50-50) - Config + Chat
+    configPanelRef.current?.resize(50);
+    chatPanelRef.current?.resize(50);
+  }
+  
   updateUiState({ isConfigCollapsed: false });
-  };
+}, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isNotesCollapsed, uiState.isPromptHelperOpen, isFocus, updateUiState]);
+const handleExpandPromptHelper = useCallback(() => {
+  const openPanelsCount = [
+    !uiState.isConfigCollapsed,
+    !uiState.isPromptHelperCollapsed,
+    !uiState.isNotesCollapsed
+  ].filter(Boolean).length;
 
-const COLLAPSED = 5;
-const OPEN_MIN = 25;
-
-const openPromptHelperPanel = () => {
-  const promptSize = Math.max(OPEN_MIN, panelSizes.promptHelper || 33.33);
-
-  // ALWAYS keep notes closed at 5 when it's collapsed
-  const notesSize = uiState.isNotesCollapsed ? COLLAPSED : Math.max(OPEN_MIN, panelSizes.notes || 33.33);
-
-  // config = remaining, but if notes is collapsed keep it EXACT 5 by reducing config only
-  let configSize = 100 - promptSize - notesSize;
-
-  // if config goes too small, steal only from prompt (NOT from notes)
-  if (configSize < OPEN_MIN) {
-    const need = OPEN_MIN - configSize;
-    configSize = OPEN_MIN;
-    // reduce prompt, keep notes fixed
-    const newPrompt = Math.max(OPEN_MIN, promptSize - need);
-    promptHelperPanelRef.current?.resize(newPrompt);
-  } else {
-    promptHelperPanelRef.current?.resize(promptSize);
+  if (openPanelsCount === 2) {
+    // 2 panels open → make all 3 equal
+    configPanelRef.current?.resize(33.33);
+    promptHelperPanelRef.current?.resize(33.33);
+    notesPanelRef.current?.resize(33.33);
+  } else if (openPanelsCount === 1) {
+    // Only 1 panel open
+    if (!uiState.isConfigCollapsed) {
+      // Config is open → PromptHelper takes from Config
+      configPanelRef.current?.resize(50);
+      promptHelperPanelRef.current?.resize(50);
+    } else if (!uiState.isNotesCollapsed) {
+      // Notes is open → PromptHelper takes from Notes
+      promptHelperPanelRef.current?.resize(50);
+      notesPanelRef.current?.resize(50);
+    }
   }
+  
+  updateUiState({ isPromptHelperCollapsed: false });
+}, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isNotesCollapsed, updateUiState]);
 
-  configAndChatPanelRef.current?.resize(configSize);
-  notesPanelRef.current?.resize(notesSize);
+const handleExpandNotes = useCallback(() => {
+  const openPanelsCount = [
+    !uiState.isConfigCollapsed,
+    !uiState.isPromptHelperCollapsed,
+    !uiState.isNotesCollapsed
+  ].filter(Boolean).length;
 
-  updateUiState({ isPromptHelperCollapsed: false, isNotesCollapsed: uiState.isNotesCollapsed });
-};
-
-const openNotesPanel = () => {
-  const notesSize = Math.max(OPEN_MIN, panelSizes.notes || 33.33);
-
-  // ALWAYS keep prompt closed at 5 when it's collapsed
-  const promptSize = uiState.isPromptHelperCollapsed ? COLLAPSED : Math.max(OPEN_MIN, panelSizes.promptHelper || 33.33);
-
-  let configSize = 100 - notesSize - promptSize;
-
-  // if config goes too small, steal only from notes (NOT from prompt)
-  if (configSize < OPEN_MIN) {
-    const need = OPEN_MIN - configSize;
-    configSize = OPEN_MIN;
-    const newNotes = Math.max(OPEN_MIN, notesSize - need);
-    notesPanelRef.current?.resize(newNotes);
-  } else {
-    notesPanelRef.current?.resize(notesSize);
+  if (openPanelsCount === 2) {
+    // 2 panels open → make all 3 equal
+    configPanelRef.current?.resize(33.33);
+    promptHelperPanelRef.current?.resize(33.33);
+    notesPanelRef.current?.resize(33.33);
+  } else if (openPanelsCount === 1) {
+    // Only 1 panel open
+    if (!uiState.isPromptHelperCollapsed) {
+      // PromptHelper is open → Notes takes from PromptHelper
+      promptHelperPanelRef.current?.resize(50);
+      notesPanelRef.current?.resize(50);
+    } else if (!uiState.isConfigCollapsed) {
+      // Config is open, PromptHelper is closed → Notes takes from Config
+      // Set flag to prevent PromptHelper state update
+      isManualResizeRef.current = true;
+      
+promptHelperPanelRef.current?.resize(5);
+      configPanelRef.current?.resize(50);  // Changed from 50 to 45
+      notesPanelRef.current?.resize(50);    // Changed from 45 to 50
+      
+      // Reset flag after a short delay
+      setTimeout(() => {
+        isManualResizeRef.current = false;
+      }, 100);
+    }
   }
-
-  configAndChatPanelRef.current?.resize(configSize);
-  promptHelperPanelRef.current?.resize(promptSize);
-
-  updateUiState({ isNotesCollapsed: false, isPromptHelperCollapsed: uiState.isPromptHelperCollapsed });
-};
-
-
-  const leftPanelScrollRef = useRef(null);
+  
+  updateUiState({ isNotesCollapsed: false });
+}, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isNotesCollapsed, updateUiState]);const leftPanelScrollRef = useRef(null);
   const handleCloseTextAreaFocus = useCallback(() => {
     if (typeof window.closeTechDoc === 'function') {
       window.closeTechDoc();
@@ -373,22 +423,22 @@ const openNotesPanel = () => {
       const agentBridge = Array.isArray(bridges)
         ? bridges.find((bridge) => bridge?._id === resolvedParams?.id)
         : null;
-      
+
       if (!agentBridge) {
         // Include the type parameter when navigating back to maintain sidebar selection
         const agentType = resolvedSearchParams?.type || 'api';
         router.push(`/org/${resolvedParams?.org_id}/agents?type=${agentType}`);
         return
       }
-      
+
       try {
         await dispatch(getSingleBridgesAction({ id: resolvedParams.id, version: resolvedSearchParams.version }));
-        
+
         // After getting the bridge, ensure type query parameter matches the bridge type
         const currentType = resolvedSearchParams?.type;
         const bridgeTypeFromRedux = agentBridge.bridgeType?.toLowerCase();
         let correctType;
-        
+
         // Determine the correct type based on bridge type from Redux
         if (bridgeTypeFromRedux === 'chatbot') {
           correctType = 'chatbot';
@@ -396,7 +446,7 @@ const openNotesPanel = () => {
           // For 'api', 'batch', or any other type, default to 'api'
           correctType = 'api';
         }
-        
+
         // If type is missing or doesn't match, update the URL
         if (!currentType || currentType !== correctType) {
           const url = new URL(window.location);
@@ -444,7 +494,6 @@ const openNotesPanel = () => {
     mountRef.current = true;
   }, [bridgeType]);
 
-  
   // Show skeleton loading state only for initial load (when no data exists)
   if (isLoading && !hasData && !hasError) {
     return (
@@ -510,8 +559,8 @@ const openNotesPanel = () => {
           <PanelGroup direction="horizontal" className="w-full h-full">
             {/* Configuration Panel */}
             <Panel
+              ref={configPanelRef}
               defaultSize={panelSizes.config}
-              ref={configAndChatPanelRef}
               minSize={3}
               maxSize={100}
               className="bg-base-100"
@@ -525,7 +574,7 @@ const openNotesPanel = () => {
             >
               {/* Bundle - Show when collapsed */}
               {uiState.isConfigCollapsed && (
-                <ConfigBundle  onClick={openConfigPanelAndChatPanel}/>
+                <ConfigBundle onClick={handleExpandConfig} />
               )}
 
               {/* Configuration Content - Always in DOM, just hidden when collapsed */}
@@ -565,6 +614,7 @@ const openNotesPanel = () => {
             {!uiState.isPromptHelperOpen || !isFocus ? (
               // Chat Panel (Two-panel mode)
               <Panel
+                ref={chatPanelRef}
                 defaultSize={panelSizes.chat}
                 minSize={3}
                 className="bg-base-50"
@@ -577,7 +627,7 @@ const openNotesPanel = () => {
                 }}
               >
                 {uiState.isChatCollapsed ? (
-                  <ChatBundle onClick={openConfigPanelAndChatPanel}/>
+                  <ChatBundle onClick={handleExpandChat} />
                 ) : (
                   <div className="h-full flex flex-col" id="parentChatbot">
                     <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
@@ -588,18 +638,23 @@ const openNotesPanel = () => {
                           searchParams={resolvedSearchParams}
                           onVisibilityChange={setIsGuideVisible}
                         />
-                        {!sessionStorage.getItem('orchestralUser') ? (
-                          <div className="flex-1 min-h-0">
-                            {bridgeType === 'batch' && versionService === 'openai' ? (
-                              <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                        {/* Only show experimental Chat for non-chatbot types */}
+                        {bridgeType !== 'chatbot' && (
+                          <>
+                            {!sessionStorage.getItem('orchestralUser') ? (
+                              <div className="flex-1 min-h-0">
+                                {bridgeType === 'batch' && versionService === 'openai' ? (
+                                  <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                                ) : (
+                                  <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                                )}
+                              </div>
                             ) : (
-                              <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                              <div className="flex-1 min-h-0">
+                                <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                              </div>
                             )}
-                          </div>
-                        ) : (
-                          <div className="flex-1 min-h-0">
-                            <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                          </div>
+                          </>
                         )}
                       </div>
                     </div>
@@ -612,21 +667,24 @@ const openNotesPanel = () => {
               <>
                 {/* PromptHelper Panel */}
                 <Panel
-                  defaultSize={panelSizes.promptHelper}
-                  ref={promptHelperPanelRef}
-                  minSize={3}
-                  maxSize={100}
-                  className="bg-base-50"
-                  collapsible={false}
-                  onResize={(size) => {
-                    const isCollapsed = size <= 5;
-                    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
-                      updateUiState({ isPromptHelperCollapsed: isCollapsed });
-                    }
-                  }}
-                >
+  ref={promptHelperPanelRef}
+  defaultSize={panelSizes.promptHelper}
+  minSize={3}
+  maxSize={100}
+  className="bg-base-50"
+  collapsible={false}
+  onResize={(size) => {
+    // Don't update state if we're manually keeping it collapsed
+    if (isManualResizeRef.current) return;
+    
+    const isCollapsed = size <= 5;
+    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
+      updateUiState({ isPromptHelperCollapsed: isCollapsed });
+    }
+  }}
+>
                   {uiState.isPromptHelperCollapsed ? (
-                    <PromptHelperBundle onClick={openPromptHelperPanel}  />
+                    <PromptHelperBundle onClick={handleExpandPromptHelper} />
                   ) : (
                     <PromptHelper
                       isVisible={uiState.isPromptHelperOpen && !isMobileView}
@@ -701,7 +759,7 @@ const openNotesPanel = () => {
                     }}
                   >
                     {uiState.isNotesCollapsed ? (
-                      <NotesBundle onClick={openNotesPanel}/>
+                      <NotesBundle onClick={handleExpandNotes} />
                     ) : (
                       <NotesPanel
                         isVisible={true}
@@ -769,18 +827,24 @@ const openNotesPanel = () => {
             <div className="min-h-screen" id="parentChatbot">
               <div className="h-full flex flex-col">
                 <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
-                {!sessionStorage.getItem('orchestralUser') ? (
-                  <div className="flex-1 min-h-0">
-                    {bridgeType === 'batch' && versionService === 'openai' ? (
-                      <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+
+                {/* Only show experimental Chat for non-chatbot types */}
+                {bridgeType !== 'chatbot' && (
+                  <>
+                    {!sessionStorage.getItem('orchestralUser') ? (
+                      <div className="flex-1 min-h-0">
+                        {bridgeType === 'batch' && versionService === 'openai' ? (
+                          <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                        ) : (
+                          <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                        )}
+                      </div>
                     ) : (
-                      <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                      <div className="flex-1 min-h-0">
+                        <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                      </div>
                     )}
-                  </div>
-                ) : (
-                  <div className="flex-1 min-h-0">
-                    <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                  </div>
+                  </>
                 )}
               </div>
               <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
