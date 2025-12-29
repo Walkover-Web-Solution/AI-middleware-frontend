@@ -133,10 +133,10 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   }
 };
 
-export const deleteFunctionApi = async (function_name) => {
+export const deleteFunctionApi = async (script_id) => {
   try {
     const response = await axios.delete(`${URL}/api/tools/`, {
-      data: { function_name }
+      data: { script_id }
     });
     return response.data;
   } catch (error) {

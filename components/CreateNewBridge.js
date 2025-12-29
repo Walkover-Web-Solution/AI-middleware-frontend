@@ -115,10 +115,41 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
           cleanState();
         })
         .catch((error) => {
-          updateState({ 
-            isAiLoading: false,
-            globalError: error?.response?.data?.message || "Error while creating agent"
-          });
+          updateState({ isAiLoading: false });
+          const name = generateUniqueName();
+          const slugname = generateUniqueName();
+
+          if (name.length > 0 && state.selectedModel) {
+            updateState({ isLoading: true });
+            const fallbackDataToSend = {
+              service: state.selectedService,
+              model: state.selectedModel,
+              name,
+              slugName: slugname,
+              bridgeType: resolvedBridgeType,
+              type: state.selectedType,
+            };
+            dispatch(createBridgeAction({ dataToSend: fallbackDataToSend, orgid }, (data) => {
+              if (isEmbedUser) {
+                sendDataToParent("drafted", {
+                  name: data?.agent?.name, 
+                  agent_id: data?.agent?._id
+                }, "Agent created Successfully");
+              }             
+              router.push(`/org/${orgid}/agents/configure/${data.data.agent._id}?version=${data.data.agent.versions[0]}`);
+              updateState({ isLoading: false });
+              cleanState();
+            })).catch(() => {
+              updateState({ 
+                isLoading: false,
+                globalError: error?.response?.data?.message || "Error while creating agent"
+              });
+            });
+          } else {
+            updateState({ 
+              globalError: error?.response?.data?.message || "Error while creating agent"
+            });
+          }
         });
     } else {
       const name = generateUniqueName();

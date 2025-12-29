@@ -88,7 +88,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
     const fn = function_data?.[functionId];
     setfunctionData(fn);
     setToolData(fn);
-    const fnName = fn?.function_name || fn?.endpoint;
+    const fnName = fn?.script_id;
     setFunctionName(fnName);
     setVariablesPath(variables_path[fnName] || {});
     openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)

@@ -53,7 +53,7 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true }) =>
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
     const handleOpenModal = (functionId) => {
         setPreFunctionId(functionId);
-        setPreFunctionName(function_data?.[functionId]?.function_name || function_data?.[functionId]?.endpoint);
+        setPreFunctionName(function_data?.[functionId]?.script_id || function_data?.[functionId]?.title || '');
         setPreToolData(function_data?.[functionId]);
         setPreFunctionData(function_data?.[functionId]);
         setVariablesPath(variables_path[preFunctionName] || {});

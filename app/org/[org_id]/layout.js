@@ -313,7 +313,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (e?.data?.action === 'deleted') {
         if (versionData && typeof versionData === 'object' && !Array.isArray(versionData)) {
           const selectedVersionData = Object.values(versionData).find(
-            fn => fn.function_name === e?.data?.id
+            fn => fn.script_id === e?.data?.id
           );
           if (selectedVersionData) {
             //This condition will delete the tools and preTools..
@@ -323,7 +323,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               dataToSend: {
                 functionData: {
                   function_id: selectedVersionData._id,
-                  function_name: selectedVersionData.function_name
+                  function_name: selectedVersionData.script_id
                 }
               }
             }));
@@ -341,7 +341,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 version_id: resolvedSearchParams?.get('version')
               }))
           }
-          dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+          dispatch(deleteFunctionAction({ script_id: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
 
         }
       }

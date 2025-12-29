@@ -34,7 +34,7 @@ import InviteUserModal from '../modals/InviteuserModal';
 /*                                  Component                                 */
 /* -------------------------------------------------------------------------- */
 
-function MainSlider({ isEmbedUser }) {
+function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFromHeader}) {
   /* --------------------------- Router & selectors ------------------------- */
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -42,7 +42,7 @@ function MainSlider({ isEmbedUser }) {
   const dispatch = useDispatch();
 
   const pathParts = pathname.split('?')[0].split('/');
-  const orgId = pathParts[2];
+  const orgId =orgIdFromHeader || pathParts[2];
 
   const { userdetails, organizations, currrentOrgDetail } = useCustomSelector(state => ({
     userdetails: state.userDetailsReducer.userDetails,
@@ -50,6 +50,11 @@ function MainSlider({ isEmbedUser }) {
     currrentOrgDetail: state?.userDetailsReducer?.organizations?.[orgId]
   }));
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization', [organizations, orgId]);
+  const getInitials = (name = '') => {
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0][0]?.toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
 
   // Check if we're in side-by-side mode
   const isSideBySideMode = pathParts.length === 4;
@@ -65,7 +70,6 @@ function MainSlider({ isEmbedUser }) {
   const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
   const [showContent, setShowContent] = useState(isSideBySideMode); // Control content visibility with delay
   const [isAdminMode, setIsAdminMode] = useState(false); // New state for admin settings mode
-  
   // Theme detection placeholder (not actively used)
 
   // Effect to detect mobile screen size
@@ -375,13 +379,23 @@ function MainSlider({ isEmbedUser }) {
     setIsMobileVisible(prev => !prev);
   }, []);
 
+  
+  
   // Reusable function for rendering organization dropdown content
   const renderOrganizationDropdown = useCallback(() => {
     return (
       <>
         {/* User info */}
         <div className="flex items-start gap-3 p-3 border-b border-base-300 mb-3">
+        {!openDetails ? (
           <User size={16} className="text-base-content/60 mt-3  flex-shrink-0" />
+        ) : (
+          <div className="shrink-0 w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer">
+            <span className="text-primary-content font-semibold text-sm">
+              {getInitials(userdetailsfromOrg?.name || userdetails?.name || orgName)}
+            </span>
+          </div>
+        )}
           <div className="flex-1 min-w-0">
             <div className="font-medium text-sm text-base-content truncate">{userdetails?.name}</div>
             <div className="text-xs text-base-content/60 truncate mt-0.5">{userdetails?.email ?? 'user@email.com'}</div>
@@ -390,6 +404,8 @@ function MainSlider({ isEmbedUser }) {
 
         {/* Organizations List */}
         <div className="space-y-1">
+         {!openDetails && (
+  <> 
           <div className="flex items-center justify-between px-3 mb-2">
             <div className="text-xs font-medium text-base-content/50 uppercase tracking-wider">
               Organizations
@@ -443,8 +459,9 @@ function MainSlider({ isEmbedUser }) {
               </div>
             </div>
           </button>
-          
           <hr className="border-base-300 my-2" />
+          </>
+          )}
           
           {/* User Details button */}
           <button
@@ -506,6 +523,13 @@ function MainSlider({ isEmbedUser }) {
   // Determine if sidebar should show content (expanded view) with delayed hiding
   const showSidebarContent = isMobile ? false : showContent;
 
+  if (openDetails) {
+  return (
+    <div className="absolute top-23 right-2 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2 z-[9999]">
+      {renderOrganizationDropdown()}
+    </div>
+  );
+}
   return (
     <>
       {/* Custom Keyframes for Smooth Animations */}

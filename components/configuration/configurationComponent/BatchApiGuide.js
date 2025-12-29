@@ -19,7 +19,14 @@ const BatchApi = (bridgeId, versionId) => {
         `        "YOUR QUESTION 3"\n` +
         `    ],\n` +
         `    "agent_id": "${bridgeId || ''}",\n` +
-        `    "version_id": "${versionId || ''}"\n` +
+        `    "batch_variables": [\n` +
+        `        {\n` +
+        `            "message": "YOUR MESSAGE",\n` +
+        `        },\n` +
+        `        {\n` +
+        `            "name": "YOUR NAME",\n` +
+        `        },\n` +
+        `    ]\n` +
         `}'`
     );
 }
@@ -32,7 +39,7 @@ const data = [
   ['webhook.header', 'object', 'headers to include in the webhook request.', 'true'],
   ['batch', 'array of strings', 'A list of user questions to process in batch.', 'true'],
   ['agent_id', 'string', 'The unique ID of the agent to process the request.', 'true'],
-  ['version_id', 'string', 'The specific version  of the agent.', 'true'],
+  ['batch_variables', 'object', 'An object containing variables for each batch item.', 'true'],
 ];
 
 const BatchResponseFormat = () => {

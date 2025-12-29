@@ -61,7 +61,7 @@ export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => as
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
-      toast.error("Agent Name can't be duplicate");
+      toast.error("Agent Name can't be duplicate fallBack to manual bridge creation");
     } else {
       toast.error("Something went wrong");
     }
@@ -375,9 +375,9 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   }
 }
 
-export const deleteFunctionAction = ({ function_name, functionId, orgId }) => async (dispatch) => {
+export const deleteFunctionAction = ({ script_id, functionId, orgId }) => async (dispatch) => {
   try {
-    const reponse = await deleteFunctionApi(function_name);
+    const reponse = await deleteFunctionApi(script_id);
     dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
   } catch (_error) {

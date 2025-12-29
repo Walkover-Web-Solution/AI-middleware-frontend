@@ -826,8 +826,8 @@ promptHelperPanelRef.current?.resize(5);
             {/* Chat Panel */}
             <div className="min-h-screen" id="parentChatbot">
               <div className="h-full flex flex-col">
-                <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
-
+                  <AgentSetupGuide promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
+                
                 {/* Only show experimental Chat for non-chatbot types */}
                 {bridgeType !== 'chatbot' && (
                   <>

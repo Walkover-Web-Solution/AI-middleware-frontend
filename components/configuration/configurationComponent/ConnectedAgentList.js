@@ -223,12 +223,12 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                             <BotIcon size={16} className="shrink-0" />
                             {name?.length > 24 ? (
                                 <div className="tooltip tooltip-top min-w-0" data-tip={name}>
-                                    <span className="min-w-0 text-sm truncate">
+                                    <span className="min-w-0 text-sm truncate text-left">
                                         <span className="truncate text-sm font-normal block w-[300px]">{name}</span>
                                     </span>
                                 </div>
                             ) : (
-                                <span className="min-w-0 text-sm truncate">
+                                <span className="min-w-0 text-sm truncate text-left">
                                     <span className="truncate text-sm font-normal block w-[300px]">{name}</span>
                                 </span>
                             )}

@@ -224,14 +224,12 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             }
         }
         let testcase_data = {
-            matching_type: selectedStrategy,
+            matching_type: selectedStrategy || 'exact',
         }
         // Use stored testcase_id from Redux if available, otherwise fall back to prop
         const activeTestCaseId = storedTestCaseId || testCaseId;
         if (activeTestCaseId) {
             testcase_data.testcase_id = activeTestCaseId;
-        } else {
-            testcase_data = null;
         }
         dispatch(setChatError(channelIdentifier, ""));
         if (modelType !== "completion") inputRef.current.value = "";

@@ -81,19 +81,24 @@ function GuideSlider({ params, bridgeType, onClose }) {
           />
         </div>
         <div className="flex flex-col gap-4">
-          <div className="tabs tabs-boxed bg-base-100 p-1 rounded-lg">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                className={`tab flex-1 transition-colors ${activeTab === tab.id 
-                  ? 'tab-active bg-base-200 font-medium shadow-sm' 
-                  : 'hover:bg-base-200/50'}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {!tabs.some(tab => tab.id === "chatbot") && (
+  <div className="tabs tabs-boxed bg-base-100 p-1 rounded-lg">
+    {tabs.map(tab => (
+      <button
+        key={tab.id}
+        className={`tab flex-1 transition-colors ${
+          activeTab === tab.id
+            ? 'tab-active bg-base-200 font-medium shadow-sm'
+            : 'hover:bg-base-200/50'
+        }`}
+        onClick={() => setActiveTab(tab.id)}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+)}
+
           <div className="overflow-y-auto h-full scrollbar-hide rounded-lg bg-base-100 p-4 shadow-sm">
             {renderTabContent()}
           </div>

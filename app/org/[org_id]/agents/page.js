@@ -155,6 +155,8 @@ const getColumnLabel = (column) => {
       return 'Average Response Time';
     case 'totalTokens':
       return 'Usage';
+    case 'usage':
+      return 'Usage $';
     case 'promptDetails':
       return 'Prompt Details';
     case 'last_used':
@@ -170,7 +172,7 @@ const getColumnLabel = (column) => {
     case 'updated_by':
       return 'Updated By';
     case 'agent_limit':
-      return 'Limit';
+      return 'Limit $';
     case 'apikey_usage':
       return 'Apikey Usage';
     case 'agent_usage':
@@ -197,11 +199,14 @@ const renderUsageCell = (row) => {
   if (!tokens || tokens === "-") {
     return <EmptyCell />;
   }
-
   return (
     <div className="flex flex-col gap-0.5 text-xs">
       <span className="font-semibold text-base-content">
-        {cost}
+        <span className="block">{typeof cost === "string"? cost.includes(".")? cost.replace(/(\.\d{4})\d+$/, "$1"): `${cost}.0000`: cost}
+</span>
+       {typeof tokens === "string"&&
+         <span className="text-base-content/70">(tokens: {tokens})</span>
+       }
       </span>
     </div>
   );
@@ -272,7 +277,7 @@ const renderLimitCell = (limit) => {
   if (!hasLimit) {
     return (
       <div className="flex items-center justify-center">
-        <Infinity size={20} className="text-primary" />
+        <Infinity size={20} className="text-base-content" />
       </div>
     );
   }
@@ -311,7 +316,7 @@ function Home({ params, searchParams, isEmbedUser }) {
   const resolvedSearchParams = use(searchParams);
   const dispatch = useDispatch();
   const router = useRouter();
-
+  const type = searchParams?.type ?? "api";
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory, usageMetrics, isAdminOrOwner, currentOrgRole, currentUser, linksData, users } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails;
@@ -373,7 +378,7 @@ function Home({ params, searchParams, isEmbedUser }) {
     PortalDropdown,
     PortalStyles
   } = usePortalDropdown({
-    offsetX: -120,  // Better positioning for table dropdowns
+    offsetX: -100,  // Better positioning for table dropdowns
     offsetY: 5
   });
   const { isDeleting, executeDelete } = useDeleteOperation();
@@ -415,6 +420,7 @@ function Home({ params, searchParams, isEmbedUser }) {
         ? value
         : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     };
+    if (!usageMetrics?.filters?.start_date && !usageMetrics?.filters?.end_date) return "";
     return `${formatReadableDate(usageMetrics?.filters?.start_date)} → ${formatReadableDate(usageMetrics?.filters?.end_date)}`;
   }, [isUsageFilterActive, usageMetrics?.filters]);
 
@@ -637,7 +643,7 @@ function Home({ params, searchParams, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
-    cost: item.metrics ? `$${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
+    cost: item.metrics ? `${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
     usage: true, // Used as key for the combined usage column
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
     isLoading: loadingAgentId === item._id,
@@ -705,9 +711,9 @@ function Home({ params, searchParams, isEmbedUser }) {
               )}
             </div>
           )
-          : <EmptyCell />,
-        totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
-        cost: item.metrics ? `$${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
+          : <EmptyCell/>,
+        totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? "Loading..." : <EmptyCell/>,
+        cost: item.metrics ? `${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell/>,
         usage: true, // Used as key for the combined usage column
         averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
         agent_limit: renderLimitCell(item?.bridge_limit),
@@ -1053,44 +1059,44 @@ function Home({ params, searchParams, isEmbedUser }) {
               Usage &amp; Limits
             </button>
           </li>
-
+          
           <li> <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handlePortalCloseImmediate();
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handlePortalCloseImmediate();
               handlePauseBridge(row._id)
-            }}
+      }}
             className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
-          >
-            {bridgeStatus[row._id]?.bridge_status === BRIDGE_STATUS.PAUSED ? (
-              <>
-                <Play size={14} className="text-green-600" />
-                Resume Agent
-              </>
-            ) : (
-              <>
-                <Pause size={14} className="text-red-600" />
-                Pause Agent
-              </>
-            )}
+    >
+      {bridgeStatus[row._id]?.bridge_status === BRIDGE_STATUS.PAUSED ? (
+        <>
+          <Play size={14} className="text-green-600" />
+          Resume Agent
+        </>
+      ) : (
+        <>
+          <Pause size={14} className="text-red-600" />
+          Pause Agent
+        </>
+      )}
           </button></li>
-          {/* Only show Delete button for Admin or Owner roles */}
-          {isAdminOrOwner && (
-            <li><button onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handlePortalCloseImmediate();
-              setItemToDelete(row);
-              // Small delay to ensure state is set before opening modal
-              setTimeout(() => {
-                openModal(MODAL_TYPE.DELETE_MODAL);
-              }, 10);
-            }}>
-              <Trash2 size={14} className="text-red-600" />
-              Delete Agent
-            </button></li>
-          )}
+            {/* Only show Delete button for Admin or Owner roles */}
+            {isAdminOrOwner && (
+              <li><button onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePortalCloseImmediate();
+                setItemToDelete(row);
+                // Small delay to ensure state is set before opening modal
+                setTimeout(() => {
+                  openModal(MODAL_TYPE.DELETE_MODAL);
+                }, 10);
+              }}>
+                <Trash2 size={14} className="text-red-600" />
+                Delete Agent
+              </button></li>
+            )} 
         </ul>
       );
 
@@ -1235,7 +1241,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                           className="btn btn-primary btn-sm"
                           onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}
                         >
-                          {searchParams?.type === "api" ? " + Create New API Agent" : " + Create New Chatbot Agent"}
+                          {type === "api" ? " + Create New API Agent" : " + Create New Chatbot Agent"}
                         </button>
                       </div>
                     </div>
