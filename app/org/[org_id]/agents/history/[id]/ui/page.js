@@ -112,11 +112,28 @@ export default function Page({ searchParams }) {
     return data;
   }, [toolCalls]);
 
+  const calledAgentTools = useMemo(() => {
+    if (derivedBatches.length === 0) return [];
+
+    return derivedBatches.flatMap((batch) =>
+      batch.agents.map((agent) => ({
+        agentName: agent.name,
+        tools: agent.parallelTools || [],
+      }))
+    );
+  }, [derivedBatches]);
+
    useEffect(() => {
     if (derivedBatches.length) {
       console.log("Derived batches:", derivedBatches);
     }
   }, [derivedBatches]);
+
+  useEffect(() => {
+    if (calledAgentTools.length) {
+      console.log("Called agent tools:", calledAgentTools);
+    }
+  }, [calledAgentTools]);
 
   const nodes = useMemo(() => [
     {
