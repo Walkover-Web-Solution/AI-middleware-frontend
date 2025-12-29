@@ -64,8 +64,13 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             dispatch(createOrgAction(dataToSend, (data) => {
                 dispatch(userDetails());
                 handleSwitchOrg(data.id, data.name);
+                console.log(data);
                 toast.success('Workspace created successfully');
-                route.push(`/org/${data.id}/agents`);
+                // ✅ wait one tick so org state is ready
+                setTimeout(() => {
+                    console.log(data)
+                    route.replace(`/org/${data.id}/agents`);
+                }, 0);
             }));
         } catch (error) {
             toast.error('Failed to create workspace');

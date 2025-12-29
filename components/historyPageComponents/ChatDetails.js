@@ -4,7 +4,7 @@ import { allowedAttributes, generateKeyValuePairs, openModal } from "@/utils/uti
 import { CloseCircleIcon, CopyIcon } from "@/components/Icons";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
 import { truncate, useCloseSliderOnEsc } from "./AssistFile";
 
@@ -17,6 +17,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
   }
   const variablesKeyValue = selectedItem && selectedItem['variables'] ? selectedItem['variables'] : {};
   const [modalContent, setModalContent] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
   const sidebarRef = useRef(null);
 
   useEffect(() => {
@@ -43,11 +44,15 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
   useCloseSliderOnEsc(setIsSliderOpen);
 
-  const copyToClipboard = (content, message = "Copied to clipboard") => {
+  const copyToClipboard = (content, message = "Copied to clipboard", id = null) => {
     navigator.clipboard
       .writeText(typeof content === 'string' ? content : JSON.stringify(content))
       .then(() => {
         toast.success(message);
+        if (id) {
+          setCopiedId(id);
+          setTimeout(() => setCopiedId(null), 2000); // Reset after 2 seconds
+        }
       })
       .catch((error) => {
         toast.error(`Error while copying to clipboard`);
@@ -156,7 +161,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                         <a 
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            copyToClipboard(displayValue, "Current values copied to clipboard");
+                                            copyToClipboard(displayValue, "Current values copied to clipboard", `current-${key}`);
                                           }}
                                           className="flex items-center gap-2 text-sm"
                                         >
@@ -172,7 +177,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const keyValuePairs = generateKeyValuePairs(displayValue);
-                                            copyToClipboard(JSON.stringify(keyValuePairs, null, 2), "Key-value pairs copied to clipboard");
+                                            copyToClipboard(JSON.stringify(keyValuePairs, null, 2), "Key-value pairs copied to clipboard", `keyvalue-${key}`);
                                           }}
                                           className="flex items-center gap-2 text-sm"
                                         >
@@ -189,8 +194,21 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               )}
                             </div>
                           ) : (
-                            <div className="bg-base-200 p-4 rounded-lg text-sm overflow-auto whitespace-pre-wrap border border-base-200">
+                            <div className="relative bg-base-200 p-4 rounded-lg text-sm overflow-auto whitespace-pre-wrap border border-base-200">
                               <div className="text-base-content break-words" dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
+                              {key === "system Prompt" && (
+                                <button
+                                  onClick={() => copyToClipboard(displayValue, "System prompt copied to clipboard", `system-prompt`)}
+                                  className="absolute top-2 right-2 btn btn-ghost btn-sm p-1.5 rounded-md hover:bg-base-300 transition-colors duration-200"
+                                  title="Copy system prompt"
+                                >
+                                  {copiedId === 'system-prompt' ? (
+                                    <Check size={16} className="text-success" />
+                                  ) : (
+                                    <CopyIcon size={16} className="text-base-content" />
+                                  )}
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
