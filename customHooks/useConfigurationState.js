@@ -21,7 +21,7 @@ export const useConfigurationState = (params, searchParams) => {
             modelName: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
             showConfigType: state.appInfoReducer.embedUserDetails.showConfigType,
             showDefaultApikeys: state.appInfoReducer.embedUserDetails.addDefaultApiKeys,
-            shouldToolsShow: isPublished ? (bridgeDataFromState?.configuration?.tools) : (versionData?.configuration?.tools),
+            shouldToolsShow: state.modelReducer.serviceModels[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             bridgeApiKey: isPublished ? (bridgeDataFromState?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service]) : (versionData?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service]),
             shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
             bridge_functions: isPublished ? (bridgeDataFromState?.function_ids || []) : (versionData?.function_ids || []),

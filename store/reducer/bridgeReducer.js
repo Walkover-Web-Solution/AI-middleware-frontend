@@ -5,7 +5,19 @@ const initialState = {
   bridgeVersionMapping: {},
   org: {},
   loading: false,
+  error: false,
   isFocus: false,
+  savingStatus: {
+    status: null, // 'saving', 'saved', 'failed'
+    timestamp: null
+  },
+  usageMetrics: {
+    data: [],
+    filters: null,
+    // Separate flag to track if filter is user-applied
+    filterActive: false,
+    loading: false // Track loading state for metrics API
+  },
 };
 
 export const bridgeReducer = createSlice({
@@ -14,9 +26,17 @@ export const bridgeReducer = createSlice({
   reducers: {
     isPending: (state) => {
       state.loading = true;
+      state.error = false;
     },
     isError: (state) => {
       state.loading = false;
+      state.error = true;
+    },
+    setSavingStatus: (state, action) => {
+      state.savingStatus = {
+        status: action.payload.status,
+        timestamp: Date.now()
+      };
     },
     addorRemoveResponseIdInBridgeReducer: (state, action) => {
       const { response } = action.payload;
@@ -31,6 +51,7 @@ export const bridgeReducer = createSlice({
       const { _id } = bridge;
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
       state.loading = false;
+      state.error = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {
       const { bridge } = action.payload;
@@ -40,6 +61,7 @@ export const bridgeReducer = createSlice({
       }
       state.bridgeVersionMapping[parent_id][_id] = { ...(state.bridgeVersionMapping[parent_id][_id] || {}), ...bridge };
       state.loading = false;
+      state.error = false;
     },
     fetchAllBridgeReducer: (state, action) => {
       const { orgId, bridges, ...restPayload } = action.payload;
@@ -66,7 +88,7 @@ export const bridgeReducer = createSlice({
       }
     },
     createBridgeReducer: (state, action) => {
-      state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
+      state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.agent);
     },
     createBridgeVersionReducer: (state, action) => {
       const { newVersionId, parentVersionId, bridgeId, version_description, orgId } = action.payload;
@@ -189,7 +211,6 @@ export const bridgeReducer = createSlice({
 
     updateBridgeActionReducer: (state, action) => {
       const { bridgeId, actionData, versionId } = action.payload;
-      // state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
       state.bridgeVersionMapping[bridgeId][versionId].actions = actionData;
     },
     updateBridgeToolsReducer: (state, action) => {
@@ -283,6 +304,13 @@ export const bridgeReducer = createSlice({
       const { tools } = action.payload;
       state.prebuiltTools = tools;
     },
+    setBridgeUsageMetricsReducer: (state, action) => {
+      const { data = [], filters = null, filterActive = false, loading = false } = action.payload;
+      state.usageMetrics = { data, filters, filterActive, loading };
+    },
+    clearBridgeUsageMetricsReducer: (state) => {
+      state.usageMetrics = { data: [], filters: null, filterActive: false, loading: false };
+    },
     
     // Clear previous bridge and version data before fetching new data
     clearPreviousBridgeDataReducer: (state, action) => {
@@ -317,10 +345,13 @@ export const bridgeReducer = createSlice({
 export const {
   isPending,
   isError,
-  fetchAllBridgeReducer,
-  fetchAllFunctionsReducer,
+  setSavingStatus,
+  addorRemoveResponseIdInBridgeReducer,
+  setIsFocusReducer,
   fetchSingleBridgeReducer,
   fetchSingleBridgeVersionReducer,
+  fetchAllBridgeReducer,
+  fetchAllFunctionsReducer,
   createBridgeVersionReducer,
   deleteBridgeVersionReducer,
   createBridgeReducer,
@@ -340,8 +371,9 @@ export const {
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
   setThreadIdForVersionReducer,
-  setIsFocusReducer,
-  clearPreviousBridgeDataReducer
+  clearPreviousBridgeDataReducer,
+  setBridgeUsageMetricsReducer,
+  clearBridgeUsageMetricsReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

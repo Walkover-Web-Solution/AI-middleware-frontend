@@ -1,28 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { CloseIcon } from "@/components/Icons";
-import FormSection from "@/components/chatbotConfiguration/formSection";
 import ApiGuide from "../configuration/configurationComponent/ApiGuide";
 import BatchApiGuide from "../configuration/configurationComponent/BatchApiGuide";
-import SecondStep from "../chatbotConfiguration/secondStep";
-import PrivateFormSection from "../chatbotConfiguration/firstStep";
+import SecondStep from "../chatbotConfiguration/SecondStep";
+import PrivateFormSection from "../chatbotConfiguration/FirstStep";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { toggleSidebar } from "@/utils/utility";
-import SlugNameInput from "../configuration/configurationComponent/slugNameInput";
+import SlugNameInput from "../configuration/configurationComponent/SlugNameInput";
 
 function GuideSlider({ params, bridgeType, onClose }) {
+  // Initialize activeTab state
   const [activeTab, setActiveTab] = useState(bridgeType != "trigger" ? bridgeType : "chatbot");
-  useEffect(()=>{
-    setActiveTab(bridgeType != "trigger" ? bridgeType : "chatbot");
-  },[bridgeType])
-  const { slugName, prompt } = useCustomSelector((state) => ({
+  
+  // Get bridge data from Redux
+  const { slugName, prompt, bridgeTypeFromRedux } = useCustomSelector((state) => ({
     slugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-    prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt
-}));
-  const tabs = [
-    { id: "api", label: "API" },
-    { id: "chatbot", label: "Chatbot" },
-    { id: "batch", label: "Batch API" }
-  ];
+    prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt,
+    bridgeTypeFromRedux: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.toLowerCase()
+  }));
+  
+  useEffect(() => {
+    // Set initial active tab based on the bridge type from props
+    let initialTab = bridgeType != "trigger" ? bridgeType : "chatbot";
+    
+    // If the bridge type is chatbot from Redux, force chatbot tab
+    if (bridgeTypeFromRedux === "chatbot") {
+      initialTab = "chatbot";
+    } 
+    // If bridge type is not chatbot (api or batch), make sure we don't show chatbot tab
+    else if (initialTab === "chatbot") {
+      initialTab = "api"; // Default to API tab for non-chatbot agents
+    }
+    
+    setActiveTab(initialTab);
+  }, [bridgeType, bridgeTypeFromRedux]);
+
+  // Determine which tabs to show based on the bridge type
+  const tabs = bridgeTypeFromRedux === "chatbot" ?
+    // If it's a chatbot, only show the chatbot tab
+    [{ id: "chatbot", label: "Chatbot" }] :
+    // If it's API or batch, show both API and Batch API tabs
+    [
+      { id: "api", label: "API" },
+      { id: "batch", label: "Batch API" }
+    ];
 
   const renderTabContent = () => {
     switch(activeTab) {
@@ -60,19 +81,24 @@ function GuideSlider({ params, bridgeType, onClose }) {
           />
         </div>
         <div className="flex flex-col gap-4">
-          <div className="tabs tabs-boxed bg-base-100 p-1 rounded-lg">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                className={`tab flex-1 transition-colors ${activeTab === tab.id 
-                  ? 'tab-active bg-base-200 font-medium shadow-sm' 
-                  : 'hover:bg-base-200/50'}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {!tabs.some(tab => tab.id === "chatbot") && (
+  <div className="tabs tabs-boxed bg-base-100 p-1 rounded-lg">
+    {tabs.map(tab => (
+      <button
+        key={tab.id}
+        className={`tab flex-1 transition-colors ${
+          activeTab === tab.id
+            ? 'tab-active bg-base-200 font-medium shadow-sm'
+            : 'hover:bg-base-200/50'
+        }`}
+        onClick={() => setActiveTab(tab.id)}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+)}
+
           <div className="overflow-y-auto h-full scrollbar-hide rounded-lg bg-base-100 p-4 shadow-sm">
             {renderTabContent()}
           </div>

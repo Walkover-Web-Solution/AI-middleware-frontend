@@ -1,13 +1,13 @@
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfigurationState } from "@/customHooks/useConfigurationState";
 import { ConfigurationProvider } from "./ConfigurationContext";
 import SetupView from "./SetupView";
-import Protected from "../protected";
+import Protected from "../Protected";
 import { Lock } from 'lucide-react';
 import { toggleSidebar } from '@/utils/utility';
 import GuideSlider from '../sliders/IntegrationGuideSlider';
+import { useCustomSelector } from "@/customHooks/customSelector";
 
 const ConfigurationPage = ({
     params,
@@ -30,6 +30,33 @@ const ConfigurationPage = ({
 
     const configState = useConfigurationState(params, searchParams);
     const { bridgeType } = configState;
+    
+    // Get user role to determine edit permissions
+    const { isAdminOrOwner, currentOrgRole, currentUser } = useCustomSelector(state => {
+        const orgRole = state?.userDetailsReducer?.organizations?.[params.org_id]?.role_name;
+        const isAdminOrOwner = orgRole === "Admin" || orgRole === "Owner";
+        
+        return {
+            isAdminOrOwner,
+            currentOrgRole: orgRole || '',
+            currentUser: state?.userDetailsReducer?.userDetails || {}
+        };
+    });
+    
+    // Determine if user has edit permissions for this agent
+    const bridge = useCustomSelector(state => state?.bridgeReducer?.allBridgesMap?.[params?.id]);
+    const isEditor = useMemo(() => {
+        // For embed users, only check agent access (not org role)
+        if (isEmbedUser) {
+            return true
+        }
+        
+        // Original logic for non-embed users
+        return ((currentOrgRole === "Editor" && (bridge?.users?.length === 0 || !bridge?.users || (bridge?.users?.length > 0 && bridge?.users?.some(user => user === currentUser.id))))
+            || ((currentOrgRole === "Viewer") && (bridge?.users?.some(user => user === currentUser.id)))
+            || currentOrgRole === "Creator"
+            || isAdminOrOwner);
+    }, [currentOrgRole, currentUser, bridge?.users, isAdminOrOwner, isEmbedUser]);
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -46,7 +73,7 @@ const ConfigurationPage = ({
 
     const renderHelpSection = useMemo(() => () => {
         return (
-            <div className="z-very-low mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
+            <div className="mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
                 <div className="flex flex-row gap-6 mt-4 items-center">
                     {/* Speak to us */}
                     {!isEmbedUser && (
@@ -122,7 +149,8 @@ const ConfigurationPage = ({
         closeHelperButtonLocation,
         currentView,
         switchView: handleNavigation,
-        isPublished
+        isPublished,
+        isEditor
     }), [
         configState,
         params,
@@ -139,44 +167,82 @@ const ConfigurationPage = ({
         isMobileView,
         closeHelperButtonLocation,
         isPublished,
+        isEditor,
         currentView,
         handleNavigation
     ]);
 
 
-    // Check if viewing published data
-    const [bannerState, setBannerState] = useState({ show: isPublished, animating: false });
+    // Check if viewing published data or non-editor mode
+    const [bannerState, setBannerState] = useState({ 
+        showPublished: isPublished, 
+        showNonEditor: !isEditor,
+        animatingPublished: false,
+        animatingNonEditor: false 
+    });
     const prevIsPublished = useRef(isPublished);
+    const prevIsEditor = useRef(isEditor);
 
     // Handle banner animation when isPublished changes
     useEffect(() => {
         if (prevIsPublished.current !== isPublished) {
             if (isPublished) {
                 // Switching to published - show with slide-in animation
-                setBannerState({ show: true, animating: false });
+                setBannerState(prev => ({ ...prev, showPublished: true, animatingPublished: false }));
             } else {
                 // Switching from published - start slide-out animation
-                setBannerState({ show: true, animating: true });
+                setBannerState(prev => ({ ...prev, showPublished: true, animatingPublished: true }));
                 // Hide banner after animation completes
                 setTimeout(() => {
-                    setBannerState({ show: false, animating: false });
+                    setBannerState(prev => ({ ...prev, showPublished: false, animatingPublished: false }));
                 }, 300); // Match animation duration
             }
             prevIsPublished.current = isPublished;
         }
     }, [isPublished]);
+    
+    // Handle banner animation when isEditor changes
+    useEffect(() => {
+        if (prevIsEditor.current !== isEditor) {
+            if (!isEditor) {
+                // Switching to non-editor - show with slide-in animation
+                setBannerState(prev => ({ ...prev, showNonEditor: true, animatingNonEditor: false }));
+            } else {
+                // Switching to editor - start slide-out animation
+                setBannerState(prev => ({ ...prev, showNonEditor: true, animatingNonEditor: true }));
+                // Hide banner after animation completes
+                setTimeout(() => {
+                    setBannerState(prev => ({ ...prev, showNonEditor: false, animatingNonEditor: false }));
+                }, 300); // Match animation duration
+            }
+            prevIsEditor.current = isEditor;
+        }
+    }, [isEditor]);
 
     return (
         <ConfigurationProvider value={contextValue}>
             <div className="flex flex-col gap-2 relative bg-base-100">
                 {/* Published Data Banner - Sticky and close to navbar */}
-                {bannerState.show && (
-                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 px-4 py-2 ${bannerState.animating ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                {bannerState.showPublished && (
+                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                             <span className="text-blue-700 dark:text-slate-300">
                                 This is a <span className="text-blue-800 dark:text-white font-medium">read-only</span> published data.
+                            </span>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Non-Editor Banner - Sticky and close to navbar */}
+                {bannerState.showNonEditor && (
+                    <div className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                        }`}>
+                        <div className="flex items-center justify-center gap-2 text-sm">
+                            <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-blue-700 dark:text-slate-300">
+                                You don't have <span className="text-blue-800 dark:text-white font-medium">edit access</span> to update this agent.
                             </span>
                         </div>
                     </div>

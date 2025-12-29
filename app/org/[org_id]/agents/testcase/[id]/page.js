@@ -4,9 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, updateTestCaseAction } from '@/store/action/testCasesAction';
-import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@/components/Icons';
+import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/Icons';
 import OnBoarding from '@/components/OnBoarding';
-import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import PageHeader from '@/components/Pageheader';
 
@@ -47,15 +47,22 @@ function TestCases({ params }) {
 
   useEffect(() => {
     if (selectedVersion) {
-      router.push(`?version=${bridgeVersion}&versionId=${selectedVersion}`);
+      // Preserve the type parameter when updating URL
+      const typeParam = searchParams.get('type');
+      const typeQueryPart = typeParam ? `&type=${typeParam}` : '';
+      router.push(`?version=${bridgeVersion}&versionId=${selectedVersion}${typeQueryPart}`);
     }
-  }, [selectedVersion, router]);
+  }, [selectedVersion, router, searchParams]);
 
   const handleRunTestCase = (versionId) => {
     setIsLoading(true);
     dispatch(runTestCaseAction({ versionId, bridgeId: resolvedParams?.id }))
       .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: resolvedParams?.id })); setIsLoading(false); setSelectedVersion(versionId) });
-    router.push(`?version=${bridgeVersion}&versionId=${versionId}`);
+    
+    // Preserve the type parameter when updating URL
+    const typeParam = searchParams.get('type');
+    const typeQueryPart = typeParam ? `&type=${typeParam}` : '';
+    router.push(`?version=${bridgeVersion}&versionId=${versionId}${typeQueryPart}`);
   }
 
   const toggleRow = (index) => {
@@ -87,7 +94,7 @@ function TestCases({ params }) {
         ? { tool_calls: JSON.parse(editExpectedOutput) }
         : { response: editExpectedOutput }
     };
-    dispatch?.(updateTestCaseAction({ bridge_id: resolvedParams?.id, dataToUpdate: updatedTestCase }))
+    dispatch?.(updateTestCaseAction({ testCaseId: testCase?._id, dataToUpdate: updatedTestCase }))
     setEditingIndex(null);
   };
 
@@ -212,7 +219,7 @@ function TestCases({ params }) {
                                   <textarea
                                     value={editUserInput}
                                     onChange={(e) => setEditUserInput(e.target.value)}
-                                    className="textarea bg-white dark:bg-black/15/10 textarea-bordered w-full min-h-20"
+                                    className="textarea bg-base-200 dark:bg-black/15/10 textarea-bordered w-full min-h-20"
                                   />
                                 ) : (
                                   <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content overflow-auto max-h-40">

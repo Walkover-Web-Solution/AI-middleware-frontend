@@ -2,14 +2,14 @@ import dynamic from 'next/dynamic';
 import { useMemo, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { createNodesFromAgentDoc } from '@/components/flowDataManager';
+import { createNodesFromAgentDoc } from '@/components/FlowDataManager';
 import { useConfigurationContext } from './ConfigurationContext';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getConnectedAgentFlowAction } from '@/store/action/orchestralFlowAction';
 import { getFromCookies } from '@/utils/utility';
-import Protected from '../protected';
+import Protected from '../Protected';
 
-const AgentToAgentConnection = dynamic(() => import('@/components/agentToAgentConnection'), {
+const AgentToAgentConnection = dynamic(() => import('@/components/AgentToAgentConnection'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-[400px]">

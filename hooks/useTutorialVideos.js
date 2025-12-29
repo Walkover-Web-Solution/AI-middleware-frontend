@@ -7,7 +7,7 @@ import { getTutorialDataAction } from '@/store/action/flowDataAction';
  * Custom hook to manage dynamic tutorial videos from Redux
  * Provides dynamic video content from API instead of static videos
  */
-export const useTutorialVideos = () => {
+const useTutorialVideos = () => {
   const dispatch = useDispatch();
   
   // Get tutorial data from Redux store
@@ -27,8 +27,6 @@ export const useTutorialVideos = () => {
     const tutorial = tutorialData?.find(tutorial => {
       const title = tutorial?.title?.toLowerCase() || '';
       const type = tutorial?.type?.toLowerCase() || '';
-      const description = tutorial?.description?.toLowerCase() || '';
-      
       switch (tutorialType) {
         case 'bridge_creation':
         case 'agent_creation':

@@ -17,8 +17,8 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
     const { mongoIdsOfTools } = useCustomSelector((state) => {
         const functionData = state.bridgeReducer.org?.[params.org_id]?.functionData;
         const mongoIds = functionData ? Object.values(functionData).reduce((acc, item) => {
-                if (item?.function_name && item?._id) {
-                    acc[item.function_name] = item._id;
+                if (item?.script_id && item?._id) {
+                    acc[item.script_id] = item._id;
                 }
                 return acc;
             }, {})
@@ -161,7 +161,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
             if (childIndex) {
                 try {
                     JSON.parse(newValue);
-                } catch (error) {
+                } catch {
                     toast.error('InValid JSON');
                     return prevTestCases;
                 }

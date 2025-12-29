@@ -5,19 +5,19 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 
 // Model and Service APIs
-export const getSingleModels = async () => {
-  try {
-    const getSingleModels = await axios.get(`${URL}/api/v1/config/models`)
-    return getSingleModels
-  } catch (error) {
-    console.error(error)
-    throw new Error(error)
-  }
-}
+// export const getSingleModels = async () => {
+//   try {
+//     const getSingleModels = await axios.get(`${URL}/api/v1/agentConfig/models`)
+//     return getSingleModels
+//   } catch (error) {
+//     console.error(error)
+//     throw new Error(error)
+//   }
+// }
 
 export const getAllModels = async (service) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service/models/${service}`);
+    const response = await axios.get(`${URL}/api/service/${service}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -27,7 +27,7 @@ export const getAllModels = async (service) => {
 
 export const getAllServices = async () => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service`);
+    const response = await axios.get(`${URL}/api/service`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -37,7 +37,7 @@ export const getAllServices = async () => {
 
 export const addNewModel = async (newModelObj) => {
   try {
-    const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
+    const response = await axios.post(`${URL}/api/models`, newModelObj)
     return response;
   } catch (error) {
     throw error
@@ -46,7 +46,7 @@ export const addNewModel = async (newModelObj) => {
 
 export const deleteModel = async (dataToSend) => {
   try {
-    const response = await axios.delete(`${URL}/modelConfiguration/user?${new URLSearchParams(dataToSend).toString()}`)
+    const response = await axios.delete(`${URL}/api/models?${new URLSearchParams(dataToSend).toString()}`)
     toast.success(response?.data?.message)
     return response;
   } catch (error) {
@@ -58,40 +58,43 @@ export const deleteModel = async (dataToSend) => {
 // API Key Management APIs
 export const saveApiKeys = async (data) => {
   try {
-    const response = await axios.post(`${URL}/apikeys`, data);
+    const response = await axios.post(`${URL}/api/apikeys`, data);
     return response;
   } catch (error) {
     console.error(error);
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.message);
     return error;
   }
 }
 
 export const updateApikey = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/apikeys/${dataToSend.apikey_object_id}`, dataToSend)
+    const response = await axios.put(`${URL}/api/apikeys/${dataToSend.apikey_object_id}`, dataToSend)
     return response;
   } catch (error) {
     console.error(error)
+    toast.error(error?.response?.data?.message);
     return error;
   }
 }
 
 export const deleteApikey = async (id) => {
   try {
-    const response = await axios.delete(`${URL}/apikeys`, {
+    const response = await axios.delete(`${URL}/api/apikeys`, {
       data: { apikey_object_id: id },
     });
     return response;
   } catch (error) {
+    
     console.error(error);
+    toast.error(error?.response?.data?.message);
     return error;
   }
 };
 
 export const getAllApikey = async (org_id) => {
   try {
-    const response = await axios.get(`${URL}/apikeys`, org_id)
+    const response = await axios.get(`${URL}/api/apikeys`, org_id)
     return response;
   } catch (error) {
     console.error(error)

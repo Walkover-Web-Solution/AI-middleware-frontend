@@ -1,4 +1,4 @@
-import { getPrebuiltPrompts, resetPrebuiltPrompt, updatePrebuiltPrompt } from "@/config";
+import { getPrebuiltPrompts, resetPrebuiltPrompt, updatePrebuiltPrompt } from "@/config/index";
 import { getAllPrebuiltPrompts, updatePrebuiltPromptData } from "../reducer/prebuiltPromptReducer";
 
 export const getPrebuiltPromptsAction = () => async (dispatch) => {

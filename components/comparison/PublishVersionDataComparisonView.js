@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Check, X, AlertCircle } from 'lucide-react';
 import { isEqual } from 'lodash';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { DIFFERNCE_DATA_DISPLAY_NAME } from '@/jsonFiles/bridgeParameter';
+import { DIFFERNCE_DATA_DISPLAY_NAME, CONFIGURATION_KEYS_TO_EXCLUDE } from '@/jsonFiles/bridgeParameter';
 
 const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
 
@@ -122,7 +122,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       if (Array.isArray(value) && value.length > 0) {
         const functionItems = Object.values(functionData || {}).filter(item => value.includes(item?._id));
         if (functionItems.length > 0) {
-          return functionItems.map(item => item?.endpoint_name || item?._id).join(', ');
+          return functionItems.map(item => item?.title || item?._id).join(', ');
         }
       }
       return JSON.stringify(value);
@@ -171,7 +171,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
             ))}
           </div>
         );
-      } catch (e) {
+      } catch {
         // Fallback to JSON string if there's an error in the recursive rendering
         return <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-auto">{JSON.stringify(value, null, 2)}</pre>;
       }
@@ -192,13 +192,19 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
     const categories = {};
     
     flattenedDifferences.forEach(diff => {
-      const category = diff.path.split('.')[0];
+      // Check if this is a configuration key that should be excluded
+      const pathParts = diff.path.split('.');
+      if (pathParts[0] === 'configuration' && pathParts.length > 1) {
+        const configKey = pathParts[1];
+        if (CONFIGURATION_KEYS_TO_EXCLUDE.includes(configKey)) return;
+      }
+      
+      const category = pathParts[0];
       if (!categories[category]) {
         categories[category] = [];
       }
       categories[category].push(diff);
     });
-    
     return categories;
   }, [flattenedDifferences]);
 

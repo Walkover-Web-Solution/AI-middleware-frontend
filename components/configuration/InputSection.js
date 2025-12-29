@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import PreEmbedList from "./configurationComponent/preEmbedList";
-import InputConfigComponent from "./configurationComponent/inputConfigComponent";
+import PreEmbedList from "./configurationComponent/PreEmbedList";
+import InputConfigComponent from "./configurationComponent/InputConfigComponent";
 import { useConfigurationContext } from './ConfigurationContext';
 import { toggleSidebar } from '@/utils/utility';
 import {BookText } from 'lucide-react';
@@ -13,7 +13,6 @@ const InputSection = memo(() => {
         promptTextAreaRef, 
         isEmbedUser, 
         hidePreTool,
-        // Consolidated state props
         uiState,
         updateUiState,
         promptState,
@@ -22,6 +21,7 @@ const InputSection = memo(() => {
         savePrompt,
         isMobileView,
         isPublished,
+        isEditor,
         bridgeType,
     } = useConfigurationContext();
     return (
@@ -36,7 +36,7 @@ const InputSection = memo(() => {
             {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
                 <div className="w-full pt-4 cursor-default flex flex-wrap justify-between items-start gap-2">
                     <div className="flex-1 min-w-[220px] max-w-md">
-                        <PreEmbedList isPublished={isPublished} params={params} searchParams={searchParams} />
+                        <PreEmbedList isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} />
                     </div>
                     {!isEmbedUser && (
                         <button
@@ -63,6 +63,7 @@ const InputSection = memo(() => {
                 savePrompt={savePrompt}
                 isMobileView={isMobileView}
                 isPublished={isPublished}
+                isEditor={isEditor}
             />
         </>
     );

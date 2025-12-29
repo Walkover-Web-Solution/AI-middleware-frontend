@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
-import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
+import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import Protected from './protected';
+import Protected from './Protected';
 
 const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isEmbedUser, searchParams, onVisibilityChange = () => {} }) => {
-  const { bridgeApiKey, prompt, shouldPromptShow, service, showDefaultApikeys, modelName } = useCustomSelector((state) => {
+  const { bridgeApiKey, prompt, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const isPublished = searchParams?.isPublished === 'true';
@@ -25,10 +25,11 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service,
       showDefaultApikeys,
-      modelName: modelName
+      modelName: modelName,
+      bridgeType: bridgeDataFromState?.bridgeType
    };
   });
-  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (modelName !== 'gpt-5-nano'||prompt===""))
+  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys && prompt!="")? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (modelName !== 'gpt-5-nano'||prompt===""))
   const [isAnimating, setIsAnimating] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
@@ -57,7 +58,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   };
 
   useEffect(() => {
-    if(isEmbedUser && showDefaultApikeys)
+    if(isEmbedUser && showDefaultApikeys && prompt!=="")
     {
       setIsVisible(false);
       return;
@@ -91,7 +92,18 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     } else {
       setIsVisible(true);
     }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName]);
+    
+    // Chatbot open/close logic - moved to end to handle all conditions
+    if (bridgeType === 'chatbot' && hasPrompt && (hasApiKey || modelName === 'gpt-5-nano')) {
+      if (typeof window !== 'undefined' && window.openChatbot) {
+        window?.openChatbot();
+      }
+    } else {
+      if (typeof window !== 'undefined' && window.closeChatbot) {
+        window?.closeChatbot();
+      }
+    }
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType]);
 
   useEffect(() => {
     if (typeof onVisibilityChange === 'function') {
@@ -100,7 +112,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   }, [isVisible, onVisibilityChange]);
 
   const handleStart = () => {
-    if(isEmbedUser && showDefaultApikeys)
+    if(isEmbedUser && showDefaultApikeys && prompt!=="")
     {
       setIsVisible(false);
       return;
@@ -133,7 +145,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
   }
 
   return (
-    <div className={`w-full h-full z-very-high bg-base-100 overflow-hidden relative transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+    <div className={`w-full h-full z-very-low bg-base-100 overflow-hidden relative transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">

@@ -20,9 +20,14 @@ export const uploadImage = async (formData, isVedioOrPdf) => {
   }
 };
 
-export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = { query, thread_id, version_id} }) => {
+export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = { query, thread_id, version_id } }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'optimize_prompt',
+      ...data,
+      bridge_id: bridge_id || data.bridge_id,
+      version_id: version_id || data.version_id
+    });
     return response.data.result;
   } catch (error) {
     console.error(error);
@@ -33,8 +38,11 @@ export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_i
 export const optimizeSchemaApi = async ({ data }) => {
   try {
     const response = await axios.post(
-      `${PYTHON_URL}/utils/structured_output`,
-      data
+      `${URL}/api/utils/call-gtwy`,
+      {
+        type: 'structured_output',
+        ...data
+      }
     );
     return response.data;
   } catch (error) {
@@ -46,8 +54,11 @@ export const optimizeSchemaApi = async ({ data }) => {
 export const optimizeJsonApi = async ({ data }) => {
   try {
     const response = await axios.post(
-      `${PYTHON_URL}/bridge/genrate/rawjson`,
-      data
+      `${URL}/api/utils/call-gtwy`,
+      {
+        type: 'generate_json',
+        ...data
+      }
     );
     return response.data;
   } catch (error) {
@@ -56,10 +67,13 @@ export const optimizeJsonApi = async ({ data }) => {
   }
 };
 
-export const improvePrompt =  async (variables) =>{
+export const improvePrompt = async (variables) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/utils/improve_prompt`, {variables})
-    return response?.data;
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'improve_prompt',
+      variables
+    });
+    return response?.data?.result;
   } catch (error) {
     console.error(error)
     throw new Error(error);
@@ -67,12 +81,12 @@ export const improvePrompt =  async (variables) =>{
 }
 
 // AI Assistant Tools APIs
-export const getPrebuiltPrompts = async ()=>{
-  try{
-     const getPrebuiltPrompts = await axios.get(`${PYTHON_URL}/prebuilt_prompt`)
-     return getPrebuiltPrompts?.data?.data
+export const getPrebuiltPrompts = async () => {
+  try {
+    const getPrebuiltPrompts = await axios.get(`${URL}/api/prebuilt_prompt`)
+    return getPrebuiltPrompts?.data?.data
   }
-  catch(error){
+  catch (error) {
     console.error(error)
     throw error
   }
@@ -80,7 +94,7 @@ export const getPrebuiltPrompts = async ()=>{
 
 export const updatePrebuiltPrompt = async (dataToSend) => {
   try {
-    const response= await axios.put(`${PYTHON_URL}/prebuilt_prompt`, dataToSend)
+    const response = await axios.put(`${URL}/api/prebuilt_prompt`, dataToSend)
     return response?.data?.data
   } catch (error) {
     console.error(error)
@@ -90,7 +104,7 @@ export const updatePrebuiltPrompt = async (dataToSend) => {
 
 export const resetPrebuiltPrompt = async (dataToSend) => {
   try {
-    const response= await axios.post(`${PYTHON_URL}/prebuilt_prompt/reset`, dataToSend)
+    const response = await axios.post(`${URL}/api/prebuilt_prompt/reset`, dataToSend)
     return response?.data?.data
   } catch (error) {
     console.error(error)
@@ -101,7 +115,7 @@ export const resetPrebuiltPrompt = async (dataToSend) => {
 // Functions Management APIs
 export const getAllFunctionsApi = async () => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/functions/all`)
+    const data = await axios.get(`${URL}/api/tools/`)
     return data;
   } catch (error) {
     console.error(error)
@@ -111,7 +125,7 @@ export const getAllFunctionsApi = async () => {
 
 export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/functions/${function_id}`, { dataToSend });
+    const response = await axios.put(`${URL}/api/tools/${function_id}`, { dataToSend });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -119,10 +133,10 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   }
 };
 
-export const deleteFunctionApi = async (function_name) => {
+export const deleteFunctionApi = async (script_id) => {
   try {
-    const response = await axios.delete(`${PYTHON_URL}/functions/`, {
-      data: { function_name }
+    const response = await axios.delete(`${URL}/api/tools/`, {
+      data: { script_id }
     });
     return response.data;
   } catch (error) {
@@ -133,7 +147,7 @@ export const deleteFunctionApi = async (function_name) => {
 
 export const getPrebuiltToolsApi = async () => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/inbuilt/tools`);
+    const response = await axios.get(`${URL}/api/tools/inbuilt`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -144,7 +158,7 @@ export const getPrebuiltToolsApi = async () => {
 // Webhook and Alerting APIs
 export const createWebhookAlert = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/alerting`, dataToSend);
+    const response = await axios.post(`${URL}/api/alerting`, dataToSend);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -154,7 +168,7 @@ export const createWebhookAlert = async (dataToSend) => {
 
 export const updateWebhookAlert = async ({ data, id }) => {
   try {
-    const response = await axios.put(`${URL}/alerting/${id}`, data);
+    const response = await axios.put(`${URL}/api/alerting/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -164,7 +178,7 @@ export const updateWebhookAlert = async ({ data, id }) => {
 
 export const getAllWebhookAlert = async () => {
   try {
-    const response = await axios.get(`${URL}/alerting`);
+    const response = await axios.get(`${URL}/api/alerting`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -174,7 +188,7 @@ export const getAllWebhookAlert = async () => {
 
 export const deleteWebhookAlert = async (id) => {
   try {
-    const response = await axios.delete(`${URL}/alerting`, {
+    const response = await axios.delete(`${URL}/api/alerting`, {
       data: { id: id },
     });
     return response.data;
@@ -185,7 +199,7 @@ export const deleteWebhookAlert = async (id) => {
 };
 
 // Integration and External APIs
-export const updateFlow = async (embed_token, functionId, description,title) => {
+export const updateFlow = async (embed_token, functionId, description, title) => {
   try {
     const response = await fetch(`https://flow-api.viasocket.com/projects/updateflowembed/${functionId}`, {
       method: "PUT",
@@ -199,7 +213,7 @@ export const updateFlow = async (embed_token, functionId, description,title) => 
         "endpoint_name": title
       })
     });
-    
+
     const data = await response.json();
     return data.data;
   } catch (error) {
@@ -226,7 +240,7 @@ export const integration = async (embed_token) => {
 
 export const createapi = async (dataFromEmbed) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/createapi`, dataFromEmbed);
+    const response = await axios.post(`${URL}/api/tools/`, dataFromEmbed);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -236,7 +250,7 @@ export const createapi = async (dataFromEmbed) => {
 
 export const updateapi = async (bridge_id, dataFromEmbed) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/updateapi/${bridge_id}`, dataFromEmbed);
+    const response = await axios.put(`${URL}/api/tools/pre_tool/${bridge_id}`, dataFromEmbed);
     return response;
   } catch (error) {
     console.error(error);
@@ -256,42 +270,42 @@ export const storeMarketingRefUser = async (data) => {
 }
 
 // Tutorial and Guide APIs
-export const getTutorial =async ()=>{
+export const getTutorial = async () => {
   try {
-    const response=await axios.get("https://flow.sokt.io/func/scri33jNs1M1");
+    const response = await axios.get("https://flow.sokt.io/func/scri33jNs1M1");
     return response;
   }
-  catch(error){
+  catch (error) {
     throw new Error(error);
   }
 }
 
-export const getApiKeyGuide =async ()=>{
+export const getApiKeyGuide = async () => {
   try {
-    const response=await axios.get("https://flow.sokt.io/func/scriDewB9Jk2");
+    const response = await axios.get("https://flow.sokt.io/func/scriDewB9Jk2");
     return response;
   }
-  catch(error){
+  catch (error) {
     throw new Error(error);
   }
 }
 
-export const getDescriptions =async()=>{
-   try{
-    const response=await axios.get("https://flow.sokt.io/func/scriPqFeiEKa")
-    return response;
-   }
-   catch(error){
-    throw new Error(error);
-   }
-}
-
-export const getGuardrailsTemplates=async()=>{
+export const getDescriptions = async () => {
   try {
-    const response=await axios.get("https://flow.sokt.io/func/scriKh8LMVKV");
+    const response = await axios.get("https://flow.sokt.io/func/scriPqFeiEKa")
     return response;
   }
-  catch(error){
+  catch (error) {
+    throw new Error(error);
+  }
+}
+
+export const getGuardrailsTemplates = async () => {
+  try {
+    const response = await axios.get("https://flow.sokt.io/func/scriKh8LMVKV");
+    return response;
+  }
+  catch (error) {
     throw new Error(error);
   }
 }
@@ -309,7 +323,7 @@ export const getAllShowCase = async () => {
 
 export const getAllAgentsApi = async () => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/publicAgent/all`);
+    const response = await axios.get(`${URL}/api/runagents/`);
     return response;
   } catch (error) {
     console.error(error);
@@ -322,6 +336,15 @@ export const getFinishReasons = async () => {
     const response = await axios.get("https://flow.sokt.io/func/scritxGh53At");
     return response;
   } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+export const getLinks = async () => {
+  try{
+    const response = await axios.get("https://flow.sokt.io/func/scriiS7RkdxI");
+    return response;
+  }catch(error){
     console.error(error);
     throw new Error(error);
   }

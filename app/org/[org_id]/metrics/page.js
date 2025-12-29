@@ -1,7 +1,7 @@
 "use client";
 import { use, useEffect, useState } from 'react';
 import { TIME_RANGE_OPTIONS } from '@/utils/enums';
-import Protected from '@/components/protected';
+import Protected from '@/components/Protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useSearchParams } from 'next/navigation';
 

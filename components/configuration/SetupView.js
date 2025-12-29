@@ -1,7 +1,5 @@
 import { memo } from 'react';
-import TriggersList from "./configurationComponent/TriggersList";
-import AdvancedParameters from "./configurationComponent/advancedParamenter";
-import ConfigurationSettingsAccordion from "./configurationComponent/ConfigurationSettingsAccordion";
+import AdvancedParameters from "./configurationComponent/AdvancedParamenter";
 import CommonConfigComponents from "./CommonConfigComponents";
 import NonImageModelConfig from "./NonImageModelConfig";
 import ConnectedAgentFlowPanel from "./ConnectedAgentFlowPanel";
@@ -9,7 +7,6 @@ import { useConfigurationContext } from './ConfigurationContext';
 
 const SetupView = memo(() => {
     const { 
-        bridgeType, 
         modelType, 
         params, 
         searchParams, 
@@ -22,7 +19,8 @@ const SetupView = memo(() => {
         service,
         showDefaultApikeys,
         currentView,
-        isPublished
+        isPublished,
+        isEditor
     } = useConfigurationContext();
 
     // Render agent flow panel when view is 'agent-flow'
@@ -32,9 +30,6 @@ const SetupView = memo(() => {
 
     return (
         <>
-            {/* {bridgeType === 'trigger' && !isEmbedUser && (
-                <TriggersList params={params} />
-            )} */}
             {modelType === "image" ? (
                 <>
                     <CommonConfigComponents
@@ -49,6 +44,7 @@ const SetupView = memo(() => {
                         isEmbedUser={isEmbedUser}
                         hideAdvancedParameters={hideAdvancedParameters}
                         isPublished={isPublished}
+                        isEditor={isEditor}
                     />
                     <AdvancedParameters 
                         params={params} 
@@ -58,8 +54,9 @@ const SetupView = memo(() => {
                         isPublished={isPublished}
                         className="max-w-md"
                         level={2}
+                        isEditor={isEditor}
                     />
-                    <ConfigurationSettingsAccordion />
+                  
                 </>
             ) : (
                 <NonImageModelConfig />

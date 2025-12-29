@@ -1,4 +1,4 @@
-import { getAllServices } from "@/config";
+import { getAllServices } from "@/config/index";
 import { fetchServiceReducer } from "../reducer/serviceReducer";
 
 export const getServiceAction = () => async (dispatch) => {

@@ -1,6 +1,6 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, fetchBridgeUsageMetricsApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
 import { toast } from "react-toastify";
-import { clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { clearBridgeUsageMetricsReducer, clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, setSavingStatus, setBridgeUsageMetricsReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -9,8 +9,8 @@ export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getS
     dispatch(clearPreviousBridgeDataReducer())
     dispatch(isPending())
     const data = await getSingleBridge(id);
-    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
-    getBridgeVersionAction({ versionId: version || data.data?.bridge?.published_version_id })(dispatch);
+    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.agent }));
+    getBridgeVersionAction({ versionId: version || data.data?.agent?.published_version_id })(dispatch);
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -22,8 +22,8 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
   try {
     dispatch(isPending())
     const data = await getBridgeVersionApi({ bridgeVersionId: versionId });
-    dispatch(fetchSingleBridgeVersionReducer({ bridge: data?.bridge }));
-    return data?.bridge;
+    dispatch(fetchSingleBridgeVersionReducer({ bridge: data?.agent }));
+    return data?.agent;
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -61,7 +61,7 @@ export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => as
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
-      toast.error("Agent Name can't be duplicate");
+      toast.error("Agent Name can't be duplicate fallBack to manual bridge creation");
     } else {
       toast.error("Something went wrong");
     }
@@ -116,10 +116,10 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const triggerEmbedToken = response?.data?.trigger_embed_token;
     const average_response_time = response?.data?.avg_response_time;
     const doctstar_embed_token=response?.data?.doctstar_embed_token;
+    const bridgesPayload = response?.data?.agent || [];
 
-
-    if (onSuccess) onSuccess(response?.data?.bridge)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
+    if (onSuccess) onSuccess(bridgesPayload)
+    dispatch(fetchAllBridgeReducer({ bridges: bridgesPayload, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
@@ -155,7 +155,7 @@ export const getAllFunctions = () => async (dispatch) => {
 export const updateFuntionApiAction = ({ function_id, dataToSend }) => async (dispatch) => {
   try {
     const response = await updateFunctionApi({ function_id, dataToSend });
-    dispatch(updateFunctionReducer({ org_id: response.data.data.org_id, data: response.data.data }))
+    dispatch(updateFunctionReducer({ org_id: response.data.org_id, data: response.data }))
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -179,7 +179,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(bridgeId);
     const data = await updateBridge({ bridgeId, dataToSend });
-    dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
+    dispatch(updateBridgeReducer({ bridges: data.data.agent, functionData: dataToSend?.functionData || null }));
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -194,15 +194,43 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
       toast.error("You cannot update published data");
       return;
     }
+    
+    // Show saving indication in navbar
+    dispatch(setSavingStatus({ status: 'saving' }));
+    
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
-    if (data?.success) {
-      dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
+    const updatedVersion = data?.agent;
+    
+    if (data?.success && updatedVersion) {
+      dispatch(updateBridgeVersionReducer({ bridges: updatedVersion, functionData: dataToSend?.functionData || null }));
+      // Update status to show success
+      dispatch(setSavingStatus({ status: 'saved' }));
+      
+      // Clear the status after 3 seconds
+      setTimeout(() => {
+        dispatch(setSavingStatus({ status: null }));
+      }, 3000);
+    } else {
+      // Update status to show warning
+      dispatch(setSavingStatus({ status: 'warning' }));
+      
+      // Clear the status after 3 seconds
+      setTimeout(() => {
+        dispatch(setSavingStatus({ status: null }));
+      }, 3000);
     }
   } catch (error) {
     console.error(error);
     dispatch(isError());
+    // Show error status
+    dispatch(setSavingStatus({ status: 'failed' }));
+    
+    // Clear the status after 3 seconds
+    setTimeout(() => {
+      dispatch(setSavingStatus({ status: null }));
+    }, 3000);
   }
 };
 
@@ -246,8 +274,7 @@ export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) =>
   try {
     markUpdateInitiatedByCurrentTab(dataFromEmbed?.version_id);
     const data = await updateapi(bridge_id, dataFromEmbed);
-    // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
-    dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
+    dispatch(updateBridgeVersionReducer({ bridges: data?.data?.agent }));
   } catch (error) {
     console.error(error)
   }
@@ -302,8 +329,8 @@ export const archiveBridgeAction = (bridge_id, newStatus = 1) => async (dispatch
   try {
     dispatch(isPending());
     const response = await archiveBridgeApi(bridge_id, newStatus);
-    dispatch(updateBridgeReducer({ bridges: response.data, functionData: null }))
-    return response?.data?.status;
+    dispatch(updateBridgeReducer({ bridges: response?.agent, functionData: null }))
+    return response?.agent?.status;
   } catch (error) {
     dispatch(isError());
     toast.error('Failed to Archive the bridge');
@@ -343,17 +370,17 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   try {
     const reponse = await getTestcasesScrore(version_id);
     return reponse;
-  } catch (error) {
+  } catch (_error) {
     toast.error('Failed to genrate testcase score');
   }
 }
 
-export const deleteFunctionAction = ({ function_name, functionId, orgId }) => async (dispatch) => {
+export const deleteFunctionAction = ({ script_id, functionId, orgId }) => async (dispatch) => {
   try {
-    const reponse = await deleteFunctionApi(function_name);
+    const reponse = await deleteFunctionApi(script_id);
     dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
-  } catch (error) {
+  } catch (_error) {
     toast.error('Failed to delete function')
   }
 }
@@ -366,6 +393,38 @@ export const getPrebuiltToolsAction = () => async (dispatch) => {
     console.error(error)
   }
 }
+
+export const fetchBridgeUsageMetricsAction = ({ start_date, end_date, filterActive = false }) => async (dispatch) => {
+  try {
+    // Set loading to true before API call
+    dispatch(setBridgeUsageMetricsReducer({
+      loading: true,
+      data: [],
+      filters: { start_date, end_date },
+      filterActive
+    }));
+    
+    const response = await fetchBridgeUsageMetricsApi({ start_date, end_date });
+    
+    // Set loading to false after API call completes
+    dispatch(setBridgeUsageMetricsReducer({
+      loading: false,
+      data: response?.data || [],
+      filters: { start_date, end_date },
+      filterActive // Pass filter activation status to reducer
+    }));
+    return response?.data;
+  } catch (error) {
+    toast.error(error?.data?.message || error?.response?.data?.message || "Failed to fetch usage metrics");
+    console.error('Failed to fetch bridge usage metrics:', error);
+    throw error;
+  }
+};
+
+export const clearBridgeUsageMetricsAction = () => (dispatch) => {
+  dispatch(clearBridgeUsageMetricsReducer());
+  dispatch(fetchBridgeUsageMetricsAction({start_date: null, end_date: null, filterActive: true}));
+};
 
 export const publishBulkVersionAction = (version_ids) => async (dispatch) => {
   try {

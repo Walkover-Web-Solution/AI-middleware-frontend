@@ -1,10 +1,8 @@
 import { getStatusClass } from '@/utils/utility';
-import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
-import { InfoIcon } from 'lucide-react';
-import InfoTooltip from '@/components/InfoTooltip';
 
-function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData }) {
+function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData, isPublished = false, isEditor = true }) {
+    // Determine if content is read-only (either published or user is not an editor)
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {

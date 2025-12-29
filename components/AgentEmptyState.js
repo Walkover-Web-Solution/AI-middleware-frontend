@@ -1,13 +1,12 @@
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { MessageCircleIcon, MessageSquareIcon, PlugIcon, SettingsIcon, MessageCircleMoreIcon } from "./Icons";
-import { PlusIcon, Zap } from "lucide-react";
+import { MessageCircleMoreIcon } from "./Icons";
 import PageHeader from "./Pageheader";
-import CreateNewBridge from "./createNewBridge";
+import CreateNewBridge from "./CreateNewBridge";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import Protected from "./protected";
+import Protected from "./Protected";
 
-const AgentEmptyState = ({ orgid, isEmbedUser }) => {
+const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = 'api' }) => {
   const { tutorialData } = useCustomSelector((state) => ({
     tutorialData: state.flowDataReducer?.flowData?.tutorialData || []
   }))
@@ -77,7 +76,7 @@ const AgentEmptyState = ({ orgid, isEmbedUser }) => {
 
         {/* Features Section */}
 
-        <CreateNewBridge orgid={orgid} isEmbedUser={isEmbedUser} />
+        <CreateNewBridge orgid={orgid} isEmbedUser={isEmbedUser} defaultBridgeType={defaultBridgeType} />
       </div>
     </div>
   );

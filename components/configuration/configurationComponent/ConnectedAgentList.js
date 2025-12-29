@@ -3,21 +3,22 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, SettingsIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { AddIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
-import FunctionParameterModal from './functionParameterModal';
+import FunctionParameterModal from './FunctionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark } from 'lucide-react';
-import { BotIcon } from 'lucide-react';
+import { BotIcon, CircleQuestionMark } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
-const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
+const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
@@ -26,7 +27,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_AGENT_MODAL);
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
+    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -44,8 +45,6 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
-            bridges: state?.bridgeReducer?.allBridgesMap
-
         };
     });
     const handleSaveAgent = (overrideBridge = null, bridgeData) => {
@@ -224,13 +223,13 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             <BotIcon size={16} className="shrink-0" />
                             {name?.length > 24 ? (
                                 <div className="tooltip tooltip-top min-w-0" data-tip={name}>
-                                    <span className="min-w-0 text-sm truncate">
-                                        <span className="text-sm font-normal block w-full">{name}</span>
+                                    <span className="min-w-0 text-sm truncate text-left">
+                                        <span className="truncate text-sm font-normal block w-[300px]">{name}</span>
                                     </span>
                                 </div>
                             ) : (
-                                <span className="min-w-0 text-sm truncate">
-                                    <span className="text-sm font-normal block w-full">{name}</span>
+                                <span className="min-w-0 text-sm truncate text-left">
+                                    <span className="truncate text-sm font-normal block w-[300px]">{name}</span>
                                 </span>
                             )}
                         </div>
@@ -245,6 +244,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                             title="Config"
+                            disabled={isReadOnly}
                         >
                             <SettingsIcon size={16} />
                         </button>
@@ -255,7 +255,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             }}
                             className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                         >
                             <TrashIcon size={16} />
                         </button>
@@ -289,7 +289,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                                 </div>
                                 <button
                                     tabIndex={0}
-                                    disabled={isPublished}
+                                    disabled={isReadOnly}
                                     className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <AddIcon className="w-2 h-2" />
@@ -299,7 +299,7 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                         ) : (
                             <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
                                 <button
-                                    disabled={isPublished}
+                                    disabled={isReadOnly}
                                     tabIndex={0}
                                     className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
@@ -316,6 +316,8 @@ const ConnectedAgentList = ({ params, searchParams,isPublished }) => {
                             modelName={model}
                             bridges={bridgeData}
                             bridgeData={bridgeData}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
                         />
                     </div>
                     <div className="flex flex-col gap-2 w-full ">

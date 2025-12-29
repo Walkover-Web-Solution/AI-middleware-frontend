@@ -7,7 +7,7 @@ const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 // Test Case Management APIs
 export const getAllTestCasesOfBridgeApi = async ({ bridgeId }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/testcases/${bridgeId}`);
+    const response = await axios.get(`${URL}/api/testcases/${bridgeId}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -17,7 +17,7 @@ export const getAllTestCasesOfBridgeApi = async ({ bridgeId }) => {
 
 export const createTestCaseApi = async ({ bridgeId, data }) => {
   try {
-    const response = await axios.post(`${URL}/testcases/`, { bridge_id: bridgeId, ...data });
+    const response = await axios.post(`${URL}/api/testcases/create`, { bridge_id: bridgeId, ...data });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -25,9 +25,9 @@ export const createTestCaseApi = async ({ bridgeId, data }) => {
   }
 }
 
-export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
+export const updateTestCaseApi = async ({ testCaseId, dataToUpdate }) => {
   try {
-    const response = await axios.put(`${URL}/testcases/`, { bridge_id, ...dataToUpdate });
+    const response = await axios.put(`${URL}/api/testcases/${testCaseId}`, dataToUpdate);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -37,9 +37,7 @@ export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
 
 export const deleteTestCaseApi = async ({ testCaseId }) => {
   try {
-    const response = await axios.delete(`${URL}/testcases/`, {
-      data: { id: testCaseId }
-    });
+    const response = await axios.delete(`${URL}/api/testcases/${testCaseId}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -60,8 +58,10 @@ export const runTestCaseApi = async ({ versionId, testcase_id, testCaseData, bri
 
 export const generateAdditionalTestCasesApi = async ({ bridgeId, versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridgeId}/generateAdditionalTestCases`, { 
-      "version_id": versionId 
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'generate_test_cases',
+      bridge_id: bridgeId,
+      version_id: versionId
     });
     return response.data;
   } catch (error) {

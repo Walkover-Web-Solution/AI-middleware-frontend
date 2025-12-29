@@ -1,8 +1,8 @@
 import { SendHorizontalIcon, CopyIcon as CopyIconComponent, CheckIcon as CheckIconComponent } from "@/components/Icons";
-import { BrainCircuit, CheckIcon, CopyIcon, Lightbulb, MousePointerClick, RotateCcw } from "lucide-react";
+import { Lightbulb, MousePointerClick, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
-import CodeBlock from "./codeBlock/codeBlock";
+import CodeBlock from "./codeBlock/CodeBlock";
 
 function Canvas({ 
   OptimizePrompt,  
@@ -60,7 +60,7 @@ function Canvas({
         isJson: true,
         formatted: JSON.stringify(parsed, null, 2)
       };
-    } catch (e) {
+    } catch {
       // If not JSON, return original content
       return {
         isJson: false,
@@ -76,7 +76,7 @@ function Canvas({
     if (typeof content === 'object' && content !== null) {
       try {
         textToCopy = JSON.stringify(content, null, 2);
-      } catch (e) {
+      } catch {
         textToCopy = String(content);
       }
     }
@@ -135,6 +135,7 @@ function Canvas({
         return [...prev, assistantMessage];
       });
     } catch (err) {
+      console.error('OptimizePrompt call failed', err);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         sender: "assistant",

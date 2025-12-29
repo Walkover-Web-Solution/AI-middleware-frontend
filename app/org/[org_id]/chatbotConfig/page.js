@@ -1,15 +1,16 @@
 'use client'
-import FormSection from '@/components/chatbotConfiguration/formSection'
+import FormSection from '@/components/chatbotConfiguration/FormSection'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import PageHeader from '@/components/Pageheader'
-import Protected from '@/components/protected'
+import Protected from '@/components/Protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import React, { use } from 'react'
 
 const Page = ({ params }) => {
   const resolvedParams = use(params);
-  const { descriptions } = useCustomSelector((state) => ({
+  const { descriptions , linksData } = useCustomSelector((state) => ({
     descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+    linksData: state.flowDataReducer.flowData.linksData || [],
   }));
   return (
     <div className="h-auto">
@@ -18,7 +19,7 @@ const Page = ({ params }) => {
           <PageHeader
             title="Chatbot Configuration"
             description={descriptions?.['Chatbot Setup'] || "Customize your chatbot's appearance, behavior, and agent switching capabilities."}
-            docLink="https://gtwy.ai/blogs/features/-embed-chatbot"
+              docLink={linksData?.find(link => link.title === 'Chatbot Configuration')?.blog_link}
           />
         </div>
         
