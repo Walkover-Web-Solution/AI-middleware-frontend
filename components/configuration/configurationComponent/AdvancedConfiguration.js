@@ -19,7 +19,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
 
   const dispatch = useDispatch();
 
-  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
+  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, serviceModels, currentService, fallbackModel, DefaultModel, currentModel, embedDefaultApiKeys, showDefaultApikeys } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const apikeys = state?.apiKeysReducer?.apikeys || {};
@@ -38,7 +38,8 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
       currentModel: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
       fallbackModel: isPublished ? (bridgeDataFromState?.fall_back) : (versionData?.fall_back),
       DefaultModel: state?.serviceReducer?.default_model||[],
-
+      embedDefaultApiKeys: state.appInfoReducer.embedUserDetails?.apikey_object_id || {},
+      showDefaultApikeys: state.appInfoReducer.embedUserDetails?.addDefaultApiKeys,
     };
   });
   useEffect(() => {
@@ -73,7 +74,20 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
   };
 
    const filterApiKeysByService = (service) => {
-    return apikeydata.filter(apiKey => apiKey?.service === service);
+    const regularApiKeys = apikeydata.filter(apiKey => apiKey?.service === service);
+    
+    // Add default embed API keys if they exist for this service and showDefaultApikeys is true
+    const defaultApiKeys = [];
+    if (showDefaultApikeys && embedDefaultApiKeys[service]) {
+      defaultApiKeys.push({
+        _id: embedDefaultApiKeys[service],
+        name: `Default Key`,
+        service: service,
+        isDefaultEmbedKey: true
+      });
+    }
+    
+    return [...defaultApiKeys, ...regularApiKeys];
   };
 
   const handleSelectionChange = useCallback((service, apiKeyId) => {
@@ -403,8 +417,11 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
                               onChange={() => handleSelectionChange(service?.value, apiKey?._id)}
                               className="radio radio-sm h-4 w-4"
                             />
-                            <span className="text-sm">
+                            <span className={`text-sm flex items-center gap-2 ${apiKey?.isDefaultEmbedKey ? 'font-medium text-primary' : ''}`}>
                               {truncateText(apiKey?.name, 25)}
+                              {apiKey?.isDefaultEmbedKey && (
+                                <span className="badge badge-primary badge-xs">DEFAULT</span>
+                              )}
                             </span>
                           </label>
                         </div>

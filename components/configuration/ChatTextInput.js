@@ -625,7 +625,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
 
             {/* Input Group */}
             <div className="input-group flex justify-end items-end gap-2 w-full relative">
-                {(modelType !== "completion") && (modelType !== 'image') && (
+                {(modelType !== "completion") && (
                     <textarea
                         ref={inputRef}
                         placeholder="Type here"
