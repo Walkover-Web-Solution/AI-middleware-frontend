@@ -13,7 +13,11 @@ const useThemeVariables = (userType = 'default', customThemePath = null, customT
           return;
         }
         if (userType === 'embed') {
-          await loadEmbedTheme(customThemePath || undefined);
+          if (customThemePath) {
+            await loadEmbedTheme(customThemePath);
+          } else {
+            await loadDefaultTheme();
+          }
         } else {
           await loadDefaultTheme();
         }
