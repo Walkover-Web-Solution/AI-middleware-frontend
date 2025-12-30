@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, TrashIcon, DatabaseIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -143,40 +143,30 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         );
     }, [knowbaseVersionData, knowledgeBaseData]);
     return (
-        <div className="label max-w-md flex-col items-start w-full p-0">
-            <div className="dropdown dropdown-right flex items-center">
-                <div className='flex items-center w-full'>
-                    {knowbaseVersionData?.length > 0 ? (
-                        <>
-                            <div className="flex items-center gap-1 mb-2">
-                                <p className="whitespace-nowrap font-medium">KnowledgeBase</p>
-                                <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                                </InfoTooltip>
+        <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
+            <div className="dropdown dropdown-left flex items-center">
+                <div className='flex justify-between w-full'>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-primary p-1.5 rounded-md">
+                                <DatabaseIcon size={16} className="text-primary-content" />
                             </div>
-                            <button
-
-                                tabIndex={0}
-                                className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={!shouldToolsShow || isReadOnly}
-                            >
-                                <AddIcon className="w-2 h-2" />
-                                <span className="text-xs font-medium">Add</span>
-                            </button>
-                        </>
-                    ) : (
+                            <div>
+                                <p className="text-sm whitespace-nowrap">Knowledge Base</p>
+                                <p className="text-xs text-base-content/50">Connect documents and data</p>
+                            </div>
+                        </div>
                         <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                            <button
-                                tabIndex={0}
-                                className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={!shouldToolsShow || isReadOnly}
-                            >
-                                <AddIcon className="w-2 h-2" />
-                                <span className="text-sm font-medium">Knowledge Base</span>
-                            </button>
+                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
-
-                    )}
+                    </div>
+                    <button
+                        tabIndex={0}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70"
+                        disabled={!shouldToolsShow || isReadOnly}
+                    >
+                        <AddIcon className="w-6 h-6" />
+                    </button>
                 </div>
                 {tutorialState?.showSuggestion && (
                     <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
@@ -228,6 +218,14 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                 )}
             </div>
             <div className="flex flex-col gap-2 w-full ">
+                {/* Show empty state when no knowledge bases are connected */}
+                {knowbaseVersionData?.length === 0 && (
+                    <div className="text-center py-8 border border-dashed border-white/[0.08] rounded-lg bg-white/[0.02]">
+                        <DatabaseIcon className="w-6 h-6 text-gray-600 mx-auto mb-2" />
+                        <p className="text-xs text-gray-500">No knowledge bases connected</p>
+                    </div>
+                )}
+                
                 {renderKnowledgebase}
             </div>
             <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />

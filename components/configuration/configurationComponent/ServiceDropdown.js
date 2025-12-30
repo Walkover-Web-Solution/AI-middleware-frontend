@@ -8,6 +8,7 @@ import Protected from "@/components/Protected";
 import { getIconOfService } from "@/utils/utility";
 import InfoTooltip from "@/components/InfoTooltip";
 import Dropdown from '@/components/UI/Dropdown';
+import { ChevronDownIcon } from "lucide-react";
 
 const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser, isPublished = false, isEditor = true }) => {
     // Determine if content is read-only (either published or user is not an editor)
@@ -131,9 +132,10 @@ const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAre
             options={serviceOptions}
             value={selectedService || ''}
             onChange={handleServiceChange}
-            placeholder="Select a Service"
+            placeholder="Select service"
             size="sm"
-            className={`btn btn-sm border border-base-content/20 bg-base-100 font-normal rounded-sm px-2 w-auto ${isDisabled ? 'btn-disabled' : ''}`}
+            className={`flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 border-white/[0.08] text-base-content h-8 focus:border-blue-500/50 min-w-[150px] ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            style={{ backgroundColor: 'color-mix(in oklab, var(--color-white) 3%, transparent)' }}
             menuClassName="w-full min-w-[200px]"
             fullWidth={false}
             renderTriggerContent={({ selectedOption }) => {
@@ -141,24 +143,30 @@ const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAre
 
               if (!currentValue) {
                 return (
-                  <span className="flex items-center gap-2 text-base-content/60">
-                    <span>Select a Service</span>
+                  <span className="flex items-center gap-2 text-gray-100/60">
+                    <span>Select service</span>
                   </span>
                 );
               }
 
+              const serviceName = Array.isArray(SERVICES) 
+                ? SERVICES.find((svc) => svc?.value === currentValue)?.displayName || currentValue
+                : currentValue;
+
               return (
+                <div className="flex justify-between w-full items-center gap-2">
                 <span className="flex items-center gap-2">
                   <span
-                    className="flex h-7 w-7 items-center justify-center rounded-md bg-base-200"
-                    title={Array.isArray(SERVICES) 
-                        ? SERVICES.find((svc) => svc?.value === currentValue)?.displayName || currentValue
-                        : currentValue
-                    }
+                    className="flex h-4 w-4 items-center justify-center rounded-md bg-base-200"
                   >
-                    {getIconOfService(currentValue, 18, 18)}
+                    {getIconOfService(currentValue, 16, 16)}
+                  </span>
+                  <span className="text-base-content/70 text-xs">
+                    {serviceName}
                   </span>
                 </span>
+                <ChevronDownIcon size={16} className="ml-2 h-4 w-4 opacity-70" />
+                </div>
               );
             }}
           />

@@ -16,7 +16,7 @@ import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import { CircleQuestionMark } from 'lucide-react';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false, isEditor = true }) => {
-  // Determine if content is read-only (either published or user is not an editor)
+ 
   const isReadOnly = isPublished || !isEditor;
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
@@ -242,7 +242,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
     const isDefaultValue = configuration?.[key] === 'default';
-    const checkboxSizeClass = 'checkbox-xs';
     const inputSizeClass = 'input-xs';
     const selectSizeClass = 'select-sm';
     const buttonSizeClass = 'btn-xs';
@@ -276,11 +275,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     
     return (
       <div key={key} className={`group w-full ${isLevel2 ? 'space-y-1' : 'space-y-3'}`}>
-        <div className={`flex items-center justify-between gap-2 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
-          <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-4 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
+          <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
             <input
               type="checkbox"
-              className={`checkbox ${checkboxSizeClass} cursor-pointer`}
+              className={`toggle ${toggleSizeClass} cursor-pointer`}
               title={isDefaultValue ? 'Use default value' : 'Use custom value'}
               checked={!isDefaultValue}
               onChange={(e) => {
@@ -296,300 +295,302 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             />
             <div className="flex items-center gap-1">
               <span className={labelTextClass}>{name || key}</span>
+
+              
               {description && (
                 <InfoTooltip tooltipContent={description}>
                   <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                 </InfoTooltip>
               )}
+              {key === 'parallel_tool_calls' && field === 'boolean' && !isDefaultValue && (
+                <input
+                  name={key}
+                  type="checkbox"
+                  className="checkbox checkbox-xs"
+                  checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
+                  onChange={(e) => handleInputChange(e, key)}
+                  disabled={isReadOnly}
+                />
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {sliderValueNode}
-            {isDefaultValue && (
-              <span className="badge badge-info badge-xs p-2">Default</span>
+          
+          {/* All input fields inline with label */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Text input */}
+            {field === 'text' && (
+              <input
+                type="text"
+                value={isDefaultValue ? '' : (inputConfiguration?.[key] || '')}
+                onChange={(e) => {
+                  // Auto-toggle off default when user starts typing
+                  if (isDefaultValue && e.target.value) {
+                    setSliderValue(e.target.value, key, isDeafaultObject);
+                  }
+                  setInputConfiguration((prev) => ({
+                    ...prev,
+                    [key]: e.target.value,
+                  }));
+                  debouncedInputChange(e, key);
+                }}
+                className={`input input-bordered ${inputSizeClass} flex-1 ${isDefaultValue ? 'opacity-70' : ''}`}
+                name={key}
+                disabled={isReadOnly}
+                placeholder={isDefaultValue ? 'Click to edit (will disable default)' : ''}
+              />
+            )}
+            
+            {/* Number input */}
+            {field === 'number' && (
+              <input
+                type="number"
+                min={min}
+                max={max}
+                step={step}
+                value={isDefaultValue ? (defaultValue || 0) : (inputConfiguration?.[key] || 0)}
+                onChange={(e) => {
+                  // Auto-toggle off default when user changes value
+                  if (isDefaultValue && e.target.value !== (defaultValue || 0).toString()) {
+                    setSliderValue(e.target.value, key, isDeafaultObject);
+                  }
+                  setInputConfiguration((prev) => ({
+                    ...prev,
+                    [key]: e.target.value,
+                  }));
+                }}
+                onBlur={(e) => handleInputChange(e, key)}
+                className={`input input-bordered ${inputSizeClass} flex-1 ${isDefaultValue ? 'opacity-70' : ''}`}
+                name={key}
+                disabled={isReadOnly}
+              />
+            )}
+            
+            {/* Boolean input */}
+            {field === 'boolean' && key !== 'parallel_tool_calls' && (
+              <input
+                name={key}
+                type="checkbox"
+                className={`checkbox checkbox-xs ${isDefaultValue ? 'opacity-70' : ''}`}
+                checked={isDefaultValue ? (defaultValue || false) : (inputConfiguration?.[key] || false)}
+                onChange={(e) => {
+                  // Auto-toggle off default when user changes checkbox
+                  if (isDefaultValue) {
+                    setSliderValue(e.target.checked, key, isDeafaultObject);
+                  }
+                  handleInputChange(e, key);
+                }}
+                disabled={isReadOnly}
+              />
+            )}
+            
+            {/* Select input */}
+            {field === 'select' && !isDefaultValue && (
+              <select
+                value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
+                onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
+                className={`select ${selectSizeClass} max-w-xs select-bordered capitalize`}
+                disabled={isReadOnly}
+              >
+                <option value='default' disabled> Select {key} mode </option>
+                {options?.map((service, index) => (
+                  <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
+                ))}
+              </select>
+            )}
+            
+            {/* Object input */}
+            {field === 'object' && (
+              <textarea
+                value={isDefaultValue ? JSON.stringify(defaultValue || {}, null, 2) : (objectFieldValue || JSON.stringify(configuration?.[key] || {}, null, 2))}
+                onChange={(e) => {
+                  // Auto-toggle off default when user starts editing
+                  if (isDefaultValue && e.target.value !== JSON.stringify(defaultValue || {}, null, 2)) {
+                    try {
+                      const parsedValue = JSON.parse(e.target.value);
+                      setSliderValue(parsedValue, key, isDeafaultObject);
+                    } catch {
+                      // If invalid JSON, still toggle off default to allow editing
+                      setSliderValue(e.target.value, key, isDeafaultObject);
+                    }
+                  }
+                  setObjectFieldValue(e.target.value);
+                  try {
+                    const parsedValue = JSON.parse(e.target.value);
+                    handleInputChange({ target: { value: parsedValue } }, key);
+                  } catch (error) {
+                    console.log('Invalid JSON:', error);
+                  }
+                }}
+                className={`textarea textarea-bordered ${inputSizeClass} w-32 h-16 font-mono text-xs ${isDefaultValue ? 'opacity-70' : ''}`}
+                placeholder={isDefaultValue ? 'Click to edit (will disable default)' : 'Enter JSON object...'}
+                disabled={isReadOnly}
+              />
+            )}
+            
+            {/* Slider input */}
+            {field === 'slider' && (
+              <>
+                <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20 ${isDefaultValue ? 'opacity-70' : ''}`} disabled={isReadOnly} onClick={() => {
+                  if (isDefaultValue) {
+                    setSliderValue(min || 0, key, isDeafaultObject);
+                  } else {
+                    setSliderValue('min', key);
+                  }
+                }}>Min</button>
+                {sliderValueNode}
+                <input
+                  type="range"
+                  min={min || 0}
+                  max={max || 100}
+                  step={step || 1}
+                  key={`${key}-${configuration?.[key]}-${service}-${model}`}
+                  defaultValue={isDefaultValue ? defaultValue : sliderDisplayValue ?? ''}
+                  onChange={(e) => {
+                    // Auto-toggle off default when user moves slider
+                    if (isDefaultValue) {
+                      setSliderValue(e.target.value, key, isDeafaultObject);
+                    }
+                    const el = document.getElementById(sliderValueId);
+                    if (el) el.innerText = e.target.value;
+                    debouncedInputChange(e, key, true);
+                  }}
+                  className={`range range-accent h-2 rounded-full ${rangeSizeClass} flex-1 ${isDefaultValue ? 'opacity-70' : ''}`}
+                  name={key}
+                  disabled={isReadOnly}
+                />
+                <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20 ${isDefaultValue ? 'opacity-70' : ''}`} disabled={isReadOnly} onClick={() => {
+                  if (isDefaultValue) {
+                    setSliderValue(max || 100, key, isDeafaultObject);
+                  } else {
+                    setSliderValue('max', key);
+                  }
+                }}>Max</button>
+              </>
+            )}
+            
+            {/* Dropdown input */}
+            {field === 'dropdown' && (
+              <div className="relative flex-1">
+                <div
+                  className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer ${isDefaultValue ? 'opacity-70' : ''}`}
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  <span className="truncate text-base-content text-xs">
+                    {isDefaultValue 
+                      ? 'Click to edit (will disable default)'
+                      : selectedOptions?.length > 0
+                        ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
+                        : 'Select a tool choice option...'}
+                  </span>
+                  <div className="ml-auto">
+                    {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
+                  </div>
+                </div>
+
+                {showDropdown && (
+                  <div className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
+                    <div className="p-2 top-0 bg-base-100">
+                      <input
+                        type="text"
+                        placeholder="Search functions..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className={`input input-bordered ${inputSizeClass} w-full`}
+                        disabled={isReadOnly}
+                      />
+                    </div>
+                    {options && options.map(option => (
+                      <div
+                        key={option?.id}
+                        className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                        onClick={() => {
+                          // Auto-toggle off default when user selects option
+                          if (isDefaultValue) {
+                            setSliderValue(option, key, isDeafaultObject);
+                          }
+                          setSelectedOptions([{ name: option, id: option }]);
+                          handleDropdownChange(option, key);
+                          setShowDropdown(false);
+                        }}
+                      >
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="function-select"
+                            checked={selectedOptions?.some(opt => opt?.name === option)}
+                            className="radio radio-xs"
+                            disabled={isReadOnly}
+                          />
+                          <span className="font-medium text-xs">{option}</span>
+                          <span className="text-gray-500 text-xs">
+                            {option === 'none'
+                              ? "Model won't call a function; it will generate a message."
+                              : option === 'auto'
+                                ? "Model can generate a response or call a function."
+                                : "One or more specific functions must be called"}
+                          </span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
 
-        {field === 'dropdown' && !isDefaultValue && (
-          <div className="w-full">
-            <div className="relative">
-              <div
-                className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
-                onClick={() => setShowDropdown(!showDropdown)}
+        {/* JSON Schema textarea and modal - positioned below the key/label */}
+        {field === 'select' && !isDefaultValue && configuration?.[key]?.type === "json_schema" && (
+          <div className="mt-3 space-y-2">
+            <div className="flex justify-end">
+              <span
+                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity text-xs"
+                onClick={() => {
+                  openModal(MODAL_TYPE.JSON_SCHEMA);
+                }}
               >
-                <span className="truncate text-base-content text-xs">
-                  {selectedOptions?.length > 0
-                    ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
-                    : 'Select a tool choice option...'}
-                </span>
-                <div className="ml-auto">
-                  {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
-                </div>
-              </div>
-
-              {showDropdown && (
-                <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-[200px] overflow-y-auto mt-1 p-2">
-                  <div className="p-2 top-0 bg-base-100">
-                    <input
-                      type="text"
-                      placeholder="Search functions..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`input input-bordered ${inputSizeClass} w-full`}
-                    />
-                  </div>
-                  {options && options.map(option => (
-                    <div
-                      key={option?.id}
-                      className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
-                      onClick={() => {
-                        setSelectedOptions([{ name: option, id: option }]);
-                        handleDropdownChange(option, key);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="function-select"
-                          checked={selectedOptions?.some(opt => opt?.name === option)}
-                          className="radio radio-xs"
-                        />
-                        <span className="font-medium text-xs">{option}</span>
-                        <span className="text-gray-500 text-xs">
-                          {option === 'none'
-                            ? "Model won't call a function; it will generate a message."
-                            : option === 'auto'
-                              ? "Model can generate a response or call a function."
-                              : "One or more specific functions must be called"}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
-                  {version_function_data && typeof version_function_data === 'object' && (
-                    Object.values(version_function_data)
-                      .filter(value => {
-                        const functionName = value?.script_id || value?.title;
-                        const title = integrationData?.[functionName]?.title || value?.title || 'Untitled';
-                        return title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
-                      })
-                      .sort((a, b) => {
-                        const aName = a?.script_id || a?.title;
-                        const bName = b?.script_id || b?.title;
-                        const aTitle = integrationData?.[aName]?.title || aName || 'Untitled';
-                        const bTitle = integrationData?.[bName]?.title || bName || 'Untitled';
-                        return aTitle?.localeCompare(bTitle);
-                      })
-                      .map((value) => {
-                        const functionName = value?.script_id || value?.title;
-                        const title = integrationData?.[functionName]?.title || value?.title || 'Untitled';
-                        const isSelected = selectedOptions?.some(opt => opt?.id === value?._id);
-                        return (
-                          <div
-                            key={value?._id}
-                            className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
-                            onClick={() => {
-                              setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value?._id }]);
-                              handleDropdownChange(isSelected ? null : value?._id, key);
-                              setShowDropdown(false);
-                            }}
-                          >
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name="function-select"
-                                checked={isSelected}
-                                className="radio radio-xs"
-                              />
-                              <span className="text-xs">{title}</span>
-                            </label>
-                          </div>
-                        );
-                      })
-                  )}
-                  {connected_agents && typeof connected_agents === 'object' && (
-                    <>
-                      <div className="px-2 pt-2 pb-1 text-xs font-semibold text-base-content/70">Agents</div>
-                      {Object.entries(connected_agents)
-                        .filter(([name, item]) => {
-                          const label = name || item?.description || '';
-                          return label?.toLowerCase()?.includes(searchQuery?.toLowerCase());
-                        })
-                        .sort(([aName], [bName]) => (aName || '').localeCompare(bName || ''))
-                        .map(([name, item]) => {
-                          const title = name || 'Untitled';
-                          const isSelected = selectedOptions?.some(opt => opt?.id === item?.bridge_id);
-                          return (
-                            <div
-                              key={item?.bridge_id}
-                              className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
-                              onClick={() => {
-                                setSelectedOptions(isSelected ? [] : [{ name, id: item?.bridge_id }]);
-                                handleDropdownChange(isSelected ? null : item?.bridge_id, key);
-                                setShowDropdown(false);
-                              }}
-                            >
-                              <label className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name="agent-select"
-                                  checked={isSelected}
-                                  className="radio radio-xs"
-                                />
-                                <span className="text-xs">{title}</span>
-                              </label>
-                            </div>
-                          );
-                        })}
-                    </>
-                  )}
-                </div>
-              )}
+                Response Builder
+              </span>
             </div>
-          </div>
-        )}
 
-        {field === 'slider' && !isDefaultValue && (
-          <div className="flex items-center gap-2">
-            <button disabled={isReadOnly} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('min', key)}>Min</button>
-            <input
-              type="range"
-              min={min || 0}
-              max={max || 100}
-              step={step || 1}
-              key={`${key}-${configuration?.[key]}-${service}-${model}`}
-              defaultValue={sliderDisplayValue ?? ''}
-              onChange={(e) => {
-                const el = document.getElementById(sliderValueId);
-                if (el) el.innerText = e.target.value;
-                debouncedInputChange(e, key, true);
+            <textarea
+              key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
+              type="input"
+              defaultValue={
+                objectFieldValue ||
+                JSON.stringify(
+                  configuration?.[key]?.json_schema,
+                  undefined,
+                  4
+                )
+              }
+              className="textarea bg-white dark:bg-black/15 border border-base-content/20 w-full min-h-96 resize-y"
+              onBlur={(e) =>
+                handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
+              }
+              placeholder="Enter valid JSON object here..."
+              disabled={isReadOnly}
+            />
+
+            <JsonSchemaModal
+              params={params}
+              searchParams={searchParams}
+              messages={messages}
+              setMessages={setMessages}
+              thread_id={thread_id}
+              onResetThreadId={() => {
+                const newId = generateRandomID();
+                setThreadId(newId);
+                setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                  bridgeId: params?.id,
+                  versionId: searchParams?.version,
+                  thread_id: newId,
+                }));
               }}
-              className={`range range-accent disabled:opacity-50 disabled:cursor-not-allowed h-2 rounded-full ${rangeSizeClass}`}
-              name={key}
-              disabled={isReadOnly}
             />
-            <button disabled={isReadOnly} type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
 
-        {field === 'text' && !isDefaultValue && (
-          <input
-            type="text"
-            value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
-            onChange={(e) => {
-              setInputConfiguration((prev) => ({
-                ...prev,
-                [key]: e.target.value,
-              }));
-              debouncedInputChange(e, key);
-            }}
-            className={`input input-bordered ${inputSizeClass} w-full`}
-            name={key}
-            disabled={isReadOnly}
-          />
-        )}
-
-        {field === 'number' && !isDefaultValue && (
-          <input
-            type="number"
-            min={min}
-            max={max}
-            step={step}
-            value={inputConfiguration?.[key] === "default" ? 0 : inputConfiguration?.[key]}
-            onChange={(e) =>
-              setInputConfiguration((prev) => ({
-                ...prev,
-                [key]: e.target.value,
-              }))
-            }
-            onBlur={(e) => handleInputChange(e, key)}
-            className={`input input-bordered ${inputSizeClass} w-full`}
-            name={key}
-            disabled={isReadOnly}
-          />
-        )}
-
-        {field === 'boolean' && !isDefaultValue && (
-          <label className='flex items-center justify-start w-fit gap-2 bg-base-100 text-base-content'>
-            <input
-              name={key}
-              type="checkbox"
-              className={`toggle ${toggleSizeClass}`}
-              checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
-              onChange={(e) => handleInputChange(e, key)}
-              disabled={isReadOnly}
-            />
-          </label>
-        )}
-
-        {field === 'select' && !isDefaultValue && (
-          <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
-            <select
-              value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
-              onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
-              className={`select ${selectSizeClass} max-w-xs select-bordered capitalize`}
-              disabled={isReadOnly}
-            >
-              <option value='default' disabled> Select {key} mode </option>
-              {options?.map((service, index) => (
-                <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
-              ))}
-            </select>
-
-            {configuration?.[key]?.type === "json_schema" && (
-              <>
-                <div className="flex justify-end mb-2">
-                  <span
-                    className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => {
-                      openModal(MODAL_TYPE.JSON_SCHEMA);
-                    }}
-                  >
-                    Response Builder
-                  </span>
-                </div>
-
-                <textarea
-                  key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
-                  type="input"
-                  defaultValue={
-                    objectFieldValue ||
-                    JSON.stringify(
-                      configuration?.[key]?.json_schema,
-                      undefined,
-                      4
-                    )
-                  }
-                  className="textarea bg-white dark:bg-black/15 border border-base-content/20 w-full min-h-96 resize-y"
-                  onBlur={(e) =>
-                    handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
-                  }
-                  placeholder="Enter valid JSON object here..."
-                  disabled={isReadOnly}
-                />
-
-                <JsonSchemaModal
-                  params={params}
-                  searchParams={searchParams}
-                  messages={messages}
-                  setMessages={setMessages}
-                  thread_id={thread_id}
-                  onResetThreadId={() => {
-                    const newId = generateRandomID();
-                    setThreadId(newId);
-                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                      bridgeId: params?.id,
-                      versionId: searchParams?.version,
-                      thread_id: newId,
-                    }));
-                  }}
-                />
-              </>
-            )}
-
-          </label>
-        )}
       </div>
     );
   };
@@ -605,9 +606,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       <div className={`z-very-low mt-2 text-base-content w-full ${className}`} tabIndex={0}>
         {/* Level 2 Parameters - Displayed Outside Accordion */}
         {level2Parameters.length > 0 && (
-          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-center">
+          <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-start">
             {level2Parameters.map(([key, paramConfig]) => (
-              <div key={key} className="compact-parameter w-full max-w-md">
+              <div key={key} className="compact-parameter w-full">
                 {renderParameterField(key, paramConfig)}
               </div>
             ))}
@@ -631,9 +632,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
         {tutorialState.showTutorial && (
           <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getAdvanceParameterVideo()} flagKey={"AdvanceParameter"} />
         )}
-        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-center`}>
+        <div className={`w-full flex flex-col ${compact ? 'gap-3' : 'gap-4'} items-start`}>
           {level1Parameters.map(([key, paramConfig]) => (
-            <div key={key} className="w-full max-w-md">
+            <div key={key} className="w-full">
               {renderParameterField(key, paramConfig)}
             </div>
           ))}

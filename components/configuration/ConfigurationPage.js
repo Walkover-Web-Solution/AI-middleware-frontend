@@ -5,8 +5,6 @@ import { ConfigurationProvider } from "./ConfigurationContext";
 import SetupView from "./SetupView";
 import Protected from "../Protected";
 import { Lock } from 'lucide-react';
-import { toggleSidebar } from '@/utils/utility';
-import GuideSlider from '../sliders/IntegrationGuideSlider';
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 const ConfigurationPage = ({
@@ -68,7 +66,6 @@ const ConfigurationPage = ({
 
     const handleNavigation = useCallback((target) => {
         setCurrentView(target);
-        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
     }, [params.org_id, params.id, searchParams?.version, router]);
 
     const renderHelpSection = useMemo(() => () => {
@@ -106,8 +103,7 @@ const ConfigurationPage = ({
                     
                         <button
                             onClick={() => {
-                                // Use setTimeout to ensure the component is rendered before toggling
-                                setTimeout(() => toggleSidebar("integration-guide-slider", "right"), 10);
+                                handleNavigation('integration');
                             }}
                             className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
                         >
@@ -221,7 +217,7 @@ const ConfigurationPage = ({
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-2 relative bg-base-100">
+            <div className="flex flex-col gap-2 relative bg-base-100 min-h-full">
                 {/* Published Data Banner - Sticky and close to navbar */}
                 {bannerState.showPublished && (
                     <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
@@ -247,13 +243,13 @@ const ConfigurationPage = ({
                         </div>
                     </div>
                 )}
-                <SetupView />
-                {renderHelpSection()}
+                <div className="flex-1">
+                    <SetupView />
+                </div>
+                <div className="mt-auto">
+                    {renderHelpSection()}
+                </div>
             </div>
-            {!isEmbedUser && <GuideSlider
-                params={params}
-                bridgeType={bridgeType}
-            />}
 
         </ConfigurationProvider>
     );
