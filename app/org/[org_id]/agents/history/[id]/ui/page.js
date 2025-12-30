@@ -4,6 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { getHistoryAction, getThread } from "@/store/action/historyAction";
 
 import { UserPromptUI } from "./UserPromptUi.js";
 import { AgentUI } from "./AgentUi.js";
@@ -18,35 +21,218 @@ const nodeTypes = {
 
 
 
-export default function Page({ searchParams }) {
+export default function Page() {
+  const dispatch = useDispatch();
   const [selectedTool, setSelectedTool] = useState(null);
+  const [childAgentData, setChildAgentData] = useState({});
   const thread = useCustomSelector(
     (state) => state?.historyReducer?.thread || []
   );
+  const [stableThreadItem, setStableThreadItem] = useState(null);
+
+  const sp = useSearchParams();
+  const messageId = sp.get("message_id");
   const selectedThreadItem = useMemo(() => {
-    if (!searchParams?.message_id) return null;
-    return thread.find((item) => item?.message_id === searchParams.message_id) || null;
-  }, [searchParams?.message_id, thread]);
+    if (!messageId) return null;
+    return thread.find((item) => item?.message_id === messageId) || null;
+  }, [messageId, thread]);
+
 
   useEffect(() => {
-    if (selectedThreadItem) {
-      console.log("Thread data:", selectedThreadItem);
-      console.log("Thread data:", selectedThreadItem.tools_call_data[0]);
-
-    }
+    if (selectedThreadItem) setStableThreadItem(selectedThreadItem);
   }, [selectedThreadItem]);
 
- 
+  const activeThreadItem = selectedThreadItem || stableThreadItem; // use this everywhere
+
+  console.log("messageId:", messageId);
+  console.log("thread :", thread);
+  console.log("Selected thread item:", activeThreadItem);
+
+  const agentTools = (activeThreadItem?.tools_call_data || [])
+    .flatMap((toolSet) => Object.values(toolSet || {}))
+    .filter((tool) => tool?.data?.metadata?.type === "agent");
+
+  console.log("✅ ALL AGENT TOOLS:", agentTools);
+
+  // Fetch complete child agent history (all threads + detailed data for each)
+  useEffect(() => {
+    const fetchCompleteChildAgentHistory = async () => {
+      if (agentTools.length === 0) return;
+
+      console.log("🚀 Fetching COMPLETE history for", agentTools.length, "child agents...");
+
+      for (const agentTool of agentTools) {
+        const agentId = agentTool?.data?.metadata?.agent_id;
+        const versionId = agentTool?.data?.metadata?.version_id;
+
+        if (!agentId) {
+          console.warn("⚠️ Missing agent_id for agent:", agentTool);
+          continue;
+        }
+
+        console.log(`📥 Step 1: Fetching all thread IDs for ${agentTool.name} (${agentId})...`);
+
+        try {
+          // Step 1: Get all thread IDs for this agent
+          const allThreads = await dispatch(
+            getHistoryAction(
+              agentId,
+              1,
+              "all",
+              false,
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            )
+          );
+
+          console.log(`✅ Found ${allThreads?.length || 0} threads for ${agentTool.name}`);
+
+          if (!allThreads || allThreads.length === 0) {
+            console.warn(`⚠️ No threads found for ${agentTool.name}`);
+            continue;
+          }
+
+          // Step 2: Fetch detailed data for each thread
+          console.log(`📥 Step 2: Fetching detailed data for all ${allThreads.length} threads...`);
+
+          const detailedThreadsData = [];
+
+          for (const thread of allThreads) {
+            const threadId = thread.thread_id;
+
+            console.log(`  📄 Fetching thread ${threadId}...`);
+
+            try {
+              const threadData = await dispatch(
+                getThread({
+                  threadId: threadId,
+                  bridgeId: agentId,
+                  subThreadId: threadId,
+                  nextPage: 1,
+                  user_feedback: "all",
+                  versionId: versionId || "",
+                  error: false,
+                })
+              );
+
+              detailedThreadsData.push({
+                thread_id: threadId,
+                updated_at: thread.updated_at,
+                messages: threadData
+              });
+
+            } catch (error) {
+              console.error(`  ❌ Error fetching thread ${threadId}:`, error);
+            }
+          }
+
+          console.log(`✅ Complete history for ${agentTool.name}:`, detailedThreadsData);
+
+          // Filter to find the specific thread matching the message_id from agentTools
+          const targetMessageId = agentTool?.data?.metadata?.message_id;
+
+          let matchedThread = null;
+          let childToolCalls = [];
+
+          if (targetMessageId) {
+            // Find the thread that contains a message with the matching message_id
+            matchedThread = detailedThreadsData.find(thread => {
+              const messages = thread.messages?.data || [];
+              return messages.some(msg => msg.message_id === targetMessageId);
+            });
+
+            if (matchedThread) {
+              console.log(`🎯 MATCHED THREAD for ${agentTool.name} (message_id: ${targetMessageId}):`, matchedThread);
+
+              // Extract tools_call_data from all messages in the matched thread
+              const messages = matchedThread.messages?.data || [];
+              childToolCalls = messages
+                .flatMap(msg => msg.tools_call_data || [])
+                .flatMap(toolSet => Object.values(toolSet || {}));
+
+              console.log(`🔧 CHILD TOOL CALLS for ${agentTool.name}:`, childToolCalls);
+            } else {
+              console.warn(`⚠️ No thread found matching message_id ${targetMessageId} for ${agentTool.name}`);
+            }
+          }
+
+          // Store in state - only the matched thread, not all threads
+          setChildAgentData(prev => ({
+            ...prev,
+            [agentId]: {
+              agentName: agentTool.name,
+              targetMessageId: targetMessageId,
+              matchedThread: matchedThread,
+              childToolCalls: childToolCalls
+            }
+          }));
+
+        } catch (error) {
+          console.error(`❌ Error fetching complete history for ${agentTool.name}:`, error);
+        }
+      }
+    };
+
+    fetchCompleteChildAgentHistory();
+  }, [agentTools.length, dispatch]);
+
+  // Console log the complete child agent history
+  useEffect(() => {
+    if (Object.keys(childAgentData).length > 0) {
+      console.log("🎯 COMPLETE CHILD AGENT HISTORY (ALL THREADS WITH DETAILS):", childAgentData);
+    }
+  }, [childAgentData]);
+
   const toolCalls = useMemo(() => {
-    const toolData = selectedThreadItem?.tools_call_data;
+    const toolData = activeThreadItem?.tools_call_data;
     if (!Array.isArray(toolData) || toolData.length === 0) return [];
 
     return toolData.flatMap((toolSet) =>
       Object.keys(toolSet).map((key) => toolSet[key])
     );
-  }, [selectedThreadItem?.tools_call_data]);
+  }, [activeThreadItem?.tools_call_data]);
 
   const derivedBatches = useMemo(() => {
+    console.log(`⏰ derivedBatches running. childAgentData:`, childAgentData, `keys:`, Object.keys(childAgentData));
+
+    // If we have childAgentData, create a batch with the parallel tools
+    if (Object.keys(childAgentData).length > 0) {
+      const agents = Object.entries(childAgentData).map(([agentId, agentData]) => {
+        const parallelTools = (agentData.childToolCalls || []).map(tool => ({
+          name: tool?.name || "Unknown Tool",
+          functionData: {
+            id: tool?.id || null,
+            args: tool?.args || {},
+            data: tool?.data || {},
+          }
+        }));
+
+        return {
+          name: agentData.agentName || "Unknown Agent",
+          functionData: {
+            id: agentId,
+            args: {},
+            data: {
+              metadata: {
+                type: "agent",
+                agent_id: agentId
+              }
+            }
+          },
+          parallelTools
+        };
+      });
+
+      console.log(`⏰ Processed child agents:`, agents);
+      return [{
+        title: "BATCH 1",
+        agents
+      }];
+    }
+
+    // Fallback to original logic if no childAgentData
     if (toolCalls.length === 0) return [];
 
     const orderedTools = toolCalls;
@@ -62,10 +248,23 @@ export default function Page({ searchParams }) {
       };
 
       if (toolType === "agent") {
+        const agentId = tool?.data?.metadata?.agent_id;
+        const childData = childAgentData[agentId];
+
+        // Map all child tool calls directly to parallel tools
+        const childParallelTools = (childData?.childToolCalls || []).map(childTool => ({
+          name: childTool?.name || "Unknown Tool",
+          functionData: {
+            id: childTool?.id ?? null,
+            args: childTool?.args ?? {},
+            data: childTool?.data ?? {},
+          }
+        }));
+
         currentAgent = {
           name: tool?.name || "Unknown Agent",
           functionData,
-          parallelTools: [],
+          parallelTools: childParallelTools,
         };
         agents.push(currentAgent);
         return;
@@ -87,28 +286,37 @@ export default function Page({ searchParams }) {
       }
     });
 
-    return [
-      {
-        title: "BATCH 1",
-        agents,
-      },
-    ];
-  }, [toolCalls]);
+    console.log(`⏰ derivedBatches running. agents array:`, agents);
+    console.log(`⏰ Number of agents:`, agents.length);
+    agents.forEach((agent, idx) => {
+      console.log(`⏰ Agent ${idx}:`, {
+        name: agent.name,
+        hasFunctionData: !!agent.functionData,
+        parallelToolsCount: agent.parallelTools?.length || 0,
+        parallelTools: agent.parallelTools
+      });
+    });
+
+    return [{
+      title: "BATCH 1",
+      agents,
+    }];
+  }, [toolCalls, childAgentData]);
 
   const mainAgentTools = useMemo(() => {
     if (toolCalls.length === 0) return [];
 
     const data = toolCalls
-  .filter(tool => tool?.data?.metadata?.type === "function")
-  .map((tool) => ({
-    name: tool?.name || "Unknown Tool",
-    functionData: {
-      id: tool?.id ?? null,
-      args: tool?.args ?? {},
-      data: tool?.data ?? {},
-    },
-  }));
-    console.log("Main agent tools:", data);
+      .filter(tool => tool?.data?.metadata?.type === "function")
+      .map((tool) => ({
+        name: tool?.name || "Unknown Tool",
+        functionData: {
+          id: tool?.id ?? null,
+          args: tool?.args ?? {},
+          data: tool?.data ?? {},
+        },
+      }));
+
     return data;
   }, [toolCalls]);
 
@@ -123,18 +331,6 @@ export default function Page({ searchParams }) {
     );
   }, [derivedBatches]);
 
-   useEffect(() => {
-    if (derivedBatches.length) {
-      console.log("Derived batches:", derivedBatches);
-    }
-  }, [derivedBatches]);
-
-  useEffect(() => {
-    if (calledAgentTools.length) {
-      console.log("Called agent tools:", calledAgentTools);
-    }
-  }, [calledAgentTools]);
-
   const nodes = useMemo(() => [
     {
       id: "1",
@@ -146,7 +342,7 @@ export default function Page({ searchParams }) {
           width: 260,
           containerClass: "p-4",
           render: () => (
-            <UserPromptUI text={selectedThreadItem?.user || ""} />
+            <UserPromptUI text={activeThreadItem?.user || ""} />
           ),
         },
       },
@@ -167,6 +363,7 @@ export default function Page({ searchParams }) {
               onToolClick={(tool) => setSelectedTool(tool)}
               status="PROCESSING"
               statusClass="text-blue-500"
+              tools={mainAgentTools}
             />
           ),
         },
@@ -184,16 +381,16 @@ export default function Page({ searchParams }) {
           containerClass: "border p-3 bg-gray-100",
           render: () => (
             <BatchUI
-  batches={derivedBatches.map(batch => ({
-    ...batch,
-    agents: batch.agents.map(agent => ({
-      name: agent.name,
-      functionData: agent.functionData
-      // ⛔ remove parallelTools
-    }))
-  }))}
-  onToolClick={(agent) => setSelectedTool(agent)}
-/>
+              batches={derivedBatches.map(batch => ({
+                ...batch,
+                agents: batch.agents.map(agent => ({
+                  name: agent.name,
+                  functionData: agent.functionData,
+                  parallelTools: agent.parallelTools
+                }))
+              }))}
+              onToolClick={(agent) => setSelectedTool(agent)}
+            />
           ),
         },
       },
@@ -235,7 +432,7 @@ export default function Page({ searchParams }) {
         },
       },
     },
-  ], []);
+  ], [derivedBatches, mainAgentTools, activeThreadItem?.user]);
 
   const edges = [
     { id: "e1-2", source: "1", target: "2" },

@@ -38,20 +38,19 @@ export function AgentUI({
           </div>
 
           {tools.map((tool, index) => (
-            <div
-              key={`${tool?.name || "tool"}-${index}`}
-              className="flex items-center justify-between border hover:border-orange-400 border-2 p-2 mb-3 hover:bg-orange-50 cursor-pointer"
-              onClick={() => handleToolClick(tool)}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-orange-500">🔧</span>
-                <span className="text-sm text-gray-700">
-                  {tool?.name || `tool_${index + 1}`}
-                </span>
-              </div>
-              <span className="text-green-500">✔</span>
-            </div>
-          ))}
+  <div
+    key={`${tool?.name || "tool"}-${index}`}
+    className="flex items-center justify-between border hover:border-orange-400 border-2 p-2 mb-3 hover:bg-orange-50 cursor-pointer"
+    onClick={() => handleToolClick(tool)}
+  >
+    <div className="flex items-center gap-2">
+      <span className="text-orange-500">🔧</span>
+      <span className="text-sm text-gray-700">
+        {tool?.name || "Unknown Tool"}  {/* Add this line to display the tool name */}
+      </span>
+    </div>
+  </div>
+))}   
         </div>
       )}
 
