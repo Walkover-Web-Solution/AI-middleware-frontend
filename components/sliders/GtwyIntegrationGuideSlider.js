@@ -435,6 +435,22 @@ const CONFIG_SCHEMA = [
     defaultValue: false,
     section: "Display Settings",
   }, 
+  {
+    key: "showResponseType",
+    type: "toggle",
+    label: "Show Response Type",
+    description: "Show response type",
+    defaultValue: false,
+    section: "Interface Options",
+  },
+  {
+    key:"showVariables",
+    type:"toggle",
+    label:"Show Variables",
+    description:"Show variables",
+    defaultValue:false,
+    section:"Interface Options",
+  }
 ];
 
 const cloneTheme = (theme) =>
