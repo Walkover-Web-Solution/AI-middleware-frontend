@@ -32,7 +32,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
-  const {service,version_function_data,configuration,integrationData,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
+  const {service,version_function_data,configuration,integrationData,connected_agents,modelInfoData,bridge,showResponseType } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
@@ -52,7 +52,8 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       configuration,
       connected_agents: isPublished ? (bridgeDataFromState?.connected_agents) : (versionData?.connected_agents),
       modelInfoData,
-      bridge: activeData
+      bridge: activeData,
+      showResponseType:state.appInfoReducer.embedUserDetails.showResponseType,
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
@@ -234,7 +235,10 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
     const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
     if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
-
+    if (key === 'response_type' && isEmbedUser && !showResponseType) {
+      return null;
+    }
+    
     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
     const isDefaultValue = configuration?.[key] === 'default';
