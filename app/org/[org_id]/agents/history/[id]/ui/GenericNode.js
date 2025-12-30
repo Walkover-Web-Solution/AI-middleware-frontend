@@ -5,7 +5,7 @@ export default function GenericNode({ data }) {
 
   return (
     <div
-      className={` bg-white ${ui.containerClass}`}
+      className={` bg-base-100 ${ui.containerClass}`}
       style={{ width: ui.width || 220 }}
     >
       {ui.render?.()}

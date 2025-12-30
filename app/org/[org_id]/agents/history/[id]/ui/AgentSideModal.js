@@ -6,8 +6,8 @@ export function AgentSideModal({ agent, top, onClose }) {
         absolute left-full ml-4
         w-64
         h-60
-        border
-        bg-white
+        border border-base-300
+        bg-base-100
         p-3
         shadow
         z-[999999]
@@ -16,12 +16,12 @@ export function AgentSideModal({ agent, top, onClose }) {
     >
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
-        <div className="text-xs font-semibold text-gray-500">
+        <div className="text-xs font-semibold text-base-content/60">
           AGENT DETAILS
         </div>
         <button
           onClick={onClose}
-          className="text-xs text-gray-400 hover:text-black"
+          className="text-xs text-base-content/40 hover:text-base-content"
         >
           ✕
         </button>
@@ -34,14 +34,14 @@ export function AgentSideModal({ agent, top, onClose }) {
 
       {agent.parallelTools && (
         <div>
-          <div className="text-xs text-gray-500 mb-1">
+          <div className="text-xs text-base-content/60 mb-1">
             TOOLS
           </div>
 
           {agent.parallelTools.map(tool => (
             <div
               key={tool}
-              className="border px-2 py-1 text-xs mb-1"
+              className="border border-base-300 px-2 py-1 text-xs mb-1 text-base-content"
             >
               {tool}
             </div>

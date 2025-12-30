@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-export function BatchUI({ batches, onToolClick }) {
+export function BatchUI({ batches, onToolClick, isLoading = false }) {
   const [openAgentKey, setOpenAgentKey] = useState(null);
   const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
   const [selectedFunctionData, setSelectedFunctionData] = useState(null);
+  const [selectedAgentMeta, setSelectedAgentMeta] = useState(null);
+  const [selectedToolMeta, setSelectedToolMeta] = useState(null);
   const rowRefs = useRef({});
 
   const handleToolClick = (tool) => {
@@ -14,10 +16,20 @@ export function BatchUI({ batches, onToolClick }) {
 
   console.log(batches);
 
-  const handleAgentClick = (agentKey, functionData) => {
+  const handleAgentClick = (agentKey, functionData, agentName, tools) => {
     const nextOpen = openAgentKey === agentKey ? null : agentKey;
     setOpenAgentKey(nextOpen);
     setSelectedFunctionData(nextOpen ? functionData : null);
+    setSelectedAgentMeta(
+      nextOpen
+        ? {
+            name: agentName || "Unknown Agent",
+            tools: Array.isArray(tools) ? tools : [],
+            error: false,
+          }
+        : null
+    );
+    setSelectedToolMeta(null);
   };
 
   useEffect(() => {
@@ -46,12 +58,31 @@ export function BatchUI({ batches, onToolClick }) {
     };
   }, [openAgentKey]);
 
+  const isBatchEmpty =
+    !Array.isArray(batches) ||
+    batches.length === 0 ||
+    batches.every(
+      (batch) => !Array.isArray(batch?.agents) || batch.agents.length === 0
+    );
+
+  if (isLoading || isBatchEmpty) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-base-content/60">
+        <span
+          className="h-4 w-4 border-2 border-base-300 border-t-transparent rounded-full animate-spin"
+          aria-label="Loading"
+        />
+        <span>Loading batch data...</span>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="space-y-4">
         {batches?.map((batch, batchIndex) => (
           <div key={batchIndex} className="space-y-2">
-            <div className="text-xs font-semibold text-gray-600">
+            <div className="text-xs font-semibold text-base-content/60">
               {batch.title}
             </div>
 
@@ -87,11 +118,18 @@ export function BatchUI({ batches, onToolClick }) {
                   {isActualAgent && (
                     <div className="relative">
                       <div
-                        onClick={() => handleAgentClick(agentKey, functionData)}
+                        onClick={() =>
+                          handleAgentClick(
+                            agentKey,
+                            functionData,
+                            agent.name,
+                            agent.parallelTools
+                          )
+                        }
                         ref={(node) => {
                           if (node) rowRefs.current[agentKey] = node;
                         }}
-                        className="flex justify-between items-center border px-2 py-2 text-sm text-black hover:border-blue-500 border-2 hover:bg-blue-50 cursor-pointer"
+                        className="flex justify-between items-center border border-base-300 px-2 py-2 text-sm text-base-content hover:border-primary hover:bg-primary/10 cursor-pointer"
                         title={agent.name}
                       >
                         <span className="truncate">{agent.name}</span>
@@ -102,7 +140,7 @@ export function BatchUI({ batches, onToolClick }) {
 
                   {/* Show FUNCTIONS label for non-agent groups */}
                   {!isActualAgent && agent.name === "FUNCTIONS" && (
-                    <div className="text-xs font-semibold text-gray-600 mb-1">
+                    <div className="text-xs font-semibold text-base-content/60 mb-1">
                       MAIN AGENT TOOLS
                     </div>
                   )}
@@ -111,7 +149,7 @@ export function BatchUI({ batches, onToolClick }) {
                   {Array.isArray(agent.parallelTools) && agent.parallelTools.length > 0 && (
                     <div className={`space-y-1 ${isActualAgent ? 'ml-4' : ''}`}>
                       {isActualAgent && (
-                        <div className="text-[10px] text-gray-600 flex items-center gap-1">
+                        <div className="text-[10px] text-base-content/60 flex items-center gap-1">
                           🔧 {agent.parallelTools.length} TOOL{agent.parallelTools.length > 1 ? 'S' : ''} CALLED BY {agent.name.toUpperCase()}
                         </div>
                       )}
@@ -130,8 +168,8 @@ export function BatchUI({ batches, onToolClick }) {
                             <div
                               key={`${toolName}-${index}`}
                               onClick={() => handleToolClick(tool)}
-                              className={`cursor-pointer flex items-center justify-between border px-2 py-1 text-xs text-black
-                              ${isActualAgent ? 'hover:border-purple-400 hover:bg-purple-50' : 'hover:border-orange-400 hover:bg-orange-50'}
+                              className={`cursor-pointer flex items-center justify-between border border-base-300 px-2 py-1 text-xs text-base-content
+                              ${isActualAgent ? 'hover:border-primary hover:bg-primary/10' : 'hover:border-primary hover:bg-primary/10'}
                               ${isLastOdd ? "col-span-2" : ""}`}
                               title={toolName}
                             >
@@ -153,7 +191,7 @@ export function BatchUI({ batches, onToolClick }) {
       {openAgentKey && selectedFunctionData &&
         createPortal(
           <div
-            className="fixed z-[9999] w-[420px] overflow-y-auto bg-white border border-gray-200 shadow-xl p-4 text-xs"
+            className="fixed z-[9999] w-[420px] overflow-y-auto bg-base-100 border border-base-300 shadow-xl p-4 text-xs text-base-content"
             style={{
               top: popupPos.top,
               left: popupPos.left,
@@ -161,30 +199,102 @@ export function BatchUI({ batches, onToolClick }) {
               overscrollBehavior: "contain",
             }}
           >
-            <div className="text-[11px] font-semibold text-gray-700 tracking-wide mb-3">
+            <div className="text-[11px] font-semibold text-base-content tracking-wide mb-3">
               FUNCTION DATA:
             </div>
 
             <div className="space-y-3">
               <div>
-                <div className="text-[11px] text-gray-600 mb-1">Id:</div>
-                <div className="border border-gray-200 bg-gray-50 px-2 py-1 text-gray-800">
+                <div className="text-[11px] text-base-content/60 mb-1">Id:</div>
+                <div className="border border-base-300 bg-base-200 px-2 py-1 text-base-content">
                   {selectedFunctionData.id || "null"}
                 </div>
               </div>
 
               <div>
-                <div className="text-[11px] text-gray-600 mb-1">Args:</div>
-                <pre className="border border-gray-200 bg-gray-50 px-2 py-2 whitespace-pre-wrap text-gray-800 leading-5">
+                <div className="text-[11px] text-base-content/60 mb-1">Args:</div>
+                <pre className="border border-base-300 bg-base-200 px-2 py-2 whitespace-pre-wrap text-base-content leading-5">
                   {JSON.stringify(selectedFunctionData.args, null, 2)}
                 </pre>
               </div>
 
               <div>
-                <div className="text-[11px] text-gray-600 mb-1">Data:</div>
-                <pre className="border border-gray-200 bg-gray-50 px-2 py-2 whitespace-pre-wrap text-gray-800 leading-5">
+                <div className="text-[11px] text-base-content/60 mb-1">Data:</div>
+                <pre className="border border-base-300 bg-base-200 px-2 py-2 whitespace-pre-wrap text-base-content leading-5">
                   {JSON.stringify(selectedFunctionData.data, null, 2)}
                 </pre>
+              </div>
+
+              <div>
+                <div className="text-[11px] text-base-content/60 mb-1">Name:</div>
+                <div className="border border-base-300 bg-base-200 px-2 py-1 text-base-content">
+                  {selectedAgentMeta?.name || "Unknown Agent"}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[11px] text-base-content/60 mb-1">Error:</div>
+                <div className="border border-base-300 bg-base-200 px-2 py-1 text-base-content">
+                  {selectedAgentMeta?.error ? "true" : "false"}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[11px] text-base-content/60 mb-1">Tools:</div>
+                <div className="space-y-2">
+                  {(selectedAgentMeta?.tools || []).length === 0 ? (
+                    <div className="border border-base-300 bg-base-200 px-2 py-1 text-base-content/60">
+                      No tools found
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {selectedAgentMeta?.tools?.map((tool, index) => {
+                        const toolName = tool?.name || tool?.id || `tool_${index + 1}`;
+                        return (
+                          <button
+                            key={`${toolName}-${index}`}
+                            type="button"
+                            onClick={() => setSelectedToolMeta(tool)}
+                            className="w-full text-left border border-base-300 bg-base-200 px-2 py-1 text-base-content hover:bg-base-300"
+                          >
+                            {toolName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {selectedToolMeta && (
+                    <div className="border border-base-300 bg-base-100 p-2">
+                      <div className="text-[11px] font-semibold text-base-content mb-2">Run history</div>
+
+                      <div className="text-[11px] text-base-content/60 mb-1">Payload</div>
+                      <pre className="border border-base-300 bg-base-200 px-2 py-2 whitespace-pre-wrap text-base-content leading-5">
+                        {JSON.stringify(selectedToolMeta?.args || {}, null, 2)}
+                      </pre>
+
+                      <div className="text-[11px] text-base-content/60 mt-3 mb-1">Response</div>
+                      <pre className="border border-base-300 bg-base-200 px-2 py-2 whitespace-pre-wrap text-base-content leading-5">
+                        {JSON.stringify(selectedToolMeta?.data || {}, null, 2)}
+                      </pre>
+
+                      <div className="text-[11px] text-base-content/60 mt-3 mb-1">Metadata</div>
+                      <pre className="border border-base-300 bg-base-200 px-2 py-2 whitespace-pre-wrap text-base-content leading-5">
+                        {JSON.stringify(
+                          {
+                            tool_id: selectedToolMeta?.id || null,
+                            tool_name: selectedToolMeta?.name || null,
+                            status: selectedToolMeta?.data?.status ?? null,
+                            execution_time: selectedToolMeta?.data?.execution_time ?? null,
+                            error: selectedToolMeta?.error ?? false,
+                          },
+                          null,
+                          2
+                        )}
+                      </pre>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>,

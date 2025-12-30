@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 
@@ -25,9 +25,24 @@ export default function Page() {
   const dispatch = useDispatch();
   const [selectedTool, setSelectedTool] = useState(null);
   const [childAgentData, setChildAgentData] = useState({});
+  const params = useParams();
+  const orgId = params?.org_id;
+  const bridgeId = params?.id;
   const thread = useCustomSelector(
     (state) => state?.historyReducer?.thread || []
   );
+  const mainAgentName = useCustomSelector((state) => {
+    const orgAgents = state?.bridgeReducer?.org?.[orgId]?.orgs || [];
+    const agent = orgAgents.find(
+      (item) => item?._id === bridgeId || item?.id === bridgeId
+    );
+    return (
+      agent?.name ||
+      agent?.agent_name ||
+      agent?.bridge_name ||
+      "main_agent"
+    );
+  });
   const [stableThreadItem, setStableThreadItem] = useState(null);
 
   const sp = useSearchParams();
@@ -307,7 +322,7 @@ export default function Page() {
     if (toolCalls.length === 0) return [];
 
     const data = toolCalls
-      .filter(tool => tool?.data?.metadata?.type === "function")
+      .filter(tool => tool?.data?.metadata?.type !== "agent")
       .map((tool) => ({
         name: tool?.name || "Unknown Tool",
         functionData: {
@@ -320,6 +335,19 @@ export default function Page() {
     return data;
   }, [toolCalls]);
 
+  const mainAgentCalls = useMemo(() => {
+    if (!Array.isArray(agentTools) || agentTools.length === 0) return [];
+
+    return agentTools.map((tool) => ({
+      name: tool?.name || "Unknown Agent",
+      functionData: {
+        id: tool?.id ?? null,
+        args: tool?.args ?? {},
+        data: tool?.data ?? {},
+      },
+    }));
+  }, [agentTools]);
+
   const calledAgentTools = useMemo(() => {
     if (derivedBatches.length === 0) return [];
 
@@ -330,6 +358,11 @@ export default function Page() {
       }))
     );
   }, [derivedBatches]);
+
+  const isBatchLoading = useMemo(() => {
+    if (!Array.isArray(agentTools) || agentTools.length === 0) return false;
+    return Object.keys(childAgentData).length === 0;
+  }, [agentTools, childAgentData]);
 
   const nodes = useMemo(() => [
     {
@@ -359,7 +392,7 @@ export default function Page() {
           render: () => (
             <AgentUI
               label="MAIN AGENT"
-              name="untitled_agent_4"
+              name={mainAgentName}
               onToolClick={(tool) => setSelectedTool(tool)}
               status="PROCESSING"
               statusClass="text-blue-500"
@@ -378,9 +411,10 @@ export default function Page() {
         target: true,
         ui: {
           width: 320,
-          containerClass: "border p-3 bg-gray-100",
+          containerClass: "border border-base-300 p-3 bg-base-200",
           render: () => (
             <BatchUI
+              isLoading={isBatchLoading}
               batches={derivedBatches.map(batch => ({
                 ...batch,
                 agents: batch.agents.map(agent => ({
@@ -407,8 +441,8 @@ export default function Page() {
           containerClass: "p-4",
           render: () => (
             <AgentUI
-              label="MAIN AGENT"
-              name="finalizing_agent"
+              label="MAIN AGENT TOOLS"
+              name={`${mainAgentName} tools`}
               onToolClick={(tool) => setSelectedTool(tool)}
               status="FINALIZING"
               statusClass="text-blue-500"
@@ -442,14 +476,14 @@ export default function Page() {
   ];
 
   return (
-    <div className="h-screen w-full relative bg-gray-200">
+    <div className="h-screen w-full relative bg-base-200">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
       >
-        {/* <Background /> */}
+        <Background />
       </ReactFlow>
 
       {selectedTool && (

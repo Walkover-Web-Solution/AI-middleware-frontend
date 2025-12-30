@@ -18,39 +18,39 @@ export function AgentUI({
       {/* Icon + Heading */}
       <div className="flex flex-col items-center gap-2">
         {/* Robot Icon Box */}
-        <div className="w-8 h-8 flex items-center justify-center border border-blue-500 rounded-none bg-gray-50">
-          <Bot size={16} className="text-gray-700" />
+        <div className="w-8 h-8 flex items-center justify-center border border-primary rounded-none bg-base-200">
+          <Bot size={16} className="text-base-content" />
         </div>
 
         {/* Heading */}
-        <div className="text-xs text-gray-500 font-semibold">
+        <div className="text-xs text-base-content/60 font-semibold">
           {label}
         </div>
         {/* Agent Name */}
-        <div className="font-semibold border border-blue-500 text-blue-600 text-sm p-2 bg-blue-100">
+        <div className="font-semibold border border-primary text-primary text-sm p-2 bg-primary/10">
           {name}
         </div>
       </div>
       {status === "FINALIZING" && tools.length > 0 && (
-        <div className="bg-white">
-          <div className="text-center text-xs tracking-widest text-gray-500 mb-4">
+        <div className="bg-base-100">
+          <div className="text-center text-xs tracking-widest text-base-content/60 mb-4">
             PROCESSING
           </div>
 
           {tools.map((tool, index) => (
-  <div
-    key={`${tool?.name || "tool"}-${index}`}
-    className="flex items-center justify-between border hover:border-orange-400 border-2 p-2 mb-3 hover:bg-orange-50 cursor-pointer"
-    onClick={() => handleToolClick(tool)}
-  >
-    <div className="flex items-center gap-2">
-      <span className="text-orange-500">🔧</span>
-      <span className="text-sm text-gray-700">
-        {tool?.name || "Unknown Tool"}  {/* Add this line to display the tool name */}
-      </span>
-    </div>
-  </div>
-))}   
+            <div
+              key={`${tool?.name || "tool"}-${index}`}
+              className="flex items-center justify-between border border-base-300 hover:border-primary p-2 mb-3 hover:bg-primary/10 cursor-pointer"
+              onClick={() => handleToolClick(tool)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-primary">🔧</span>
+                <span className="text-sm text-base-content">
+                  {tool?.name || "Unknown Tool"}  {/* Add this line to display the tool name */}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

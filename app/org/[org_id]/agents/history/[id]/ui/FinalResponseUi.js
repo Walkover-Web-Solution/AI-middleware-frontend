@@ -9,12 +9,12 @@ export function FinalResponseUI({ status }) {
       </div>
 
       {/* Heading */}
-      <div className="text-xs text-gray-500 font-semibold py-2">
+      <div className="text-xs text-base-content/60 font-semibold py-2">
         FINAL RESPONSE
       </div>
 
       {/* Status */}
-      <div className="text-green-600 font-semibold text-sm bg-green-50 border-green-500 border p-2">
+      <div className="text-green-600 font-semibold text-sm bg-base-200 border-green-500 border p-2">
         {status}
       </div>
     </div>
