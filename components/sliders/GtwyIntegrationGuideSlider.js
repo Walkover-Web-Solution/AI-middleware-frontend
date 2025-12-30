@@ -1031,7 +1031,7 @@ window.openGtwy({
 `;
 
   const getDataUsingUserId = () => {
-    return `curl --location ${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents \\
+    return `curl --location ${process.env.NEXT_PUBLIC_SERVER_URL}/api/embed/getAgents \\
 -H 'Authorization: your_embed_token'`;
   };
 
