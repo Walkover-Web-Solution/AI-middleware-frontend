@@ -15,7 +15,7 @@ import { AddIcon, TrashIcon, SettingsIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/PrebuiltToolsConfigModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark } from 'lucide-react';
+import { CircleQuestionMark, Link2 } from 'lucide-react';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -43,7 +43,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
   const dispatch = useDispatch();
-  const { integrationData, bridge_functions, function_data, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, isFirstFunction, prebuiltToolsFilters } = useCustomSelector((state) => {
+  const { integrationData, bridge_functions, function_data, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools, prebuiltToolsFilters } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
@@ -54,7 +54,6 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
     const serviceName = activeData?.service;
     const modelTypeName = activeData?.configuration?.type?.toLowerCase();
     const modelName = activeData?.configuration?.model;
-    const currentUser = state.userDetailsReducer.userDetails;
     
     return {
       integrationData: orgData?.integrationData || {},
@@ -67,7 +66,6 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
       variables_path: isPublished ? (bridgeDataFromState?.variables_path || {}) : (versionData?.variables_path || {}),
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
       toolsVersionData: isPublished ? (bridgeDataFromState?.built_in_tools) : (versionData?.built_in_tools),
-      isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
       prebuiltToolsFilters: isPublished ? (bridgeDataFromState?.web_search_filters || []) : (versionData?.web_search_filters || []),
     };
   });
@@ -77,12 +75,6 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
           showTutorial: false,
           showSuggestion: false
       });
-  const handleTutorial = () => {
-          setTutorialState(prev => ({
-              ...prev,
-              showSuggestion: isFirstFunction
-          }));
-      };
   const handleOpenModal = (functionId) => {
     setFunctionId(functionId);
     const fn = function_data?.[functionId];
@@ -259,40 +251,35 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
         setVariablesPath={setVariablesPath}
         variablesPath={variablesPath}
       />
-      <div className="w-full max-w-md gap-2 flex flex-col px-2 py-2 cursor-default">
+      <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
         {shouldToolsShow && (
           <>
-            <div className="dropdown dropdown-right w-full flex items-center">
-              {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? (
-                <>
-                  <div className="flex items-center gap-1 mb-2">
-                    <p className="font-medium whitespace-nowrap">Tools</p>
+            <div className="dropdown dropdown-left w-full flex items-center">
+              {/* {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? ( */}
+                <div className='flex justify-between w-full'>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-primary p-1.5 rounded-md">
+                        <Link2 size={16} className="text-primary-content" />
+                      </div>
+                      <div>
+                        <p className="text-sm whitespace-nowrap">Tools</p>
+                        <p className="text-xs text-base-content/50">Connect external tools and services</p>
+                      </div>
+                    </div>
                     <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                       <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                     </InfoTooltip>
                   </div>
                   <button
                     tabIndex={0}
-                    className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70 "
                     disabled={!shouldToolsShow || isReadOnly}
                   >
-                    <AddIcon className="w-2 h-2" />
-                    <span className="text-xs font-medium">Add</span>
+                    <AddIcon className="w-6 h-6" />
                   </button>
-                </>
-              ) : (
-                <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-                  <button
-                    tabIndex={0}
-                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleTutorial}
-                    disabled={isReadOnly}
-                  >
-                    <AddIcon className="w-2 h-2" />
-                    <p className="label-text text-sm whitespace-nowrap">Tool</p>
-                  </button>
-                </InfoTooltip>
-              )}
+                </div>
+              
               <EmbedListSuggestionDropdownMenu
                 name={"Function"}
                 params={params}
@@ -313,6 +300,14 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
               />
             </div>
             <div className="flex flex-col gap-2 w-full">
+              {/* Show empty state when no tools are connected */}
+              {bridgeFunctions.length === 0 && selectedPrebuiltTools.length === 0 && (
+                <div className="text-center py-8 border border-dashed border-white/[0.08] rounded-lg bg-white/[0.02]">
+                  <Link2 className="w-6 h-6 text-gray-600 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">No tools connected</p>
+                </div>
+              )}
+              
               {bridgeFunctions.length > 0 && (
                 <div className="flex flex-col gap-2 w-full">
                   <RenderEmbed 

@@ -211,9 +211,10 @@ const ModelDropdown = ({ params, searchParams, isPublished, isEditor = true }) =
                     onChange={handleSelect}
                     onOptionHover={handleOptionHover}
                     showGroupHeaders
-                    placeholder="Select a Model"
+                    placeholder="Select model"
                     size="sm"
-                    className="btn btn-sm w-auto justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem] rounded-sm px-3"
+                    className="flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 border-white/[0.08] text-base-content h-8 focus:border-blue-500/50 min-w-[150px]"
+                    style={{ backgroundColor: 'color-mix(in oklab, var(--color-white) 3%, transparent)' }}
                     menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
                     maxLabelLength={20}
                 />
