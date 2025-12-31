@@ -32,7 +32,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
     const versionId = searchParams?.version;
     const isPublished = searchParams?.isPublished === 'true';
     
-    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName } = useCustomSelector((state) => {
+    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName, isEmbedUser, showVariables } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         
@@ -48,6 +48,8 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             service: isPublished ? (bridgeDataFromState?.service?.toLowerCase()) : (versionData?.service?.toLowerCase()),
             modelType: isPublished ? (bridgeDataFromState?.configuration?.type) : (versionData?.configuration?.type),
             modelName: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+            isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser || false,
+            showVariables: state?.appInfoReducer?.embedUserDetails?.showVariables || false,
         };
     });
 
@@ -194,11 +196,14 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                 const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
                 setValidationError(errorMsg);
 
-                // Open the variable collection slider
-                toggleSidebar("variable-collection-slider", "right");
+                // Don't open variable modal for embed users when showVariables is true
+                if (!isEmbedUser || (isEmbedUser && showVariables)) {
+                    // Open the variable collection slider
+                    toggleSidebar("variable-collection-slider", "right");
 
-                // Store missing variables in sessionStorage for the slider to highlight
-                sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
+                    // Store missing variables in sessionStorage for the slider to highlight
+                    sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
+                }
 
                 return;
             } else {
