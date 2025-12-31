@@ -84,7 +84,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
     }, [prebuiltToolsData, toolsVersionData, searchQuery, showInbuiltTools]);
 
     return (
-        <div className="dropdown dropdown-left mt-8">
+        <div className="dropdown dropdown-end mt-8">
 
             {tutorialState?.showSuggestion && (
                 <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"} />

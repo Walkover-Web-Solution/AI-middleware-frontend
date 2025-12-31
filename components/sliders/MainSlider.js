@@ -580,7 +580,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar bg-base-300 border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar bg-base-100 border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
             transform: isMobile ? (isMobileVisible ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',

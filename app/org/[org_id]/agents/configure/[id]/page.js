@@ -528,14 +528,14 @@ promptHelperPanelRef.current?.resize(5);
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
+      className={`w-full bg-base-300 h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
     >
       {/* Debug Panel States */}
 
       {uiState.isDesktop ? (
         isAgentFlowView ? (
           <div className="w-full h-full">
-            <div className="h-full overflow-y-auto py-4 px-4">
+            <div className="h-full overflow-y-auto py-4">
               <ConfigurationPage
                 promptTextAreaRef={promptTextAreaRef}
                 params={resolvedParams}
@@ -563,7 +563,7 @@ promptHelperPanelRef.current?.resize(5);
               defaultSize={panelSizes.config}
               minSize={3}
               maxSize={100}
-              className="bg-base-100"
+              className="bg-base-300"
               collapsible={false}
               onResize={(size) => {
                 const isCollapsed = size <= 5;
@@ -582,7 +582,7 @@ promptHelperPanelRef.current?.resize(5);
                 className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
               >
                 {/* Configuration Content */}
-                <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : 'px-4'}`}>
+                <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : ' pl-8  px-4'}`}>
                   <ConfigurationPage
                     promptTextAreaRef={promptTextAreaRef}
                     params={resolvedParams}
@@ -606,7 +606,7 @@ promptHelperPanelRef.current?.resize(5);
             {/* Resizer Handle with Custom Line */}
             <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-primary/80 transition-colors duration-200 rounded-full" />
+                <div className="w-0.5 h-full bg-base-200 group-hover:bg-primary/80 transition-colors duration-200 rounded-full" />
               </div>
             </PanelResizeHandle>
 

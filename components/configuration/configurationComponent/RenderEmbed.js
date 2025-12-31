@@ -45,7 +45,7 @@ const RenderEmbed = ({
           <div
             key={value?._id}
             id={value?._id}
-            className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
+            className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-100 shadow-md relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} transition-colors duration-200`}
           >
             <div
               className="p-2 flex-1 flex items-center"
