@@ -9,6 +9,7 @@ import { ThemeManager } from '@/customHooks/useThemeManager';
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
+import { getRichUiTemplatesAction } from "@/store/action/richUiTemplateAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
@@ -207,6 +208,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
       dispatch(getAllAuthData())
+      dispatch(getRichUiTemplatesAction(resolvedParams.org_id))
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
@@ -336,7 +338,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
                   pre_tools: data?._id,
-                  status:"1",
+                  status: "1",
                   version_id: resolvedSearchParams?.get('version')
                 }))
               )

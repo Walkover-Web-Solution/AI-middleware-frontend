@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE, template as RESPONSE_TEMPLATES } from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
 import useTutorialVideos from '@/hooks/useTutorialVideos';
 import { generateRandomID, openModal } from '@/utils/utility';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
@@ -13,7 +13,7 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
-import { CircleQuestionMark } from 'lucide-react';
+import { Check, CircleQuestionMark } from 'lucide-react';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false }) => {
   // Use the tutorial videos hook
@@ -30,7 +30,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, connected_agents, modelInfoData, bridge } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, connected_agents, modelInfoData, bridge, doctstar_embed_token, currrentOrgDetail, richUiTemplates } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
@@ -50,7 +50,8 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       configuration,
       connected_agents: isPublished ? (bridgeDataFromState?.connected_agents) : (versionData?.connected_agents),
       modelInfoData,
-      bridge: activeData
+      bridge: activeData,
+      richUiTemplates: state?.richUiTemplateReducer?.templates || []
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
@@ -237,12 +238,12 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     }
   }, [configuration?.response_type?.template_id]);
 
-  // Function to generate the schema from selected templates
   const generateCombinedSchema = useCallback((selectedIndices) => {
     if (selectedIndices.length === 0) return null;
 
-    const anyOfSchemas = selectedIndices.map(index => {
-      const templateObj = RESPONSE_TEMPLATES[index];
+    const anyOfSchemas = selectedIndices.map(indexOrId => {
+      // Find template by _id
+      const templateObj = richUiTemplates.find(t => t._id === indexOrId);
       if (templateObj?.json_schema?.schema) {
         // We use the schema directly from the template
         return templateObj.json_schema.schema;
@@ -268,7 +269,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       },
       strict: true
     };
-  }, []);
+  }, [richUiTemplates]);
 
   // Function to handle applying selected templates
   const handleApplyTemplates = useCallback(() => {
@@ -669,36 +670,28 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                     )}
                   </div>
                   <div className="grid grid-cols-1 gap-2">
-                    {RESPONSE_TEMPLATES.map((templateObj, index) => {
-                      const templateKeys = Object.keys(templateObj).filter(key =>
-                        key !== 'json_schema' && key !== 'html'
-                      );
-                      const templateName = templateKeys[0] || `Template ${index + 1}`;
-                      const isSelected = selectedTemplates.includes(index);
+                    {richUiTemplates.map((templateObj) => {
+                      const templateName = templateObj.name || `Template`;
+                      const isSelected = selectedTemplates.includes(templateObj._id);
 
                       return (
-                        <div key={index} className="flex items-center p-2 bg-base-100 rounded border cursor-pointer" onClick={() => {
-                          if (isPublished) return;
-                          setSelectedTemplates(prev => {
-                            if (prev.includes(index)) {
-                              return prev.filter(i => i !== index);
-                            }
-                            return [...prev, index];
-                          });
-                        }}>
-                          <input
-                            type="checkbox"
-                            className="checkbox checkbox-xs mr-3"
-                            checked={isSelected}
-                            onChange={() => { }} // Handled by div click
-                            disabled={isPublished}
-                          />
-                          <div>
-                            <span className="text-sm font-medium capitalize">{templateName.replace('_', ' ')}</span>
-                            {templateObj.json_schema?.name && (
-                              <span className="text-xs text-base-content/70 ml-2">({templateObj.json_schema.name})</span>
-                            )}
-                          </div>
+                        <div
+                          key={templateObj._id}
+                          className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${isSelected ? 'bg-primary/10 border-primary text-primary' : 'bg-base-100 border-base-200 hover:bg-base-200'}`}
+                          onClick={() => {
+                            if (isPublished) return;
+                            setSelectedTemplates(prev => {
+                              if (prev.includes(templateObj._id)) {
+                                return prev.filter(i => i !== templateObj._id);
+                              }
+                              return [...prev, templateObj._id];
+                            });
+                          }}
+                        >
+                          <span className="text-sm font-medium capitalize">{templateName}</span>
+                          {isSelected && (
+                            <Check className="w-5 h-5" />
+                          )}
                         </div>
                       );
                     })}
@@ -722,7 +715,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   </span>
                 </div>
 
-                {key === 'response_type' && RESPONSE_TEMPLATES.length > 0 && (
+                {key === 'response_type' && richUiTemplates.length > 0 && (
                   <div className="mb-3 p-3 bg-base-200 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-sm font-medium">Available Templates:</div>
@@ -738,36 +731,30 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                       )}
                     </div>
                     <div className="grid grid-cols-1 gap-2">
-                      {RESPONSE_TEMPLATES.map((templateObj, index) => {
-                        const templateKeys = Object.keys(templateObj).filter(key =>
-                          key !== 'json_schema' && key !== 'html'
-                        );
-                        const templateName = templateKeys[0] || `Template ${index + 1}`;
-                        const isSelected = selectedTemplates.includes(index);
+                      {richUiTemplates.map((templateObj) => {
+                        const templateName = templateObj.name || `Template`;
+                        const isSelected = selectedTemplates.includes(templateObj._id);
 
                         return (
-                          <div key={index} className="flex items-center p-2 bg-base-100 rounded border cursor-pointer" onClick={() => {
-                            if (isPublished) return;
-                            setSelectedTemplates(prev => {
-                              if (prev.includes(index)) {
-                                return prev.filter(i => i !== index);
-                              }
-                              return [...prev, index];
-                            });
-                          }}>
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-xs mr-3"
-                              checked={isSelected}
-                              onChange={() => { }} // Handled by div click
-                              disabled={isPublished}
-                            />
-                            <div>
-                              <span className="text-sm font-medium capitalize">{templateName.replace('_', ' ')}</span>
-                              {templateObj.json_schema?.name && (
-                                <span className="text-xs text-base-content/70 ml-2">({templateObj.json_schema.name})</span>
-                              )}
-                            </div>
+                          <div
+                            key={templateObj._id}
+                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${isSelected ? 'bg-primary/10 border-primary text-primary' : 'bg-base-100 border-base-200 hover:bg-base-200'}`}
+                            onClick={() => {
+                              if (isPublished) return;
+                              setSelectedTemplates(prev => {
+                                if (prev.includes(templateObj._id)) {
+                                  return prev.filter(i => i !== templateObj._id);
+                                }
+                                return [...prev, templateObj._id];
+                              });
+                            }}
+                          >
+                            <span className="text-sm font-medium capitalize">{templateName}</span>
+                            {isSelected && (
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
                           </div>
                         );
                       })}
