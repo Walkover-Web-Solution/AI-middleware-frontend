@@ -256,8 +256,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
   window.addEventListener('message', (event) => {
     const data = event.data;
-    if(data.type === "GTWY_ACTION")
-    {
+    if (data.type === "GTWY_ACTION") {
       console.log(data)
     }
     if (data && data.type === 'GTWY_ACTION_ACK' && data.elementId) {
@@ -761,20 +760,19 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                       }}
                                     >
                                       {/* Show model's actual response if testcase was run, otherwise show original content */}
-                                      {message.testCaseResult && message.sender === "assistant"
+                                      {message.type !== 'template' && (message.testCaseResult && message.sender === "assistant"
                                         ? message.testCaseResult.actual_result || message.content
-                                        : message.content}
+                                        : message.content)}
                                     </ReactMarkdown>
                                   )}
 
-                                  {/* Render Template HTML */}
-                                  {message?.type === 'template' && message?.html && (
+                                  {/* Render Template Content (without HTML) */}
+                                  {message?.type === 'template' && message?.content && (
                                     <div
                                       className="mt-4 template-html-container w-full"
-                                      dangerouslySetInnerHTML={{ __html: message.html }}
+                                      dangerouslySetInnerHTML={{ __html: message.content }}
                                     />
                                   )}
-                                  {renderMessageAttachments(message)}
                                 </div>
                               )}
                             </div>
