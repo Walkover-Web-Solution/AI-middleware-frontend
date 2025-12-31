@@ -88,7 +88,6 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
 
             {batch.agents?.map((agent, agentIndex) => {
               const agentKey = `${batchIndex}-${agentIndex}`;
-              const isOpen = openAgentKey === agentKey;
 
               // Check if this is an actual agent (has functionData) or just "FUNCTIONS" group
               const isActualAgent = agent.functionData !== null;

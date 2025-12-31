@@ -374,30 +374,6 @@ export default function Page() {
     return data;
   }, [toolCalls]);
 
-  const mainAgentCalls = useMemo(() => {
-    if (!Array.isArray(agentTools) || agentTools.length === 0) return [];
-
-    return agentTools.map((tool) => ({
-      name: tool?.name || "Unknown Agent",
-      functionData: {
-        id: tool?.id ?? null,
-        args: tool?.args ?? {},
-        data: tool?.data ?? {},
-      },
-    }));
-  }, [agentTools]);
-
-  const calledAgentTools = useMemo(() => {
-    if (derivedBatches.length === 0) return [];
-
-    return derivedBatches.flatMap((batch) =>
-      batch.agents.map((agent) => ({
-        agentName: agent.name,
-        tools: agent.parallelTools || [],
-      }))
-    );
-  }, [derivedBatches]);
-
   const nodes = useMemo(() => [
     {
       id: "1",
