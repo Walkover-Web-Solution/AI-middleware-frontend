@@ -8,7 +8,7 @@ import { getAllBridgesAction, getSingleBridgesAction, updateBridgeVersionAction 
 import { useEffect, useRef, useState, use, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { setIsFocusReducer, setThreadIdForVersionReducer } from "@/store/reducer/bridgeReducer";
-import { updateTitle, generateRandomID } from "@/utils/utility";
+import { updateTitle, generateRandomID, extractPromptVariables } from "@/utils/utility";
 import { useRouter } from "next/navigation";
 import Chatbot from "@/components/configuration/Chatbot";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
@@ -302,14 +302,24 @@ promptHelperPanelRef.current?.resize(5);
   }, []);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
-
+    const promptVariables = extractPromptVariables(newValue);
+    const variablesState = {};
+    
+    promptVariables.forEach(varName => {
+      variablesState[varName] = {
+        status: "required",
+        default_value: "",
+      };
+    });
+    
     if (newValue !== reduxPrompt.trim()) {
       dispatch(updateBridgeVersionAction({
         versionId: resolvedSearchParams?.version,
         dataToSend: {
           configuration: {
-            prompt: newValue
-          }
+            prompt: newValue,
+          },
+          variables_state: variablesState,
         }
       }));
     }
