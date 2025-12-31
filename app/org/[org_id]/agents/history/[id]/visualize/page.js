@@ -383,7 +383,7 @@ export default function Page() {
         source: true,
         ui: {
           width: 260,
-          containerClass: "p-4",
+          containerClass: "p-4 border border-base-300 ",
           render: () => (
             <UserPromptUI text={activeThreadItem?.user || ""} />
           ),
@@ -398,7 +398,7 @@ export default function Page() {
         source: true,
         target: true,
         ui: {
-          containerClass: "p-4",
+          containerClass: "p-4 border border-base-300 ",
           render: () => (
             <AgentUI
               label="MAIN AGENT"
@@ -448,7 +448,7 @@ export default function Page() {
         target: true,
         ui: {
           width: 280,
-          containerClass: "p-4",
+          containerClass: "p-4 border border-base-300 ",
           render: () => (
             <AgentUI
               label="MAIN AGENT TOOLS"
@@ -469,7 +469,7 @@ export default function Page() {
       data: {
         target: true,
         ui: {
-          containerClass: " p-4",
+          containerClass: " p-4 border border-base-300 ",
           render: () => (
             <FinalResponseUI
               status="Delivered"
