@@ -7,6 +7,7 @@ import Diff_Modal from '@/components/modals/DiffModal';
 import PromptHeader from './PromptHeader';
 import PromptTextarea from './PromptTextarea';
 import DefaultVariablesSection from './DefaultVariablesSection';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 // Ultra-smooth InputConfigComponent with ref-based approach
 const InputConfigComponent = memo(({ 
@@ -23,8 +24,10 @@ const InputConfigComponent = memo(({
     isMobileView,
     closeHelperButtonLocation,
     isPublished,
-    isEditor
+    isEditor,
+    isEmbedUser
 }) => {
+    const { showVariables } = useCustomSelector(state => state.appInfoReducer.embedUserDetails);
     // Optimized Redux selector with memoization and shallow comparison
     const { prompt: reduxPrompt, oldContent } = usePromptSelector(params, searchParams);
     // Refs for zero-render typing experience
@@ -155,8 +158,9 @@ const InputConfigComponent = memo(({
                     isEditor={isEditor}
                     onSave={handleSavePrompt}
                 />
-                
+                {((isEmbedUser && showVariables) || !isEmbedUser)&&
                 <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt} isEditor={isEditor}/>
+                 }
             </div>
 
             <Diff_Modal oldContent={oldContentRef.current} newContent={textareaRef.current?.value || reduxPrompt} />
