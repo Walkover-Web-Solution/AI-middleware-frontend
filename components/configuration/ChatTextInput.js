@@ -191,19 +191,15 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
         // Validate variables in prompt
         if (!forceRun && !isSliderAutoOpenDisabled) {
             const validation = validatePromptVariables();
-            if (!validation.isValid) {
+            if (!validation.isValid && (!isEmbedUser || (isEmbedUser && showVariables))) {
                 const missingVars = validation.missingVariables.join(', ');
                 const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
                 setValidationError(errorMsg);
-
-                // Don't open variable modal for embed users when showVariables is true
-                if (!isEmbedUser || (isEmbedUser && showVariables)) {
                     // Open the variable collection slider
                     toggleSidebar("variable-collection-slider", "right");
 
                     // Store missing variables in sessionStorage for the slider to highlight
                     sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
-                }
 
                 return;
             } else {
