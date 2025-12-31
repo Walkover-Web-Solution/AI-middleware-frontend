@@ -79,7 +79,7 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 bg-base-100">
         {batches?.map((batch, batchIndex) => (
           <div key={batchIndex} className="space-y-2">
             <div className="text-xs font-semibold text-base-content/60">
@@ -142,6 +142,13 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
                   {!isActualAgent && agent.name === "FUNCTIONS" && (
                     <div className="text-xs font-semibold text-base-content/60 mb-1">
                       MAIN AGENT TOOLS
+                    </div>
+                  )}
+
+                  {isActualAgent && agent.isLoading && (
+                    <div className={`flex items-center gap-2 text-[10px] text-base-content/60 ${isActualAgent ? 'ml-4' : ''}`}>
+                      <span className="h-3 w-3 border-2 border-base-300 border-t-transparent rounded-full animate-spin" />
+                      <span>Loading tools...</span>
                     </div>
                   )}
 

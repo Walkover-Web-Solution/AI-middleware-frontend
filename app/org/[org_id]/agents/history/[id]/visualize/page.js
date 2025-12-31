@@ -8,12 +8,13 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 
-import { UserPromptUI } from "./UserPromptUi.js";
-import { AgentUI } from "./AgentUi.js";
-import { BatchUI } from "./BatchUi.js";
-import { FinalResponseUI } from "./FinalResponseUi.js";
-import GenericNode from "./GenericNode.js";
-import { ToolFullSlider } from "./ToolFullSlider.js";
+import { UserPromptUI } from "@/components/historyUi/UserPromptUi.js";
+import { AgentUI } from "@/components/historyUi/AgentUi.js";
+import { BatchUI } from "@/components/historyUi/BatchUi.js";
+import { FinalResponseUI } from "@/components/historyUi/FinalResponseUi.js";
+import GenericNode from "@/components/historyUi/GenericNode.js";
+import { ToolFullSlider } from "@/components/historyUi/ToolFullSlider.js";
+import { ResponseFullSlider } from "@/components/historyUi/ResponseFullSlider.js";
 
 const nodeTypes = {
   generic: GenericNode,
@@ -24,6 +25,7 @@ const nodeTypes = {
 export default function Page() {
   const dispatch = useDispatch();
   const [selectedTool, setSelectedTool] = useState(null);
+  const [selectedResponse, setSelectedResponse] = useState(null);
   const [childAgentData, setChildAgentData] = useState({});
   const params = useParams();
   const orgId = params?.org_id;
@@ -47,6 +49,10 @@ export default function Page() {
 
   const sp = useSearchParams();
   const messageId = sp.get("message_id");
+  const threadId = sp.get("thread_id");
+  const subThreadId = sp.get("subThread_id");
+  const versionId = sp.get("version");
+  const errorParam = sp.get("error") === "true";
   const selectedThreadItem = useMemo(() => {
     if (!messageId) return null;
     return thread.find((item) => item?.message_id === messageId) || null;
@@ -57,7 +63,75 @@ export default function Page() {
     if (selectedThreadItem) setStableThreadItem(selectedThreadItem);
   }, [selectedThreadItem]);
 
+  useEffect(() => {
+    if (messageId || thread.length === 0) return;
+    if (!stableThreadItem) {
+      setStableThreadItem(thread[thread.length - 1]);
+    }
+  }, [messageId, thread, stableThreadItem]);
+
+  useEffect(() => {
+    if (thread.length > 0 || threadId || !bridgeId) return;
+
+    const fetchInitialThread = async () => {
+      const history = await dispatch(
+        getHistoryAction(
+          bridgeId,
+          1,
+          "all",
+          errorParam,
+          versionId || undefined,
+          undefined,
+          undefined,
+          undefined
+        )
+      );
+
+      const firstThreadId = history?.[0]?.thread_id;
+      if (!firstThreadId) return;
+
+      dispatch(
+        getThread({
+          threadId: firstThreadId,
+          bridgeId,
+          subThreadId: firstThreadId,
+          nextPage: 1,
+          user_feedback: "all",
+          versionId: versionId || undefined,
+          error: errorParam,
+        })
+      );
+    };
+
+    fetchInitialThread();
+  }, [thread.length, threadId, bridgeId, versionId, errorParam, dispatch]);
+
+  useEffect(() => {
+    if (thread.length > 0 || !threadId || !bridgeId) return;
+
+    dispatch(
+      getThread({
+        threadId,
+        bridgeId,
+        subThreadId: subThreadId || threadId,
+        nextPage: 1,
+        user_feedback: "all",
+        versionId: versionId || undefined,
+        error: errorParam,
+      })
+    );
+  }, [thread.length, threadId, subThreadId, bridgeId, versionId, errorParam, dispatch]);
+
   const activeThreadItem = selectedThreadItem || stableThreadItem; // use this everywhere
+  const responsePreview = useMemo(() => {
+    const content =
+      activeThreadItem?.updated_llm_message ||
+      activeThreadItem?.llm_message ||
+      activeThreadItem?.chatbot_message ||
+      "";
+    if (!content) return "";
+    return content.length > 120 ? `${content.slice(0, 120)}...` : content;
+  }, [activeThreadItem]);
 
   console.log("messageId:", messageId);
   console.log("thread :", thread);
@@ -212,42 +286,6 @@ export default function Page() {
   const derivedBatches = useMemo(() => {
     console.log(`⏰ derivedBatches running. childAgentData:`, childAgentData, `keys:`, Object.keys(childAgentData));
 
-    // If we have childAgentData, create a batch with the parallel tools
-    if (Object.keys(childAgentData).length > 0) {
-      const agents = Object.entries(childAgentData).map(([agentId, agentData]) => {
-        const parallelTools = (agentData.childToolCalls || []).map(tool => ({
-          name: tool?.name || "Unknown Tool",
-          functionData: {
-            id: tool?.id || null,
-            args: tool?.args || {},
-            data: tool?.data || {},
-          }
-        }));
-
-        return {
-          name: agentData.agentName || "Unknown Agent",
-          functionData: {
-            id: agentId,
-            args: {},
-            data: {
-              metadata: {
-                type: "agent",
-                agent_id: agentId
-              }
-            }
-          },
-          parallelTools
-        };
-      });
-
-      console.log(`⏰ Processed child agents:`, agents);
-      return [{
-        title: "BATCH 1",
-        agents
-      }];
-    }
-
-    // Fallback to original logic if no childAgentData
     if (toolCalls.length === 0) return [];
 
     const orderedTools = toolCalls;
@@ -280,6 +318,7 @@ export default function Page() {
           name: tool?.name || "Unknown Agent",
           functionData,
           parallelTools: childParallelTools,
+          isLoading: !childData,
         };
         agents.push(currentAgent);
         return;
@@ -359,11 +398,6 @@ export default function Page() {
     );
   }, [derivedBatches]);
 
-  const isBatchLoading = useMemo(() => {
-    if (!Array.isArray(agentTools) || agentTools.length === 0) return false;
-    return Object.keys(childAgentData).length === 0;
-  }, [agentTools, childAgentData]);
-
   const nodes = useMemo(() => [
     {
       id: "1",
@@ -411,16 +445,16 @@ export default function Page() {
         target: true,
         ui: {
           width: 320,
-          containerClass: "border border-base-300 p-3 bg-base-200",
+          containerClass: "border border-base-300 p-3 bg-base-100`",
           render: () => (
             <BatchUI
-              isLoading={isBatchLoading}
               batches={derivedBatches.map(batch => ({
                 ...batch,
                 agents: batch.agents.map(agent => ({
                   name: agent.name,
                   functionData: agent.functionData,
-                  parallelTools: agent.parallelTools
+                  parallelTools: agent.parallelTools,
+                  isLoading: agent.isLoading
                 }))
               }))}
               onToolClick={(agent) => setSelectedTool(agent)}
@@ -461,7 +495,11 @@ export default function Page() {
         ui: {
           containerClass: " p-4",
           render: () => (
-            <FinalResponseUI status="Delivered" />
+            <FinalResponseUI
+              status="Delivered"
+              preview={responsePreview}
+              onClick={() => setSelectedResponse(activeThreadItem)}
+            />
           ),
         },
       },
@@ -491,6 +529,14 @@ export default function Page() {
           tool={selectedTool}
           onClose={() => setSelectedTool(null)}
           onBack={() => setSelectedTool(null)}
+        />
+      )}
+
+      {selectedResponse && (
+        <ResponseFullSlider
+          response={selectedResponse}
+          onClose={() => setSelectedResponse(null)}
+          onBack={() => setSelectedResponse(null)}
         />
       )}
     </div>
