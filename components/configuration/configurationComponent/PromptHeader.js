@@ -57,7 +57,7 @@ const PromptHeader = memo(({
 
             <div className="label cursor-pointer gap-1 sm:gap-2">
                   <button
-                        className="btn btn-xs"
+                        className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
                         onClick={handleOpenDiff}
                         title="View Diff"
                     >
@@ -65,7 +65,7 @@ const PromptHeader = memo(({
                     </button>
                     {!isPromptHelperOpen ? (
                     <button
-                        className="btn btn-xs btn-primary"
+                        className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
                         onClick={onOpenPromptHelper}
                         title={isPublished ? "Prompt Helper: Cannot edit in published mode" : "Open Prompt Helper"}
                     >
@@ -84,7 +84,7 @@ const PromptHeader = memo(({
               
                 {isPromptHelperOpen && !isMobileView && (
                     <button
-                        className="btn text-xs "
+                        className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
                         onClick={handleOpenDiff}
                     >
                         Diff
