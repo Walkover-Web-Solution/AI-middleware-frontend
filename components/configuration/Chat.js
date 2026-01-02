@@ -299,7 +299,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   };
 
   return (
-    <div className="px-4 pt-4 bg-base-100">
+    <div className="px-4 pt-4 bg-base-300">
       <div className="w-full flex justify-between items-center px-2">
         <button
           className="btn btn-sm btn-square"
@@ -363,7 +363,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
             </div>
           )}
 
-          <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
+          <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 w-full z-low">
             <div ref={messagesContainerRef} className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
               {messages.map((message, index) => {
 

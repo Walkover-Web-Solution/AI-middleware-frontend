@@ -101,43 +101,55 @@ export default function TriggersList({ params, isEmbedUser }) {
 
     const activeTriggers = triggers?.filter(trigger => trigger?.status !== 'deleted') || [];
 
+    const hasTriggers = activeTriggers.length > 0;
+
     return (
         <div>
-            <div className="w-full gap-2 flex flex-col cursor-default">
-                <div className="dropdown dropdown-left w-full flex items-center">
-                    <div className='flex justify-between w-full'>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="flex items-center gap-2">
-                                <div className="bg-primary p-1.5 rounded-md">
-                                    <Zap size={16} className="text-primary-content" />
-                                </div>
-                                <div>
-                                    <p className="text-sm whitespace-nowrap">Triggers</p>
-                                    <p className="text-xs text-gray-500">Automate workflows with events</p>
-                                </div>
-                            </div>
-                            <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
-                                <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                            </InfoTooltip>
-                        </div>
+            <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm whitespace-nowrap">Triggers</p>
+                        <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
+                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        </InfoTooltip>
+                    </div>
+                    {hasTriggers && (
                         <button
                             onClick={() => openTrigger()}
-                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70"
+                            className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
                             disabled={isViewer}
                         >
-                            <AddIcon className="w-6 h-6" />
+                            <AddIcon className="w-3 h-3" />
+                            ADD
                         </button>
-                    </div>
+                    )}
                 </div>
-                <div className="flex flex-col gap-2 w-full">
-                    {/* Render trigger cards */}
-                    {activeTriggers.length > 0 && (
-                        <div className="grid gap-2 w-full">
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+                {!hasTriggers ? (
+                    <div className="w-full max-w-md">
+                        <div className="rounded-md border-2 border-dashed p-4 text-center">
+                            <p className="text-sm text-base-content/70">
+                                No triggers found.
+                            </p>
+                            <button
+                                onClick={() => openTrigger()}
+                                className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-sm mt-3 gap-1"
+                                disabled={isViewer}
+                            >
+                                <AddIcon className="w-3 h-3" />
+                                ADD
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full max-w-md">
+                        <div className="flex flex-col gap-2">
                             {activeTriggers.map(trigger => (
                                 <div
                                     key={trigger?.id}
                                     onClick={() => openTrigger(trigger?.id)}
-                                    className="group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden hover:bg-base-300 transition-colors duration-200"
+                                    className="group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full transition-colors duration-200"
                                 >
                                     <div className="p-2 flex-1 flex items-center">
                                         <div className="flex items-center gap-2 w-full">
@@ -155,8 +167,8 @@ export default function TriggersList({ params, isEmbedUser }) {
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     )

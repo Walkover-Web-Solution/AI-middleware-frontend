@@ -64,24 +64,21 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
     ), [bridges, searchQuery, connect_agents, bridgeData]);
 
     return (
-        <div className="dropdown dropdown-left mt-8">
-           
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
-                <div className='flex flex-col gap-2 w-full'>
-                    <li className="text-sm font-semibold disabled">Suggested Agents</li>
-                    <input
-                        type='text'
-                        placeholder='Search Agent'
-                        value={searchQuery}
-                        onChange={handleInputChange}
-                        className='input input-bordered w-full input-sm'
-                    />
-                    {
-                        renderBridgeSuggestions
-                    }
-                </div>
-            </ul>
-        </div>
+        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+            <div className='flex flex-col gap-2 w-full'>
+                <li className="text-sm font-semibold disabled">Suggested Agents</li>
+                <input
+                    type='text'
+                    placeholder='Search Agent'
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    className='input input-bordered w-full input-sm'
+                />
+                {
+                    renderBridgeSuggestions
+                }
+            </div>
+        </ul>
     )
 }
 

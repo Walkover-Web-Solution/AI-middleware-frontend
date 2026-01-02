@@ -55,14 +55,14 @@ const ConfigurationPage = ({
             || currentOrgRole === "Creator"
             || isAdminOrOwner);
     }, [currentOrgRole, currentUser, bridge?.users, isAdminOrOwner, isEmbedUser]);
-    useEffect(() => {
-        if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
-            if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
-                setCurrentView('config');
-                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
-            }
-        }
-    }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
+    // useEffect(() => {
+    //     if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
+    //         if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
+    //             setCurrentView('config');
+    //             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
+    //         }
+    //     }
+    // }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
     const handleNavigation = useCallback((target) => {
         setCurrentView(target);
@@ -217,10 +217,10 @@ const ConfigurationPage = ({
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-2 relative bg-base-100 min-h-full">
+            <div className="flex flex-col gap-2 relative min-h-full">
                 {/* Published Data Banner - Sticky and close to navbar */}
                 {bannerState.showPublished && (
-                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -233,7 +233,7 @@ const ConfigurationPage = ({
                 
                 {/* Non-Editor Banner - Sticky and close to navbar */}
                 {bannerState.showNonEditor && (
-                    <div className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                    <div className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
