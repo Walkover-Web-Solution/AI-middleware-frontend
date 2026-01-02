@@ -1,9 +1,10 @@
-import { MoveDownIcon } from "@/components/Icons";
+import { MoveDownIcon, ChevronRightIcon } from "@/components/Icons"; // Corrected import to ChevronRightIcon
 import React, { useState, useMemo, useEffect } from "react";
 
 const CustomTable = ({
     data = [],
-    columnsToShow = [],
+    columns = [], // New generic columns prop: [{ key, title, render, sortable, width }]
+    columnsToShow = [], // Legacy support
     sorting = false,
     sortingColumns = [],
     showRowSelection = false,
@@ -11,307 +12,281 @@ const CustomTable = ({
     keysToWrap = [],
     handleRowClick = () => { },
     handleRowSelection = () => { },
-    endComponent = null,
-    customGetColumnLabel = null,
-    customRenderUsageCell = null
+    endComponent = null, // Legacy actions
+    customGetColumnLabel = null, // Legacy label
+    customRenderUsageCell = null, // Legacy usage render
+
+    // New Props for Expansion
+    expandable = false,
+    renderExpandedRow = null, // (row) => ReactNode
+    expandedRowIds = [], // Controlled expansion: array of IDs
+    onRowExpand = null, // (rowId, isExpanded) => void
+    defaultExpandedRowIds = [], // Uncontrolled expansion initial state
 }) => {
-    const keys = useMemo(() => Object.keys(data[0] || {}), [data]);
-    const [selectedRows, setSelectedRows] = useState([]);
+    // Standardize columns from legacy props if 'columns' prop is not provided
+    const normalizedColumns = useMemo(() => {
+        if (columns && columns.length > 0) return columns;
+
+        // Fallback to legacy props
+        const keys = columnsToShow.length > 0 ? columnsToShow : (data.length > 0 ? Object.keys(data[0]) : []);
+        return keys.map(key => ({
+            key,
+            title: customGetColumnLabel ? customGetColumnLabel(key) : key.replace(/_/g, ' '),
+            sortable: sortingColumns.length > 0 ? sortingColumns.includes(key) : true,
+            // Legacy render logic embedded in renderRow
+        }));
+    }, [columns, columnsToShow, data, customGetColumnLabel, sortingColumns]);
+
+    const [internalSelectedRows, setInternalSelectedRows] = useState([]);
+    const [internalExpandedRows, setInternalExpandedRows] = useState(
+        defaultExpandedRowIds.reduce((acc, id) => ({ ...acc, [id]: true }), {})
+    );
     const [activeColumn, setActiveColumn] = useState(null);
     const [ascending, setAscending] = useState(true);
     const [selectAll, setSelectAll] = useState(false);
     const [isSmallScreen, setIsSmallScreen] = useState(false);
     const [viewportWidth, setViewportWidth] = useState(0);
-   
 
-    // Fallback for column labels if customGetColumnLabel is not provided
-    const formatColumnName = (column) => column.replace(/_/g, ' ');
-    
-    // Fallback to all keys if columnsToShow is empty
-    const visibleColumns = columnsToShow.length > 0 ? columnsToShow : keys;
+    const isControlledExpansion = !!onRowExpand;
+    const currentExpandedRows = isControlledExpansion
+        ? expandedRowIds.reduce((acc, id) => ({ ...acc, [id]: true }), {})
+        : internalExpandedRows;
 
-    // Determine columns allowed for sorting
-    const sortableColumns = sortingColumns.length > 0 ? sortingColumns : visibleColumns;
+    const toggleRowExpansion = (rowId, e) => {
+        e?.stopPropagation();
+        const isExpanded = !!currentExpandedRows[rowId];
 
-    // Check screen width on mount and resize
+        if (isControlledExpansion) {
+            onRowExpand(rowId, !isExpanded);
+        } else {
+            setInternalExpandedRows(prev => ({
+                ...prev,
+                [rowId]: !isExpanded
+            }));
+        }
+    };
+
+    // Check screen width
     useEffect(() => {
         const handleResize = () => {
-            const width = window.innerWidth;
-            setViewportWidth(width);
-            setIsSmallScreen(width < 768);
+            // Access window only on client side
+            if (typeof window !== 'undefined') {
+                const width = window.innerWidth;
+                setViewportWidth(width);
+                setIsSmallScreen(width < 768);
+            }
         };
-        
-        // Set initial state
         handleResize();
-        
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Sort the data based on active column and direction
+    // Sort the data
     const sortedData = useMemo(() => {
-        if (sorting && activeColumn) {
-            return [...data].sort((a, b) => {
-                const valueA = activeColumn === 'name'
-                    ? a.actualName
-                    : activeColumn === 'createdAt'
-                    ? (a.createdAt_original ?? a.created_at_original)
-                    : activeColumn === 'updatedAt'
-                    ? (a.updatedAt_original ?? a.updated_at_original)
-                    : activeColumn === 'agent_limit'
-                    ? a.agent_limit_original
-                    : activeColumn === 'created_by'
-                    ? a.created_by_original
-                    : activeColumn === 'updated_by'
-                    ? a.updated_by_original
-                    : a[activeColumn];
-                const valueB = activeColumn === 'name'
-                    ? b.actualName
-                    : activeColumn === 'createdAt'
-                    ? (b.createdAt_original ?? b.created_at_original)
-                    : activeColumn === 'updatedAt'
-                    ? (b.updatedAt_original ?? b.updated_at_original)
-                    : activeColumn === 'agent_limit'
-                    ? b.agent_limit_original
-                    : activeColumn === 'created_by'
-                    ? b.created_by_original
-                    : activeColumn === 'updated_by'
-                    ? b.updated_by_original
-                    : b[activeColumn];
+        if (!sorting || !activeColumn) return data;
 
-                // Explicit numeric sorting for usage or cost
-                if (activeColumn === 'usage') {
-                    // Sort by cost value when usage column is active
-                    const costA = (a.cost && typeof a.cost === 'string') ? Number(a.cost.replace(/[^0-9.-]+/g, '')) : 0;
-                    const costB = (b.cost && typeof b.cost === 'string') ? Number(b.cost.replace(/[^0-9.-]+/g, '')) : 0;
-                    return ascending ? costA - costB : costB - costA;
-                }
-                
-                // Keep original sorting for totalTokens column for backward compatibility
-                if (activeColumn === 'totalTokens') {
-                    const usageA = Number(a.totalTokens ?? 0);
-                    const usageB = Number(b.totalTokens ?? 0);
-                    return ascending ? usageA - usageB : usageB - usageA;
-                }
-                
-                // Numeric sorting for agent_limit column
-                if (activeColumn === 'agent_limit') {
-                    const limitA = Number(a.agent_limit_original ?? 0);
-                    const limitB = Number(b.agent_limit_original ?? 0);
-                    return ascending ? limitA - limitB : limitB - limitA;
-                }
-                
-                // Special handling for date columns (last_used, created_at, createdAt)
-                if (['last_used', 'created_at', 'createdAt', 'updated_at', 'updatedAt'].includes(activeColumn)) {
-                    const getOriginalTimestamp = (row) => {
-                        switch (activeColumn) {
-                            case 'last_used':
-                                return row.last_used_original || row.last_used_orignal;
-                            case 'createdAt':
-                                return row.createdAt_original ?? row.created_at_original;
-                            case 'created_at':
-                                return row.created_at_original;
-                            case 'updatedAt':
-                                return row.updatedAt_original ?? row.updated_at_original;
-                            case 'updated_at':
-                                return row.updated_at_original;
-                            default:
-                                return null;
+        return [...data].sort((a, b) => {
+            // Find column definition to check for custom sorter
+            const colDef = normalizedColumns.find(c => c.key === activeColumn);
+            if (colDef?.sorter) {
+                const res = colDef.sorter(a, b);
+                return ascending ? res : -res;
+            }
+
+            // Legacy/Default Sorting Logic
+            let valueA = a[activeColumn];
+            let valueB = b[activeColumn];
+
+            // Handle specific legacy cases if not using custom columns with sorters
+            if (activeColumn === 'name') {
+                valueA = a.actualName || a.name;
+                valueB = b.actualName || b.name;
+            }
+
+            // Handle usage and cost columns that might have complex data
+            if (activeColumn === 'totalTokens') {
+                // Extract numeric value from formatted strings or use raw value
+                const extractNumeric = (val) => {
+                    if (typeof val === 'string') {
+                        if (val === 'Loading...' || val === '-') return 0;
+                        return parseFloat(val.replace(/[^0-9.-]/g, '')) || 0;
+                    }
+                    return parseFloat(val) || 0;
+                };
+                valueA = extractNumeric(valueA);
+                valueB = extractNumeric(valueB);
+            }
+
+            if (activeColumn === 'cost' || activeColumn === 'agent_usage' || activeColumn === 'agent_limit') {
+                // Extract numeric value from cost strings like "$0.0012" or "0.0012"
+                const extractCost = (val) => {
+                    if (typeof val === 'string') {
+                        if (val === 'Loading...' || val === '-') return 0;
+                        return parseFloat(val.replace(/[$,]/g, '')) || 0;
+                    }
+                    return parseFloat(val) || 0;
+                };
+                valueA = extractCost(valueA);
+                valueB = extractCost(valueB);
+            }
+
+            // Handle created_by and updated_by columns that have original values
+            if (activeColumn === 'created_by' || activeColumn === 'updated_by') {
+                valueA = a[`${activeColumn}_original`] || '';
+                valueB = b[`${activeColumn}_original`] || '';
+            }
+
+            // Handle averageResponseTime column
+            if (activeColumn === 'averageResponseTime') {
+                const extractResponseTime = (val) => {
+                    if (typeof val === 'string') {
+                        if (val.includes('Not used')) return 0;
+                        const match = val.match(/([0-9.]+)/);
+                        return match ? parseFloat(match[1]) : 0;
+                    }
+                    if (typeof val === 'object' && val?.props?.children) {
+                        // Handle React component with text content
+                        const text = val.props.children;
+                        if (typeof text === 'string') {
+                            if (text.includes('Not used')) return 0;
+                            const match = text.match(/([0-9.]+)/);
+                            return match ? parseFloat(match[1]) : 0;
                         }
-                    };
-                    // Use original timestamp values for sorting if available
-                    const originalA = getOriginalTimestamp(a);
-                    const originalB = getOriginalTimestamp(b);
-                    
-                    // Handle null/undefined values - put them at the bottom
-                    if (!originalA && !originalB) return 0;
-                    if (!originalA) return 1;
-                    if (!originalB) return -1;
-                    
-                    // Convert to Date objects for proper sorting
-                    const dateA = new Date(originalA);
-                    const dateB = new Date(originalB);
-                    
-                    return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
-                }
-                
-                if (typeof valueA === 'string' && typeof valueB === 'string') {
-                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
-                }
-                
-                if (typeof valueA === 'number' && typeof valueB === 'number') {
-                    return ascending ? valueA - valueB : valueB - valueA;
-                }
-                
-                if (valueA === "-") return ascending ? -1 : 1;
-                if (valueB === "-") return ascending ? 1 : -1;
-                
-                if (valueA < valueB) return ascending ? -1 : 1;
-                if (valueA > valueB) return ascending ? 1 : -1;
-                return 0;
-            });
-        }
-        return data;
-    }, [data, sorting, activeColumn, ascending]);
+                    }
+                    return parseFloat(val) || 0;
+                };
+                valueA = extractResponseTime(valueA);
+                valueB = extractResponseTime(valueB);
+            }
 
-    const sortByColumn = (column) => {
-        if (!sorting || !sortableColumns.includes(column)) return;
+            // Handle React components or objects by extracting text content
+            if (typeof valueA === 'object' && valueA !== null && !Array.isArray(valueA)) {
+                // Try to extract text content from React components
+                if (valueA.props && valueA.props.children) {
+                    valueA = typeof valueA.props.children === 'string' ? valueA.props.children : '';
+                } else {
+                    valueA = '';
+                }
+            }
+            if (typeof valueB === 'object' && valueB !== null && !Array.isArray(valueB)) {
+                // Try to extract text content from React components
+                if (valueB.props && valueB.props.children) {
+                    valueB = typeof valueB.props.children === 'string' ? valueB.props.children : '';
+                } else {
+                    valueB = '';
+                }
+            }
 
-        if (activeColumn === column) {
-            // Toggle sorting direction
+            // Handle usage column (which is used as a key for combined usage display)
+            if (activeColumn === 'usage') {
+                // Sort by cost value since usage is a combined display
+                const getCostValue = (row) => {
+                    const cost = row.cost;
+                    if (typeof cost === 'string') {
+                        if (cost === 'Loading...' || cost === '-') return 0;
+                        return parseFloat(cost.replace(/[$,]/g, '')) || 0;
+                    }
+                    return parseFloat(cost) || 0;
+                };
+                const costA = getCostValue(a);
+                const costB = getCostValue(b);
+                return ascending ? costA - costB : costB - costA;
+            }
+
+            // Date handling
+            if (['last_used', 'created_at', 'createdAt', 'updated_at', 'updatedAt'].includes(activeColumn)) {
+                const getDate = (row) => {
+                    // Try multiple field variations to handle typos and different naming conventions
+                    return row[`${activeColumn}_original`] || 
+                           row[`${activeColumn}_orignal`] || 
+                           row[activeColumn];
+                };
+                const dateA = new Date(getDate(a) || 0);
+                const dateB = new Date(getDate(b) || 0);
+                return ascending ? dateA - dateB : dateB - dateA;
+            }
+
+            // String comparison
+            if (typeof valueA === 'string' && typeof valueB === 'string') {
+                return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+            }
+
+            // Number comparison
+            if (typeof valueA === 'number' && typeof valueB === 'number') {
+                return ascending ? valueA - valueB : valueB - valueA;
+            }
+
+            // Null/Undefined handling
+            if (!valueA && valueA !== 0) return 1;
+            if (!valueB && valueB !== 0) return -1;
+
+            if (valueA < valueB) return ascending ? -1 : 1;
+            if (valueA > valueB) return ascending ? 1 : -1;
+            return 0;
+        });
+    }, [data, sorting, activeColumn, ascending, normalizedColumns]);
+
+    const sortByColumn = (columnKey) => {
+        if (!sorting) return;
+        const colDef = normalizedColumns.find(c => c.key === columnKey);
+        if (colDef && colDef.sortable === false) return; // Explicitly not sortable
+        // Legacy check
+        if (!colDef && sortingColumns.length > 0 && !sortingColumns.includes(columnKey)) return;
+
+        if (activeColumn === columnKey) {
             setAscending(!ascending);
         } else {
-            // Set new sorting column
-            setActiveColumn(column);
+            setActiveColumn(columnKey);
             setAscending(true);
         }
     };
 
     const toggleSelectAll = () => {
         setSelectAll(!selectAll);
-        setSelectedRows(!selectAll ? sortedData.map((item) => item.id || item._id) : []);
-        if (handleRowSelection) {
-            handleRowSelection(!selectAll ? sortedData.map((item) => item.id || item._id) : []);
-        }
+        const ids = !selectAll ? sortedData.map(item => item.id || item._id) : [];
+        setInternalSelectedRows(ids);
+        if (handleRowSelection) handleRowSelection(ids);
     };
 
     const toggleSelectRow = (id) => {
-        setSelectedRows((prevSelectedRows) => {
-            const newSelectedRows = prevSelectedRows.includes(id)
-                ? prevSelectedRows.filter((rowId) => rowId !== id)
-                : [...prevSelectedRows, id];
-            if (handleRowSelection) {
-                handleRowSelection(newSelectedRows);
-            }
-            return newSelectedRows;
-        });
+        const newSelection = internalSelectedRows.includes(id)
+            ? internalSelectedRows.filter(rowId => rowId !== id)
+            : [...internalSelectedRows, id];
+        setInternalSelectedRows(newSelection);
+        if (handleRowSelection) handleRowSelection(newSelection);
     };
 
-    // Function to get value from row (handling undefined)
-    const getDisplayValue = (row, column) => {
-        // Handle the special usage column by combining tokens and cost
-        if (column === 'usage') {
-            return customRenderUsageCell ? customRenderUsageCell(row) : (row.totalTokens || "-");
+    const getDisplayValue = (row, colDef) => {
+        // If colDef has a render function, use it
+        if (colDef.render) {
+            return colDef.render(row);
         }
-        
-        if (row[column] === undefined) return "not available";
 
-        if (keysToWrap.includes(column) && row[column] && typeof row[column] === 'string') {
-            return row[column].length > 30 ? `${row[column].substring(0, 30)}...` : row[column];
+        // Legacy special handling fallback
+        if (colDef.key === 'usage' && customRenderUsageCell) {
+            return customRenderUsageCell(row);
         }
-        
-        return row[column] || String(row[column]) || "-";
-    };
-    
-    // Sorting controls to display only in card view
-    const renderSortingControls = () => {
-        if (!sorting || sortableColumns.length === 0 || !isSmallScreen) return null;
-        
-        return (
-            <div className="flex flex-wrap items-center gap-2 mb-3 p-2">
-                <div className="font-medium text-base-content mr-2">Sort by:</div>
-                {sortableColumns.map(column => (
-                    <button
-                        key={column}
-                        onClick={() => sortByColumn(column)}
-                        className={`btn btn-sm btn-outline capitalize ${activeColumn === column ? 'btn-primary' : ''}`}
-                    >
-                        <span>{customGetColumnLabel ? customGetColumnLabel(column) : formatColumnName(column)}</span>
-                        {activeColumn === column && (
-                            <MoveDownIcon 
-                                className={`ml-1 w-4 h-4 ${ascending ? 'rotate-180' : 'rotate-0'}`}
-                            />
-                        )}
-                    </button>
-                ))}
-            </div>
-        );
+
+        const val = row[colDef.key];
+        if (val === undefined || val === null) return "-";
+
+        // Wrap long text
+        if (keysToWrap.includes(colDef.key) && typeof val === 'string' && val.length > 30) {
+            return `${val.substring(0, 30)}...`;
+        }
+
+        return val;
     };
 
-    // Render cards for mobile view
-    const renderCardView = () => {
-        return (
-            <>
-                {renderSortingControls()}
-                <div className="grid grid-cols-1 gap-4">
-                    {sortedData?.length > 0 ? (
-                        sortedData.map((row, index) => (
-                            <div 
-                                key={row.id || row?._id || index}
-                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all group ${
-                                    row.isLoading ? 'opacity-60 cursor-wait' : ''
-                                }`}
-                                onClick={() => handleRowClick(
-                                    keysToExtractOnRowClick.reduce((acc, key) => {
-                                        acc[key] = row[key];
-                                        return acc;
-                                    }, {})
-                                )}
-                            >
-                                {/* Card Header with selection */}
-                                {showRowSelection && (
-                                    <div className="flex items-center mb-3">
-                                        <input
-                                            type="checkbox"
-                                            className="h-4 w-4 cursor-pointer mr-3"
-                                            checked={selectedRows.includes(row.id || row['_id'])}
-                                            onChange={(e) => {
-                                                e.stopPropagation();
-                                                toggleSelectRow(row.id || row['_id']);
-                                            }}
-                                        />
-                                        <span className="text-sm text-base-content/70">Select</span>
-                                    </div>
-                                )}
-                                
-                                {/* Card Body */}
-                                <div className="space-y-3">
-                                    {visibleColumns.map((column) => (
-                                        <div key={column}>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium text-base-content/70 capitalize">
-                                                    {customGetColumnLabel ? customGetColumnLabel(column) : formatColumnName(column)}:
-                                                </span>
-                                                <span className="text-base-content mt-1">
-                                                    {getDisplayValue(row, column)}
-                                                </span>
-                                            </div>
-                                            {column !== visibleColumns[visibleColumns.length - 1] && (
-                                                <div className="border-t border-base-200 my-2" />
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                
-                                {/* Card Actions */}
-                                {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        {endComponent({row: row})}
-                                    </div>
-                                )}
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-left py-6 bg-base-100 shadow-sm">
-                            <p className="text-base-content/70">No data available</p>
-                        </div>
-                    )}
-                </div>
-            </>
-        );
-    };
-
-    // Render table view for desktop
     const renderTableView = () => {
-        const tableClass = viewportWidth < 1024 ? "table-compact" : "";
-
         return (
-            <div className="overflow-visible relative z-50 border border-base-300 rounded-lg" style={{ display: 'inline-block', minWidth: '50%', width: 'auto' }}>
-                <table className={`table ${tableClass} bg-base-100 shadow-md overflow-visible relative z-50 border-collapse`} style={{tableLayout: 'auto', width: '100%'}}>
+            <div className="overflow-x-auto relative z-30 w-full mb-6">
+                <table className="table table-sm bg-base-100 shadow-md w-auto border-collapse" style={{ tableLayout: 'auto' }}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
-                            {showRowSelection &&
-                                <th className="px-4 py-2 text-left">
+                            {/* Checkbox Column */}
+                            {showRowSelection && (
+                                <th className="px-4 py-2 w-10">
                                     <input
                                         type="checkbox"
                                         className="h-4 w-4 cursor-pointer"
@@ -319,94 +294,127 @@ const CustomTable = ({
                                         onChange={toggleSelectAll}
                                     />
                                 </th>
-                            }
-                            {visibleColumns.map((column) => {
-                                const isSortable = sorting && sortableColumns.includes(column);
+                            )}
 
+                            {/* Expand Column */}
+                            {expandable && (
+                                <th className="px-2 py-2 w-10"></th>
+                            )}
+
+                            {/* Data Columns */}
+                            {normalizedColumns.map((col) => {
+                                const isSortable = sorting && col.sortable !== false;
                                 return (
                                     <th
-                                        key={column}
-                                        className="px-4 py-2 text-left whitespace-nowrap capitalize"
+                                        key={col.key}
+                                        className={`px-3 py-2 text-left whitespace-nowrap capitalize ${col.width || ''}`}
                                     >
-                                        <div className="flex items-center justify-start gap-2">
-                                            {isSortable && (
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className={`select-none ${isSortable ? 'cursor-pointer hover:text-primary' : ''}`}
+                                                onClick={() => isSortable && sortByColumn(col.key)}
+                                            >
+                                                {col.title}
+                                            </span>
+                                            {isSortable && activeColumn === col.key && (
                                                 <MoveDownIcon
-                                                    className={`w-4 h-4 cursor-pointer ${activeColumn === column
-                                                        ? "text-black"
-                                                        : "text-[#BCBDBE] group-hover:text-black"
-                                                    } ${ascending ? "rotate-180" : "rotate-0"}`}
-                                                    onClick={() => sortByColumn(column)}
+                                                    className={`w-4 h-4 transition-transform ${ascending ? 'rotate-180' : ''}`}
                                                 />
                                             )}
-                                            <span
-                                                className={`${isSortable ? "cursor-pointer" : "cursor-default"} capitalize`}
-                                                onClick={() => (isSortable ? sortByColumn(column) : undefined)}
-                                            >
-                                                {customGetColumnLabel ? customGetColumnLabel(column) : formatColumnName(column)}
-                                            </span>
                                         </div>
                                     </th>
                                 );
                             })}
-                            {endComponent && <th className="px-4 py-2 text-center"><div className="flex items-center justify-center">Actions</div></th>}
+
+                            {/* Legacy End Component / Actions */}
+                            {endComponent && (
+                                <th className="px-4 py-2 text-center">Actions</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
-                        {sortedData?.length > 0 ? (
-                            sortedData?.map((row, index) => (
-                                <tr 
-                                    key={row.id || row?._id || index} 
-                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors z-40 cursor-pointer group ${
-                                        row.isLoading ? 'opacity-60 cursor-wait' : ''
-                                    }`}
-                                    onClick={() =>
-                                        handleRowClick(
-                                            keysToExtractOnRowClick.reduce((acc, key) => {
-                                                acc[key] = row[key];
-                                                return acc;
-                                            }, {})
-                                        )
-                                    }
-                                >
-                                    {showRowSelection &&
-                                        <td className="px-4 py-2 text-left">
-                                            <input
-                                                type="checkbox"
-                                                className="h-4 w-4 cursor-pointer"
-                                                checked={selectedRows.includes(row.id || row['_id'])}
-                                                onChange={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleSelectRow(row.id || row['_id']);
-                                                }}
-                                            />
-                                        </td>
-                                    }
-                                    {visibleColumns?.map((column) => (
-                                        <td
-                                            key={column}
-                                            className={`px-4 py-2 text-left whitespace-nowrap ${
-                                                ['last_used', 'created_at', 'createdAt', 'updated_at', 'updatedAt'].includes(column)
-                                                    ? 'w-40 min-w-40 max-w-40'
-                                                    : ''
-                                            }`}
+                        {sortedData.length > 0 ? (
+                            sortedData.map((row, index) => {
+                                const id = row.id || row._id || row.collection_id || index;
+                                const isExpanded = !!currentExpandedRows[id];
+                                return (
+                                    <React.Fragment key={id}>
+                                        <tr
+                                            className={`border-b border-base-300 hover:bg-base-200/60 transition-colors cursor-pointer ${row.isLoading ? 'opacity-60 cursor-wait' : ''
+                                                }`}
+                                            onClick={(e) => {
+                                                if (expandable && !e.target.closest('button') && !e.target.closest('input')) {
+                                                    // Optional: Click row to expand? 
+                                                    // toggleRowExpansion(id, e);
+                                                }
+                                                handleRowClick && handleRowClick(row);
+                                            }}
                                         >
-                                            {getDisplayValue(row, column)}
-                                        </td>
-                                    ))}
-                                    {endComponent && (
-                                        <td className="px-4 py-2 text-left relative">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative z-50">
-                                                {endComponent({row: row})}
-                                            </div>
-                                        </td>
-                                    )}
-                                </tr>
-                            ))
+                                            {/* Selection Checkbox */}
+                                            {showRowSelection && (
+                                                <td className="px-4 py-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="h-4 w-4 cursor-pointer"
+                                                        checked={internalSelectedRows.includes(id)}
+                                                        onChange={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleSelectRow(id);
+                                                        }}
+                                                    />
+                                                </td>
+                                            )}
+
+                                            {/* Expand Button */}
+                                            {expandable && (
+                                                <td className="px-2 py-2 text-center">
+                                                    <button
+                                                        className="btn btn-ghost btn-xs p-0 w-6 h-6 min-h-0"
+                                                        onClick={(e) => toggleRowExpansion(id, e)}
+                                                    >
+                                                        <ChevronRightIcon
+                                                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+                                                        />
+                                                    </button>
+                                                </td>
+                                            )}
+
+                                            {/* Data Cells */}
+                                            {normalizedColumns.map((col) => (
+                                                <td key={col.key} className="px-3 py-2 text-left">
+                                                    {getDisplayValue(row, col)}
+                                                </td>
+                                            ))}
+
+                                            {/* Actions */}
+                                            {endComponent && (
+                                                <td className="px-4 py-2 text-center">
+                                                    <div className="flex items-center justify-center">
+                                                        {endComponent({ row })}
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </tr>
+
+                                        {/* Expanded Row Content */}
+                                        {expandable && isExpanded && (
+                                            <tr className="bg-base-200/30 border-b border-base-300">
+                                                <td
+                                                    colSpan={normalizedColumns.length + (showRowSelection ? 1 : 0) + (expandable ? 1 : 0) + (endComponent ? 1 : 0)}
+                                                    className="px-6 py-4 cursor-default"
+                                                >
+                                                    {renderExpandedRow ? renderExpandedRow(row) : null}
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })
                         ) : (
                             <tr>
                                 <td
-                                    colSpan={visibleColumns.length + (showRowSelection ? 1 : 0) + (endComponent ? 1 : 0)}
-                                    className="px-4 py-4 text-left"
+                                    colSpan={normalizedColumns.length + (showRowSelection ? 1 : 0) + (expandable ? 1 : 0) + (endComponent ? 1 : 0)}
+                                    className="px-4 py-8 text-center text-gray-500"
                                 >
                                     No data available
                                 </td>
@@ -418,11 +426,68 @@ const CustomTable = ({
         );
     };
 
-    
+    // Card View for Mobile (simplified for now, can be expanded to use generic columns)
+    const renderCardView = () => (
+        <div className="grid grid-cols-1 gap-4">
+            {sortedData.map((row, index) => {
+                const id = row.id || row._id || row.collection_id || index;
+                return (
+                    <div key={id} className="bg-base-100 border border-base-300 rounded-lg p-4 shadow-sm">
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-2">
+                            {showRowSelection && (
+                                <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-sm"
+                                    checked={internalSelectedRows.includes(id)}
+                                    onChange={() => toggleSelectRow(id)}
+                                />
+                            )}
+                            {/* Primary Identifier (usually first column) */}
+                            <div className="font-bold">{getDisplayValue(row, normalizedColumns[0])}</div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="space-y-2 text-sm">
+                            {normalizedColumns.slice(1).map(col => (
+                                <div key={col.key} className="flex justify-between">
+                                    <span className="text-gray-500">{col.title}:</span>
+                                    <span>{getDisplayValue(row, col)}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Actions */}
+                        {endComponent && (
+                            <div className="mt-4 pt-2 border-t border-base-200 flex justify-end">
+                                {endComponent({ row })}
+                            </div>
+                        )}
+
+                        {/* Expansion in Card View */}
+                        {expandable && (
+                            <div className="mt-2 text-center">
+                                <button
+                                    className="btn btn-ghost btn-xs w-full"
+                                    onClick={(e) => toggleRowExpansion(id, e)}
+                                >
+                                    {currentExpandedRows[id] ? "Hide Details" : "Show Details"}
+                                </button>
+                                {currentExpandedRows[id] && (
+                                    <div className="mt-2 pt-2 text-left border-t border-base-200">
+                                        {renderExpandedRow ? renderExpandedRow(row) : null}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
 
     return (
-        <div className="bg-base-100 p-2 md:p-4 overflow-x-auto overflow-y-visible">
-            {/* Responsive view switching */}
+        <div className="w-full">
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>
     );

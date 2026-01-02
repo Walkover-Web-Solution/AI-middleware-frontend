@@ -220,8 +220,8 @@ const renderCreatedByCell = (createdBy, timestamp) => {
   // If no timestamp, just show the user name without hover behavior
   if (!timestamp) {
     return (
-      <div className="w-[120px]">
-        <span title={createdBy} className="truncate block flex-1">
+      <div className="w-[120px] min-w-[120px] max-w-[120px]">
+        <span title={createdBy} className="truncate block">
           {createdBy}
         </span>
       </div>
@@ -230,11 +230,11 @@ const renderCreatedByCell = (createdBy, timestamp) => {
 
   // If timestamp exists, show user name with date on hover
   return (
-    <div className="group cursor-help w-[120px]">
-      <span title={createdBy} className="group-hover:hidden  truncate block flex-1">
+    <div className="group cursor-help w-[120px] min-w-[120px] max-w-[120px]">
+      <span title={createdBy} className="group-hover:hidden truncate block">
         {createdBy}
       </span>
-      <span title={createdBy} className="hidden group-hover:inline">
+      <span title={formatDate(timestamp)} className="hidden group-hover:block truncate text-xs">
         {formatDate(timestamp)}
       </span>
     </div>
@@ -249,8 +249,8 @@ const renderUpdatedByCell = (updatedBy, timestamp) => {
   // If no timestamp, just show the user name without hover behavior
   if (!timestamp) {
     return (
-      <div className="w-[120px]">
-        <span title={updatedBy} className="truncate block flex-1">
+      <div className="w-[120px] min-w-[120px] max-w-[120px]">
+        <span title={updatedBy} className="truncate block">
           {updatedBy}
         </span>
       </div>
@@ -259,11 +259,11 @@ const renderUpdatedByCell = (updatedBy, timestamp) => {
 
   // If timestamp exists, show user name with date on hover
   return (
-    <div className="group cursor-help w-[120px]">
-      <span title={updatedBy} className="group-hover:hidden truncate block flex-1">
+    <div className="group cursor-help w-[120px] min-w-[120px] max-w-[120px]">
+      <span title={updatedBy} className="group-hover:hidden truncate block">
         {updatedBy}
       </span>
-      <span title={updatedBy} className="hidden group-hover:inline">
+      <span title={formatDate(timestamp)} className="hidden group-hover:block truncate text-xs">
         {formatDate(timestamp)}
       </span>
     </div>
@@ -493,11 +493,11 @@ function Home({ params, searchParams, isEmbedUser }) {
     if (!timestamp) return <EmptyCell />;
 
     return (
-      <div className="group cursor-help">
-        <span className="group-hover:hidden">
+      <div className="group cursor-help w-[100px] min-w-[100px] max-w-[100px]">
+        <span className="group-hover:hidden block truncate">
           {formatRelativeTime(timestamp)}
         </span>
-        <span className="hidden group-hover:inline">
+        <span className="hidden group-hover:block truncate text-xs">
           {formatDate(timestamp)}
         </span>
       </div>
