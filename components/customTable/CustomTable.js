@@ -45,7 +45,6 @@ const CustomTable = ({
     const [ascending, setAscending] = useState(true);
     const [selectAll, setSelectAll] = useState(false);
     const [isSmallScreen, setIsSmallScreen] = useState(false);
-    const [viewportWidth, setViewportWidth] = useState(0);
 
     const isControlledExpansion = !!onRowExpand;
     const currentExpandedRows = isControlledExpansion

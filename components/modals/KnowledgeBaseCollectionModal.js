@@ -4,13 +4,13 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal } from "@/utils/utility";
+import { closeModal, RequiredItem } from "@/utils/utility";
 import { createCollectionAction } from "@/store/action/knowledgeBaseAction";
 
 const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
     const dispatch = useDispatch();
     const [isCreatingCollection, setIsCreatingCollection] = useState(false);
-    const [chunkingType, setChunkingType] = useState('recursive');
+    const [chunkingType, setChunkingType] = useState('none');
 
     const denseModelOptions = [
         "BAAI/bge-large-en-v1.5",
@@ -27,15 +27,26 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
         event.preventDefault();
         setIsCreatingCollection(true);
         const formData = new FormData(event.target);
+        const chunkingTypeValue = formData.get("chunkingType");
+        
+        const sparseModelValue = formData.get("sparseModel");
+        const rerankerModelValue = formData.get("rerankerModel");
+        
         const payload = {
             name: (formData.get("name") || "").trim(),
             settings: {
                 denseModel: formData.get("denseModel"),
-                sparseModel: formData.get("sparseModel") || null,
-                rerankerModel: formData.get("rerankerModel") || null,
-                chunkSize: Number(formData.get("chunkSize")) || 0,
-                chunkOverlap: Number(formData.get("chunkOverlap")) || 0,
-                chunkingType: formData.get("chunkingType"),
+                ...(sparseModelValue && sparseModelValue.trim() !== "" && {
+                    sparseModel: sparseModelValue,
+                }),
+                ...(rerankerModelValue && rerankerModelValue.trim() !== "" && {
+                    rerankerModel: rerankerModelValue,
+                }),
+                ...(chunkingTypeValue !== 'none' && {
+                    chunkSize: Number(formData.get("chunkSize")) || 0,
+                    chunkOverlap: Number(formData.get("chunkOverlap")) || 0,
+                    chunkingType: chunkingTypeValue,
+                }),
             },
         };
 
@@ -47,9 +58,11 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
             denseModel: normalizeValue(settings?.denseModel),
             sparseModel: normalizeValue(settings?.sparseModel),
             rerankerModel: normalizeValue(settings?.rerankerModel),
-            chunkSize: Number(settings?.chunkSize) || 0,
-            chunkOverlap: Number(settings?.chunkOverlap) || 0,
-            chunkingType: normalizeValue(settings?.chunkingType),
+            ...(settings?.chunkingType && settings.chunkingType !== 'none' && {
+                chunkSize: Number(settings?.chunkSize) || 0,
+                chunkOverlap: Number(settings?.chunkOverlap) || 0,
+                chunkingType: normalizeValue(settings?.chunkingType),
+            }),
         });
 
         // Check duplicates locally before dispatching
@@ -60,9 +73,9 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                 existing.denseModel === targetSettings.denseModel &&
                 existing.sparseModel === targetSettings.sparseModel &&
                 existing.rerankerModel === targetSettings.rerankerModel &&
-                existing.chunkSize === targetSettings.chunkSize &&
-                existing.chunkOverlap === targetSettings.chunkOverlap &&
-                existing.chunkingType === targetSettings.chunkingType
+                (existing.chunkSize || 0) === (targetSettings.chunkSize || 0) &&
+                (existing.chunkOverlap || 0) === (targetSettings.chunkOverlap || 0) &&
+                (existing.chunkingType || null) === (targetSettings.chunkingType || null)
             );
         });
         if (hasDuplicate) {
@@ -81,7 +94,7 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
 
     return (
         <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_COLLECTION_MODAL}>
-            <div className="modal-box w-11/12 max-w-xl border-2 border-base-300">
+            <div className="modal-box w-11/12 max-w-4xl border-2 border-base-300">
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-base-300">
                     <h3 className="font-bold text-lg">Create Collection</h3>
                     <button
@@ -95,7 +108,7 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                 <form onSubmit={handleCreateCollection} className="space-y-4">
                     <div className="form-control">
                         <label className="label">
-                            <span className="label-text text-sm font-medium">Collection Name</span>
+                            <span className="label-text text-sm font-medium">Collection Name <RequiredItem /></span>
                         </label>
                         <input
                             type="text"
@@ -109,8 +122,10 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-sm font-medium">Dense Model</span>
+                            <label className="label items-start p-0 pb-2">
+                                <span className="label-text text-sm font-medium flex items-center flex-wrap">
+                                    Embedding Model <RequiredItem />
+                                </span>
                             </label>
                             <select
                                 name="denseModel"
@@ -119,15 +134,17 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                                 disabled={isCreatingCollection}
                                 defaultValue=""
                             >
-                                <option value="" disabled>Select dense model</option>
+                                <option value="" disabled>Select embedding model</option>
                                 {denseModelOptions.map((option) => (
                                     <option key={option} value={option}>{option}</option>
                                 ))}
                             </select>
                         </div>
                         <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-sm font-medium">Sparse Model</span>
+                            <label className="label items-start">
+                                <span className="label-text text-sm font-medium flex items-center flex-wrap">
+                                    Keyword Search Model <span className="badge badge-ghost badge-sm ml-2">Optional</span>
+                                </span>
                             </label>
                             <select
                                 name="sparseModel"
@@ -135,15 +152,17 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                                 disabled={isCreatingCollection}
                                 defaultValue=""
                             >
-                                <option value="">Select sparse model</option>
+                                <option value="">Select keyword search model</option>
                                 {sparseModelOptions.map((option) => (
                                     <option key={option} value={option}>{option}</option>
                                 ))}
                             </select>
                         </div>
                         <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-sm font-medium">Reranker Model</span>
+                            <label className="label items-start">
+                                <span className="label-text text-sm font-medium flex items-center flex-wrap">
+                                    Result Ranking Model <span className="badge badge-ghost badge-sm ml-2">Optional</span>
+                                </span>
                             </label>
                             <select
                                 name="rerankerModel"
@@ -151,7 +170,7 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                                 disabled={isCreatingCollection}
                                 defaultValue=""
                             >
-                                <option value="">Select reranker model</option>
+                                <option value="">Select result ranking model</option>
                                 {rerankerModelOptions.map((option) => (
                                     <option key={option} value={option}>{option}</option>
                                 ))}
@@ -171,24 +190,27 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                                 value={chunkingType}
                                 onChange={(e) => setChunkingType(e.target.value)}
                             >
+                                <option value="none">None</option>
                                 <option value="recursive">Recursive</option>
                                 <option value="semantic">Semantic</option>
                             </select>
                         </div>
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text text-sm font-medium">Chunk Size</span>
-                            </label>
-                            <input
-                                type="number"
-                                name="chunkSize"
-                                className="input input-bordered input-sm"
-                                min={1}
-                                required
-                                defaultValue={1000}
-                                disabled={isCreatingCollection}
-                            />
-                        </div>
+                        {chunkingType !== 'none' && (
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text text-sm font-medium">Chunk Size</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="chunkSize"
+                                    className="input input-bordered input-sm"
+                                    min={1}
+                                    required
+                                    defaultValue={1000}
+                                    disabled={isCreatingCollection}
+                                />
+                            </div>
+                        )}
                         {chunkingType === 'semantic' && (
                             <div className="form-control">
                                 <label className="label">
@@ -206,6 +228,7 @@ const KnowledgeBaseCollectionModal = ({ collections = [] }) => {
                             </div>
                         )}
                     </div>
+                    
                     <div className="flex justify-end gap-2">
                         <button
                             type="button"
