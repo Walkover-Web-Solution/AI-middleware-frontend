@@ -79,32 +79,6 @@ export const applyThemeObject = (theme) => {
   return theme;
 };
 
-const loadThemeFromFile = async (path) => {
-  if (typeof window === "undefined") return null;
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch theme file: ${path} (${response.status})`);
-  }
-  const theme = await response.json();
-  return applyThemeObject(theme);
-};
-
-export const loadDefaultTheme = () =>
-  loadThemeFromFile("/themes/default-user-theme.json");
-
-export const loadEmbedTheme = (customPath) =>
-  loadThemeFromFile(customPath);
-
-export const initTheme = async ({ userType = "default", customThemePath = null } = {}) => {
-  if (userType === "embed") {
-    return loadEmbedTheme(customThemePath);
-  }
-  return loadDefaultTheme();
-};
-
 export default {
-  loadDefaultTheme,
-  loadEmbedTheme,
-  initTheme,
   applyThemeObject,
 };
