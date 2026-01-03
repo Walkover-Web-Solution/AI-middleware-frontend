@@ -7,6 +7,7 @@ import ApiKeyInput from "../configurationComponent/ApiKeyInput";
 import { useConfigurationContext } from "../ConfigurationContext";
 import RecommendedModal from "../configurationComponent/RecommendedModal";
 import AdvancedParameters from "../configurationComponent/AdvancedParamenter";
+import FallbackModel from "../configurationComponent/FallbackModel";
 
 const ModelTab = () => {
   const {
@@ -20,6 +21,8 @@ const ModelTab = () => {
     showDefaultApikeys,
     isEmbedUser,
     hideAdvancedParameters,
+    hideAdvancedConfigurations,
+    bridgeType,
     isPublished,
     isEditor
   } = useConfigurationContext();
@@ -32,7 +35,7 @@ const ModelTab = () => {
   );
 
   return (
-    <div className="flex flex-col mt-4 w-full ml-2 px-2">
+    <div className="flex flex-col mt-4 w-full">
       {/* LLM Configuration Header */}
       <div className="mb-4 mt-2">
         <h3 className="text-base-content text-md font-medium">LLM Configuration</h3>
@@ -104,7 +107,7 @@ const ModelTab = () => {
         )}
         
         {/* Parameters Section with Border */}
-        <div className="border-t border-white/[0.08] pt-6">
+        <div className="border-t border-base-200 pt-6">
           <div className="mb-4">
             <h2 className="text-base-content text-md font-medium">Parameters</h2>
           </div>
@@ -124,6 +127,18 @@ const ModelTab = () => {
           />
         </div>
         </div>
+         {/* Fallback Model Section */}
+        {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
+          <div className="space-y-2">
+            <FallbackModel
+              params={params}
+              searchParams={searchParams}
+              bridgeType={bridgeType}
+              isPublished={isPublished}
+              isEditor={isEditor}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

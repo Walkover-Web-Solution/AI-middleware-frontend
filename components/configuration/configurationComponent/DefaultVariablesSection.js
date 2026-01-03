@@ -42,7 +42,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPub
                     )}
                     
                     <button 
-                        className="flex items-center gap-1 btn btn-xs text-xs bg-primary/20 ml-auto"
+                        className="flex items-center btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1 ml-auto"
                         onClick={(e) => {
                             e.stopPropagation();
                             toggleSidebar("variable-collection-slider", "right")
@@ -73,7 +73,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPub
                         <div className="space-y-2">
                             {defaultVariables.map((variable) => (
                                 <div key={variable.name} className="flex items-start gap-2">
-                                    <code className="text-xs bg-base-200 px-2 py-1 rounded text-primary font-mono">
+                                    <code className="text-xs bg-base-200 px-2 py-1 rounded text-base-content font-mono">
                                         {`{{${variable.name}}}`}
                                     </code>
                                     <span className="text-xs py-1 text-base-content/70">{variable.description}</span>

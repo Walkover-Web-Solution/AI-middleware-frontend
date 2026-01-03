@@ -2,7 +2,7 @@ const defaultTheme = require("./public/themes/default-user-theme.json");
 
 const shapeTokens = {
   "--rounded-box": "0.3rem",
-  "--rounded-btn": "0.3rem",
+  "--rounded-btn": "0.1rem",
   "--rounded-badge": "0.3rem",
   "--border-btn": "0.3px",
   "--tab-radius": "0.3rem",

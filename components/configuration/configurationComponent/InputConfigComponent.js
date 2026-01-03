@@ -145,6 +145,7 @@ const InputConfigComponent = memo(({
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
                 isPublished={isPublished}
                 isEditor={isEditor}
+                prompt={reduxPrompt}
             />
             
             <div className="form-control relative">

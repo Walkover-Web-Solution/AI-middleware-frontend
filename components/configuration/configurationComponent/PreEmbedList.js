@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark, Wrench } from 'lucide-react';
+import { CircleQuestionMark } from 'lucide-react';
 
 const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEmbedUser = false }) => {
     // Determine if content is read-only (either published or user is not an editor)
@@ -92,7 +92,7 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEm
         // Focus on the pre-tool dropdown to allow user to select a different pre-tool
         setTimeout(() => {
             // Look for the EmbedListSuggestionDropdownMenu dropdown - updated selector
-            const dropdown = document.querySelector('.dropdown-left');
+            const dropdown = document.querySelector('.dropdown-right');
             if (dropdown) {
                 // Find the dropdown content with tabIndex
                 const dropdownContent = dropdown.querySelector('ul[tabindex="0"]');
@@ -193,47 +193,47 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEm
                 />
 
                 <div className="w-full mt-4 gap-2 flex flex-col px-2 py-2 cursor-default">
-                    <div className="dropdown dropdown-left w-full flex items-center">
-                        <div className='flex justify-between w-full'>
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center gap-2">
-                                    <div className="bg-primary p-1.5 rounded-md">
-                                        <Wrench size={16} className="text-primary-content" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm whitespace-nowrap">Pre Tools</p>
-                                        <p className="text-xs text-gray-500">Prepare data before processing</p>
-                                    </div>
-                                </div>
-                                <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                                </InfoTooltip>
-                            </div>
-                            {bridgePreFunctions.length === 0 && (
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm whitespace-nowrap">Pre Functions</p> 
+                             <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        </InfoTooltip>                                    
+                        </div>
+                       
+                       
+                    </div>
+                    {bridgePreFunctions.length === 0 && (
+                        <div className="dropdown dropdown-end w-full max-w-md">
+                            <div className="border-2 border-base-200 border-dashed p-4 text-center">
+                                <p className="text-sm text-base-content/70">
+                                    No Pre Functions found.
+                                </p>
                                 <button
                                     tabIndex={0}
-                                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70"
+                                    className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                     disabled={isReadOnly}
                                 >
-                                    <AddIcon className="w-6 h-6" />
+                                    <AddIcon className="w-3 h-3" />
+                                    Add
                                 </button>
-                            )}
+                            </div>
+                            <EmbedListSuggestionDropdownMenu
+                                params={params}
+                                searchParams={searchParams}
+                                name={"preFunction"}
+                                hideCreateFunction={false}
+                                onSelect={onFunctionSelect}
+                                connectedFunctions={bridge_pre_tools}
+                                shouldToolsShow={true}
+                                modelName={model}
+                            />
                         </div>
-                        <EmbedListSuggestionDropdownMenu
-                            params={params}
-                            searchParams={searchParams}
-                            name={"preFunction"}
-                            hideCreateFunction={false}
-                            onSelect={onFunctionSelect}
-                            connectedFunctions={bridge_pre_tools}
-                            shouldToolsShow={true}
-                            modelName={model}
-                        />
-                    </div>
+                    )}
                     <div className="flex flex-col gap-2 w-full">    
                         {/* Render pre-tool cards */}
                         {bridgePreFunctions.length > 0 && (
-                            <div className="w-full">
+                            <div className="w-full max-w-md">
                                 <RenderEmbed
                                     isPublished={isPublished}
                                     isEditor={isEditor}
@@ -249,6 +249,20 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEm
                                     handleChangePreTool={handleChangePreTool}
                                     halfLength={1}
                                 />
+                                 {bridgePreFunctions.length > 0 && (
+                            <div className="dropdown dropdown-right">
+                                <EmbedListSuggestionDropdownMenu
+                                    params={params}
+                                    searchParams={searchParams}
+                                    name={"preFunction"}
+                                    hideCreateFunction={false}
+                                    onSelect={onFunctionSelect}
+                                    connectedFunctions={bridge_pre_tools}
+                                    shouldToolsShow={true}
+                                    modelName={model}
+                                />
+                            </div>
+                        )}
                             </div>
                         )}
                     </div>

@@ -36,7 +36,7 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
         }
     };
     return (
-        <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow p-4">
+        <div className="flex flex-col gap-4 p-4">
             <div>
                 <h3 className="text-lg font-semibold">Step 1</h3>
                 <p className="text-sm text-gray-600">Generate a JWT token</p>
