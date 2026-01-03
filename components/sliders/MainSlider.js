@@ -390,7 +390,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
         {!openDetails ? (
           <User size={16} className="text-base-content/60 mt-3  flex-shrink-0" />
         ) : (
-          <div className="shrink-0 w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer">
+          <div className="shrink-0 w-9 h-9 bg-primary flex items-center justify-center cursor-pointer">
             <span className="text-primary-content font-semibold text-sm">
               {getInitials(userdetailsfromOrg?.name || userdetails?.name || orgName)}
             </span>
@@ -424,7 +424,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
           
           {/* Current Organization - shown as selected */}
           {organizations?.[orgId] && (
-            <div className="w-full flex items-center cursor-pointer gap-3 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+            <div className="w-full flex items-center cursor-pointer gap-3 px-3 py-2 bg-primary/10 border border-primary/20">
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm text-primary truncate">{organizations[orgId].name}</div>
               </div>
@@ -525,7 +525,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
 
   if (openDetails) {
   return (
-    <div className="absolute top-23 right-2 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2 z-[9999]">
+    <div className="absolute top-23 right-2 mt-2 bg-base-100 border border-base-300 shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2 z-[9999]">
       {renderOrganizationDropdown()}
     </div>
   );
@@ -570,7 +570,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
         {isMobile && !isMobileVisible && (
           <button 
             onClick={handleMobileMenuToggle}
-            className="fixed top-3 left-2 w-8 h-8 bg-base-100 border border-base-300 rounded-lg flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
+            className="fixed top-3 left-2 w-8 h-8 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
           >
             <AlignJustify size={12} />
           </button>
@@ -580,7 +580,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar bg-base-300 border ${isMobile ? 'overflow-hidden' : ''} border-base-content/10 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar bg-base-100 border ${isMobile ? 'overflow-hidden' : ''} border-base-200 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} flex flex-col pb-5 ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
             transform: isMobile ? (isMobileVisible ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
@@ -593,7 +593,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
           {isMobile && isMobileVisible && (
             <button
               onClick={() => setIsMobileVisible(false)}
-              className="absolute -right-3 top-3 w-7 h-7 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
+              className="absolute -right-3 top-3 w-7 h-7 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
             >
               <ChevronLeft size={14} />
             </button>
@@ -603,7 +603,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
           {!isMobile && (
             <button
               onClick={handleToggle}
-              className="absolute -right-3 top-[50px] w-7 h-7 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
+              className="absolute -right-3 top-[50px] w-7 h-7 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
             >
               {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
             </button>
@@ -622,10 +622,10 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                 >
                   <button
                     onClick={handleOrgClick}
-                    className="w-full flex items-center gap-3 py-2 rounded-lg hover:bg-base-200 transition-colors"
+                    className="w-full flex items-center gap-3 py-2 hover:bg-base-200 transition-colors"
                   >
                     {/* First letter avatar */}
-                    <div className="shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <div className="shrink-0 w-8 h-8 bg-primary flex items-center justify-center">
                       <span className="text-primary-content font-semibold text-sm">
                         {orgName.charAt(0).toUpperCase()}
                       </span>
@@ -644,7 +644,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                   {/* Dropdown for collapsed sidebar */}
                   {isOrgDropdownOpen && !showSidebarContent && (
                     <div 
-                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2"
+                      className="absolute left-full top-0 ml-2 bg-base-100 border border-base-300 shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2"
                       onMouseEnter={() => {
                         // Clear timeout when hovering over dropdown
                         if (orgDropdownTimeout) {
@@ -660,7 +660,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
 
                   {/* Expanded dropdown for full sidebar - positioned from left edge */}
                   {isOrgDropdownExpanded && showSidebarContent && (
-                    <div className="absolute top-0 left-0 mt-2 bg-base-100 border border-base-300 rounded-lg shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
+                    <div className="absolute top-0 left-0 mt-2 bg-base-100 border border-base-300 shadow-lg p-2 w-[320px] z-50 animate-in fade-in-0 zoom-in-95 duration-200 slide-in-from-top-2">
                       {renderOrganizationDropdown()}
                     </div>
                   )}
@@ -715,7 +715,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                               }}
                               onMouseEnter={e => onItemEnter(key, e)}
                               onMouseLeave={onItemLeave}
-                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 ${
+                              className={`w-full flex items-center gap-3 py-2 px-3 transition-all duration-200 ${
                                 activeKey === key 
                                   ? 'bg-primary text-primary-content shadow-sm' 
                                   : 'hover:bg-base-200 text-base-content'
@@ -758,7 +758,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                           }}
                           onMouseEnter={e => onItemEnter(item.id, e)}
                           onMouseLeave={onItemLeave}
-                          className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 hover:bg-base-200 text-base-content ${!showSidebarContent ? 'justify-center' : ''}`}
+                          className={`w-full flex items-center gap-3 py-2 px-3 transition-all duration-200 hover:bg-base-200 text-base-content ${!showSidebarContent ? 'justify-center' : ''}`}
                         >
                           <div className="shrink-0">{item.icon}</div>
                           {showSidebarContent && (
@@ -774,14 +774,14 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
             </div>
 
             {/* Tutorial & Help Section */}
-            <div className="border-t border-base-content/20 p-2 rounded-t-lg ">
+            <div className="border-t border-base-content/20 p-2 ">
               <div className="">
                                 {/* Admin Settings Button */}
                 <button
                   onClick={handleAdminToggle}
                   onMouseEnter={e => onItemEnter('admin-toggle', e)}
                   onMouseLeave={onItemLeave}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                  className={`w-full flex items-center gap-3 p-2.5 transition-colors ${
                     isAdminMode 
                       ? 'bg-primary text-primary-content shadow-sm' 
                       : 'hover:bg-base-200 text-base-content'
@@ -796,12 +796,12 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                 </button>
                 <button
                   onClick={() => {
-                    openModal(MODAL_TYPE.TUTORIAL_MODAL);
+                    openModal(MODAL_TYPE.TUTORIAL);
                     if (isMobile) setIsMobileVisible(false);
                   }}
                   onMouseEnter={e => onItemEnter('tutorial', e)}
                   onMouseLeave={onItemLeave}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
+                  className={`w-full flex items-center gap-3 p-2.5 hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
                   {ITEM_ICONS.tutorial}
                   {showSidebarContent && <span className="text-xs truncate">Tutorial</span>}
@@ -816,14 +816,14 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                     }}
                     onMouseEnter={e => onItemEnter('lifetimeAccess', e)}
                     onMouseLeave={onItemLeave}
-                    className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-all duration-300 border-2 border-yellow-400/50 ${!showSidebarContent ? 'justify-center' : ''}`}
+                    className={`w-full flex items-center gap-3 p-2 hover:bg-base-200 transition-all duration-300 border-2 border-yellow-400/50 ${!showSidebarContent ? 'justify-center' : ''}`}
                   >
                     {/* Inner content */}
                     <div className="relative z-10 flex items-center gap-3 w-full">
                       <div className="relative">
                         {ITEM_ICONS.lifetimeAccess}
                         {/* Sparkle effect */}
-                        <div className="absolute -top-1 -right-1 w-1 h-1 bg-yellow-400 rounded-full animate-ping opacity-40"></div>
+                        <div className="absolute -top-1 -right-1 w-1 h-1 bg-yellow-400 animate-ping opacity-40"></div>
                       </div>
                       {showSidebarContent && (
                         <span className="text-xs truncate font-medium bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">

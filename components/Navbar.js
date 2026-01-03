@@ -354,7 +354,7 @@ const Navbar = ({ isEmbedUser, params }) => {
       {/* Main navigation header */}
       <div className={`sticky top-0 z-high transition-all duration-300 ${isScrolled
         ? 'bg-base-100/95 backdrop-blur-sm shadow-md border-b border-base-300'
-        : 'bg-base-100 shadow-sm border-b border-base-200 '
+        : 'bg-base-100 border-b border-base-200 '
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}
@@ -559,7 +559,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                       className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
                       disabled={isPublishing || isPublished}
                     >
-                      <span className="text-white text-sm truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
+                      <span className="text-white text-sm truncate">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                       {!isPublishing && <ChevronDown size={12} className="text-white" />}
                     </button>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow border border-base-200">
@@ -570,7 +570,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                           className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <BookCheck size={14} className="text-success" />
-                          <span>Configure and Publish</span>
+                          <span>Publish</span>
                         </button>
                       </li>
                       {isDrafted && publishedVersionId != null &&(
@@ -581,7 +581,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                             className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <RefreshCcw size={14} className="text-error" />
-                            <span>Revert to Published</span>
+                            <span>Revert</span>
                           </button>
                         </li>
                       )}
@@ -702,7 +702,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 disabled={isPublishing}
               >
                 {!isPublishing && <BookCheck size={12} className="text-black" />}
-                <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
+                <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 {!isPublishing && <ChevronDown size={10} className="text-black" />}
               </div>
               <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-48 p-2 shadow border border-base-200">

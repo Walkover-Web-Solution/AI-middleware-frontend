@@ -13,7 +13,7 @@ const PromptTab = ({ isPublished }) => {
     hideAdvancedParameters: state.appInfoReducer.embedUserDetails.hideAdvancedParameters,
   }));
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col w-full">
       <InputSection />
 
       <div className="w-full max-w-2xl">

@@ -543,7 +543,7 @@ const ConfigInput = ({ config, value, onChange }) => {
         return (
           <input
             type="checkbox"
-            className="toggle toggle-primary toggle-sm"
+            className="toggle toggle-sm"
             checked={value || false}
             onChange={(e) => onChange(key, e.target.checked)}
           />

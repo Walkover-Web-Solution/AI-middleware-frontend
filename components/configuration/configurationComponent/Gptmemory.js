@@ -37,7 +37,7 @@ const GptMemory = ({ params, searchParams, isPublished, isEditor = true }) => {
     }, [gpt_memory_context]);
 
     return (
-        <div className="bg-base-100 rounded-lg border border-base-200 p-6">
+        <div className="mt-4">
             {/* Header Section */}
             <div className="flex items-center justify-between mb-6">
                 <span className="text-base-content text-sm text-base-content/60">Configure conversation memory and context retention</span>
@@ -76,7 +76,7 @@ const GptMemory = ({ params, searchParams, isPublished, isEditor = true }) => {
                     </div>
                     <textarea
                         disabled={isReadOnly}
-                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-[400px] resize-y border-base-300 focus:border-primary focus:outline-none transition-colors text-sm leading-relaxed placeholder:text-base-content/40"
+                        className="textarea textarea-bordered w-full min-h-[400px] "
                         defaultValue={gpt_memory_context}
                         onBlur={handleUserReferenceChange}
                         key={gpt_memory_context}

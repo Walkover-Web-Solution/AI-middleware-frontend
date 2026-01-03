@@ -1,5 +1,4 @@
 import React, { memo, useCallback } from 'react';
-import { SparklesIcon } from 'lucide-react';
 
 // Optimized header component with memoization
 const PromptHeader = memo(({ 
@@ -14,7 +13,8 @@ const PromptHeader = memo(({
     showCloseHelperButton = false,
     disabled = false,
     isPublished = false,
-    isEditor = true
+    isEditor = true,
+    prompt = ''
 }) => {
     const handleOpenDiff = useCallback(() => {
         onOpenDiff?.();
@@ -23,26 +23,28 @@ const PromptHeader = memo(({
     // Conditional styling based on isPromptHelperOpen
     if (isPromptHelperOpen && !isMobileView) {
         return (
-            <div className={`flex z-very-high items-center justify-between mb-4 p-3 border-b border-base-300 bg-base-50 ${!isEditor ? 'mt-8' : ''}`}>
+            <div className={`flex z-very-high items-center justify-between p-3 border-b border-base-300 bg-base-50 ${!isEditor ? 'mt-8' : ''}`}>
                 <div className="flex items-center gap-2">
                     <h3 className="text-base font-semibold text-base-content">System Prompt</h3>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                    <button
-                        className="btn btn-xs"
-                        onClick={handleOpenDiff}
-                        title="View Diff"
-                    >
-                        Diff
-                    </button>
-                    <button
-                        className="btn btn-xs btn-error"
+                <div className="flex items-center gap-4">
+                    {prompt && (
+                        <span
+                            className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
+                            onClick={handleOpenDiff}
+                            title="View Diff"
+                        >
+                            Diff
+                        </span>
+                    )}
+                    <span
+                        className="text-sm text-error hover:text-error/80 hover:bg-error/10 cursor-pointer px-2 py-1 rounded transition-colors"
                         onClick={handleCloseTextAreaFocus}
                         title="Close Prompt Helper"
                     >
                         Close Helper
-                    </button>
+                    </span>
                 </div>
             </div>
         );
@@ -55,40 +57,41 @@ const PromptHeader = memo(({
                 <span className="label-text capitalize font-medium">System Prompt</span>
             </div>
 
-            <div className="label cursor-pointer gap-1 sm:gap-2">
-                  <button
-                        className="btn btn-xs"
-                        onClick={handleOpenDiff}
-                        title="View Diff"
-                    >
-                        Diff
-                    </button>
+            <div className="label cursor-pointer gap-6 sm:gap-4">
+                  {prompt && (
+                      <span
+                            className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
+                            onClick={handleOpenDiff}
+                            title="View Diff"
+                        >
+                            Diff
+                        </span>
+                  )}
                     {!isPromptHelperOpen ? (
-                    <button
-                        className="btn btn-xs btn-primary"
+                    <span
+                        className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
                         onClick={onOpenPromptHelper}
                         title={isPublished ? "Prompt Helper: Cannot edit in published mode" : "Open Prompt Helper"}
                     >
-                        <SparklesIcon size={12} className="" />
                         Prompt Helper
-                    </button>
+                    </span>
                 ) : showCloseHelperButton && (
-                    <button
-                        className="btn btn-xs btn-error"
+                    <span
+                        className="text-sm text-error hover:text-error/80 hover:bg-error/10 cursor-pointer px-2 py-1 rounded transition-colors"
                         onClick={handleCloseTextAreaFocus}
                         title="Close Prompt Helper"
                     >
                         Close Helper
-                    </button>
+                    </span>
                 )}
               
-                {isPromptHelperOpen && !isMobileView && (
-                    <button
-                        className="btn text-xs "
+                {isPromptHelperOpen && !isMobileView && prompt && (
+                    <span
+                        className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
                         onClick={handleOpenDiff}
                     >
                         Diff
-                    </button>
+                    </span>
                 )}
             </div>
         </div>
