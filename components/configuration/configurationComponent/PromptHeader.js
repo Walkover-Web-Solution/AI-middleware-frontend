@@ -14,7 +14,9 @@ const PromptHeader = memo(({
     disabled = false,
     isPublished = false,
     isEditor = true,
-    prompt = ''
+    prompt = '',
+    isFocused = false,
+    setIsTextareaFocused = () => {}
 }) => {
     const handleOpenDiff = useCallback(() => {
         onOpenDiff?.();
@@ -40,7 +42,11 @@ const PromptHeader = memo(({
                     )}
                     <span
                         className="text-sm text-error hover:text-error/80 hover:bg-error/10 cursor-pointer px-2 py-1 rounded transition-colors"
-                        onClick={handleCloseTextAreaFocus}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            handleCloseTextAreaFocus();
+                            setIsTextareaFocused(false);
+                        }}
                         title="Close Prompt Helper"
                     >
                         Close Helper
@@ -57,40 +63,37 @@ const PromptHeader = memo(({
                 <span className="label-text capitalize font-medium">System Prompt</span>
             </div>
 
-            <div className="label cursor-pointer gap-6 sm:gap-4">
-                  {prompt && (
+            <div className="label gap-6 sm:gap-4">
+                  {prompt && !isPromptHelperOpen && (
                       <span
-                            className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
-                            onClick={handleOpenDiff}
+                            className={`text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 px-2 py-1 rounded transition-opacity duration-500 ease-in-out ${
+                                isFocused 
+                                    ? 'opacity-100 cursor-pointer' 
+                                    : 'opacity-0 pointer-events-none cursor-default'
+                            }`}
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleOpenDiff();
+                            }}
                             title="View Diff"
                         >
                             Diff
                         </span>
                   )}
-                    {!isPromptHelperOpen ? (
+                    {!isPromptHelperOpen && (
                     <span
-                        className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
-                        onClick={onOpenPromptHelper}
+                        className={`text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 px-2 py-1 rounded transition-opacity duration-500 ease-in-out ${
+                            isFocused 
+                                ? 'opacity-100 cursor-pointer' 
+                                : 'opacity-0 pointer-events-none cursor-default'
+                        }`}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            onOpenPromptHelper();
+                        }}
                         title={isPublished ? "Prompt Helper: Cannot edit in published mode" : "Open Prompt Helper"}
                     >
                         Prompt Helper
-                    </span>
-                ) : showCloseHelperButton && (
-                    <span
-                        className="text-sm text-error hover:text-error/80 hover:bg-error/10 cursor-pointer px-2 py-1 rounded transition-colors"
-                        onClick={handleCloseTextAreaFocus}
-                        title="Close Prompt Helper"
-                    >
-                        Close Helper
-                    </span>
-                )}
-              
-                {isPromptHelperOpen && !isMobileView && prompt && (
-                    <span
-                        className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
-                        onClick={handleOpenDiff}
-                    >
-                        Diff
                     </span>
                 )}
             </div>

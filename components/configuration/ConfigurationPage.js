@@ -72,7 +72,7 @@ const ConfigurationPage = ({
                         data-cal-link="team/gtwy.ai/ai-consultation"
                         data-cal-origin="https://cal.id"
                         data-cal-config='{"layout":"month_view"}'
-                        className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
+                        className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors cursor-pointer"
                     >
                         <span>Speak to us</span>
                         <span>→</span>
@@ -82,7 +82,7 @@ const ConfigurationPage = ({
                 
                         <a
                             href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
-                            className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors"
+                            className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
@@ -97,7 +97,7 @@ const ConfigurationPage = ({
                             onClick={() => {
                                 handleNavigation('integration');
                             }}
-                            className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
+                            className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors cursor-pointer"
                         >
                             <span>Integration Guide</span>
                             <span>→</span>

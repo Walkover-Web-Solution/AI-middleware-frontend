@@ -124,9 +124,7 @@ const Dropdown = ({
     if (selectedOption) {
       if (typeof selectedOption.label === 'string') {
         titleText = selectedOption.label;
-        content = selectedOption.label.length > maxLabelLength
-          ? selectedOption.label.slice(0, maxLabelLength) + '...'
-          : selectedOption.label;
+        content = selectedOption.label;
       } else {
         content = selectedOption.label;
       }

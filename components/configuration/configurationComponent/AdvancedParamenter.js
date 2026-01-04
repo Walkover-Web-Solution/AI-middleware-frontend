@@ -295,131 +295,22 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     const isLevel2 = level === 2 || compact;
     
     return (
-      <div key={key} className={`group w-full ${isLevel2 ? 'space-y-1' : 'space-y-3'}`}>
-        <div className={`flex items-center justify-between gap-4 ${isLevel2 ? 'mb-1' : 'mb-2'}`}>
-          <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-            <div className="flex items-center gap-1">
-              <span className={labelTextClass}>{name || key}</span>
-              
-              {description && (
-                <InfoTooltip tooltipContent={description}>
-                  <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                </InfoTooltip>
-              )}
-            </div>
-          </div>
-          
-          {/* All input fields inline with label */}
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-          {/* Text input */}
-          {field === 'text' && (
-            <>
-              <input
-                type="text"
-                value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || '')}
-                onFocus={(e) => {
-                  // Prevent focus if default value is present, clear it first
-                  if (isDefaultValue) {
-                    e.target.blur();
-                    setSliderValue('', key, isDeafaultObject);
-                    setInputConfiguration((prev) => ({
-                      ...prev,
-                      [key]: ''
-                    }));
-                    // Re-focus after clearing default
-                    setTimeout(() => {
-                      e.target.focus();
-                    }, 0);
-                  }
-                }}
-                onChange={(e) => {
-                  // Update local state only
-                  setInputConfiguration((prev) => ({
-                    ...prev,
-                    [key]: e.target.value
-                  }));
-                }}
-                onBlur={(e) => {
-                  // Save to Redux on blur
-                  if (isDefaultValue && e.target.value) {
-                    setSliderValue(e.target.value, key, isDeafaultObject);
-                  } else {
-                    handleInputChange(e, key);
-                  }
-                }}
-                className={`input input-bordered ${inputSizeClass} flex-1`}
-                name={key}
-                disabled={isReadOnly}
-                placeholder=""
-              />
-              {/* Set as Default button only when not default */}
-              {!isDefaultValue && (
-                <button
-                  type="button"
-                  className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                  onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                  disabled={isReadOnly}
-                  title="Reset to default value"
-                >
-                  Set as Default
-                </button>
-              )}
-            </>
-          )}
-          
-          {/* Number input */}
-          {field === 'number' && (
-            <>
-              <input
-                type="number"
-                min={min}
-                max={max}
-                step={step}
-                value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || 0)}
-                onChange={(e) => {
-                  // Update local state only
-                  setInputConfiguration((prev) => ({
-                    ...prev,
-                    [key]: e.target.value
-                  }));
-                }}
-                onBlur={(e) => {
-                  // Save to Redux on blur
-                  if (isDefaultValue && e.target.value !== (defaultValue || 0).toString()) {
-                    setSliderValue(e.target.value, key, isDeafaultObject);
-                  } else {
-                    handleInputChange(e, key);
-                  }
-                }}
-                className={`input input-bordered ${inputSizeClass} flex-1`}
-                name={key}
-                disabled={isReadOnly}
-              />
-              {/* Set as Default button only when not default */}
-              {!isDefaultValue && (
-                <button
-                  type="button"
-                  className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                  onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                  disabled={isReadOnly}
-                  title="Reset to default value"
-                >
-                  Set as Default
-                </button>
-              )}
-            </>
-          )}
-          
-          {/* Boolean input */}
-          {field === 'boolean' && (
-            <>
+      <div key={key} className={`group w-full max-w-md ${isLevel2 ? 'space-y-1' : 'space-y-2'}`}>
+        <div className="flex items-center justify-between gap-2 mb-1 min-h-[32px]">
+          <div className="flex items-center gap-2">
+            <span className={labelTextClass}>{name || key}</span>
+            {description && (
+              <InfoTooltip tooltipContent={description}>
+                <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+              </InfoTooltip>
+            )}
+            {field === 'boolean' && (
               <input
                 name={key}
                 type="checkbox"
                 className="checkbox checkbox-xs"
-                checked={isDefaultValue ? false : (inputConfiguration?.[key] || false)}
+                checked={isDefaultValue ? true : (inputConfiguration?.[key] || false)}
                 onChange={(e) => {
-                  // Auto-toggle off default when user changes checkbox
                   if (isDefaultValue) {
                     setSliderValue(e.target.checked, key, isDeafaultObject);
                   }
@@ -427,107 +318,141 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 }}
                 disabled={isReadOnly}
               />
-              {/* Fixed width container to prevent flickering */}
-              <div className="w-24 flex justify-end">
-                {isDefaultValue ? (
-                  <span className="text-xs text-base-content/60 px-2 py-1">Default</span>
-                ) : (
-                  <button
-                    type="button"
-                    className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                    onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                    disabled={isReadOnly}
-                    title="Reset to default value"
-                  >
-                    Set as Default
-                  </button>
-                )}
-              </div>
-            </>
+            )}
+          </div>
+          <div className="w-[110px] flex justify-end flex-shrink-0 min-h-[32px]">
+            {!isDefaultValue && (
+              <button
+                type="button"
+                className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-3 py-1 rounded hover:bg-base-200 transition-colors whitespace-nowrap inline-block"
+                onClick={() => setSliderValue("default", key, isDeafaultObject)}
+                disabled={isReadOnly}
+                title="Reset to default value"
+              >
+                Set Default
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {field !== 'boolean' && (
+        <div className="flex items-center gap-2 w-full">
+          {/* Text input */}
+          {field === 'text' && (
+            <input
+              type="text"
+              value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || '')}
+              onFocus={(e) => {
+                if (isDefaultValue) {
+                  e.target.blur();
+                  setSliderValue('', key, isDeafaultObject);
+                  setInputConfiguration((prev) => ({
+                    ...prev,
+                    [key]: ''
+                  }));
+                  setTimeout(() => {
+                    e.target.focus();
+                  }, 0);
+                }
+              }}
+              onChange={(e) => {
+                setInputConfiguration((prev) => ({
+                  ...prev,
+                  [key]: e.target.value
+                }));
+              }}
+              onBlur={(e) => {
+                if (isDefaultValue && e.target.value) {
+                  setSliderValue(e.target.value, key, isDeafaultObject);
+                } else {
+                  handleInputChange(e, key);
+                }
+              }}
+              className={`input input-bordered ${inputSizeClass} w-full`}
+              name={key}
+              disabled={isReadOnly}
+              placeholder=""
+            />
+          )}
+          
+          {/* Number input */}
+          {field === 'number' && (
+            <input
+              type="number"
+              min={min}
+              max={max}
+              step={step}
+              value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || 0)}
+              onChange={(e) => {
+                setInputConfiguration((prev) => ({
+                  ...prev,
+                  [key]: e.target.value
+                }));
+              }}
+              onBlur={(e) => {
+                if (isDefaultValue && e.target.value !== (defaultValue || 0).toString()) {
+                  setSliderValue(e.target.value, key, isDeafaultObject);
+                } else {
+                  handleInputChange(e, key);
+                }
+              }}
+              className={`input input-bordered ${inputSizeClass} w-full`}
+              name={key}
+              disabled={isReadOnly}
+            />
           )}
           
           {/* Select input */}
           {field === 'select' && (
-            <>
-              <select
-                value={isDefaultValue ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
-                onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
-                className={`select select-bordered ${selectSizeClass} flex-1`}
-                name={key}
-                disabled={isReadOnly}
-              >
-                {isDefaultValue && <option value="default">default</option>}
-                {options?.map((option) => (
-                  <option key={typeof option === 'object' ? option?.value || option?.type : option} value={typeof option === 'object' ? option?.value || option?.type : option}>
-                    {typeof option === 'object' ? option?.displayName || option?.type || option?.value : option}
-                  </option>
-                ))}
-              </select>
-              {/* Set as Default button only when not default */}
-              {!isDefaultValue && (
-                <button
-                  type="button"
-                  className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                  onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                  disabled={isReadOnly}
-                  title="Reset to default value"
-                >
-                  Set as Default
-                </button>
-              )}
-            </>
+            <select
+              value={isDefaultValue ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
+              onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
+              className={`select select-bordered ${selectSizeClass} w-full`}
+              name={key}
+              disabled={isReadOnly}
+            >
+              {isDefaultValue && <option value="default">default</option>}
+              {options?.map((option) => (
+                <option key={typeof option === 'object' ? option?.value || option?.type : option} value={typeof option === 'object' ? option?.value || option?.type : option}>
+                  {typeof option === 'object' ? option?.displayName || option?.type || option?.value : option}
+                </option>
+              ))}
+            </select>
           )}
           
           {/* Object input */}
           {field === 'object' && (
-            <>
-              <textarea
-                value={isDefaultValue ? 'default' : (objectFieldValue || JSON.stringify(configuration?.[key] || {}, null, 2))}
-                onChange={(e) => {
-                  // Update local state only
-                  setObjectFieldValue(e.target.value);
-                }}
-                onBlur={(e) => {
-                  // Save to Redux on blur
-                  if (isDefaultValue && e.target.value !== JSON.stringify(defaultValue || {}, null, 2)) {
-                    try {
-                      const parsedValue = JSON.parse(e.target.value);
-                      setSliderValue(parsedValue, key, isDeafaultObject);
-                    } catch  {
-                      // Invalid JSON, but still toggle off default
-                      setSliderValue({}, key, isDeafaultObject);
-                    }
-                  } else {
-                    try {
-                      const parsedValue = JSON.parse(e.target.value);
-                      handleInputChange({ target: { value: parsedValue, name: key } }, key);
-                    } catch (error) {
-                      console.log('Invalid JSON:', error);
-                    }
+            <textarea
+              value={isDefaultValue ? 'default' : (objectFieldValue || JSON.stringify(configuration?.[key] || {}, null, 2))}
+              onChange={(e) => {
+                setObjectFieldValue(e.target.value);
+              }}
+              onBlur={(e) => {
+                if (isDefaultValue && e.target.value !== JSON.stringify(defaultValue || {}, null, 2)) {
+                  try {
+                    const parsedValue = JSON.parse(e.target.value);
+                    setSliderValue(parsedValue, key, isDeafaultObject);
+                  } catch  {
+                    setSliderValue({}, key, isDeafaultObject);
                   }
-                }}
-                className={`textarea textarea-bordered ${inputSizeClass} w-32 h-16 font-mono text-xs flex-1`}
-                placeholder="Enter JSON object..."
-                disabled={isReadOnly}
-              />
-              {/* Set as Default button only when not default */}
-              {!isDefaultValue && (
-                <button
-                  type="button"
-                  className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                  onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                  disabled={isReadOnly}
-                  title="Reset to default value"
-                >
-                  Set as Default
-                </button>
-              )}
-            </>
+                } else {
+                  try {
+                    const parsedValue = JSON.parse(e.target.value);
+                    handleInputChange({ target: { value: parsedValue, name: key } }, key);
+                  } catch (error) {
+                    console.log('Invalid JSON:', error);
+                  }
+                }
+              }}
+              className={`textarea textarea-bordered ${inputSizeClass} w-full h-16 font-mono text-xs`}
+              placeholder="Enter JSON object..."
+              disabled={isReadOnly}
+            />
           )}
           
           {/* Slider input */}
           {field === 'slider' && (
-            <>
+            <div className="flex items-center gap-2 w-full">
               <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
                 if (isDefaultValue) {
                   setSliderValue(min || 0, key, isDeafaultObject);
@@ -544,7 +469,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 key={`${key}-${configuration?.[key]}-${service}-${model}`}
                 defaultValue={isDefaultValue ? 'default' : sliderDisplayValue ?? ''}
                 onChange={(e) => {
-                  // Auto-toggle off default when user moves slider
                   if (isDefaultValue) {
                     setSliderValue(e.target.value, key, isDeafaultObject);
                   }
@@ -563,105 +487,75 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   setSliderValue('max', key);
                 }
               }}>Max</button>
-              {/* Fixed width container to prevent flickering */}
-              <div className="w-24 flex justify-end">
-                {isDefaultValue ? (
-                  <span className="text-xs text-base-content/60 px-2 py-1">Default</span>
-                ) : (
-                  <button
-                    type="button"
-                    className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                    onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                    disabled={isReadOnly}
-                    title="Reset to default value"
-                  >
-                    Set as Default
-                  </button>
-                )}
-              </div>
-            </>
+            </div>
           )}
           
           {/* Dropdown input */}
           {field === 'dropdown' && (
-            <>
-              <div className="relative flex-1" ref={dropdownContainerRef}>
-                <div
-                  className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  <span className="truncate text-base-content text-xs">
-                    {isDefaultValue
-                      ? 'default'
-                      : selectedOptions?.length > 0
-                        ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
-                        : 'Select a tool choice option...'}
-                  </span>
-                  <div className="ml-auto">
-                    {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
-                  </div>
+            <div className="relative w-full" ref={dropdownContainerRef}>
+              <div
+                className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <span className="truncate text-base-content text-xs">
+                  {isDefaultValue
+                    ? 'default'
+                    : selectedOptions?.length > 0
+                      ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
+                      : 'Select a tool choice option...'}
+                </span>
+                <div className="ml-auto">
+                  {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
                 </div>
-
-                {showDropdown && (
-                  <div className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
-                    <div className="p-2 top-0 bg-base-100">
-                      <input
-                        type="text"
-                        placeholder="Search functions..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className={`input input-bordered ${inputSizeClass} w-full`}
-                        disabled={isReadOnly}
-                      />
-                    </div>
-                    {options && options.map(option => (
-                      <div
-                        key={option?.id}
-                        className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
-                        onClick={() => {
-                          setSelectedOptions([{ name: option, id: option }]);
-                          handleDropdownChange(option, key);
-                          setShowDropdown(false);
-                        }}
-                      >
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="function-select"
-                            checked={selectedOptions?.some(opt => opt?.name === option)}
-                            className="radio radio-xs"
-                            disabled={isReadOnly}
-                          />
-                          <span className="font-medium text-xs">{option}</span>
-                          <span className="text-gray-500 text-xs">
-                            {option === 'none'
-                              ? "Model won't call a function; it will generate a message."
-                              : option === 'auto'
-                                ? "Model can generate a response or call a function."
-                                : "One or more specific functions must be called"}
-                          </span>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-              {/* Set as Default button only when not default */}
-              {!isDefaultValue && (
-                <button
-                  type="button"
-                  className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-2 py-1 rounded hover:bg-base-200 transition-colors"
-                  onClick={() => setSliderValue("default", key, isDeafaultObject)}
-                  disabled={isReadOnly}
-                  title="Reset to default value"
-                >
-                  Set as Default
-                </button>
+
+              {showDropdown && (
+                <div className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
+                  <div className="p-2 top-0 bg-base-100">
+                    <input
+                      type="text"
+                      placeholder="Search functions..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className={`input input-bordered ${inputSizeClass} w-full`}
+                      disabled={isReadOnly}
+                    />
+                  </div>
+                  {options && options.map(option => (
+                    <div
+                      key={option?.id}
+                      className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                      onClick={() => {
+                        setSelectedOptions([{ name: option, id: option }]);
+                        handleDropdownChange(option, key);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="function-select"
+                          checked={selectedOptions?.some(opt => opt?.name === option)}
+                          className="radio radio-xs"
+                          disabled={isReadOnly}
+                        />
+                        <span className="font-medium text-xs">{option}</span>
+                        <span className="text-gray-500 text-xs">
+                          {option === 'none'
+                            ? "Model won't call a function; it will generate a message."
+                            : option === 'auto'
+                              ? "Model can generate a response or call a function."
+                              : "One or more specific functions must be called"}
+                        </span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
               )}
-            </>
+            </div>
           )}
-          </div>
         </div>
+        )}
 
         {/* JSON Schema textarea and modal - positioned below the key/label */}
         {field === 'select' && !isDefaultValue && configuration?.[key]?.type === "json_schema" && (

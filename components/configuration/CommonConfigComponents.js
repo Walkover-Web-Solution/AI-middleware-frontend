@@ -1,11 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ServiceDropdown from "./configurationComponent/ServiceDropdown";
 import ModelDropdown from "./configurationComponent/ModelDropdown";
 import ApiKeyInput from "./configurationComponent/ApiKeyInput";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
-import AdvancedSettingsButton from "./configurationComponent/AdvancedSettingsButton";
-import { useConfigurationSelector } from "../../customHooks/useOptimizedSelector";
-import { AlertIcon } from '@/components/Icons';
+import AdvancedParameters from './configurationComponent/AdvancedParamenter';
 
 const CommonConfigComponents = ({
     params,
@@ -21,9 +19,19 @@ const CommonConfigComponents = ({
     isPublished = false,
     isEditor = true
 }) => {
-    const { bridge } = useConfigurationSelector(params, searchParams);
+    
+    const shouldRenderApiKey = useMemo(
+        () => ((!showDefaultApikeys && isEmbedUser) || !isEmbedUser),
+        [isEmbedUser, showDefaultApikeys]
+    );
+
     return (
-        <>
+        <div className="flex flex-col mt-4 w-full">
+            {/* LLM Configuration Header */}
+            <div className="mb-4 mt-2">
+                <h3 className="text-base-content text-md font-medium">LLM Configuration</h3>
+            </div>
+
             {!isEmbedUser && <RecommendedModal
                 params={params}
                 searchParams={searchParams}
@@ -36,52 +44,86 @@ const CommonConfigComponents = ({
                 isPublished={isPublished}
                 isEditor={isEditor}
             />}
-            {!bridge?.fall_back?.is_enable && (
-                <div className="alert alert-warning mb-1 py-2 px-2 max-w-md">
-                    <div className="flex items-center gap-2">
-                        <AlertIcon size={12} />
-                        <span className="text-xs">Enable fallback model from the settings</span>
+
+           
+
+            <div className="space-y-6">
+                {/* Service Provider and Model Row */}
+                <div className="grid grid-cols-2 mt-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="block text-base-content/70 text-sm font-medium">
+                            Service Provider
+                        </label>
+                        <ServiceDropdown
+                            params={params}
+                            apiKeySectionRef={apiKeySectionRef}
+                            promptTextAreaRef={promptTextAreaRef}
+                            searchParams={searchParams}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-base-content/70 text-sm font-medium">
+                            Model
+                        </label>
+                        <ModelDropdown
+                            params={params}
+                            searchParams={searchParams}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
+                            isEmbedUser={isEmbedUser}
+                        />
                     </div>
                 </div>
-            )}
-            <div className="flex flex-col sm:flex-row gap-2 items-start w-full max-w-md">
-                
-                <div className="w-auto">
-                    <ServiceDropdown
-                        params={params}
-                        apiKeySectionRef={apiKeySectionRef}
-                        promptTextAreaRef={promptTextAreaRef}
-                        searchParams={searchParams}
-                        isPublished={isPublished}
-                        isEditor={isEditor}
-                    />
-                </div>
-                <div className="flex items-center gap-2 w-full">
-                    <div className="w-full">
-                        <ModelDropdown isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} />
+
+                {/* API Key Section */}
+                {shouldRenderApiKey && (
+                    <div className="space-y-2">
+                        <label className="block text-base-content/70 text-sm font-medium">
+                            API Key
+                        </label>
+                        <ApiKeyInput
+                            apiKeySectionRef={apiKeySectionRef}
+                            params={params}
+                            searchParams={searchParams}
+                            isEmbedUser={isEmbedUser}
+                            hideAdvancedParameters={hideAdvancedParameters}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
+                        />
+                        <p className="text-xs text-base-content/50 mt-2">
+                            Your API key is encrypted and stored securely
+                        </p>
                     </div>
-                    <AdvancedSettingsButton
-                        params={params}
-                        searchParams={searchParams}
-                        isEmbedUser={isEmbedUser}
-                        hideAdvancedParameters={hideAdvancedParameters}
-                        isPublished={isPublished}
-                        isEditor={isEditor}
-                    />
-                </div>
+                )}
+
+                {/* Parameters Section with Border */}
+                {((!hideAdvancedParameters && isEmbedUser) || !isEmbedUser) && (
+                    <div className="border-t border-base-200 pt-6">
+                        <div className="mb-4">
+                            <h2 className="text-base-content text-md font-medium">Parameters</h2>
+                        </div>
+                        <div className="max-w-2xl">
+                            <AdvancedParameters
+                                params={params}
+                                searchParams={searchParams}
+                                isEmbedUser={isEmbedUser}
+                                hideAdvancedParameters={hideAdvancedParameters}
+                                level={1}
+                                className="mt-0"
+                                defaultExpanded
+                                showAccordion={false}
+                                compact
+                                isPublished={isPublished}
+                                isEditor={isEditor}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
-            {(!isEmbedUser || (!showDefaultApikeys && isEmbedUser)) && <div className="mt-2 w-full max-w-md">
-                <ApiKeyInput
-                    apiKeySectionRef={apiKeySectionRef}
-                    params={params}
-                    searchParams={searchParams}
-                    isEmbedUser={isEmbedUser}
-                    hideAdvancedParameters={hideAdvancedParameters}
-                    isPublished={isPublished}
-                    isEditor={isEditor}
-                />
-            </div>}
-        </>
+        </div>
     );
 };
 
