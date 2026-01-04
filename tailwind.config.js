@@ -62,7 +62,58 @@ module.exports = {
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+    function({ addBase }) {
+      addBase({
+        /* Light Theme Scrollbar */
+        '[data-theme="light"] ::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '[data-theme="light"] ::-webkit-scrollbar-thumb': {
+          background: 'rgba(200, 200, 200, 0.7)',
+          borderRadius: '4px',
+          border: '2px solid transparent',
+          backgroundClip: 'padding-box',
+          transition: 'background 0.3s ease-in-out',
+        },
+        '[data-theme="light"] ::-webkit-scrollbar-thumb:hover': {
+          background: 'rgba(180, 180, 180, 0.9)',
+        },
+        '[data-theme="light"] ::-webkit-scrollbar-track': {
+          background: 'rgba(240, 240, 240, 0.6)',
+          borderRadius: '4px',
+        },
+        /* Dark Theme Scrollbar */
+        '[data-theme="dark"] ::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '[data-theme="dark"] ::-webkit-scrollbar-thumb': {
+          background: 'rgba(80, 80, 80, 0.7)',
+          borderRadius: '4px',
+          border: '2px solid transparent',
+          backgroundClip: 'padding-box',
+          transition: 'background 0.3s ease-in-out',
+        },
+        '[data-theme="dark"] ::-webkit-scrollbar-thumb:hover': {
+          background: 'rgba(100, 100, 100, 0.9)',
+        },
+        '[data-theme="dark"] ::-webkit-scrollbar-track': {
+          background: 'rgba(34, 34, 34, 0.6)',
+          borderRadius: '4px',
+        },
+        /* Firefox support */
+        '[data-theme="light"] *': {
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(200, 200, 200, 0.4) rgba(240, 240, 240, 0.3)',
+        },
+        '[data-theme="dark"] *': {
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(80, 80, 80, 0.6) rgba(34, 34, 34, 0.3)',
+        },
+      });
+    },
+  ],
 
   daisyui: {
     themes: [

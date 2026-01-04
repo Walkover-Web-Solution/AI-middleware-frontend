@@ -1,9 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const TabsLayout = ({ tabs, activeTab, onTabChange, hideTabs = false }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const activeContent = tabs.find((tab) => tab.id === activeTab)?.content;
+
+  // Read tab from URL on component mount/refresh
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl && tabs.some(tab => tab.id === tabFromUrl) && tabFromUrl !== activeTab) {
+      onTabChange(tabFromUrl);
+    }
+  }, [searchParams, tabs, activeTab, onTabChange]);
+
+  const handleTabChange = (tabId) => {
+    // Update URL with tab query parameter
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.set('tab', tabId);
+    const search = current.toString();
+    const query = search ? `?${search}` : '';
+    router.push(`${window.location.pathname}${query}`, { scroll: false });
+    
+    // Call the original onTabChange callback
+    onTabChange(tabId);
+  };
 
   return (
     <div className="flex flex-col w-full">
@@ -23,7 +46,7 @@ const TabsLayout = ({ tabs, activeTab, onTabChange, hideTabs = false }) => {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`inline-flex items-center justify-center border border-transparent whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 rounded-lg px-2 py-1  text-xs transition-all duration-200 flex-shrink-0 min-w-fit ${
                     isActive
                       ? " text-blue-600 border-base-300/30"

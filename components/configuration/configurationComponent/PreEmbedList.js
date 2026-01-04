@@ -12,7 +12,6 @@ import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark } from 'lucide-react';
 
 const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEmbedUser = false }) => {
     // Determine if content is read-only (either published or user is not an editor)
@@ -193,30 +192,33 @@ const PreEmbedList = ({ params, searchParams, isPublished, isEditor = true, isEm
                 />
 
                 <div className="w-full mt-4 gap-2 flex flex-col px-2 py-2 cursor-default">
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-2">
-                            <p className="text-sm whitespace-nowrap">Pre Functions</p> 
+                    {bridgePreFunctions.length>0 && (
+                     <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 group">
                              <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                        </InfoTooltip>                                    
+                                <div className="flex items-center gap-1 cursor-help">
+                                    <p className="text-sm whitespace-nowrap">Pre Functions</p>
+                                </div>
+                            </InfoTooltip>                                    
                         </div>
                        
                        
                     </div>
+                    )}
                     {bridgePreFunctions.length === 0 && (
                         <div className="dropdown dropdown-end w-full max-w-md">
-                            <div className="border-2 border-base-200 border-dashed p-4 text-center">
-                                <p className="text-sm text-base-content/70">
-                                    No Pre Functions found.
-                                </p>
-                                <button
-                                    tabIndex={0}
-                                    className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                                    disabled={isReadOnly}
-                                >
-                                    <AddIcon className="w-3 h-3" />
-                                    Add
-                                </button>
+                            <div className="border-2 border-base-200 border-dashed text-center">
+                                <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+                                    <button
+                                        tabIndex={0}
+                                        className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                        disabled={isReadOnly}
+                                    >
+                                        <AddIcon className="w-3 h-3" />
+                                        Add Pre Functions
+                                    </button>
+                                </InfoTooltip>
+
                             </div>
                             <EmbedListSuggestionDropdownMenu
                                 params={params}
