@@ -626,7 +626,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
 
             {/* Input Group */}
             <div className="input-group flex justify-end items-end gap-2 w-full relative">
-                {(modelType !== "completion") && (modelType !== 'image') && (
+                {(modelType !== "completion") && (
                     <textarea
                         ref={inputRef}
                         placeholder="Type here"
@@ -756,7 +756,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     <button
                         className={`btn btn-circle transition-all duration-200 ${loading || uploading || (modelType === 'image')
                                 ? 'btn-disabled'
-                                : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                                : ' btn hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
                             }`}
                         onClick={() => {
                             handleSendMessage();

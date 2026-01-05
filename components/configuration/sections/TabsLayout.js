@@ -1,16 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const TabsLayout = ({ tabs, activeTab, onTabChange, hideTabs = false }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const activeContent = tabs.find((tab) => tab.id === activeTab)?.content;
+
+  // Read tab from URL on component mount/refresh
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl && tabs.some(tab => tab.id === tabFromUrl) && tabFromUrl !== activeTab) {
+      onTabChange(tabFromUrl);
+    }
+  }, [searchParams, tabs, activeTab, onTabChange]);
+
+  const handleTabChange = (tabId) => {
+    // Update URL with tab query parameter
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.set('tab', tabId);
+    const search = current.toString();
+    const query = search ? `?${search}` : '';
+    router.push(`${window.location.pathname}${query}`, { scroll: false });
+    
+    // Call the original onTabChange callback
+    onTabChange(tabId);
+  };
 
   return (
     <div className="flex flex-col w-full">
       {!hideTabs && (
-        <div className="border-b border-base-200 bg-base-100 px-6 sticky top-0 z-10">
+        <div className="border-b border-base-200 bg-base-100 sticky top-0 z-10 -ml-8 -mx-4">
           <div
-            className="w-full items-center flex h-10 bg-transparent gap-1 border-0 p-0 overflow-x-auto scrollbar-hide"
+            className="w-full ml-3 items-center flex h-10 bg-transparent gap-1 border-0 px-4 overflow-x-auto scrollbar-hide"
             role="tablist"
             aria-orientation="horizontal"
           >
@@ -23,11 +46,11 @@ const TabsLayout = ({ tabs, activeTab, onTabChange, hideTabs = false }) => {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`inline-flex items-center justify-center border border-transparent whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 rounded-lg px-2 py-1  text-xs transition-all duration-200 flex-shrink-0 min-w-fit ${
                     isActive
-                      ? "bg-base-content/10 text-base-content border-base-300/30"
-                      : "text-base-content/60 hover:text-base-content hover:bg-base-content/5"
+                      ? " text-blue-600 border-base-300/30"
+                      : "text-base-content/60 hover:text-base-content"
                   }`}
                 >
                   {Icon && (

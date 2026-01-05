@@ -15,7 +15,7 @@ import { AddIcon, TrashIcon, SettingsIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import PrebuiltToolsConfigModal from '@/components/modals/PrebuiltToolsConfigModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { CircleQuestionMark, Link2 } from 'lucide-react';
+import { CircleQuestionMark } from 'lucide-react';
 
 function getStatusClass(status) {
   switch (status?.toString().trim().toLowerCase()) {
@@ -212,6 +212,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
       .map(id => byId.get(id))
       .filter(Boolean);
   }, [prebuiltToolsData, toolsVersionData]);
+  const hasTools = bridgeFunctions.length > 0 || selectedPrebuiltTools.length > 0;
   return (bridge_functions &&
     <div>
       <DeleteModal
@@ -254,140 +255,168 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
       <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
         {shouldToolsShow && (
           <>
-            <div className="dropdown dropdown-left w-full flex items-center">
-              {/* {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? ( */}
-                <div className='flex justify-between w-full'>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="bg-primary p-1.5 rounded-md">
-                        <Link2 size={16} className="text-primary-content" />
-                      </div>
-                      <div>
-                        <p className="text-sm whitespace-nowrap">Tools</p>
-                        <p className="text-xs text-base-content/50">Connect external tools and services</p>
-                      </div>
-                    </div>
-                    <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                    </InfoTooltip>
-                  </div>
-                  <button
-                    tabIndex={0}
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70 "
-                    disabled={!shouldToolsShow || isReadOnly}
-                  >
-                    <AddIcon className="w-6 h-6" />
-                  </button>
-                </div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <p className="text-sm whitespace-nowrap">Tools</p>
+                <InfoTooltip video={getFunctionCreationVideo()} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+              </InfoTooltip>
+              </div>
               
-              <EmbedListSuggestionDropdownMenu
-                name={"Function"}
-                params={params}
-                searchParams={searchParams}
-                onSelect={handleSelectFunction}
-                onSelectPrebuiltTool={handleAddPrebuiltTool}
-                connectedFunctions={bridge_functions}
-                shouldToolsShow={shouldToolsShow}
-                modelName={model}
-                asDropdownContent
-                prebuiltToolsData={prebuiltToolsData}
-                toolsVersionData={toolsVersionData}
-                showInbuiltTools={showInbuiltTools}
-                tutorialState={tutorialState}
-                setTutorialState={setTutorialState}
-                isPublished={isPublished}
-                isEditor={isEditor}
-              />
             </div>
             <div className="flex flex-col gap-2 w-full">
-              {/* Show empty state when no tools are connected */}
-              {bridgeFunctions.length === 0 && selectedPrebuiltTools.length === 0 && (
-                <div className="text-center py-8 border border-dashed border-white/[0.08] rounded-lg bg-white/[0.02]">
-                  <Link2 className="w-6 h-6 text-gray-600 mx-auto mb-2" />
-                  <p className="text-xs text-gray-500">No tools connected</p>
-                </div>
-              )}
+             
               
-              {bridgeFunctions.length > 0 && (
-                <div className="flex flex-col gap-2 w-full">
-                  <RenderEmbed 
-                    bridgeFunctions={bridgeFunctions} 
-                    integrationData={integrationData} 
-                    getStatusClass={getStatusClass} 
-                    handleOpenModal={handleOpenModal} 
-                    embedToken={embedToken} 
-                    params={params} 
-                    name="function" 
-                    handleRemoveEmbed={handleRemoveFunctionFromBridge} 
-                    handleOpenDeleteModal={handleOpenDeleteModal}
-                    halfLength={1}
-                    isPublished={isPublished}
-                    isEditor={isEditor}
-                  />
-                </div>
-              )}
 
-              {/* Render selected Prebuilt Tools below functions */}
-              {selectedPrebuiltTools.length > 0 && (
-                <div className={`grid gap-2 w-full`}>
-                  {selectedPrebuiltTools.map((item) => {
-                    const missingDesc = !item?.description;
-                    const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
-                    const hasIssue = missingDesc || isNotSupported;
-                    
-                    return (
-                      <div
-                        key={item?.value}
-                        className={`group flex w-full items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative ${hasIssue ? 'border-error' : ''} hover:bg-base-300 transition-colors duration-200`}
-                      >
-                        <div className="p-2 flex-1 flex items-center gap-2">
-                          {GetPreBuiltToolTypeIcon(item?.value, 14, 14)}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center">
-                              <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
-                                <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
-                                  <span className='text-md font-normal'>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
-                                </div>
-                              </span>
-                            </div>
-                            {isNotSupported && (
-                              <p className="text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
-                                Model doesn't support {item?.name} tool
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2">
-                          {item?.value === "web_search" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenPrebuiltConfig();
-                              }}
-                              className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
-                              title="Config"
-                              disabled={isReadOnly}
-                            >
-                              <SettingsIcon size={16} />
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenDeletePrebuiltModal(item)
-                            }}
-                            className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
-                            title="Remove"
-                            disabled={isReadOnly}
-                          >
-                            <TrashIcon size={16} />
-                          </button>
-                        </div>
+                <div className="flex flex-col gap-2 w-full max-w-md">
+                  {!hasTools ? (
+                    <div className="dropdown dropdown-end w-full">
+                      <div className="border-2 border-base-200 border-dashed p-4 text-center">
+                        <p className="text-sm text-base-content/70">
+                          No tools found.
+                        </p>
+                        <button
+                          tabIndex={0}
+                          className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                          disabled={isReadOnly}
+                        >
+                          <AddIcon className="w-3 h-3" />
+                          Add
+                        </button>
                       </div>
-                    );
-                  })}
+                      <EmbedListSuggestionDropdownMenu
+                        name={"Function"}
+                        params={params}
+                        searchParams={searchParams}
+                        onSelect={handleSelectFunction}
+                        onSelectPrebuiltTool={handleAddPrebuiltTool}
+                        connectedFunctions={bridge_functions}
+                        shouldToolsShow={shouldToolsShow}
+                        modelName={model}
+                        asDropdownContent
+                        prebuiltToolsData={prebuiltToolsData}
+                        toolsVersionData={toolsVersionData}
+                        showInbuiltTools={showInbuiltTools}
+                        tutorialState={tutorialState}
+                        setTutorialState={setTutorialState}
+                        isPublished={isPublished}
+                        isEditor={isEditor}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {bridgeFunctions.length > 0 && (
+                        <RenderEmbed 
+                          bridgeFunctions={bridgeFunctions} 
+                          integrationData={integrationData} 
+                          getStatusClass={getStatusClass} 
+                          handleOpenModal={handleOpenModal} 
+                          embedToken={embedToken} 
+                          params={params} 
+                          name="function" 
+                          handleRemoveEmbed={handleRemoveFunctionFromBridge} 
+                          handleOpenDeleteModal={handleOpenDeleteModal}
+                          halfLength={1}
+                          isPublished={isPublished}
+                          isEditor={isEditor}
+                        />
+                      )}
+                      
+                      {/* Render selected Prebuilt Tools with same UI */}
+                      {selectedPrebuiltTools.map((item) => {
+                        const missingDesc = !item?.description;
+                        const isNotSupported = !showInbuiltTools || (Array.isArray(showInbuiltTools) ? !showInbuiltTools.includes(item?.value) : !showInbuiltTools[item?.value]);
+                        const hasIssue = missingDesc || isNotSupported;
+                        
+                        return (
+                          <div
+                            key={item?.value}
+                            className={`group flex w-full items-center border border-base-200 cursor-pointer bg-base-100 relative ${hasIssue ? 'border-error' : ''} transition-colors duration-200 min-h-[44px]`}
+                          >
+                            <div className="p-2 flex-1 flex items-center gap-2">
+                              {GetPreBuiltToolTypeIcon(item?.value, 16, 16)}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center">
+                                  <span className="flex-1 min-w-0 text-sm font-normal text-base-content truncate">
+                                    <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
+                                      <span className="truncate block w-[300px]">{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
+                                    </div>
+                                  </span>
+                                </div>
+                                {isNotSupported && (
+                                  <p className="text-xs text-base-content/70 line-clamp-1">
+                                    Model doesn't support {item?.name} tool
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
+                              {item?.value === "web_search" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenPrebuiltConfig();
+                                  }}
+                                  className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
+                                  title="Config"
+                                  disabled={isReadOnly}
+                                >
+                                  <SettingsIcon size={16} />
+                                </button>
+                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenDeletePrebuiltModal(item);
+                                }}
+                                className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
+                                title="Remove"
+                                disabled={isReadOnly}
+                              >
+                                <TrashIcon size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      
+                      {hasTools && (
+                        <div className="dropdown dropdown-end w-full max-w-md">
+                          <div className="border-2 border-base-200 border-dashed text-center">
+                              <button
+                                tabIndex={0}
+                                className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                disabled={isReadOnly}
+                              >
+                                <AddIcon className="w-3 h-3" />
+                                Add Tool
+                              </button>
+                          </div>
+                          <EmbedListSuggestionDropdownMenu
+                            name={"Function"}
+                            params={params}
+                            searchParams={searchParams}
+                            onSelect={handleSelectFunction}
+                            onSelectPrebuiltTool={handleAddPrebuiltTool}
+                            connectedFunctions={bridge_functions}
+                            shouldToolsShow={shouldToolsShow}
+                            modelName={model}
+                            asDropdownContent
+                            prebuiltToolsData={prebuiltToolsData}
+                            toolsVersionData={toolsVersionData}
+                            showInbuiltTools={showInbuiltTools}
+                            tutorialState={tutorialState}
+                            setTutorialState={setTutorialState}
+                            isPublished={isPublished}
+                            isEditor={isEditor}
+                          />
+                        </div>
+                      )}
+                      
+                    </>
+                  )}
                 </div>
-              )}
+
             </div>
           </>
         )}

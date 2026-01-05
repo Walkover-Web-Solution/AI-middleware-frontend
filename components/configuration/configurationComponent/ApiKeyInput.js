@@ -106,7 +106,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hide
                 showSearch
                 searchPlaceholder="Search API keys..."
                 size="sm"
-                className="flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 border-white/[0.08] text-base-content h-8 focus:border-blue-500/50 min-w-[150px]"
+                className="flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 border-base-200 text-base-content h-8 min-w-[150px]"
                 style={{ backgroundColor: 'color-mix(in oklab, var(--color-white) 3%, transparent)' }}
                 maxLabelLength={20}
                 menuClassName="w-full min-w-[200px]"

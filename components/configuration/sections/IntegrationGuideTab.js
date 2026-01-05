@@ -90,7 +90,7 @@ const IntegrationGuideTab = ({ isPublished }) => {
         </div>
 
         {/* Locked State */}
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-base-100 rounded-lg p-8">
+        <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
           <div className="text-center space-y-4">
             {/* Enhanced Lock Icon */}
             <div className="mx-auto w-20 h-20 bg-base-300/20 rounded-full flex items-center justify-center backdrop-blur-lg">
@@ -143,7 +143,7 @@ const IntegrationGuideTab = ({ isPublished }) => {
         )}
 
         {/* Tab Content */}
-        <div className="overflow-y-auto h-full scrollbar-hide rounded-lg bg-base-100 p-4 shadow-sm">
+        <div className="overflow-y-auto h-full scrollbar-hide p-4">
           {renderTabContent()}
         </div>
       </div>

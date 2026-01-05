@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, SettingsIcon, TrashIcon, BotIcon as BotIconWrapper } from '@/components/Icons';
+import { AddIcon, SettingsIcon, TrashIcon, BotIcon } from '@/components/Icons';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
-import { BotIcon, CircleQuestionMark } from 'lucide-react';
+import { CircleQuestionMark } from 'lucide-react';
 import useExpandableList from '@/customHooks/useExpandableList';
 
 const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true }) => {
@@ -202,6 +202,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
     const agentEntries = useMemo(() => {
         return connect_agents ? Object.entries(connect_agents) : [];
     }, [connect_agents]);
+    const hasAgents = agentEntries.length > 0;
 
     // Use expandable list hook
     const { displayItems, isExpanded, toggleExpanded, shouldShowToggle, hiddenItemsCount } = useExpandableList(agentEntries, 1);
@@ -213,7 +214,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full overflow-hidden ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
+                    className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full overflow-hidden ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} transition-colors duration-200`}
                 >
                     <div
                         className="p-2 flex-1 flex items-center"
@@ -265,7 +266,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
         });
 
         return (
-            <div className="w-full">
+            <div className="w-full max-w-md">
                 <div className={`grid gap-2 w-full`}>
                     {agentItems}
                 </div>
@@ -277,52 +278,74 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
         <div>
             <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
                 <>
-                    <div className="dropdown dropdown-left w-full flex items-center">
-                        <div className='flex justify-between w-full'>
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center gap-2">
-                                    <div className="bg-primary p-1.5 rounded-md">
-                                        <BotIconWrapper size={16} className="text-primary-content" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm whitespace-nowrap">Agents</p>
-                                        <p className="text-xs text-base-content/50">Connect other agents</p>
-                                    </div>
-                                </div>
-                                <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                                </InfoTooltip>
-                            </div>
-                            <button
-                                tabIndex={0}
-                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70"
-                                disabled={!shouldToolsShow || isReadOnly}
-                            >
-                                <AddIcon className="w-6 h-6" />
-                            </button>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm whitespace-nowrap">Agents</p>
+                            <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        </InfoTooltip>
                         </div>
-                        <ConnectedAgentListSuggestion
-                            params={params}
-                            handleSelectAgents={handleSelectAgents}
-                            connect_agents={connect_agents}
-                            shouldToolsShow={shouldToolsShow}
-                            modelName={model}
-                            bridges={bridgeData}
-                            bridgeData={bridgeData}
-                            isPublished={isPublished}
-                            isEditor={isEditor}
-                        />
+                        
                     </div>
-                    <div className="flex flex-col gap-2 w-full">
-                        {/* Show empty state when no agents are connected */}
-                        {Object?.entries(connect_agents)?.length === 0 && (
-                            <div className="text-center py-8 border border-dashed border-white/[0.08] rounded-lg bg-white/[0.02]">
-                                <BotIconWrapper className="w-6 h-6 text-gray-600 mx-auto mb-2" />
-                                <p className="text-xs text-gray-500">No agents connected</p>
+            <div className="flex flex-col gap-2 w-full">
+                        {!hasAgents ? (
+                            <div className="dropdown dropdown-end w-full max-w-md">
+                                <div className="border-2 border-base-200 border-dashed p-4 text-center">
+                                    <p className="text-sm text-base-content/70">
+                                        No agents found.
+                                    </p>
+                                    <button
+                                        tabIndex={0}
+                                        className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                        disabled={!shouldToolsShow || isReadOnly}
+                                    >
+                                        <AddIcon className="w-3 h-3" />
+                                        Add
+                                    </button>
+                                </div>
+                                <ConnectedAgentListSuggestion
+                                    params={params}
+                                    handleSelectAgents={handleSelectAgents}
+                                    connect_agents={connect_agents}
+                                    shouldToolsShow={shouldToolsShow}
+                                    modelName={model}
+                                    bridges={bridgeData}
+                                    bridgeData={bridgeData}
+                                    isPublished={isPublished}
+                                    isEditor={isEditor}
+                                />
                             </div>
+                        ) : (
+                            <>
+                                {renderEmbed}
+                                {hasAgents && (
+                                    <div className="dropdown dropdown-end w-full max-w-md">
+                                        <div className="border-2 border-base-200 border-dashed text-center">
+                                                <button
+                                                    tabIndex={0}
+                                                    className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                                    disabled={isReadOnly}
+                                                >
+                                                    <AddIcon className="w-3 h-3" />
+                                                    Add Agent
+                                                </button>
+                                        </div>
+                                        <ConnectedAgentListSuggestion
+                                            params={params}
+                                            handleSelectAgents={handleSelectAgents}
+                                            connect_agents={connect_agents}
+                                            shouldToolsShow={shouldToolsShow}
+                                            modelName={model}
+                                            bridges={bridgeData}
+                                            bridgeData={bridgeData}
+                                            isPublished={isPublished}
+                                            isEditor={isEditor}
+                                        />
+                                    </div>
+                                )}
+                            </>
                         )}
-                        {renderEmbed}
-                    </div>
+            </div>
                 </>
             </div>
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />

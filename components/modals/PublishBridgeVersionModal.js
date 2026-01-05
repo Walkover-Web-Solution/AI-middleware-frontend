@@ -562,7 +562,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                       <span className="text-xs text-base-content/70">Include in publish</span>
                       <input
                         type="checkbox"
-                        className="toggle toggle-primary toggle-sm"
+                        className="toggle toggle-sm"
                         checked={isSelected}
                         onChange={() => toggleAgentSelection(agent._id)}
                         disabled={isLoading}

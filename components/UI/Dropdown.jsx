@@ -124,9 +124,7 @@ const Dropdown = ({
     if (selectedOption) {
       if (typeof selectedOption.label === 'string') {
         titleText = selectedOption.label;
-        content = selectedOption.label.length > maxLabelLength
-          ? selectedOption.label.slice(0, maxLabelLength) + '...'
-          : selectedOption.label;
+        content = selectedOption.label;
       } else {
         content = selectedOption.label;
       }
@@ -134,7 +132,7 @@ const Dropdown = ({
 
     return (
       <span
-        className={cx('truncate text-left flex-1 text-base-content/70 text-xs', !selectedOption ? 'text-base-content/60' : '')}
+        className={cx('text-left flex-1 text-base-content/70 text-xs', !selectedOption ? 'text-base-content/60' : '')}
         title={titleText}
       >
         {content}
@@ -243,7 +241,7 @@ const Dropdown = ({
                                   : opt.label;
                               }
                               return (
-                                <span className="truncate" title={titleText}>{content}</span>
+                                <span className="" title={titleText}>{content}</span>
                               );
                             })()}
                             {opt.description && (
@@ -291,7 +289,7 @@ const Dropdown = ({
                                       : opt.label;
                                   }
                                   return (
-                                    <span className="truncate" title={titleText}>{content}</span>
+                                    <span className="" title={titleText}>{content}</span>
                                   );
                                 })()}
                                 {opt.description && (

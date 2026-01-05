@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, TrashIcon, DatabaseIcon, ChevronRightIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, TrashIcon, ChevronRightIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -555,20 +555,28 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                                 </div>
                             </li>
                         </div>
-                        </ul>
+                        {knowledgebaseDropdownContent}
                     </div>
+                ) : (
+                    <>
+                        {renderKnowledgebase}
+                        {hasKnowledgebases && (
+                            <div className="dropdown dropdown-end w-full max-w-md">
+                                <div className="border-2 border-base-200 border-dashed text-center">
+                                        <button
+                                            tabIndex={0}
+                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                            disabled={isReadOnly}
+                                        >
+                                            <AddIcon className="w-3 h-3" />
+                                            Add Knowledge Base
+                                        </button>
+                                </div>
+                                {knowledgebaseDropdownContent}
+                            </div>
+                        )}
+                    </>
                 )}
-            </div>
-            <div className="flex flex-col gap-2 w-full ">
-                {/* Show empty state when no knowledge bases are connected */}
-                {knowbaseVersionData?.length === 0 && (
-                    <div className="text-center py-8 border border-dashed border-white/[0.08] rounded-lg bg-white/[0.02]">
-                        <DatabaseIcon className="w-6 h-6 text-gray-600 mx-auto mb-2" />
-                        <p className="text-xs text-gray-500">No knowledge bases connected</p>
-                    </div>
-                )}
-                
-                {renderKnowledgebase}
             </div>
             <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />

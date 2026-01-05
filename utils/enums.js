@@ -103,6 +103,13 @@ export const AGENT_SETUP_GUIDE_STEPS = [
   },
   {
     step: '2',
+    title: 'Configure API Access',
+    detail: 'Add your API keys and configure authentication to enable your agent.',
+    icon: '🔐',
+    example: 'Examples: OpenAI API key, Anthropic API key, Custom webhook URLs, Database connection strings'
+  },
+  {
+    step: '3',
     title: 'Connect External Functions',
     detail: 'Enhance your agent\'s capabilities by connecting APIs, databases, or custom functions.',
     optional: true,
@@ -110,7 +117,7 @@ export const AGENT_SETUP_GUIDE_STEPS = [
     example: 'Examples: CRM systems (Salesforce), Payment processors (Stripe), Database queries, Email services'
   },
   {
-    step: '3',
+    step: '4',
     title: 'Choose Your AI Service',
     detail: 'Select from available AI providers like OpenAI, Anthropic, or others.',
     optional: true,
@@ -118,19 +125,12 @@ export const AGENT_SETUP_GUIDE_STEPS = [
     example: 'Examples: OpenAI GPT-4, Claude 3.5 Sonnet'
   },
   {
-    step: '4',
+    step: '5',
     title: 'Select the Right Model',
     detail: 'Pick an AI model that matches your requirements.',
     optional: true,
     icon: '🧠',
     example: 'Examples: GPT-4 for complex tasks, GPT-3.5 for cost efficiency, Claude for long conversations'
-  },
-  {
-    step: '5',
-    title: 'Configure API Access',
-    detail: 'Add your API keys and configure authentication to enable your agent.',
-    icon: '🔐',
-    example: 'Examples: OpenAI API key, Anthropic API key, Custom webhook URLs, Database connection strings'
   },
 ];
 
