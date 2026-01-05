@@ -12,6 +12,7 @@ const PromptTextarea = memo(({
   initialValue = "",
   onChange,
   onFocus,
+  onTextAreaBlur,
   onKeyDown,
   isPromptHelperOpen,
   className = "",
@@ -96,9 +97,12 @@ const PromptTextarea = memo(({
     onKeyDown?.(e);
   }, [onKeyDown]);
 
-  const handleSave = useCallback(() => {
+  const handleBlur = useCallback((e) => {
     onSave?.();
-  }, [onSave]);
+    if (!isPromptHelperOpen) {
+      onTextAreaBlur?.(e);
+    }
+  }, [onSave, isPromptHelperOpen, onTextAreaBlur]);
 
   return (
     <div
@@ -120,11 +124,11 @@ const PromptTextarea = memo(({
         disabled={isPublished || !isEditor}
         contentEditable={!isPublished && isEditor}
         className={`
-          w-full h-full min-h-full max-h-full resize-none bg-transparent border-none
+          w-full text-sm h-full min-h-full max-h-full resize-none bg-transparent border-none
           caret-base-content outline-none overflow-auto p-2
           ${className}
         `}
-        onBlur={handleSave}
+        onBlur={handleBlur}
         onChange={handleChange}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}

@@ -320,16 +320,15 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                                 {renderEmbed}
                                 {hasAgents && (
                                     <div className="dropdown dropdown-end w-full max-w-md">
-                                        <div
-                                            tabIndex={0}
-                                            className="group flex items-center border border-base-200 cursor-pointer relative min-h-[44px] w-full overflow-hidden opacity-60 hover:opacity-80 transition-all duration-200 border-dashed"
-                                        >
-                                            <div className="p-2 flex-1 flex items-center justify-center">
-                                                <div className="flex items-center gap-2">
-                                                    <AddIcon className="w-4 h-4 shrink-0" />
-                                                    <span className="text-sm font-normal">Add Agent</span>
-                                                </div>
-                                            </div>
+                                        <div className="border-2 border-base-200 border-dashed text-center">
+                                                <button
+                                                    tabIndex={0}
+                                                    className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                                    disabled={isReadOnly}
+                                                >
+                                                    <AddIcon className="w-3 h-3" />
+                                                    Add Agent
+                                                </button>
                                         </div>
                                         <ConnectedAgentListSuggestion
                                             params={params}

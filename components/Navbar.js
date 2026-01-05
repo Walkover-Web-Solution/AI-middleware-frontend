@@ -68,7 +68,7 @@ const Navbar = ({ isEmbedUser, params }) => {
         icon: BotIcon,
         shortLabel: `${bridgeData.bridgeType === 'api' ? 'Agent' : 'Chatbot'} Config`
       },
-      { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
+      { id: 'history', label: 'History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
     if (!isEmbedUser) {
       baseTabs.splice(1, 0, { id: 'testcase', label: 'Test Cases', icon: TestTube, shortLabel: 'Tests' });

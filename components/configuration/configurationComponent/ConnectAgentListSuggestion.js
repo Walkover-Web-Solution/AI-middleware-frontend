@@ -66,7 +66,7 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
     return (
         <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
             <div className='flex flex-col gap-2 w-full'>
-                <li className="text-sm font-semibold disabled">Suggested Agents</li>
+                <li className="text-sm font-semibold disabled">Available Agents</li>
                 <input
                     type='text'
                     placeholder='Search Agent'

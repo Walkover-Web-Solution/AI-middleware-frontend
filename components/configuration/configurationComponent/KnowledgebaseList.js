@@ -96,7 +96,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
     const knowledgebaseDropdownContent = !tutorialState?.showTutorial && (
         <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
             <div className='flex flex-col gap-2 w-full'>
-                <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
+                <li className="text-sm font-semibold disabled">Available Knowledge Bases</li>
                 <input
                     type='text'
                     placeholder='Search Knowledge Base'
@@ -225,16 +225,15 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                         {renderKnowledgebase}
                         {hasKnowledgebases && (
                             <div className="dropdown dropdown-end w-full max-w-md">
-                                <div
-                                    tabIndex={0}
-                                    className="group flex items-center border border-base-200 cursor-pointer relative min-h-[44px] w-full overflow-hidden opacity-60 hover:opacity-80 transition-all duration-200 border-dashed"
-                                >
-                                    <div className="p-2 flex-1 flex items-center justify-center">
-                                        <div className="flex items-center gap-2">
-                                            <AddIcon className="w-4 h-4 shrink-0" />
-                                            <span className="text-sm font-normal">Add Knowledge Base</span>
-                                        </div>
-                                    </div>
+                                <div className="border-2 border-base-200 border-dashed text-center">
+                                        <button
+                                            tabIndex={0}
+                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                            disabled={isReadOnly}
+                                        >
+                                            <AddIcon className="w-3 h-3" />
+                                            Add Knowledge Base
+                                        </button>
                                 </div>
                                 {knowledgebaseDropdownContent}
                             </div>
