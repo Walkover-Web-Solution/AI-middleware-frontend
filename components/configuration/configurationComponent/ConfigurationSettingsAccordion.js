@@ -92,6 +92,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
                     modelType={modelType}
                     isPublished={isPublished}
                     isEditor={isEditor}
+                    isEmbedUser={isEmbedUser}
                   />
                 </div>
               )}

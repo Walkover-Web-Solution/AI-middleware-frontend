@@ -16,7 +16,8 @@ const NonImageModelConfig = memo(() => {
      const { 
         isPublished,
         uiState,
-        currentView
+        currentView,
+        isEmbedUser
     } = useConfigurationContext();
     const [activeTab, setActiveTab] = useState('prompt');
 
@@ -27,14 +28,22 @@ const NonImageModelConfig = memo(() => {
         }
     }, [currentView]);
 
-    const tabs = useMemo(() => ([
-        { id: 'prompt', label: 'Prompt', icon: SparklesIcon, content: <PromptTab isPublished={isPublished}  /> },
-        { id: 'model', label: 'Model', icon: BotIcon, content: <ModelTab isPublished={isPublished} /> },
-        { id: 'connectors', label: 'Connectors', icon: LinkIcon, content: <ConnectorsTab isPublished={isPublished} /> },
-        { id: 'memory', label: 'Memory', icon: BrainIcon, content: <MemoryTab isPublished={isPublished} /> },
-        { id: 'settings', label: 'Settings', icon: SettingsIcon, content: <SettingsTab isPublished={isPublished} /> },
-        { id: 'integration', label: 'Integration Guide', icon: BookOpen, content: <IntegrationGuideTab isPublished={isPublished} /> },
-    ]), []);
+    const tabs = useMemo(() => {
+        const baseTabs = [
+            { id: 'prompt', label: 'Prompt', icon: SparklesIcon, content: <PromptTab isPublished={isPublished}  /> },
+            { id: 'model', label: 'Model', icon: BotIcon, content: <ModelTab isPublished={isPublished} /> },
+            { id: 'connectors', label: 'Connectors', icon: LinkIcon, content: <ConnectorsTab isPublished={isPublished} /> },
+            { id: 'memory', label: 'Memory', icon: BrainIcon, content: <MemoryTab isPublished={isPublished} /> },
+            { id: 'settings', label: 'Settings', icon: SettingsIcon, content: <SettingsTab isPublished={isPublished} /> },
+        ];
+        
+        // Only add integration tab for non-embed users
+        if (!isEmbedUser) {
+            baseTabs.push({ id: 'integration', label: 'Integration Guide', icon: BookOpen, content: <IntegrationGuideTab isPublished={isPublished} /> });
+        }
+        
+        return baseTabs;
+    }, [isPublished, isEmbedUser]);
 
     // Hide tabs when prompt helper is open
     const shouldHideTabs = uiState?.isPromptHelperOpen;

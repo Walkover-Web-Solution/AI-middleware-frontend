@@ -14,7 +14,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
 
   const dispatch = useDispatch();
 
-  const {  bridgeApikey_object_id, SERVICES, serviceModels, currentService, fallbackModel, DefaultModel, currentModel } = useCustomSelector((state) => {
+  const {  bridgeApikey_object_id, SERVICES, serviceModels, currentService, fallbackModel, DefaultModel, currentModel, embedDefaultApiKeys ,showDefaultApikeys} = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     
@@ -30,9 +30,10 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
       currentModel: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
       fallbackModel: isPublished ? (bridgeDataFromState?.fall_back) : (versionData?.fall_back),
       DefaultModel: state?.serviceReducer?.default_model||[],
+      embedDefaultApiKeys: state.appInfoReducer.embedUserDetails?.apikey_object_id || {},
+      showDefaultApikeys: state.appInfoReducer.embedUserDetails?.addDefaultApiKeys,
     };
   });
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -50,13 +51,18 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filterApiKeysByServiceForFallback = (service) => {
-    return Object.keys(bridgeApikey_object_id).filter(key => key === service);
-  };
+ 
 
   // Check if a service has available API keys
   const hasApiKeysForService = (service) => {
-    return filterApiKeysByServiceForFallback(service).length > 0;
+    const regularApiKeys = Object.keys(bridgeApikey_object_id).filter(key => key === service);
+    
+    // For embed users with showDefaultApikeys, also check embedDefaultApiKeys
+    if (showDefaultApikeys && embedDefaultApiKeys && embedDefaultApiKeys[service]) {
+      return regularApiKeys.length > 0 || !!embedDefaultApiKeys[service];
+    }
+    
+    return regularApiKeys.length > 0;
   };
 
   const truncateText = (text, maxLength) => {

@@ -61,19 +61,15 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                 },
             };
 
-            dispatch(createOrgAction(dataToSend, async (data) => {
-                try {
-                    dispatch(userDetails());
-                    await handleSwitchOrg(data.id, data.name);
-                    toast.success('Workspace created successfully');
-                    closeModal(MODAL_TYPE.CREATE_ORG_MODAL);
-                    route.push(`/org/${data.id}/agents`);
-                } catch (error) {
-                    console.error('Error in org creation callback:', error);
-                    toast.error('Failed to switch to new workspace');
-                } finally {
-                    setIsLoading(false);
-                }
+            dispatch(createOrgAction(dataToSend, (data) => {
+                dispatch(userDetails());
+                handleSwitchOrg(data.id, data.name);
+                toast.success('Workspace created successfully');
+                closeModal(MODAL_TYPE.CREATE_ORG_MODAL);
+                // ✅ wait one tick so org state is ready
+                setTimeout(() => {
+                    route.replace(`/org/${data.id}/agents`);
+                }, 0);
             }));
         } catch (error) {
             toast.error('Failed to create workspace');

@@ -9,7 +9,7 @@ import ToolCallCount from './ToolCallCount';
 import GuardrailSelector from './GuardrailSelector';
 import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, isPublished, isEditor = true }) => {
+const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, isPublished, isEditor = true ,isEmbedUser}) => {
   // Determine if content is read-only (either published or user is not an editor)
   const isReadOnly = isPublished || !isEditor;
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
@@ -18,7 +18,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
 
   const dispatch = useDispatch();
 
-  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, embedDefaultApiKeys, showDefaultApikeys } = useCustomSelector((state) => {
+  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, showDefaultApikeys } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const apikeys = state?.apiKeysReducer?.apikeys || {};
@@ -31,7 +31,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
       apikeydata: apikeys[params?.org_id] || [],
       bridgeApikey_object_id: isPublished ? (bridgeDataFromState?.apikey_object_id || {}) : (versionData?.apikey_object_id || {}),
       SERVICES: state?.serviceReducer?.services,
-      embedDefaultApiKeys: state.appInfoReducer.embedUserDetails?.apikey_object_id || {},
       showDefaultApikeys: state.appInfoReducer.embedUserDetails?.addDefaultApiKeys,
     };
   });
@@ -60,19 +59,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
 
    const filterApiKeysByService = (service) => {
     const regularApiKeys = apikeydata.filter(apiKey => apiKey?.service === service);
-    
-    // Add default embed API keys if they exist for this service and showDefaultApikeys is true
-    const defaultApiKeys = [];
-    if (showDefaultApikeys && embedDefaultApiKeys[service]) {
-      defaultApiKeys.push({
-        _id: embedDefaultApiKeys[service],
-        name: `Default Key`,
-        service: service,
-        isDefaultEmbedKey: true
-      });
-    }
-    
-    return [...defaultApiKeys, ...regularApiKeys];
+    return regularApiKeys;
   };
 
   const handleSelectionChange = useCallback((service, apiKeyId) => {
@@ -108,7 +95,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
           <ResponseFormatSelector isPublished={isPublished} isEditor={isEditor} params={params} searchParams={searchParams} />
         </div>
       )}
-
+ {((!showDefaultApikeys && isEmbedUser) || !isEmbedUser) && (
       <div className="">
         <div className="flex flex-col gap-3 w-full">
           {/* Multiple API Keys Label */}
@@ -159,9 +146,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
                             />
                             <span className={`text-sm flex items-center gap-2 ${apiKey?.isDefaultEmbedKey ? 'font-medium text-primary' : ''}`}>
                               {truncateText(apiKey?.name, 25)}
-                              {apiKey?.isDefaultEmbedKey && (
-                                <span className="badge badge-primary badge-xs">DEFAULT</span>
-                              )}
                             </span>
                           </label>
                         </div>
@@ -179,6 +163,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, is
         </div>
         </div>
       </div>
+    )}
 
       <div className="">
         <ToolCallCount params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor}/>
