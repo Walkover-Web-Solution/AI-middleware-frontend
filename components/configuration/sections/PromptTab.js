@@ -6,10 +6,9 @@ import { useConfigurationContext } from "../ConfigurationContext";
 import AdvancedParameters from "../configurationComponent/AdvancedParamenter";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
-const PromptTab = ({ isPublished }) => {
+const PromptTab = ({ isPublished,isEmbedUser }) => {
   const { params, searchParams, isEditor } = useConfigurationContext();
-  const { isEmbedUser, hideAdvancedParameters } = useCustomSelector(state => ({
-    isEmbedUser: state.appInfoReducer.embedUserDetails.isEmbedUser,
+  const { hideAdvancedParameters } = useCustomSelector(state => ({
     hideAdvancedParameters: state.appInfoReducer.embedUserDetails.hideAdvancedParameters,
   }));
   return (

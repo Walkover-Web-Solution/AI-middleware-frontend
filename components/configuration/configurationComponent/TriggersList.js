@@ -25,7 +25,7 @@ function getStatusClass(status) {
     }
 };
 
-export default function TriggersList({ params, isEmbedUser }) {
+export default function TriggersList({ params,isEmbedUser,isReadOnly}) {
     const dispatch = useDispatch();
     const { triggerEmbedToken, triggerData, isViewer } = useCustomSelector((state) => ({
         triggerEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.triggerEmbedToken,
@@ -43,7 +43,7 @@ export default function TriggersList({ params, isEmbedUser }) {
         if (triggerData) {
             const filteredTriggers = triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
             setTriggers(filteredTriggers);
-            if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
+            if (!filteredTriggers?.length && window?.openViasocket && authkey && !isReadOnly) openTrigger()
         }
         if (!isEmbedUser && !isViewer) getAndSetAuthKey()
     }, [params?.org_id, authkey, isEmbedUser, isViewer]);
@@ -128,17 +128,17 @@ export default function TriggersList({ params, isEmbedUser }) {
             <div className="flex flex-col gap-2 w-full">
                 {!hasTriggers ? (
                     <div className="w-full max-w-md">
-                        <div className="border-2 border-dashed p-4 text-center">
+                        <div className="border-2 border-dashed border-base-200 p-4 text-center">
                             <p className="text-sm text-base-content/70">
                                 No triggers found.
                             </p>
                             <button
                                 onClick={() => openTrigger()}
-                                className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-sm mt-3 gap-1"
-                                disabled={isViewer}
+                                className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                disabled={isReadOnly}
                             >
                                 <AddIcon className="w-3 h-3" />
-                                ADD
+                                Add
                             </button>
                         </div>
                     </div>

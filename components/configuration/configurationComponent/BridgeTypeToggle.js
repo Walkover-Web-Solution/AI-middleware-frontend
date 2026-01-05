@@ -88,7 +88,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser, isPublished, isEd
                                             className="radio radio-sm sm:radio"
                                             checked={bridgeType?.toString()?.toLowerCase() === "trigger"}
                                             onChange={(e) => handleInputChange(e, "bridgeType")}
-                                            disabled={modelType === 'embedding'}
+                                            disabled={modelType === 'embedding'|| isReadOnly}
                                         />
                                         <div className="group relative inline-block">
                                             <span className="label-text text-sm sm:text-base ml-2 cursor-pointer">Triggers</span>
