@@ -65,6 +65,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                 dispatch(userDetails());
                 handleSwitchOrg(data.id, data.name);
                 toast.success('Workspace created successfully');
+                closeModal(MODAL_TYPE.CREATE_ORG_MODAL);
                 // ✅ wait one tick so org state is ready
                 setTimeout(() => {
                     route.replace(`/org/${data.id}/agents`);
