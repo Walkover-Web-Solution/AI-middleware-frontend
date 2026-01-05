@@ -284,9 +284,14 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                   className="dropdown-content mb-6 z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[340px] w-[260px] overflow-y-auto border border-base-300"
                 >
                   {Object.entries(computedModelsList || {}).map(([group, options]) => {
-                    const isInvalidGroup = group === "image";
-                    if (isInvalidGroup) return null;
+                          if (group === "image") return null;
 
+                    // 1️⃣ Pre-filter valid models
+                  const validModels = Object.keys(options || {}).filter(option => {
+                  const modelName = options?.[option]?.configuration?.model?.default || option;
+                    return currentModel !== modelName && currentModel !== option;
+                  });
+                  if (validModels.length === 0) return null;
                     return (
                       <li key={group} className="px-2 py-1 cursor-pointer">
                         <span className="text-sm text-base-content">{group}</span>
