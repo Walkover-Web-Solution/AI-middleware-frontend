@@ -71,7 +71,6 @@ const CustomTable = ({
             // Access window only on client side
             if (typeof window !== 'undefined') {
                 const width = window.innerWidth;
-                setViewportWidth(width);
                 setIsSmallScreen(width < 768);
             }
         };

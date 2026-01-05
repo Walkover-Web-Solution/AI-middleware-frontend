@@ -54,6 +54,7 @@ export const KEYS_TO_COMPARE = [
     "connected_agents",
     "user_reference",
     "doc_ids",
+    "knowledge_base",
     "guardrails",
     'gpt_memory_context',
     'fall_back'
@@ -69,7 +70,8 @@ export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {
         case 'function_ids': return 'Tools';
         case 'service': return 'Service Provider';
         case 'apikey_object_id': return 'API Key';
-        case 'doc_ids': return 'Knowledge Base';
+        case 'doc_ids': return 'Knowledge Base (Legacy)';
+        case 'knowledge_base': return 'Knowledge Base';
         case 'connected_agents': return 'Connected Agents';
         case 'model': return 'Model';
         case 'prompt': return 'Prompt';

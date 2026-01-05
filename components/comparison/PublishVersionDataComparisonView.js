@@ -128,7 +128,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       return JSON.stringify(value);
     }
     
-    // Handle document IDs
+    // Handle document IDs (legacy format)
     if (rootKey === 'doc_ids') {
       if (Array.isArray(value) && value.length > 0) {
         const kbItems = knowledgeBaseData?.filter(item => value.includes(item?._id));
@@ -137,6 +137,32 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
         }
       }
       return JSON.stringify(value);
+    }
+    
+    // Handle knowledge base (new format)
+    if (rootKey === 'knowledge_base') {
+      if (Array.isArray(value) && value.length > 0) {
+        return (
+          <div className="space-y-2">
+            {value.map((kbEntry, index) => {
+              const collection = collections?.find(c => c.collection_id === kbEntry.collection_id);
+              const resourceCount = kbEntry.resource_ids?.length || 0;
+              
+              return (
+                <div key={index} className="p-2 bg-base-200 rounded border">
+                  <div className="font-medium text-sm">
+                    {collection?.name || `Collection: ${kbEntry.collection_id}`}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {resourceCount} resource{resourceCount !== 1 ? 's' : ''} connected
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+      return <span className="text-gray-500 text-sm">No knowledge base connected</span>;
     }
     
     // Handle objects and arrays with improved display
