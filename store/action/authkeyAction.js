@@ -1,6 +1,5 @@
 import { allAuthKey, createAuthKey, deleteAuthkey } from "@/config/index";
 import { fetchAllAuthData, addAuthData, removeAuthData } from "../reducer/authkeyReducer";
-import posthog from "@/utils/posthog";
 
 
 /**
@@ -34,9 +33,6 @@ export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
 
     // Update the authkey reducer with the new auth key data
     dispatch(addAuthData(data));
-    posthog.capture('auth_key_created', {
-      auth_key_data: data
-    });
     return data
   } catch (error) {
     // Log the error if any
@@ -60,9 +56,6 @@ export const deleteAuthData = (data) => async (dispatch, getState) => {
 
     // Make a request to the server to delete the auth key
     await deleteAuthkey(data.id);
-    posthog.capture('auth_key_deleted', {
-      auth_key_data: data
-    });
   } catch (error) {
     // Log the error if any
     console.error(error);
