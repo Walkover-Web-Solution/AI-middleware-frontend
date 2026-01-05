@@ -494,7 +494,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 <div className="relative flex items-center gap-1">
                   {/* Sliding background indicator */}
                   <span
-                    className="absolute inset-0 rounded-lg bg-primary shadow-sm transition-all duration-300 ease-in-out"
+                    className="absolute inset-0 ml-3 rounded-lg bg-primary shadow-sm transition-all duration-300 ease-in-out"
                     style={{
                       width: `${100 / (TABS.length || 1)}%`,
                       transform: `translateX(${activeTabIndex * 100}%)`,
@@ -506,7 +506,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                       <button
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
-                        className={`relative z-10 px-2 sm:px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm font-medium whitespace-nowrap ${
+                        className={`relative z-10 px-3 py-2 sm:px-4 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm font-medium whitespace-nowrap ${
                           isActive
                             ? 'text-primary-content bg-transparent hover:bg-transparent'
                             : 'text-base-content/70 hover:text-base-content hover:bg-base-200/30'
@@ -518,7 +518,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                             isActive ? 'opacity-100' : 'opacity-60'
                           }`}
                         />
-                        <span className="truncate text-xs pr-2">
+                        <span className="truncate text-xs">
                           {isMobile ? tab.shortLabel : tab.label}
                         </span>
                       </button>

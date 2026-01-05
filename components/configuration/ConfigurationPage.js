@@ -57,8 +57,20 @@ const ConfigurationPage = ({
     // }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
     const handleNavigation = useCallback((target) => {
+        // Update URL with view parameter while preserving existing query params
+        const current = new URLSearchParams(window.location.search);
+        // Remove tab parameter when switching to integration view to avoid conflicts
+        if (target === 'integration') {
+            current.delete('tab');
+        }
+        current.set('tab', target);
+
+        const search = current.toString();
+        const query = search ? `?${search}` : '';
+        router.push(`${window.location.pathname}${query}`, { scroll: false });
+        
         setCurrentView(target);
-    }, [params.org_id, params.id, searchParams?.version, router]);
+    }, [params.org_id, params.id, router]);
 
     const renderHelpSection = useMemo(() => () => {
         return (
@@ -81,7 +93,7 @@ const ConfigurationPage = ({
                     {/* Help Docs */}
                 
                         <a
-                            href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
+                            href="https://gtwy.ai/resources"
                             className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors"
                             target="_blank"
                             rel="noopener noreferrer"

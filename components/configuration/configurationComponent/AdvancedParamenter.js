@@ -495,7 +495,8 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             <div className="relative w-full" ref={dropdownContainerRef}>
               <div
                 className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
-                onClick={() => setShowDropdown(!showDropdown)}
+                disabled={isReadOnly}
+                onClick={() => !isReadOnly && setShowDropdown(!showDropdown)}
               >
                 <span className="truncate text-base-content text-xs">
                   {isDefaultValue
