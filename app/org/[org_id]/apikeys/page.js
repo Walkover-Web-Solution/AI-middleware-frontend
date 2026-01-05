@@ -88,11 +88,11 @@ const Page = () => {
       </div>
     ),
     last_used: item.last_used ? (
-      <div className="group cursor-help">
-        <span className="group-hover:hidden">
+      <div className="group cursor-help w-[100px] min-w-[100px] max-w-[100px]">
+        <span className="group-hover:hidden block truncate">
           {formatRelativeTime(item.last_used)}
         </span>
-        <span className="hidden group-hover:inline ">
+        <span className="hidden group-hover:block truncate text-xs" title={formatDate(item.last_used)}>
           {formatDate(item.last_used)}
         </span>
       </div>

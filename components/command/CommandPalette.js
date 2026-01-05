@@ -50,10 +50,11 @@ const CommandPalette = ({isEmbedUser}) => {
     return null;
   }, [pathname]);
 
-  const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData } = useCustomSelector((state) => ({
+  const { agentList, apikeys, collections, resourcesByCollection, functionData, integrationData, authData } = useCustomSelector((state) => ({
     agentList: state?.bridgeReducer?.org?.[orgId]?.orgs || [],
     apikeys: state?.apiKeysReducer?.apikeys?.[orgId] || [],
-    knowledgeBase: state?.knowledgeBaseReducer?.knowledgeBaseData?.[orgId] || [],
+    collections: state?.knowledgeBaseReducer?.collections || [],
+    resourcesByCollection: state?.knowledgeBaseReducer?.resourcesByCollection || {},
     functionData: state?.bridgeReducer?.org?.[orgId]?.functionData || {},
     integrationData: state?.integrationReducer?.integrationData?.[orgId] || [],
     authData: state?.authDataReducer?.authData || [],
@@ -112,12 +113,31 @@ const CommandPalette = ({isEmbedUser}) => {
         }));
 
       case 'docs':
-        return knowledgeBase.map((d) => ({
-          id: d._id,
-          title: d.name || d._id,
-          subtitle: "Knowledge Base",
-          type: "docs",
-        }));
+        const allItems = [];
+        // Add collections
+        collections.forEach((collection) => {
+          allItems.push({
+            id: collection.collection_id,
+            title: collection.name || collection.collection_id,
+            subtitle: "Collection",
+            type: "docs",
+            itemType: "collection",
+          });
+          
+          // Add resources for this collection
+          const resources = resourcesByCollection[collection.collection_id] || [];
+          resources.forEach((resource) => {
+            allItems.push({
+              id: resource._id,
+              title: resource.title || "Untitled Resource",
+              subtitle: `Resource in ${collection.name}`,
+              type: "docs",
+              itemType: "resource",
+              collectionId: collection.collection_id,
+            });
+          });
+        });
+        return allItems;
 
       case 'integrations':
         return integrationData.map((d) => ({
@@ -138,7 +158,7 @@ const CommandPalette = ({isEmbedUser}) => {
       default:
         return [];
     }
-  }, [agentList, apikeys, knowledgeBase, integrationData, authData]);
+  }, [agentList, apikeys, collections, resourcesByCollection, integrationData, authData]);
 
   const createAgentItem = (a, type) => ({
     id: a._id,
@@ -217,12 +237,38 @@ const CommandPalette = ({isEmbedUser}) => {
     type: "apikeys",
   }));
 
-  const kbGroup = filterBy(knowledgeBase, ["name", "_id"]).map((d) => ({
-    id: d._id,
-    title: d.name || d._id,
-    subtitle: "Knowledge Base",
-    type: "docs",
-  }));
+  const kbGroup = useMemo(() => {
+    const allItems = [];
+    // Filter collections
+    const filteredCollections = filterBy(collections, ["name", "collection_id"]);
+    filteredCollections.forEach((collection) => {
+      allItems.push({
+        id: collection.collection_id,
+        title: collection.name || collection.collection_id,
+        subtitle: "Collection",
+        type: "docs",
+        itemType: "collection",
+      });
+    });
+    
+    // Filter resources
+    collections.forEach((collection) => {
+      const resources = resourcesByCollection[collection.collection_id] || [];
+      const filteredResources = filterBy(resources, ["title", "_id"]);
+      filteredResources.forEach((resource) => {
+        allItems.push({
+          id: resource._id,
+          title: resource.title || "Untitled Resource",
+          subtitle: `Resource in ${collection.name}`,
+          type: "docs",
+          itemType: "resource",
+          collectionId: collection.collection_id,
+        });
+      });
+    });
+    
+    return allItems;
+  }, [query, collections, resourcesByCollection]);
 
   const integrationGroup = filterBy(integrationData, ["name", "service", "_id"]).map((d) => ({
     id: d._id,
@@ -249,7 +295,7 @@ const CommandPalette = ({isEmbedUser}) => {
     docs: kbGroup,
     integrations: integrationGroup,
     auths: authGroup,
-  }), [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
+  }), [query, agentList, apikeys, collections, resourcesByCollection, functions, integrationData, authData]);
 
   const allResults = useMemo(() => [
     ...items.agents.map((it) => ({ 
@@ -421,8 +467,13 @@ const CommandPalette = ({isEmbedUser}) => {
         router.push(`/org/${orgId}/apikeys?filter=${item.id}`);
         break;
       case "docs":
-        // Always navigate to knowledge base page with filter parameter
-        router.push(`/org/${orgId}/knowledge_base?filter=${item.id}`);
+        if (item.itemType === "resource") {
+          // Navigate to knowledge base page with resource filter
+          router.push(`/org/${orgId}/knowledge_base?filter=${item.id}&type=resource`);
+        } else {
+          // Navigate to knowledge base page with collection filter
+          router.push(`/org/${orgId}/knowledge_base?filter=${item.id}&type=collection`);
+        }
         break;
       case "integrations":
         // Always navigate to integrations page with filter parameter
