@@ -49,7 +49,6 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
     const activeData = isPublished ? bridgeDataFromState : versionData;
-    console.log(activeData,"activeData")
     const serviceName = activeData?.service;
     const modelTypeName = activeData?.configuration?.type?.toLowerCase();
     const modelName = activeData?.configuration?.model;

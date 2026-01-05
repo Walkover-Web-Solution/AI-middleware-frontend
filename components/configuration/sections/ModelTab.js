@@ -26,9 +26,6 @@ const ModelTab = () => {
     isPublished,
     isEditor
   } = useConfigurationContext();
-  console.log(isPublished,"12345")
-  console.log(isEditor,"4321")
-
   const shouldRenderApiKey = useMemo(
     () => ((!showDefaultApikeys && isEmbedUser) || !isEmbedUser),
     [isEmbedUser, showDefaultApikeys]
