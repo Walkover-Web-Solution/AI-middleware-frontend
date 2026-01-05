@@ -5,9 +5,8 @@ import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import KnowledgebaseList from "./configurationComponent/KnowledgebaseList";
 import { useConfigurationContext } from './ConfigurationContext';
 
-const ToolsSection = memo(({ isPublished }) => {
-    const { params, searchParams, shouldToolsShow, isEditor } = useConfigurationContext();
-
+const ToolsSection = memo(({isPublished }) => {
+    const { params, searchParams, shouldToolsShow ,isEditor} = useConfigurationContext();
     if (!shouldToolsShow) {
         return (
             <div className="flex items-center gap-2 mt-3 mb-3">
