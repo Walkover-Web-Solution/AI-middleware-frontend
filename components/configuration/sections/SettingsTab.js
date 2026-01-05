@@ -40,7 +40,7 @@ const SettingsTab = () => {
     <div className="flex flex-col mt-4 gap-6 w-full">
       {shouldShowTriggers && (
         <div className="rounded-xl w-full">
-          <TriggersList params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
+          <TriggersList params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} isReadOnly={isReadOnly} />
         </div>
       )}
 
@@ -94,6 +94,7 @@ const SettingsTab = () => {
                   modelType={modelType}
                   isPublished={isPublished}
                   isEditor={isEditor}
+                  isEmbedUser={isEmbedUser}
                 />
               </div>
             )}

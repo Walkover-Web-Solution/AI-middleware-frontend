@@ -1,6 +1,5 @@
 import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteBridgeVersionApi, deleteFunctionApi, discardBridgeVersionApi, fetchBridgeUsageMetricsApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, publishBulkVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config/index";
 import { toast } from "react-toastify";
-import posthog from "@/utils/posthog";
 import { clearBridgeUsageMetricsReducer, clearPreviousBridgeDataReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, deleteBridgeVersionReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, setSavingStatus, setBridgeUsageMetricsReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
@@ -43,11 +42,6 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
     };
     onSuccess(serializableData);
     dispatch(createBridgeReducer({ data: serializableData, orgId: dataToSend.orgid }));
-    if (response?.data?._id) {
-      posthog.capture('agent_created', {
-        data: serializableData
-      });
-    }
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
       toast.error("Agent Name can't be duplicate");
@@ -63,7 +57,7 @@ export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => as
   try {
     dispatch(clearPreviousBridgeDataReducer())
     const data = await createBridge(dataToSend)
-    dispatch(createBridgeReducer({ data, orgId: orgId }));
+    dispatch(createBridgeReducer({data, orgId: orgId}));
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
@@ -86,9 +80,6 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     if (result?.success) {
       onSuccess(result);
       dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description, orgId: data?.orgId }));
-      posthog.capture('agent_version_created', {
-        version_id: result?.version_id
-      });
       toast.success('New version created successfully');
     }
   } catch (error) {
@@ -124,22 +115,11 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const history_page_chatbot_token = response?.data?.history_page_chatbot_token
     const triggerEmbedToken = response?.data?.trigger_embed_token;
     const average_response_time = response?.data?.avg_response_time;
-    const doctstar_embed_token = response?.data?.doctstar_embed_token;
+    const doctstar_embed_token=response?.data?.doctstar_embed_token;
     const bridgesPayload = response?.data?.agent || [];
 
     if (onSuccess) onSuccess(bridgesPayload)
-    dispatch(fetchAllBridgeReducer({ bridges: bridgesPayload, orgId: response?.data?.org_id, embed_token, doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
-
-    // Update user properties with agent metrics for user segmentation
-    const totalAgents = bridgesPayload.length;
-    const publishedAgents = bridgesPayload.filter(agent => agent.published_version_id).length;
-
-    posthog.setPersonProperties({
-      total_agents: totalAgents,
-      published_agents: publishedAgents,
-      has_agents: totalAgents > 0,
-      agents_last_fetched: new Date().toISOString()
-    });
+    dispatch(fetchAllBridgeReducer({ bridges: bridgesPayload, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
@@ -200,10 +180,6 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
     markUpdateInitiatedByCurrentTab(bridgeId);
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.agent, functionData: dataToSend?.functionData || null }));
-    posthog.capture('agent_updated', {
-      agent_id: bridgeId,
-      update_type: 'metadata'
-    });
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -214,24 +190,24 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
 
 export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
   try {
-    if (!versionId) {
+    if(!versionId){
       toast.error("You cannot update published data");
       return;
     }
-
+    
     // Show saving indication in navbar
     dispatch(setSavingStatus({ status: 'saving' }));
-
+    
     dispatch(isPending());
     markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
     const updatedVersion = data?.agent;
-
+    
     if (data?.success && updatedVersion) {
       dispatch(updateBridgeVersionReducer({ bridges: updatedVersion, functionData: dataToSend?.functionData || null }));
       // Update status to show success
       dispatch(setSavingStatus({ status: 'saved' }));
-
+      
       // Clear the status after 3 seconds
       setTimeout(() => {
         dispatch(setSavingStatus({ status: null }));
@@ -239,7 +215,7 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     } else {
       // Update status to show warning
       dispatch(setSavingStatus({ status: 'warning' }));
-
+      
       // Clear the status after 3 seconds
       setTimeout(() => {
         dispatch(setSavingStatus({ status: null }));
@@ -250,7 +226,7 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     dispatch(isError());
     // Show error status
     dispatch(setSavingStatus({ status: 'failed' }));
-
+    
     // Clear the status after 3 seconds
     setTimeout(() => {
       dispatch(setSavingStatus({ status: null }));
@@ -263,17 +239,12 @@ export const deleteBridgeAction = ({ bridgeId, org_id, restore = false }) => asy
     const response = await deleteBridge(bridgeId, org_id, restore);
     if (response?.data?.success) {
       dispatch(deleteBridgeReducer({ bridgeId, orgId: org_id, restore }));
-      posthog.capture('agent_deleted', {
-        agent_id: bridgeId,
-        org_id: org_id,
-        restore: restore
-      });
     }
     return response;
   } catch (error) {
     toast.error(error?.response?.data?.error || error?.message || error || 'Failed to delete agent');
     console.error('Failed to delete bridge:', error);
-    throw error;
+    throw  error;
   }
 };
 
@@ -432,9 +403,9 @@ export const fetchBridgeUsageMetricsAction = ({ start_date, end_date, filterActi
       filters: { start_date, end_date },
       filterActive
     }));
-
+    
     const response = await fetchBridgeUsageMetricsApi({ start_date, end_date });
-
+    
     // Set loading to false after API call completes
     dispatch(setBridgeUsageMetricsReducer({
       loading: false,
@@ -452,7 +423,7 @@ export const fetchBridgeUsageMetricsAction = ({ start_date, end_date, filterActi
 
 export const clearBridgeUsageMetricsAction = () => (dispatch) => {
   dispatch(clearBridgeUsageMetricsReducer());
-  dispatch(fetchBridgeUsageMetricsAction({ start_date: null, end_date: null, filterActive: true }));
+  dispatch(fetchBridgeUsageMetricsAction({start_date: null, end_date: null, filterActive: true}));
 };
 
 export const publishBulkVersionAction = (version_ids) => async (dispatch) => {

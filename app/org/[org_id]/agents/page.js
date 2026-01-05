@@ -1112,7 +1112,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                 <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
+                  router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}&type=${row?.bridgeType || 'chatbot'}`);
                 }}>
                   History
                 </button>

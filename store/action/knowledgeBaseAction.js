@@ -26,27 +26,19 @@ import {
   updateResourcesInCollection,
   setResourcesForCollection
 } from "../reducer/knowledgeBaseReducer";
-import posthog from "@/utils/posthog";
 
 
 
 export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) => {
-
   try {
     const response = await createKnowledgeBaseEntry(data);
     if (response.data) {
       toast.success(response?.data?.message)
-      dispatch(addKnowbaseDataReducer({
+      dispatch(addKnowbaseDataReducer({ 
         orgId,
-        data: response?.data,
-        _id: response?.data?._id
+        data : response?.data,
+        _id: response?.data?._id 
       }))
-
-      posthog.capture('knowledge_base_created', {
-        knowledge_base_data: response?.data,
-        org_id: orgId
-      });
-
       return response?.data
     }
   } catch (error) {
@@ -54,15 +46,15 @@ export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) 
   }
 };
 export const getKnowledgeBaseTokenAction = (orgId) => async (dispatch) => {
-  try {
-    const response = await getKnowledgeBaseToken();
-    if (response) {
-      return { response };
+    try {
+      const response = await getKnowledgeBaseToken(); 
+      if (response) {
+        return { response };
+      }
+    } catch (error) {
+      toast.error("something went wrong");
+      console.error(error);
     }
-  } catch (error) {
-    toast.error("something went wrong");
-    console.error(error);
-  }
 };
 export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
   try {
@@ -76,19 +68,14 @@ export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
   }
 };
 
-export const deleteKnowBaseDataAction = ({ data }) => async (dispatch) => {
+export const deleteKnowBaseDataAction = ({data}) => async (dispatch) => {
   try {
     // Step 1: Create a backup of the current state
     dispatch(backupKnowledgeBaseReducer({ orgId: data?.orgId }));
-    dispatch(deleteKnowledgeBaseReducer({ id: data?.id, orgId: data?.orgId }))
+    dispatch(deleteKnowledgeBaseReducer({id:data?.id, orgId:data?.orgId}))
     const response = await deleteKnowBaseData(data);
     if (response) {
       toast.success(response.message);
-
-      posthog.capture('knowledge_base_deleted', {
-        knowledge_base_deleted: response,
-        org_id: data?.orgId
-      });
     }
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId: data?.orgId }));
@@ -99,7 +86,7 @@ export const deleteKnowBaseDataAction = ({ data }) => async (dispatch) => {
 export const updateKnowledgeBaseAction = (data, orgId) => async (dispatch) => {
   try {
     dispatch(backupKnowledgeBaseReducer({ orgId }));
-    dispatch(updateKnowledgeBaseReducer({
+    dispatch(updateKnowledgeBaseReducer({ 
       orgId,
       data: data,
       _id: data?._id
@@ -107,16 +94,11 @@ export const updateKnowledgeBaseAction = (data, orgId) => async (dispatch) => {
     const response = await updateKnowledgeBaseEntry(data);
     if (response.data) {
       toast.success(response?.data?.message);
-      dispatch(updateKnowledgeBaseReducer({
+      dispatch(updateKnowledgeBaseReducer({ 
         orgId,
         data: response?.data?.data,
         _id: response?.data?.data?._id
       }));
-
-      posthog.capture('knowledge_base_updated', {
-        knowledge_base_data: response?.data?.data,
-        org_id: orgId
-      });
     }
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId }));
