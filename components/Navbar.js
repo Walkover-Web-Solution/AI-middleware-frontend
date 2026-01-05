@@ -551,8 +551,9 @@ const Navbar = ({ isEmbedUser, params }) => {
               </div>
               
               {/* Publish/Discard Dropdown - Fixed Position */}
+                {activeTab == 'configure' && (
               <div className="flex items-center">
-                <div className="dropdown dropdown-end">
+                <div className="dropdown dropdown-end">                  
                     <button 
                       tabIndex={0}
                       role="button" 
@@ -589,7 +590,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                   </div>
               
               </div>
-              
+                )}
               {/* Ellipsis menu - Fixed Position */}
               <div className="flex items-center">
                 {!isEmbedUser && (
