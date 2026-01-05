@@ -561,6 +561,7 @@ promptHelperPanelRef.current?.resize(5);
                 closeHelperButtonLocation={closeHelperButtonLocation}
                 bridgeName={bridgeName}
                 onViewChange={handleViewChange}
+                viewOverride={isAgentFlowView ? 'agent-flow' : undefined}
               />
             </div>
           </div>
@@ -608,6 +609,7 @@ promptHelperPanelRef.current?.resize(5);
                     closeHelperButtonLocation={closeHelperButtonLocation}
                     bridgeName={bridgeName}
                     onViewChange={handleViewChange}
+                    viewOverride={isAgentFlowView ? 'agent-flow' : undefined}
                   />
                 </div>
               </div>
@@ -805,6 +807,7 @@ promptHelperPanelRef.current?.resize(5);
                   isMobileView={isMobileView}
                   bridgeName={bridgeName}
                   onViewChange={handleViewChange}
+                  viewOverride={isAgentFlowView ? 'agent-flow' : undefined}
                 />
               </div>
             </div>
@@ -829,6 +832,7 @@ promptHelperPanelRef.current?.resize(5);
                   isMobileView={isMobileView}
                   bridgeName={bridgeName}
                   onViewChange={handleViewChange}
+                  viewOverride={isAgentFlowView ? 'agent-flow' : undefined}
                 />
               </div>
             </div>

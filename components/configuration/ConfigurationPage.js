@@ -20,11 +20,13 @@ const ConfigurationPage = ({
     handleCloseTextAreaFocus,
     savePrompt,
     isMobileView,
-    closeHelperButtonLocation
+    closeHelperButtonLocation,
+    onViewChange,
+    viewOverride
 }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
-    const [currentView, setCurrentView] = useState(view);
+    const [currentView, setCurrentView] = useState(viewOverride || view);
 
     const configState = useConfigurationState(params, searchParams);
     
@@ -70,7 +72,14 @@ const ConfigurationPage = ({
         router.push(`${window.location.pathname}${query}`, { scroll: false });
         
         setCurrentView(target);
-    }, [params.org_id, params.id, router]);
+        onViewChange?.(target === 'agent-flow');
+    }, [onViewChange, params.org_id, params.id, searchParams?.version, router]);
+
+    useEffect(() => {
+        if (viewOverride && viewOverride !== currentView) {
+            setCurrentView(viewOverride);
+        }
+    }, [currentView, viewOverride]);
 
     const renderHelpSection = useMemo(() => () => {
         return (
