@@ -48,8 +48,6 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
-    console.log(bridgeDataFromState,"bridgeDataFromState",isPublished,versionData,"versionData")
-    // Use bridgeData when isPublished=true, otherwise use versionData
     const activeData = isPublished ? bridgeDataFromState : versionData;
     console.log(activeData,"activeData")
     const serviceName = activeData?.service;
