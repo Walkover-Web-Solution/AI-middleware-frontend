@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, TrashIcon, ChevronRightIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, TrashIcon, DatabaseIcon, ChevronRightIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -50,6 +50,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedCollections, setExpandedCollections] = useState({});
+    const [expandedDropdownCollections, setExpandedDropdownCollections] = useState({});
     
     // Toggle collection expansion in dropdown
     const toggleDropdownCollection = (collectionId) => {
@@ -187,8 +188,6 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         };
     }, [params.org_id, dispatch]);
 
-    // State for tracking which collections are expanded in dropdown
-    const [expandedDropdownCollections, setExpandedDropdownCollections] = useState({});
 
     // Get resources for collection when expanded
     const getResourcesForCollection = (collectionId) => {
@@ -388,13 +387,168 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                             <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
                     </div>
-                    <button
-                        tabIndex={0}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70"
-                        disabled={!shouldToolsShow || isReadOnly}
-                    >
-                        <AddIcon className="w-6 h-6" />
-                    </button>
+                    <div className="dropdown dropdown-end">
+                        <button
+                            tabIndex={0}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none text-primary-content p-1.5 h-8 w-8 bg-primary hover:bg-primary/70"
+                            disabled={!shouldToolsShow || isReadOnly}
+                        >
+                            <AddIcon className="w-6 h-6" />
+                        </button>
+                        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-2 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                            <div className='flex flex-col gap-1 w-full'>
+                                <li className="text-xs font-semibold disabled py-1">Available Knowledge Bases</li>
+                                <input
+                                    type='text'
+                                    placeholder='Search Knowledge Base'
+                                    value={searchQuery}
+                                    onChange={handleInputChange}
+                                    className='input input-bordered w-full input-xs text-xs'
+                                />
+                                <div className="text-xs text-base-content/60 mb-1 px-1">Expand collections to see individual resources</div>
+                                {collections
+                                    .filter(collection =>
+                                        collection?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+                                    )
+                                    .map(collection => {
+                                        const isCollectionConnected = Array.isArray(knowbaseVersionData) && 
+                                            knowbaseVersionData.some(kb => kb.collection_id === collection.collection_id);
+                                        const isExpanded = expandedDropdownCollections[collection.collection_id];
+                                        const resources = resourcesByCollection[collection.collection_id] || [];
+                                        
+                                        return (
+                                            <div key={collection.collection_id} className="mb-1">
+                                                {/* Collection Header */}
+                                                <li className="hover:bg-base-300/30 rounded px-1 py-0.5">
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <div className="flex items-center gap-2 flex-1">
+                                                            {/* Chevron Button */}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    toggleDropdownCollection(collection.collection_id);
+                                                                }}
+                                                                className="p-0.5 hover:bg-base-300 rounded transition-colors"
+                                                            >
+                                                                <ChevronRightIcon 
+                                                                    size={10} 
+                                                                    className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+                                                                />
+                                                            </button>
+                                                            
+                                                            {/* Collection Info */}
+                                                            <div className="flex items-center gap-1 flex-1">
+                                                                <DatabaseIcon size={12} className="text-base-content" />
+                                                                <div className="flex-1">
+                                                                    <div className="text-xs font-medium leading-tight">
+                                                                        {collection.name.length > 20 ? (
+                                                                            <div className="tooltip" data-tip={collection.name}>
+                                                                                {truncate(collection.name, 20)}
+                                                                            </div>
+                                                                        ) : (
+                                                                            collection.name
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="text-xs text-base-content/60 leading-tight">
+                                                                        {collection.resource_ids?.length || 0} resources
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Add All Collection Button */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (!isCollectionConnected) {
+                                                                    handleAddKnowledgebase(collection, 'collection');
+                                                                }
+                                                            }}
+                                                            className={`px-1.5 py-0.5 rounded text-xs ${
+                                                                isCollectionConnected 
+                                                                    ? 'text-base-content bg-base-300 cursor-not-allowed' 
+                                                                    : 'text-base-content hover:bg-base-200 cursor-pointer'
+                                                            }`}
+                                                            disabled={isCollectionConnected}
+                                                        >
+                                                            {isCollectionConnected ? '✓ All' : '+ All'}
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                                
+                                                {/* Expanded Resources */}
+                                                {isExpanded && (
+                                                    <div className="ml-4 mt-0.5 space-y-0.5">
+                                                        {resources.length === 0 ? (
+                                                            <div className="text-xs text-base-content/60 py-1 px-1">
+                                                                Loading resources...
+                                                            </div>
+                                                        ) : (
+                                                            resources
+                                                                .filter(resource =>
+                                                                    resource?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                                                                    resource?.url?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+                                                                )
+                                                                .map(resource => {
+                                                                    const isResourceConnected = Array.isArray(knowbaseVersionData) && 
+                                                                        knowbaseVersionData.some(kb => 
+                                                                            kb.collection_id === collection.collection_id &&
+                                                                            kb.resource_ids?.includes(resource._id)
+                                                                        );
+                                                                    
+                                                                    return (
+                                                                        <li key={resource._id}
+                                                                            onClick={() => !isResourceConnected && handleAddKnowledgebase({
+                                                                                collection_id: collection.collection_id,
+                                                                                resource_id: resource._id
+                                                                            }, 'resource')}
+                                                                            className={`${isResourceConnected ? 'opacity-50 cursor-not-allowed' : 'hover:bg-base-200 cursor-pointer'} rounded px-1 py-0.5`}
+                                                                        >
+                                                                            <div className="flex justify-between items-center w-full">
+                                                                                <div className="flex items-center gap-1 flex-1">
+                                                                                    {GetFileTypeIcon('document', 10, 10)}
+                                                                                    <div className="flex-1">
+                                                                                        <div className="text-xs font-medium leading-tight">
+                                                                                            {(resource.title || 'Untitled').length > 25 ? (
+                                                                                                <div className="tooltip" data-tip={resource.title || 'Untitled'}>
+                                                                                                    {truncate(resource.title || 'Untitled', 25)}
+                                                                                                </div>
+                                                                                            ) : (
+                                                                                                resource.title || 'Untitled'
+                                                                                            )}
+                                                                                        </div>
+                                                                                        {resource.url && (
+                                                                                            <div className="text-xs text-base-content/50 truncate max-w-[180px] leading-tight">
+                                                                                                {resource.url}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                                {isResourceConnected ? (
+                                                                                    <span className="text-xs text-base-content">✓</span>
+                                                                                ) : (
+                                                                                    <span className="text-xs text-base-content">+</span>
+                                                                                )}
+                                                                            </div>
+                                                                        </li>
+                                                                    );
+                                                                })
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                }
+                                <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 hover:bg-base-200" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
+                                    <div className="flex items-center gap-1 justify-center text-base-content">
+                                        <AddIcon size={14} />
+                                        <p className='font-semibold text-xs'>Create New Collection</p>
+                                    </div>
+                                </li>
+                            </div>
+                        </ul>
+                    </div>
                 </div>
                 {tutorialState?.showSuggestion && (
                     <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
@@ -402,181 +556,264 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                 {tutorialState?.showTutorial && (
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
                 )}
-                {!tutorialState?.showTutorial && (
-                    <div className="dropdown dropdown-left mt-8">
-                        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-2 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-1 w-full'>
-                            <li className="text-xs font-semibold disabled py-1">Available Knowledge Bases</li>
-                            <input
-                                type='text'
-                                placeholder='Search Knowledge Base'
-                                value={searchQuery}
-                                onChange={handleInputChange}
-                                className='input input-bordered w-full input-xs text-xs'
-                            />
-                            <div className="text-xs text-base-content/60 mb-1 px-1">Expand collections to see individual resources</div>
-                            {collections
-                                .filter(collection =>
-                                    collection?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-                                )
-                                .map(collection => {
-                                    const isCollectionConnected = Array.isArray(knowbaseVersionData) && 
-                                        knowbaseVersionData.some(kb => kb.collection_id === collection.collection_id);
-                                    const isExpanded = expandedDropdownCollections[collection.collection_id];
-                                    const resources = resourcesByCollection[collection.collection_id] || [];
-                                    
-                                    return (
-                                        <div key={collection.collection_id} className="mb-1">
-                                            {/* Collection Header */}
-                                            <li className="hover:bg-base-300/30 rounded px-1 py-0.5">
-                                                <div className="flex items-center justify-between w-full">
-                                                    <div className="flex items-center gap-2 flex-1">
-                                                        {/* Chevron Button */}
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                toggleDropdownCollection(collection.collection_id);
-                                                            }}
-                                                            className="p-0.5 hover:bg-base-300 rounded transition-colors"
-                                                        >
-                                                            <ChevronRightIcon 
-                                                                size={10} 
-                                                                className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
-                                                            />
-                                                        </button>
-                                                        
-                                                        {/* Collection Info */}
-                                                        <div className="flex items-center gap-1 flex-1">
-                                                            <DatabaseIcon size={12} className="text-base-content" />
-                                                            <div className="flex-1">
-                                                                <div className="text-xs font-medium leading-tight">
-                                                                    {collection.name.length > 20 ? (
-                                                                        <div className="tooltip" data-tip={collection.name}>
-                                                                            {truncate(collection.name, 20)}
-                                                                        </div>
-                                                                    ) : (
-                                                                        collection.name
-                                                                    )}
-                                                                </div>
-                                                                <div className="text-xs text-base-content/60 leading-tight">
-                                                                    {collection.resource_ids?.length || 0} resources
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {/* Add All Collection Button */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (!isCollectionConnected) {
-                                                                handleAddKnowledgebase(collection, 'collection');
-                                                            }
-                                                        }}
-                                                        className={`px-1.5 py-0.5 rounded text-xs ${
-                                                            isCollectionConnected 
-                                                                ? 'text-base-content bg-base-300 cursor-not-allowed' 
-                                                                : 'text-base-content hover:bg-base-200 cursor-pointer'
-                                                        }`}
-                                                        disabled={isCollectionConnected}
-                                                    >
-                                                        {isCollectionConnected ? '✓ All' : '+ All'}
-                                                    </button>
-                                                </div>
-                                            </li>
+            </div>
+            <div className="flex flex-col gap-2 w-full ">
+                {/* Show empty state when no knowledge bases are connected */}
+                {knowbaseVersionData?.length === 0 && (
+                    <div className="border-2 border-dashed border-base-300 rounded-lg p-8 text-center">
+                        <p className="text-base-content/60 mb-4">No knowledge base found.</p>
+                        <div className="dropdown dropdown-end">
+                            <button
+                                tabIndex={0}
+                                className="btn btn-ghost text-base-content/60 hover:text-base-content"
+                                disabled={!shouldToolsShow || isReadOnly}
+                            >
+                                <AddIcon className="w-4 h-4" />
+                                Add
+                            </button>
+                            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-2 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                                <div className='flex flex-col gap-1 w-full'>
+                                    <li className="text-xs font-semibold disabled py-1">Available Knowledge Bases</li>
+                                    <input
+                                        type='text'
+                                        placeholder='Search Knowledge Base'
+                                        value={searchQuery}
+                                        onChange={handleInputChange}
+                                        className='input input-bordered w-full input-xs text-xs'
+                                    />
+                                    <div className="text-xs text-base-content/60 mb-1 px-1">Expand collections to see individual resources</div>
+                                    {collections
+                                        .filter(collection =>
+                                            collection?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+                                        )
+                                        .map(collection => {
+                                            const isCollectionConnected = Array.isArray(knowbaseVersionData) && 
+                                                knowbaseVersionData.some(kb => kb.collection_id === collection.collection_id);
+                                            const isExpanded = expandedDropdownCollections[collection.collection_id];
+                                            const resources = resourcesByCollection[collection.collection_id] || [];
                                             
-                                            {/* Expanded Resources */}
-                                            {isExpanded && (
-                                                <div className="ml-4 mt-0.5 space-y-0.5">
-                                                    {resources.length === 0 ? (
-                                                        <div className="text-xs text-base-content/60 py-1 px-1">
-                                                            Loading resources...
-                                                        </div>
-                                                    ) : (
-                                                        resources
-                                                            .filter(resource =>
-                                                                resource?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
-                                                                resource?.url?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-                                                            )
-                                                            .map(resource => {
-                                                                const isResourceConnected = Array.isArray(knowbaseVersionData) && 
-                                                                    knowbaseVersionData.some(kb => 
-                                                                        kb.collection_id === collection.collection_id &&
-                                                                        kb.resource_ids?.includes(resource._id)
-                                                                    );
+                                            return (
+                                                <div key={collection.collection_id} className="mb-1">
+                                                    {/* Collection Header */}
+                                                    <li className="hover:bg-base-300/30 rounded px-1 py-0.5">
+                                                        <div className="flex items-center justify-between w-full">
+                                                            <div className="flex items-center gap-2 flex-1">
+                                                                {/* Chevron Button */}
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        toggleDropdownCollection(collection.collection_id);
+                                                                    }}
+                                                                    className="p-0.5 hover:bg-base-300 rounded transition-colors"
+                                                                >
+                                                                    <ChevronRightIcon 
+                                                                        size={10} 
+                                                                        className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+                                                                    />
+                                                                </button>
                                                                 
-                                                                return (
-                                                                    <li key={resource._id}
-                                                                        onClick={() => !isResourceConnected && handleAddKnowledgebase({
-                                                                            collection_id: collection.collection_id,
-                                                                            resource_id: resource._id
-                                                                        }, 'resource')}
-                                                                        className={`${isResourceConnected ? 'opacity-50 cursor-not-allowed' : 'hover:bg-base-200 cursor-pointer'} rounded px-1 py-0.5`}
-                                                                    >
-                                                                        <div className="flex justify-between items-center w-full">
-                                                                            <div className="flex items-center gap-1 flex-1">
-                                                                                {GetFileTypeIcon('document', 10, 10)}
-                                                                                <div className="flex-1">
-                                                                                    <div className="text-xs font-medium leading-tight">
-                                                                                        {(resource.title || 'Untitled').length > 25 ? (
-                                                                                            <div className="tooltip" data-tip={resource.title || 'Untitled'}>
-                                                                                                {truncate(resource.title || 'Untitled', 25)}
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            resource.title || 'Untitled'
-                                                                                        )}
-                                                                                    </div>
-                                                                                    {resource.url && (
-                                                                                        <div className="text-xs text-base-content/50 truncate max-w-[180px] leading-tight">
-                                                                                            {resource.url}
-                                                                                        </div>
-                                                                                    )}
+                                                                {/* Collection Info */}
+                                                                <div className="flex items-center gap-1 flex-1">
+                                                                    <DatabaseIcon size={12} className="text-base-content" />
+                                                                    <div className="flex-1">
+                                                                        <div className="text-xs font-medium leading-tight">
+                                                                            {collection.name.length > 20 ? (
+                                                                                <div className="tooltip" data-tip={collection.name}>
+                                                                                    {truncate(collection.name, 20)}
                                                                                 </div>
-                                                                            </div>
-                                                                            {isResourceConnected ? (
-                                                                                <span className="text-xs text-base-content">✓</span>
                                                                             ) : (
-                                                                                <span className="text-xs text-base-content">+</span>
+                                                                                collection.name
                                                                             )}
                                                                         </div>
-                                                                    </li>
-                                                                );
-                                                            })
+                                                                        <div className="text-xs text-base-content/60 leading-tight">
+                                                                            {collection.resource_ids?.length || 0} resources
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Add All Collection Button */}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (!isCollectionConnected) {
+                                                                        handleAddKnowledgebase(collection, 'collection');
+                                                                    }
+                                                                }}
+                                                                className={`px-1.5 py-0.5 rounded text-xs ${
+                                                                    isCollectionConnected 
+                                                                        ? 'text-base-content bg-base-300 cursor-not-allowed' 
+                                                                        : 'text-base-content hover:bg-base-200 cursor-pointer'
+                                                                }`}
+                                                                disabled={isCollectionConnected}
+                                                            >
+                                                                {isCollectionConnected ? '✓ All' : '+ All'}
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                    
+                                                    {/* Expanded Resources */}
+                                                    {isExpanded && (
+                                                        <div className="ml-4 mt-0.5 space-y-0.5">
+                                                            {resources.length === 0 ? (
+                                                                <div className="text-xs text-base-content/60 py-1 px-1">
+                                                                    Loading resources...
+                                                                </div>
+                                                            ) : (
+                                                                resources
+                                                                    .filter(resource =>
+                                                                        resource?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                                                                        resource?.url?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+                                                                    )
+                                                                    .map(resource => {
+                                                                        const isResourceConnected = Array.isArray(knowbaseVersionData) && 
+                                                                            knowbaseVersionData.some(kb => 
+                                                                                kb.collection_id === collection.collection_id &&
+                                                                                kb.resource_ids?.includes(resource._id)
+                                                                            );
+                                                                        
+                                                                        return (
+                                                                            <li key={resource._id}
+                                                                                onClick={() => !isResourceConnected && handleAddKnowledgebase({
+                                                                                    collection_id: collection.collection_id,
+                                                                                    resource_id: resource._id
+                                                                                }, 'resource')}
+                                                                                className={`${isResourceConnected ? 'opacity-50 cursor-not-allowed' : 'hover:bg-base-200 cursor-pointer'} rounded px-1 py-0.5`}
+                                                                            >
+                                                                                <div className="flex justify-between items-center w-full">
+                                                                                    <div className="flex items-center gap-1 flex-1">
+                                                                                        {GetFileTypeIcon('document', 10, 10)}
+                                                                                        <div className="flex-1">
+                                                                                            <div className="text-xs font-medium leading-tight">
+                                                                                                {(resource.title || 'Untitled').length > 25 ? (
+                                                                                                    <div className="tooltip" data-tip={resource.title || 'Untitled'}>
+                                                                                                        {truncate(resource.title || 'Untitled', 25)}
+                                                                                                    </div>
+                                                                                                ) : (
+                                                                                                    resource.title || 'Untitled'
+                                                                                                )}
+                                                                                            </div>
+                                                                                            {resource.url && (
+                                                                                                <div className="text-xs text-base-content/50 truncate max-w-[180px] leading-tight">
+                                                                                                    {resource.url}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {isResourceConnected ? (
+                                                                                        <span className="text-xs text-base-content">✓</span>
+                                                                                    ) : (
+                                                                                        <span className="text-xs text-base-content">+</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            </li>
+                                                                        );
+                                                                    })
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
-                                            )}
+                                            );
+                                        })
+                                    }
+                                    <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 hover:bg-base-200" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
+                                        <div className="flex items-center gap-1 justify-center text-base-content">
+                                            <AddIcon size={14} />
+                                            <p className='font-semibold text-xs'>Create New Collection</p>
                                         </div>
-                                    );
-                                })
-                            }
-                            <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 hover:bg-base-200" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
-                                <div className="flex items-center gap-1 justify-center text-base-content">
-                                    <AddIcon size={14} />
-                                    <p className='font-semibold text-xs'>Create New Collection</p>
+                                    </li>
                                 </div>
-                            </li>
+                            </ul>
                         </div>
-                        {knowledgebaseDropdownContent}
                     </div>
-                ) : (
-                    <>
-                        {renderKnowledgebase}
-                        {hasKnowledgebases && (
-                            <div className="dropdown dropdown-end w-full max-w-md">
-                                <div className="border-2 border-base-200 border-dashed text-center">
-                                        <button
-                                            tabIndex={0}
-                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                                            disabled={isReadOnly}
-                                        >
-                                            <AddIcon className="w-3 h-3" />
-                                            Add Knowledge Base
-                                        </button>
-                                </div>
-                                {knowledgebaseDropdownContent}
-                            </div>
-                        )}
-                    </>
                 )}
+                
+                {/* Render connected knowledge bases */}
+                {Array.isArray(knowbaseVersionData) && knowbaseVersionData.map((kbEntry, index) => {
+                    const collection = collections.find(c => c.collection_id === kbEntry.collection_id);
+                    const isExpanded = expandedCollections[kbEntry.collection_id];
+                    const resources = resourcesByCollection[kbEntry.collection_id] || [];
+                    const connectedResources = resources.filter(resource =>
+                        kbEntry.resource_ids?.includes(resource._id)
+                    );
+                    
+                    return (
+                        <div key={`${kbEntry.collection_id}-${index}`} className="border border-base-300 rounded-lg p-3 bg-base-100">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 flex-1">
+                                    <button
+                                        onClick={() => setExpandedCollections(prev => ({
+                                            ...prev,
+                                            [kbEntry.collection_id]: !prev[kbEntry.collection_id]
+                                        }))}
+                                        className="p-1 hover:bg-base-200 rounded transition-colors"
+                                    >
+                                        <ChevronRightIcon 
+                                            size={12} 
+                                            className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+                                        />
+                                    </button>
+                                    <DatabaseIcon size={16} className="text-base-content" />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-medium">
+                                            {collection?.name || 'Unknown Collection'}
+                                        </div>
+                                        <div className="text-xs text-base-content/60">
+                                            {connectedResources.length} of {collection?.resource_ids?.length || 0} resources connected
+                                        </div>
+                                    </div>
+                                </div>
+                                {!isReadOnly && (
+                                    <button
+                                        onClick={() => handleOpenDeleteModal({ collection_id: kbEntry.collection_id, type: 'collection' })}
+                                        className="p-1 hover:bg-base-200 rounded transition-colors text-base-content/60 hover:text-base-content"
+                                    >
+                                        <TrashIcon size={14} />
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* Expanded Resources */}
+                            {isExpanded && (
+                                <div className="mt-3 ml-6 space-y-2">
+                                    {connectedResources.length === 0 ? (
+                                        <div className="text-xs text-base-content/60">No resources connected from this collection</div>
+                                    ) : (
+                                        connectedResources.map(resource => (
+                                            <div key={resource._id} className="flex items-center justify-between p-2 bg-base-200/50 rounded">
+                                                <div className="flex items-center gap-2 flex-1">
+                                                    {GetFileTypeIcon('document', 12, 12)}
+                                                    <div className="flex-1">
+                                                        <div className="text-xs font-medium">
+                                                            {resource.title || 'Untitled'}
+                                                        </div>
+                                                        {resource.url && (
+                                                            <div className="text-xs text-base-content/50 truncate">
+                                                                {resource.url}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {!isReadOnly && (
+                                                    <button
+                                                        onClick={() => handleOpenDeleteModal({
+                                                            collection_id: kbEntry.collection_id,
+                                                            resource_id: resource._id,
+                                                            type: 'resource'
+                                                        })}
+                                                        className="p-1 hover:bg-base-300 rounded transition-colors text-base-content/60 hover:text-base-content"
+                                                    >
+                                                        <TrashIcon size={12} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
             <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
