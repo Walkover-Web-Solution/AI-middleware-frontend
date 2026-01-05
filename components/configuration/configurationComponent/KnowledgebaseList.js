@@ -96,7 +96,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
     const knowledgebaseDropdownContent = !tutorialState?.showTutorial && (
         <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
             <div className='flex flex-col gap-2 w-full'>
-                <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
+                <li className="text-sm font-semibold disabled">Available Knowledge Bases</li>
                 <input
                     type='text'
                     placeholder='Search Knowledge Base'
