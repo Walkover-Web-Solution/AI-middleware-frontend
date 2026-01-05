@@ -69,7 +69,7 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
     }, [bridgeApiKey, params?.version, promptTextAreaRef, apiKeySectionRef]);
   return (
     <div>
-         <div className="flex flex-col gap-3 mt-4">
+         <div className="flex flex-col gap-3">
                         {shouldPromptShow && (
                             <div className="flex flex-col items-start gap-2">
                                 <button

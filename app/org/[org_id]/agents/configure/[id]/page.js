@@ -8,7 +8,7 @@ import { getAllBridgesAction, getSingleBridgesAction, updateBridgeVersionAction 
 import { useEffect, useRef, useState, use, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { setIsFocusReducer, setThreadIdForVersionReducer } from "@/store/reducer/bridgeReducer";
-import { updateTitle, generateRandomID } from "@/utils/utility";
+import { updateTitle, generateRandomID, extractPromptVariables } from "@/utils/utility";
 import { useRouter } from "next/navigation";
 import Chatbot from "@/components/configuration/Chatbot";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
@@ -25,12 +25,13 @@ const ConfigurationSkeleton = dynamic(() => import("@/components/skeletons/Confi
 export const runtime = 'edge';
 
 // Bundle Components for collapsed panels (5px min width)
-const ConfigBundle = () => {
+const ConfigBundle = ({ onClick }) => {
   return (
     <div
-      className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Configuration Panel"
       style={{ minWidth: '15px' }}
+      onClick={onClick}
     >
       <div className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Config
@@ -39,12 +40,13 @@ const ConfigBundle = () => {
   );
 };
 
-const ChatBundle = () => {
+const ChatBundle = ({ onClick }) => {
   return (
     <div
-      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Chat Panel"
       style={{ minWidth: '20px' }}
+      onClick={onClick}
     >
       <div className=" font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Chat
@@ -53,12 +55,13 @@ const ChatBundle = () => {
   );
 };
 
-const PromptHelperBundle = () => {
+const PromptHelperBundle = ({ onClick }) => {
   return (
     <div
-      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Prompt Helper Panel"
       style={{ minWidth: '20px' }}
+      onClick={onClick}
     >
       <div className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Helper
@@ -67,12 +70,13 @@ const PromptHelperBundle = () => {
   );
 };
 
-const NotesBundle = () => {
+const NotesBundle = ({ onClick }) => {
   return (
     <div
-      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200"
+      className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Notes Panel"
       style={{ minWidth: '20px' }}
+      onClick={onClick}
     >
       <div className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Notes
@@ -89,6 +93,14 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const mountRef = useRef(false);
   const dispatch = useDispatch();
 
+  // Panel refs for programmatic resizing
+  const configPanelRef = useRef(null);
+  const chatPanelRef = useRef(null);
+  const promptHelperPanelRef = useRef(null);
+  const notesPanelRef = useRef(null);
+
+// Add this new ref
+const isManualResizeRef = useRef(false);
   // Simplified UI state for react-resizable-panels with collapse states
   const [uiState, setUiState] = useState(() => ({
     isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 710 : false,
@@ -146,8 +158,113 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     setUiState(prev => ({ ...prev, ...updates }));
   }, []);
 
+  const handleExpandChat = useCallback(() => {
+    if (chatPanelRef.current) {
+      chatPanelRef.current.resize(panelSizes.chat);
+    }
+  }, [panelSizes.chat]);
 
-  const leftPanelScrollRef = useRef(null);
+const handleExpandConfig = useCallback(() => {
+  // Check if we're in two-panel or three-panel mode
+  const isThreePanelMode = uiState.isPromptHelperOpen && isFocus;
+  
+  if (isThreePanelMode) {
+    // THREE-PANEL MODE (33-33-33)
+    const openPanelsCount = [
+      !uiState.isConfigCollapsed,
+      !uiState.isPromptHelperCollapsed,
+      !uiState.isNotesCollapsed
+    ].filter(Boolean).length;
+
+    if (openPanelsCount === 2) {
+      // 2 panels open → make all 3 equal
+      configPanelRef.current?.resize(33.33);
+      promptHelperPanelRef.current?.resize(33.33);
+      notesPanelRef.current?.resize(33.33);
+    } else if (openPanelsCount === 1) {
+      // Only 1 panel open
+      if (!uiState.isPromptHelperCollapsed) {
+        // PromptHelper is open → Config takes from PromptHelper
+        configPanelRef.current?.resize(50);
+        promptHelperPanelRef.current?.resize(50);
+      } else if (!uiState.isNotesCollapsed) {
+        // Notes is open → Config takes from Notes
+        configPanelRef.current?.resize(50);
+        notesPanelRef.current?.resize(50);
+      }
+    }
+  } else {
+    // TWO-PANEL MODE (50-50) - Config + Chat
+    configPanelRef.current?.resize(50);
+    chatPanelRef.current?.resize(50);
+  }
+  
+  updateUiState({ isConfigCollapsed: false });
+}, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isNotesCollapsed, uiState.isPromptHelperOpen, isFocus, updateUiState]);
+const handleExpandPromptHelper = useCallback(() => {
+  const openPanelsCount = [
+    !uiState.isConfigCollapsed,
+    !uiState.isPromptHelperCollapsed,
+    !uiState.isNotesCollapsed
+  ].filter(Boolean).length;
+
+  if (openPanelsCount === 2) {
+    // 2 panels open → make all 3 equal
+    configPanelRef.current?.resize(33.33);
+    promptHelperPanelRef.current?.resize(33.33);
+    notesPanelRef.current?.resize(33.33);
+  } else if (openPanelsCount === 1) {
+    // Only 1 panel open
+    if (!uiState.isConfigCollapsed) {
+      // Config is open → PromptHelper takes from Config
+      configPanelRef.current?.resize(50);
+      promptHelperPanelRef.current?.resize(50);
+    } else if (!uiState.isNotesCollapsed) {
+      // Notes is open → PromptHelper takes from Notes
+      promptHelperPanelRef.current?.resize(50);
+      notesPanelRef.current?.resize(50);
+    }
+  }
+  
+  updateUiState({ isPromptHelperCollapsed: false });
+}, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isNotesCollapsed, updateUiState]);
+
+const handleExpandNotes = useCallback(() => {
+  const openPanelsCount = [
+    !uiState.isConfigCollapsed,
+    !uiState.isPromptHelperCollapsed,
+    !uiState.isNotesCollapsed
+  ].filter(Boolean).length;
+
+  if (openPanelsCount === 2) {
+    // 2 panels open → make all 3 equal
+    configPanelRef.current?.resize(33.33);
+    promptHelperPanelRef.current?.resize(33.33);
+    notesPanelRef.current?.resize(33.33);
+  } else if (openPanelsCount === 1) {
+    // Only 1 panel open
+    if (!uiState.isPromptHelperCollapsed) {
+      // PromptHelper is open → Notes takes from PromptHelper
+      promptHelperPanelRef.current?.resize(50);
+      notesPanelRef.current?.resize(50);
+    } else if (!uiState.isConfigCollapsed) {
+      // Config is open, PromptHelper is closed → Notes takes from Config
+      // Set flag to prevent PromptHelper state update
+      isManualResizeRef.current = true;
+      
+promptHelperPanelRef.current?.resize(5);
+      configPanelRef.current?.resize(50);  // Changed from 50 to 45
+      notesPanelRef.current?.resize(50);    // Changed from 45 to 50
+      
+      // Reset flag after a short delay
+      setTimeout(() => {
+        isManualResizeRef.current = false;
+      }, 100);
+    }
+  }
+  
+  updateUiState({ isNotesCollapsed: false });
+}, [uiState.isConfigCollapsed, uiState.isPromptHelperCollapsed, uiState.isNotesCollapsed, updateUiState]);const leftPanelScrollRef = useRef(null);
   const handleCloseTextAreaFocus = useCallback(() => {
     if (typeof window.closeTechDoc === 'function') {
       window.closeTechDoc();
@@ -185,14 +302,24 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   }, []);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
-
+    const promptVariables = extractPromptVariables(newValue);
+    const variablesState = {};
+    
+    promptVariables.forEach(varName => {
+      variablesState[varName] = {
+        status: "required",
+        default_value: "",
+      };
+    });
+    
     if (newValue !== reduxPrompt.trim()) {
       dispatch(updateBridgeVersionAction({
         versionId: resolvedSearchParams?.version,
         dataToSend: {
           configuration: {
-            prompt: newValue
-          }
+            prompt: newValue,
+          },
+          variables_state: variablesState,
         }
       }));
     }
@@ -306,22 +433,22 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       const agentBridge = Array.isArray(bridges)
         ? bridges.find((bridge) => bridge?._id === resolvedParams?.id)
         : null;
-      
+
       if (!agentBridge) {
         // Include the type parameter when navigating back to maintain sidebar selection
         const agentType = resolvedSearchParams?.type || 'api';
         router.push(`/org/${resolvedParams?.org_id}/agents?type=${agentType}`);
         return
       }
-      
+
       try {
         await dispatch(getSingleBridgesAction({ id: resolvedParams.id, version: resolvedSearchParams.version }));
-        
+
         // After getting the bridge, ensure type query parameter matches the bridge type
         const currentType = resolvedSearchParams?.type;
         const bridgeTypeFromRedux = agentBridge.bridgeType?.toLowerCase();
         let correctType;
-        
+
         // Determine the correct type based on bridge type from Redux
         if (bridgeTypeFromRedux === 'chatbot') {
           correctType = 'chatbot';
@@ -329,7 +456,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           // For 'api', 'batch', or any other type, default to 'api'
           correctType = 'api';
         }
-        
+
         // If type is missing or doesn't match, update the URL
         if (!currentType || currentType !== correctType) {
           const url = new URL(window.location);
@@ -411,14 +538,14 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
+      className={`w-full bg-base-300 h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? 'max-h-[calc(100vh-2rem)]' : 'overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row' : 'overflow-y-auto'}`}
     >
       {/* Debug Panel States */}
 
       {uiState.isDesktop ? (
         isAgentFlowView ? (
           <div className="w-full h-full">
-            <div className="h-full overflow-y-auto py-4 px-4">
+            <div className="h-full overflow-y-auto py-4">
               <ConfigurationPage
                 promptTextAreaRef={promptTextAreaRef}
                 params={resolvedParams}
@@ -442,10 +569,11 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           <PanelGroup direction="horizontal" className="w-full h-full">
             {/* Configuration Panel */}
             <Panel
+              ref={configPanelRef}
               defaultSize={panelSizes.config}
               minSize={3}
               maxSize={100}
-              className="bg-base-100"
+              className="bg-base-300"
               collapsible={false}
               onResize={(size) => {
                 const isCollapsed = size <= 5;
@@ -456,7 +584,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             >
               {/* Bundle - Show when collapsed */}
               {uiState.isConfigCollapsed && (
-                <ConfigBundle />
+                <ConfigBundle onClick={handleExpandConfig} />
               )}
 
               {/* Configuration Content - Always in DOM, just hidden when collapsed */}
@@ -464,7 +592,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
               >
                 {/* Configuration Content */}
-                <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : 'px-4'}`}>
+                <div ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : ' pl-8  px-4'}`}>
                   <ConfigurationPage
                     promptTextAreaRef={promptTextAreaRef}
                     params={resolvedParams}
@@ -486,16 +614,17 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             </Panel>
 
             {/* Resizer Handle with Custom Line */}
-            <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-primary/80 transition-colors duration-200 rounded-full" />
-              </div>
+            <PanelResizeHandle className="w-2 bg-base-100 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
+               <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
+                    </div>
             </PanelResizeHandle>
 
             {/* Chat/PromptHelper Panel - Conditional based on focus mode */}
             {!uiState.isPromptHelperOpen || !isFocus ? (
               // Chat Panel (Two-panel mode)
               <Panel
+                ref={chatPanelRef}
                 defaultSize={panelSizes.chat}
                 minSize={3}
                 className="bg-base-50"
@@ -508,7 +637,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 }}
               >
                 {uiState.isChatCollapsed ? (
-                  <ChatBundle />
+                  <ChatBundle onClick={handleExpandChat} />
                 ) : (
                   <div className="h-full flex flex-col" id="parentChatbot">
                     <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
@@ -548,20 +677,24 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               <>
                 {/* PromptHelper Panel */}
                 <Panel
-                  defaultSize={panelSizes.promptHelper}
-                  minSize={3}
-                  maxSize={100}
-                  className="bg-base-50"
-                  collapsible={false}
-                  onResize={(size) => {
-                    const isCollapsed = size <= 5;
-                    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
-                      updateUiState({ isPromptHelperCollapsed: isCollapsed });
-                    }
-                  }}
-                >
+  ref={promptHelperPanelRef}
+  defaultSize={panelSizes.promptHelper}
+  minSize={3}
+  maxSize={100}
+  className="bg-base-50"
+  collapsible={false}
+  onResize={(size) => {
+    // Don't update state if we're manually keeping it collapsed
+    if (isManualResizeRef.current) return;
+    
+    const isCollapsed = size <= 5;
+    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
+      updateUiState({ isPromptHelperCollapsed: isCollapsed });
+    }
+  }}
+>
                   {uiState.isPromptHelperCollapsed ? (
-                    <PromptHelperBundle />
+                    <PromptHelperBundle onClick={handleExpandPromptHelper} />
                   ) : (
                     <PromptHelper
                       isVisible={uiState.isPromptHelperOpen && !isMobileView}
@@ -622,6 +755,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 {/* Notes Panel */}
                 {uiState.showNotes && !isEmbedUser && (
                   <Panel
+                    ref={notesPanelRef}
                     defaultSize={panelSizes.notes}
                     minSize={3}
                     maxSize={100}
@@ -635,7 +769,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                     }}
                   >
                     {uiState.isNotesCollapsed ? (
-                      <NotesBundle />
+                      <NotesBundle onClick={handleExpandNotes} />
                     ) : (
                       <NotesPanel
                         isVisible={true}

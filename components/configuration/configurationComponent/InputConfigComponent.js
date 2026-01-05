@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { usePromptSelector } from '@/customHooks/useOptimizedSelector';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
@@ -7,6 +7,7 @@ import Diff_Modal from '@/components/modals/DiffModal';
 import PromptHeader from './PromptHeader';
 import PromptTextarea from './PromptTextarea';
 import DefaultVariablesSection from './DefaultVariablesSection';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 // Ultra-smooth InputConfigComponent with ref-based approach
 const InputConfigComponent = memo(({ 
@@ -23,8 +24,10 @@ const InputConfigComponent = memo(({
     isMobileView,
     closeHelperButtonLocation,
     isPublished,
-    isEditor
+    isEditor,
+    isEmbedUser
 }) => {
+    const { showVariables } = useCustomSelector(state => state.appInfoReducer.embedUserDetails);
     // Optimized Redux selector with memoization and shallow comparison
     const { prompt: reduxPrompt, oldContent } = usePromptSelector(params, searchParams);
     // Refs for zero-render typing experience
@@ -32,6 +35,9 @@ const InputConfigComponent = memo(({
     const oldContentRef = useRef(oldContent );
     const hasUnsavedChangesRef = useRef(false);
     const textareaRef = useRef(null);
+    
+    // Focus state for textarea
+    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
     // Update refs when redux prompt changes (external updates)
     if (oldContentRef.current !== reduxPrompt) {
         oldContentRef.current = oldContent || reduxPrompt;
@@ -77,8 +83,9 @@ const InputConfigComponent = memo(({
             newContent: '',
             hasUnsavedChanges: false
         }));
-        handleCloseTextAreaFocus();
-    }, [savePrompt, handleCloseTextAreaFocus, setPromptState]);
+        // Don't close Prompt Helper when saving
+        // handleCloseTextAreaFocus();
+    }, [savePrompt, setPromptState]);
 
     // Memoized handlers to prevent unnecessary re-renders
     const handleOpenDiffModal = useCallback(() => {
@@ -104,6 +111,19 @@ const InputConfigComponent = memo(({
     const handleClosePromptHelper = useCallback(() => {
         updateUiState({ isPromptHelperOpen: false });
     }, [updateUiState]);
+    
+    // Handle textarea focus
+    const handleTextareaFocus = useCallback(() => {
+        setIsTextareaFocused(true);
+    }, []);
+    
+    // Handle textarea blur with delay to allow button clicks
+    const handleTextareaBlur = useCallback(() => {
+        // Delay to allow button clicks to register before hiding
+        setTimeout(() => {
+            setIsTextareaFocused(false);
+        }, 200);
+    }, []);
     
     // Memoized values to prevent recalculation
     const isDisabled = useMemo(() => 
@@ -142,6 +162,9 @@ const InputConfigComponent = memo(({
                 handleCloseTextAreaFocus={handleCloseTextAreaFocus}
                 isPublished={isPublished}
                 isEditor={isEditor}
+                prompt={reduxPrompt}
+                setIsTextareaFocused={setIsTextareaFocused}
+                isFocused={isTextareaFocused}
             />
             
             <div className="form-control relative">
@@ -154,9 +177,12 @@ const InputConfigComponent = memo(({
                     isPublished={isPublished}
                     isEditor={isEditor}
                     onSave={handleSavePrompt}
+                    onFocus={handleTextareaFocus}
+                    onTextAreaBlur={handleTextareaBlur}
                 />
-                
+                {((isEmbedUser && showVariables) || !isEmbedUser)&&
                 <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt} isEditor={isEditor}/>
+                 }
             </div>
 
             <Diff_Modal oldContent={oldContentRef.current} newContent={textareaRef.current?.value || reduxPrompt} />

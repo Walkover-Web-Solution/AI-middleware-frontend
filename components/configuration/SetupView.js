@@ -20,13 +20,13 @@ const SetupView = memo(() => {
         showDefaultApikeys,
         currentView,
         isPublished,
-        isEditor
+        isEditor,
     } = useConfigurationContext();
-
     // Render agent flow panel when view is 'agent-flow'
     if (currentView === 'agent-flow') {
         return <ConnectedAgentFlowPanel />;
     }
+
 
     return (
         <>

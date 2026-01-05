@@ -7,7 +7,6 @@ import {
   initializeVariablesState,
   updateVariables,
 } from "@/store/reducer/variableReducer";
-import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { sendDataToParent, toggleSidebar } from "@/utils/utility";
 import { CloseIcon } from "@/components/Icons";
 import { Trash2, Upload, Play } from "lucide-react";
@@ -567,16 +566,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       if (!hasVariableStateChanged()) {
         return;
       }
-      if (filteredPairs?.length) {
-        dispatch(
-          updateBridgeVersionAction({
-            versionId,
-            dataToSend: {
-              variables_state: Object.assign({}, ...filteredPairs),
-            },
-          })
-        );
-      }
+     
 
       if (isEmbedUser) {
         sendDataToParent(

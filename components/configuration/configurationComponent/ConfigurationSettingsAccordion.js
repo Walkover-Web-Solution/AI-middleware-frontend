@@ -65,7 +65,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
                   <input
                     type="checkbox"
                     disabled={isReadOnly}
-                    className="toggle toggle-primary toggle-sm"
+                    className="toggle toggle-sm"
                     checked={currentView === 'agent-flow'}
                     onChange={() => {
                       const newView = currentView === 'agent-flow' ? 'config' : 'agent-flow';
@@ -92,6 +92,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
                     modelType={modelType}
                     isPublished={isPublished}
                     isEditor={isEditor}
+                    isEmbedUser={isEmbedUser}
                   />
                 </div>
               )}

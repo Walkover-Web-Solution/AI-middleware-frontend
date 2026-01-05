@@ -724,11 +724,11 @@ function Home({ params, searchParams, isEmbedUser }) {
         last_used: renderMetricsTimestamp(item, lastUsed),
         last_used_original: item.metrics?.last_used_time || lastUsed,
         last_used_orignal: usageMetricsMap[item._id]?.last_used_time || lastUsed,
-        created_by: renderCreatedByCell(users.find(user => user.user_id === item.user_id)?.name, createdAt),
-        created_by_original: users.find(user => user.user_id === item.user_id)?.name ? users.find(user => user.user_id === item.user_id)?.name : <EmptyCell />,
+        created_by: renderCreatedByCell(users?.find(user => user?.user_id === item.user_id)?.name, createdAt),
+        created_by_original: users?.find(user => user?.user_id === item.user_id)?.name ? users?.find(user => user?.user_id === item.user_id)?.name : <EmptyCell />,
         created_at_original: createdAt,
-        updated_by: renderUpdatedByCell(users.find(user => user.user_id === item.last_publisher_id)?.name, updatedAt),
-        updated_by_original: users.find(user => user.user_id === item.last_publisher_id)?.name ? users.find(user => user.user_id === item.last_publisher_id)?.name : <EmptyCell />,
+        updated_by: renderUpdatedByCell(users?.find(user => user?.user_id === item.last_publisher_id)?.name, updatedAt),
+        updated_by_original: users?.find(user => user?.user_id === item.last_publisher_id)?.name ? users?.find(user => user?.user_id === item.last_publisher_id)?.name : <EmptyCell />,
         updated_at_original: updatedAt,
       });
     });
@@ -805,11 +805,11 @@ function Home({ params, searchParams, isEmbedUser }) {
         last_used: renderMetricsTimestamp(item, lastUsed),
         last_used_original: item.metrics?.last_used_time || lastUsed,
         last_used_orignal: usageMetricsMap[item._id]?.last_used_time || lastUsed,
-        created_by: renderCreatedByCell(users.find(user => user.user_id === item.user_id)?.name, createdAt),
-        created_by_original: users.find(user => user.user_id === item.user_id)?.name,
+        created_by: renderCreatedByCell(users?.find(user => user.user_id === item.user_id)?.name, createdAt),
+        created_by_original: users?.find(user => user.user_id === item.user_id)?.name,
         created_at_original: createdAt,
-        updated_by: renderUpdatedByCell(users.find(user => user.user_id === item.last_publisher_id)?.name, updatedAt),
-        updated_by_original: users.find(user => user.user_id === item.last_publisher_id)?.name,
+        updated_by: renderUpdatedByCell(users?.find(user => user.user_id === item.last_publisher_id)?.name, updatedAt),
+        updated_by_original: users?.find(user => user.user_id === item.last_publisher_id)?.name,
         updated_at_original: updatedAt,
         agent_usage: item?.bridge_usage ? parseFloat(item.bridge_usage).toFixed(4) : 0,
 
@@ -1112,7 +1112,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                 <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
+                  router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}&type=${row?.bridgeType || 'chatbot'}`);
                 }}>
                   History
                 </button>

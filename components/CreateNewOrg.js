@@ -74,7 +74,6 @@ const CreateOrg = ({ handleSwitchOrg }) => {
         } catch (error) {
             toast.error('Failed to create workspace');
             console.error(error);
-        } finally {
             setIsLoading(false);
         }
     }, [orgDetails, dispatch, route]);

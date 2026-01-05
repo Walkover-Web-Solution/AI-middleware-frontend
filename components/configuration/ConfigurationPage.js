@@ -5,8 +5,6 @@ import { ConfigurationProvider } from "./ConfigurationContext";
 import SetupView from "./SetupView";
 import Protected from "../Protected";
 import { Lock } from 'lucide-react';
-import { toggleSidebar } from '@/utils/utility';
-import GuideSlider from '../sliders/IntegrationGuideSlider';
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 const ConfigurationPage = ({
@@ -29,7 +27,6 @@ const ConfigurationPage = ({
     const [currentView, setCurrentView] = useState(view);
 
     const configState = useConfigurationState(params, searchParams);
-    const { bridgeType } = configState;
     
     // Get user role to determine edit permissions
     const { isAdminOrOwner, currentOrgRole, currentUser } = useCustomSelector(state => {
@@ -57,19 +54,23 @@ const ConfigurationPage = ({
             || currentOrgRole === "Creator"
             || isAdminOrOwner);
     }, [currentOrgRole, currentUser, bridge?.users, isAdminOrOwner, isEmbedUser]);
-    useEffect(() => {
-        if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
-            if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
-                setCurrentView('config');
-                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
-            }
-        }
-    }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
+    // }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
     const handleNavigation = useCallback((target) => {
+        // Update URL with view parameter while preserving existing query params
+        const current = new URLSearchParams(window.location.search);
+        // Remove tab parameter when switching to integration view to avoid conflicts
+        if (target === 'integration') {
+            current.delete('tab');
+        }
+        current.set('tab', target);
+
+        const search = current.toString();
+        const query = search ? `?${search}` : '';
+        router.push(`${window.location.pathname}${query}`, { scroll: false });
+        
         setCurrentView(target);
-        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
-    }, [params.org_id, params.id, searchParams?.version, router]);
+    }, [params.org_id, params.id, router]);
 
     const renderHelpSection = useMemo(() => () => {
         return (
@@ -83,7 +84,7 @@ const ConfigurationPage = ({
                         data-cal-link="team/gtwy.ai/ai-consultation"
                         data-cal-origin="https://cal.id"
                         data-cal-config='{"layout":"month_view"}'
-                        className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
+                        className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors cursor-pointer"
                     >
                         <span>Speak to us</span>
                         <span>→</span>
@@ -92,8 +93,8 @@ const ConfigurationPage = ({
                     {/* Help Docs */}
                 
                         <a
-                            href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
-                            className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors"
+                            href="https://gtwy.ai/resources"
+                            className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
@@ -106,10 +107,9 @@ const ConfigurationPage = ({
                     
                         <button
                             onClick={() => {
-                                // Use setTimeout to ensure the component is rendered before toggling
-                                setTimeout(() => toggleSidebar("integration-guide-slider", "right"), 10);
+                                handleNavigation('integration');
                             }}
-                            className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
+                            className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors cursor-pointer"
                         >
                             <span>Integration Guide</span>
                             <span>→</span>
@@ -221,10 +221,10 @@ const ConfigurationPage = ({
 
     return (
         <ConfigurationProvider value={contextValue}>
-            <div className="flex flex-col gap-2 relative bg-base-100">
+            <div className="flex flex-col gap-2 relative min-h-full">
                 {/* Published Data Banner - Sticky and close to navbar */}
                 {bannerState.showPublished && (
-                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -237,7 +237,7 @@ const ConfigurationPage = ({
                 
                 {/* Non-Editor Banner - Sticky and close to navbar */}
                 {bannerState.showNonEditor && (
-                    <div className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 px-4 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                    <div className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -247,13 +247,13 @@ const ConfigurationPage = ({
                         </div>
                     </div>
                 )}
-                <SetupView />
-                {renderHelpSection()}
+                <div className="flex-1">
+                    <SetupView />
+                </div>
+                <div className="mt-auto">
+                    {renderHelpSection()}
+                </div>
             </div>
-            {!isEmbedUser && <GuideSlider
-                params={params}
-                bridgeType={bridgeType}
-            />}
 
         </ConfigurationProvider>
     );

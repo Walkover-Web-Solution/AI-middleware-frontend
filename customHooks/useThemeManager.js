@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getFromCookies, setInCookies } from '@/utils/utility';
-import { loadDefaultTheme, loadEmbedTheme, applyThemeObject } from '@/utils/themeLoader';
+import {applyThemeObject } from '@/utils/themeLoader';
 
 const useThemeVariables = (userType = 'default', customThemePath = null, customTheme = null) => {
   useEffect(() => {
@@ -11,11 +11,6 @@ const useThemeVariables = (userType = 'default', customThemePath = null, customT
         if (customTheme) {
           applyThemeObject(customTheme);
           return;
-        }
-        if (userType === 'embed') {
-          await loadEmbedTheme(customThemePath || undefined);
-        } else {
-          await loadDefaultTheme();
         }
       } catch (error) {
         console.error('[ThemeManager] Failed to load theme', error);

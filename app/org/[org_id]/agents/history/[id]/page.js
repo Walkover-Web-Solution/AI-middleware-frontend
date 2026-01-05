@@ -131,7 +131,7 @@ function Page({ params, searchParams }) {
       const getItemRole = () => {
         if (item?.tools_call_data && item.tools_call_data.length > 0) return 'tools_call';
         if (item?.error) return 'error';
-        if (item?.user) return 'user';
+        if (item?.user || item?.user_urls?.length > 0) return 'user';
         if (item?.llm_message || item?.chatbot_message || item?.updated_llm_message) return 'assistant';
         return 'unknown';
       };

@@ -25,7 +25,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
     setRunningTests(prev => new Set([...prev, testId]));
     try {
       await dispatch(runTestCaseAction({ versionId: resolvedParams?.version, bridgeId: params?.id, testcase_id: testId }));
-      await dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+      // No need to refetch - runTestCaseAction now updates Redux store directly
     } catch (error) {
       console.error('Error running test case:', error);
     } finally {
@@ -41,7 +41,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
     const testIds = Array.isArray(testCases) ? testCases.map(test => test._id) : [];
     setRunningTests(new Set(testIds));
     await dispatch(runTestCaseAction({ versionId: resolvedParams?.version, bridgeId: params?.id }));
-    await dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+    // No need to refetch - runTestCaseAction now updates Redux store directly
     setRunningTests(new Set());
   }
 

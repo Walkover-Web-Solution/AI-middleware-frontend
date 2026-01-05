@@ -50,9 +50,9 @@ export const ITEM_ICONS = {
 export const DISPLAY_NAMES = (key) => {
   switch (key) {
     case 'api':
-      return 'API Agents';
+      return 'API';
     case 'chatbot':
-      return 'Chatbot Agents';
+      return 'Chatbot';
     case 'agents':
       return 'Agents';
     case 'knowledge_base':
