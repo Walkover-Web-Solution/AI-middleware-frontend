@@ -740,6 +740,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                     testCaseId={testCaseId}
                     selectedStrategy={selectedStrategy}
                     handleSendMessageRef={handleSendMessageRef}
+                    showTestCases={showTestCases}
                   />
                 </div>
               </div>
