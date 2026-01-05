@@ -5,6 +5,7 @@ import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import InfoTooltip from "@/components/InfoTooltip";
+import { CircleQuestionMark, Zap } from 'lucide-react';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -24,7 +25,7 @@ function getStatusClass(status) {
     }
 };
 
-export default function TriggersList({ params, isEmbedUser }) {
+export default function TriggersList({ params,isEmbedUser,isReadOnly}) {
     const dispatch = useDispatch();
     const { triggerEmbedToken, triggerData, isViewer } = useCustomSelector((state) => ({
         triggerEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.triggerEmbedToken,
@@ -42,7 +43,7 @@ export default function TriggersList({ params, isEmbedUser }) {
         if (triggerData) {
             const filteredTriggers = triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
             setTriggers(filteredTriggers);
-            if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
+            if (!filteredTriggers?.length && window?.openViasocket && authkey && !isReadOnly) openTrigger()
         }
         if (!isEmbedUser && !isViewer) getAndSetAuthKey()
     }, [params?.org_id, authkey, isEmbedUser, isViewer]);
@@ -98,50 +99,76 @@ export default function TriggersList({ params, isEmbedUser }) {
         });
     }
 
+    const activeTriggers = triggers?.filter(trigger => trigger?.status !== 'deleted') || [];
+
+    const hasTriggers = activeTriggers.length > 0;
+
     return (
-        <div className="w-full">
-            <div className="flex items-start flex-col gap-2">
-                <div className='flex gap-5 ml-1  items-start just'>
-                    {triggers?.length > 0 ? (
-                        <div className="flex items-center gap-1 flex-row mb-2">
-                            <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
-                            <p className="label-text info font-medium  whitespace-nowrap">Trigger</p>
-                            </InfoTooltip>
-                            <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4" onClick={() => { openTrigger() }}>
-                                <AddIcon className="w-2 h-2" />
-                                <span className="text-xs font-medium">Add</span>
-                            </button>
-                        </div>
-                    ) : (
+        <div>
+            <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm whitespace-nowrap">Triggers</p>
                         <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
-                            <button tabIndex={0} className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2" onClick={() => { openTrigger() }}>
-                                <AddIcon size={16} />Trigger
-                            </button>
+                            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
+                    </div>
+                    {hasTriggers && (
+                        <button
+                            onClick={() => openTrigger()}
+                            className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
+                            disabled={isViewer}
+                        >
+                            <AddIcon className="w-3 h-3" />
+                            ADD
+                        </button>
                     )}
                 </div>
-                
-                </div>
-            <div className="flex flex-wrap gap-4">
-                {triggers?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.map(trigger => {
-                    return (
-                        <div key={trigger?.id} onClick={() => { openTrigger(trigger?.id) }}
-                            className="group flex h-full p-2 w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200 transition-colors duration-200">
-                            <div className="flex items-center gap-2">
-                                <div className="flex-1 min-w-0 text-[9px] sm:text-[5px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                                    <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
-                                        {trigger?.title}
-                                    </p>
-                                </div>
-                                <div className="">
-                                <span className={`shrink-0 inline-block rounded-full mb-2 capitalize px-2 py-0 text-[10px]  font-medium  ${getStatusClass(trigger?.status)}`}>
-                                        {trigger?.status || "Draft"}
-                                    </span>
-                                </div>
-                            </div>
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+                {!hasTriggers ? (
+                    <div className="w-full max-w-md">
+                        <div className="border-2 border-dashed border-base-200 p-4 text-center">
+                            <p className="text-sm text-base-content/70">
+                                No triggers found.
+                            </p>
+                            <button
+                                onClick={() => openTrigger()}
+                                className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                disabled={isReadOnly}
+                            >
+                                <AddIcon className="w-3 h-3" />
+                                Add
+                            </button>
                         </div>
-                    )
-                })) : null) : null}
+                    </div>
+                ) : (
+                    <div className="w-full max-w-md">
+                        <div className="flex flex-col gap-2">
+                            {activeTriggers.map(trigger => (
+                                <div
+                                    key={trigger?.id}
+                                    onClick={() => openTrigger(trigger?.id)}
+                                    className="group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full transition-colors duration-200"
+                                >
+                                    <div className="p-2 flex-1 flex items-center">
+                                        <div className="flex items-center gap-2 w-full">
+                                            <Zap size={16} className="shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-sm font-normal block truncate">
+                                                    {trigger?.title}
+                                                </span>
+                                            </div>
+                                            <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0.5 text-[10px] font-medium ${getStatusClass(trigger?.status)}`}>
+                                                {trigger?.status || "Draft"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

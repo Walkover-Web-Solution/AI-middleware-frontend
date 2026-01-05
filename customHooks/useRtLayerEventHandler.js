@@ -180,8 +180,16 @@ function useRtLayerEventHandler(channelIdentifier="") {
       if (response.data) {
         const channelId = channelIdentifier;        
         if (response.data) {
-          // Process the response data structure you provided
-          const rawImages = Array.isArray(response.data.images) ? response.data.images : [];
+          // Process the response data structure - handle image_urls format with permanent_url
+          let rawImages = [];
+          
+          if (Array.isArray(response.data.image_urls)) {
+            rawImages = response.data.image_urls.map(imageObj => {
+              // Extract permanent_url or fallback to image_url
+              return imageObj.permanent_url || imageObj.image_url || imageObj;
+            }).filter(Boolean);
+          }
+          
           const llmUrls = buildLlmUrls(rawImages, []);
           const messageData = {
             id: response.data.id || response.data.message_id,

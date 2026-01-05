@@ -84,8 +84,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
     }, [prebuiltToolsData, toolsVersionData, searchQuery, showInbuiltTools]);
 
     return (
-        <div className="dropdown dropdown-left mt-8">
-
+        <>
             {tutorialState?.showSuggestion && (
                 <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"} />
             )}
@@ -95,10 +94,14 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
             {!tutorialState?.showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0">
                     <div className='flex flex-col gap-2 w-full'>
-                        <li className="text-sm font-semibold disabled">Suggested Tools</li>
+                        {name === "preFunction" ? (
+                            <li className="text-sm font-semibold disabled">Available Pre Functions</li>
+                        ) : (
+                            <li className="text-sm font-semibold disabled">Available Tools</li>
+                        )}
                         <input
                             type='text'
-                            placeholder='Search Function'
+                            placeholder={`Search ${name=="preFunction" ? "Pre Function" : "Tool"}`}
                             value={searchQuery}
                             onChange={handleInputChange} // Update search query on input change
                             className='input input-bordered w-full input-sm'
@@ -148,7 +151,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                     </div>
                 </ul>
             )}
-        </div>
+        </>
     )
 }
 

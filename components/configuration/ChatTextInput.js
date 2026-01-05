@@ -21,7 +21,21 @@ import { buildUserUrls } from '@/utils/attachmentUtils';
 
 const VARIABLE_SLIDER_DISABLE_KEY = 'variableSliderDisabled';
 
-function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef }) {
+function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef, showTestCases }) {
+    // Reset textarea height when test cases are toggled or when the component mounts
+    useEffect(() => {
+        if (inputRef.current) {
+            // Use requestAnimationFrame to ensure the DOM is ready
+            requestAnimationFrame(() => {
+                inputRef.current.style.height = 'auto';
+                inputRef.current.style.height = '40px'; // Reset to default height
+                // Clear any existing content
+                if (inputRef.current.value === '') {
+                    inputRef.current.style.height = '40px';
+                }
+            });
+        }
+    }, [showTestCases, inputRef]);
     const [uploading, setUploading] = useState(false);
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
@@ -626,7 +640,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
 
             {/* Input Group */}
             <div className="input-group flex justify-end items-end gap-2 w-full relative">
-                {(modelType !== "completion") && (modelType !== 'image') && (
+                {(modelType !== "completion") && (
                     <textarea
                         ref={inputRef}
                         placeholder="Type here"
@@ -638,7 +652,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                         rows={1}
                         onInput={(e) => {
                             e.target.style.height = 'auto'; // Reset height
-                            e.target.style.height = `${e.target.scrollHeight}px`; // Set to scroll height
+                            e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`; // Set to scroll height, max 200px
                         }}
                     />
                 )}
@@ -756,7 +770,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     <button
                         className={`btn btn-circle transition-all duration-200 ${loading || uploading || (modelType === 'image')
                                 ? 'btn-disabled'
-                                : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                                : ' btn hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
                             }`}
                         onClick={() => {
                             handleSendMessage();

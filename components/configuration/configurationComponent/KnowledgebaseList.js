@@ -92,13 +92,56 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         };
     }, [params.org_id]);
 
+    const hasKnowledgebases = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : []).length > 0;
+    const knowledgebaseDropdownContent = !tutorialState?.showTutorial && (
+        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+            <div className='flex flex-col gap-2 w-full'>
+                <li className="text-sm font-semibold disabled">Available Knowledge Bases</li>
+                <input
+                    type='text'
+                    placeholder='Search Knowledge Base'
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    className='input input-bordered w-full input-sm'
+                />
+                {(Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [])
+                    .filter(item =>
+                        item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) &&
+                        !knowbaseVersionData?.includes(item?._id)
+                    )
+                    .map(item => (
+                        <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
+                            <div className="flex justify-between items-center w-full">
+                                <div className="flex items-center gap-2">
+                                    {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
+                                    {item?.name.length > 20 ? (
+                                        <div className="tooltip" data-tip={item?.name}>
+                                            {truncate(item?.name, 20)}
+                                        </div>
+                                    ) : (
+                                        truncate(item?.name, 20)
+                                    )}
+                                </div>
+                            </div>
+                        </li>
+                    ))
+                }
+                <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
+                    <div>
+                        <AddIcon size={16} /><p className='font-semibold'>Add new Knowledge Base</p>
+                    </div>
+                </li>
+            </div>
+        </ul>
+    );
+
     const renderKnowledgebase = useMemo(() => {
         const knowledgebaseItems = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
                 <div
                     key={docId}
-                    className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
+                    className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""}transition-colors duration-200`}
                 >
                     <div className="flex items-center gap-2 w-full ml-2">
                         {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
@@ -137,98 +180,66 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         }).filter(Boolean);
 
         return (
-            <div className={`grid gap-2 w-full`}>
+            <div className={`grid gap-2 w-full max-w-md`}>
                 {knowledgebaseItems}
             </div>
         );
     }, [knowbaseVersionData, knowledgeBaseData]);
     return (
-        <div className="label max-w-md flex-col items-start w-full p-0">
-            <div className="dropdown dropdown-right flex items-center">
-                <div className='flex items-center w-full'>
-                    {knowbaseVersionData?.length > 0 ? (
-                        <>
-                            <div className="flex items-center gap-1 mb-2">
-                                <p className="whitespace-nowrap font-medium">KnowledgeBase</p>
-                                <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                                </InfoTooltip>
-                            </div>
-                            <button
-
-                                tabIndex={0}
-                                className=" flex ml-4 items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={!shouldToolsShow || isReadOnly}
-                            >
-                                <AddIcon className="w-2 h-2" />
-                                <span className="text-xs font-medium">Add</span>
-                            </button>
-                        </>
-                    ) : (
-                        <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                            <button
-                                tabIndex={0}
-                                className="flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={!shouldToolsShow || isReadOnly}
-                            >
-                                <AddIcon className="w-2 h-2" />
-                                <span className="text-sm font-medium">Knowledge Base</span>
-                            </button>
-                        </InfoTooltip>
-
-                    )}
+        <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
+            <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                    <p className="text-sm whitespace-nowrap">Knowledge Base</p>
+                     <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                </InfoTooltip>
                 </div>
-                {tutorialState?.showSuggestion && (
-                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
-                )}
-                {tutorialState?.showTutorial && (
-                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
-                )}
-                {!tutorialState?.showTutorial && (
-                    <div className="dropdown dropdown-left mt-8">
-                        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">                        <div className='flex flex-col gap-2 w-full'>
-                            <li className="text-sm font-semibold disabled">Suggested Knowledge Bases</li>
-                            <input
-                                type='text'
-                                placeholder='Search Knowledge Base'
-                                value={searchQuery}
-                                onChange={handleInputChange}
-                                className='input input-bordered w-full input-sm'
-                            />
-                            {(Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [])
-                                .filter(item =>
-                                    item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) &&
-                                    !knowbaseVersionData?.includes(item?._id)
-                                )
-                                .map(item => (
-                                    <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
-                                        <div className="flex justify-between items-center w-full">
-                                            <div className="flex items-center gap-2">
-                                                {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
-                                                {item?.name.length > 20 ? (
-                                                    <div className="tooltip" data-tip={item?.name}>
-                                                        {truncate(item?.name, 20)}
-                                                    </div>
-                                                ) : (
-                                                    truncate(item?.name, 20)
-                                                )}
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))
-                            }
-                            <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
-                                <div>
-                                    <AddIcon size={16} /><p className='font-semibold'>Add new Knowledge Base</p>
-                                </div>
-                            </li>
-                        </div>
-                        </ul>
-                    </div>
-                )}
+               
             </div>
+            {tutorialState?.showSuggestion && (
+                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
+            )}
+            {tutorialState?.showTutorial && (
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
+            )}
             <div className="flex flex-col gap-2 w-full ">
-                {renderKnowledgebase}
+                {!hasKnowledgebases ? (
+                    <div className="dropdown dropdown-end w-full max-w-md">
+                        <div className="border-2 border-base-200 border-dashed p-4 text-center">
+                            <p className="text-sm text-base-content/70">
+                                No knowledge base found.
+                            </p>
+                            <button
+                                tabIndex={0}
+                                className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                disabled={!shouldToolsShow || isReadOnly}
+                            >
+                                <AddIcon className="w-3 h-3" />
+                                Add
+                            </button>
+                        </div>
+                        {knowledgebaseDropdownContent}
+                    </div>
+                ) : (
+                    <>
+                        {renderKnowledgebase}
+                        {hasKnowledgebases && (
+                            <div className="dropdown dropdown-end w-full max-w-md">
+                                <div className="border-2 border-base-200 border-dashed text-center">
+                                        <button
+                                            tabIndex={0}
+                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                            disabled={isReadOnly}
+                                        >
+                                            <AddIcon className="w-3 h-3" />
+                                            Add Knowledge Base
+                                        </button>
+                                </div>
+                                {knowledgebaseDropdownContent}
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
             <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
