@@ -296,48 +296,14 @@ export default function Page() {
     return data;
   }, [toolCalls]);
 
-  const nodes = useMemo(() => [
-    {
-      id: "1",
+  const nodes = useMemo(() => {
+    const baseX = 650;
+    const nodeGap = 350;
+
+    const agentNodes = derivedAgents.map((agent, index) => ({
+      id: `agent-${index}`,
       type: "generic",
-      position: { x: 0, y: 150 },
-      data: {
-        source: true,
-        ui: {
-          width: 260,
-          containerClass: "p-4 border border-base-300 ",
-          render: () => (
-            <UserPromptUI text={activeThreadItem?.user || ""} />
-          ),
-        },
-      },
-    },
-    {
-      id: "2",
-      type: "generic",
-      position: { x: 320, y: 150 },
-      data: {
-        source: true,
-        target: true,
-        ui: {
-          containerClass: "p-4 border border-base-300 ",
-          render: () => (
-            <AgentUI
-              label="MAIN AGENT"
-              name={mainAgentName}
-              onToolClick={(tool) => setSelectedTool(tool)}
-              status="PROCESSING"
-              statusClass="text-blue-500"
-              tools={mainAgentTools}
-            />
-          ),
-        },
-      },
-    },
-    {
-      id: "3",
-      type: "generic",
-      position: { x: 650, y: 120 },
+      position: { x: baseX + index * nodeGap, y: 120 },
       data: {
         source: true,
         target: true,
@@ -347,67 +313,138 @@ export default function Page() {
           render: () => (
             <BatchUI
               isLoading={recursiveHistoryLoading}
-              agents={derivedAgents.map((agent) => ({
-                name: agent.name,
-                functionData: agent.functionData,
-                parallelTools: agent.parallelTools,
-                isLoading: agent.isLoading,
-              }))}
-              onToolClick={(agent) => setSelectedTool(agent)}
-            />
-          ),
-        },
-      },
-    },
-    {
-      id: "4",
-      type: "generic",
-      position: { x: 1100, y: 170 },
-      data: {
-        source: true,
-        target: true,
-        ui: {
-          width: 280,
-          containerClass: "p-4 border border-base-300 ",
-          render: () => (
-            <AgentUI
-              label="MAIN AGENT TOOLS"
-              name={`${mainAgentName} tools`}
+              agents={[
+                {
+                  name: agent.name,
+                  functionData: agent.functionData,
+                  parallelTools: agent.parallelTools,
+                  isLoading: agent.isLoading,
+                },
+              ]}
               onToolClick={(tool) => setSelectedTool(tool)}
-              status="FINALIZING"
-              statusClass="text-blue-500"
-              tools={mainAgentTools}
             />
           ),
         },
       },
-    },
-    {
-      id: "5",
-      type: "generic",
-      position: { x: 1450, y: 170 },
-      data: {
-        target: true,
-        ui: {
-          containerClass: " p-4 border border-base-300 ",
-          render: () => (
-            <FinalResponseUI
-              status="Delivered"
-              preview={responsePreview}
-              onClick={() => setSelectedResponse(activeThreadItem)}
-            />
-          ),
-        },
-      },
-    },
-  ], [derivedAgents, mainAgentTools, activeThreadItem?.user]);
+    }));
 
-  const edges = [
-    { id: "e1-2", source: "1", target: "2" },
-    { id: "e2-3", source: "2", target: "3" },
-    { id: "e3-4", source: "3", target: "4" },
-    { id: "e4-5", source: "4", target: "5" },
-  ];
+    const mainToolsX =
+      baseX + Math.max(derivedAgents.length, 1) * nodeGap;
+    const finalX = mainToolsX + nodeGap;
+
+    return [
+      {
+        id: "1",
+        type: "generic",
+        position: { x: 0, y: 150 },
+        data: {
+          source: true,
+          ui: {
+            width: 260,
+            containerClass: "p-4 border border-base-300 ",
+            render: () => (
+              <UserPromptUI text={activeThreadItem?.user || ""} />
+            ),
+          },
+        },
+      },
+      {
+        id: "2",
+        type: "generic",
+        position: { x: 320, y: 150 },
+        data: {
+          source: true,
+          target: true,
+          ui: {
+            containerClass: "p-4 border border-base-300 ",
+            render: () => (
+              <AgentUI
+                label="MAIN AGENT"
+                name={mainAgentName}
+                onToolClick={(tool) => setSelectedTool(tool)}
+                status="PROCESSING"
+                statusClass="text-blue-500"
+                tools={mainAgentTools}
+              />
+            ),
+          },
+        },
+      },
+      ...agentNodes,
+      {
+        id: "4",
+        type: "generic",
+        position: { x: mainToolsX, y: 170 },
+        data: {
+          source: true,
+          target: true,
+          ui: {
+            width: 280,
+            containerClass: "p-4 border border-base-300 ",
+            render: () => (
+              <AgentUI
+                label="MAIN AGENT TOOLS"
+                name={`${mainAgentName} tools`}
+                onToolClick={(tool) => setSelectedTool(tool)}
+                status="FINALIZING"
+                statusClass="text-blue-500"
+                tools={mainAgentTools}
+              />
+            ),
+          },
+        },
+      },
+      {
+        id: "5",
+        type: "generic",
+        position: { x: finalX, y: 170 },
+        data: {
+          target: true,
+          ui: {
+            containerClass: " p-4 border border-base-300 ",
+            render: () => (
+              <FinalResponseUI
+                status="Delivered"
+                preview={responsePreview}
+                onClick={() => setSelectedResponse(activeThreadItem)}
+              />
+            ),
+          },
+        },
+      },
+    ];
+  }, [
+    derivedAgents,
+    recursiveHistoryLoading,
+    mainAgentTools,
+    activeThreadItem?.user,
+    mainAgentName,
+  ]);
+
+  const edges = useMemo(() => {
+    const edgeList = [{ id: "e1-2", source: "1", target: "2" }];
+
+    if (derivedAgents.length > 0) {
+      edgeList.push({ id: "e2-a0", source: "2", target: "agent-0" });
+      for (let i = 1; i < derivedAgents.length; i += 1) {
+        edgeList.push({
+          id: `e-a${i - 1}-a${i}`,
+          source: `agent-${i - 1}`,
+          target: `agent-${i}`,
+        });
+      }
+      edgeList.push({
+        id: "e-alast-4",
+        source: `agent-${derivedAgents.length - 1}`,
+        target: "4",
+      });
+    } else {
+      edgeList.push({ id: "e2-4", source: "2", target: "4" });
+    }
+
+    edgeList.push({ id: "e4-5", source: "4", target: "5" });
+    return edgeList;
+  }, [derivedAgents.length]);
 
   return (
     <div className="h-screen w-full relative bg-base-200">
