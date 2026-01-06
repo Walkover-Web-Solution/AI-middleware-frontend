@@ -119,10 +119,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     if (value === undefined) return null;
 
                     let displayValue = value;
-                    
+                    let rawSystemPrompt;
                     if (key === "system Prompt" && typeof value === "string") {
-                      displayValue = replaceVariablesInPrompt(value);
-                      displayValue = displayValue.replace(/\n/g, '<br />');
+                      rawSystemPrompt = replaceVariablesInPrompt(value);
+                      displayValue = rawSystemPrompt.replace(/\n/g, "<br />");
                     }
 
                     return (
@@ -198,7 +198,9 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               <div className="text-base-content break-words" dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
                               {key === "system Prompt" && (
                                 <button
-                                  onClick={() => copyToClipboard(displayValue, "System prompt copied to clipboard", `system-prompt`)}
+                                  onClick={() =>
+                                    copyToClipboard(rawSystemPrompt, "System prompt copied to clipboard", "system-prompt")
+                                  }
                                   className="absolute top-2 right-2 btn btn-ghost btn-sm p-1.5 rounded-md hover:bg-base-300 transition-colors duration-200"
                                   title="Copy system prompt"
                                 >
