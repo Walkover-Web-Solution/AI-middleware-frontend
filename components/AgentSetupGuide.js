@@ -97,7 +97,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     // Hide guide if: 
     // 1. It's gpt-5-nano model and has prompt OR
     // 2. Both prompt and API key are provided
-    if ((modelName === 'gpt-5-nano' && hasPrompt) || (hasPrompt && hasApiKey)) {
+    if ((modelName === 'gpt-5-nano' && hasPrompt && bridgeType === 'chatbot') || (hasPrompt && hasApiKey)) {
       if (isVisible) {
         setIsAnimating(true);
         setTimeout(() => {
@@ -110,18 +110,24 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     } else {
       setIsVisible(true);
     }
-    
-    // Chatbot open/close logic - moved to end to handle all conditions
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType, isVisible]);
+
+  // Function to handle chatbot open/close with delay
+  const checkConfigToOpenChatbot = () => {
+    const hasPrompt =(prompt !== ""|| !shouldPromptShow);
+    const hasApiKey = bridgeApiKey;
     if (bridgeType === 'chatbot' && hasPrompt && (hasApiKey || modelName === 'gpt-5-nano')) {
-        setTimeout(() => {
-          window?.openChatbot();
-        }, 500);
+        window?.openChatbot();
     } else {
-        setTimeout(() => {
-          window?.closeChatbot();
-        }, 300);
-      }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType]);
+        window?.closeChatbot();
+    }
+  };
+
+  useEffect(() => {
+   setTimeout(() => {
+    checkConfigToOpenChatbot();
+   }, 2000);
+  }, [bridgeApiKey, prompt, shouldPromptShow, modelName, bridgeType]);
 
   useEffect(() => {
     if (typeof onVisibilityChange === 'function') {
