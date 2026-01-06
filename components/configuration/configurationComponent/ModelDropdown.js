@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { createPortal } from 'react-dom';
+import { createPortal } from 'react-dom'; 
 import Dropdown from '@/components/UI/Dropdown';
 // Model Preview component to display model specifications
 const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
