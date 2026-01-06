@@ -1149,17 +1149,6 @@ if (!isEqual(toolData, function_details)) {
               </div>
             )}
           </div>
-          <p className="flex items-center gap-1 whitespace-nowrap text-xs mb-1">
-            <InfoIcon size={14} /> You can change the data in raw json format. For more info click{" "}
-            <a
-              href="/faq/jsonformatdoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link link-primary underline cursor-pointer"
-            >
-              here
-            </a>
-          </p>
         </div>
         <div className="flex flex-row mb-1">
           
