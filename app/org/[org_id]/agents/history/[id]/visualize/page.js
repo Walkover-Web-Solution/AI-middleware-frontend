@@ -6,7 +6,7 @@ import "reactflow/dist/style.css";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useParams, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { getHistoryAction, getThread } from "@/store/action/historyAction";
+import { getHistoryAction, getThread, getRecursiveHistoryAction } from "@/store/action/historyAction";
 
 import { UserPromptUI } from "@/components/historyUi/UserPromptUi.js";
 import { AgentUI } from "@/components/historyUi/AgentUi.js";
@@ -26,12 +26,17 @@ export default function Page() {
   const dispatch = useDispatch();
   const [selectedTool, setSelectedTool] = useState(null);
   const [selectedResponse, setSelectedResponse] = useState(null);
-  const [childAgentData, setChildAgentData] = useState({});
   const params = useParams();
   const orgId = params?.org_id;
   const bridgeId = params?.id;
   const thread = useCustomSelector(
     (state) => state?.historyReducer?.thread || []
+  );
+  const recursiveHistory = useCustomSelector(
+    (state) => state?.historyReducer?.recursiveHistory
+  );
+  const recursiveHistoryLoading = useCustomSelector(
+    (state) => state?.historyReducer?.recursiveHistoryLoading
   );
   const mainAgentName = useCustomSelector((state) => {
     const orgAgents = state?.bridgeReducer?.org?.[orgId]?.orgs || [];
@@ -58,7 +63,7 @@ export default function Page() {
     return thread.find((item) => item?.message_id === messageId) || null;
   }, [messageId, thread]);
 
-
+  console.log("🚀 selectedThreadItem:", selectedThreadItem) ;
   useEffect(() => {
     if (selectedThreadItem) setStableThreadItem(selectedThreadItem);
   }, [selectedThreadItem]);
@@ -133,159 +138,92 @@ export default function Page() {
     return content.length > 120 ? `${content.slice(0, 120)}...` : content;
   }, [activeThreadItem]);
 
-  console.log("messageId:", messageId);
-  console.log("thread :", thread);
-  console.log("Selected thread item:", activeThreadItem);
-
-  const agentTools = (activeThreadItem?.tools_call_data || [])
-    .flatMap((toolSet) => Object.values(toolSet || {}))
-    .filter((tool) => tool?.data?.metadata?.type === "agent");
-
-  console.log("✅ ALL AGENT TOOLS:", agentTools);
-
-  // Fetch complete child agent history (all threads + detailed data for each)
+ 
   useEffect(() => {
-    const fetchCompleteChildAgentHistory = async () => {
-      if (agentTools.length === 0) return;
-
-      console.log("🚀 Fetching COMPLETE history for", agentTools.length, "child agents...");
-
-      for (const agentTool of agentTools) {
-        const agentId = agentTool?.data?.metadata?.agent_id;
-        const versionId = agentTool?.data?.metadata?.version_id;
-
-        if (!agentId) {
-          console.warn("⚠️ Missing agent_id for agent:", agentTool);
-          continue;
-        }
-
-        console.log(`📥 Step 1: Fetching all thread IDs for ${agentTool.name} (${agentId})...`);
-
-        try {
-          // Step 1: Get all thread IDs for this agent
-          const allThreads = await dispatch(
-            getHistoryAction(
-              agentId,
-              1,
-              "all",
-              false,
-              undefined,
-              undefined,
-              undefined,
-              undefined
-            )
-          );
-
-          console.log(`✅ Found ${allThreads?.length || 0} threads for ${agentTool.name}`);
-
-          if (!allThreads || allThreads.length === 0) {
-            console.warn(`⚠️ No threads found for ${agentTool.name}`);
-            continue;
-          }
-
-          // Step 2: Fetch detailed data for each thread
-          console.log(`📥 Step 2: Fetching detailed data for all ${allThreads.length} threads...`);
-
-          const detailedThreadsData = [];
-
-          for (const thread of allThreads) {
-            const threadId = thread.thread_id;
-
-            console.log(`  📄 Fetching thread ${threadId}...`);
-
-            try {
-              const threadData = await dispatch(
-                getThread({
-                  threadId: threadId,
-                  bridgeId: agentId,
-                  subThreadId: threadId,
-                  nextPage: 1,
-                  user_feedback: "all",
-                  versionId: versionId || "",
-                  error: false,
-                })
-              );
-
-              detailedThreadsData.push({
-                thread_id: threadId,
-                updated_at: thread.updated_at,
-                messages: threadData
-              });
-
-            } catch (error) {
-              console.error(`  ❌ Error fetching thread ${threadId}:`, error);
-            }
-          }
-
-          console.log(`✅ Complete history for ${agentTool.name}:`, detailedThreadsData);
-
-          // Filter to find the specific thread matching the message_id from agentTools
-          const targetMessageId = agentTool?.data?.metadata?.message_id;
-
-          let matchedThread = null;
-          let childToolCalls = [];
-
-          if (targetMessageId) {
-            // Find the thread that contains a message with the matching message_id
-            matchedThread = detailedThreadsData.find(thread => {
-              const messages = thread.messages?.data || [];
-              return messages.some(msg => msg.message_id === targetMessageId);
-            });
-
-            if (matchedThread) {
-              console.log(`🎯 MATCHED THREAD for ${agentTool.name} (message_id: ${targetMessageId}):`, matchedThread);
-
-              // Extract tools_call_data from all messages in the matched thread
-              const messages = matchedThread.messages?.data || [];
-              childToolCalls = messages
-                .flatMap(msg => msg.tools_call_data || [])
-                .flatMap(toolSet => Object.values(toolSet || {}));
-
-              console.log(`🔧 CHILD TOOL CALLS for ${agentTool.name}:`, childToolCalls);
-            } else {
-              console.warn(`⚠️ No thread found matching message_id ${targetMessageId} for ${agentTool.name}`);
-            }
-          }
-
-          // Store in state - only the matched thread, not all threads
-          setChildAgentData(prev => ({
-            ...prev,
-            [agentId]: {
-              agentName: agentTool.name,
-              targetMessageId: targetMessageId,
-              matchedThread: matchedThread,
-              childToolCalls: childToolCalls
-            }
-          }));
-
-        } catch (error) {
-          console.error(`❌ Error fetching complete history for ${agentTool.name}:`, error);
-        }
+    const selectedBridgeId = activeThreadItem?.bridge_id || bridgeId;
+    const selectedThreadId = activeThreadItem?.thread_id || threadId;
+    const selectedMessageId = activeThreadItem?.message_id || messageId;
+ 
+    const fetchRecursiveHistory = async () => {
+      if (!selectedBridgeId || !selectedThreadId || !selectedMessageId) {
+        return;
+      }
+ 
+      try {
+        const data = await dispatch(getRecursiveHistoryAction({
+          agent_id: selectedBridgeId,
+          thread_id: selectedThreadId,
+          message_id: selectedMessageId,
+        }));
+        console.log("🚀 Recursive history data:", data) ;
+      } catch (error) {
+        console.error("❌ Error fetching recursive history:", error);
       }
     };
 
-    fetchCompleteChildAgentHistory();
-  }, [agentTools.length, dispatch]);
+    fetchRecursiveHistory();
+  }, [activeThreadItem, bridgeId, threadId, messageId, dispatch]);
 
-  // Console log the complete child agent history
-  useEffect(() => {
-    if (Object.keys(childAgentData).length > 0) {
-      console.log("🎯 COMPLETE CHILD AGENT HISTORY (ALL THREADS WITH DETAILS):", childAgentData);
+  const normalizeToolCalls = (toolData) => {
+    if (!toolData) return [];
+    if (Array.isArray(toolData)) {
+      if (toolData.length === 0) return [];
+      return toolData.flatMap((toolSet) => Object.values(toolSet || {}));
     }
-  }, [childAgentData]);
+    if (typeof toolData === "object") {
+      return Object.values(toolData);
+    }
+    return [];
+  };
+
+  const recursiveMessage = recursiveHistory?.data || null;
 
   const toolCalls = useMemo(() => {
-    const toolData = activeThreadItem?.tools_call_data;
-    if (!Array.isArray(toolData) || toolData.length === 0) return [];
+    return normalizeToolCalls(recursiveMessage?.tools_call_data);
+  }, [recursiveMessage?.tools_call_data]);
 
-    return toolData.flatMap((toolSet) =>
-      Object.keys(toolSet).map((key) => toolSet[key])
+  const getToolType = (tool) => {
+    return (
+      tool?.data?.metadata?.type ||
+      (Array.isArray(tool?.tools_call_data) ? "agent" : null)
     );
-  }, [activeThreadItem?.tools_call_data]);
+  };
 
-  const derivedBatches = useMemo(() => {
-    console.log(`⏰ derivedBatches running. childAgentData:`, childAgentData, `keys:`, Object.keys(childAgentData));
+  const buildToolNode = (tool) => {
+    const toolType = getToolType(tool);
+    const functionData = {
+      id: tool?.id ?? null,
+      args: tool?.args ?? (tool?.user ? { _query: tool.user } : {}),
+      data:
+        tool?.data ??
+        (toolType
+          ? { metadata: { type: toolType }, response: tool }
+          : { response: tool }),
+    };
 
+    if (toolType === "agent") {
+      const childMessage = tool?.data?.response || tool?.response || tool || null;
+      const childTools = normalizeToolCalls(childMessage?.tools_call_data);
+      return {
+        name:
+          tool?.name ||
+          tool?.AiConfig?.model ||
+          tool?.bridge_id ||
+          "Unknown Agent",
+        functionData,
+        children: childTools.map(buildToolNode),
+      };
+    }
+
+    return {
+      name: tool?.name || "Unknown Tool",
+      functionData,
+      children: [],
+    };
+  };
+
+  const derivedAgents = useMemo(() => {
+ 
     if (toolCalls.length === 0) return [];
 
     const orderedTools = toolCalls;
@@ -293,32 +231,32 @@ export default function Page() {
     let currentAgent = null;
 
     orderedTools.forEach((tool) => {
-      const toolType = tool?.data?.metadata?.type;
+      const toolType = getToolType(tool);
       const functionData = {
         id: tool?.id ?? null,
-        args: tool?.args ?? {},
-        data: tool?.data ?? {},
+        args: tool?.args ?? (tool?.user ? { _query: tool.user } : {}),
+        data:
+          tool?.data ??
+          (toolType
+            ? { metadata: { type: toolType }, response: tool }
+            : { response: tool }),
       };
 
       if (toolType === "agent") {
-        const agentId = tool?.data?.metadata?.agent_id;
-        const childData = childAgentData[agentId];
-
-        // Map all child tool calls directly to parallel tools
-        const childParallelTools = (childData?.childToolCalls || []).map(childTool => ({
-          name: childTool?.name || "Unknown Tool",
-          functionData: {
-            id: childTool?.id ?? null,
-            args: childTool?.args ?? {},
-            data: childTool?.data ?? {},
-          }
-        }));
+        const childMessage =
+          tool?.data?.response || tool?.response || tool || null;
+        const childToolCalls = normalizeToolCalls(childMessage?.tools_call_data);
+        const childParallelTools = childToolCalls.map(buildToolNode);
 
         currentAgent = {
-          name: tool?.name || "Unknown Agent",
+          name:
+            tool?.name ||
+            tool?.AiConfig?.model ||
+            tool?.bridge_id ||
+            "Unknown Agent",
           functionData,
           parallelTools: childParallelTools,
-          isLoading: !childData,
+          isLoading: recursiveHistoryLoading && childParallelTools.length === 0,
         };
         agents.push(currentAgent);
         return;
@@ -339,29 +277,13 @@ export default function Page() {
         });
       }
     });
-
-    console.log(`⏰ derivedBatches running. agents array:`, agents);
-    console.log(`⏰ Number of agents:`, agents.length);
-    agents.forEach((agent, idx) => {
-      console.log(`⏰ Agent ${idx}:`, {
-        name: agent.name,
-        hasFunctionData: !!agent.functionData,
-        parallelToolsCount: agent.parallelTools?.length || 0,
-        parallelTools: agent.parallelTools
-      });
-    });
-
-    return [{
-      title: "BATCH 1",
-      agents,
-    }];
-  }, [toolCalls, childAgentData]);
-
+    return agents;
+  }, [toolCalls, recursiveHistoryLoading]);
   const mainAgentTools = useMemo(() => {
     if (toolCalls.length === 0) return [];
 
     const data = toolCalls
-      .filter(tool => tool?.data?.metadata?.type !== "agent")
+      .filter((tool) => getToolType(tool) === "function")
       .map((tool) => ({
         name: tool?.name || "Unknown Tool",
         functionData: {
@@ -424,14 +346,12 @@ export default function Page() {
           containerClass: "border border-base-300 p-3 bg-base-100`",
           render: () => (
             <BatchUI
-              batches={derivedBatches.map(batch => ({
-                ...batch,
-                agents: batch.agents.map(agent => ({
-                  name: agent.name,
-                  functionData: agent.functionData,
-                  parallelTools: agent.parallelTools,
-                  isLoading: agent.isLoading
-                }))
+              isLoading={recursiveHistoryLoading}
+              agents={derivedAgents.map((agent) => ({
+                name: agent.name,
+                functionData: agent.functionData,
+                parallelTools: agent.parallelTools,
+                isLoading: agent.isLoading,
               }))}
               onToolClick={(agent) => setSelectedTool(agent)}
             />
@@ -480,7 +400,7 @@ export default function Page() {
         },
       },
     },
-  ], [derivedBatches, mainAgentTools, activeThreadItem?.user]);
+  ], [derivedAgents, mainAgentTools, activeThreadItem?.user]);
 
   const edges = [
     { id: "e1-2", source: "1", target: "2" },

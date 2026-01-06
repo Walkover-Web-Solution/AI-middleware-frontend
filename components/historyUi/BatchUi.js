@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-export function BatchUI({ batches, onToolClick, isLoading = false }) {
+export function BatchUI({ agents, onToolClick, isLoading = false }) {
   const [openAgentKey, setOpenAgentKey] = useState(null);
   const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
   const [selectedFunctionData, setSelectedFunctionData] = useState(null);
   const [selectedAgentMeta, setSelectedAgentMeta] = useState(null);
   const rowRefs = useRef({});
   const popupRef = useRef(null);
-
+  console.log("Agents", agents);
   const handleToolClick = (tool) => {
     if (!onToolClick) return;
     onToolClick(tool?.functionData ?? tool);
   };
 
-  console.log(batches);
+  console.log(agents);
 
   const handleAgentClick = (agentKey, functionData, agentName, tools) => {
     const nextOpen = openAgentKey === agentKey ? null : agentKey;
@@ -28,6 +28,45 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
             error: false,
           }
         : null
+    );
+  };
+
+  const renderToolGrid = (tools, depth = 0) => {
+    if (!Array.isArray(tools) || tools.length === 0) return null;
+    return (
+      <div
+        className="grid grid-cols-2 gap-2"
+        style={{ marginLeft: depth * 12 }}
+      >
+        {tools.map((tool, index) => {
+          const isLastOdd =
+            tools.length % 2 !== 0 && index === tools.length - 1;
+          const toolName =
+            typeof tool === "string"
+              ? tool
+              : tool?.name || tool?.id || `tool_${index + 1}`;
+          const hasChildren = Array.isArray(tool?.children) && tool.children.length > 0;
+
+          return (
+            <div key={`${toolName}-${index}`} className={isLastOdd ? "col-span-2" : ""}>
+              <div
+                onClick={() => handleToolClick(tool)}
+                className={`cursor-pointer flex items-center justify-between border hover:border-primary px-2 py-1 text-xs text-base-content
+                              hover:hover:border-primary hover:bg-primary/10`}
+                title={toolName}
+              >
+                <span className="truncate">{toolName}</span>
+                <span className="text-green-500 flex-shrink-0 ml-2">✔</span>
+              </div>
+              {hasChildren && (
+                <div className="col-span-2 mt-2">
+                  {renderToolGrid(tool.children, depth + 1)}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     );
   };
 
@@ -74,12 +113,7 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
     };
   }, [openAgentKey]);
 
-  const isBatchEmpty =
-    !Array.isArray(batches) ||
-    batches.length === 0 ||
-    batches.every(
-      (batch) => !Array.isArray(batch?.agents) || batch.agents.length === 0
-    );
+  const isBatchEmpty = !Array.isArray(agents) || agents.length === 0;
 
   if (isLoading || isBatchEmpty) {
     return (
@@ -96,14 +130,8 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
   return (
     <>
       <div className="space-y-4 bg-base-100">
-        {batches?.map((batch, batchIndex) => (
-          <div key={batchIndex} className="space-y-2">
-            <div className="text-xs font-semibold text-base-content/60">
-              {batch.title}
-            </div>
-
-            {batch.agents?.map((agent, agentIndex) => {
-              const agentKey = `${batchIndex}-${agentIndex}`;
+        {agents?.map((agent, agentIndex) => {
+          const agentKey = `${agentIndex}`;
 
               // Check if this is an actual agent (has functionData) or just "FUNCTIONS" group
               const isActualAgent = agent.functionData !== null;
@@ -126,46 +154,46 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
                   response: "Successfully executed agent task",
                 },
               };
-
-              return (
-                <div key={agentIndex} className="space-y-2">
-                  {/* AGENT ROW - Only show for actual agents */}
-                  {isActualAgent && (
-                    <div className="relative">
-                      <div
-                        onClick={() =>
-                          handleAgentClick(
-                            agentKey,
-                            functionData,
-                            agent.name,
-                            agent.parallelTools
-                          )
-                        }
-                        ref={(node) => {
-                          if (node) rowRefs.current[agentKey] = node;
-                        }}
-                        className="flex justify-between items-center border hover:border-primary px-2 py-2 text-sm text-base-content hover:hover:border-primary hover:bg-primary/10 cursor-pointer"
-                        title={agent.name}
-                      >
-                        <span className="truncate">{agent.name}</span>
-                        <span className="text-green-500 flex-shrink-0 ml-2">✔</span>
-                      </div>
-                    </div>
-                  )}
+              console.log("hihihihihiiihihih", agent)
+          return (
+            <div key={agentIndex} className="space-y-2">
+              {/* AGENT ROW - Only show for actual agents */}
+              {isActualAgent && (
+                <div className="relative">
+                  <div
+                    onClick={() =>
+                      handleAgentClick(
+                        agentKey,
+                        functionData,
+                        agent.name,
+                        agent.parallelTools
+                      )
+                    }
+                    ref={(node) => {
+                      if (node) rowRefs.current[agentKey] = node;
+                    }}
+                    className="flex justify-between items-center border hover:border-primary px-2 py-2 text-sm text-base-content hover:hover:border-primary hover:bg-primary/10 cursor-pointer"
+                    title={agent.name}
+                  >
+                    <span className="truncate">{agent.name}</span>
+                    <span className="text-green-500 flex-shrink-0 ml-2">✔</span>
+                  </div>
+                </div>
+              )}
 
                   {/* Show FUNCTIONS label for non-agent groups */}
-                  {!isActualAgent && agent.name === "FUNCTIONS" && (
-                    <div className="text-xs font-semibold text-base-content/60 mb-1">
-                      MAIN AGENT TOOLS
-                    </div>
-                  )}
+              {!isActualAgent && agent.name === "FUNCTIONS" && (
+                <div className="text-xs font-semibold text-base-content/60 mb-1">
+                  MAIN AGENT TOOLS
+                </div>
+              )}
 
-                  {isActualAgent && agent.isLoading && (
-                    <div className={`flex items-center gap-2 text-[10px] text-base-content/60 ${isActualAgent ? 'ml-4' : ''}`}>
-                      <span className="h-3 w-3 border-2 hover:border-primary border-t-transparent rounded-full animate-spin" />
-                      <span>Loading tools...</span>
-                    </div>
-                  )}
+              {isActualAgent && agent.isLoading && (
+                <div className={`flex items-center gap-2 text-[10px] text-base-content/60 ${isActualAgent ? 'ml-4' : ''}`}>
+                  <span className="h-3 w-3 border-2 hover:border-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Loading tools...</span>
+                </div>
+              )}
 
                   {/* PARALLEL TOOLS */}
                   {Array.isArray(agent.parallelTools) && agent.parallelTools.length > 0 && (
@@ -176,38 +204,12 @@ export function BatchUI({ batches, onToolClick, isLoading = false }) {
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-2">
-                        {agent.parallelTools.map((tool, index) => {
-                          const isLastOdd =
-                            agent.parallelTools.length % 2 !== 0 &&
-                            index === agent.parallelTools.length - 1;
-                          const toolName =
-                            typeof tool === "string"
-                              ? tool
-                              : tool?.name || tool?.id || `tool_${index + 1}`;
-
-                          return (
-                            <div
-                              key={`${toolName}-${index}`}
-                              onClick={() => handleToolClick(tool)}
-                              className={`cursor-pointer flex items-center justify-between border hover:border-primary px-2 py-1 text-xs text-base-content
-                              ${isActualAgent ? 'hover:hover:border-primary hover:bg-primary/10' : 'hover:hover:border-primary hover:bg-primary/10'}
-                              ${isLastOdd ? "col-span-2" : ""}`}
-                              title={toolName}
-                            >
-                              <span className="truncate">{toolName}</span>
-                              <span className="text-green-500 flex-shrink-0 ml-2">✔</span>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      {renderToolGrid(agent.parallelTools)}
                     </div>
                   )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
       {openAgentKey && selectedFunctionData &&
