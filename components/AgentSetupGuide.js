@@ -113,14 +113,14 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     
     // Chatbot open/close logic - moved to end to handle all conditions
     if (bridgeType === 'chatbot' && hasPrompt && (hasApiKey || modelName === 'gpt-5-nano')) {
-      if (typeof window !== 'undefined' && window.openChatbot) {
-        window?.openChatbot();
-      }
+        setTimeout(() => {
+          window?.openChatbot();
+        }, 500);
     } else {
-      if (typeof window !== 'undefined' && window.closeChatbot) {
-        window?.closeChatbot();
+        setTimeout(() => {
+          window?.closeChatbot();
+        }, 300);
       }
-    }
   }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType]);
 
   useEffect(() => {

@@ -316,7 +316,7 @@ function Home({ params, searchParams, isEmbedUser }) {
   const resolvedSearchParams = use(searchParams);
   const dispatch = useDispatch();
   const router = useRouter();
-  const type = searchParams?.type ?? "api";
+  const type = resolvedSearchParams?.type ?? "api";
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus, showHistory, usageMetrics, isAdminOrOwner, currentOrgRole, currentUser, linksData, users } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails;
