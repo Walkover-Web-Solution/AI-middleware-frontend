@@ -448,7 +448,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               {/* Saving Status Indicator */}
               {savingStatus?.status && (
                 <div className="flex-shrink-0 ml-2 mr-2">
-                  <div className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 ${savingStatus.status === 'saving' ? 'bg-blue-100 text-blue-800' : savingStatus.status === 'saved' ? 'bg-green-100 text-green-800' : savingStatus.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  <div className="px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 text-base-content">
                     {savingStatus.status === 'saving' && (
                       <>
                         <div className="loading loading-spinner loading-xs"></div>

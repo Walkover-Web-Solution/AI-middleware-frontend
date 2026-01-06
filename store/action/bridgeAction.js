@@ -209,12 +209,10 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
       dispatch(setSavingStatus({ status: 'saved' }));
       
       // Clear the status after 3 seconds
-      setTimeout(() => {
-        dispatch(setSavingStatus({ status: null }));
-      }, 3000);
+  
     } else {
       // Update status to show warning
-      dispatch(setSavingStatus({ status: 'warning' }));
+      dispatch(setSavingStatus({ status: 'failed' }));
       
       // Clear the status after 3 seconds
       setTimeout(() => {
@@ -228,9 +226,6 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
     dispatch(setSavingStatus({ status: 'failed' }));
     
     // Clear the status after 3 seconds
-    setTimeout(() => {
-      dispatch(setSavingStatus({ status: null }));
-    }, 3000);
   }
 };
 
