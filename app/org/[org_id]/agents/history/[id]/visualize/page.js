@@ -4,9 +4,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { getHistoryAction, getThread, getRecursiveHistoryAction } from "@/store/action/historyAction";
+import { X, ArrowLeft } from "lucide-react";
+import { formatRelativeTime } from "@/utils/utility";
 
 import { UserPromptUI } from "@/components/historyUi/UserPromptUi.js";
 import { AgentUI } from "@/components/historyUi/AgentUi.js";
@@ -24,6 +26,7 @@ const nodeTypes = {
 
 export default function Page() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [selectedTool, setSelectedTool] = useState(null);
   const [selectedResponse, setSelectedResponse] = useState(null);
   const params = useParams();
@@ -308,11 +311,12 @@ export default function Page() {
   const nodes = useMemo(() => {
     const baseX = 650;
     const nodeGap = 350;
+    const alignY = 150; // Single Y position for all nodes
 
     const agentNodes = derivedAgents.map((agent, index) => ({
       id: `agent-${index}`,
       type: "generic",
-      position: { x: baseX + index * nodeGap, y: 120 },
+      position: { x: baseX + index * nodeGap, y: alignY },
       data: {
         source: true,
         target: true,
@@ -346,7 +350,7 @@ export default function Page() {
       {
         id: "1",
         type: "generic",
-        position: { x: 0, y: 150 },
+        position: { x: 0, y: alignY },
         data: {
           source: true,
           ui: {
@@ -361,7 +365,7 @@ export default function Page() {
       {
         id: "2",
         type: "generic",
-        position: { x: 320, y: 150 },
+        position: { x: 320, y: alignY },
         data: {
           source: true,
           target: true,
@@ -384,7 +388,7 @@ export default function Page() {
       {
         id: "4",
         type: "generic",
-        position: { x: mainToolsX, y: 170 },
+        position: { x: mainToolsX, y: alignY },
         data: {
           source: true,
           target: true,
@@ -408,7 +412,7 @@ export default function Page() {
       {
         id: "5",
         type: "generic",
-        position: { x: finalX, y: 170 },
+        position: { x: finalX, y: alignY },
         data: {
           target: true,
           ui: {
@@ -433,40 +437,101 @@ export default function Page() {
   ]);
 
   const edges = useMemo(() => {
-    const edgeList = [{ id: "e1-2", source: "1", target: "2" }];
+    const edgeStyle = {
+      stroke: '#22c55e', // Green color
+      strokeWidth: 2,
+      animated: true,
+    };
+
+    const edgeList = [
+      { 
+        id: "e1-2", 
+        source: "1", 
+        target: "2",
+        style: edgeStyle,
+        animated: true,
+      }
+    ];
 
     if (derivedAgents.length > 0) {
-      edgeList.push({ id: "e2-a0", source: "2", target: "agent-0" });
+      edgeList.push({ 
+        id: "e2-a0", 
+        source: "2", 
+        target: "agent-0",
+        style: edgeStyle,
+        animated: true,
+      });
       for (let i = 1; i < derivedAgents.length; i += 1) {
         edgeList.push({
           id: `e-a${i - 1}-a${i}`,
           source: `agent-${i - 1}`,
           target: `agent-${i}`,
+          style: edgeStyle,
+          animated: true,
         });
       }
       edgeList.push({
         id: "e-alast-4",
         source: `agent-${derivedAgents.length - 1}`,
         target: "4",
+        style: edgeStyle,
+        animated: true,
       });
     } else {
-      edgeList.push({ id: "e2-4", source: "2", target: "4" });
+      edgeList.push({ 
+        id: "e2-4", 
+        source: "2", 
+        target: "4",
+        style: edgeStyle,
+        animated: true,
+      });
     }
 
-    edgeList.push({ id: "e4-5", source: "4", target: "5" });
+    edgeList.push({ 
+      id: "e4-5", 
+      source: "4", 
+      target: "5",
+      style: edgeStyle,
+      animated: true,
+    });
     return edgeList;
   }, [derivedAgents.length]);
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
   return (
-    <div className="h-screen w-full relative bg-base-200">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        fitView
-      >
-        <Background />
-      </ReactFlow>
+    <div className="h-screen w-full relative bg-base-200 flex flex-col">
+      {/* Navbar */}
+      <div className="bg-base-100 border-b border-base-300 px-6 py-4 flex items-center justify-between z-10">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold text-base-content">Agent Execution Flow</h1>
+          <span className="text-base-content/40">•</span>
+          <p className="text-sm text-base-content/60">
+            Executed {activeThreadItem?.created_at ? formatRelativeTime(activeThreadItem.created_at) : 'recently'}
+          </p>
+        </div>
+        <button
+          onClick={handleGoBack}
+          className="text-base-content hover:text-primary transition-colors"
+          title="Close"
+        >
+          <X size={24} />
+        </button>
+      </div>
+
+      {/* ReactFlow Container */}
+      <div className="flex-1 relative">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          fitView
+        >
+          {/* <Background /> */}
+        </ReactFlow>
+      </div>
 
       {selectedTool && (
         <ToolFullSlider
@@ -483,6 +548,15 @@ export default function Page() {
           onBack={() => setSelectedResponse(null)}
         />
       )}
+
+      {/* Close Button - Bottom Right */}
+      <button
+        onClick={handleGoBack}
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-primary text-primary-content rounded-md hover:bg-primary/80 shadow-lg transition-all"
+      >
+        <ArrowLeft size={16} />
+        <span className="text-sm font-medium">GO BACK</span>
+      </button>
     </div>
   );
 }

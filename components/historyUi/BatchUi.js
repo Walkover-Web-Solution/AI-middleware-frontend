@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BotIcon, WrenchIcon } from "@/components/Icons";
+import { Zap } from "lucide-react";
 
 export function BatchUI({ agents, onToolClick, isLoading = false }) {
   const [openAgentKey, setOpenAgentKey] = useState(null);
@@ -63,8 +64,8 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
                       )
                     : handleToolClick(tool)
                 }
-                className={`cursor-pointer flex items-center justify-between border hover:border-primary px-3 py-2 text-xs text-base-content gap-2
-                              hover:hover:border-primary hover:bg-primary/10`}
+                className={`cursor-pointer flex items-center justify-between border px-3 py-2 text-xs text-base-content gap-2
+                              ${isAgentNode ? 'hover:border-blue-400 hover:bg-blue-400/10' : 'hover:border-orange-400 hover:bg-orange-400/10'}`}
                 title={toolName}
               >
                 <span className="flex items-center gap-2 flex-1 min-w-0">
@@ -82,6 +83,22 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
               </div>
               {hasChildren && (
                 <div className="col-span-2 mt-2">
+                  {/* Show summary for child agents */}
+                  {isAgentNode && (() => {
+                    const childToolCount = tool.children.filter(t => t?.nodeType !== 'agent').length;
+                    const childAgentCount = tool.children.filter(t => t?.nodeType === 'agent').length;
+                    const parts = [];
+                    if (childAgentCount > 0) parts.push(`${childAgentCount} agent${childAgentCount > 1 ? 's' : ''}`);
+                    if (childToolCount > 0) parts.push(`${childToolCount} tool${childToolCount > 1 ? 's' : ''}`);
+                    const summary = parts.join(' ');
+                    
+                    return summary ? (
+                      <div className="flex items-center gap-2 text-[10px] text-base-content/60 mb-2 ml-3">
+                        <Zap size={10} className="text-yellow-500" />
+                        <span>{summary} called by {toolName}</span>
+                      </div>
+                    ) : null;
+                  })()}
                   {renderToolGrid(tool.children, depth + 1)}
                 </div>
               )}
@@ -193,7 +210,7 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
                     ref={(node) => {
                       if (node) rowRefs.current[agentKey] = node;
                     }}
-                    className="flex justify-between items-center border hover:border-primary px-2 py-2 text-sm text-base-content hover:hover:border-primary hover:bg-primary/10 cursor-pointer"
+                    className="flex justify-between items-center border px-2 py-2 text-sm text-base-content cursor-pointer hover:border-blue-400 hover:bg-blue-400/10"
                     title={agent.name}
                   >
                     <span className="truncate flex items-center gap-2">
@@ -225,11 +242,21 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
                   {/* PARALLEL TOOLS */}
                   {Array.isArray(agent.parallelTools) && agent.parallelTools.length > 0 && (
                     <div className={`space-y-1 ${isActualAgent ? 'ml-4' : ''}`}>
-                      {isActualAgent && (
-                        <div className="text-[10px] text-base-content/60 flex items-center gap-1">
-                          🔧 {agent.parallelTools.length} TOOL{agent.parallelTools.length > 1 ? 'S' : ''} CALLED BY {agent.name.toUpperCase()}
-                        </div>
-                      )}
+                      {isActualAgent && (() => {
+                        const toolCount = agent.parallelTools.filter(t => t?.nodeType !== 'agent').length;
+                        const agentCount = agent.parallelTools.filter(t => t?.nodeType === 'agent').length;
+                        const parts = [];
+                        if (agentCount > 0) parts.push(`${agentCount} agent${agentCount > 1 ? 's' : ''}`);
+                        if (toolCount > 0) parts.push(`${toolCount} tool${toolCount > 1 ? 's' : ''}`);
+                        const summary = parts.join(' ');
+                        
+                        return (
+                          <div className="flex items-center gap-2 text-[10px] text-base-content/60 mb-2">
+                            <Zap size={12} className="text-yellow-500" />
+                            <span>{summary} called by {agent.name}</span>
+                          </div>
+                        );
+                      })()}
 
                       {renderToolGrid(agent.parallelTools)}
                     </div>

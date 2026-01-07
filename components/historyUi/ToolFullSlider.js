@@ -94,11 +94,6 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
       false,
   };
 
-  const handleExportLogs = () => {
-    // Implement export logs functionality
-    console.log('Exporting logs...');
-  };
-
   return (
 <>
       <div
@@ -177,13 +172,7 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
       </div>
 
           {/* Footer */}
-          <div className="flex justify-between p-4 border-t border-base-300 bg-base-200">
-            <button
-              onClick={handleExportLogs}
-              className="px-4 py-2 text-sm font-medium text-base-content bg-base-100 border border-base-300 rounded-md hover:bg-base-200"
-            >
-              EXPORT LOGS
-            </button>
+          <div className="flex justify-end p-4 border-t border-base-300 bg-base-200">
             <button
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/80"
