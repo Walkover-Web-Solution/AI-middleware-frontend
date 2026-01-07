@@ -626,13 +626,13 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   2
                 )
               }
-              onChange={(e) => {
+              onBlur={(e) => {
                 setObjectFieldValue(e.target.value);
                 try {
                   const  parsedValue = JSON.parse(e.target.value);
                   handleSelectChange({ target: { value: "json_schema" } }, key, defaultValue, parsedValue, true);
                 } catch (error) {
-                  console.log('Invalid JSON:', error);
+                  toast.error('Invalid JSON schema');
                 }
               }}
               className="textarea textarea-bordered w-full h-32 font-mono text-xs"
