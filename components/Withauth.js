@@ -11,12 +11,20 @@ import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
 const handleUserDetailsAndSwitchOrg = async (url, dispatch) => {
 const userDetailsData = await dispatch(userDetails());
-  const companyRefId = extractCompanyRefId(url); 
+const companyRefId = extractCompanyRefId(url); 
   if (companyRefId) {
     const company = userDetailsData?.c_companies?.find((company) => company.id == companyRefId)
     await switchOrg(companyRefId);
     const localToken = await switchUser({ orgId: companyRefId, orgName: company.name });
     setInCookies('local_token', localToken.token);
+    return url; 
+  }
+  else{
+    const companyId = userDetailsData?.currentCompany?.id;
+    await switchOrg(companyId);
+    const localToken = await switchUser({ orgId: companyId, orgName: userDetailsData?.currentCompany?.name });
+    setInCookies('local_token', localToken.token);
+    return `/org/${companyId}/agents`; 
   }
 };
 
@@ -81,10 +89,10 @@ const WithAuth = (Children) => {
           });
           setInCookies('local_token', localToken.token);
 
-        if(getFromCookies("previous_url")) {
-          await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch, userDetails);
-        }
-        router.replace(redirectionUrl);
+  
+          const finalRedirectUrl = await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch, userDetails);
+        
+        router.replace(finalRedirectUrl);
         removeCookie("previous_url");
         return;
       }

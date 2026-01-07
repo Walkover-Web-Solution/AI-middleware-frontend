@@ -64,7 +64,7 @@ const PromptTextarea = memo(({
 
     if (isPromptHelperOpen) {
       // Helper → ALWAYS full height, disable resize
-      wrapper.style.height = "calc(100vh - 110px)";
+      wrapper.style.height = "calc(100vh - 90px)";
       wrapper.style.resize = "none";
     } else {
       // Small mode → restore last resize, enable resize
@@ -114,7 +114,7 @@ const PromptTextarea = memo(({
         ring-2 ring-transparent
         focus-within:ring-2 focus-within:ring-base-content/20 box-border
         ${isPromptHelperOpen
-          ? "h-[calc(100vh-110px)] w-[700px] border-primary shadow-md resize-none"
+          ? "h-[calc(100vh-50px)] w-[700px] border-primary shadow-md resize-none"
           : "h-96 min-h-96 border-base-content/20 resize-y"
         }
       `}

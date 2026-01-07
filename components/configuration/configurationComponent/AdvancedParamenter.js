@@ -522,9 +522,10 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                       disabled={isReadOnly}
                     />
                   </div>
+                  {/* Static options (auto, none, required) */}
                   {options && options.map(option => (
                     <div
-                      key={option?.id}
+                      key={option}
                       className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
                       onClick={() => {
                         setSelectedOptions([{ name: option, id: option }]);
@@ -551,6 +552,77 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                       </label>
                     </div>
                   ))}
+                  
+                  {/* Tools Section */}
+                  {version_function_data && Object.values(version_function_data).length > 0 && (
+                    <>
+                      <div className="px-2 py-1 sticky top-0 z-10">
+                        <span className="text-xs font-semibold text-base-content/70">TOOLS</span>
+                      </div>
+                      {Object.values(version_function_data)
+                        .filter(func => {
+                          const funcName = func?.script_id || func?.title || '';
+                          return funcName.toLowerCase().includes(searchQuery.toLowerCase());
+                        })
+                        .map(func => (
+                          <div
+                            key={func?._id}
+                            className="p-2 hover:bg-base-200 cursor-pointer"
+                            onClick={() => {
+                              setSelectedOptions([{ name: func?.title, id: func?._id }]);
+                              handleDropdownChange(func?._id, key);
+                              setShowDropdown(false);
+                            }}
+                          >
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name="function-select"
+                                checked={selectedOptions?.some(opt => opt?.id === func?._id)}
+                                className="radio radio-xs"
+                                disabled={isReadOnly}
+                              />
+                              <span className="font-medium text-xs">{integrationData?.[func?.script_id]?.title || func?.title}</span>
+                            </label>
+                          </div>
+                        ))}
+                    </>
+                  )}
+                  
+                  {/* Agents Section */}
+                  {connected_agents && Object.keys(connected_agents).length > 0 && (
+                    <>
+                      <div className="px-2 py-1 sticky top-0 z-10">
+                        <span className="text-xs font-semibold text-base-content/70">AGENTS</span>
+                      </div>
+                      {Object.entries(connected_agents)
+                        .filter(([name, agent]) => {
+                          return name.toLowerCase().includes(searchQuery.toLowerCase());
+                        })
+                        .map(([name, agent]) => (
+                          <div
+                            key={agent.bridge_id}
+                            className="p-2 hover:bg-base-200 cursor-pointer"
+                            onClick={() => {
+                              setSelectedOptions([{ name, id: agent.bridge_id }]);
+                              handleDropdownChange(agent.bridge_id, key);
+                              setShowDropdown(false);
+                            }}
+                          >
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name="function-select"
+                                checked={selectedOptions?.some(opt => opt?.id === agent.bridge_id)}
+                                className="radio radio-xs"
+                                disabled={isReadOnly}
+                              />
+                              <span className="font-medium text-xs">{name}</span>
+                            </label>
+                          </div>
+                        ))}
+                    </>
+                  )}
                 </div>
               )}
             </div>
