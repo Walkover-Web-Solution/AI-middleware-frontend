@@ -632,6 +632,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   const  parsedValue = JSON.parse(e.target.value);
                   handleSelectChange({ target: { value: "json_schema" } }, key, defaultValue, parsedValue, true);
                 } catch (error) {
+                  console.error(error)
                   toast.error('Invalid JSON schema');
                 }
               }}
