@@ -187,11 +187,12 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
     try {
-      if (Objectvalue && !JSON.parse(Objectvalue)) {
-        toast.error("Invalid JSON provided");
-        return;
+      // Check if Objectvalue is already an object or needs parsing
+      if (typeof Objectvalue === 'string') {
+        newValue = Objectvalue ? JSON.parse(Objectvalue) : {};
+      } else {
+        newValue = Objectvalue || {};
       }
-      newValue = Objectvalue ? JSON.parse(Objectvalue) : JSON.parse("{}");
       setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
     } catch {
       toast.error("Invalid JSON provided");
@@ -419,37 +420,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               ))}
             </select>
           )}
-          
-          {/* Object input */}
-          {field === 'object' && (
-            <textarea
-              value={isDefaultValue ? 'default' : (objectFieldValue || JSON.stringify(configuration?.[key] || {}, null, 2))}
-              onChange={(e) => {
-                setObjectFieldValue(e.target.value);
-              }}
-              onBlur={(e) => {
-                if (isDefaultValue && e.target.value !== JSON.stringify(defaultValue || {}, null, 2)) {
-                  try {
-                    const parsedValue = JSON.parse(e.target.value);
-                    setSliderValue(parsedValue, key, isDeafaultObject);
-                  } catch  {
-                    setSliderValue({}, key, isDeafaultObject);
-                  }
-                } else {
-                  try {
-                    const parsedValue = JSON.parse(e.target.value);
-                    handleInputChange({ target: { value: parsedValue, name: key } }, key);
-                  } catch (error) {
-                    console.log('Invalid JSON:', error);
-                  }
-                }
-              }}
-              className={`textarea textarea-bordered ${inputSizeClass} w-full h-16 font-mono text-xs`}
-              placeholder="Enter JSON object..."
-              disabled={isReadOnly}
-            />
-          )}
-          
           {/* Slider input */}
           {field === 'slider' && (
             <div className="flex items-center gap-2 w-full">
@@ -583,13 +553,13 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   2
                 )
               }
-              onChange={(e) => {
+              onBlur={(e) => {
                 setObjectFieldValue(e.target.value);
                 try {
-                  const parsedValue = JSON.parse(e.target.value);
-                  handleInputChange({ target: { value: parsedValue } }, key);
+                  const  parsedValue = JSON.parse(e.target.value);
+                  handleSelectChange({ target: { value: "json_schema" } }, key, defaultValue, parsedValue, true);
                 } catch (error) {
-                  console.log('Invalid JSON:', error);
+                  toast.error('Invalid JSON schema');
                 }
               }}
               className="textarea textarea-bordered w-full h-32 font-mono text-xs"
