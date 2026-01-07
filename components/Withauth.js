@@ -7,9 +7,10 @@ import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import ErrorPage from "@/app/not-found";
 import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
+import { trackAuthEvent } from "@/utils/posthog";
 
 
-const handleUserDetailsAndSwitchOrg = async (url, dispatch) => {
+const handleUserDetailsAndSwitchOrg = async (url, dispatch,userDetails) => {
 const userDetailsData = await dispatch(userDetails());
 const companyRefId = extractCompanyRefId(url); 
   if (companyRefId) {
@@ -31,7 +32,7 @@ const companyRefId = extractCompanyRefId(url);
 const extractCompanyRefId = (url) => {
   const regex = /\/org\/(\d+)\//; // This assumes the company_ref_id is between '/org/' and another '/'
   const match = url.match(regex);
-  return match ? match[1] : null; 
+  return match ? match[1] : null;
 };
 
 
@@ -49,38 +50,38 @@ const WithAuth = (Children) => {
     // If the user has not logged in, it will redirect the user to the login page
 
     const isEmbedUser = useCustomSelector((state) => state.appInfoReducer.embedUserDetails.isEmbedUser);
-    
+
     useLayoutEffect(() => {
 
       const runEffect = async (isEmbedUser) => {
-      const proxyToken = getFromCookies('proxy_token');
-      const proxyAuthToken = proxy_auth_token;
-      let redirectionUrl = getFromCookies("previous_url") || "/org";
+        const proxyToken = getFromCookies('proxy_token');
+        const proxyAuthToken = proxy_auth_token;
+        let redirectionUrl = getFromCookies("previous_url") || "/org";
             if(isEmbedUser)
       {
-        const proxy_auth_token = sessionStorage.getItem('proxy_token');
-        const org_id = sessionStorage.getItem('gtwy_org_id');
+          const proxy_auth_token = sessionStorage.getItem('proxy_token');
+          const org_id = sessionStorage.getItem('gtwy_org_id');
         if(proxy_auth_token && org_id)
         {
-          router.replace(`/org/${org_id}/agents`);
-          return
-        }
+            router.replace(`/org/${org_id}/agents`);
+            return
+          }
         else{
-          setLoading(false);
+            setLoading(false);
           <ErrorPage/>
-          return
+            return
+          }
         }
-      }
-      if (proxyToken) {
-        router.replace("/org");
-        return;
-      }
+        if (proxyToken) {
+          router.replace("/org");
+          return;
+        }
 
-      if (proxyAuthToken) {
-        setLoading(true);
-        setInCookies('proxy_token', proxyAuthToken);
+        if (proxyAuthToken) {
+          setLoading(true);
+          setInCookies('proxy_token', proxyAuthToken);
 
-      
+
           const localToken = await loginUser({
             userId: searchParams.get('user_ref_id'),
             orgId: searchParams.get('company_ref_id'),
@@ -89,44 +90,48 @@ const WithAuth = (Children) => {
           });
           setInCookies('local_token', localToken.token);
 
-  
-          const finalRedirectUrl = await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch, userDetails);
-        
-        router.replace(finalRedirectUrl);
-        removeCookie("previous_url");
-        return;
-      }
-      else{
-        setLoading(false);
-      }
-
-      const configuration = {
-        referenceId: process.env.NEXT_PUBLIC_REFERENCEID,
-        addInfo: {
-          redirect_path: '/login'
-        },
-        success: (data) => {
-          console.dir('success response', data);
-        },
-        failure: (error) => {
-          console.error('failure reason', error);
+       
+         const finalRedirectUrl = await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch, userDetails);
+          
+          trackAuthEvent('user_logged_in', {
+            user_id: searchParams.get('user_ref_id'),
+            org_id: searchParams.get('company_ref_id'),
+          });
+          router.replace(finalRedirectUrl);
+          removeCookie("previous_url");
+          return;
         }
-      };
+        else{
+          setLoading(false);
+        }
 
-      // Load the login script from msg91
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.onload = () => {
-        const checkInitVerification = setInterval(() => {
-          if (typeof initVerification === 'function') {
-            clearInterval(checkInitVerification);
-            initVerification(configuration); // Initialize the login process
+        const configuration = {
+          referenceId: process.env.NEXT_PUBLIC_REFERENCEID,
+          addInfo: {
+            redirect_path: '/login'
+          },
+          success: (data) => {
+            console.dir('success response', data);
+          },
+          failure: (error) => {
+            console.error('failure reason', error);
           }
-        }, 100);
-      };
-      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
-      document.body.appendChild(script); // Add the script to the page
-    }
+        };
+
+        // Load the login script from msg91
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.onload = () => {
+          const checkInitVerification = setInterval(() => {
+            if (typeof initVerification === 'function') {
+              clearInterval(checkInitVerification);
+              initVerification(configuration); // Initialize the login process
+            }
+          }, 100);
+        };
+        script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
+        document.body.appendChild(script); // Add the script to the page
+      }
 
       runEffect(isEmbedUser);
     }, [isEmbedUser, pathName, proxy_auth_token]);
