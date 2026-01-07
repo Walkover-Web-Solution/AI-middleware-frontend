@@ -6,6 +6,7 @@ export function AgentUI({
   status,
   statusClass,
   onToolClick,
+  emptyToolsMessage,
   tools = [],
 }) {
   const handleToolClick = (tool) => {
@@ -31,26 +32,32 @@ export function AgentUI({
           {name}
         </div>
       </div>
-      {status === "FINALIZING" && tools.length > 0 && (
+      {status === "FINALIZING" && (
         <div className="bg-base-100">
           <div className="text-center text-xs tracking-widest text-base-content/60 mb-4">
             PROCESSING
           </div>
 
-          {tools.map((tool, index) => (
-            <div
-              key={`${tool?.name || "tool"}-${index}`}
-              className="flex items-center justify-between border border-base-300 hover:border-primary p-2 mb-3 hover:bg-primary/10 cursor-pointer"
-              onClick={() => handleToolClick(tool)}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-primary">🔧</span>
-                <span className="text-sm text-base-content">
-                  {tool?.name || "Unknown Tool"}  {/* Add this line to display the tool name */}
-                </span>
+          {tools.length > 0 ? (
+            tools.map((tool, index) => (
+              <div
+                key={`${tool?.name || "tool"}-${index}`}
+                className="flex items-center justify-between border border-base-300 hover:border-primary p-2 mb-3 hover:bg-primary/10 cursor-pointer"
+                onClick={() => handleToolClick(tool)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-primary">🔧</span>
+                  <span className="text-sm text-base-content">
+                    {tool?.name || "Unknown Tool"}
+                  </span>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="border border-base-300 bg-base-200 text-xs text-base-content/60 p-3 text-center">
+              {emptyToolsMessage || "No tool calls for this agent."}
             </div>
-          ))}
+          )}
         </div>
       )}
 

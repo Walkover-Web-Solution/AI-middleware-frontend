@@ -63,7 +63,7 @@ export default function Page() {
     return thread.find((item) => item?.message_id === messageId) || null;
   }, [messageId, thread]);
 
-  console.log("🚀 selectedThreadItem:", selectedThreadItem) ;
+  console.log("🚀 selectedThreadItem:", selectedThreadItem);
   useEffect(() => {
     if (selectedThreadItem) setStableThreadItem(selectedThreadItem);
   }, [selectedThreadItem]);
@@ -75,59 +75,61 @@ export default function Page() {
     }
   }, [messageId, thread, stableThreadItem]);
 
-  useEffect(() => {
-    if (thread.length > 0 || threadId || !bridgeId) return;
+  // COMMENTED OUT: These hooks fetch thread data, but activeThreadItem already has all needed data
+  // useEffect(() => {
+  //   if (thread.length > 0 || threadId || !bridgeId) return;
 
-    const fetchInitialThread = async () => {
-      const history = await dispatch(
-        getHistoryAction(
-          bridgeId,
-          1,
-          "all",
-          errorParam,
-          versionId || undefined,
-          undefined,
-          undefined,
-          undefined
-        )
-      );
+  //   const fetchInitialThread = async () => {
+  //     const history = await dispatch(
+  //       getHistoryAction(
+  //         bridgeId,
+  //         1,
+  //         "all",
+  //         errorParam,
+  //         versionId || undefined,
+  //         undefined,
+  //         undefined,
+  //         undefined
+  //       )
+  //     );
+  //     console.log("🚀 history:", history);
+  //     const firstThreadId = history?.[0]?.thread_id;
+  //     if (!firstThreadId) return;
 
-      const firstThreadId = history?.[0]?.thread_id;
-      if (!firstThreadId) return;
+  //     dispatch(
+  //       getThread({
+  //         threadId: firstThreadId,
+  //         bridgeId,
+  //         subThreadId: firstThreadId,
+  //         nextPage: 1,
+  //         user_feedback: "all",
+  //         versionId: versionId || undefined,
+  //         error: errorParam,
+  //       })
+  //     );
+  //   };
 
-      dispatch(
-        getThread({
-          threadId: firstThreadId,
-          bridgeId,
-          subThreadId: firstThreadId,
-          nextPage: 1,
-          user_feedback: "all",
-          versionId: versionId || undefined,
-          error: errorParam,
-        })
-      );
-    };
+  //   fetchInitialThread();
+  // }, [thread.length, threadId, bridgeId, versionId, errorParam, dispatch]);
 
-    fetchInitialThread();
-  }, [thread.length, threadId, bridgeId, versionId, errorParam, dispatch]);
+  // useEffect(() => {
+  //   if (thread.length > 0 || !threadId || !bridgeId) return;
 
-  useEffect(() => {
-    if (thread.length > 0 || !threadId || !bridgeId) return;
-
-    dispatch(
-      getThread({
-        threadId,
-        bridgeId,
-        subThreadId: subThreadId || threadId,
-        nextPage: 1,
-        user_feedback: "all",
-        versionId: versionId || undefined,
-        error: errorParam,
-      })
-    );
-  }, [thread.length, threadId, subThreadId, bridgeId, versionId, errorParam, dispatch]);
+  //   dispatch(
+  //     getThread({
+  //       threadId,
+  //       bridgeId,
+  //       subThreadId: subThreadId || threadId,
+  //       nextPage: 1,
+  //       user_feedback: "all",
+  //       versionId: versionId || undefined,
+  //       error: errorParam,
+  //     })
+  //   );
+  // }, [thread.length, threadId, subThreadId, bridgeId, versionId, errorParam, dispatch]);
 
   const activeThreadItem = selectedThreadItem || stableThreadItem; // use this everywhere
+  console.log("🚀 activeThreadItem:", activeThreadItem);
   const responsePreview = useMemo(() => {
     const content =
       activeThreadItem?.updated_llm_message ||
@@ -138,31 +140,35 @@ export default function Page() {
     return content.length > 120 ? `${content.slice(0, 120)}...` : content;
   }, [activeThreadItem]);
 
- 
+
+  // Fetch recursive history using activeThreadItem data
   useEffect(() => {
-    const selectedBridgeId = activeThreadItem?.bridge_id || bridgeId;
-    const selectedThreadId = activeThreadItem?.thread_id || threadId;
-    const selectedMessageId = activeThreadItem?.message_id || messageId;
- 
+    if (!activeThreadItem) return;
+
+    const selectedBridgeId = activeThreadItem.bridge_id;
+    const selectedThreadId = activeThreadItem.thread_id;
+    const selectedMessageId = activeThreadItem.message_id;
+
     const fetchRecursiveHistory = async () => {
       if (!selectedBridgeId || !selectedThreadId || !selectedMessageId) {
+        console.warn("Missing required IDs for recursive history fetch");
         return;
       }
- 
+
       try {
         const data = await dispatch(getRecursiveHistoryAction({
           agent_id: selectedBridgeId,
           thread_id: selectedThreadId,
           message_id: selectedMessageId,
         }));
-        console.log("🚀 Recursive history data:", data) ;
+        console.log("🚀 Recursive history data:", data);
       } catch (error) {
         console.error("❌ Error fetching recursive history:", error);
       }
     };
 
     fetchRecursiveHistory();
-  }, [activeThreadItem, bridgeId, threadId, messageId, dispatch]);
+  }, [activeThreadItem, dispatch]);
 
   const normalizeToolCalls = (toolData) => {
     if (!toolData) return [];
@@ -183,10 +189,10 @@ export default function Page() {
   }, [recursiveMessage?.tools_call_data]);
 
   const getToolType = (tool) => {
-    return (
-      tool?.data?.metadata?.type ||
-      (Array.isArray(tool?.tools_call_data) ? "agent" : null)
-    );
+    if (tool?.data?.metadata?.type) return tool.data.metadata.type;
+    if (tool?.message_id || tool?.bridge_id || tool?.thread_id) return "agent";
+    if (Array.isArray(tool?.tools_call_data)) return "agent";
+    return null;
   };
 
   const buildToolNode = (tool) => {
@@ -211,19 +217,21 @@ export default function Page() {
           tool?.bridge_id ||
           "Unknown Agent",
         functionData,
+        nodeType: "agent",
         children: childTools.map(buildToolNode),
       };
     }
 
     return {
       name: tool?.name || "Unknown Tool",
+      nodeType: "tool",
       functionData,
       children: [],
     };
   };
 
   const derivedAgents = useMemo(() => {
- 
+
     if (toolCalls.length === 0) return [];
 
     const orderedTools = toolCalls;
@@ -255,6 +263,7 @@ export default function Page() {
             tool?.bridge_id ||
             "Unknown Agent",
           functionData,
+          nodeType: "agent",
           parallelTools: childParallelTools,
           isLoading: recursiveHistoryLoading && childParallelTools.length === 0,
         };
@@ -319,6 +328,7 @@ export default function Page() {
                   functionData: agent.functionData,
                   parallelTools: agent.parallelTools,
                   isLoading: agent.isLoading,
+                  nodeType: agent.nodeType,
                 },
               ]}
               onToolClick={(tool) => setSelectedTool(tool)}
@@ -389,6 +399,7 @@ export default function Page() {
                 status="FINALIZING"
                 statusClass="text-blue-500"
                 tools={mainAgentTools}
+                emptyToolsMessage={`No tool calls by ${mainAgentName}.`}
               />
             ),
           },

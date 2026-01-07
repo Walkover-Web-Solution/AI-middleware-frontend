@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { BotIcon, WrenchIcon } from "@/components/Icons";
 
 export function BatchUI({ agents, onToolClick, isLoading = false }) {
   const [openAgentKey, setOpenAgentKey] = useState(null);
@@ -45,18 +46,39 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
             typeof tool === "string"
               ? tool
               : tool?.name || tool?.id || `tool_${index + 1}`;
-          const hasChildren = Array.isArray(tool?.children) && tool.children.length > 0;
+          const hasChildren =
+            Array.isArray(tool?.children) && tool.children.length > 0;
+          const isAgentNode = tool?.nodeType === "agent";
 
           return (
             <div key={`${toolName}-${index}`} className={isLastOdd ? "col-span-2" : ""}>
               <div
-                onClick={() => handleToolClick(tool)}
-                className={`cursor-pointer flex items-center justify-between border hover:border-primary px-2 py-1 text-xs text-base-content
+                onClick={() =>
+                  isAgentNode
+                    ? handleAgentClick(
+                        `child-${depth}-${index}`,
+                        tool?.functionData ?? tool,
+                        toolName,
+                        tool?.children || []
+                      )
+                    : handleToolClick(tool)
+                }
+                className={`cursor-pointer flex items-center justify-between border hover:border-primary px-3 py-2 text-xs text-base-content gap-2
                               hover:hover:border-primary hover:bg-primary/10`}
                 title={toolName}
               >
-                <span className="truncate">{toolName}</span>
-                <span className="text-green-500 flex-shrink-0 ml-2">✔</span>
+                <span className="flex items-center gap-2 flex-1 min-w-0">
+                  {isAgentNode ? (
+                    <BotIcon size={12} className="text-base-content/70 shrink-0" />
+                  ) : (
+                    <WrenchIcon size={12} className="text-base-content/70 shrink-0" />
+                  )}
+                  <span className="truncate">{toolName}</span>
+                </span>
+                <span className="flex items-center gap-2 text-[10px] font-semibold text-base-content/60 shrink-0">
+                  {isAgentNode ? "AGENT" : "TOOL"}
+                  <span className="text-green-500 flex-shrink-0">✔</span>
+                </span>
               </div>
               {hasChildren && (
                 <div className="col-span-2 mt-2">
@@ -154,7 +176,6 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
                   response: "Successfully executed agent task",
                 },
               };
-              console.log("hihihihihiiihihih", agent)
           return (
             <div key={agentIndex} className="space-y-2">
               {/* AGENT ROW - Only show for actual agents */}
@@ -175,8 +196,14 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
                     className="flex justify-between items-center border hover:border-primary px-2 py-2 text-sm text-base-content hover:hover:border-primary hover:bg-primary/10 cursor-pointer"
                     title={agent.name}
                   >
-                    <span className="truncate">{agent.name}</span>
-                    <span className="text-green-500 flex-shrink-0 ml-2">✔</span>
+                    <span className="truncate flex items-center gap-2">
+                      <BotIcon size={14} className="text-base-content/70" />
+                      {agent.name}
+                    </span>
+                    <span className="flex items-center gap-2 text-[10px] font-semibold text-base-content/60">
+                      AGENT
+                      <span className="text-green-500 flex-shrink-0">✔</span>
+                    </span>
                   </div>
                 </div>
               )}
