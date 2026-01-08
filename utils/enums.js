@@ -76,7 +76,7 @@ export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 export const TIME_RANGE_OPTIONS = ['1 hour', '3 hours', '6 hours', '12 hours','1 day', '2 days','7 days','14 days','30 days'];
 
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
-export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description'];
+export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description', 'created', 'strategy', 'chunk'];
 export const KNOWLEDGE_BASE_SECTION_TYPES = [
   { value: 'default', label: 'Default' },
   { value: 'custom', label: 'Custom' }

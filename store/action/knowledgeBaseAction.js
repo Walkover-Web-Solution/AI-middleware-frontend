@@ -1,4 +1,4 @@
-import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData, getKnowledgeBaseToken, updateKnowledgeBaseEntry } from "@/config/index";
+import { createKnowledgeBaseEntry, createResource, deleteKnowBaseData, deleteResource, getAllKnowBaseData, getKnowledgeBaseToken, updateKnowledgeBaseEntry, updateResource } from "@/config/index";
 
 import { toast } from "react-toastify";
 import { addKnowbaseDataReducer, backupKnowledgeBaseReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData, knowledgeBaseRollBackReducer, updateKnowledgeBaseReducer } from "../reducer/knowledgeBaseReducer";
@@ -35,8 +35,8 @@ export const getKnowledgeBaseTokenAction = (orgId) => async (dispatch) => {
 export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
   try {
     const response = await getAllKnowBaseData();
-    if (response.data) {
-      dispatch(fetchAllKnowlegdeBaseData({ data: response?.data, orgId }))
+    if (response) {
+      dispatch(fetchAllKnowlegdeBaseData({ data: response, orgId }))
     }
   } catch (error) {
     toast.error('something went wrong')
@@ -79,6 +79,61 @@ export const updateKnowledgeBaseAction = (data, orgId) => async (dispatch) => {
   } catch (error) {
     dispatch(knowledgeBaseRollBackReducer({ orgId }));
     console.error(error);
+  }
+};
+
+
+export const createResourceAction = (data, orgId) => async (dispatch) => {
+  try {
+    const response = await createResource(data);
+    if (response.data) {
+      toast.success(response?.data?.message);
+      dispatch(addKnowbaseDataReducer({ 
+        orgId,
+        data: response?.data,
+        _id: response?.data?._id
+      }));
+    }
+    return response?.data
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+
+export const updateResourceAction = (resourceId, payload, orgId) => async (dispatch) => {
+  try {
+    const response = await updateResource(resourceId, payload);
+    if (response?.success) {
+      dispatch(updateKnowledgeBaseReducer({
+        orgId,
+        _id: resourceId,
+        data: response.data || payload
+      }));
+      return { success: true };
+    }
+    return { success: false };
+  } catch (error) {
+    console.error("Error updating resource:", error);
+    return { success: false };
+  }
+};
+
+export const deleteResourceAction = ({data}) => async (dispatch) => {
+  try {
+    const response = await deleteResource(data?.id);
+    if (response?.success) {
+      dispatch(deleteKnowledgeBaseReducer({
+        orgId: data?.orgId,
+        id: data?.id
+      }));
+      return { success: true };
+    }
+    return { success: false };
+  } catch (error) {
+    console.error("Error deleting resource:", error);
+    return { success: false };
   }
 };
 
