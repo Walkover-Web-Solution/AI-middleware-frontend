@@ -46,16 +46,24 @@ const ResponseFormat = () => {
     "success": true,
     "response": {
          "data": {
-            "id": "chatcmpl-785654654v4ew54656",
-            "content": "Response from the AI",
+            "id": "chatcmpl-d7a6874d-a82f-4cb5-8a40-1c899722c64f",
+            "content": "Response from the AI assistant",
             "model": "Your selected model",
             "role": "assistant",
-            "finish_reason": "stop"
+            "tools_data": {},
+            "fallback": false,
+            "finish_reason": "completed",
+            "message_id": "abdd920a-ec69-11f0-b14a-928ade59a1ee"
          },
          "usage": {
-            "input_tokens": 269,
-            "output_tokens": 10,
-            "total_tokens": 279
+            "total_tokens": 500,
+            "input_tokens": 300,
+            "output_tokens": 200,
+            "cached_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 0,
+            "reasoning_tokens": 0,
+            "cost": 0.0025
          }
     }
   }`
