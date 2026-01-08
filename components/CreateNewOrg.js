@@ -106,8 +106,6 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             onChange={handleChange}
                             placeholder="About Your Workspace"
                             className="p-2.5 w-full text-sm textarea textarea-bordered"
-                            minLength={10}
-                            maxLength={400}
                         />
                         <label className='label-text mb-1'>Timezone *</label>
 
