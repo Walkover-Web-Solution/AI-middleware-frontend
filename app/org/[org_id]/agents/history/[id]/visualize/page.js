@@ -11,9 +11,8 @@ import { X, ArrowLeft } from "lucide-react";
 import { formatRelativeTime } from "@/utils/utility";
 
 import { UserPromptUI } from "@/components/historyUi/UserPromptUi.js";
-import { AgentUI } from "@/components/historyUi/AgentUi.js";
+import { MainAgentUI } from "@/components/historyUi/MainAgentUi.js";
 import { BatchUI } from "@/components/historyUi/BatchUi.js";
-import { FinalResponseUI } from "@/components/historyUi/FinalResponseUi.js";
 import GenericNode from "@/components/historyUi/GenericNode.js";
 import { ToolFullSlider } from "@/components/historyUi/ToolFullSlider.js";
 import { ResponseFullSlider } from "@/components/historyUi/ResponseFullSlider.js";
@@ -308,43 +307,98 @@ export default function Page() {
     return data;
   }, [toolCalls]);
 
+  // Store edges at component level so they can be accessed by edges memo
+  const treeEdgesRef = React.useRef([]);
+
   const nodes = useMemo(() => {
     const baseX = 650;
-    const nodeGap = 350;
-    const alignY = 150; // Single Y position for all nodes
+    const levelGap = 400; // Horizontal gap between tree levels
+    const siblingGap = 200; // Vertical gap between sibling nodes
+    const alignY = 150; // Y position for root level
 
-    const agentNodes = derivedAgents.map((agent, index) => ({
-      id: `agent-${index}`,
-      type: "generic",
-      position: { x: baseX + index * nodeGap, y: alignY },
-      data: {
-        source: true,
-        target: true,
-        ui: {
-          width: 320,
-          containerClass: "border border-base-300 p-3 bg-base-100`",
-          render: () => (
-            <BatchUI
-              isLoading={recursiveHistoryLoading}
-              agents={[
-                {
-                  name: agent.name,
-                  functionData: agent.functionData,
-                  parallelTools: agent.parallelTools,
-                  isLoading: agent.isLoading,
-                  nodeType: agent.nodeType,
-                },
-              ]}
-              onToolClick={(tool) => setSelectedTool(tool)}
-            />
-          ),
+    const allNodes = [];
+    const allEdges = [];
+    let nodeIdCounter = 0;
+
+    // Recursive function to build tree nodes
+    const buildTreeNodes = (agent, parentId, level, siblingIndex, totalSiblings) => {
+      const nodeId = `agent-${nodeIdCounter++}`;
+      const x = baseX + level * levelGap;
+      
+      // Calculate Y position based on sibling index
+      // Center the siblings vertically around alignY
+      const totalHeight = (totalSiblings - 1) * siblingGap;
+      const startY = alignY - totalHeight / 2;
+      const y = startY + siblingIndex * siblingGap;
+
+      // Get child agents from parallelTools
+      const childAgents = agent.parallelTools?.filter(tool => tool?.nodeType === "agent") || [];
+      
+      // Filter parallelTools to exclude child agents (they'll be separate nodes)
+      // Only show direct tools and functions in this node's BatchUI
+      const toolsForDisplay = agent.parallelTools?.filter(tool => tool?.nodeType !== "agent") || [];
+      
+      // Create node for this agent using BatchUI
+      allNodes.push({
+        id: nodeId,
+        type: "generic",
+        position: { x, y },
+        data: {
+          source: childAgents.length > 0,
+          target: level > 0,
+          ui: {
+            width: 320,
+            containerClass: "border border-base-300 p-3 bg-base-100",
+            render: () => (
+              <BatchUI
+                agents={[
+                  {
+                    name: agent.name,
+                    functionData: agent.functionData,
+                    parallelTools: toolsForDisplay, // Only direct tools, no child agents
+                    isLoading: agent.isLoading,
+                    nodeType: agent.nodeType,
+                  },
+                ]}
+                onToolClick={(tool) => setSelectedTool(tool)}
+              />
+            ),
+          },
         },
-      },
-    }));
+      });
 
-    const mainToolsX =
-      baseX + Math.max(derivedAgents.length, 1) * nodeGap;
-    const finalX = mainToolsX + nodeGap;
+      // Create edge from parent to this node
+      if (parentId) {
+        allEdges.push({
+          id: `e-${parentId}-${nodeId}`,
+          source: parentId,
+          target: nodeId,
+          style: {
+            stroke: '#22c55e',
+            strokeWidth: 2,
+            animated: true,
+          },
+          animated: true,
+        });
+      }
+
+      // Recursively build nodes for child agents (they become separate nodes)
+      if (childAgents.length > 0) {
+        childAgents.forEach((childAgent, index) => {
+          buildTreeNodes(childAgent, nodeId, level + 1, index, childAgents.length);
+        });
+      }
+
+      return nodeId;
+    };
+
+    // Build the tree starting from derived agents
+    derivedAgents.forEach((agent, index) => {
+      buildTreeNodes(agent, "2", 1, index, derivedAgents.length);
+    });
+
+    // Store edges for use in edges memo
+    treeEdgesRef.current = allEdges;
 
     return [
       {
@@ -370,70 +424,29 @@ export default function Page() {
           source: true,
           target: true,
           ui: {
+            width: 320,
             containerClass: "p-4 border border-base-300 ",
             render: () => (
-              <AgentUI
-                label="MAIN AGENT"
+              <MainAgentUI
                 name={mainAgentName}
                 onToolClick={(tool) => setSelectedTool(tool)}
-                status="PROCESSING"
-                statusClass="text-blue-500"
+                onResponseClick={() => setSelectedResponse(activeThreadItem)}
+                responsePreview={responsePreview}
                 tools={mainAgentTools}
               />
             ),
           },
         },
       },
-      ...agentNodes,
-      {
-        id: "4",
-        type: "generic",
-        position: { x: mainToolsX, y: alignY },
-        data: {
-          source: true,
-          target: true,
-          ui: {
-            width: 280,
-            containerClass: "p-4 border border-base-300 ",
-            render: () => (
-              <AgentUI
-                label="MAIN AGENT TOOLS"
-                name={`${mainAgentName} tools`}
-                onToolClick={(tool) => setSelectedTool(tool)}
-                status="FINALIZING"
-                statusClass="text-blue-500"
-                tools={mainAgentTools}
-                emptyToolsMessage={`No tool calls by ${mainAgentName}.`}
-              />
-            ),
-          },
-        },
-      },
-      {
-        id: "5",
-        type: "generic",
-        position: { x: finalX, y: alignY },
-        data: {
-          target: true,
-          ui: {
-            containerClass: " p-4 border border-base-300 ",
-            render: () => (
-              <FinalResponseUI
-                status="Delivered"
-                preview={responsePreview}
-                onClick={() => setSelectedResponse(activeThreadItem)}
-              />
-            ),
-          },
-        },
-      },
+      ...allNodes,
     ];
   }, [
     derivedAgents,
-    recursiveHistoryLoading,
     mainAgentTools,
     activeThreadItem?.user,
     mainAgentName,
+    responsePreview,
+    activeThreadItem,
   ]);
 
   const edges = useMemo(() => {
@@ -443,6 +456,7 @@ export default function Page() {
       animated: true,
     };
 
+    // Start with the edge from User Prompt to Main Agent
     const edgeList = [
       { 
         id: "e1-2", 
@@ -450,50 +464,11 @@ export default function Page() {
         target: "2",
         style: edgeStyle,
         animated: true,
-      }
+      },
+      // Add all the tree edges collected during node building
+      ...treeEdgesRef.current,
     ];
 
-    if (derivedAgents.length > 0) {
-      edgeList.push({ 
-        id: "e2-a0", 
-        source: "2", 
-        target: "agent-0",
-        style: edgeStyle,
-        animated: true,
-      });
-      for (let i = 1; i < derivedAgents.length; i += 1) {
-        edgeList.push({
-          id: `e-a${i - 1}-a${i}`,
-          source: `agent-${i - 1}`,
-          target: `agent-${i}`,
-          style: edgeStyle,
-          animated: true,
-        });
-      }
-      edgeList.push({
-        id: "e-alast-4",
-        source: `agent-${derivedAgents.length - 1}`,
-        target: "4",
-        style: edgeStyle,
-        animated: true,
-      });
-    } else {
-      edgeList.push({ 
-        id: "e2-4", 
-        source: "2", 
-        target: "4",
-        style: edgeStyle,
-        animated: true,
-      });
-    }
-
-    edgeList.push({ 
-      id: "e4-5", 
-      source: "4", 
-      target: "5",
-      style: edgeStyle,
-      animated: true,
-    });
     return edgeList;
   }, [derivedAgents.length]);
 
