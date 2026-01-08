@@ -66,8 +66,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
       dispatch(getDescriptionsAction());
-      dispatch(getLinksAction());
     }
+     dispatch(getLinksAction());
+
     if (pathName.endsWith("apikeys") && !isEmbedUser) {
       dispatch(getApiKeyGuideAction());
     }
