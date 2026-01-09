@@ -240,7 +240,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                     tabIndex={0}
                     disabled={isReadOnly}
                     role="button"
-                    className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${bridgeType === 'batch' ? 'btn-disabled cursor-not-allowed opacity-50' : ''}`}
+                    className={`btn btn-sm border-base-200 bg-base-300 text-base-content/70 capitalize w-full justify-between ${bridgeType === 'batch' ? 'btn-disabled cursor-not-allowed opacity-50' : ''}`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       {fallbackService && getIconOfService(fallbackService, 16, 16)}
@@ -306,7 +306,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                   tabIndex={0}
                   disabled={isReadOnly}
                   role="button"
-                  className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
+                  className="btn btn-sm w-full justify-between border border-base-200 bg-base-300 text-base-content/70 hover:bg-base-200 font-normal"
                 >
                   <span>{fallbackModelName ? truncateText(fallbackModelName, 30) : 'Select a Model'}</span>
                   <ChevronDownIcon size={16} />

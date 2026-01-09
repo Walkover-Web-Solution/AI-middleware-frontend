@@ -1260,7 +1260,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                     <div className="">
                       <div className="flex justify-center items-center my-4">
                         <p className="border-t border-base-300 w-full"></p>
-                        <p className="bg-base-300 text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                        <p className="bg-base-300 text-base-content py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
                           {archivedSectionTitle}
                         </p>
                         <p className="border-t border-base-300 w-full"></p>

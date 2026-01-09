@@ -19,7 +19,8 @@ const PromptHelper = ({
   autoCloseOnBlur,
   setHasUnsavedChanges,
   setNewContent,
-  isEmbedUser
+  isEmbedUser,
+  savePrompt
 }) => {
   const dispatch = useDispatch();
   const [optimizedPrompt, setOptimizedPrompt] = useState('');
@@ -46,13 +47,18 @@ const PromptHelper = ({
     }
   }, [params.id, searchParams.version, thread_id]);
 
-  // Apply optimized prompt
+  // Apply optimized prompt and save immediately
   const handleApplyOptimizedPrompt = (promptToApply) => {
     const promptContent = promptToApply || optimizedPrompt;
     if (promptContent && setPrompt) {
       setPrompt(promptContent);
       setHasUnsavedChanges(true);
       setNewContent(promptContent);
+      
+      // Save the prompt immediately after applying
+      if (savePrompt) {
+        savePrompt(promptContent);
+      }
     }
   };
 

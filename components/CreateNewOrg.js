@@ -47,35 +47,41 @@ const CreateOrg = ({ handleSwitchOrg }) => {
         e.preventDefault();
         const { name, about, timezone } = orgDetails;
         setIsLoading(true);
-        try {
-            const selectedTimezone = timezoneData.find(tz => tz.identifier === timezone);
-            const dataToSend = {
-                company: {
-                    name,
-                    meta: {
-                        about,
-                        identifier: selectedTimezone?.identifier,
-                        offSet: selectedTimezone?.offSet,
-                    },
-                    timezone: selectedTimezone?.offSet
+        
+        const selectedTimezone = timezoneData.find(tz => tz.identifier === timezone);
+        const dataToSend = {
+            company: {
+                name,
+                meta: {
+                    about,
+                    identifier: selectedTimezone?.identifier,
+                    offSet: selectedTimezone?.offSet,
                 },
-            };
+                timezone: selectedTimezone?.offSet
+            },
+        };
 
-            dispatch(createOrgAction(dataToSend, async (data) => {
+        dispatch(createOrgAction(
+            dataToSend,
+            // Success callback
+            async (data) => {
                 dispatch(userDetails());
                 await handleSwitchOrg(data.id, data.name);
                 toast.success('Workspace created successfully');
                 closeModal(MODAL_TYPE.CREATE_ORG_MODAL);
+                setIsLoading(false);
                 setTimeout(() => {
                     route.replace(`/org/${data.id}/agents`);
                 }, 100);
-            }));
-        } catch (error) {
-            toast.error('Failed to create workspace');
-            console.error(error);
-            setIsLoading(false);
-        }
-    }, [orgDetails, dispatch, route]);
+            },
+            // Error callback
+            (error) => {
+                closeModal(MODAL_TYPE.CREATE_ORG_MODAL);
+                setIsLoading(false);
+                console.error('Create org error:', error);
+            }
+        ));
+    }, [orgDetails, dispatch, route, handleSwitchOrg]);
 
     return (
         <div>

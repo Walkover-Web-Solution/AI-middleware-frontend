@@ -18,7 +18,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.542.0",
     "next": "15.5.2",
-    "posthog-js": "^1.307.0",
+    "posthog-js": "^1.315.1",
     "react": "^19.1.1",
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.1.1",

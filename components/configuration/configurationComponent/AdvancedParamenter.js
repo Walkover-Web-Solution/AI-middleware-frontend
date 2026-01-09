@@ -224,7 +224,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     }
   };
   const setSliderValue = (value, key, isDeafaultObject = false) => {
-    debugger
     setInputConfiguration((prev) => ({
       ...prev,
       [key]: value,
@@ -266,11 +265,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
     const isDefaultValue = configuration?.[key] === 'default';
-    const inputSizeClass = 'input-xs';
-    const selectSizeClass = 'select-sm';
-    const buttonSizeClass = 'btn-xs';
+    const inputSizeClass = 'input-sm h-8';
+    const selectSizeClass = 'select-sm h-8';
+    const buttonSizeClass = 'btn-sm h-8';
     const rangeSizeClass = 'range-xs';
-    const labelTextClass = 'text-sm font-medium capitalizen';
+    const labelTextClass = 'text-sm font-medium text-base-content/70';
     const sliderValueId = `sliderValue-${key} h-2`;
 
     let error = false;
@@ -370,7 +369,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   handleInputChange(e, key);
                 }
               }}
-              className={`input input-bordered ${inputSizeClass} w-full`}
+              className={`input border-base-200 ${inputSizeClass} w-full bg-base-300 text-base-content/70 text-sm`}
               name={key}
               disabled={isReadOnly}
               placeholder=""
@@ -398,7 +397,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   handleInputChange(e, key);
                 }
               }}
-              className={`input input-bordered ${inputSizeClass} w-full`}
+              className={`input border-base-200 ${inputSizeClass} w-full bg-base-300 text-base-content/70 text-sm`}
               name={key}
               disabled={isReadOnly}
             />
@@ -409,7 +408,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             <select
               value={isDefaultValue ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
               onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
-              className={`select select-bordered ${selectSizeClass} w-full`}
+              className={`select ${selectSizeClass} w-full bg-base-300 border-base-200 text-base-content/70 text-sm`}
               name={key}
               disabled={isReadOnly}
             >
@@ -424,7 +423,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           {/* Slider input */}
           {field === 'slider' && (
             <div className="flex items-center gap-2 w-full">
-              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
+              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20 text-sm`} disabled={isReadOnly} onClick={() => {
                 if (isDefaultValue) {
                   setSliderValue(min || 0, key, isDeafaultObject);
                 } else {
@@ -451,7 +450,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 name={key}
                 disabled={isReadOnly}
               />
-              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
+              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20 text-sm`} disabled={isReadOnly} onClick={() => {
                 if (isDefaultValue) {
                   setSliderValue(max || 100, key, isDeafaultObject);
                 } else {
@@ -465,11 +464,11 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           {field === 'dropdown' && (
             <div className="relative w-full" ref={dropdownContainerRef}>
               <div
-                className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
+                className={`flex items-center gap-2  ${inputSizeClass} w-full input border border-base-200 cursor-pointer bg-base-300 text-base-content/70`}
                 disabled={isReadOnly}
                 onClick={() => !isReadOnly && setShowDropdown(!showDropdown)}
               >
-                <span className="truncate text-base-content text-xs">
+                <span className="truncate text-sm">
                   {isDefaultValue
                     ? 'default'
                     : selectedOptions?.length > 0
@@ -482,7 +481,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               </div>
 
               {showDropdown && (
-                <div className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
+                <div className="absolute top-full left-0 right-0 bg-base-300 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
                   <div className="p-2 top-0 bg-base-100">
                     <input
                       type="text"
@@ -527,7 +526,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   {/* Tools Section */}
                   {version_function_data && Object.values(version_function_data).length > 0 && (
                     <>
-                      <div className="px-2 py-1 sticky top-0 z-10">
+                      <div className="px-2 py-1 top-0 z-10">
                         <span className="text-xs font-semibold text-base-content/70">TOOLS</span>
                       </div>
                       {Object.values(version_function_data)
@@ -563,7 +562,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   {/* Agents Section */}
                   {connected_agents && Object.keys(connected_agents).length > 0 && (
                     <>
-                      <div className="px-2 py-1 sticky top-0 z-10">
+                      <div className="px-2 py-1 top-0 z-10">
                         <span className="text-xs font-semibold text-base-content/70">AGENTS</span>
                       </div>
                       {Object.entries(connected_agents)
