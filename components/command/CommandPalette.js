@@ -166,8 +166,9 @@ const CommandPalette = ({isEmbedUser}) => {
 
   const filterBy = (list, fields) => {
     if (!query) return [];
+    const lowerQuery = query.toLowerCase();
     return list.filter((it) =>
-      fields.some((f) => String(it?.[f] || "").toLowerCase().includes(query))
+      fields.some((f) => String(it?.[f] || "").toLowerCase().includes(lowerQuery))
     );
   };
 
