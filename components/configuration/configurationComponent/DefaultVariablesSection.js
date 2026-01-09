@@ -3,7 +3,7 @@ import { ChevronDownIcon, SettingsIcon } from '@/components/Icons';
 import { toggleSidebar, extractPromptVariables } from '@/utils/utility';
 
 // Optimized default variables section with accordion
-const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPublished = false }) => {
+const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPublished = false,isEditor=true }) => {
     const [isExpanded, setIsExpanded] = useState(false);
    // Extract variables used in the prompt
     const usedVariables = useMemo(() => {
@@ -11,7 +11,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPub
     }, [prompt]);
 
     const defaultVariables = [
-        { name: 'current_time_and_date', description: 'To access the current date and time' },
+        { name: 'current_time_date_and_current_identifier', description: 'To access the current date and time' },
         { name: 'pre_function', description: 'Use this variable if you are using the pre_function' },
         { name: 'timezone', description: 'Access the timezone using a timezone identifier' }
     ];
@@ -42,13 +42,13 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPub
                     )}
                     
                     <button 
-                        className="flex items-center gap-1 btn btn-xs text-xs bg-primary/20 ml-auto"
+                        className="flex items-center btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1 ml-auto"
                         onClick={(e) => {
                             e.stopPropagation();
                             toggleSidebar("variable-collection-slider", "right")
                         }}
                         title="Manage Variables"
-                        disabled={isPublished}
+                        disabled={isPublished||!isEditor}
                     >
                         <div className="flex items-center gap-1" >
                             <SettingsIcon size={12} />
@@ -73,7 +73,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPub
                         <div className="space-y-2">
                             {defaultVariables.map((variable) => (
                                 <div key={variable.name} className="flex items-start gap-2">
-                                    <code className="text-xs bg-base-200 px-2 py-1 rounded text-primary font-mono">
+                                    <code className="text-xs bg-base-200 px-2 py-1 rounded text-base-content font-mono">
                                         {`{{${variable.name}}}`}
                                     </code>
                                     <span className="text-xs py-1 text-base-content/70">{variable.description}</span>

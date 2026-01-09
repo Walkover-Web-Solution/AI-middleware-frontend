@@ -31,10 +31,24 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [summaryAccordionOpen, setSummaryAccordionOpen] = useState(false);
   
 
-  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap, prompt } = useCustomSelector((state) => {
+  const { bridge, versionData, bridgeData, agentList, bridge_summary, allBridgesMap, prompt, isEditor } = useCustomSelector((state) => {
     const isPublished = searchParams?.get("isPublished") === 'true';
     const bridgeDataFromState = state.bridgeReducer.allBridgesMap?.[params?.id];
     const versionDataFromState = state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.get("version")];
+    
+    // Check if user has editor permissions
+    const orgId = params?.org_id;
+    const currentOrgRole = state?.userDetailsReducer?.organizations?.[orgId]?.role_name || "Viewer";
+    const currentUser = state.userDetailsReducer.userDetails;
+    const agentUsers = bridgeDataFromState?.users || [];
+    
+    // Determine if user is allowed to edit based on role and agent access
+    const isAdminOrOwner = currentOrgRole === "Admin" || currentOrgRole === "Owner";
+    // Updated canEdit condition
+    const canEdit = ((currentOrgRole === "Editor" && (agentUsers?.length === 0 || !agentUsers || (agentUsers?.length > 0 && agentUsers?.some(user => user.id === currentUser?.id))))||
+                  ((currentOrgRole === "Viewer") && (agentUsers?.some(user => user === currentUser?.id))) ||
+                  currentOrgRole === "Creator") ||
+                  isAdminOrOwner;
     
     return {
       bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
@@ -44,8 +58,12 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
       allBridgesMap: state.bridgeReducer.allBridgesMap || {},
       prompt: isPublished ? (bridgeDataFromState?.configuration?.prompt || "") : (versionDataFromState?.configuration?.prompt || ""),
+      isEditor: isEmbedUser ? true : canEdit,
     };
   });
+
+  // Flag to determine if the UI should be in read-only mode
+  const isReadOnly = !isEditor;
   // Memoized form data initialization
   const [formData, setFormData] = useState(() => ({
     url_slugname: '',
@@ -544,7 +562,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                       <span className="text-xs text-base-content/70">Include in publish</span>
                       <input
                         type="checkbox"
-                        className="toggle toggle-primary toggle-sm"
+                        className="toggle toggle-sm"
                         checked={isSelected}
                         onChange={() => toggleAgentSelection(agent._id)}
                         disabled={isLoading}
@@ -711,6 +729,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 onSave={() => setShowSummaryValidation(false)}
                 isMandatory={showSummaryValidation}
                 showValidationError={showSummaryValidation}
+                isEditor={isEditor}
               />
             </div>
           </div>
@@ -986,7 +1005,8 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
             <button
               className={`btn btn-primary btn-sm ${isLoading ? 'loading' : ''}`}
               onClick={handlePublishBridge}
-              disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim())}
+              disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim()) || isReadOnly}
+              title={isReadOnly ? "You don't have permission to publish" : ""}
             >
               {isLoading ? (
                 <>

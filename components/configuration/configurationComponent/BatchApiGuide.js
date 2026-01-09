@@ -19,7 +19,14 @@ const BatchApi = (bridgeId, versionId) => {
         `        "YOUR QUESTION 3"\n` +
         `    ],\n` +
         `    "agent_id": "${bridgeId || ''}",\n` +
-        `    "version_id": "${versionId || ''}"\n` +
+        `    "batch_variables": [\n` +
+        `        {\n` +
+        `            "message": "YOUR MESSAGE",\n` +
+        `        },\n` +
+        `        {\n` +
+        `            "name": "YOUR NAME",\n` +
+        `        },\n` +
+        `    ]\n` +
         `}'`
     );
 }
@@ -32,7 +39,7 @@ const data = [
   ['webhook.header', 'object', 'headers to include in the webhook request.', 'true'],
   ['batch', 'array of strings', 'A list of user questions to process in batch.', 'true'],
   ['agent_id', 'string', 'The unique ID of the agent to process the request.', 'true'],
-  ['version_id', 'string', 'The specific version  of the agent.', 'true'],
+  ['batch_variables', 'object', 'An object containing variables for each batch item.', 'true'],
 ];
 
 const BatchResponseFormat = () => {
@@ -53,14 +60,14 @@ const Section = ({ title, caption, children }) => (
 const BatchApiGuide = ({ params, searchParams }) => {
     return (
         <div className="min-h-screen gap-4 flex flex-col">
-            <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
+            <div className="flex flex-col gap-4 p-4">
                 <Section title="Step 1" caption="Create `Auth key`" />
                 <p className=" text-sm">
                     Follow the on-screen instructions to create a new Auth key. Ignore if already created
                     <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create Auth key</Link>
                 </p>
             </div>
-            <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
+            <div className="flex flex-col gap-4 p-4">
                 <Section title="Step 2" caption="Use the Batch API" />
                 <div className="mockup-code relative">
                     <CopyButton data={BatchApi(params.id, searchParams?.version)} />
@@ -74,7 +81,7 @@ const BatchApiGuide = ({ params, searchParams }) => {
                 <p className=" text-sm"><strong>Note:</strong> Ensure that the 'webhook_url' is correctly set to receive batch processing updates.
                 </p>
             </div>
-            <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-lg p-4">
+            <div className="flex flex-col gap-4 p-4">
                 <Section title="Response Format" />
                 <div className="mockup-code relative">
                     <CopyButton data={BatchResponseFormat()} />

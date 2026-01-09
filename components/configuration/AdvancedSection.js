@@ -22,6 +22,7 @@ const AdvancedSection = memo(() => {
                     searchParams={searchParams}
                     bridgeType={bridgeType}
                     modelType={modelType}
+                    isEmbedUser={isEmbedUser}
                 />
             )}
         </>

@@ -171,7 +171,7 @@ const NewInputConfigComponent = ({ params }) => {
                                 <div className="flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
                                     <span className="">
-                                        &#123;&#123;current_time_and_date&#125;&#125;
+                                        &#123;&#123;current_time_date_and_current_identifier&#125;&#125;
                                     </span>
                                     <span className=" ml-2">
                                         - To access the current date and time

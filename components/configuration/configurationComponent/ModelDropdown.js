@@ -109,7 +109,9 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
 
 ModelPreview.displayName = 'ModelPreview';
 
-const ModelDropdown = ({ params, searchParams, isPublished }) => {
+const ModelDropdown = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => {
@@ -162,9 +164,18 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
                 const modelName = cfg?.configuration?.model?.default;
                 if (!modelName) return;
                 const specs = cfg?.validationConfig?.specification;
+                const displayLabel = modelName === 'gpt-5-nano' && bridgeType === 'chatbot'
+                    ? (
+                        <div className="flex items-center gap-2">
+                            <span>{modelName}</span>
+                            <span className="badge badge-success badge-sm text-xs">FREE</span>
+                        </div>
+                    )
+                    : modelName;
+                
                 opts.push({
                     value: modelName,
-                    label: modelName,
+                    label: displayLabel,
                     // pass meta to use in onChange and onOptionHover
                     meta: { group, modelName, specs }
                 });
@@ -194,15 +205,16 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
         <div className="flex flex-col items-start gap-4 relative">
             <div className="w-full" ref={dropdownRef}>
                 <Dropdown
-                    disabled={isPublished}
+                    disabled={isReadOnly}
                     options={modelOptions}
                     value={model || ''}
                     onChange={handleSelect}
                     onOptionHover={handleOptionHover}
                     showGroupHeaders
-                    placeholder="Select a Model"
+                    placeholder="Select model"
                     size="sm"
-                    className="btn btn-sm w-auto justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem] rounded-sm px-3"
+                    className="flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 border-base-200 text-base-content h-8 min-w-[150px]"
+                    style={{ backgroundColor: 'color-mix(in oklab, var(--color-white) 3%, transparent)' }}
                     menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
                     maxLabelLength={20}
                 />
@@ -223,6 +235,7 @@ const ModelDropdown = ({ params, searchParams, isPublished }) => {
                         defaultValue={fineTuneModel}
                         onBlur={handleFinetuneModelChange}
                         placeholder="Fine-tune model Name"
+                        disabled={isReadOnly}
                         className="input input-bordered input-sm w-full bg-base-100 text-base-content focus:border-primary focus:ring-1 focus:ring-primary min-h-[2.5rem] sm:min-h-[2rem]"
                     />
                 </div>

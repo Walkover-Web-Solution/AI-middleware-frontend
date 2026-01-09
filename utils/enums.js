@@ -64,7 +64,9 @@ export const MODAL_TYPE = {
   DELETE_VERSION_MODAL: 'DELETE_VERSION_MODAL',
   PREBUILT_TOOLS_CONFIG_MODAL: 'PREBUILT_TOOLS_CONFIG_MODAL',
   INVITE_USER: 'INVITE_USER',
-  ORCHESTRAL_DELETE_MODAL: "ORCHESTRAL_DELETE_MODAL"
+  ORCHESTRAL_DELETE_MODAL: "ORCHESTRAL_DELETE_MODAL",
+  ACCESS_MANAGEMENT_MODAL: "ACCESS_MANAGEMENT_MODAL",
+  UNSAVED_CHANGES_MODAL: "UNSAVED_CHANGES_MODAL",
 };
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment', 'apikey_limit'];
@@ -74,7 +76,7 @@ export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 export const TIME_RANGE_OPTIONS = ['1 hour', '3 hours', '6 hours', '12 hours', '1 day', '2 days', '7 days', '14 days', '30 days'];
 
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
-export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description'];
+export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description', 'created', 'strategy', 'chunk'];
 export const KNOWLEDGE_BASE_SECTION_TYPES = [
   { value: 'default', label: 'Default' },
   { value: 'custom', label: 'Custom' }
@@ -98,6 +100,13 @@ export const AGENT_SETUP_GUIDE_STEPS = [
   },
   {
     step: '2',
+    title: 'Configure API Access',
+    detail: 'Add your API keys and configure authentication to enable your agent.',
+    icon: '🔐',
+    example: 'Examples: OpenAI API key, Anthropic API key, Custom webhook URLs, Database connection strings'
+  },
+  {
+    step: '3',
     title: 'Connect External Functions',
     detail: 'Enhance your agent\'s capabilities by connecting APIs, databases, or custom functions.',
     optional: true,
@@ -105,7 +114,7 @@ export const AGENT_SETUP_GUIDE_STEPS = [
     example: 'Examples: CRM systems (Salesforce), Payment processors (Stripe), Database queries, Email services'
   },
   {
-    step: '3',
+    step: '4',
     title: 'Choose Your AI Service',
     detail: 'Select from available AI providers like OpenAI, Anthropic, or others.',
     optional: true,
@@ -113,19 +122,12 @@ export const AGENT_SETUP_GUIDE_STEPS = [
     example: 'Examples: OpenAI GPT-4, Claude 3.5 Sonnet'
   },
   {
-    step: '4',
+    step: '5',
     title: 'Select the Right Model',
     detail: 'Pick an AI model that matches your requirements.',
     optional: true,
     icon: '🧠',
     example: 'Examples: GPT-4 for complex tasks, GPT-3.5 for cost efficiency, Claude for long conversations'
-  },
-  {
-    step: '5',
-    title: 'Configure API Access',
-    detail: 'Add your API keys and configure authentication to enable your agent.',
-    icon: '🔐',
-    example: 'Examples: OpenAI API key, Anthropic API key, Custom webhook URLs, Database connection strings'
   },
 ];
 

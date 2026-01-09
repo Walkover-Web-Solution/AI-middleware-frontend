@@ -5,7 +5,7 @@ import ChatTextInput from "./ChatTextInput";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/AssistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
-import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot, AlertTriangle } from "lucide-react";
+import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, AlertTriangle } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
@@ -58,12 +58,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, [params, searchParams, publishedVersionId]);
 
   // Redux selectors for chat state
-  const { messages, bridgeType, finishReasonDescription } = useCustomSelector((state) => ({
+  const { messages, finishReasonDescription } = useCustomSelector((state) => ({
     messages: state?.chatReducer?.messagesByChannel?.[channelIdentifier] || [],
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     finishReasonDescription: state?.flowDataReducer?.flowData?.finishReasonsData || [],
   }));
-
+ 
   // Initialize channel and RT layer
   useEffect(() => {
     if (channelIdentifier) {
@@ -304,25 +303,29 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   }, []);
 
   const renderMessageAttachments = (message) => {
-    const hasImages = Array.isArray(message?.image_urls) && message.image_urls.length > 0;
+    // Check for both image_urls (user images) and llm_urls (assistant images)
+    const isAssistant = message?.sender === 'assistant' || message?.role === 'assistant';
+    const hasUserImages = !isAssistant && Array.isArray(message?.image_urls) && message.image_urls.length > 0;
+    const hasLlmImages = Array.isArray(message?.llm_urls) && message.llm_urls.length > 0;
     const hasFiles = Array.isArray(message?.files) && message.files.length > 0;
     const hasVideo = Boolean(message?.video_data);
     const hasYoutube = Boolean(message?.youtube_url);
 
-    if (!hasImages && !hasFiles && !hasVideo && !hasYoutube) {
+    if (!hasUserImages && !hasLlmImages && !hasFiles && !hasVideo && !hasYoutube) {
       return null;
     }
 
     return (
       <div className="mt-3 flex flex-col gap-3">
-        {hasImages && (
+        {/* User images - only show for non-assistant messages */}
+        {hasUserImages && (
           <div className="flex flex-wrap gap-2">
             {message.image_urls.map((url, imgIndex) => (
               typeof url === "string" && url ? (
                 <Image
-                  key={imgIndex}
+                  key={`user-img-${imgIndex}`}
                   src={url}
-                  alt={`Message Image ${imgIndex + 1}`}
+                  alt={`User Image ${imgIndex + 1}`}
                   width={80}
                   height={80}
                   className="w-20 h-20 object-cover rounded-lg cursor-pointer"
@@ -330,6 +333,28 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                 />
               ) : null
             ))}
+          </div>
+        )}
+        
+        {/* LLM/Assistant images */}
+        {hasLlmImages && (
+          <div className="flex flex-wrap gap-2">
+            {message.llm_urls.map((urlObj, imgIndex) => {
+              const imageUrl = typeof urlObj === "string" ? urlObj : urlObj?.url;
+              const isImage = typeof urlObj === "string" || urlObj?.type === "image";
+              
+              return imageUrl && isImage ? (
+                <Image
+                  key={`llm-img-${imgIndex}`}
+                  src={imageUrl}
+                  alt={`Generated Image ${imgIndex + 1}`}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-cover rounded-lg cursor-pointer"
+                  onClick={() => window.open(imageUrl, "_blank")}
+                />
+              ) : null;
+            })}
           </div>
         )}
 
@@ -394,7 +419,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
   };
 
   return (
-    <div className="px-4 pt-4 bg-base-100">
+    <div className="px-4 pt-4 bg-base-300">
       <div className="w-full flex justify-between items-center px-2">
         <button
           className="btn btn-sm btn-square"
@@ -425,15 +450,6 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Add Test Case</button>
             </div>
           )}
-          {!isOrchestralModel && !isEmbedUser && bridgeType === 'chatbot' && <button
-            className="btn btn-sm btn-primary"
-            onClick={handleOpenChatbot}
-            title="Open Chatbot"
-          >
-            <div className="tooltip tooltip-left" data-tip="Open Chatbot">
-              <Bot size={14} />
-            </div>
-          </button>}
           {/* Test Cases Toggle Button */}
         </div>
 
@@ -467,7 +483,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
             </div>
           )}
 
-          <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
+          <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 w-full z-low">
             <div
               ref={messagesContainerRef}
               className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
@@ -596,7 +612,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                       message.sender === "assistant" ||
                       message.sender === "expected" ||
                       message.sender === "error") &&
-                      (message?.content || message?.isLoading) && (
+                      (message?.content || message?.isLoading || message?.llm_urls?.length > 0 || message?.image_urls?.length > 0) && (
                         <div className={`flex gap-2 show-on-hover justify-start max-w-[700px] items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
                             <button
@@ -829,6 +845,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                     testCaseId={testCaseId}
                     selectedStrategy={selectedStrategy}
                     handleSendMessageRef={handleSendMessageRef}
+                    showTestCases={showTestCases}
                   />
                 </div>
               </div>

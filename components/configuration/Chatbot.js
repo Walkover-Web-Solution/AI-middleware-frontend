@@ -15,7 +15,7 @@ const Chatbot = ({ params, searchParams }) => {
     }
     return result;
   }, [searchParams]); 
-  const { bridgeName, bridgeSlugName, chatbot_token, variablesKeyValue, configuration, service } = useCustomSelector((state) => {
+  const { bridgeName, bridgeSlugName, chatbot_token, variablesKeyValue, configuration, service, bridgeType } = useCustomSelector((state) => {
     const versionState = state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version] || {};
     return {
       bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
@@ -24,9 +24,9 @@ const Chatbot = ({ params, searchParams }) => {
       variablesKeyValue: versionState?.variables || [],
       configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
       service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
+      bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     };
   });
-
   // Convert variables array to object
   const variables = useMemo(() => {
     const coerceValue = (rawValue, fallback, type) => {
@@ -123,21 +123,22 @@ const Chatbot = ({ params, searchParams }) => {
     }
 
     const intervalId = setInterval(() => {
-      if (window?.SendDataToChatbot) {
+      if (window?.SendDataToChatbot && bridgeType==='chatbot') {
         // Send all configuration data
         window.SendDataToChatbot({
           "bridgeName": bridgeSlugName,
           "threadId": bridgeName?.replaceAll(" ", "_"),
           "parentId": 'parentChatbot',
           "fullScreen": true,
-          "hideCloseButton": false,
+          "hideCloseButton": true,
           "hideIcon": true,
           "version_id": isPublished ? "null" : version,
           "variables": variables || {}
         });
         clearInterval(intervalId);
       }
-    }, 300);
+    }, 1000);
+
 
   }, [chatbot_token, searchParams, isPublished, bridgeSlugName, bridgeName, variables]);
 

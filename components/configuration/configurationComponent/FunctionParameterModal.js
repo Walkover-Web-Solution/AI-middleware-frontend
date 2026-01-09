@@ -16,6 +16,7 @@ import { PlusCircleIcon, CircleQuestionMark } from "lucide-react";
 // Parameter Card Component
 const ParameterCard = ({
   isPublished,
+  isEditor = true,
   paramKey,
   param,
   depth = 0,
@@ -37,7 +38,7 @@ const ParameterCard = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [editingName, setEditingName] = useState(paramKey);
   const [editingEnum, setEditingEnum] = useState(JSON.stringify(param.enum || []));
-  
+  const isReadOnly = isPublished || !isEditor;
   // Update editingName when paramKey changes (after successful rename)
   useEffect(() => {
     setEditingName(paramKey);
@@ -58,7 +59,7 @@ const ParameterCard = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 justify-between w-full">
           <input
-            disabled={isPublished}
+            disabled={isPublished || !isEditor}
             type="text"
             value={editingName}
             className="w-1/2 text-xs font-medium bg-transparent p-0 focus:outline-none"
@@ -232,7 +233,7 @@ const ParameterCard = ({
                 type="checkbox"
                 className="checkbox checkbox-xs"
                 checked={!(currentPath in variablesPath)}
-                disabled={name === "Pre Tool" || isPublished}
+                disabled={name === "Pre Tool" || isPublished || !isEditor}
                 onChange={() => {
                   const updatedVariablesPath = { ...variablesPath };
                   if (currentPath in updatedVariablesPath) {
@@ -250,7 +251,7 @@ const ParameterCard = ({
         
         <div className="flex items-center gap-2 text-xs">
           <select
-            disabled={isPublished}
+            disabled={isReadOnly}
             className="select select-xs select-bordered text-xs"
             value={param.type || "string"}
             onChange={(e) => onTypeChange(currentPath, e.target.value)}
@@ -265,7 +266,7 @@ const ParameterCard = ({
             onClick={() => onDelete(currentPath)}
             className="btn btn-sm btn-ghost text-error text-xs"
             title="Delete parameter"
-            disabled={isPublished}
+            disabled={isReadOnly}
           >
             <TrashIcon size={14} />
           </button>
@@ -290,7 +291,7 @@ const ParameterCard = ({
       {param.type !== "object" && (
           <div className="flex items-center gap-1 text-xs mb-1">
             <input
-              disabled={isPublished}
+              disabled={isReadOnly}
               type="checkbox"
               className="checkbox checkbox-xs"
               checked={param.hasOwnProperty('enum')}
@@ -306,7 +307,7 @@ const ParameterCard = ({
           
           {param.hasOwnProperty('enum') && (
             <input
-              disabled={isPublished}
+              disabled={isReadOnly}
               type="text"
               placeholder="['a','b','c']"
               className="input input-xs input-bordered text-xs"
@@ -330,7 +331,7 @@ const ParameterCard = ({
             <div className="mb-1 flex flex-row ml-1 items-center justify-end">
               <label className="block text-xs mb-0 mr-1">Value Path:</label>
               <input
-                disabled={isPublished}
+                disabled={isReadOnly}
                 type="text"
                 placeholder="your_path"
                 className={`input input-xs input-bordered text-xs ${
@@ -361,7 +362,7 @@ const ParameterCard = ({
             </button>
             <button
               onClick={() => onAddChild(currentPath)}
-              disabled={isPublished}
+              disabled={isReadOnly}
               className="btn btn-sm btn-ghost text-primary gap-1"
               title="Add property"
             >
@@ -405,53 +406,56 @@ const ParameterCard = ({
 };
 
 function FunctionParameterModal({
-  isPublished,
-  name = "",
-  functionId = "",
-  Model_Name,
-  embedToken = "",
-  handleSave = () => {},
-  toolData = {},
-  setToolData = () => {},
-  function_details = {},
-  variables_path = {},
-  functionName = "",
-  variablesPath = {},
-  setVariablesPath = () => {},
-  isMasterAgent = false,
-  params = {},
-  tool_name = "",
+isPublished,
+isEditor = true,
+name = "",
+functionId = "",
+Model_Name,
+embedToken = "",
+handleSave = () => {},
+toolData = {},
+setToolData = () => {},
+function_details = {},
+variables_path = {},
+functionName = "",
+variablesPath = {},
+setVariablesPath = () => {},
+isMasterAgent = false,
+params = {},
+tool_name = "",
 }) {
-  const [toolName, setToolName] = useState(
-    (name === "Agent" || name === "orchestralAgent") ? tool_name : toolData?.title || toolData?.endpoint_name
-  );
-  const [isToolNameManuallyChanged, setIsToolNameManuallyChanged] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
-  const dispatch = useDispatch();
-  const { versions, publishedVersion } = useCustomSelector(state => {
-    const agent = state?.bridgeReducer.org[params?.org_id]?.orgs?.find((item) => item._id === functionId);
-    return {
-      versions: agent?.versions || [],
-      publishedVersion: agent?.published_version_id || null,
-    };
-  });
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
+const [toolName, setToolName] = useState(
+(name === "Agent" || name === "orchestralAgent") ? tool_name : toolData?.title 
+);
+const [isToolNameManuallyChanged, setIsToolNameManuallyChanged] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
+const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
+const dispatch = useDispatch();
+const { versions, publishedVersion } = useCustomSelector(state => {
+const agent = state?.bridgeReducer.org[params?.org_id]?.orgs?.find((item) => item._id === functionId);
+return {
+versions: agent?.versions || [],
+publishedVersion: agent?.published_version_id || null,
+};
+});
 
-  useEffect(() => {
-    // Only reset toolName if user hasn't manually changed it
-    if (!isToolNameManuallyChanged) {
-      setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
-    }
-  }, [toolData, tool_name, isToolNameManuallyChanged]);
+useEffect(() => {
+// Only reset toolName if user hasn't manually changed it
+if (!isToolNameManuallyChanged) {
+setToolName(name === "Agent" ? tool_name : toolData?.title);
+}
+}, [toolData, tool_name, isToolNameManuallyChanged]);
 
-  const [isModified, setIsModified] = useState(false);
-  const [objectFieldValue, setObjectFieldValue] = useState("");
-  const [isTextareaVisible, setIsTextareaVisible] = useState(false);
-  const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
-  const [showNameDescription, setShowNameDescription] = useState(false);
+const [isModified, setIsModified] = useState(false);
+const [objectFieldValue, setObjectFieldValue] = useState("");
+const [isTextareaVisible, setIsTextareaVisible] = useState(false);
+const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
+const [showNameDescription, setShowNameDescription] = useState(false);
 
-  useEffect(() => {
-    if (!isEqual(toolData, function_details)) {
+useEffect(() => {
+if (!isEqual(toolData, function_details)) {
       const thread_id = function_details?.thread_id ? function_details?.thread_id : toolData?.thread_id;
       const version_id = function_details?.version_id ? function_details?.version_id : toolData?.version_id;
       setToolData({ ...function_details, thread_id, version_id });
@@ -461,7 +465,7 @@ function FunctionParameterModal({
   useEffect(() => {
     // Only reset toolName if user hasn't manually changed it
     if (!isToolNameManuallyChanged) {
-      setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
+      setToolName(name === "Agent" ? tool_name : toolData?.title);
     }
   }, [tool_name, isToolNameManuallyChanged]);
 
@@ -520,18 +524,18 @@ function FunctionParameterModal({
         // New structure
         properties = parsedData.fields || {};
         toolDescription = parsedData.description || function_details?.["description"] || "";
-        toolName = parsedData.name || function_details?.["endpoint_name"] || function_details?.["function_name"];
+        toolName = parsedData.name || function_details?.["title"] || function_details?.["script_id"];
       } else {
         // Old structure - treat as fields only
         properties = parsedData;
         toolDescription = function_details?.["description"] || "";
-        toolName = function_details?.["endpoint_name"] || function_details?.["function_name"];
+        toolName = function_details?.["title"] || function_details?.["script_id"];
       }
       
       const toolCallFormat = {
         type: "function",
         function: {
-          name: function_details?.["function_name"],
+          name: function_details?.["script_name"],
           description: toolName ? `Name: ${toolName}, Description: ${toolDescription}` : `Description: ${toolDescription}`,
           parameters: {
             type: "object",
@@ -679,6 +683,16 @@ function FunctionParameterModal({
         ...prevToolData,
         fields: newFields,
       };
+    });
+    setVariablesPath((prev) => {
+      const updatedPath = { ...prev };
+      delete updatedPath[path];
+      const remainingPaths = Object.entries(updatedPath);
+      const formattedPaths = {};
+      remainingPaths.forEach(([key, value]) => {
+        formattedPaths[key] = value;
+      });
+      return formattedPaths;
     });
     setIsModified(true);
   }, []);
@@ -1074,14 +1088,14 @@ function FunctionParameterModal({
     }
     if (name !== "Agent" && name !== "orchestralAgent") {
       try {
-        const flowResponse = await updateFlow(embedToken, toolData.function_name, toolData?.description || "", toolName);
+        const flowResponse = await updateFlow(embedToken, toolData.script_id, toolData?.description || "", toolName);
         if (flowResponse?.metadata?.description) {
           const { _id, description, ...dataToSend } = toolData;
           await dispatch(updateFuntionApiAction({
             function_id: functionId,
-            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description, title: flowResponse?.title, endpoint_name: flowResponse?.title }
+            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description, title: flowResponse?.title, title: flowResponse?.title }
           }));
-          setToolData(prev => ({ ...prev, description: flowResponse.metadata.description, title: flowResponse.title, endpoint_name: flowResponse.title }));
+          setToolData(prev => ({ ...prev, description: flowResponse.metadata.description, title: flowResponse.title, title: flowResponse.title }));
           toast.success('Description updated successfully');
           setIsDescriptionEditing(false);
         } else {
@@ -1103,7 +1117,7 @@ function FunctionParameterModal({
           <h2 className="text-lg font-semibold">Config {name}</h2>
           <div className="flex justify-end gap-2 mt-1">
             <select 
-              disabled={isPublished}
+              disabled={isReadOnly}
               className="select select-xs select-bordered text-xs min-w-20"
               value={isTextareaVisible ? 'advanced' : 'simple'}
               onChange={(e) => {
@@ -1135,17 +1149,6 @@ function FunctionParameterModal({
               </div>
             )}
           </div>
-          <p className="flex items-center gap-1 whitespace-nowrap text-xs mb-1">
-            <InfoIcon size={14} /> You can change the data in raw json format. For more info click{" "}
-            <a
-              href="/faq/jsonformatdoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link link-primary underline cursor-pointer"
-            >
-              here
-            </a>
-          </p>
         </div>
         <div className="flex flex-row mb-1">
           
@@ -1159,7 +1162,7 @@ function FunctionParameterModal({
                       <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                     </InfoTooltip>
                       <input
-                        disabled={isPublished}
+                        disabled={isReadOnly}
                         type="checkbox"
                         className="toggle toggle-sm"
                         onChange={(e) => {
@@ -1182,7 +1185,7 @@ function FunctionParameterModal({
                         </InfoTooltip>
                       </label>
                       <select
-                        disabled={isPublished}
+                        disabled={isReadOnly}
                         className="select select-xs select-bordered ml-2"
                         value={toolData?.version_id || (publishedVersion ? 'published' : '')}
                         onChange={(e) => {
@@ -1225,7 +1228,7 @@ function FunctionParameterModal({
               <div className="flex items-center text-sm gap-3">
                 <p>Check for old data</p>
                 <input
-                  disabled={isPublished}
+                  disabled={isReadOnly}
                   type="checkbox"
                   className="toggle toggle-sm"
                   checked={isOldFieldViewTrue}
@@ -1259,7 +1262,7 @@ function FunctionParameterModal({
             {/* Name and Description Toggle */}
             <div className="mb-3">
               <button
-                disabled={isPublished}
+                disabled={isReadOnly}
                 onClick={() => setShowNameDescription(!showNameDescription)}
                 className="flex items-center gap-2 text-xs  font-semibold text-base-content transition-colors"
               >
@@ -1290,7 +1293,7 @@ function FunctionParameterModal({
                           }}
                           maxLength={50}
                           placeholder="Enter tool name"
-                          disabled={isPublished}></input>
+                          disabled={isReadOnly}></input>
                     )}
                   </div>
 
@@ -1300,7 +1303,7 @@ function FunctionParameterModal({
                       Description
                     </label>
                     <textarea
-                      disabled={isPublished}
+                      disabled={isReadOnly}
                       className="textarea bg-white dark:bg-black/15 textarea-sm textarea-bordered w-full resize-y"
                       rows={2}
                       value={toolData?.description || ""}
@@ -1318,7 +1321,7 @@ function FunctionParameterModal({
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold text-xs text-base-content">Parameters</h3>
               <button
-                disabled={isPublished}
+                disabled={isReadOnly}
                 onClick={handleAddParameter}
                 className="btn btn-sm btn-primary gap-1"
               >
@@ -1362,7 +1365,7 @@ function FunctionParameterModal({
         ) : (
           <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
             <textarea
-            disabled={isPublished}
+            disabled={isReadOnly}
               type="input"
               value={objectFieldValue}
               className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
@@ -1372,7 +1375,7 @@ function FunctionParameterModal({
             />
             {isOldFieldViewTrue && (
               <textarea
-              disabled={isPublished}
+              disabled={isReadOnly}
                 type="text"
                 value={
                   toolData?.old_fields

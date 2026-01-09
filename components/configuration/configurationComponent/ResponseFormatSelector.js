@@ -8,7 +8,9 @@ import { CircleQuestionMark } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
+const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = true }) => {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const { response_format } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -23,17 +25,32 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
     const [selectedOption, setSelectedOption] = useState(response_format?.type || 'default');
     const [webhookData, setWebhookData] = useState({ url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
     const [errors, setErrors] = useState({ webhook: "", headers: "" });
+    const [initialValues, setInitialValues] = useState({ type: response_format?.type || 'default', url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
     const dispatch = useDispatch();
 
     useEffect(() => {
+        let type, url, headers;
+        
         if (response_format) {
-            setSelectedOption(response_format.type === 'RTLayer' ? 'RTLayer' : response_format.type === 'webhook' ? 'custom' : 'default');
-            setWebhookData({ url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
+            type = response_format.type === 'RTLayer' ? 'RTLayer' : response_format.type === 'webhook' ? 'custom' : 'default';
+            url = response_format?.cred?.url || "";
+            headers = response_format?.cred?.headers || "";
+            
+            setSelectedOption(type);
+            setWebhookData({ url, headers });
         } else {
             // Reset to default when no response_format data
+            type = 'default';
+            url = "";
+            headers = "";
+            
             setSelectedOption('default');
             setWebhookData({ url: "", headers: "" });
         }
+        
+        // Store initial values for change tracking
+        setInitialValues({ type, url, headers });
+        
         // Clear any existing errors when switching versions
         setErrors({ webhook: "", headers: "" });
     }, [response_format, searchParams?.version, searchParams?.isPublished]);
@@ -73,6 +90,13 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
             }
         };
         dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams.version, dataToSend: { ...updatedDataToSend } }));
+        
+        // Update initialValues to match the new saved state
+        setInitialValues({
+            type, 
+            url: cred.url, 
+            headers: cred.headers
+        });
     }
 
     const responseOptions = [
@@ -92,7 +116,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                 <div className="form-control w-fit" key={value}>
                     <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
                         <input
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                             type="radio"
                             name="radio-10"
                             className="radio radio-sm"
@@ -108,7 +132,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                     <label className="form-control w-full mb-4">
                         <span className="text-sm block mb-2">Webhook URL</span>
                         <input
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                             type="text"
                             placeholder="https://example.com/webhook"
                             className="input input-bordered max-w-xs input-sm w-full"
@@ -121,7 +145,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                     <label className="form-control mb-4">
                         <span className="text-sm block mb-2">Headers (JSON format)</span>
                         <textarea
-                            disabled={isPublished}
+                            disabled={isReadOnly}
                             className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"
                             id="headers"
                             defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
@@ -130,7 +154,18 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished }) => {
                         ></textarea>
                         {errors.headers && <p className="text-red-500 text-xs mt-2">{errors.headers}</p>}
                     </label>
-                    <button className="btn btn-primary btn-sm my-2 float-right" onClick={() => handleResponseChange("custom")} disabled={errors.webhook !== '' || errors.headers !== '' || isPublished}>
+                    <button 
+                        className="btn btn-primary btn-sm my-2 float-right" 
+                        onClick={() => handleResponseChange("custom")} 
+                        disabled={
+                            errors.webhook !== '' || 
+                            errors.headers !== '' || 
+                            isReadOnly || 
+                            // Check if there are any changes to apply compared to initial values
+                            (webhookData.url === initialValues.url && 
+                             JSON.stringify(webhookData.headers) === JSON.stringify(initialValues.headers))
+                        }
+                    >
                         Apply
                     </button>
                 </div>

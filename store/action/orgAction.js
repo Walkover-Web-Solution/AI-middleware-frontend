@@ -1,16 +1,24 @@
-import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, updateOrganizationData, updateUser } from "@/config/index";
-import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
-import {  updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
+import { createOrg, generateAccessKey, generateGtwyAccessTokenApi, getAllOrg, getUsers, updateOrganizationData, updateUser } from "@/config/index";
+import { organizationCreated, organizationsFetched, setCurrentOrgId, usersFetched } from "../reducer/orgReducer";
+import { updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
+import { trackOrganizationEvent } from "@/utils/posthog";
 
 export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
   try {
     const data = await createOrg(dataToSend);
     onSuccess(data.data.data);
     dispatch(organizationCreated(data));
+    if (data?.data?.data) {
+      trackOrganizationEvent('created', {
+        org_id: data.data.data.id,
+        name: data.data.data.name,
+      });
+    }
   } catch (error) {
     console.error(error);
   }
 }
+
 
 export const getAllOrgAction = () => async (dispatch, getState) => {
   try {
@@ -82,5 +90,15 @@ export const updateOrgMetaAction = (orgId, orgDetails) => async (dispatch) => {
   } catch (error) {
     console.error('Error updating organization meta:', error);
     throw error;
+  }
+}
+
+export const getUsersAction = () => async (dispatch) => {
+  try {
+    const response = await getUsers();
+    dispatch(usersFetched(response.data));
+    return response;
+  } catch (error) {
+    console.error("Error fetching users:", error);
   }
 }

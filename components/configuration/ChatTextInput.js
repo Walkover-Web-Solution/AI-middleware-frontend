@@ -17,10 +17,25 @@ import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon, CloseCircleIcon } f
 import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
 import { toggleSidebar } from '@/utils/utility';
+import { buildUserUrls } from '@/utils/attachmentUtils';
 
 const VARIABLE_SLIDER_DISABLE_KEY = 'variableSliderDisabled';
 
-function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef }) {
+function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef, searchParams, setTestCaseId, testCaseId, selectedStrategy, handleSendMessageRef, showTestCases }) {
+    // Reset textarea height when test cases are toggled or when the component mounts
+    useEffect(() => {
+        if (inputRef.current) {
+            // Use requestAnimationFrame to ensure the DOM is ready
+            requestAnimationFrame(() => {
+                inputRef.current.style.height = 'auto';
+                inputRef.current.style.height = '40px'; // Reset to default height
+                // Clear any existing content
+                if (inputRef.current.value === '') {
+                    inputRef.current.style.height = '40px';
+                }
+            });
+        }
+    }, [showTestCases, inputRef]);
     const [uploading, setUploading] = useState(false);
     const [mediaUrls, setMediaUrls] = useState(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
@@ -31,7 +46,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
     const versionId = searchParams?.version;
     const isPublished = searchParams?.isPublished === 'true';
     
-    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName } = useCustomSelector((state) => {
+    const { bridge, variablesKeyValue, prompt, configuration, modelInfo, service, modelType, modelName, isEmbedUser, showVariables } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
         
@@ -47,6 +62,8 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             service: isPublished ? (bridgeDataFromState?.service?.toLowerCase()) : (versionData?.service?.toLowerCase()),
             modelType: isPublished ? (bridgeDataFromState?.configuration?.type) : (versionData?.configuration?.type),
             modelName: isPublished ? (bridgeDataFromState?.configuration?.model) : (versionData?.configuration?.model),
+            isEmbedUser: state?.appInfoReducer?.embedUserDetails?.isEmbedUser || false,
+            showVariables: state?.appInfoReducer?.embedUserDetails?.showVariables || false,
         };
     });
 
@@ -188,16 +205,15 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
         // Validate variables in prompt
         if (!forceRun && !isSliderAutoOpenDisabled) {
             const validation = validatePromptVariables();
-            if (!validation.isValid) {
+            if (!validation.isValid && (!isEmbedUser || (isEmbedUser && showVariables))) {
                 const missingVars = validation.missingVariables.join(', ');
                 const errorMsg = `Missing values for variables: ${missingVars}. Please provide values or default values.`;
                 setValidationError(errorMsg);
+                    // Open the variable collection slider
+                    toggleSidebar("variable-collection-slider", "right");
 
-                // Open the variable collection slider
-                toggleSidebar("variable-collection-slider", "right");
-
-                // Store missing variables in sessionStorage for the slider to highlight
-                sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
+                    // Store missing variables in sessionStorage for the slider to highlight
+                    sessionStorage.setItem('missingVariables', JSON.stringify(validation.missingVariables));
 
                 return;
             } else {
@@ -223,14 +239,12 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
             }
         }
         let testcase_data = {
-            matching_type: selectedStrategy,
+            matching_type: selectedStrategy || 'exact',
         }
         // Use stored testcase_id from Redux if available, otherwise fall back to prop
         const activeTestCaseId = storedTestCaseId || testCaseId;
         if (activeTestCaseId) {
             testcase_data.testcase_id = activeTestCaseId;
-        } else {
-            testcase_data = null;
         }
         dispatch(setChatError(channelIdentifier, ""));
         if (modelType !== "completion") inputRef.current.value = "";
@@ -238,6 +252,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
         try {
             let responseData;
             let data;
+            const userUrls = buildUserUrls(uploadedImages, uploadedFiles);
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
@@ -258,8 +273,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                                 type: modelType
                             },
                             user: data.content,
-                            images: uploadedImages,
-                            files: uploadedFiles,
+                            user_urls: userUrls,
                             variables,
                             orchestrator_flag: isOrchestralModel
                         },
@@ -274,8 +288,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     apiCall,
                     isOrchestralModel,
                     {
-                        images: uploadedImages,
-                        files: uploadedFiles,
+                        user_urls: userUrls,
                         youtube_url: mediaUrls
                     }
                 ));
@@ -627,7 +640,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
 
             {/* Input Group */}
             <div className="input-group flex justify-end items-end gap-2 w-full relative">
-                {(modelType !== "completion") && (modelType !== 'image') && (
+                {(modelType !== "completion") && (
                     <textarea
                         ref={inputRef}
                         placeholder="Type here"
@@ -639,7 +652,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                         rows={1}
                         onInput={(e) => {
                             e.target.style.height = 'auto'; // Reset height
-                            e.target.style.height = `${e.target.scrollHeight}px`; // Set to scroll height
+                            e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`; // Set to scroll height, max 200px
                         }}
                     />
                 )}
@@ -757,7 +770,7 @@ function ChatTextInput({ channelIdentifier, params, isOrchestralModel, inputRef,
                     <button
                         className={`btn btn-circle transition-all duration-200 ${loading || uploading || (modelType === 'image')
                                 ? 'btn-disabled'
-                                : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                                : ' btn hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
                             }`}
                         onClick={() => {
                             handleSendMessage();

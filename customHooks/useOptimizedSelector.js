@@ -25,6 +25,10 @@ export const useConfigurationSelector = (params, searchParams) => {
         isFocus: state?.bridgeReducer?.isFocus,
         modelType: isPublished ? (bridgeData?.configuration?.type?.toLowerCase()) : (versionData?.configuration?.type?.toLowerCase()),
         modelName: isPublished ? (bridgeData?.configuration?.model) : (versionData?.configuration?.model),
+        isLoading: state?.bridgeReducer?.loading,
+        hasError: state?.bridgeReducer?.error,
+        hasData: !!(bridgeData || versionData),
+        oldContent: bridgeData?.configuration?.prompt || "",
       };
     }, [paramsId, version, isPublished]),
     shallowEqual
@@ -51,6 +55,7 @@ export const usePromptSelector = (params, searchParams) => {
         service: isPublished ? (bridgeData?.service || "") : (versionData?.service || ""),
         serviceType: isPublished ? (bridgeData?.configuration?.type || "") : (versionData?.configuration?.type || ""),
         variablesKeyValue: variableState?.variables || [],
+        oldContent: bridgeData?.configuration?.prompt || "",
         bridge: activeData || ""
       };
     }, [paramsId, version, isPublished]),

@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { SettingsIcon, TrashIcon, RefreshIcon, SquareFunctionIcon } from '@/components/Icons';
-import { truncate } from '@/components/historyPageComponents/AssistFile';
 import useExpandableList from '@/customHooks/useExpandableList';
 
 const RenderEmbed = ({
@@ -15,14 +14,17 @@ const RenderEmbed = ({
   handleChangePreTool,
   name,
   halfLength = 1,
-  isPublished
+  isPublished,
+  isEditor = true
 }) => {
+  // Determine if content is read-only (either published or user is not an editor)
+  const isReadOnly = isPublished || !isEditor;
   // Sort functions first
   const sortedFunctions = useMemo(() => {
     return bridgeFunctions?.slice()
       .sort((a, b) => {
-        const aFnName = a?.function_name || a?.endpoint;
-        const bFnName = b?.function_name || b?.endpoint;
+        const aFnName = a?.script_id;
+        const bFnName = b?.script_id;
         const aTitle = a?.title || integrationData?.[aFnName]?.title;
         const bTitle = b?.title || integrationData?.[bFnName]?.title;
         if (!aTitle) return 1;
@@ -36,14 +38,14 @@ const RenderEmbed = ({
 
   const renderEmbed = useMemo(() => {
     const embedItems = displayItems?.map((value) => {
-        const functionName = value?.function_name || value?.endpoint;
+        const functionName = value?.script_id;
         const title = value?.title || integrationData?.[functionName]?.title;
 
         return (
           <div
             key={value?._id}
             id={value?._id}
-            className={`group flex items-center rounded-md border border-base-300 cursor-pointer bg-base-200 relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-300 transition-colors duration-200`}
+            className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} transition-colors duration-200`}
           >
             <div
               className="p-2 flex-1 flex items-center"
@@ -59,13 +61,13 @@ const RenderEmbed = ({
                 <SquareFunctionIcon size={16} className="shrink-0" />
                 {title?.length > 24 ? (
                   <div className="tooltip tooltip-top min-w-0" data-tip={title}>
-                    <span className="min-w-0 text-sm truncate">
-                      <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                    <span className="min-w-0 text-sm truncate text-left">
+                      <span className="truncate text-sm font-normal block w-[300px]">{title}</span>
                     </span>
                   </div>
                 ) : (
-                  <span className="min-w-0 text-sm truncate">
-                    <span className="text-sm font-normal block w-full">{truncate(title, 24)}</span>
+                  <span className="min-w-0 text-sm truncate text-left">
+                    <span className="truncate text-sm font-normal block w-[300px]">{title}</span>
                   </span>
                 )}
               </div>
@@ -89,9 +91,9 @@ const RenderEmbed = ({
                     e.stopPropagation();
                     handleChangePreTool();
                   }}
-                  className="btn btn-ghost btn-sm p-1 hover:text-primary"
+                  className="btn btn-ghost btn-sm p-1"
                   title="Change Pre Tool"
-                  disabled={isPublished}
+                  disabled={isReadOnly}
                 >
                   <RefreshIcon size={16} />
                 </button>
@@ -99,11 +101,11 @@ const RenderEmbed = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleOpenDeleteModal(value?._id, value?.function_name);
+                  handleOpenDeleteModal(value?._id, value?.script_id);
                 }}
                 className="btn btn-ghost btn-sm p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
-                disabled={isPublished}
+                disabled={isReadOnly}
               >
                 <TrashIcon size={16} />
               </button>

@@ -11,7 +11,7 @@ import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunct
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getRichUiTemplatesAction } from "@/store/action/richUiTemplateAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateUserMetaOnboarding, updateOrgMetaAction } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding, updateOrgMetaAction, getUsersAction } from "@/store/action/orgAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
@@ -19,13 +19,12 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction, getFinishReasonsAction, getLinksAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
-import { getAllAuthData } from "@/store/action/authkeyAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import ServiceInitializer from "@/components/organization/ServiceInitializer";
 
@@ -51,14 +50,16 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.pre_tools || {},
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.pre_tools || [],
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
     currrentOrgDetail: state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   }));
   useEffect(() => {
-    dispatch(getTutorialDataAction());
+    if (!isEmbedUser) {
+      dispatch(getTutorialDataAction());
+    }
     if (pathName.endsWith("agents")) {
       dispatch(getFinishReasonsAction());
     }
@@ -66,6 +67,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
       dispatch(getDescriptionsAction());
+      dispatch(getLinksAction());
     }
     if (pathName.endsWith("apikeys") && !isEmbedUser) {
       dispatch(getApiKeyGuideAction());
@@ -74,7 +76,9 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
-      const reference_id = getFromCookies("reference_id");
+      // Skip user meta updates for embed users
+      if (isEmbedUser) return;
+      
       const unlimited_access = getFromCookies("unlimited_access");
       const utmSource = getFromCookies("utm_source");
       const utmMedium = getFromCookies("utm_medium");
@@ -91,13 +95,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (utmCampaign && !currentUser?.meta?.utm_campaign) utmParams.utm_campaign = utmCampaign;
       if (utmTerm && !currentUser?.meta?.utm_term) utmParams.utm_term = utmTerm;
       if (utmContent && !currentUser?.meta?.utm_content) utmParams.utm_content = utmContent;
-      if (reference_id && !currentUser?.meta?.reference_id) paramsUpdate.reference_id = reference_id;
       if (unlimited_access && !currrentOrgDetail?.meta?.unlimited_access) paramsUpdate.unlimited_access = unlimited_access;
 
       // Check if we need to update user meta (either null meta or new UTM params
       try {
         // If UTM params exist, store marketing ref first
-        if (Object.keys(utmParams).length > 0 || (Object.keys(utmParams).length === 1 && !utmParams.reference_id)) {
+        if (!currentUser?.meta) {
           await dispatch(
             storeMarketingRefUserAction({
               ...utmParams,
@@ -143,7 +146,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           removeCookie("unlimited_access");
         }
 
-        const data = (currentUserMeta?.meta === null || Object.keys(utmParams).length > 0 || Object.keys(paramsUpdate).length > 0) ? await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser)) : null;
+        const data = (currentUserMeta === null || Object.keys(utmParams).length > 0 || Object.keys(paramsUpdate).length > 0) ? await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser)) : null;
         if (data?.data?.status) {
           currentUserMeta = data?.data?.data?.user?.meta;
         }
@@ -156,7 +159,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, []);
 
 
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser,currrentOrgDetail?.role_name==="Viewer");
+  
   useRtLayerEventHandler();
 
 
@@ -196,18 +200,20 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       }))
       dispatch(getAllFunctions())
     }
-  }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
+  }, [isValidOrg, !isEmbedUser ? currentUser?.meta?.onboarding?.bridgeCreation : true]);
 
 
   useEffect(() => {
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
-      dispatch(getPrebuiltPromptsAction())
       dispatch(getPrebuiltToolsAction())
-      dispatch(getAuthDataAction(resolvedParams?.org_id))
-      dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
-      dispatch(getAllAuthData())
+      if(!isEmbedUser){
+        dispatch(getAuthDataAction(resolvedParams?.org_id))
+        dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
+        dispatch(getPrebuiltPromptsAction())
+        dispatch(getUsersAction());
+      }
       dispatch(getRichUiTemplatesAction(resolvedParams.org_id))
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
@@ -217,7 +223,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
 
 
   useEffect(() => {
-    if (isValidOrg) {
+    if (isValidOrg && !isEmbedUser) {
       const updateScript = (token) => {
         const existingScript = document.getElementById(scriptId);
         if (existingScript) {
@@ -263,9 +269,14 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         }
       }
     };
-    window.addEventListener('focus', onFocus);
+    // Only add focus listener for non-embed users
+    if (!isEmbedUser) {
+      window.addEventListener('focus', onFocus);
+    }
     return () => {
-      window.removeEventListener('focus', onFocus);
+      if (!isEmbedUser) {
+        window.removeEventListener('focus', onFocus);
+      }
     }
   }, [isValidOrg, resolvedParams])
   const docstarScriptId = "docstar-main-script";
@@ -292,7 +303,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       };
     }
   }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
-
   async function handleMessage(e) {
     if (e.data?.metadata?.type !== 'tool') return;
     // todo: need to make api call to update the name & description
@@ -305,21 +315,36 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       if (e?.data?.action === 'deleted') {
         if (versionData && typeof versionData === 'object' && !Array.isArray(versionData)) {
           const selectedVersionData = Object.values(versionData).find(
-            fn => fn.function_name === e?.data?.id
+            fn => fn.script_id === e?.data?.id
           );
           if (selectedVersionData) {
+            //This condition will delete the tools and preTools..
             await dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: resolvedSearchParams?.get('version'),
               dataToSend: {
                 functionData: {
                   function_id: selectedVersionData._id,
-                  function_name: selectedVersionData.function_name
+                  function_name: selectedVersionData.script_id
                 }
               }
             }));
+            if (preTools.includes(selectedVersionData?._id)) {
+              dispatch(updateApiAction(path[5], {
+                pre_tools: selectedVersionData?._id,
+                status: "0",
+                version_id: resolvedSearchParams?.get('version')
+              }))
+            }
+          }else {
+              dispatch(updateApiAction(path[5], {
+                pre_tools: preTools[0],
+                status: "0",
+                version_id: resolvedSearchParams?.get('version')
+              }))
           }
-          dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+          dispatch(deleteFunctionAction({ script_id: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
+
         }
       }
 
@@ -374,10 +399,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     return <ErrorPage></ErrorPage>;
   }
 
+  const themeUserType = isEmbedUser ? 'embed' : 'default';
+
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <ThemeManager />
+        <ThemeManager userType={themeUserType} />
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="flex flex-col h-full z-high">
@@ -415,7 +442,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   else {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <ThemeManager />
+        <ThemeManager userType={themeUserType} />
         {/* Main Content Area for Embed Users */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Sticky Navbar */}

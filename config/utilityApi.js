@@ -73,7 +73,7 @@ export const improvePrompt = async (variables) => {
       type: 'improve_prompt',
       variables
     });
-    return response?.data;
+    return response?.data?.result;
   } catch (error) {
     console.error(error)
     throw new Error(error);
@@ -133,10 +133,10 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   }
 };
 
-export const deleteFunctionApi = async (function_name) => {
+export const deleteFunctionApi = async (script_id) => {
   try {
     const response = await axios.delete(`${URL}/api/tools/`, {
-      data: { function_name }
+      data: { script_id }
     });
     return response.data;
   } catch (error) {
@@ -250,7 +250,7 @@ export const createapi = async (dataFromEmbed) => {
 
 export const updateapi = async (bridge_id, dataFromEmbed) => {
   try {
-    const response = await axios.put(`${URL}/api/tools/${bridge_id}`, dataFromEmbed);
+    const response = await axios.put(`${URL}/api/tools/pre_tool/${bridge_id}`, dataFromEmbed);
     return response;
   } catch (error) {
     console.error(error);
@@ -336,6 +336,15 @@ export const getFinishReasons = async () => {
     const response = await axios.get("https://flow.sokt.io/func/scritxGh53At");
     return response;
   } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+export const getLinks = async () => {
+  try{
+    const response = await axios.get("https://flow.sokt.io/func/scriiS7RkdxI");
+    return response;
+  }catch(error){
     console.error(error);
     throw new Error(error);
   }

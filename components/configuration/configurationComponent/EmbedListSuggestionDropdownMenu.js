@@ -7,7 +7,8 @@ import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { truncate } from '@/components/historyPageComponents/AssistFile';
 
-function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => { }, connectedFunctions = [], shouldToolsShow, modelName, prebuiltToolsData, toolsVersionData, showInbuiltTools = {}, tutorialState, setTutorialState }) {
+function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => { }, connectedFunctions = [], shouldToolsShow, modelName, prebuiltToolsData, toolsVersionData, showInbuiltTools = {}, tutorialState, setTutorialState, isPublished = false, isEditor = true }) {
+    // Determine if content is read-only (either published or user is not an editor)
     // Use the tutorial videos hook
     const { getFunctionCreationVideo } = useTutorialVideos();
      
@@ -36,15 +37,15 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
     const renderEmbedSuggestions = useMemo(() => (
         function_data && (Object.values(function_data))
             .filter(value => {
-                const fnName = value?.function_name || value?.endpoint;
+                const fnName = value?.script_id 
                 const title = value?.title || integrationData?.[fnName]?.title;
                 return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
                     !(connectedFunctions || [])?.includes(value?._id);
             })
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
-                const aFnName = a?.function_name || a?.endpoint;
-                const bFnName = b?.function_name || b?.endpoint;
+                const aFnName = a?.script_id;
+                const bFnName = b?.script_id;
                 const aTitle = a?.title || integrationData?.[aFnName]?.title;
                 const bTitle = b?.title || integrationData?.[bFnName]?.title;
                 if (!aTitle) return 1;
@@ -53,7 +54,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                 return aTitle?.localeCompare(bTitle); // Sort alphabetically based on title
             })
             .map((value) => {
-                const functionName = value?.function_name || value?.endpoint;
+                const functionName = value?.script_id;
                 const status = value?.status || integrationData?.[functionName]?.status;
                 const title = value?.title || integrationData?.[functionName]?.title || 'Untitled';
                 return (
@@ -83,8 +84,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
     }, [prebuiltToolsData, toolsVersionData, searchQuery, showInbuiltTools]);
 
     return (
-        <div className="dropdown dropdown-left mt-8">
-
+        <>
             {tutorialState?.showSuggestion && (
                 <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"} />
             )}
@@ -94,10 +94,14 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
             {!tutorialState?.showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0">
                     <div className='flex flex-col gap-2 w-full'>
-                        <li className="text-sm font-semibold disabled">Suggested Tools</li>
+                        {name === "preFunction" ? (
+                            <li className="text-sm font-semibold disabled">Available Pre Functions</li>
+                        ) : (
+                            <li className="text-sm font-semibold disabled">Available Tools</li>
+                        )}
                         <input
                             type='text'
-                            placeholder='Search Function'
+                            placeholder={`Search ${name=="preFunction" ? "Pre Function" : "Tool"}`}
                             value={searchQuery}
                             onChange={handleInputChange} // Update search query on input change
                             className='input input-bordered w-full input-sm'
@@ -147,7 +151,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                     </div>
                 </ul>
             )}
-        </div>
+        </>
     )
 }
 

@@ -6,7 +6,9 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { CircleQuestionMark } from 'lucide-react';
 
-function ToolCallCount({ params, searchParams ,isPublished }) {
+function ToolCallCount({ params, searchParams, isPublished, isEditor = true }) {
+    // Determine if content is read-only (either published or user is not an editor)
+    const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();
     const { tool_call_count, modelType, model } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
@@ -37,7 +39,7 @@ function ToolCallCount({ params, searchParams ,isPublished }) {
                 </InfoTooltip>
             </div>
             <input
-            disabled={isPublished}
+            disabled={isReadOnly}
                 type="number"
                 placeholder="Type here"
                 className="input input-sm input-bordered w-full"

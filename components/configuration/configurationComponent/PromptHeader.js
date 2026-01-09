@@ -1,5 +1,4 @@
 import React, { memo, useCallback } from 'react';
-import { SparklesIcon } from 'lucide-react';
 
 // Optimized header component with memoization
 const PromptHeader = memo(({ 
@@ -13,12 +12,12 @@ const PromptHeader = memo(({
     handleCloseTextAreaFocus,
     showCloseHelperButton = false,
     disabled = false,
-    isPublished = false
+    isPublished = false,
+    isEditor = true,
+    prompt = '',
+    isFocused = false,
+    setIsTextareaFocused = () => {}
 }) => {
-    const handleSave = useCallback(() => {
-        onSave?.();
-    }, [onSave]);
-
     const handleOpenDiff = useCallback(() => {
         onOpenDiff?.();
     }, [onOpenDiff]);
@@ -26,34 +25,32 @@ const PromptHeader = memo(({
     // Conditional styling based on isPromptHelperOpen
     if (isPromptHelperOpen && !isMobileView) {
         return (
-            <div className="flex items-center justify-between mb-4 p-3 border-b border-base-300 bg-base-50">
+            <div className={`flex z-very-high items-center justify-between p-3 border-b border-base-300 bg-base-50 ${!isEditor ? 'mt-8' : ''}`}>
                 <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-base-content">Prompt</h3>
+                    <h3 className="text-base font-semibold text-base-content">System Prompt</h3>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                    <button
-                        className={`btn btn-xs ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
-                        onClick={handleSave}
-                        disabled={disabled || !hasUnsavedChanges}
-                        title="Save Prompt"
-                    >
-                        Save
-                    </button>
-                    <button
-                        className="btn btn-xs"
-                        onClick={handleOpenDiff}
-                        title="View Diff"
-                    >
-                        Diff
-                    </button>
-                    <button
-                        className="btn btn-xs btn-error"
-                        onClick={handleCloseTextAreaFocus}
+                <div className="flex items-center gap-4">
+                    {prompt && (
+                        <span
+                            className="text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 cursor-pointer px-2 py-1 rounded transition-colors"
+                            onClick={handleOpenDiff}
+                            title="View Diff"
+                        >
+                            Diff
+                        </span>
+                    )}
+                    <span
+                        className="text-sm text-error hover:text-error/80 hover:bg-error/10 cursor-pointer px-2 py-1 rounded transition-colors"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            handleCloseTextAreaFocus();
+                            setIsTextareaFocused(false);
+                        }}
                         title="Close Prompt Helper"
                     >
                         Close Helper
-                    </button>
+                    </span>
                 </div>
             </div>
         );
@@ -63,45 +60,41 @@ const PromptHeader = memo(({
     return (
         <div className="flex justify-between items-center">
             <div className="label flex items-center gap-2">
-                <span className="label-text capitalize font-medium">Prompt</span>
+                <span className="label-text capitalize font-medium">System Prompt</span>
             </div>
 
-            <div className="label cursor-pointer gap-1 sm:gap-2">
-                <button
-                    className={`btn btn-xs ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
-                    onClick={handleSave}
-                    disabled={disabled || !hasUnsavedChanges}
-                >
-                    Save
-                </button>
-              
-                    {!isPromptHelperOpen ? (
-                    <button
-                        className="btn btn-xs btn-primary"
-                        onClick={onOpenPromptHelper}
+            <div className="label gap-6 sm:gap-4">
+                  {prompt && !isPromptHelperOpen && (
+                      <span
+                            className={`text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 px-2 py-1 rounded transition-opacity duration-500 ease-in-out ${
+                                isFocused 
+                                    ? 'opacity-100 cursor-pointer' 
+                                    : 'opacity-0 pointer-events-none cursor-default'
+                            }`}
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleOpenDiff();
+                            }}
+                            title="View Diff"
+                        >
+                            Diff
+                        </span>
+                  )}
+                    {!isPromptHelperOpen && (
+                    <span
+                        className={`text-sm text-base-content hover:text-base-content/80 hover:bg-base-200 px-2 py-1 rounded transition-opacity duration-500 ease-in-out ${
+                            isFocused 
+                                ? 'opacity-100 cursor-pointer' 
+                                : 'opacity-0 pointer-events-none cursor-default'
+                        }`}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            onOpenPromptHelper();
+                        }}
                         title={isPublished ? "Prompt Helper: Cannot edit in published mode" : "Open Prompt Helper"}
-                        disabled={isPublished}
                     >
-                        <SparklesIcon size={12} className="" />
                         Prompt Helper
-                    </button>
-                ) : showCloseHelperButton && (
-                    <button
-                        className="btn btn-xs btn-error"
-                        onClick={handleCloseTextAreaFocus}
-                        title="Close Prompt Helper"
-                    >
-                        Close Helper
-                    </button>
-                )}
-              
-                {isPromptHelperOpen && !isMobileView && (
-                    <button
-                        className="btn text-xs "
-                        onClick={handleOpenDiff}
-                    >
-                        Diff
-                    </button>
+                    </span>
                 )}
             </div>
         </div>

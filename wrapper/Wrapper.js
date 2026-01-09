@@ -8,6 +8,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import CommandPalette from "@/components/command/CommandPalette";
 import { usePathname } from "next/navigation";
 import { useThemeManager } from "@/customHooks/useThemeManager";
+import PostHogProvider from "@/components/PostHogProvider";
 
 /**
  * The Wrapper component is the top level component of our application
@@ -43,17 +44,19 @@ const Wrapper = ({ children }) => {
     <>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <div className="w-screen">
-            {/* All the child components */}
-            {children}
-            {/* Global Command Palette */}
-            <CommandPalette />
-            {/* Notification toast container */}
-            <ToastContainer 
-              position="bottom-left" 
-              theme={actualTheme === 'dark' ? 'dark' : 'light'}
-            />
-          </div>
+          <PostHogProvider>
+            <div className="w-screen">
+              {/* All the child components */}
+              {children}
+              {/* Global Command Palette */}
+              <CommandPalette />
+              {/* Notification toast container */}
+              <ToastContainer 
+                position="bottom-left" 
+                theme={actualTheme === 'dark' ? 'dark' : 'light'}
+              />
+            </div>
+          </PostHogProvider>
         </PersistGate>
       </Provider>
     </>

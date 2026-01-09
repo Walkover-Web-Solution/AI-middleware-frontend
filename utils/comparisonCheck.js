@@ -4,11 +4,9 @@ import { createDiff } from '@/utils/utility'
 const ComparisonCheck = ({ oldContent, newContent }) => {
     const diffData = createDiff(oldContent || '', newContent || '');
     const isNewContentEmpty = !newContent || newContent.trim() === '';
-    
     const leftScrollRef = useRef(null);
     const rightScrollRef = useRef(null);
     const syncingRef = useRef(false);
-    
     const syncScroll = (source, target) => {
         if (syncingRef.current) return;
         syncingRef.current = true;
@@ -23,8 +21,8 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
             {isNewContentEmpty ? (
                 <div className="flex flex-col items-center justify-center h-[70vh] w-full bg-base-200 rounded-lg p-6">
                     <div className="text-center">
-                        <h3 className="text-xl font-bold mb-2">No Optimized Prompt Available</h3>
-                        <p className="text-base-content/70">You need to optimize your prompt first to see a comparison.</p>
+                        <h3 className="text-xl font-bold mb-2">No Current or Published Prompt Available</h3>
+                        <p className="text-base-content/70">You need to publish your prompt first to see a comparison.</p>
                     </div>
                 </div>
             ) : (
@@ -32,7 +30,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                     <div className="flex gap-2 h-[70vh] w-full mt-3">
                         <div className="w-1/2 flex flex-col">
                             <div className="label">
-                                <span className="label-text font-medium text-red-600">Original Prompt</span>
+                                <span className="label-text font-medium text-red-600">Published Prompt</span>
                             </div>
                             <div className="flex-1 border border-base-300 rounded-lg overflow-auto">
                                 <div 
@@ -44,7 +42,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                                         <div
                                             key={index}
                                             className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-300/50 ${
-                                                line.type === 'deleted' ? 'bg-red-200 text-black' :
+                                                line.type === 'deleted' ? 'bg-red-200 text-base-content' :
                                                 line.type === 'modified' ? 'bg-red-100 text-black' :
                                                 line.type === 'equal' ? 'bg-base-200 text-base-content' :
                                                 'bg-base-100 opacity-30 text-base-content'
@@ -68,7 +66,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                         <div className="w-1/2 flex flex-col">
                             <div className="label">
                                 <span className="label-text font-medium text-green-600">
-                                    New Prompt
+                                    Current Prompt
                                 </span>
                             </div>
                             <div className="flex-1 border border-base-300 rounded-lg overflow-auto">
@@ -81,7 +79,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                                         <div
                                             key={index}
                                             className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-300/50 ${
-                                                line.type === 'added' ? 'bg-green-200 text-black' :
+                                                line.type === 'added' ? 'bg-green-200 text-base-content' :
                                                 line.type === 'modified' ? 'bg-green-100 text-black' :
                                                 line.type === 'equal' ? 'bg-base-200 text-base-content' :
                                                 'bg-base-100 opacity-30 text-base-content'
@@ -104,10 +102,14 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                     </div>
 
                     <div className="flex justify-between items-center mt-2">
-                        <div className="text-sm text-base-content">
-                            <span className="inline-block w-4 h-4 bg-red-200 rounded mr-2"></span>Removed
-                            <span className="inline-block w-4 h-4 bg-green-200 rounded mr-2 ml-4"></span>Added
-                            <span className="inline-block w-4 h-4 bg-warning/30 rounded mr-2 ml-4"></span>Modified
+                        <div className="text-sm text-base-content flex gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="inline-block w-4 h-4 rounded" style={{ backgroundColor: '#ee1414ff' }}></span>Removed
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="inline-block w-4 h-4 rounded" style={{ backgroundColor: '#0c8d39ff' }}></span>Added
+                            </div>
+                            
                         </div>
                     </div>
                 </>

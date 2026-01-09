@@ -24,15 +24,15 @@ export const getAllChatBot = async (orgId) => {
 //   }
 // }
 
-// export const getChatBotDetails = async (botId) => {
-//   try {
-//     const response = await axios.get(`${URL}/chatbot/${botId}`);
-//     return response;
-//   } catch (error) {
-//     console.error(error);
-//     return error;
-//   }
-// }
+export const getChatBotDetails = async (botId) => {
+  try {
+    const response = await axios.get(`${URL}/api/chatbot/${botId}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 
 // export const getChatBotOfBridge = async (orgId, bridgeId) => {
 //   try {
@@ -54,25 +54,29 @@ export const getAllChatBot = async (orgId) => {
 //   }
 // }
 
-// export const updateChatBotConfig = async (botId, dataToSend) => {
-//   try {
-//     const response = await axios.post(`${URL}/chatbot/${botId}/updateconfig`, dataToSend);
-//     return response;
-//   } catch (error) {
-//     console.error(error);
-//     return error;
-//   }
-// }
+export const updateChatBotConfig = async (botId, dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/api/chatbot/${botId}/updateconfig`, dataToSend);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 
-// export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) => {
-//   try {
-//     const response = await axios.put(`${URL}/chatbot/${orgId}/${botId}/bridge/${bridgeId}?type=${type}`);
-//     return response;
-//   } catch (error) {
-//     console.error(error);
-//     return error;
-//   }
-// }
+export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) => {
+  try {
+    const response = await axios.put(`${URL}/api/chatbot/agent`, {
+      botId,
+      agentId: bridgeId,
+      action: type
+    });
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 
 // Chatbot Response Management APIs
 export const getAllResponseTypesApi = async (orgId) => {
@@ -97,7 +101,7 @@ export const createReponseTypeInOrg = async (orgId) => {
 export const createOrgToken = async (orgId) => {
   try {
     const data = await axios.post(`${URL}/api/utils/token`, {
-      type: 'org_token'
+      type: 'org'
     });
     return data;
   } catch (error) {
@@ -116,9 +120,9 @@ export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseOb
 }
 
 // Chatbot Action Management APIs
-export const createOrRemoveAction = async ({ orgId, bridgeId, versionId, type, dataToSend }) => {
+export const createOrRemoveAction = async ({ bridgeId, versionId, type, dataToSend }) => {
   try {
-    const response = await axios.post(`${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`, { ...dataToSend, version_id: versionId });
+    const response = await axios.post(`${URL}/api/chatbot/agent/${bridgeId}/action?type=${type}`, { ...dataToSend, version_id: versionId });
     return response.data;
   } catch (error) {
     console.error(error);

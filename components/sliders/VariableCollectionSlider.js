@@ -7,7 +7,6 @@ import {
   initializeVariablesState,
   updateVariables,
 } from "@/store/reducer/variableReducer";
-import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { sendDataToParent, toggleSidebar } from "@/utils/utility";
 import { CloseIcon } from "@/components/Icons";
 import { Trash2, Upload, Play } from "lucide-react";
@@ -449,7 +448,6 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   const resetLocalState = useCallback(
     (sourceList) => {
       // Clear all local state to prevent stale data
-      setGroupEditor({ mode: "idle", value: "", error: "", groupId: null });
       setError("");
       setBulkEditMode(false);
       setBulkEditText("");
@@ -568,16 +566,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
       if (!hasVariableStateChanged()) {
         return;
       }
-      if (filteredPairs?.length) {
-        dispatch(
-          updateBridgeVersionAction({
-            versionId,
-            dataToSend: {
-              variables_state: Object.assign({}, ...filteredPairs),
-            },
-          })
-        );
-      }
+     
 
       if (isEmbedUser) {
         sendDataToParent(
@@ -1148,7 +1137,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                               handleFieldChange(index, "key", event.target.value)
                             }
                             onBlur={(event) => handleFieldCommit(index, "key", event.target.value.trim())}
-                            placeholder="customer_email"
+                            placeholder="variable key"
                           />
 
                           {variable.type === "boolean" ? (
@@ -1190,7 +1179,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                               onBlur={(event) =>
                                 handleFieldCommit(index, "value", event.target.value)
                               }
-                              placeholder="Dynamic value or placeholder"
+                              placeholder="variable value"
                             />
                           ) : variable.type === "string" ? (
                             <input
@@ -1207,7 +1196,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                               onBlur={(event) =>
                                 handleFieldCommit(index, "value", event.target.value)
                               }
-                              placeholder="Dynamic value or placeholder"
+                              placeholder="variable value"
                             />
                           ) : variable.type === "object" || variable.type === "array" ? (
                             <textarea
@@ -1240,7 +1229,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                               onBlur={(event) =>
                                 handleFieldCommit(index, "value", event.target.value)
                               }
-                              placeholder="Dynamic value or placeholder"
+                              placeholder="variable value"
                             />
                           )}
 
@@ -1304,7 +1293,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                               onBlur={(event) =>
                                 handleFieldCommit(index, "defaultValue", event.target.value)
                               }
-                              placeholder="Fallback when no value supplied"
+                              placeholder="default value"
                             />
                           )}
 

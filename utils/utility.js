@@ -159,54 +159,92 @@ export const isValidJson = (jsonString) => {
 
 export const toggleSidebar = (sidebarId, direction = "left") => {
     const sidebar = document.getElementById(sidebarId);
-    const handleClickOutside = (event) => {
-        const sidebar = document.getElementById(sidebarId);
-        const button = event.target.closest('button');
-        const withinSidebar = (() => {
-            if (!sidebar) return false;
-            if (typeof event.composedPath === "function") {
-                return event.composedPath().includes(sidebar);
-            }
-            return sidebar.contains(event.target);
-        })();
-
-        if (sidebar && !withinSidebar && !button) {
-            if (direction === "left") {
-                sidebar.classList.add('-translate-x-full');
-            } else {
-                sidebar.classList.add('translate-x-full');
-            }
-            document.removeEventListener('click', handleClickOutside);
-            document.removeEventListener('keydown', handleEscPress);
+    if (!sidebar) return;
+    
+    const translateClass = direction === "left" ? '-translate-x-full' : 'translate-x-full';
+    
+    // Helper to check if slider is visible
+    const isSliderVisible = (el) => !el.classList.contains(translateClass);
+    
+    // Helper to clean up event listeners
+    const cleanupListeners = () => {
+        document.removeEventListener('click', handleOutsideClick, true);
+        document.removeEventListener('keyup', handleEscKey, true);
+    };
+    
+    // Function to close the sidebar
+    const closeSidebar = () => {
+        const sidebarEl = document.getElementById(sidebarId);
+        if (!sidebarEl) return;
+        
+        sidebarEl.classList.add(translateClass);
+        cleanupListeners();
+        sidebarEl._clickHandler = null;
+        sidebarEl._keyHandler = null;
+    };
+    
+    // Helper to check for unsaved changes and handle closing
+    const handleClosing = (sidebarEl) => {
+        const hasUnsavedChanges = sidebarEl.getAttribute('data-unsaved-changes') === 'true';
+        
+        if (hasUnsavedChanges) {
+            const modalId = sidebarEl.getAttribute('data-confirmation-modal') || MODAL_TYPE.UNSAVED_CHANGES_MODAL;
+            openModal(modalId);
+        } else {
+            closeSidebar();
         }
     };
-
-    const handleEscPress = (event) => {
-        if (event.key === 'Escape' || (event.key === 'k' && event.ctrlKey)) {
-            if (direction === "left") {
-                sidebar.classList.add('-translate-x-full');
-            } else {
-                sidebar.classList.add('translate-x-full');
-            }
-            document.removeEventListener('click', handleClickOutside);
-            document.removeEventListener('keydown', handleEscPress);
+    
+    // Click outside handler
+    const handleOutsideClick = (event) => {
+        const sidebarEl = document.getElementById(sidebarId);
+        if (!sidebarEl || !isSliderVisible(sidebarEl)) return;
+        
+        // Check if click is inside the sidebar
+        let isInsideSidebar = false;
+        if (typeof event.composedPath === "function") {
+            isInsideSidebar = event.composedPath().includes(sidebarEl);
+        } else {
+            isInsideSidebar = sidebarEl.contains(event.target);
+        }
+        
+        // Skip clicks on buttons
+        const isButton = event.target.tagName?.toLowerCase() === 'button' || 
+                        event.target.closest('button') !== null;
+        
+        // Process only outside clicks that aren't on buttons
+        if (!isInsideSidebar && !isButton) {
+            handleClosing(sidebarEl);
         }
     };
-
-    if (sidebar) {
-        if (direction === "left") {
-            sidebar.classList.toggle('-translate-x-full');
-        } else {
-            sidebar.classList.toggle('translate-x-full');
-        }
-
-        if (!sidebar.classList.contains(direction === "left" ? '-translate-x-full' : 'translate-x-full')) {
-            document.addEventListener('click', handleClickOutside);
-            document.addEventListener('keydown', handleEscPress);
-        } else {
-            document.removeEventListener('click', handleClickOutside);
-            document.removeEventListener('keydown', handleEscPress);
-        }
+    
+    // Escape key handler
+    const handleEscKey = (event) => {
+        if (event.key !== 'Escape') return;
+        
+        const sidebarEl = document.getElementById(sidebarId);
+        if (!sidebarEl || !isSliderVisible(sidebarEl)) return;
+        
+        handleClosing(sidebarEl);
+    };
+    
+    // Clean up any existing listeners
+    if (sidebar._clickHandler) document.removeEventListener('click', sidebar._clickHandler, true);
+    if (sidebar._keyHandler) document.removeEventListener('keyup', sidebar._keyHandler, true);
+    
+    // Store handler references
+    sidebar._clickHandler = handleOutsideClick;
+    sidebar._keyHandler = handleEscKey;
+    
+    // Toggle sidebar visibility
+    sidebar.classList.toggle(translateClass);
+    
+    // Add or remove listeners based on visibility
+    if (isSliderVisible(sidebar)) {
+        document.addEventListener('click', handleOutsideClick, true);
+        document.addEventListener('keyup', handleEscKey, true);
+    } else {
+        cleanupListeners();
     }
 };
 
@@ -828,11 +866,11 @@ export const formatRelativeTime = (dateString) => {
 };
 
 export const formatDate = (dateString) => {
-  const normalized = normalizeToUTC(dateString);
-  if (!normalized) return dateString;
+ const normalized = normalizeToUTC(dateString);
+  if (!normalized) return 'No records found';
 
   const date = new Date(normalized);
-  if (isNaN(date.getTime())) return dateString;
+  if (isNaN(date.getTime())) return 'No records found';
 
   return new Intl.DateTimeFormat("en-IN", {
     year: "2-digit",

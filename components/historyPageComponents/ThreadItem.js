@@ -132,9 +132,10 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
 const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   // Determine message type based on new data structure
   const getInitialMessageType = () => {
-    // Prioritize in order of importance
+    if (item?.user === 'user') {
+      return 'user';
+    }
     if (item?.llm_message) return 'llm_message';
-    if (item?.user) return 'user';
     if (item?.updated_llm_message) return 'updated_llm_message';
     if (item?.chatbot_message) return 'chatbot_message';
     if (item?.error) return 'error';
@@ -181,12 +182,23 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   };
 
   const handleEdit = () => {
-    setModalInput({
-      content: item.updated_llm_message || item.llm_message || item.chatbot_message || item.user,
-      originalContent: item.llm_message || item.user,
-      index,
-      Id: item.id || item.Id
-    });
+    // For user messages, use user content
+    if (getMessageRole() === 'user') {
+      setModalInput({
+        content: item.user || "",
+        originalContent: item.user || "",
+        index,
+        Id: item.id || item.Id
+      });
+    } else {
+      // For assistant messages, don't fall back to user content
+      setModalInput({
+        content: item.updated_llm_message || item.llm_message || item.chatbot_message || "",
+        originalContent: item.llm_message || "",
+        index,
+        Id: item.id || item.Id
+      });
+    }
     openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   };
 
@@ -417,7 +429,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
             if (!url) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
-                  <ImageFallback type={attachment.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
+                  <ImageFallback type={attachment?.source === 'user' ? 'small' : 'large'} error="failed_to_load" />
                 </div>
               );
             }
@@ -713,7 +725,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   </ReactMarkdown>
 
                   {/* Edit button for assistant messages */}
-                  {!item?.image_urls?.length && !item?.fromRTLayer && (
+                  {!item?.llm_urls?.length && !item?.fromRTLayer && (
                     <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Edit message">
                       <button
                         className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"

@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Archive, Edit2, BotIcon, ChevronDown, RefreshCcw } from 'lucide-react';
+import { TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, MoreVertical, Clock, Home, HistoryIcon, ArchiveRestore, Edit2, BotIcon, ChevronDown, RefreshCcw } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -41,7 +41,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, savingStatus , publishedVersionId } = useCustomSelector(state => {
     return {
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -56,17 +56,19 @@ const Navbar = ({ isEmbedUser, params }) => {
     hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
+    publishedVersionId: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || null,
+    savingStatus: state?.bridgeReducer?.savingStatus || { status: null, timestamp: null },
   }});
   // Define tabs based on user type
   const TABS = useMemo(() => {
     const baseTabs = [
       {
         id: 'configure',
-        label: ' Agent Config',
+        label: `${bridgeData.bridgeType === 'api' ? 'Agent' : 'Chatbot'} Config`,
         icon: BotIcon,
-        shortLabel: 'Agent Config'
+        shortLabel: `${bridgeData.bridgeType === 'api' ? 'Agent' : 'Chatbot'} Config`
       },
-      { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
+      { id: 'history', label: 'History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
     if (!isEmbedUser) {
       baseTabs.splice(1, 0, { id: 'testcase', label: 'Test Cases', icon: TestTube, shortLabel: 'Tests' });
@@ -213,15 +215,25 @@ const Navbar = ({ isEmbedUser, params }) => {
   const handleTabChange = useCallback((tabId) => {
     const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
     
+    // Get bridge type from Redux and determine correct type parameter
+    let typeValue;
+    if (bridgeType && bridgeType.toLowerCase() === 'chatbot') {
+      typeValue = 'chatbot';
+    } else {
+      // For 'api', 'batch', or any other type, default to 'api'
+      typeValue = 'api';
+    }
+    const typeQueryPart = `&type=${typeValue}`;
+    
     // If currently in published mode and navigating to testcase or history
     if (isPublished && (tabId === 'testcase' || tabId === 'history')) {
       // Use published version ID and remove isPublished parameter
-      router.push(base + (publishedVersion ? `?version=${publishedVersion}` : ''));
+      router.push(base + (publishedVersion ? `?version=${publishedVersion}${typeQueryPart}` : `?type=${typeValue}`));
     } else {
       // Normal navigation with current version
-      router.push(base + (versionId ? `?version=${versionId}` : ''));
+      router.push(base + (versionId ? `?version=${versionId}${typeQueryPart}` : `?type=${typeValue}`));
     }
-  }, [router, orgId, bridgeId, versionId, isPublished, publishedVersion]);
+  }, [router, orgId, bridgeId, versionId, isPublished, publishedVersion, bridgeType]);
 
   const handlePublishedClick = useCallback(() => {
     if (!publishedVersion) {
@@ -233,8 +245,19 @@ const Navbar = ({ isEmbedUser, params }) => {
     // Don't push versionId when isPublished=true, just set isPublished flag
     currentUrl.searchParams.delete('version'); // Remove version parameter
     currentUrl.searchParams.set('isPublished', 'true');
+    
+    // Ensure the type parameter is set based on the bridge type from Redux
+    let typeValue;
+    if (bridgeType && bridgeType.toLowerCase() === 'chatbot') {
+      typeValue = 'chatbot';
+    } else {
+      // For 'api', 'batch', or any other type, default to 'api'
+      typeValue = 'api';
+    }
+    currentUrl.searchParams.set('type', typeValue);
+    
     router.push(currentUrl.pathname + currentUrl.search);
-  }, [router, publishedVersion]);
+  }, [router, publishedVersion, bridgeType]);
 
   const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
@@ -274,8 +297,8 @@ const Navbar = ({ isEmbedUser, params }) => {
       </button>
 
       {showEllipsisMenu && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-[9999]">
-          <div className="py-1">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-very-high">
+          <div className="">
             <button
               onMouseDown={async (e) => {
                 e.preventDefault();
@@ -300,7 +323,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               )}
             </button>
           </div>
-          <div className="py-1">
+          <div className="">
             <button
               onMouseDown={async (e) => {
                 e.preventDefault();
@@ -309,20 +332,15 @@ const Navbar = ({ isEmbedUser, params }) => {
                 setShowEllipsisMenu(false);
               }}
               disabled={isUpdatingBridge}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 cursor-pointer ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+              className={`w-full px-4 text-left text-sm hover:bg-base-200 flex items-center gap-1 cursor-pointer ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+                } ${isArchived ? 'hidden' : ''}`}
             >
-              {isArchived ? (
-                <>
-                  <Archive size={14} className="text-green-600" />
-                  Archive Agent
-                </>
-              ) : (
+              {!isArchived ?
                 <>
                   <ArchiveRestore size={14} className="text-red-600" />
                   Unarchive Agent
                 </>
-              )}
+              : null}
             </button>
           </div>
         </div>
@@ -336,7 +354,7 @@ const Navbar = ({ isEmbedUser, params }) => {
       {/* Main navigation header */}
       <div className={`sticky top-0 z-high transition-all duration-300 ${isScrolled
         ? 'bg-base-100/95 backdrop-blur-sm shadow-md border-b border-base-300'
-        : 'bg-base-100 shadow-sm border-b border-base-200 '
+        : 'bg-base-100 border-b border-base-200 '
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}
@@ -411,16 +429,55 @@ const Navbar = ({ isEmbedUser, params }) => {
 
                   {/* Bridge Version Dropdown - Desktop Only */}
                   <div className="hidden sm:flex min-w-0 flex-1">
-                    <BridgeVersionDropdown 
-                      params={{ org_id: orgId, id: bridgeId }} 
-                      searchParams={searchParams}
-                      maxVersions={2}
-                    />
+                    {orgId && bridgeId ? (
+                      <BridgeVersionDropdown 
+                        params={{ org_id: orgId, id: bridgeId }} 
+                        searchParams={searchParams}
+                        maxVersions={2}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <div className="h-6 bg-base-200 animate-pulse rounded w-8"></div>
+                        <div className="h-6 bg-base-200 animate-pulse rounded w-8"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
               
-              {/* Status Indicator */}
+              {/* Saving Status Indicator */}
+              {savingStatus?.status && (
+                <div className="flex-shrink-0 ml-2 mr-2">
+                  <div className="px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 text-base-content">
+                    {savingStatus.status === 'saving' && (
+                      <>
+                        <div className="loading loading-spinner loading-xs"></div>
+                        <span>Saving</span>
+                      </>
+                    )}
+                    {savingStatus.status === 'saved' && (
+                      <>
+                        <BookCheck size={14} />
+                        <span>Saved</span>
+                      </>
+                    )}
+                    {savingStatus.status === 'failed' && (
+                      <>
+                        <ClipboardX size={14} />
+                        <span>Failed</span>
+                      </>
+                    )}
+                    {savingStatus.status === 'warning' && (
+                      <>
+                        <Clock size={14} />
+                        <span>Warning</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Bridge Status Indicator */}
               {bridgeStatus !== BRIDGE_STATUS.ACTIVE && (
                 <div className="flex-shrink-0">
                   <StatusIndicator status={bridgeStatus} />
@@ -437,7 +494,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 <div className="relative flex items-center gap-1">
                   {/* Sliding background indicator */}
                   <span
-                    className="absolute inset-0 rounded-lg bg-primary shadow-sm transition-all duration-300 ease-in-out"
+                    className="absolute inset-0 ml-3 rounded-lg bg-primary shadow-sm transition-all duration-300 ease-in-out"
                     style={{
                       width: `${100 / (TABS.length || 1)}%`,
                       transform: `translateX(${activeTabIndex * 100}%)`,
@@ -449,7 +506,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                       <button
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
-                        className={`relative z-10 px-2 sm:px-3 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm font-medium whitespace-nowrap ${
+                        className={`relative z-10 px-3 py-2 sm:px-4 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm font-medium whitespace-nowrap ${
                           isActive
                             ? 'text-primary-content bg-transparent hover:bg-transparent'
                             : 'text-base-content/70 hover:text-base-content hover:bg-base-200/30'
@@ -494,18 +551,19 @@ const Navbar = ({ isEmbedUser, params }) => {
               </div>
               
               {/* Publish/Discard Dropdown - Fixed Position */}
+                {activeTab == 'configure' && (
               <div className="flex items-center">
-                <div className="dropdown dropdown-end">
+                <div className="dropdown dropdown-end">                  
                     <button 
                       tabIndex={0}
                       role="button" 
                       className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
                       disabled={isPublishing || isPublished}
                     >
-                      <span className="text-white text-sm truncate">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
+                      <span className="text-white text-sm truncate">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                       {!isPublishing && <ChevronDown size={12} className="text-white" />}
                     </button>
-                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
+                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow border border-base-200">
                       <li>
                         <button
                           onClick={handlePublish}
@@ -513,10 +571,10 @@ const Navbar = ({ isEmbedUser, params }) => {
                           className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <BookCheck size={14} className="text-success" />
-                          <span>Configure and Publish</span>
+                          <span>Publish</span>
                         </button>
                       </li>
-                      {isDrafted && (
+                      {isDrafted && publishedVersionId != null &&(
                         <li>
                           <button
                             onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
@@ -524,7 +582,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                             className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <RefreshCcw size={14} className="text-error" />
-                            <span>Revert to Published</span>
+                            <span>Revert</span>
                           </button>
                         </li>
                       )}
@@ -532,7 +590,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                   </div>
               
               </div>
-              
+                )}
               {/* Ellipsis menu - Fixed Position */}
               <div className="flex items-center">
                 {!isEmbedUser && (
@@ -606,12 +664,19 @@ const Navbar = ({ isEmbedUser, params }) => {
 
               {/* Version Dropdown */}
               <div className="min-w-0">
-                <BridgeVersionDropdown 
-                  params={{ org_id: orgId, id: bridgeId }} 
-                  searchParams={searchParams}
-                  maxVersions={2}
-                  showDropdownOnly={true}
-                />
+                {orgId && bridgeId ? (
+                  <BridgeVersionDropdown 
+                    params={{ org_id: orgId, id: bridgeId }} 
+                    searchParams={searchParams}
+                    maxVersions={2}
+                    showDropdownOnly={true}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <div className="h-6 bg-base-200 animate-pulse rounded w-6"></div>
+                    <div className="h-6 bg-base-200 animate-pulse rounded w-6"></div>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -638,10 +703,10 @@ const Navbar = ({ isEmbedUser, params }) => {
                 disabled={isPublishing}
               >
                 {!isPublishing && <BookCheck size={12} className="text-black" />}
-                <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Configure and Publish'}</span>
+                <span className="text-black text-xs">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 {!isPublishing && <ChevronDown size={10} className="text-black" />}
               </div>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-48 p-2 shadow border border-base-200">
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-48 p-2 shadow border border-base-200">
                 <li>
                   <button
                     onClick={handlePublish}

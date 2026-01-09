@@ -8,39 +8,32 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import LoadingSpinner from "./LoadingSpinner";
 import Protected from "./Protected";
-import { BotIcon, Info, Lightbulb, Plus } from "lucide-react";
+import { BotIcon, Info, Plus } from "lucide-react";
 import { CloseIcon } from "./Icons";
-import { getModelAction } from "@/store/action/modelAction";
 
-const INITIAL_STATE = {
+const buildInitialState = () => ({
   selectedService: 'openai',
   selectedModel: "gpt-4o",
   selectedType: "chat",
-  bridgeType: "api",
   isManualMode: false,
-  selectedBridgeTypeCard: "api",
-  validationErrors: { bridgeType: "", purpose: "" },
+  validationErrors: { purpose: "" },
   globalError: "",
   isLoading: false,
   isAiLoading: false
-};
+});
 
-function CreateNewBridge({ orgid, isEmbedUser }) {
-  const [state, setState] = useState(INITIAL_STATE);
+function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
+  const [state, setState] = useState(buildInitialState);
   const textAreaPurposeRef = useRef();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
+  const { SERVICES } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
-    modelsList: state?.modelReducer?.serviceModels[state.selectedService],
-    showAgentType: state.appInfoReducer.embedUserDetails?.showAgentTypeOnCreateAgent,
   }));
-
-  // Memoized calculations
-  const shouldHideAgentType = useMemo(() => 
-    isEmbedUser && !showAgentType, 
-    [isEmbedUser, showAgentType]
+  const bridgeTypeForContext = useMemo(
+    () => defaultBridgeType?.toLowerCase() === 'chatbot' ? 'chatbot' : 'api',
+    [defaultBridgeType]
   );
 
   // Generate unique names
@@ -56,7 +49,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   // Clean state
   const cleanState = useCallback(() => {
-    setState(INITIAL_STATE);
+    setState(buildInitialState());
     if (textAreaPurposeRef?.current) {
       textAreaPurposeRef.current.value = '';
     }
@@ -69,12 +62,6 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
       dispatch(getServiceAction({ orgid }));
     }
   }, [SERVICES, dispatch, orgid]);
-
-  useEffect(() => {
-    if (state.selectedService && !modelsList) {
-      dispatch(getModelAction({ service: state.selectedService }));
-    }
-  }, [state.selectedService, modelsList, dispatch]);
 
   useEffect(() => () => {
     closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
@@ -97,28 +84,19 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   const handleCreateAgent = useCallback(() => {
     const purpose = textAreaPurposeRef?.current?.value?.trim();
-    const newValidationErrors = { bridgeType: "", purpose: "" };
-    let hasErrors = false;
+    updateState({
+      validationErrors: { purpose: "" },
+      globalError: ""
+    });
 
-    // Validate bridge type if not hidden
-    if (!state.selectedBridgeTypeCard && !shouldHideAgentType) {
-      newValidationErrors.bridgeType = "Select Agent Type";
-      hasErrors = true;
-    }
+    const resolvedBridgeType = bridgeTypeForContext;
 
-    if (hasErrors) {
-      updateState({ validationErrors: newValidationErrors, globalError: "" });
-      return;
-    }
-
-    // If purpose exists, create with AI, otherwise create manually
     if (purpose) {
-      // Create with AI using purpose
       updateState({ isAiLoading: true });
       
       const dataToSend = { 
         purpose, 
-        bridgeType: shouldHideAgentType ? "api" : state.selectedBridgeTypeCard 
+        bridgeType: resolvedBridgeType 
       };
 
       dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
@@ -137,13 +115,43 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           cleanState();
         })
         .catch((error) => {
-          updateState({ 
-            isAiLoading: false,
-            globalError: error?.response?.data?.message || "Error while creating agent"
-          });
+          updateState({ isAiLoading: false });
+          const name = generateUniqueName();
+          const slugname = generateUniqueName();
+
+          if (name.length > 0 && state.selectedModel) {
+            updateState({ isLoading: true });
+            const fallbackDataToSend = {
+              service: state.selectedService,
+              model: state.selectedModel,
+              name,
+              slugName: slugname,
+              bridgeType: resolvedBridgeType,
+              type: state.selectedType,
+            };
+            dispatch(createBridgeAction({ dataToSend: fallbackDataToSend, orgid }, (data) => {
+              if (isEmbedUser) {
+                sendDataToParent("drafted", {
+                  name: data?.agent?.name, 
+                  agent_id: data?.agent?._id
+                }, "Agent created Successfully");
+              }             
+              router.push(`/org/${orgid}/agents/configure/${data.data.agent._id}?version=${data.data.agent.versions[0]}`);
+              updateState({ isLoading: false });
+              cleanState();
+            })).catch(() => {
+              updateState({ 
+                isLoading: false,
+                globalError: error?.response?.data?.message || "Error while creating agent"
+              });
+            });
+          } else {
+            updateState({ 
+              globalError: error?.response?.data?.message || "Error while creating agent"
+            });
+          }
         });
     } else {
-      // Create manually without purpose
       const name = generateUniqueName();
       const slugname = generateUniqueName();
 
@@ -155,7 +163,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
           model: state.selectedModel,
           name,
           slugName: slugname,
-          bridgeType: shouldHideAgentType ? "api" : state.selectedBridgeTypeCard || state.bridgeType,
+          bridgeType: resolvedBridgeType,
           type: state.selectedType,
         };
 
@@ -176,9 +184,17 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
       }
     }
   }, [
-    state.selectedBridgeTypeCard, state.selectedModel, state.selectedService, 
-    state.bridgeType, state.selectedType, shouldHideAgentType, updateState, 
-    dispatch, orgid, isEmbedUser, router, cleanState, generateUniqueName
+    state.selectedModel,
+    state.selectedService,
+    state.selectedType,
+    updateState,
+    dispatch,
+    orgid,
+    isEmbedUser,
+    router,
+    cleanState,
+    generateUniqueName,
+    bridgeTypeForContext
   ]);
 
   const handleCloseModal = useCallback(() => {
@@ -218,11 +234,8 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
           {/* Agent Purpose Section */}
           <div className="space-y-4">
-            <div className="bg-base-100 p-6 rounded-xl border border-base-300 shadow-sm">
+            <div className=" rounded-xl shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
-                  <Lightbulb size={20} className="text-primary" />
-                </div>
                 <h4 className="text-lg font-semibold text-base-content">Agent Purpose</h4>
                 <span className="text-xs bg-info/20 text-info px-2 py-1 rounded-full">Optional</span>
               </div>
