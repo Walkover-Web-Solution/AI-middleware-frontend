@@ -49,7 +49,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     };
   }, [showDropdown]);
 
-  const { service, version_function_data, configuration, integrationData, connected_agents, modelInfoData, bridge, doctstar_embed_token, currrentOrgDetail, richUiTemplates } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, connected_agents, modelInfoData, bridge, richUiTemplates } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
@@ -71,7 +71,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
       modelInfoData,
       bridge: activeData,
       richUiTemplates: state?.richUiTemplateReducer?.templates || [],
-      showResponseType:state.appInfoReducer.embedUserDetails.showResponseType,
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
@@ -224,7 +223,6 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     }
   };
   const setSliderValue = (value, key, isDeafaultObject = false) => {
-    debugger
     setInputConfiguration((prev) => ({
       ...prev,
       [key]: value,
@@ -728,10 +726,20 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
               value={(() => {
-                const currentVal = configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key]);
-                if (key === 'response_type' && currentVal === 'json_schema' && configuration?.[key]?.is_template) {
-                  return 'template';
+                if (key === 'response_type') {
+                  // Handle response_type specifically
+                  if (configuration?.[key]?.is_template) {
+                    return 'template';
+                  } else if (configuration?.[key]?.type) {
+                    return configuration?.[key]?.type;
+                  } else if (configuration?.[key] === 'default') {
+                    return 'default';
+                  } else {
+                    return configuration?.[key] || 'default';
+                  }
                 }
+                // For other keys, use the original logic
+                const currentVal = configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key]);
                 return currentVal;
               })()}
               onChange={(e) => {
@@ -786,7 +794,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             </select>
 
             {/* Template UI - Only show if mode is template */}
-            {key === 'response_type' && configuration?.[key]?.type === "json_schema" && configuration?.[key]?.is_template && (
+            {key === 'response_type' && configuration?.[key]?.is_template && (
               <>
                 <div className="mb-3 p-3 bg-base-200 rounded-lg mt-2">
                   <div className="flex justify-between items-center mb-2">
@@ -936,7 +944,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 }));
               }}
             />
-          </div>
+              </>
+            )}
+          </label>
         )}
 
       </div>
