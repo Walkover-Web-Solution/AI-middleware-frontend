@@ -182,7 +182,8 @@ const CommandPalette = ({isEmbedUser}) => {
     ["name", "slugName", "service", "_id", "last_used", "total_tokens"]
   ).map(a => createAgentItem(a, 'chatbot'));
 
-  const agentsVersionMatches = !query ? [] : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => {
+  const agentsVersionMatches = !query ? [] : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => 
+    {
     const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
     const published = a?.published_version_id ? [a.published_version_id] : [];
     const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
