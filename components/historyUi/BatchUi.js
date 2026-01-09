@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { BotIcon, WrenchIcon } from "@/components/Icons";
+import { BotIcon, WrenchIcon, FileClockIcon } from "@/components/Icons";
 import { Zap } from "lucide-react";
 
-export function BatchUI({ agents, onToolClick, isLoading = false }) {
+export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = false }) {
   const [openAgentKey, setOpenAgentKey] = useState(null);
   const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
   const [selectedFunctionData, setSelectedFunctionData] = useState(null);
@@ -14,6 +14,12 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
   const handleToolClick = (tool) => {
     if (!onToolClick) return;
     onToolClick(tool?.functionData ?? tool);
+  };
+
+  const handleToolSliderClick = (event, tool) => {
+    event.stopPropagation();
+    if (!onToolSliderClick) return;
+    onToolSliderClick(tool?.functionData ?? tool);
   };
 
   console.log(agents);
@@ -78,6 +84,16 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
                 </span>
                 <span className="flex items-center gap-2 text-[10px] font-semibold text-base-content/60 shrink-0">
                   {isAgentNode ? "AGENT" : "TOOL"}
+                  {!isAgentNode && (
+                    <button
+                      type="button"
+                      onClick={(event) => handleToolSliderClick(event, tool)}
+                      className="p-1 border border-base-300 rounded hover:border-primary hover:text-primary"
+                      title="Open tool logs"
+                    >
+                      <FileClockIcon size={12} />
+                    </button>
+                  )}
                   <span className="text-green-500 flex-shrink-0">✔</span>
                 </span>
               </div>
@@ -173,26 +189,8 @@ export function BatchUI({ agents, onToolClick, isLoading = false }) {
           const agentKey = `${agentIndex}`;
 
               // Check if this is an actual agent (has functionData) or just "FUNCTIONS" group
-              const isActualAgent = agent.functionData !== null;
-
-              const functionData = agent.functionData || {
-                id: "null",
-                args: {
-                  _query: `Execute ${agent.name} with parameters for request 1`,
-                },
-                data: {
-                  status: 0,
-                  metadata: {
-                    type: "agent",
-                    agent_id: "hepvnes88in",
-                    thread_id: null,
-                    message_id: "",
-                    version_id: null,
-                    subthread_id: null,
-                  },
-                  response: "Successfully executed agent task",
-                },
-              };
+              const isActualAgent = Boolean(agent.functionData);
+              const functionData = agent.functionData;
           return (
             <div key={agentIndex} className="space-y-2">
               {/* AGENT ROW - Only show for actual agents */}

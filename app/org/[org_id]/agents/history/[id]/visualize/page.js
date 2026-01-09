@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background } from "reactflow";
 import "reactflow/dist/style.css";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -40,6 +40,9 @@ export default function Page() {
   const recursiveHistoryLoading = useCustomSelector(
     (state) => state?.historyReducer?.recursiveHistoryLoading
   );
+  const embedToken = useCustomSelector(
+    (state) => state?.bridgeReducer?.org?.[orgId]?.embed_token
+  );
   const mainAgentName = useCustomSelector((state) => {
     const orgAgents = state?.bridgeReducer?.org?.[orgId]?.orgs || [];
     const agent = orgAgents.find(
@@ -77,58 +80,57 @@ export default function Page() {
     }
   }, [messageId, thread, stableThreadItem]);
 
-  // COMMENTED OUT: These hooks fetch thread data, but activeThreadItem already has all needed data
-  // useEffect(() => {
-  //   if (thread.length > 0 || threadId || !bridgeId) return;
+  useEffect(() => {
+    if (thread.length > 0 || threadId || !bridgeId) return;
 
-  //   const fetchInitialThread = async () => {
-  //     const history = await dispatch(
-  //       getHistoryAction(
-  //         bridgeId,
-  //         1,
-  //         "all",
-  //         errorParam,
-  //         versionId || undefined,
-  //         undefined,
-  //         undefined,
-  //         undefined
-  //       )
-  //     );
-  //     console.log("🚀 history:", history);
-  //     const firstThreadId = history?.[0]?.thread_id;
-  //     if (!firstThreadId) return;
+    const fetchInitialThread = async () => {
+      const history = await dispatch(
+        getHistoryAction(
+          bridgeId,
+          1,
+          "all",
+          errorParam,
+          versionId || undefined,
+          undefined,
+          undefined,
+          undefined
+        )
+      );
+      console.log("🚀 history:", history);
+      const firstThreadId = history?.[0]?.thread_id;
+      if (!firstThreadId) return;
 
-  //     dispatch(
-  //       getThread({
-  //         threadId: firstThreadId,
-  //         bridgeId,
-  //         subThreadId: firstThreadId,
-  //         nextPage: 1,
-  //         user_feedback: "all",
-  //         versionId: versionId || undefined,
-  //         error: errorParam,
-  //       })
-  //     );
-  //   };
+      dispatch(
+        getThread({
+          threadId: firstThreadId,
+          bridgeId,
+          subThreadId: firstThreadId,
+          nextPage: 1,
+          user_feedback: "all",
+          versionId: versionId || undefined,
+          error: errorParam,
+        })
+      );
+    };
 
-  //   fetchInitialThread();
-  // }, [thread.length, threadId, bridgeId, versionId, errorParam, dispatch]);
+    fetchInitialThread();
+  }, [thread.length, threadId, bridgeId, versionId, errorParam, dispatch]);
 
-  // useEffect(() => {
-  //   if (thread.length > 0 || !threadId || !bridgeId) return;
+  useEffect(() => {
+    if (thread.length > 0 || !threadId || !bridgeId) return;
 
-  //   dispatch(
-  //     getThread({
-  //       threadId,
-  //       bridgeId,
-  //       subThreadId: subThreadId || threadId,
-  //       nextPage: 1,
-  //       user_feedback: "all",
-  //       versionId: versionId || undefined,
-  //       error: errorParam,
-  //     })
-  //   );
-  // }, [thread.length, threadId, subThreadId, bridgeId, versionId, errorParam, dispatch]);
+    dispatch(
+      getThread({
+        threadId,
+        bridgeId,
+        subThreadId: subThreadId || threadId,
+        nextPage: 1,
+        user_feedback: "all",
+        versionId: versionId || undefined,
+        error: errorParam,
+      })
+    );
+  }, [thread.length, threadId, subThreadId, bridgeId, versionId, errorParam, dispatch]);
 
   const activeThreadItem = selectedThreadItem || stableThreadItem; // use this everywhere
   console.log("🚀 activeThreadItem:", activeThreadItem);
@@ -291,22 +293,10 @@ export default function Page() {
     return agents;
   }, [toolCalls, recursiveHistoryLoading]);
 
-  const recursiveCallCounts = useMemo(() => {
+  const directCallCounts = useMemo(() => {
     if (toolCalls.length === 0) return { agentCount: 0, toolCount: 0 };
-    let agentCount = 0;
-    let toolCount = 0;
-
-    const walk = (node) => {
-      if (!node) return;
-      if (node.nodeType === "agent") agentCount += 1;
-      if (node.nodeType === "tool") toolCount += 1;
-      (node.children || []).forEach(walk);
-    };
-
-    toolCalls.forEach((tool) => {
-      walk(buildToolNode(tool));
-    });
-
+    const agentCount = toolCalls.filter((tool) => getToolType(tool) === "agent").length;
+    const toolCount = toolCalls.filter((tool) => getToolType(tool) === "function").length;
     return { agentCount, toolCount };
   }, [toolCalls]);
   const mainAgentTools = useMemo(() => {
@@ -325,6 +315,23 @@ export default function Page() {
 
     return data;
   }, [toolCalls]);
+
+  const handleToolPrimaryClick = useCallback((tool) => {
+    if (!tool) return;
+    const flowHitId = tool?.data?.metadata?.flowHitId;
+    if (typeof window !== "undefined" && window.openViasocket) {
+      window.openViasocket(tool?.id, {
+        flowHitId,
+        embedToken,
+        meta: {
+          type: "tool",
+          bridge_id: bridgeId,
+        },
+      });
+      return;
+    }
+    setSelectedTool(tool);
+  }, [embedToken, bridgeId]);
 
   // Store edges at component level so they can be accessed by edges memo
   const treeEdgesRef = React.useRef([]);
@@ -405,6 +412,7 @@ export default function Page() {
                   },
                 ]}
                 onToolClick={(tool) => setSelectedTool(tool)}
+                onToolSliderClick={(tool) => handleToolPrimaryClick(tool)}
               />
             ),
           },
@@ -484,11 +492,12 @@ export default function Page() {
               <MainAgentUI
                 name={mainAgentName}
                 onToolClick={(tool) => setSelectedTool(tool)}
+                onToolSliderClick={(tool) => handleToolPrimaryClick(tool)}
                 onResponseClick={() => setSelectedResponse(activeThreadItem)}
                 responsePreview={responsePreview}
                 tools={mainAgentTools}
-                agentCount={recursiveCallCounts.agentCount}
-                toolCount={recursiveCallCounts.toolCount}
+                agentCount={directCallCounts.agentCount}
+                toolCount={directCallCounts.toolCount}
               />
             ),
           },

@@ -1,8 +1,10 @@
 import { Bot } from "lucide-react";
+import { FileClockIcon } from "@/components/Icons";
 
 export function MainAgentUI({
   name,
   onToolClick,
+  onToolSliderClick,
   onResponseClick,
   responsePreview,
   tools = [],
@@ -12,6 +14,12 @@ export function MainAgentUI({
   const handleToolClick = (tool) => {
     if (!onToolClick) return;
     onToolClick(tool?.functionData ?? tool);
+  };
+
+  const handleToolSliderClick = (event, tool) => {
+    event.stopPropagation();
+    if (!onToolSliderClick) return;
+    onToolSliderClick(tool?.functionData ?? tool);
   };
 
   return (
@@ -48,6 +56,14 @@ export function MainAgentUI({
                     {tool?.name || "Unknown Tool"}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  onClick={(event) => handleToolSliderClick(event, tool)}
+                  className="p-1 border border-base-300 rounded hover:border-primary hover:text-primary"
+                  title="Open tool logs"
+                >
+                  <FileClockIcon size={14} />
+                </button>
               </div>
             ))}
           </div>
@@ -60,11 +76,9 @@ export function MainAgentUI({
           <div className="text-center text-xs tracking-widest text-base-content/60">
             RESPONSE
           </div>
-          {(agentCount > 0 || toolCount > 0) && (
-            <div className="text-[10px] text-base-content/60 text-center">
-              {agentCount} agent{agentCount === 1 ? "" : "s"} • {toolCount} tool{toolCount === 1 ? "" : "s"} called
-            </div>
-          )}
+          <div className="text-[10px] text-base-content/60 text-center">
+            {agentCount} agent{agentCount === 1 ? "" : "s"} • {toolCount} tool{toolCount === 1 ? "" : "s"} called
+          </div>
           <div
             className="border border-base-300 hover:border-success p-3 hover:bg-success/10 cursor-pointer transition-all"
             onClick={onResponseClick}
