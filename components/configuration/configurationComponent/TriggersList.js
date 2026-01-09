@@ -68,6 +68,9 @@ export default function TriggersList({ params,isEmbedUser,isReadOnly}) {
                         "pauth_key": authkey
                     }
                 }
+            },
+            hiddenSteps:{
+                "row4qwo5ot1l":true
             }
         })
     }
