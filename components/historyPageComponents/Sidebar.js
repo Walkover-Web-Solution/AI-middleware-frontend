@@ -504,7 +504,7 @@ const Sidebar = memo(({
                             {loadingSubThreads ? (
                               <Skeleton />
                             ) : (
-                              <div className="pl-4 p-1.5 text-base-content text-xs rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
+                              <div className="pl-4 p-1.5 text-base-content text-xs rounded-x-lg rounded-b-lg shadow-sm  overflow-hidden">
                                 <ul>
                                   {subThreads?.length === 0 ? (
                                     <li className="text-xs p-1">No sub thread available</li>
