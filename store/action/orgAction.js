@@ -3,7 +3,7 @@ import { organizationCreated, organizationsFetched, setCurrentOrgId, usersFetche
 import { updateGtwyAccessToken, updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
 import { trackOrganizationEvent } from "@/utils/posthog";
 
-export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
+export const createOrgAction = (dataToSend, onSuccess, onError) => async (dispatch) => {
   try {
     const data = await createOrg(dataToSend);
     onSuccess(data.data.data);
@@ -16,6 +16,9 @@ export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
     }
   } catch (error) {
     console.error(error);
+    if (onError) {
+      onError(error);
+    }
   }
 }
 

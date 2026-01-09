@@ -13,6 +13,7 @@ export const createOrg = async (dataToSend) => {
     return data;
   } catch (error) {
     toast.error(error.response.data.message)
+    return error;
   }
 }
 
