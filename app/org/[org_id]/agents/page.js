@@ -154,9 +154,9 @@ const getColumnLabel = (column) => {
     case 'averageResponseTime':
       return 'Average Response Time';
     case 'totalTokens':
-      return 'Usage';
-    case 'usage':
-      return 'Usage $';
+      return 'Tokens';
+    case 'cost':
+      return 'Cost $';
     case 'promptDetails':
       return 'Prompt Details';
     case 'last_used':
@@ -184,33 +184,23 @@ const getColumnLabel = (column) => {
   }
 };
 
+const customCellRenderers = {
+  cost: (row) => row.cost,
+  totalTokens: (row) => row.totalTokens,
+};
+
+
 // Empty cell component without tooltip
 const EmptyCell = () => (
   ""
 );
 
-// Combined usage cell rendering (tokens + cost)
-const renderUsageCell = (row) => {
-  const tokens = row.totalTokens;
-  const cost = row.cost;
-  if (tokens === "Loading...") {
-    return <div className="w-8 h-4 bg-base-300 rounded animate-pulse"></div>;
-  }
-  if (!tokens || tokens === "-") {
-    return <EmptyCell />;
-  }
-  return (
-    <div className="flex flex-col gap-0.5 text-xs">
-      <span className="font-semibold text-base-content">
-        <span className="block">{typeof cost === "string"? cost.includes(".")? cost.replace(/(\.\d{4})\d+$/, "$1"): `${cost}.0000`: cost}
-</span>
-       {typeof tokens === "string"&&
-         <span className="text-base-content/70">(tokens: {tokens})</span>
-       }
-      </span>
-    </div>
-  );
-};
+// Loading skeleton component for usage metrics
+const LoadingSkeleton = () => (
+  <div className="w-8 h-4 bg-base-300 rounded animate-pulse"></div>
+);
+
+
 
 const renderCreatedByCell = (createdBy, timestamp) => {
   if (!createdBy) {
@@ -403,7 +393,6 @@ function Home({ params, searchParams, isEmbedUser }) {
 
     return result;
   }, [usageMetrics?.data]);
-
   const usageFilterIds = useMemo(() => new Set(Object.keys(usageMetricsMap)), [usageMetricsMap]);
   const isUsageFilterActive = useMemo(
     // Only consider filter active if explicitly set by user action
@@ -642,9 +631,9 @@ function Home({ params, searchParams, isEmbedUser }) {
     status: item.status,
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
-    totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
-    cost: item.metrics ? `${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
-    usage: true, // Used as key for the combined usage column
+    totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? <LoadingSkeleton /> : <EmptyCell />,
+    totalTokens_original: item.metrics?.total_tokens || 0,
+    cost: item.metrics ? `$${Number(item.metrics.total_cost).toFixed(4)}` : usageMetrics?.loading ? <LoadingSkeleton /> : <EmptyCell />,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
     isLoading: loadingAgentId === item._id,
     last_used: renderMetricsTimestamp(item, item.last_used),
@@ -711,10 +700,10 @@ function Home({ params, searchParams, isEmbedUser }) {
               )}
             </div>
           )
-          : <EmptyCell/>,
-        totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? "Loading..." : <EmptyCell/>,
-        cost: item.metrics ? `${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell/>,
-        usage: true, // Used as key for the combined usage column
+          : <EmptyCell />,
+        totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? <LoadingSkeleton /> : <EmptyCell />,
+        totalTokens_original: item.metrics?.total_tokens || 0,
+        cost: item.metrics ? `$${Number(item.metrics.total_cost).toFixed(4)}` : usageMetrics?.loading ? <LoadingSkeleton /> : <EmptyCell />,
         averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
         agent_limit: renderLimitCell(item?.bridge_limit),
         agent_limit_original: item?.bridge_limit || 0,
@@ -795,9 +784,9 @@ function Home({ params, searchParams, isEmbedUser }) {
             </div>
           )
           : <EmptyCell />,
-        totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
-        cost: item.metrics ? `$${Number(item.metrics.total_cost).toFixed(6)}` : usageMetrics?.loading ? "Loading..." : <EmptyCell />,
-        usage: true, // Used as key for the combined usage column
+        totalTokens: item.metrics ? formatUsageNumber(item.metrics.total_tokens) : usageMetrics?.loading ? <LoadingSkeleton /> : <EmptyCell />,
+        totalTokens_original: item.metrics?.total_tokens || 0,
+        cost: item.metrics ? `$${Number(item.metrics.total_cost).toFixed(4)}` : usageMetrics?.loading ? <LoadingSkeleton /> : <EmptyCell />,
         agent_limit: renderLimitCell(item?.bridge_limit),
         agent_limit_original: item?.bridge_limit || 0,
         averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
@@ -1066,7 +1055,7 @@ function Home({ params, searchParams, isEmbedUser }) {
         e.stopPropagation();
         handlePortalCloseImmediate();
               handlePauseBridge(row._id)
-      }}
+            }}
             className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
     >
       {bridgeStatus[row._id]?.bridge_status === BRIDGE_STATUS.PAUSED ? (
@@ -1250,9 +1239,9 @@ function Home({ params, searchParams, isEmbedUser }) {
                   <div className="w-full overflow-visible">
                     <CustomTable
                       data={UnArchivedBridges}
-                      columnsToShow={['name', 'promptDetails', 'usage', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
+                      columnsToShow={['name', 'promptDetails', 'cost', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                       sorting
-                      sortingColumns={['name', 'usage', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
+                      sortingColumns={['name', 'cost', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                       handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)}
                       keysToExtractOnRowClick={['_id', 'versionId']}
                       keysToWrap={['name', 'model']}
@@ -1262,7 +1251,7 @@ function Home({ params, searchParams, isEmbedUser }) {
                       usageFilterLabel={usageFilterLabel}
                       usageFilterIsLoading={isUsageFilterSubmitting}
                       customGetColumnLabel={getColumnLabel}
-                      customRenderUsageCell={renderUsageCell}
+                      customCellRenderers={customCellRenderers}
                     />
                   </div>
 
@@ -1279,15 +1268,15 @@ function Home({ params, searchParams, isEmbedUser }) {
                       <div className="opacity-60 overflow-visible">
                         <CustomTable
                           data={ArchivedBridges}
-                          columnsToShow={['name', 'model', 'usage', 'agent_usage', 'last_used']}
+                          columnsToShow={['name', 'model', 'cost', 'totalTokens', 'agent_usage', 'last_used']}
                           sorting
-                          sortingColumns={['name', 'model', 'usage', 'agent_usage', 'last_used']}
+                          sortingColumns={['name', 'model', 'cost', 'totalTokens', 'agent_usage', 'last_used']}
                           handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)}
                           keysToExtractOnRowClick={['_id', 'versionId']}
                           keysToWrap={['name', 'prompt', 'model']}
                           endComponent={EndComponent}
                           customGetColumnLabel={getColumnLabel}
-                          customRenderUsageCell={renderUsageCell}
+                            customCellRenderers={customCellRenderers} 
                         />
                       </div>
                     </div>
@@ -1305,14 +1294,14 @@ function Home({ params, searchParams, isEmbedUser }) {
                       <div className="opacity-60 overflow-visible">
                         <CustomTable
                           data={DeletedBridges}
-                          columnsToShow={['name', 'promptDetails', 'usage', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
+                          columnsToShow={['name', 'promptDetails', 'cost', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by']}
                           sorting
-                          sortingColumns={['name', 'usage', 'agent_limit', 'last_used', 'created_by', 'updated_by', 'created_at', 'updated_at']}
+                          sortingColumns={['name', 'cost', 'totalTokens', 'agent_limit', 'last_used', 'created_by', 'updated_by', 'created_at', 'updated_at']}
                           keysToWrap={['name', 'model']}
                           endComponent={DeletedEndComponent}
                           isUsageFilterActive={isUsageFilterActive}
                           customGetColumnLabel={getColumnLabel}
-                          customRenderUsageCell={renderUsageCell}
+                            customCellRenderers={customCellRenderers} 
                         />
                       </div>
                     </div>
