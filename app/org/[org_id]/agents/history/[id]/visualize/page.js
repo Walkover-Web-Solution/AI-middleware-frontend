@@ -290,6 +290,25 @@ export default function Page() {
     });
     return agents;
   }, [toolCalls, recursiveHistoryLoading]);
+
+  const recursiveCallCounts = useMemo(() => {
+    if (toolCalls.length === 0) return { agentCount: 0, toolCount: 0 };
+    let agentCount = 0;
+    let toolCount = 0;
+
+    const walk = (node) => {
+      if (!node) return;
+      if (node.nodeType === "agent") agentCount += 1;
+      if (node.nodeType === "tool") toolCount += 1;
+      (node.children || []).forEach(walk);
+    };
+
+    toolCalls.forEach((tool) => {
+      walk(buildToolNode(tool));
+    });
+
+    return { agentCount, toolCount };
+  }, [toolCalls]);
   const mainAgentTools = useMemo(() => {
     if (toolCalls.length === 0) return [];
 
@@ -313,30 +332,55 @@ export default function Page() {
   const nodes = useMemo(() => {
     const baseX = 650;
     const levelGap = 400; // Horizontal gap between tree levels
-    const siblingGap = 200; // Vertical gap between sibling nodes
+    const baseRowHeight = 160; // Base node height estimate
+    const verticalPadding = 80; // Extra spacing between sibling subtrees
     const alignY = 150; // Y position for root level
 
     const allNodes = [];
     const allEdges = [];
     let nodeIdCounter = 0;
 
+    const getAgentToolList = (agent) => {
+      if (Array.isArray(agent?.parallelTools)) return agent.parallelTools;
+      if (Array.isArray(agent?.children)) return agent.children;
+      return [];
+    };
+
+    const getChildAgents = (agent) =>
+      getAgentToolList(agent).filter((tool) => tool?.nodeType === "agent");
+
+    const getToolsForDisplay = (agent) =>
+      getAgentToolList(agent).filter((tool) => tool?.nodeType !== "agent");
+
+    const estimateNodeHeight = (agent) => {
+      const tools = getToolsForDisplay(agent);
+      const toolCount = tools.length;
+      if (toolCount === 0) return baseRowHeight;
+      const rows = Math.ceil(toolCount / 2);
+      const toolSection = 36 + rows * 42;
+      return baseRowHeight + toolSection;
+    };
+
+    const getSubtreeHeight = (agent) => {
+      const children = getChildAgents(agent);
+      const nodeHeight = estimateNodeHeight(agent);
+      const minHeight = nodeHeight + verticalPadding;
+      if (children.length === 0) return minHeight;
+      return Math.max(
+        minHeight,
+        children.reduce((sum, child) => sum + getSubtreeHeight(child), 0)
+      );
+    };
+
     // Recursive function to build tree nodes
-    const buildTreeNodes = (agent, parentId, level, siblingIndex, totalSiblings) => {
+    const buildTreeNodes = (agent, parentId, level, yOffset) => {
       const nodeId = `agent-${nodeIdCounter++}`;
       const x = baseX + level * levelGap;
-      
-      // Calculate Y position based on sibling index
-      // Center the siblings vertically around alignY
-      const totalHeight = (totalSiblings - 1) * siblingGap;
-      const startY = alignY - totalHeight / 2;
-      const y = startY + siblingIndex * siblingGap;
-
-      // Get child agents from parallelTools
-      const childAgents = agent.parallelTools?.filter(tool => tool?.nodeType === "agent") || [];
-      
-      // Filter parallelTools to exclude child agents (they'll be separate nodes)
-      // Only show direct tools and functions in this node's BatchUI
-      const toolsForDisplay = agent.parallelTools?.filter(tool => tool?.nodeType !== "agent") || [];
+      const childAgents = getChildAgents(agent);
+      const toolsForDisplay = getToolsForDisplay(agent);
+      const subtreeHeight = getSubtreeHeight(agent);
+      const nodeHeight = estimateNodeHeight(agent);
+      const y = yOffset + subtreeHeight / 2 - nodeHeight / 2;
       
       // Create node for this agent using BatchUI
       allNodes.push({
@@ -384,8 +428,10 @@ export default function Page() {
 
       // Recursively build nodes for child agents (they become separate nodes)
       if (childAgents.length > 0) {
-        childAgents.forEach((childAgent, index) => {
-          buildTreeNodes(childAgent, nodeId, level + 1, index, childAgents.length);
+        let runningOffset = yOffset;
+        childAgents.forEach((childAgent) => {
+          buildTreeNodes(childAgent, nodeId, level + 1, runningOffset);
+          runningOffset += getSubtreeHeight(childAgent);
         });
       }
 
@@ -393,9 +439,17 @@ export default function Page() {
     };
 
     // Build the tree starting from derived agents
-    derivedAgents.forEach((agent, index) => {
-      buildTreeNodes(agent, "2", 1, index, derivedAgents.length);
-    });
+    if (derivedAgents.length > 0) {
+      const totalTreeHeight = derivedAgents.reduce(
+        (sum, agent) => sum + getSubtreeHeight(agent),
+        0
+      );
+      let runningOffset = alignY - totalTreeHeight / 2;
+      derivedAgents.forEach((agent) => {
+        buildTreeNodes(agent, "2", 1, runningOffset);
+        runningOffset += getSubtreeHeight(agent);
+      });
+    }
 
     // Store edges for use in edges memo
     treeEdgesRef.current = allEdges;
@@ -433,6 +487,8 @@ export default function Page() {
                 onResponseClick={() => setSelectedResponse(activeThreadItem)}
                 responsePreview={responsePreview}
                 tools={mainAgentTools}
+                agentCount={recursiveCallCounts.agentCount}
+                toolCount={recursiveCallCounts.toolCount}
               />
             ),
           },

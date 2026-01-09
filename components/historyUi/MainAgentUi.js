@@ -6,6 +6,8 @@ export function MainAgentUI({
   onResponseClick,
   responsePreview,
   tools = [],
+  agentCount = 0,
+  toolCount = 0,
 }) {
   const handleToolClick = (tool) => {
     if (!onToolClick) return;
@@ -58,6 +60,11 @@ export function MainAgentUI({
           <div className="text-center text-xs tracking-widest text-base-content/60">
             RESPONSE
           </div>
+          {(agentCount > 0 || toolCount > 0) && (
+            <div className="text-[10px] text-base-content/60 text-center">
+              {agentCount} agent{agentCount === 1 ? "" : "s"} • {toolCount} tool{toolCount === 1 ? "" : "s"} called
+            </div>
+          )}
           <div
             className="border border-base-300 hover:border-success p-3 hover:bg-success/10 cursor-pointer transition-all"
             onClick={onResponseClick}
