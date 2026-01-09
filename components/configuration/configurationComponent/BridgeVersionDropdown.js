@@ -14,7 +14,7 @@ const globalFetchTracker = {
     inProgress: new Set()
 };
 import { useDispatch } from 'react-redux';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { TrashIcon } from '@/components/Icons';
 import DeleteModal from '@/components/UI/DeleteModal';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
@@ -389,7 +389,11 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                             className="flex items-center gap-1 px-2 py-1 text-xs bg-base-100 text-base-content hover:bg-base-200 rounded-md transition-all duration-200"
                             title={`Show All Versions (${bridgeVersionsArray.length - versionsToShow.length} more)`}
                         >
-                            <ChevronDown className="w-3 h-3" />
+                            {showVersionDropdown ? (
+                                <ChevronUp className="w-3 h-3" />
+                            ) : (
+                                <ChevronDown className="w-3 h-3" />
+                            )}
                             <span className="text-xs">+{bridgeVersionsArray.length - versionsToShow.length}</span>
                         </button>
 
