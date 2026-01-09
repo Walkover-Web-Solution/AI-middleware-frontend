@@ -166,8 +166,9 @@ const CommandPalette = ({isEmbedUser}) => {
 
   const filterBy = (list, fields) => {
     if (!query) return [];
+    const lowerQuery = query.toLowerCase();
     return list.filter((it) =>
-      fields.some((f) => String(it?.[f] || "").toLowerCase().includes(query))
+      fields.some((f) => String(it?.[f] || "").toLowerCase().includes(lowerQuery))
     );
   };
 
@@ -181,7 +182,8 @@ const CommandPalette = ({isEmbedUser}) => {
     ["name", "slugName", "service", "_id", "last_used", "total_tokens"]
   ).map(a => createAgentItem(a, 'chatbot'));
 
-  const agentsVersionMatches = !query ? [] : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => {
+  const agentsVersionMatches = !query ? [] : (agentList || []).filter(agent => !agent.deletedAt).flatMap((a) => 
+    {
     const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
     const published = a?.published_version_id ? [a.published_version_id] : [];
     const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
