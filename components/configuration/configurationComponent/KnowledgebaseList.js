@@ -16,7 +16,7 @@ import useTutorialVideos from '@/hooks/useTutorialVideos';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 
-const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true }) => {
+const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,}) => {
     // Determine if content is read-only (either published or user is not an editor)
     const isReadOnly = isPublished || !isEditor;
     // Use the tutorial videos hook
@@ -66,7 +66,8 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         // Format the new item with collection_id and resource_id
         const newDocItem = {
             collection_id: knowledgeBaseItem.collectionId,
-            resource_id: id
+            resource_id: id,
+            description:knowledgeBaseItem.description
         };
 
         dispatch(updateBridgeVersionAction({
@@ -284,7 +285,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                 )}
             </div>
             <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
-            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
+            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true}/>
         </div>
     );
 };

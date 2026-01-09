@@ -4,11 +4,12 @@ import { useDispatch } from "react-redux";
 import Modal from "@/components/UI/Modal";
 import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal, RequiredItem } from "@/utils/utility";
-import { createResourceAction, updateResourceAction } from "@/store/action/knowledgeBaseAction";
+import { createResourceAction, updateResourceAction, } from "@/store/action/knowledgeBaseAction";
 import { uploadImage } from "@/config/utilityApi";
 import { toast } from "react-toastify";
+import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 
-const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = () => { } }) => {
+const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = () => { }, addToVersion = false, knowbaseVersionData = [], searchParams }) => {
     const dispatch = useDispatch();
     const [isCreatingResource, setIsCreatingResource] = useState(false);
     const [inputType, setInputType] = useState('url'); // 'url', 'file', 'content'
@@ -140,6 +141,14 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
             closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
             event.target.reset();
             setInputType('url');
+            if (params?.org_id && searchParams?.version && addToVersion) {
+                dispatch(updateBridgeVersionAction({
+                    orgId: params?.org_id,
+                    bridgeId: params?.bridge_id,
+                    versionId: searchParams?.version,
+                    dataToSend: { doc_ids: [...(knowbaseVersionData || {}), {resource_id:result._id, collection_id: result.collectionId, description: result.description}] }
+                }));
+            }
         }
         setIsCreatingResource(false);
     };
@@ -194,40 +203,6 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                         ✕
                     </button>
                 </div>
-                {!selectedResource && (
-                    <div className="flex gap-4 mb-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="inputType"
-                                className="radio radio-primary radio-sm"
-                                checked={inputType === 'url'}
-                                onChange={() => setInputType('url')}
-                            />
-                            <span className="text-sm font-medium">URL</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="inputType"
-                                className="radio radio-primary radio-sm"
-                                checked={inputType === 'file'}
-                                onChange={() => setInputType('file')}
-                            />
-                            <span className="text-sm font-medium">Upload File</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="inputType"
-                                className="radio radio-primary radio-sm"
-                                checked={inputType === 'content'}
-                                onChange={() => setInputType('content')}
-                            />
-                            <span className="text-sm font-medium">Content</span>
-                        </label>
-                    </div>
-                )}
 
                 <form onSubmit={selectedResource ? handleUpdateResource : handleCreateResource} className="space-y-4">
                     {/* Name Field */}
@@ -263,7 +238,40 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             disabled={isCreatingResource}
                         />
                     </div>
-
+                    {!selectedResource && (
+                        <div className="flex gap-4 mb-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="inputType"
+                                    className="radio radio-primary radio-sm"
+                                    checked={inputType === 'url'}
+                                    onChange={() => setInputType('url')}
+                                />
+                                <span className="text-sm font-medium">URL</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="inputType"
+                                    className="radio radio-primary radio-sm"
+                                    checked={inputType === 'file'}
+                                    onChange={() => setInputType('file')}
+                                />
+                                <span className="text-sm font-medium">Upload File</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="inputType"
+                                    className="radio radio-primary radio-sm"
+                                    checked={inputType === 'content'}
+                                    onChange={() => setInputType('content')}
+                                />
+                                <span className="text-sm font-medium">Content</span>
+                            </label>
+                        </div>
+                    )}
                     {/* Content Input Based on Type */}
                     {inputType === 'file' && !selectedResource ? (
                         <div className="form-control">
