@@ -5,7 +5,6 @@ import GuardrailSelector from './GuardrailSelector';
 
 const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType, isPublished, isEditor = true }) => {
   // Determine if content is read-only (either published or user is not an editor)
-  const isReadOnly = isPublished || !isEditor;
   const dropdownContainerRef = useRef(null);
 
   useEffect(() => {
