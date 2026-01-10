@@ -45,11 +45,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
         try {
             const formData = new FormData();
             formData.append('file', file);
-
-            // Determine if it's video or PDF based on file type
-            const isVedioOrPdf = file.type.includes('video') || file.type === 'application/pdf';
-
-            const response = await uploadImage(formData, isVedioOrPdf);
+            const response = await uploadImage(formData, true);
             const fileUrl = response.url || response.file_url || response.data?.url;
 
             setUploadedFile({
@@ -402,6 +398,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                     onChange={(e) => setChunkingType(e.target.value)}
                                     disabled={isCreatingResource}
                                 >
+                                    <option value="agentic">Agentic</option>
                                     <option value="recursive">Recursive</option>
                                     <option value="semantic">Semantic</option>
                                     <option value="custom">Custom</option>
@@ -433,6 +430,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             name="chunkSize"
                                             className="input input-bordered input-sm"
                                             min={1}
+                                            max={4000}
                                             required
                                             defaultValue={4000}
                                             disabled={isCreatingResource}
@@ -449,6 +447,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                                 name="chunkingOverlap"
                                                 className="input input-bordered input-sm"
                                                 min={0}
+                                                max={200}
                                                 defaultValue={200}
                                                 disabled={isCreatingResource}
                                             />

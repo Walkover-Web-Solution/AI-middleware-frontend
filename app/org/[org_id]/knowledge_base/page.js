@@ -40,7 +40,7 @@ const Page = ({ params }) => {
         <span> {item.title}</span>
       </div>
     </div>,
-    description: <div className="text-sm text-gray-700 max-w-xs">
+    description: <div className="text-sm text-base-content max-w-xs">
       {item?.description ? (
         <div className="tooltip" data-tip={item.description}>
           <span className="truncate block">{item.description.split(' ').slice(0, 5).join(' ')}{item.description.split(' ').length > 5 ? '...' : ''}</span>
