@@ -69,6 +69,26 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
         setUploadedFile(null);
     };
 
+    const handleChunkSizeInput = (e) => {
+        const value = parseInt(e.target.value);
+        if (value > 4000) {
+            e.target.value = 4000;
+            toast.warning("Chunk size cannot exceed 4000");
+        } else if (value < 1 && e.target.value !== '') {
+            e.target.value = 1;
+        }
+    };
+
+    const handleChunkOverlapInput = (e) => {
+        const value = parseInt(e.target.value);
+        if (value > 200) {
+            e.target.value = 200;
+            toast.warning("Chunk overlap cannot exceed 200");
+        } else if (value < 0 && e.target.value !== '') {
+            e.target.value = 0;
+        }
+    };
+
     const handleCreateResource = async (event) => {
         event.preventDefault();
         setIsCreatingResource(true);
@@ -432,7 +452,8 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             min={1}
                                             max={4000}
                                             required
-                                            defaultValue={4000}
+                                            defaultValue={selectedResource?.settings?.chunkSize ? Math.min(selectedResource.settings.chunkSize, 4000) : 4000}
+                                            onInput={handleChunkSizeInput}
                                             disabled={isCreatingResource}
                                         />
                                     </div>
@@ -448,7 +469,8 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                                 className="input input-bordered input-sm"
                                                 min={0}
                                                 max={200}
-                                                defaultValue={200}
+                                                defaultValue={selectedResource?.settings?.chunkOverlap ? Math.min(selectedResource.settings.chunkOverlap, 200) : 200}
+                                                onInput={handleChunkOverlapInput}
                                                 disabled={isCreatingResource}
                                             />
                                         </div>
