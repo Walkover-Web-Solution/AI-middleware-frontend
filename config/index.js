@@ -11,5 +11,5 @@ export * from './testCaseApi';
 export * from './metricsApi';
 export * from './utilityApi';
 export * from './historyApi';
+export * from './orchestralHistoryApi';
 export * from './integrationApi';
-
