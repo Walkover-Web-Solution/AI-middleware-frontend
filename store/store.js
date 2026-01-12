@@ -19,6 +19,7 @@ import integrationSliceReducer from "./reducer/integrationReducer";
 import authSliceReducer from "./reducer/authReducer";
 import gtwyAgentSliceReducer from "./reducer/gwtyAgentReducer";
 import orchestralFlowSliceReducer from "./reducer/orchestralFlowReducer";
+import orchestralHistorySliceReducer from "./reducer/orchestralHistoryReducer";
 import prebuiltPromptSliceReducer from "./reducer/prebuiltPromptReducer";
 import apiKeysSliceReducer from "./reducer/apiKeysReducer";
 import variableSliceReducer from "./reducer/variableReducer";
@@ -81,6 +82,7 @@ const rootReducer = combineReducers({
     integrationReducer: integrationSliceReducer,
     authReducer: authSliceReducer,
     orchestralFlowReducer: orchestralFlowSliceReducer,
+    orchestralHistoryReducer: orchestralHistorySliceReducer,
     prebuiltPromptReducer: prebuiltPromptSliceReducer,
     apiKeysReducer: apiKeysSliceReducer,
     variableReducer: variableSliceReducer,

@@ -77,8 +77,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
   }, []);
 
   // Open modal if selectedItem.value matches a key
+  // Don't auto-open modal for common slider views (AiConfig, variables, system Prompt, more)
   useEffect(() => {
-    if (selectedItem?.value && selectedItem?.value !== 'system Prompt') {
+    const skipModalValues = ['AiConfig', 'variables', 'system Prompt', 'more'];
+    if (selectedItem?.value && !skipModalValues.includes(selectedItem.value)) {
       const key = selectedItem.value;
       const value = selectedItem[key];
       if (value) {

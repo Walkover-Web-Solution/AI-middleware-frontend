@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { createNodesFromAgentDoc } from '@/components/FlowDataManager';
@@ -10,6 +10,15 @@ import { getFromCookies } from '@/utils/utility';
 import Protected from '../Protected';
 
 const AgentToAgentConnection = dynamic(() => import('@/components/AgentToAgentConnection'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-[400px]">
+      <span className="loading loading-spinner loading-lg text-primary" />
+    </div>
+  ),
+});
+
+const OrchestraHistoryView = dynamic(() => import('@/components/orchestralHistoryComponents/OrchestraHistoryView'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-[400px]">
@@ -118,6 +127,7 @@ const formatAgentsForPersist = (agents = {}) =>
 
 const ConnectedAgentFlowPanel = ({isEmbedUser}) => {
   const dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState('flow'); // Default to 'flow' tab
   const {
     params,
     searchParams,
@@ -207,28 +217,54 @@ const ConnectedAgentFlowPanel = ({isEmbedUser}) => {
 
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-between items-center mb-2">
+        {/* Back to Config button on the left */}
         <button
-          className="btn btn-xs btn-outline gap-1"
+          className="btn btn-xs btn-outline gap-1 ml-8"
           onClick={() => switchView?.('config')}
         >
           ⬅ Back to Config
         </button>
+        
+        {/* Tabs on the right */}
+        <div className="tabs tabs-boxed">
+          <button 
+            className={`tab ${activeTab === 'flow' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('flow')}
+          >
+            Flow
+          </button>
+          <button 
+            className={`tab ${activeTab === 'history' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            History
+          </button>
+        </div>
       </div>
+      
       <div className="w-full h-[calc(100vh-8rem)] min-h-[600px] border border-base-200 rounded-xl overflow-hidden bg-base-50">
-        <AgentToAgentConnection
-          params={{ ...params, bridgeId: params.id }}
-          searchParams={searchParams}
-          orchestralData={processedFlow}
-          discardedData={processedFlow}
-          name={bridgeName || 'Agent Flow'}
-          description=""
-          createdFlow={Boolean(effectiveFlow)}
-          setIsLoading={() => {}}
-          isEmbedUser={false}
-          mode="connected"
-          onConnectedFlowSave={handleFlowSave}
-        />
+        {activeTab === 'flow' ? (
+          <AgentToAgentConnection
+            params={{ ...params, bridgeId: params.id }}
+            searchParams={searchParams}
+            orchestralData={processedFlow}
+            discardedData={processedFlow}
+            name={bridgeName || 'Agent Flow'}
+            description=""
+            createdFlow={Boolean(effectiveFlow)}
+            setIsLoading={() => {}}
+            isEmbedUser={false}
+            mode="connected"
+            onConnectedFlowSave={handleFlowSave}
+          />
+        ) : (
+          <OrchestraHistoryView
+            params={params}
+            searchParams={searchParams}
+            bridgeName={bridgeName}
+          />
+        )}
       </div>
     </div>
   );
