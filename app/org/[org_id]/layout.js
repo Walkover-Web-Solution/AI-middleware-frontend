@@ -22,10 +22,10 @@ import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataActi
 import { userDetails } from "@/store/action/userDetailsAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
-import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import ServiceInitializer from "@/components/organization/ServiceInitializer";
+import { getAllAuthData } from "@/store/action/authkeyAction";
 
 const Navbar = dynamic(() => import("@/components/Navbar"), { loading: () => <LoadingSpinner /> });
 const MainSlider = dynamic(() => import("@/components/sliders/MainSlider"), { loading: () => <LoadingSpinner /> });
@@ -72,7 +72,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     if (pathName.endsWith("apikeys") && !isEmbedUser) {
       dispatch(getApiKeyGuideAction());
     }
-
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
@@ -209,7 +208,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
       dispatch(getPrebuiltToolsAction())
       if(!isEmbedUser){
-        dispatch(getAuthDataAction(resolvedParams?.org_id))
+        currrentOrgDetail?.role_name!="Viewer" && dispatch(getAllAuthData(resolvedParams?.org_id))
         dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
         dispatch(getPrebuiltPromptsAction())
         dispatch(getUsersAction());

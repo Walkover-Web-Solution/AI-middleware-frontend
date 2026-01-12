@@ -170,8 +170,10 @@ function TestCases({ params }) {
                     ? JSON.stringify(testCase?.expected?.tool_calls)
                     : testCase?.expected?.response || 'N/A';
 
-                  const testCaseVersionArray = testCase?.version_history?.[selectedVersion];
-                  const model_output = JSON.stringify(testCaseVersionArray?.[testCaseVersionArray?.length - 1]?.model_output);
+                  const displayVersion = selectedVersion || versions?.[versions?.length - 1];
+                  const testCaseVersionArray = testCase?.version_history?.[displayVersion];
+                  const modelOutputRaw = testCaseVersionArray?.[testCaseVersionArray?.length - 1]?.model_output;
+                  const model_output = typeof modelOutputRaw === 'string' ? modelOutputRaw : JSON.stringify(modelOutputRaw);
 
                   const isExpanded = expandedRows[index] || false;
 
