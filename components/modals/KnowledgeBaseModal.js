@@ -157,6 +157,8 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
             closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
             event.target.reset();
             setInputType('url');
+            setUploadedFile(null);
+            setIsUploading(false)
             if (params?.org_id && searchParams?.version && addToVersion) {
                 dispatch(updateBridgeVersionAction({
                     orgId: params?.org_id,
