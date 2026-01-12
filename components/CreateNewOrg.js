@@ -87,9 +87,15 @@ const CreateOrg = ({ handleSwitchOrg }) => {
         <div>
             {isLoading && <LoadingSpinner />}
             <div className=""></div>
-            <dialog id={MODAL_TYPE.CREATE_ORG_MODAL} className="modal">
+            <dialog id={MODAL_TYPE.CREATE_ORG_MODAL} className="modal" onKeyDown={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-center min-h-screen py-8">
-                    <form className="modal-box relative p-5 bg-base-100 rounded-lg shadow-xl mx-4 max-h-[90vh] overflow-y-auto" onSubmit={createOrgHandler}>
+                    <form className="modal-box relative p-5 bg-base-100 rounded-lg shadow-xl mx-4 max-h-[90vh] overflow-y-auto" 
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        createOrgHandler(e);
+                    }}
+                    >
                         <h3 className="font-bold text-lg mb-2">Create Workspace</h3>
                         <label className='label-text mb-1'>Workspace Name *</label>
                         <input
@@ -169,8 +175,8 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                         </div>
 
                         <div className="modal-action">
-                            <button type="button" onClick={() => closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn btn-sm">Close</button>
-                            <button type="submit" className="btn btn-sm btn-primary">Create</button>
+                            <button type="button" onClick={() => closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} onKeyDown={(e) => e.stopPropagation()} className="btn btn-sm">Close</button>
+                            <button type="submit" onKeyDown={(e) => e.stopPropagation()} className="btn btn-sm btn-primary">Create</button>
                         </div>
                     </form>
                 </div>
