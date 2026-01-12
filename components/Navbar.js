@@ -270,6 +270,53 @@ const Navbar = ({ isEmbedUser, params }) => {
   const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
 
+  // Keyboard shortcuts for navigation
+  useEffect(() => {
+    let gPressed = false;
+    let timeoutId = null;
+
+    const handleKeyDown = (e) => {
+      const target = e.target;
+      const isInputField = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.isContentEditable;
+      
+      if (isInputField) return;
+
+      if (e.key === 'g' || e.key === 'G') {
+        gPressed = true;
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          gPressed = false;
+        }, 1000);
+      } else if (gPressed) {
+        if (e.key === 'c' || e.key === 'C') {
+          e.preventDefault();
+          handleTabChange('configure');
+          gPressed = false;
+          if (timeoutId) clearTimeout(timeoutId);
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          if (!isEmbedUser) {
+            handleTabChange('testcase');
+          }
+          gPressed = false;
+          if (timeoutId) clearTimeout(timeoutId);
+        } else if (e.key === 'h' || e.key === 'H') {
+          e.preventDefault();
+          handleTabChange('history');
+          gPressed = false;
+          if (timeoutId) clearTimeout(timeoutId);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [handleTabChange, isEmbedUser]);
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
