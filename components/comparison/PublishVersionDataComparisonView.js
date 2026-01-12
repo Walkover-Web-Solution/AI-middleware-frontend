@@ -217,7 +217,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
           <span>No differences found between the data sets.</span>
         </div>
       ) : (
-        <>
+        <React.Fragment>
           <div className="divider"></div>
           {Object.entries(categorizedDifferences).map(([category, items]) => (
             <div key={category} className="mb-6">
@@ -239,7 +239,8 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
 
                         {isPromptField ? (
                           // Use ComparisonCheck for prompt field
-                          <ComparisonCheck
+                          <ComparisonCheck 
+                            isFromPublishModal={true}
                             oldContent={oldValue}
                             newContent={newValue}
                           />
@@ -267,7 +268,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
               </div>
             </div>
           ))}
-        </>
+        </React.Fragment>
       )}
     </div>
   );
