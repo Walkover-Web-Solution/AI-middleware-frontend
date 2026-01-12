@@ -109,11 +109,14 @@ function Canvas({
     setInstruction("");
     setErrorMessage("");
     setLoading(true);
-
     try {
       const response = await OptimizePrompt(instruction);
-      const result = typeof response === 'string' ? JSON.parse(response) : response;
-      
+      let result;
+      if(label === "Schema"){
+        result = typeof response.result === 'string' ? JSON.parse(response.result) : response.result; 
+      }else if(label   === "prompt"){
+        result = typeof response === 'string' ? JSON.parse(response) : response;
+      }
       // Ensure content is always a string
       let contentString = "";
       if (result && result.updated !== undefined) {
