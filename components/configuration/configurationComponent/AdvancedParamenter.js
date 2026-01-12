@@ -156,28 +156,24 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   };
 
   const handleInputChange = (e, key, isSlider = false) => {
-    setInputConfiguration((prev) => ({
-      ...prev,
-      [key]: e.target.value,
-    }))
     let newValue = e.target.value;
     let newCheckedValue = e.target.checked;
-    if (e.target.type === 'number') {
+    if (e.target.type === 'number' || isSlider) {
       newValue = String(newValue)?.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
     }
     let updatedDataToSend = {
       configuration: {
-        [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
+        [key]: isSlider ? newValue : e.target.type === 'checkbox' ? newCheckedValue : newValue,
       }
     };
-    if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration?.[key]) {
+    if ((isSlider ? newValue : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration?.[key]) {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
   const debouncedInputChange = useCallback(
     (e, paramKey, isSlider = false) => {
-      const delay = paramKey === 'stop' ? 2000 : 5000;
+      const delay = paramKey === 'stop' ? 2000 : 500;
       const debouncedFn = debounce(handleInputChange, delay);
       return debouncedFn(e, paramKey, isSlider);
     },
@@ -224,22 +220,25 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     }
   };
   const setSliderValue = (value, key, isDeafaultObject = false) => {
+    const numericValue = typeof value === 'string' && value !== 'default' && value !== 'min' && value !== 'max' ? 
+      (String(value)?.includes('.') ? parseFloat(value) : parseInt(value, 10)) : value;
+    
     setInputConfiguration((prev) => ({
       ...prev,
-      [key]: value,
+      [key]: numericValue,
     }))
-    let updatedDataToSend = (isDeafaultObject && value !== "default") ? {
+    let updatedDataToSend = (isDeafaultObject && numericValue !== "default") ? {
       configuration: {
         [key]:{
-          [value?.key]: value[value?.key]
+          [numericValue?.key]: numericValue[numericValue?.key]
         }
       }
     } : {
       configuration: {
-        [key]: value
+        [key]: numericValue
       }
     };
-    if (value !== configuration?.[key]) {
+    if (numericValue !== configuration?.[key]) {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
     }
   };
@@ -345,15 +344,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || '')}
               onFocus={(e) => {
                 if (isDefaultValue) {
-                  e.target.blur();
                   setSliderValue('', key, isDeafaultObject);
-                  setInputConfiguration((prev) => ({
-                    ...prev,
-                    [key]: ''
-                  }));
-                  setTimeout(() => {
-                    e.target.focus();
-                  }, 0);
                 }
               }}
               onChange={(e) => {
@@ -363,11 +354,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 }));
               }}
               onBlur={(e) => {
-                if (isDefaultValue && e.target.value) {
-                  setSliderValue(e.target.value, key, isDeafaultObject);
-                } else {
-                  handleInputChange(e, key);
-                }
+                handleInputChange(e, key);
               }}
               className={`input border-base-200 ${inputSizeClass} w-full bg-base-300 text-base-content/70 text-sm`}
               name={key}
@@ -391,11 +378,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 }));
               }}
               onBlur={(e) => {
-                if (isDefaultValue && e.target.value !== (defaultValue || 0).toString()) {
-                  setSliderValue(e.target.value, key, isDeafaultObject);
-                } else {
-                  handleInputChange(e, key);
-                }
+                handleInputChange(e, key);
               }}
               className={`input border-base-200 ${inputSizeClass} w-full bg-base-300 text-base-content/70 text-sm`}
               name={key}
@@ -439,11 +422,21 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 key={`${key}-${configuration?.[key]}-${service}-${model}`}
                 defaultValue={isDefaultValue ? 'default' : sliderDisplayValue ?? ''}
                 onChange={(e) => {
-                  if (isDefaultValue) {
-                    setSliderValue(e.target.value, key, isDeafaultObject);
-                  }
+                  // Only update the display value and local state, don't trigger API call
+                  const numValue = String(e.target.value)?.includes('.') ? parseFloat(e.target.value) : parseInt(e.target.value, 10);
+                  setInputConfiguration((prev) => ({
+                    ...prev,
+                    [key]: numValue
+                  }));
                   const el = document.getElementById(sliderValueId);
                   if (el) el.innerText = e.target.value;
+                }}
+                onMouseUp={(e) => {
+                  // Trigger API call when user releases mouse
+                  debouncedInputChange(e, key, true);
+                }}
+                onTouchEnd={(e) => {
+                  // Trigger API call when user releases touch
                   debouncedInputChange(e, key, true);
                 }}
                 className={`range range-accent h-2 rounded-full ${rangeSizeClass} flex-1`}
@@ -620,7 +613,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
               defaultValue={
                 objectFieldValue ||
                 JSON.stringify(
-                  configuration?.[key]?.value || configuration?.[key] || {},
+                  configuration?.[key]?.value || {},
                   null,
                   2
                 )
