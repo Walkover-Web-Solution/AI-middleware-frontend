@@ -2,6 +2,7 @@
 import CustomTable from "@/components/customTable/CustomTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import KnowledgeBaseModal from "@/components/modals/KnowledgeBaseModal";
+import ResourceChunksModal from "@/components/modals/ResourceChunksModal";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteResourceAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
@@ -27,6 +28,7 @@ const Page = ({ params }) => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
+  const [selectedResourceForChunks, setSelectedResourceForChunks] = useState({ id: null, name: null });
   const { isDeleting, executeDelete } = useDeleteOperation();
   useEffect(() => {
     setFilterKnowledgeBase(knowledgeBaseData)
@@ -34,7 +36,10 @@ const Page = ({ params }) => {
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     actualName: item?.name,
-    name: <div className="flex gap-2">
+    name: <div className="flex gap-2 cursor-pointer" onClick={() => {
+      setSelectedResourceForChunks({ id: item._id, name: item.title });
+      openModal(MODAL_TYPE.RESOURCE_CHUNKS_MODAL);
+    }}>
       <div className="tooltip flex items-center gap-2" data-tip={item.title}>
         <span>{GetFileTypeIcon(item?.url?.includes('.pdf') ? 'pdf' : 'document', 16, 16)}</span>
         <span> {item.title}</span>
@@ -70,6 +75,7 @@ const Page = ({ params }) => {
     collection_id: item.collection_id,
     _id: item._id,
   }));
+  console.log("table data " , tableData  )
   const handleUpdateKnowledgeBase = (item) => {
     const originalItem = knowledgeBaseData.find(kb => kb._id === item._id);
     setSelectedKnowledgeBase(originalItem);
@@ -155,6 +161,7 @@ const Page = ({ params }) => {
       )}
 
       <KnowledgeBaseModal params={resolvedParams} selectedResource={selectedKnowledgeBase} setSelectedResource={setSelectedKnowledgeBase} />
+      <ResourceChunksModal resourceId={selectedResourceForChunks.id} resourceName={selectedResourceForChunks.name} />
       <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} loading={isDeleting} isAsync={true} />
     </div>
   );
