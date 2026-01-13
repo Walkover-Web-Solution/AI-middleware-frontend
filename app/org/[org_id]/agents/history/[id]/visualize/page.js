@@ -8,7 +8,7 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { getHistoryAction, getThread, getRecursiveHistoryAction } from "@/store/action/historyAction";
 import { X, ArrowLeft } from "lucide-react";
-import { formatRelativeTime } from "@/utils/utility";
+import { formatRelativeTime, toggleSidebar } from "@/utils/utility";
 
 import { UserPromptUI } from "@/components/historyUi/UserPromptUi.js";
 import { MainAgentUI } from "@/components/historyUi/MainAgentUi.js";
@@ -449,7 +449,10 @@ export default function Page() {
                     nodeType: agent.nodeType,
                   },
                 ]}
-                onToolClick={(tool) => setSelectedTool(tool)}
+                onToolClick={(tool) => {
+                  setSelectedTool(tool);
+                  toggleSidebar('tool-full-slider', 'right');
+                }}
                 onToolSliderClick={(tool) => handleToolPrimaryClick(tool)}
               />
             ),
@@ -529,9 +532,15 @@ export default function Page() {
             render: () => (
               <MainAgentUI
                 name={mainAgentName}
-                onToolClick={(tool) => setSelectedTool(tool)}
+                onToolClick={(tool) => {
+                  setSelectedTool(tool);
+                  toggleSidebar('tool-full-slider', 'right');
+                }}
                 onToolSliderClick={(tool) => handleToolPrimaryClick(tool)}
-                onResponseClick={() => setSelectedResponse(activeThreadItem)}
+                onResponseClick={() => {
+                  setSelectedResponse(activeThreadItem);
+                  toggleSidebar('response-full-slider', 'right');
+                }}
                 responsePreview={responsePreview}
                 tools={mainAgentTools}
                 agentCount={directCallCounts.agentCount}
@@ -576,10 +585,6 @@ export default function Page() {
   }, [derivedAgents.length]);
 
   const handleGoBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-      return;
-    }
     const searchParams = new URLSearchParams();
     if (versionId) searchParams.set("version", versionId);
     searchParams.set("type", "chatbot");
@@ -619,21 +624,23 @@ export default function Page() {
         </ReactFlow>
       </div>
 
-      {selectedTool && (
-        <ToolFullSlider
-          tool={selectedTool}
-          onClose={() => setSelectedTool(null)}
-          onBack={() => setSelectedTool(null)}
-        />
-      )}
+      <ToolFullSlider
+        tool={selectedTool}
+        onClose={() => {
+          toggleSidebar('tool-full-slider', 'right');
+          setSelectedTool(null);
+        }}
+        onBack={handleGoBack}
+      />
 
-      {selectedResponse && (
-        <ResponseFullSlider
-          response={selectedResponse}
-          onClose={() => setSelectedResponse(null)}
-          onBack={() => setSelectedResponse(null)}
-        />
-      )}
+      <ResponseFullSlider
+        response={selectedResponse}
+        onClose={() => {
+          toggleSidebar('response-full-slider', 'right');
+          setSelectedResponse(null);
+        }}
+        onBack={handleGoBack}
+      />
 
       {/* Close Button - Bottom Right */}
       <button

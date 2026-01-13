@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react';
+import { toggleSidebar } from '@/utils/utility';
 
 const CollapsibleSection = ({ title, children, defaultOpen = true }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -52,29 +53,11 @@ const formatTimestamp = (value) => {
 };
 
 export function ToolFullSlider({ tool, onClose, onBack }) {
-  const sliderRef = useRef(null);
-
-  // Handle click outside to close
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (sliderRef.current && !sliderRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
-
-    // Add event listener when the component mounts
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    // Clean up the event listener when the component unmounts
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
-
   const handleBack = () => {
-    onBack?.(); // Call the onBack handler if provided
-    onClose();   // Also close the slider
+    onBack?.();
+    onClose();
   };
+
   const toolData = tool || {};
   const payload = toolData.payload || toolData.args || null;
   const responseData = toolData.response || toolData.data?.response || null;
@@ -95,25 +78,14 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
   };
 
   return (
-<>
-      <div
-        className={`
-          fixed inset-0 bg-black bg-opacity-50 z-[999998] transition-opacity duration-300
-          ${tool ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-        `}
-      >
-        <div
-          ref={sliderRef}
-          className={`
-            fixed top-0 right-0
-            h-screen w-[50vw] min-w-[600px]
-            bg-base-100 z-[999999]
-            transform transition-transform duration-300
-            flex flex-col
-            ${tool ? "translate-x-0" : "translate-x-full"}
-          `}
-          onClick={(e) => e.stopPropagation()}
-        >
+    <aside
+      id="tool-full-slider"
+      className={`sidebar-container fixed flex flex-col top-0 right-0 
+                  w-full md:w-1/2 lg:w-[50vw] min-w-[600px] h-screen 
+                  bg-base-100 transition-all duration-300 z-[999999] border-l border-base-300
+                  ${tool ? 'translate-x-0' : 'translate-x-full'}`}
+      aria-label="Tool Details Slider"
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-base-300">
         <button
@@ -171,17 +143,15 @@ export function ToolFullSlider({ tool, onClose, onBack }) {
         </CollapsibleSection>
       </div>
 
-          {/* Footer */}
-          <div className="flex justify-end p-4 border-t border-base-300 bg-base-200">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/80"
-            >
-              CLOSE
-            </button>
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="flex justify-end p-4 border-t border-base-300 bg-base-200">
+        <button
+          onClick={onClose}
+          className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/80"
+        >
+          CLOSE
+        </button>
       </div>
-    </>
+    </aside>
   );
 }
