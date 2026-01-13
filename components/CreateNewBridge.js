@@ -132,8 +132,8 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
             dispatch(createBridgeAction({ dataToSend: fallbackDataToSend, orgid }, (data) => {
               if (isEmbedUser) {
                 sendDataToParent("drafted", {
-                  name: data?.agent?.name, 
-                  agent_id: data?.agent?._id
+                  name: data?.data?.agent?.name, 
+                  agent_id: data?.data?.agent?._id
                 }, "Agent created Successfully");
               }             
               router.push(`/org/${orgid}/agents/configure/${data.data.agent._id}?version=${data.data.agent.versions[0]}`);
@@ -170,8 +170,8 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
         dispatch(createBridgeAction({ dataToSend, orgid }, (data) => {
           if (isEmbedUser) {
             sendDataToParent("drafted", {
-              name: data?.agent?.name, 
-              agent_id: data?.agent?._id
+              name: data?.data?.agent?.name, 
+              agent_id: data?.data?.agent?._id
             }, "Agent created Successfully");
           }
           
