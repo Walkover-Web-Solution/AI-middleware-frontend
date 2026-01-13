@@ -1097,6 +1097,7 @@ window.openGtwy({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h4 className="card-title text-primary text-base mb-0">Theme Palette</h4>
+                    <p className="text-xs text-base-content/70">Customize the colors of GTWY to match your application's design.</p>
                   </div>
                   <button
                     className="btn btn-outline btn-xs"

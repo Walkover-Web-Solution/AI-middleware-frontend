@@ -15,7 +15,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
     const previewStyle = {
         position: 'fixed',
         top: Math.max(20, dropdownRect?.top-50),
-        left: dropdownRect?.right + (-55), // Position to the right of dropdown
+        left: dropdownRect?.right + (-125), // Position to the right of dropdown
         zIndex: 99999,
         maxHeight: `${viewportHeight}px`,
         overflowY: 'auto'
