@@ -63,6 +63,44 @@ export default function Page() {
   const subThreadId = sp.get("subThread_id");
   const versionId = sp.get("version");
   const errorParam = sp.get("error") === "true";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!bridgeId) return;
+    if (!messageId || !threadId || !subThreadId) {
+      const storedRaw = window.localStorage.getItem(`visualize_ids:${bridgeId}`);
+      if (!storedRaw) return;
+      try {
+        const stored = JSON.parse(storedRaw);
+        const newUrl = new URL(window.location.href);
+        if (!messageId && stored.message_id) {
+          newUrl.searchParams.set("message_id", stored.message_id);
+        }
+        if (!threadId && stored.thread_id) {
+          newUrl.searchParams.set("thread_id", stored.thread_id);
+        }
+        if (!subThreadId && stored.sub_thread_id) {
+          newUrl.searchParams.set("subThread_id", stored.sub_thread_id);
+        }
+        router.replace(`${newUrl.pathname}${newUrl.search}`);
+      } catch (error) {
+        console.warn("Failed to restore visualize ids from localStorage", error);
+      }
+    }
+  }, [bridgeId, messageId, threadId, subThreadId, router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!bridgeId || !messageId || !threadId || !subThreadId) return;
+    window.localStorage.setItem(
+      `visualize_ids:${bridgeId}`,
+      JSON.stringify({
+        message_id: messageId,
+        thread_id: threadId,
+        sub_thread_id: subThreadId,
+      })
+    );
+  }, [bridgeId, messageId, threadId, subThreadId]);
   const selectedThreadItem = useMemo(() => {
     if (!messageId) return null;
     return thread.find((item) => item?.message_id === messageId) || null;
@@ -538,7 +576,15 @@ export default function Page() {
   }, [derivedAgents.length]);
 
   const handleGoBack = () => {
-    router.back();
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    const searchParams = new URLSearchParams();
+    if (versionId) searchParams.set("version", versionId);
+    searchParams.set("type", "chatbot");
+    const query = searchParams.toString();
+    router.push(`/org/${orgId}/agents/history/${bridgeId}${query ? `?${query}` : ""}`);
   };
 
   return (

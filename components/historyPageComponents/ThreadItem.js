@@ -157,11 +157,13 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
   const router = useRouter();
   const handleVisualizeClick = () => {
     if (!params?.org_id || !params?.id) return;
-    const messageId = item?.message_id
-      ? encodeURIComponent(item.message_id)
-      : "";
-    const messageQuery = messageId ? `?message_id=${messageId}` : "";
-    router.push(`/org/${params.org_id}/agents/history/${params.id}/visualize${messageQuery}`);
+    const searchParams = new URLSearchParams();
+    if (item?.message_id) searchParams.set("message_id", item.message_id);
+    if (item?.thread_id) searchParams.set("thread_id", item.thread_id);
+    if (item?.sub_thread_id || item?.thread_id) {
+      searchParams.set("subThread_id", item?.sub_thread_id || item?.thread_id);
+    }
+    router.push(`/org/${params.org_id}/agents/history/${params.id}/visualize?${searchParams.toString()}`);
   };
 
   useEffect(() => {
