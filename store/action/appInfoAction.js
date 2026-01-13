@@ -1,6 +1,6 @@
 import { 
   setEmbedUserDetails, 
-  clearEmbedUserDetails,
+  clearEmbedThemeDetails,
 } from '../reducer/appInfoReducer';
 
 // Action creators for embed user details
@@ -12,9 +12,9 @@ export const setEmbedUserDetailsAction = (embedUserData) => (dispatch) => {
   }
 };
 
-export const clearEmbedUserDetailsAction = () => (dispatch) => {
+export const clearEmbedThemeDetailsAction = () => (dispatch) => {
   try {
-    dispatch(clearEmbedUserDetails());
+    dispatch(clearEmbedThemeDetails());
   } catch (error) {
     console.error('Error clearing embed user details:', error);
   }

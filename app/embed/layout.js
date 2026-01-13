@@ -1,7 +1,7 @@
 "use client"
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation';
-import { setEmbedUserDetailsAction, clearEmbedUserDetailsAction } from '@/store/action/appInfoAction';
+import { setEmbedUserDetailsAction, clearEmbedThemeDetailsAction } from '@/store/action/appInfoAction';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
@@ -35,10 +35,10 @@ const Layout = ({ children }) => {
   const resolvedEmbedTheme = useMemo(() => embedThemeConfig || defaultUserTheme, [embedThemeConfig]);
     // Reset embed theme config to ensure fresh state for new embeds
   const resetEmbedThemeConfig = useCallback(() => {
-    dispatch(clearEmbedUserDetailsAction());
+    dispatch(clearEmbedThemeDetailsAction());
   }, [dispatch]);
   useEffect(() => {
-    if (!embedThemeConfig) {
+    if (!embedThemeConfig || embedThemeConfig.length === 0) {
       dispatch(setEmbedUserDetailsAction({ theme_config: defaultUserTheme }));
     }
   }, [dispatch, embedThemeConfig]);
@@ -159,7 +159,7 @@ const Layout = ({ children }) => {
         setIsLoading(true);
         
         // Clear previous embed user details to prevent theme persistence
-        dispatch(clearEmbedUserDetailsAction());
+        dispatch(clearEmbedThemeDetailsAction());
 
         if (urlParamsObj.token) {
           dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
@@ -221,9 +221,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const handleMessage = async (event) => {
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
-      
-      // Clear previous embed user details when receiving new message data
-      dispatch(clearEmbedUserDetailsAction());
+
       
       // Only fetch bridges if not already present in store
       let bridges = allBridges;

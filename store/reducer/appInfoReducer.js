@@ -23,15 +23,15 @@ export const appInfoReducer = createSlice({
         ...validUpdates
       };
     },
-    clearEmbedUserDetails: (state) => {
-      state.embedUserDetails = {};
+    clearEmbedThemeDetails: (state) => {
+      state.embedUserDetails.theme_config = {};
     },    
   }
 });
 
 export const {
   setEmbedUserDetails,
-  clearEmbedUserDetails
+  clearEmbedThemeDetails
 } = appInfoReducer.actions;
 
 export default appInfoReducer.reducer;
