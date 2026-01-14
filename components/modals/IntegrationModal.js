@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
 import { toast } from 'react-toastify'
 
-const IntegrationModal = ({ params }) => {
+const IntegrationModal = ({ params, type = "embed" }) => {
   const integrationNameRef = React.useRef('');
   const dispatch = useDispatch();
   const handleCreateNewIntegration = () => {
@@ -14,25 +14,34 @@ const IntegrationModal = ({ params }) => {
      toast.error("Embed name should not be empty");
       return;
     }
-    dispatch(createIntegrationAction({
+    
+    // Build the payload object
+    const payload = {
       name: integrationNameRef?.current?.value,
       orgId: params.org_id,
-      config:{
-            "hideHomeButton": false,
-            "showGuide": true,
-            "showHistory": false,
-            "showConfigType": false,
-            "slide": "right",
-            "defaultOpen": true,
-            "hideFullScreenButton": false,
-            "hideCloseButton": false,
-            "hideHeader": false,
-            "hideAdvancedParameters": false,
-            "hideAdvancedConfigurations": false,
-            "hidePreTool": false,
-            "hideCreateManuallyButton": false
-        }
-    }))
+      type: type, // Pass type from props ("embed" or "rag_embed")
+    };
+    
+    // Only add config if type is not "rag_embed"
+    if (type !== "rag_embed") {
+      payload.config = {
+        "hideHomeButton": false,
+        "showGuide": true,
+        "showHistory": false,
+        "showConfigType": false,
+        "slide": "right",
+        "defaultOpen": true,
+        "hideFullScreenButton": false,
+        "hideCloseButton": false,
+        "hideHeader": false,
+        "hideAdvancedParameters": false,
+        "hideAdvancedConfigurations": false,
+        "hidePreTool": false,
+        "hideCreateManuallyButton": false
+      };
+    }
+    
+    dispatch(createIntegrationAction(payload));
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';
   }

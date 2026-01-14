@@ -88,7 +88,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
       (item?.id && item?.id?.toString()?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))
     ) || [];
     setFilterItems(filtered);
-  }, [searchTerm, data]);
+  }, [searchTerm, data, setFilterItems]);
 
   const containerClasses = (isWorkspaceItem ) ? `${item === 'org' ? 'w-full mt-2' : 'max-w-xs ml-2'}` : 'max-w-xs ml-2';
   const inputClasses = style
