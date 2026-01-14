@@ -1112,10 +1112,6 @@ function Home({ params, searchParams, isEmbedUser }) {
                 <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  const searchParams = new URLSearchParams();
-                  if (row?.versionId) searchParams.set("version", row.versionId);
-                  if (row?.bridgeType) searchParams.set("type", row.bridgeType);
-                  const query = searchParams.toString();
                   router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}${query ? `?${query}` : ""}`);
                 }}>
                   History
