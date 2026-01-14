@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react';
-import { toggleSidebar } from '@/utils/utility';
 
 const CollapsibleSection = ({ title, children, defaultOpen = true }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);

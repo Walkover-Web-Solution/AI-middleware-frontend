@@ -620,7 +620,7 @@ export default function Page() {
           nodeTypes={nodeTypes}
           fitView
         >
-          {/* <Background /> */}
+          <Background />
         </ReactFlow>
       </div>
 
