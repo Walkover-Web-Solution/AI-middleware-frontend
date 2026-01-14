@@ -4,7 +4,7 @@ import { generateAccessKeyAction } from '@/store/action/orgAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-function RAGEmbedContent({ params }) {
+function RAGEmbedContent({ params, folderId }) {
     const dispatch = useDispatch();
     const access_key = useCustomSelector((state) =>
         state?.userDetailsReducer?.organizations?.[params.org_id]?.meta?.auth_token || ""
@@ -34,6 +34,9 @@ function RAGEmbedContent({ params }) {
                 <div className="mockup-code">
                     <CopyButton data={apiConfig} />
                     <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
+                    {folderId && (
+                        <pre data-prefix=">" className="text-error"><code>folder_id=</code><code className="text-warning">{folderId}</code></pre>
+                    )}
                     <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
                 </div>
                 <div className="form-control">
