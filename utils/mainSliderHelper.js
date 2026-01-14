@@ -10,7 +10,8 @@ import {
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
   Cog,
-  Code2
+  Code2,
+  LayoutTemplate
 } from 'lucide-react';
 import { AddIcon, KeyIcon } from '@/components/Icons';
 import GiftIcon from '@/icons/GiftIcon';
@@ -44,7 +45,8 @@ export const ITEM_ICONS = {
   userDetails: <Cog size={15} />,
   auth: <KeyIcon size={15} />,
   addModel: <AddIcon size={15} />,
-  prebuiltPrompts: <Bot size={15} />
+  prebuiltPrompts: <Bot size={15} />,
+  templates: <LayoutTemplate size={15} />
 };
 
 export const DISPLAY_NAMES = (key) => {
@@ -79,6 +81,8 @@ export const DISPLAY_NAMES = (key) => {
       return 'Auth Key';
     case 'apikeys':
       return 'API Keys';
+    case 'templates':
+      return 'Templates';
     default:
       return key;
   }
@@ -87,7 +91,7 @@ export const DISPLAY_NAMES = (key) => {
 
 export const NAV_SECTIONS = [
   { title: 'AGENT TYPES', items: ['api', 'chatbot'] },
-  { title: 'CONFIGURATION', items: ['chatbotConfig', 'knowledge_base'] },
+  { title: 'CONFIGURATION', items: ['chatbotConfig', 'knowledge_base', 'templates'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'Developer', items: ['integration', 'RAG_embed'] }
