@@ -1,12 +1,11 @@
 "use client";
 import React, { useState, useEffect, use, useCallback } from 'react';
-import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from "@/utils/enums";
 import CustomTable from "@/components/customTable/CustomTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { toggleSidebar, formatRelativeTime, formatDate } from "@/utils/utility";
+import { toggleSidebar, formatRelativeTime, formatDate , openModal } from "@/utils/utility";
 import SearchItems from "@/components/UI/SearchItems";
 import RAGEmbedGuideSlider from "@/components/sliders/RAGEmbedGuideSlider";
 import IntegrationModal from "@/components/modals/IntegrationModal";
