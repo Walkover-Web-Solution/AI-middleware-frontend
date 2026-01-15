@@ -13,24 +13,18 @@ const ResourceChunksModal = ({ resourceId, resourceName }) => {
 
     useEffect(() => {
         const fetchChunks = async () => {
+            console.log("fetched")
             if (!resourceId) {
-                console.log('ResourceChunksModal: No resourceId provided');
                 return;
             }
-            
-            console.log('ResourceChunksModal: Fetching chunks for resourceId:', resourceId);
             setIsLoading(true);
             setError(null);
             
             try {
                 const response = await getResourceChunks(resourceId);
-                console.log('ResourceChunksModal: API Response:', response);
-                
                 if (response?.success && response?.data?.chunks) {
-                    console.log('ResourceChunksModal: Chunks found:', response.data.chunks.length);
                     setChunks(response.data.chunks);
                 } else {
-                    console.log('ResourceChunksModal: No chunks in response');
                     setChunks([]);
                 }
             } catch (err) {
@@ -47,8 +41,6 @@ const ResourceChunksModal = ({ resourceId, resourceName }) => {
 
     const handleClose = () => {
         closeModal(MODAL_TYPE.RESOURCE_CHUNKS_MODAL);
-        setChunks([]);
-        setError(null);
     };
 
     return (
