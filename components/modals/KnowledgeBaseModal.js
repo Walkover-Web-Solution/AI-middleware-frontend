@@ -207,6 +207,11 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
         setShowQuerySettings(false);
         setIsUploading(false);
     };
+    const formatFileSize = (bytes = 0) => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+    };
 
     return (
         <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
@@ -324,7 +329,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                         <div className="flex items-center gap-2 flex-1 min-w-0">
                                             <span className="truncate font-medium">{uploadedFile.name}</span>
                                             <span className="text-xs text-gray-500">
-                                                ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
+                                                ({formatFileSize(uploadedFile.size)})
                                             </span>
                                         </div>
                                         <button

@@ -807,10 +807,10 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
                       {isAdminMode ? 'Back to Main' : 'Admin Settings'}
                     </span>
                   )}
-                </button>
+              </button>
                 <button
                   onClick={() => {
-                    openModal(MODAL_TYPE.TUTORIAL);
+                    openModal(MODAL_TYPE.TUTORIAL_MODAL);
                     if (isMobile) setIsMobileVisible(false);
                   }}
                   onMouseEnter={e => onItemEnter('tutorial', e)}
