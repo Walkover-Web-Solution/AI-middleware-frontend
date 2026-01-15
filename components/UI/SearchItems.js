@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import Protected from '../Protected';
@@ -78,7 +78,8 @@ const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
     }
   }, [searchTerm, filterParam, router]);
 
-  useEffect(() => {
+  // Memoize the filtering logic to prevent infinite re-renders
+  const filterData = useCallback(() => {
     const filtered = data?.filter(item =>
       (item?.name && item?.name?.toLowerCase()?.includes(searchTerm.toLowerCase().trim())) ||
       (item?.slugName && item?.slugName?.toLowerCase()?.includes(searchTerm.toLowerCase().trim())) ||
@@ -87,8 +88,13 @@ const SearchItems = ({ data, setFilterItems ,item, style='', isEmbedUser}) => {
       (item?.flow_name && item?.flow_name?.toLowerCase()?.includes(searchTerm.toLowerCase().trim())) ||
       (item?.id && item?.id?.toString()?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))
     ) || [];
+    return filtered;
+  }, [data, searchTerm]);
+
+  useEffect(() => {
+    const filtered = filterData();
     setFilterItems(filtered);
-  }, [searchTerm, data]);
+  }, [filterData, setFilterItems]);
 
   const containerClasses = (isWorkspaceItem ) ? `${item === 'org' ? 'w-full mt-2' : 'max-w-xs ml-2'}` : 'max-w-xs ml-2';
   const inputClasses = style
