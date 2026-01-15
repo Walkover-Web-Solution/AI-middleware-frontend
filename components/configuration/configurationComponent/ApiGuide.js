@@ -78,18 +78,18 @@ const Section = ({ title, caption, children }) => (
 
 const ApiGuide = ({ params, searchParams, modelType, isEmbedUser, prompt = '' }) => {
   return (
-    <div className="min-h-screen gap-4 flex flex-col">
-      {!isEmbedUser && <div className="flex flex-col gap-4 p-4">
+    <div id="api-guide-container" className="min-h-screen gap-4 flex flex-col">
+      {!isEmbedUser && <div id="api-guide-step1-section" className="flex flex-col gap-4 p-4">
         <Section title="Step 1" caption="Create Auth Key" />
         <p className=" text-sm">
           Follow the on-screen instructions to create a new Auth Key. Ignore if already created
-          <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create Auth Key</Link>
+          <br /> <Link id="api-guide-create-authkey-link" href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create Auth Key</Link>
         </p>
       </div>}
-      <div className="flex flex-col gap-4 p-4">
+      <div id="api-guide-step2-section" className="flex flex-col gap-4 p-4">
         <Section title={`${isEmbedUser ? 'Step 1' : 'Step 2'}`} caption="Use the API" />
-        <div className="mockup-code relative">
-          <CopyButton data={ComplitionApi(params.id, modelType, isEmbedUser, prompt)} />
+        <div id="api-guide-curl-code-block" className="mockup-code relative">
+          <CopyButton  data={ComplitionApi(params.id, modelType, isEmbedUser, prompt)} />
           <pre className="break-words whitespace-pre-wrap">
             <code>
               {ComplitionApi(params.id, modelType, isEmbedUser, prompt)}
@@ -100,9 +100,9 @@ const ApiGuide = ({ params, searchParams, modelType, isEmbedUser, prompt = '' })
         <p className=" text-sm"><strong>Note:</strong> If the value of response_type is undefined, the output will be in JSON format by default.
         </p>
       </div>
-      <div className="flex flex-col gap-4 p-4">
+      <div id="api-guide-response-section" className="flex flex-col gap-4 p-4">
         <Section title="Response Format" />
-        <div className="mockup-code relative">
+        <div id="api-guide-response-code-block"className="mockup-code relative">
           <CopyButton data={ResponseFormat()} />
           <pre className="break-words whitespace-pre-wrap">
             <code>

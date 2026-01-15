@@ -19,7 +19,8 @@ const LoginButton = () => {
   };
 
   return (
-    <button 
+    <button
+      id="login-button" 
       onClick={handleLogin}
       disabled={isLoading}
       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors flex items-center"

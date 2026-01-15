@@ -377,7 +377,7 @@ const AccessManagementModal = ({ agent }) => {
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.ACCESS_MANAGEMENT_MODAL}>
-      <div className="modal-box max-w-3xl">
+      <div id="access-management-modal-container" className="modal-box max-w-3xl">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-lg font-semibold">
@@ -388,10 +388,11 @@ const AccessManagementModal = ({ agent }) => {
 
         <div className="mb-4">
           {/* Email input with contextual Add/Invite actions */}
-          <div className="bg-base-200 rounded-lg mb-4">
+          <div  id="access-management-search-section" className="bg-base-200 rounded-lg mb-4">
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
+                  id="access-management-email-input"
                   type="email"
                   value={emailInput}
                   onChange={handleEmailChange}
@@ -408,12 +409,13 @@ const AccessManagementModal = ({ agent }) => {
               {emailInput.trim() && (isSearching || searchResults.length > 0) && (
                 <div className="flex items-center">
                   {isSearching ? (
-                    <button className="btn btn-primary btn-sm" disabled>
+                    <button id="access-management-searching-button" className="btn btn-primary btn-sm" disabled>
                       <span className="loading loading-spinner loading-xs"></span>
                       Searching...
                     </button>
                   ) : searchResults.length > 0 ? (
                     <button
+                      id="access-management-add-user-button"
                       className="btn btn-primary btn-sm"
                       onClick={() => {
                         const targetUser = foundUser || searchResults[0];
@@ -432,6 +434,7 @@ const AccessManagementModal = ({ agent }) => {
                     </button>
                   ) : (
                     <button
+                      id="access-management-invite-button"
                       className="btn btn-outline btn-sm btn-primary"
                       onClick={handleInviteUser}
                       disabled={isInviting || !emailInput.trim()}
@@ -449,11 +452,12 @@ const AccessManagementModal = ({ agent }) => {
             
             {/* Show search results */}
             {emailInput.trim() && searchResults.length > 0 && (
-              <div className="mt-3 border border-base-300 rounded-lg bg-base-100 max-h-60 overflow-y-auto">
+              <div id="access-management-search-results" className="mt-3 border border-base-300 rounded-lg bg-base-100 max-h-60 overflow-y-auto">
                 <ul className="menu p-0">
                   {searchResults.map((user) => (
                     <li key={user.user_id || user.id}>
                       <button 
+                        id={`access-management-user-result-${user.user_id || user.id}`}
                         className={`flex items-start py-2 px-3 hover:bg-base-200 w-full text-left ${(foundUser?.user_id || foundUser?.id) === (user.user_id || user.id) ? 'bg-primary/10' : ''}`}
                         onClick={() => selectUser(user)}
                       >
@@ -483,10 +487,11 @@ const AccessManagementModal = ({ agent }) => {
             
             {/* Show no results message with invite button - only when not typing */}
             {!isSearching && emailInput.trim() && searchResults.length === 0 && !isTypingRef.current && (
-              <div className="mt-3 p-3 border border-base-300 rounded-lg bg-base-100">
+              <div  id="access-management-no-results" className="mt-3 p-3 border border-base-300 rounded-lg bg-base-100">
                 <div className="text-center">
                   <p className="text-sm">No users found with email: <span className="font-medium">{emailInput}</span></p>
                   <button 
+                    id="access-management-invite-no-results-button"
                     className="btn btn-outline btn-sm btn-primary mt-2"
                     onClick={handleInviteUser}
                     disabled={isInviting}
@@ -502,14 +507,15 @@ const AccessManagementModal = ({ agent }) => {
           
         </div>
 
-        <div className="mt-6">
+        <div  id="access-management-members-section" className="mt-6">
           <h3 className="text-sm font-medium mb-2">Users with Access to this Agent</h3>
           <div className="border border-base-200 rounded-lg">
             <div className="max-h-[50vh] overflow-y-auto">
               {agentMembers.length > 0 ? (
-                <div className="flex flex-wrap gap-2 p-2">
+                <div id="access-management-members-list" className="flex flex-wrap gap-2 p-2">
                   {agentMembers.map((agentMember) => (
                     <div
+                      id={`access-management-member-${agentMember.id}`}
                       key={agentMember.id}
                       className="flex items-center gap-2 px-2 py-1 border border-base-200 rounded-full bg-base-100 hover:bg-base-200"
                     >
@@ -520,6 +526,7 @@ const AccessManagementModal = ({ agent }) => {
                       </div>
                       {/* Don't show remove button for admin/owner */}
                         <button 
+                          id={`access-management-remove-button-${agentMember.id}`}
                           className="btn btn-ghost btn-xs btn-circle text-error ml-1" 
                           onClick={() => removeUserFromAgent(agentMember.id || agentMember.user_id)}
                           disabled={isUpdating}
@@ -532,7 +539,7 @@ const AccessManagementModal = ({ agent }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
+                <div id="access-management-empty-state" className="text-center py-8">
                   <UserCircleIcon size={48} className="text-base-content/30 mx-auto mb-4" />
                   <p className="text-base-content/70 text-sm max-w-md mx-auto">
                  Without members, this agent is editable by all except viewers.                  </p>
@@ -543,7 +550,7 @@ const AccessManagementModal = ({ agent }) => {
         </div>
 
         <div className="mt-4 flex justify-end">
-          <button onClick={handleClose} className="btn btn-sm">
+          <button id="access-management-close-button"onClick={handleClose} className="btn btn-sm">
             Close
           </button>
         </div>

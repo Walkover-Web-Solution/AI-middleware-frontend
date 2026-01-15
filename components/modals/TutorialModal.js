@@ -70,7 +70,7 @@ const TutorialModal = () => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
       {/* Main Modal */}
-      <div className="relative z-low w-full max-w-5xl bg-base-100 rounded-xl shadow-2xl overflow-hidden border border-base-300">
+      <div id="tutorial-modal-container" className="relative z-low w-full max-w-5xl bg-base-100 rounded-xl shadow-2xl overflow-hidden border border-base-300">
         {/* Header */}
         <div className=" px-8 py-6 ">
           <div className="flex items-center justify-between">
@@ -98,6 +98,7 @@ const TutorialModal = () => {
 
               return (
                 <div
+                  id={`tutorial-item-${index}`}
                   key={index}
                   className={`border rounded-xl transition-all duration-200 transform hover:scale-[1.01] ${isActive
                       ? 'border-base-300 shadow-lg bg-base-100'
@@ -124,6 +125,7 @@ const TutorialModal = () => {
                       <div className="flex items-center gap-3 flex-shrink-0">
                         {!isActive && (
                           <button
+                            id={`tutorial-watch-button-${index}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleTutorial(index);
@@ -135,7 +137,7 @@ const TutorialModal = () => {
                           </button>
                         )}
 
-                        <div className={`text-slate-400 transition-transform duration-200 cursor-pointer ${isActive ? 'rotate-180' : 'hover:translate-x-1'
+                        <div id={`tutorial-toggle-${index}`} className={`text-slate-400 transition-transform duration-200 cursor-pointer ${isActive ? 'rotate-180' : 'hover:translate-x-1'
                           }`} onClick={() => toggleTutorial(index)}>
                           {isActive ? (
                             <ChevronDownIcon size={20} />
@@ -164,6 +166,7 @@ const TutorialModal = () => {
                             You can pause, rewind, or replay the video using the video controls
                           </div>
                           <button
+                            id={`tutorial-close-video-button-${index}`}
                             onClick={() => setActiveIndex(null)}
                             className="px-4 py-2 text-base-content hover:text-base-content hover:bg-base-200 rounded-lg transition-all duration-200 text-sm hover:scale-105"
                           >
@@ -183,6 +186,7 @@ const TutorialModal = () => {
         <div className="border-t border-base-300 bg-base-100 px-8 py-5">
           <div className="flex justify-between items-center">
             <button
+              id="tutorial-close-button"
               onClick={internalClose}
               className="px-6 py-2 bg-base-300 text-base-content rounded-lg hover:bg-base-200 transition-all duration-200 font-medium text-sm hover:scale-105 shadow-sm hover:shadow-md ml-auto"
             >

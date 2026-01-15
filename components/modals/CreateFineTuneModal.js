@@ -51,25 +51,25 @@ function CreateFineTuneModal({params, selectedThreadIds}) {
     }
     return (
         <Modal MODAL_ID={MODAL_TYPE.FINE_TUNE_MODAL}>
-            <div className="modal-box">
+            <div id="fine-tune-modal-container" className="modal-box">
                 <h3 className="font-bold text-lg">Choose Response Category</h3>
                 <p className="py-2 text-sm mb-2">Select the category on the basis of user feedback</p>
                 <div className="form-control">
                     <label className="label cursor-pointer">
                         <span className="label-text flex items-center gap-2"><GlobeIcon size={16} color='skyblue' />All Responses &#40; including no feedback &#41;</span>
-                        <input type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 0)} checked={status?.includes(0)} />
+                        <input id="fine-tune-all-responses-checkbox" type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 0)} checked={status?.includes(0)} />
                     </label>
                 </div>
                 <div className="form-control">
                     <label className="label cursor-pointer">
                         <span className="label-text flex items-center gap-2"><CirclePlusIcon size={16} color='green' />Positive Feedback Responses</span>
-                        <input type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 1)} checked={status?.includes(0) || status?.includes(1)} disabled={status?.includes(0)}/>
+                        <input  id="fine-tune-positive-feedback-checkbox"  type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 1)} checked={status?.includes(0) || status?.includes(1)} disabled={status?.includes(0)}/>
                     </label>
                 </div>
                 <div className="form-control">
                     <label className="label cursor-pointer">
                         <span className="label-text flex items-center gap-2"><CircleMinusIcon size={16} color='red' />Negative Feedback Responses</span>
-                        <input type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 2)} checked={status?.includes(0) || status?.includes(2)}  disabled={status?.includes(0)}/>
+                        <input id="fine-tune-negative-feedback-checkbox" type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 2)} checked={status?.includes(0) || status?.includes(2)}  disabled={status?.includes(0)}/>
                     </label>
                 </div>
 
@@ -79,8 +79,8 @@ function CreateFineTuneModal({params, selectedThreadIds}) {
                 <div className="modal-action">
                     <form method="dialog">
                         {/* if there is a button in form, it will close the modal */}
-                        <button className="btn mr-2">Close</button>
-                        <button className="btn btn-primary" onClick={handleDownloadFineTuneData} disabled={status?.length===0}>Download</button>
+                        <button id="fine-tune-close-button" className="btn mr-2">Close</button>
+                        <button id="fine-tune-download-button"className="btn btn-primary" onClick={handleDownloadFineTuneData} disabled={status?.length===0}>Download</button>
                     </form>
                 </div>
             </div>

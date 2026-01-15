@@ -83,7 +83,7 @@ const ConfigurationPage = ({
 
     const renderHelpSection = useMemo(() => () => {
         return (
-            <div className="mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
+            <div  className="mt-4 mb-4 border-t border-base-content/10 border-b-0 ">
                 <div className="flex flex-row gap-6 mt-4 items-center">
                     {/* Speak to us */}
                     {!isEmbedUser && (
@@ -102,6 +102,7 @@ const ConfigurationPage = ({
                     {/* Help Docs */}
                 
                         <a
+                            id="help-docs-link"
                             href="https://gtwy.ai/resources"
                             className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors"
                             target="_blank"
@@ -115,10 +116,11 @@ const ConfigurationPage = ({
                      {/* Integration Guide */}
                     
                         <button
+                            id="integration-guide-button"
                             onClick={() => {
                                 handleNavigation('integration');
                             }}
-                            className="flex items-center gap-1 text-sm text-base-content/50 hover:text-base-content font-bold transition-colors cursor-pointer"
+                            className="flex items-center gap-1 text-sm text-base-content-50 hover:text-base-content font-bold transition-colors cursor-pointer"
                         >
                             <span>Integration Guide</span>
                             <span>→</span>
@@ -233,7 +235,7 @@ const ConfigurationPage = ({
             <div className="flex flex-col gap-2 relative min-h-full">
                 {/* Published Data Banner - Sticky and close to navbar */}
                 {bannerState.showPublished && (
-                    <div className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                    <div id="published-banner" className={`sticky top-0 z-40 bg-blue-50 dark:bg-slate-800 border-b border-blue-200 dark:border-slate-700 py-2 ${bannerState.animatingPublished ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -246,7 +248,7 @@ const ConfigurationPage = ({
                 
                 {/* Non-Editor Banner - Sticky and close to navbar */}
                 {bannerState.showNonEditor && (
-                    <div className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
+                    <div id="non-editor-banner" className={`sticky top-0 z-40 bg-amber-50 dark:bg-slate-800 border-b border-amber-200 dark:border-slate-700 py-2 ${bannerState.animatingNonEditor ? 'animate-slide-out-to-navbar' : 'animate-slide-in-from-navbar'
                         }`}>
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />

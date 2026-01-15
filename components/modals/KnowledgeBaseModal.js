@@ -214,6 +214,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-base-300">
                     <h3 className="font-bold text-lg">{selectedResource ? "Edit" : "Create"} Knowledge Base</h3>
                     <button
+                        id="knowledgebase-modal-close-button"
                         onClick={handleClose}
                         className="btn btn-circle btn-ghost btn-sm"
                         disabled={isCreatingResource}
@@ -229,6 +230,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             <span className="label-text text-sm font-medium">Name <RequiredItem /></span>
                         </label>
                         <input
+                            id="knowledgebase-name-input"
                             type="text"
                             name="title"
                             className="input input-bordered input-sm"
@@ -246,6 +248,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             <span className="label-text text-sm font-medium">Description <RequiredItem /></span>
                         </label>
                         <textarea
+                            id="knowledgebase-description-textarea"
                             name="description"
                             className="textarea textarea-bordered textarea-sm"
                             placeholder="Brief description of the knowledge base content"
@@ -260,6 +263,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                         <div className="flex gap-4 mb-4">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
+                                    id="knowledgebase-input-type-url"
                                     type="radio"
                                     name="inputType"
                                     className="radio radio-primary radio-sm"
@@ -270,6 +274,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
+                                    id="knowledgebase-input-type-file"
                                     type="radio"
                                     name="inputType"
                                     className="radio radio-primary radio-sm"
@@ -280,6 +285,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
+                                    id="knowledgebase-input-type-content"
                                     type="radio"
                                     name="inputType"
                                     className="radio radio-primary radio-sm"
@@ -301,6 +307,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             {!uploadedFile && (
                                 <>
                                     <input
+                                        id="knowledgebase-file-upload"
                                         type="file"
                                         onChange={handleFileUpload}
                                         className="file-input file-input-bordered file-input-sm w-full"
@@ -328,6 +335,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             </span>
                                         </div>
                                         <button
+                                            id="knowledgebase-remove-file-button"
                                             type="button"
                                             onClick={removeUploadedFile}
                                             className="btn btn-ghost btn-xs text-error hover:bg-error hover:text-white"
@@ -346,6 +354,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                 <span className="label-text text-sm font-medium">Content <RequiredItem /></span>
                             </label>
                             <textarea
+                                id="knowledgebase-content-textarea-create"
                                 name="content"
                                 className="textarea textarea-bordered textarea-sm w-full h-32"
                                 placeholder="Enter content here..."
@@ -362,6 +371,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                     <span className="label-text text-sm font-medium">Content <RequiredItem /></span>
                                 </label>
                                 <textarea
+                                    id="knowledgebase-content-textarea-edit"
                                     name="content"
                                     className="textarea textarea-bordered textarea-sm w-full h-32"
                                     placeholder="Enter content here..."
@@ -377,6 +387,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                     <span className="label-text text-sm font-medium">URL</span>
                                 </label>
                                 <input
+                                    id="knowledgebase-url-input-edit"
                                     type="url"
                                     name="url"
                                     className="input input-bordered input-sm bg-gray-100"
@@ -396,6 +407,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                 <span className="label-text text-sm font-medium">URL <RequiredItem /></span>
                             </label>
                             <input
+                                id="knowledgebase-url-input-create"
                                 type="url"
                                 name="url"
                                 className="input input-bordered input-sm"
@@ -414,6 +426,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                     <span className="label-text text-sm font-medium">Chunking Type</span>
                                 </label>
                                 <select
+                                    id="knowledgebase-chunking-type-select"
                                     name="chunkingType"
                                     className="select select-bordered select-sm"
                                     value={chunkingType}
@@ -433,6 +446,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                         <span className="label-text text-sm font-medium">Chunking URL</span>
                                     </label>
                                     <input
+                                        id="knowledgebase-chunking-url-input"
                                         type="url"
                                         name="chunkingUrl"
                                         className="input input-bordered input-sm"
@@ -448,6 +462,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             <span className="label-text text-sm font-medium">Chunk Size</span>
                                         </label>
                                         <input
+                                            id="knowledgebase-chunk-size-input"
                                             type="number"
                                             name="chunkSize"
                                             className="input input-bordered input-sm"
@@ -466,6 +481,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                                 <span className="label-text text-sm font-medium">Chunk Overlap</span>
                                             </label>
                                             <input
+                                                id="knowledgebase-chunk-overlap-input"
                                                 type="number"
                                                 name="chunkingOverlap"
                                                 className="input input-bordered input-sm"
@@ -486,6 +502,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                     {!selectedResource && (
                         <div className="collapse collapse-arrow border border-base-300 bg-base-100">
                             <input
+                                id="knowledgebase-advanced-settings-toggle"
                                 type="checkbox"
                                 checked={showQuerySettings}
                                 onChange={(e) => setShowQuerySettings(e.target.checked)}
@@ -503,6 +520,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                         <div className="flex gap-4">
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
+                                                    id="knowledgebase-query-type-fastest"
                                                     type="radio"
                                                     name="queryAccessType"
                                                     value="fastest"
@@ -514,6 +532,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             </label>
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
+                                                    id="knowledgebase-query-type-moderate"
                                                     type="radio"
                                                     name="queryAccessType"
                                                     value="moderate"
@@ -524,6 +543,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             </label>
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
+                                                    id="knowledgebase-query-type-high-accuracy"
                                                     type="radio"
                                                     name="queryAccessType"
                                                     value="high_accuracy"
@@ -540,6 +560,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                     )}
                     <div className="flex justify-end gap-2">
                         <button
+                            id="knowledgebase-cancel-button"
                             type="button"
                             className="btn btn-ghost btn-sm"
                             onClick={handleClose}
@@ -548,6 +569,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                             Cancel
                         </button>
                         <button
+                            id="knowledgebase-submit-button"
                             type="submit"
                             className="btn btn-primary btn-sm"
                             disabled={isCreatingResource}

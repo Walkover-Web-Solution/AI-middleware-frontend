@@ -8,13 +8,13 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
     const copyToClipboard = () => { navigator.clipboard.writeText(value) };
 
     return (
-        <div className="join form-control w-full max-w-xs">
+        <div id="input-with-copy-container" className="join form-control w-full max-w-xs">
             <div className="label">
                 <span className="label-text">{label}</span>
             </div>
             <div className="flex items-center justify-start">
-                <input className="input input-bordered join-item input-sm w-[25rem]" placeholder={placeholder} value={value} disabled={disabled} />
-                <button className="btn join-item btn-sm" onClick={copyToClipboard}><CopyIcon size={16} /></button>
+                <input  id="input-with-copy-input" className="input input-bordered join-item input-sm w-[25rem]" placeholder={placeholder} value={value} disabled={disabled} />
+                <button id="input-with-copy-button" className="btn join-item btn-sm" onClick={copyToClipboard}><CopyIcon size={16} /></button>
             </div>
         </div>
     );
@@ -36,7 +36,7 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
         }
     };
     return (
-        <div className="flex flex-col gap-4 p-4">
+        <div id="first-step-container" className="flex flex-col gap-4 p-4">
             <div>
                 <h3 className="text-lg font-semibold">Step 1</h3>
                 <p className="text-sm text-gray-600">Generate a JWT token</p>
@@ -73,7 +73,7 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
                 {showInput ? (
                     <InputWithCopyButton label="Access Key" placeholder="Access Key" value={accessKey} />
                 ) : (
-                    <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>
+                    <button id="first-step-show-access-key" className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>
                         Show Access Key
                     </button>
                 )}

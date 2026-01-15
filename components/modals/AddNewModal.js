@@ -501,11 +501,12 @@ export default function AddNewModelModal() {
     return (
 
         <Modal MODAL_ID={MODAL_TYPE.ADD_NEW_MODEL_MODAL}>
-            <div className='modal-box min-w-[70rem]'>
+            <div id="add-new-model-modal-container"  className='modal-box min-w-[70rem]'>
                 <div className="min-h-screen bg-base-100 pt-4">
                     <div className="w-full mx-auto">
                         <div className="relative text-center">
                             <button
+                                id="add-model-reset-button"
                                 onClick={resetFormToDefault}
                                 className="btn btn-ghost absolute right-0 top-1/3 tooltip tooltip-left"
                                 data-tip="Reset form to default values"
@@ -525,7 +526,7 @@ export default function AddNewModelModal() {
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="form-control">
                                             <label className="label"><span className="label-text">Service</span></label>
-                                            <select value={config.service} onChange={e => handleTopLevelChange('service', e.target.value)}
+                                            <select  id="add-model-service-select" value={config.service} onChange={e => handleTopLevelChange('service', e.target.value)}
                                                 className="select select-bordered w-full">
                                                 {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
                                                     <option key={value} value={value}>{displayName}</option>
@@ -534,7 +535,7 @@ export default function AddNewModelModal() {
                                         </div>
                                         <div className="form-control">
                                             <label className="label"><span className="label-text">Model Name<span className="text-error">*</span></span></label>
-                                            <input type="text" value={config.model_name}
+                                            <input id="add-model-name-input" type="text" value={config.model_name}
                                                 onChange={e => {
                                                     const value = e.target.value;
                                                     handleTopLevelChange('model_name', value);
@@ -556,7 +557,7 @@ export default function AddNewModelModal() {
                                         </div>
                                         <div className="form-control">
                                             <label className="label"><span className="label-text">Display Name <span className="text-error">*</span></span></label>
-                                            <input type="text" value={config.display_name}
+                                            <input id="add-model-display-name-input" type="text" value={config.display_name}
                                                 onChange={e => handleTopLevelChange('display_name', e.target.value)}
                                                 className="input input-bordered w-full"
                                                 placeholder={PLACEHOLDERS[config.service]?.display_name} />
@@ -568,25 +569,26 @@ export default function AddNewModelModal() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                             <div className="form-control p-4 rounded-lg border border-base-300">
                                                 <label className="label cursor-pointer justify-start gap-4">
-                                                    <input type="checkbox" checked={!!config?.validationConfig?.vision} onChange={e => handleValidationChange('vision', e.target.checked)} className="checkbox checkbox-primary" />
+                                                    <input id="add-model-vision-checkbox" type="checkbox" checked={!!config?.validationConfig?.vision} onChange={e => handleValidationChange('vision', e.target.checked)} className="checkbox checkbox-primary" />
                                                     <span className="label-text font-medium">Supports Vision</span>
                                                 </label>
                                             </div>
                                             <div className="form-control p-4 rounded-lg border border-base-300">
                                                 <label className="label cursor-pointer justify-start gap-4">
-                                                    <input type="checkbox" checked={!!config.validationConfig?.tools} onChange={e => handleValidationChange('tools', e.target.checked)} className="checkbox checkbox-primary" />
+                                                    <input id="add-model-tools-checkbox" type="checkbox" checked={!!config.validationConfig?.tools} onChange={e => handleValidationChange('tools', e.target.checked)} className="checkbox checkbox-primary" />
                                                     <span className="label-text font-medium">Supports Tools</span>
                                                 </label>
                                             </div>
                                             <div className="form-control p-4 rounded-lg border border-base-300">
                                                 <label className="label cursor-pointer justify-start gap-4">
-                                                    <input type="checkbox" checked={!!config.validationConfig?.system_prompt} onChange={e => handleValidationChange('system_prompt', e.target.checked)} className="checkbox checkbox-primary" />
+                                                    <input id="add-model-system-prompt-checkbox" type="checkbox" checked={!!config.validationConfig?.system_prompt} onChange={e => handleValidationChange('system_prompt', e.target.checked)} className="checkbox checkbox-primary" />
                                                     <span className="label-text font-medium">Support System Prompt</span>
                                                 </label>
                                             </div>
                                             <div className="form-control p-4 rounded-lg border border-base-300">
                                                 <label className="label"><span className="label-text font-medium">Model Type</span></label>
                                                 <select
+                                                    id="add-model-type-select"
                                                     value={config.validationConfig?.type}
                                                     onChange={e => handleValidationChange('type', e.target.value)}
                                                     className="select select-bordered w-full"
@@ -606,7 +608,7 @@ export default function AddNewModelModal() {
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="form-control">
                                                         <label className="label"><span className="label-text">Input Cost / Mtok<span className="text-error">*</span></span></label>
-                                                        <input type="number" value={config.validationConfig.specification.input_cost}
+                                                        <input  id="add-model-input-cost-input" type="number" value={config.validationConfig.specification.input_cost}
                                                             onChange={e => handleSpecificationChange('input_cost', e.target.value === '' ? '' : parseFloat(e.target.value))}
                                                             className="input input-bordered w-full" step="0.001"
                                                             placeholder={PLACEHOLDERS[config.service]?.input_cost}
@@ -614,7 +616,7 @@ export default function AddNewModelModal() {
                                                     </div>
                                                     <div className="form-control">
                                                         <label className="label"><span className="label-text">Output Cost / Mtok<span className="text-error">*</span></span></label>
-                                                        <input type="number" value={config.validationConfig.specification.output_cost}
+                                                        <input id="add-model-output-cost-input" type="number" value={config.validationConfig.specification.output_cost}
                                                             onChange={e => {
                                                                 const value = parseFloat(e.target.value);
                                                                 if (value < 0) {
@@ -630,7 +632,7 @@ export default function AddNewModelModal() {
                                                 </div>
                                                 <div className="form-control">
                                                     <label className="label"><span className="label-text">Description<span className="text-error">*</span></span></label>
-                                                    <textarea value={config.validationConfig.specification.description}
+                                                    <textarea id="add-model-description-textarea" value={config.validationConfig.specification.description}
                                                         onChange={e => handleSpecificationChange('description', e.target.value)}
                                                         onBlur={e => handleSpecificationChange('description', e.target.value.trim())}
                                                         className="textarea bg-white dark:bg-black/15 textarea-bordered w-full" rows={3}
@@ -638,7 +640,7 @@ export default function AddNewModelModal() {
                                                 </div>
                                                 <div className="form-control">
                                                     <label className="label"><span className="label-text">Knowledge Cutoff<span className="text-error">*</span></span></label>
-                                                    <input type="text" value={config.validationConfig.specification.knowledge_cutoff}
+                                                    <input id="add-model-knowledge-cutoff-input" type="text" value={config.validationConfig.specification.knowledge_cutoff}
                                                         onChange={e => handleSpecificationChange('knowledge_cutoff', e.target.value)}
                                                         onBlur={e => handleSpecificationChange('knowledge_cutoff', e.target.value.trim())}
                                                         className="input input-bordered w-full"
@@ -646,7 +648,7 @@ export default function AddNewModelModal() {
                                                 </div>
                                                 <div className="form-control">
                                                     <label className="label"><span className="label-text">Use Case</span></label>
-                                                    <textarea value={(config.validationConfig.specification.usecase || []).join('\n')}
+                                                    <textarea id="add-model-usecase-textarea" value={(config.validationConfig.specification.usecase || []).join('\n')}
                                                         onChange={e => handleSpecificationChange('usecase', e.target.value.split('\n').filter(Boolean))}
                                                         onBlur={e => handleSpecificationChange('usecase', e.target.value.trim().split('\n'))}
                                                         className="textarea bg-white dark:bg-black/15 textarea-bordered w-full"
@@ -662,26 +664,26 @@ export default function AddNewModelModal() {
                                             <span className="text-xs text-base-content/40 font-normal">(advanced tuning)</span>
                                         </h3>
                                         {!showNewParamForm && (
-                                            <button className="btn btn-primary btn-sm mb-5" onClick={() => setShowNewParamForm(true)}>
+                                            <button id="add-model-add-param-button" className="btn btn-primary btn-sm mb-5" onClick={() => setShowNewParamForm(true)}>
                                                 + Add Model Parameter
                                             </button>
                                         )}
                                         {showNewParamForm && (
-                                            <div className="p-4 border border-primary/20 rounded-lg bg-primary/5 mb-6">
+                                            <div  id="add-model-new-param-form"  className="p-4 border border-primary/20 rounded-lg bg-primary/5 mb-6">
                                                 <h4 className="text-md font-medium mb-3">New Parameter Details</h4>
                                                 <form className="space-y-4"
                                                     onSubmit={e => { e.preventDefault(); handleAddNewParam(); }}>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div className="form-control">
                                                             <label className="label"><span className="label-text">Parameter Name</span></label>
-                                                            <input type="text" autoFocus
+                                                            <input id="add-model-param-name-input" type="text" autoFocus
                                                                 value={newParamData.name}
                                                                 onChange={e => setNewParamData(p => ({ ...p, name: e.target.value.replace(/\s/g, '_') }))}
                                                                 className="input input-bordered w-full" />
                                                         </div>
                                                         <div className="form-control">
                                                             <label className="label"><span className="label-text">Field Type</span></label>
-                                                            <select value={newParamData.type}
+                                                            <select id="add-model-param-type-select"  value={newParamData.type}
                                                                 onChange={e => setNewParamData(p => ({ ...p, type: e.target.value }))}
                                                                 className="select select-bordered w-full">
                                                                 <option value="slider">Numeric (Slider)</option>
@@ -693,8 +695,8 @@ export default function AddNewModelModal() {
                                                         </div>
                                                     </div>
                                                     <div className="flex space-x-2">
-                                                        <button type="submit" className="btn btn-primary">Save</button>
-                                                        <button type="button" onClick={() => setShowNewParamForm(false)} className="btn btn-ghost">Cancel</button>
+                                                        <button id="add-model-save-param-button" type="submit" className="btn btn-primary">Save</button>
+                                                        <button  id="add-model-cancel-param-button"  type="button" onClick={() => setShowNewParamForm(false)} className="btn btn-ghost">Cancel</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -710,10 +712,10 @@ export default function AddNewModelModal() {
                                         </div>
                                     </div>
                                 )}
-                                    <button type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn btn-sm">
+                                    <button id="add-model-close-button" type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn btn-sm">
                                         Close
                                     </button>
-                                    <button type="button"
+                                    <button id="add-model-save-button" type="button"
                                         onClick={handleAddModel}
                                         className="btn btn-sm btn-primary"
                                         disabled={isFormInvalid}>

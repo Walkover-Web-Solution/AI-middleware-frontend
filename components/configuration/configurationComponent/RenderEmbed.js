@@ -45,6 +45,7 @@ const RenderEmbed = ({
           <div
             key={value?._id}
             id={value?._id}
+            
             className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full ${value?.description?.trim() === "" ? "border-red-600" : ""} transition-colors duration-200`}
           >
             <div
@@ -76,6 +77,7 @@ const RenderEmbed = ({
             {/* Action buttons that appear on hover */}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
               <button
+               id={`render-embed-config-button-${value?._id}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenModal(value?._id);
@@ -87,6 +89,7 @@ const RenderEmbed = ({
               </button>
               {name === "preFunction" && handleChangePreTool && (
                 <button
+                id={`render-embed-refresh-button-${value?._id}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleChangePreTool();
@@ -99,6 +102,7 @@ const RenderEmbed = ({
                 </button>
               )}
               <button
+              id={`render-embed-delete-button-${value?._id}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenDeleteModal(value?._id, value?.script_id);
@@ -115,7 +119,7 @@ const RenderEmbed = ({
       });
 
     return (
-      <div className="w-full">
+      <div id="render-embed-container" className="w-full">
         <div className={`grid gap-2 w-full`}>
           {embedItems}
         </div>

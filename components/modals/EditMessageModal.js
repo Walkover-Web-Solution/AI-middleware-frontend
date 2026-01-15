@@ -6,7 +6,7 @@ import { Zap, Eye } from 'lucide-react'
 const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handleImprovePrompt,isImprovingPrompt,hasGeneratedPrompt,handleShowGeneratedPrompt}) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.EDIT_MESSAGE_MODAL}>
-    <div className="bg-base-100 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
+    <div  id="edit-message-modal-container" className="bg-base-100 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
       <h2 className="text-xl font-semibold mb-4">Improve Your Prompt</h2>
       
       {/* Instructions */}
@@ -21,6 +21,7 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
           <span className="label-text">Describe your ideal response:</span>
         </label>
         <textarea
+          id="edit-message-textarea"
           className="input input-bordered textarea min-h-[200px]"
           defaultValue={modalInput?.content}
           key={modalInput?.Id}
@@ -33,7 +34,7 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
       </div>
 
       <div className="flex text-base-content justify-end gap-2">
-        <button className="btn btn-sm" onClick={handleClose}>
+        <button  id="edit-message-cancel-button" className="btn btn-sm" onClick={handleClose}>
           Cancel
         </button>
         
@@ -42,6 +43,7 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
           <>
             {/* Show generated prompt button */}
             <button 
+              id="edit-message-show-generated-button"
               className="btn btn-secondary btn-sm gap-2"
               onClick={handleShowGeneratedPrompt}
             >
@@ -54,6 +56,7 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
         ) : (
           /* First time - show Better Prompt button */
           <button 
+            id="edit-message-improve-button"
             className="btn btn-primary btn-sm gap-2"
             onClick={handleImprovePrompt}
           >

@@ -36,8 +36,9 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
   }
 
   const modalContent = (
-    <div className="fixed inset-0 z-very-high  bg-black bg-opacity-70 flex items-center justify-center">
+    <div  id="onboarding-modal-overlay" className="fixed inset-0 z-very-high  bg-black bg-opacity-70 flex items-center justify-center">
       <button
+        id="onboarding-close-button"
         onClick={() => handleVideoEnd()}
         className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-low-medium"
         aria-label="Close Tutorial"
@@ -47,6 +48,7 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
 
       <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '76vh', width: '160vh', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
         <iframe
+          id="onboarding-video-iframe"
           src={video}
           loading="lazy"
           title="AI-middleware"

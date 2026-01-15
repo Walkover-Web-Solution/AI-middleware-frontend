@@ -142,6 +142,7 @@ const Dropdown = ({
 
   const DefaultTrigger = (
     <button
+      id="dropdown-trigger-button"
       type="button"
       disabled={disabled}
       onClick={() => !disabled && setOpen((s) => !s)}
@@ -193,6 +194,7 @@ const Dropdown = ({
           {enableSearch && (
             <div className="p-2 border-b border-base-content/10">
               <input
+                id="dropdown-search-input"
                 autoFocus
                 type="text"
                 value={query}
@@ -220,7 +222,8 @@ const Dropdown = ({
                     return (
                       <li key={String(opt.value)} className="whitespace-nowrap">
                         <a
-                          className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
+                         id={`dropdown-option-${opt.value}`}
+                         className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelect(opt.value, opt)
@@ -271,6 +274,7 @@ const Dropdown = ({
                         return (
                           <li key={String(opt.value)} className="whitespace-nowrap">
                             <a
+                              id={`dropdown-grouped-option-${opt.value}`}
                               className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
                               onClick={() => handleSelect(opt.value, opt)}
                               onMouseEnter={() => onOptionHover && onOptionHover(opt)}

@@ -50,10 +50,11 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
-        <div className="bg-base-100 rounded-lg shadow-2xl max-w-6xl w-[90vw] h-auto overflow-auto relative flex flex-col">
+        <div id="chat-details-modal-container" className="bg-base-100 rounded-lg shadow-2xl max-w-6xl w-[90vw] h-auto overflow-auto relative flex flex-col">
           <div className="flex items-start justify-between p-6 border-b border-base-300">
             <h3 className="text-2xl font-bold">Detailed View</h3>
             <button
+              id="chat-details-close-button"
               className="hover:text-error"
               onClick={() => closeModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL)}
             >
@@ -62,7 +63,7 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
           </div>
 
           <div className="flex-1 overflow-auto p-6">
-            <div className="bg-base-200 rounded-lg p-6 h-auto overflow-auto relative">
+            <div id="chat-details-content-container"className="bg-base-200 rounded-lg p-6 h-auto overflow-auto relative">
               <CopyButton data={JSON.stringify(modalContent, null, 2)} btnStyle="text-sm"/>
               {modalContent && Object.entries(modalContent).map(([key, value]) => (
                 <div key={key} className="mb-6 last:mb-0">

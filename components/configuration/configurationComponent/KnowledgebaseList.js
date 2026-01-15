@@ -120,10 +120,11 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
 
     const hasKnowledgebases = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : []).length > 0;
     const knowledgebaseDropdownContent = !tutorialState?.showTutorial && (
-        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+        <ul id="knowledgebase-dropdown" tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
             <div className='flex flex-col gap-2 w-full'>
                 <li className="text-sm font-semibold disabled">Available Knowledge Bases</li>
                 <input
+                id="knowledgebase-search-input"
                     type='text'
                     placeholder='Search Knowledge Base'
                     value={searchQuery}
@@ -144,7 +145,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                         return matchesSearch && !alreadyExists;
                     })
                     .map(item => (
-                        <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
+                        <li id={`knowledgebase-dropdown-item-${item?._id}`} key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                             <div className="flex justify-between items-center w-full">
                                 <div className="flex items-center gap-2">
                                     {GetFileTypeIcon(item?.url?.includes('.pdf') ? 'pdf' : 'document', 16, 16)}
@@ -160,7 +161,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                         </li>
                     ))
                 }
-                <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
+                <li id="knowledgebase-add-new-button" className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) }; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
                     <div>
                         <AddIcon size={16} /><p className='font-semibold'>Add new Knowledge Base</p>
                     </div>
@@ -184,6 +185,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
             const item = knowledgeBaseData?.find(kb => kb._id === resourceId);
             return item ? (
                 <div
+                id={`knowledgebase-card-${docId}`}
                     key={resourceId || index}
                     className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""}transition-colors duration-200`}
                 >
@@ -207,6 +209,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                     {/* Remove button that appears on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                         <button
+                            id={`knowledgebase-delete-button-${docId}`}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenDeleteModal(item);
@@ -253,6 +256,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                                 No knowledge base found.
                             </p>
                             <button
+                               id="knowledgebase-add-first-button"
                                 tabIndex={0}
                                 className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                 disabled={!shouldToolsShow || isReadOnly}
@@ -269,14 +273,15 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                         {hasKnowledgebases && (
                             <div className="dropdown dropdown-end w-full max-w-md">
                                 <div className="border-2 border-base-200 border-dashed text-center">
-                                    <button
-                                        tabIndex={0}
-                                        className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                                        disabled={isReadOnly}
-                                    >
-                                        <AddIcon className="w-3 h-3" />
-                                        Add Knowledge Base
-                                    </button>
+                                        <button
+                                            id="knowledgebase-add-more-button"
+                                            tabIndex={0}
+                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                            disabled={isReadOnly}
+                                        >
+                                            <AddIcon className="w-3 h-3" />
+                                            Add Knowledge Base
+                                        </button>
                                 </div>
                                 {knowledgebaseDropdownContent}
                             </div>

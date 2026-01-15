@@ -128,6 +128,7 @@ const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAre
 
     const renderServiceDropdown = () => (
         <Dropdown
+            id="service-dropdown"
             disabled={isReadOnly}
             options={serviceOptions}
             value={selectedService || ''}
@@ -143,7 +144,7 @@ const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAre
 
               if (!currentValue) {
                 return (
-                  <span className="flex items-center gap-2 text-gray-100/60">
+                  <span id="service-dropdown-placeholder" className="flex items-center gap-2 text-gray-100/60">
                     <span>Select service</span>
                   </span>
                 );
@@ -154,18 +155,19 @@ const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAre
                 : currentValue;
 
               return (
-                <div className="flex justify-between w-full items-center gap-2">
-                <span className="flex items-center gap-2">
+                <div id="service-dropdown-trigger" className="flex justify-between w-full items-center gap-2">
+                <span id="service-dropdown-selected" className="flex items-center gap-2">
                   <span
+                   id="service-dropdown-icon-wrapper"
                     className="flex h-4 w-4 items-center justify-center rounded-md bg-base-200"
                   >
                     {getIconOfService(currentValue, 16, 16)}
                   </span>
-                  <span className="text-base-content/70 text-xs">
+                  <span  id="service-dropdown-selected-name"className="text-base-content/70 text-xs">
                     {serviceName}
                   </span>
                 </span>
-                <ChevronDownIcon size={16} className="ml-2 h-4 w-4 opacity-70" />
+                <ChevronDownIcon   id="service-dropdown-chevron" size={16} className="ml-2 h-4 w-4 opacity-70" />
                 </div>
               );
             }}
@@ -173,12 +175,12 @@ const ServiceDropdown = ({ params, searchParams, apiKeySectionRef, promptTextAre
     );
 
     return (
-        <div className="space-y-4">
-            <div className="form-control">
-                <div className="flex items-center gap-2 z-auto">
+        <div id="service-dropdown-container"  className="space-y-4">
+            <div id="service-dropdown-form-control" className="form-control">
+                <div id="service-dropdown-wrapper"  className="flex items-center gap-2 z-auto">
                 {isDisabled && (
-                            <InfoTooltip tooltipContent="Batch API is only applicable for OpenAI">
-                              <AlertIcon size={16} className="text-warning" />
+                            <InfoTooltip  id="service-dropdown-batch-warning" tooltipContent="Batch API is only applicable for OpenAI">
+                              <AlertIcon   id="service-dropdown-alert-icon" size={16} className="text-warning" />
                             </InfoTooltip>
                         )}
                     {renderServiceDropdown()}

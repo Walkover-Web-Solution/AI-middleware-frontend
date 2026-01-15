@@ -193,10 +193,10 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
     return (
         <Modal MODAL_ID={MODAL_TYPE.ADD_TEST_CASE_MODAL}>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
-                <form onSubmit={handleSubmit} className="bg-base-200 rounded-lg shadow-2xl max-w-5xl w-[90vw] relative flex flex-col">
+                <form id="add-testcase-modal-form" onSubmit={handleSubmit} className="bg-base-200 rounded-lg shadow-2xl max-w-5xl w-[90vw] relative flex flex-col">
                     <div className="flex justify-between items-center p-6 pb-0  top-0 bg-base-100 z-low">
                         <h3 className="text-xl font-semibold">Add Test Case</h3>
-                        <button type="button" className="btn btn-circle btn-ghost btn-sm" onClick={handleClose}>✕</button>
+                        <button  id="add-testcase-close-x-button" type="button" className="btn btn-circle btn-ghost btn-sm" onClick={handleClose}>✕</button>
                     </div>
                     
                     <div className="px-6 py-4 space-y-6">
@@ -204,6 +204,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                         {finalTestCases && finalTestCases.length > 2 && !showFullConversation && (
                             <div className="flex xs">
                                 <button
+                                  id="add-testcase-show-conversations-button"
                                     type="button"
                                     onClick={() => setShowFullConversation(true)}
                                     className="btn btn-outline btn-sm"
@@ -215,9 +216,10 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
 
                         {/* Conversations Section - Show all conversations when expanded */}
                         {showFullConversation && finalTestCases && finalTestCases.length > 2 && (
-                            <div className="space-y-4">
+                            <div id="add-testcase-conversations-section" className="space-y-4">
                                 <div className="flex items-center justify-between border-b border-base-300 pb-2">
                                     <button
+                                        id="add-testcase-hide-conversations-button"
                                         type="button"
                                         onClick={() => setShowFullConversation(false)}
                                         className="btn btn-ghost btn-sm"
@@ -227,7 +229,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                 </div>
                                 
                                 {finalTestCases.slice(0, -2).map((message, index) => (
-                                    <div key={index} className="space-y-2 mb-4">
+                                    <div key={index} id={`add-testcase-conversation-${index}`} className="space-y-2 mb-4">
                                         <div className="text-xs font-medium uppercase text-base-content tracking-wide">
                                             {message?.role?.replace('_', ' ') || message?.sender?.replace('_', ' ')}
                                         </div>
@@ -236,6 +238,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                 {message.tools?.map((item, idx) => (
                                                     <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
                                                         <textarea
+                                                           id={`add-testcase-tool-textarea-${index}-${idx}`}
                                                             defaultValue={JSON.stringify(item, null, 2)}
                                                             className="textarea bg-white dark:bg-black/15 w-full font-mono text-sm p-2 bg-transparent focus:outline-none resize-none overflow-hidden"
                                                             onInput={handleTextareaInput}
@@ -244,6 +247,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                         />
                                                         {message.tools.length > 1 && (
                                                             <button
+                                                                id={`add-testcase-remove-tool-${index}-${idx}`}
                                                                 className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                                 onClick={() => removeTool(index, idx)}
                                                             >
@@ -255,6 +259,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                             </div>
                                         ) : (
                                             <textarea 
+                                                id={`add-testcase-content-textarea-${index}`}
                                                 defaultValue={message.content}
                                                 className="textarea bg-white dark:bg-black/15 w-full text-sm p-3 focus:outline-none rounded-lg shadow-sm resize-none overflow-hidden"
                                                 onInput={handleTextareaInput}
@@ -269,7 +274,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
 
                         {/* Last User Message */}
                         {finalTestCases && finalTestCases.length >= 2 && (
-                            <div className="space-y-4">
+                            <div id="add-testcase-last-user-message"className="space-y-4">
                                 {(() => {
                                     const secondLastMessage = finalTestCases[finalTestCases.length - 2];
                                     const secondLastIndex = finalTestCases.length - 2;
@@ -283,6 +288,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                     {secondLastMessage.tools?.map((item, idx) => (
                                                         <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
                                                             <textarea
+                                                                id={`add-testcase-second-last-tool-textarea-${idx}`}
                                                                 defaultValue={JSON.stringify(item, null, 2)}
                                                                 className="textarea bg-white dark:bg-black/15 w-full font-mono text-sm p-2 bg-transparent focus:outline-none resize-none overflow-hidden"
                                                             onInput={handleTextareaInput}
@@ -291,6 +297,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                             />
                                                             {secondLastMessage.tools.length > 1 && (
                                                                 <button
+                                                                    id={`add-testcase-second-last-remove-tool-${idx}`}
                                                                     className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                                     onClick={() => removeTool(secondLastIndex, idx)}
                                                                 >
@@ -302,6 +309,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                 </div>
                                             ) : (
                                                 <textarea 
+                                                    id={`add-testcase-second-last-remove-tool-${idx}`}
                                                     defaultValue={secondLastMessage.content}
                                                     className="textarea bg-white dark:bg-black/15 w-full text-sm p-3 focus:outline-none rounded-lg shadow-sm resize-none overflow-hidden"
                                                 onInput={handleTextareaInput}
@@ -317,7 +325,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
 
                         {/* User Expected Output Section - Last message (Assistant renamed) */}
                         {finalTestCases && finalTestCases.length > 0 && (
-                            <div className="space-y-4">
+                            <div id="add-testcase-expected-output" className="space-y-4">
                                 {(() => {
                                     const lastMessage = finalTestCases[finalTestCases.length - 1];
                                     const lastIndex = finalTestCases.length - 1;
@@ -331,6 +339,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                     {lastMessage.tools?.map((item, idx) => (
                                                         <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
                                                             <textarea
+                                                                id={`add-testcase-expected-tool-textarea-${idx}`}
                                                                 defaultValue={JSON.stringify(item, null, 2)}
                                                                 className="textarea bg-white dark:bg-black/15 w-full font-mono text-sm p-2 bg-transparent focus:outline-none resize-none overflow-hidden"
                                                             onInput={handleTextareaInput}
@@ -339,6 +348,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                             />
                                                             {lastMessage.tools.length > 1 && (
                                                                 <button
+                                                                    id={`add-testcase-expected-remove-tool-${idx}`}
                                                                     className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                                     onClick={() => removeTool(lastIndex, idx)}
                                                                 >
@@ -350,6 +360,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                                                 </div>
                                             ) : (
                                                 <textarea 
+                                                   id="add-testcase-expected-content-textarea"
                                                     defaultValue={lastMessage.content}
                                                     className="textarea bg-white dark:bg-black/15 w-full text-sm p-3 focus:outline-none rounded-lg shadow-sm resize-none overflow-hidden"
                                                 onInput={handleTextareaInput}
@@ -368,6 +379,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                         <div className="flex items-center gap-3">
                             <label className="text-sm text-base-content">Matching strategy:</label>
                             <select 
+                                id="add-testcase-matching-strategy-select"
                                 className="select select-sm bg-base-100 focus:outline-none border-none"
                                 value={responseType} 
                                 onChange={(e) => setResponseType(e.target.value)}
@@ -378,8 +390,8 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                             </select>
                         </div>
                         <div className="flex gap-2">
-                            <button type="button" className="btn btn-sm btn-ghost" onClick={handleClose}>Cancel</button>
-                            <button type="submit" className="btn btn-sm btn-primary px-6" disabled={isLoading}>
+                            <button id="add-testcase-cancel-button" type="button" className="btn btn-sm btn-ghost" onClick={handleClose}>Cancel</button>
+                            <button  id="add-testcase-create-button" type="submit" className="btn btn-sm btn-primary px-6" disabled={isLoading}>
                                 {isLoading ? <span className="loading loading-spinner"></span> : 'Create'}
                             </button>
                         </div>

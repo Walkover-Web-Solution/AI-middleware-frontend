@@ -18,6 +18,7 @@ const VariablesSuggestions = memo(({
 
         return suggestions.map((suggestion, index) => (
             <div
+                id={`variable-suggestion-${index}`}
                 key={suggestion}
                 className={`px-3 py-2 cursor-pointer hover:bg-base-200 ${
                     index === activeSuggestionIndex ? 'bg-base-200' : ''
@@ -35,6 +36,7 @@ const VariablesSuggestions = memo(({
 
     return (
         <div
+         id="variables-suggestions-dropdown"
             className="absolute bg-base-100 border border-base-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto min-w-48"
             style={{
                 top: position.top + 20,

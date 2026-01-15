@@ -138,11 +138,12 @@ function OptimiseBaseModal({
 
   return (
     <Modal MODAL_ID={modalType}>
-      <div className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-base-100 overflow-hidden flex flex-col">
+      <div id="optimise-base-modal-container" className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-base-100 overflow-hidden flex flex-col">
         {/* Fixed Header */}
         <div className="flex justify-between items-center pb-2 pt-2 bg-base-100 z-low">
           <h3 className="font-bold text-lg">{title}</h3>
           <button
+            id="optimise-toggle-diff-button"
             className="btn btn-sm btn-primary"
             onClick={() => setDiff(prev => !prev)}
             type="button"
@@ -226,6 +227,7 @@ function OptimiseBaseModal({
               </div>
               <div className="relative">
                 <textarea
+                  id="optimise-content-textarea"
                   className="textarea bg-white dark:bg-black/15 textarea-bordered border focus:border-primary caret-base-content p-2 w-full resize-none flex-grow min-h-[60vh]"
                   value={textareaContent}
                   onChange={(e) => handleContentChange(e.target.value)}
@@ -250,6 +252,7 @@ function OptimiseBaseModal({
         {/* Fixed Footer */}
         <div className="border-t border-base-content/20 mb-2 bg-base-100 pt-1 flex justify-end gap-3">
           <button
+            id="optimise-close-button"
             onClick={handleCloseModal}
             className="btn btn-sm mt-2"
             disabled={isStreaming}
@@ -258,6 +261,7 @@ function OptimiseBaseModal({
             Close
           </button>
           <button
+            id="optimise-apply-button"
             onClick={handleApply}
             className="btn btn-sm btn-primary mt-2"
             disabled={loading || isStreaming || !displayContent}

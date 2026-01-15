@@ -27,7 +27,7 @@ const MetricsFilters = memo(({
         {/* Group By Dropdown */}
         <div className='flex items-center gap-2'>
           <span className="font-medium">Group by:</span>
-          <details className="dropdown dropdown-end"
+          <details id="metrics-filter-group-by-dropdown" className="dropdown dropdown-end"
             tabIndex={0}
             onBlur={(e) => {
               if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -35,7 +35,7 @@ const MetricsFilters = memo(({
               }
             }}
           >
-            <summary className="btn btn-sm m-1">
+            <summary id="metrics-filter-group-by-button" className="btn btn-sm m-1">
               {FACTOR_OPTIONS[factor]}
               <ChevronDownIcon className="w-3 h-3 ml-2" />
             </summary>
@@ -43,6 +43,7 @@ const MetricsFilters = memo(({
               {FACTOR_OPTIONS.map((item, index) => (
                 <li key={index}>
                   <a
+                    id={`metrics-filter-group-by-option-${index}`}
                     className={`${factor === index ? 'active' : ''}`}
                     onClick={(e) => {
                       onFactorChange(index);
@@ -61,7 +62,7 @@ const MetricsFilters = memo(({
         {/* Agent Selection */}
         <div className='flex items-center gap-2'>
           <span className="font-medium">Agent:</span>
-          <details className="dropdown dropdown-end z-high"
+          <details id="metrics-filter-agent-dropdown" className="dropdown dropdown-end z-high"
             ref={(node) => {
               if (node) {
                 const handleClickOutside = (event) => {
@@ -76,7 +77,7 @@ const MetricsFilters = memo(({
               }
             }}
           >
-            <summary className="btn btn-sm m-1">
+            <summary id="metrics-filter-agent-button"className="btn btn-sm m-1">
               {bridge?.['bridge_name']
                 ? bridge?.['bridge_name'].length > 15
                   ? bridge?.['bridge_name'].substring(0, 15) + '...'
@@ -92,6 +93,7 @@ const MetricsFilters = memo(({
 
               <li>
                 <a
+                  id="metrics-filter-agent-all"
                   onClick={(e) => {
                     onBridgeChange(null, null);
                     const details = e.currentTarget.closest('details');
@@ -106,6 +108,7 @@ const MetricsFilters = memo(({
               {filterBridges.map((item, index) => (
                 <li key={index}>
                   <a
+                    id={`metrics-filter-agent-${item?._id}`}
                     onClick={(e) => {
                       onBridgeChange(item?._id, item?.name);
                       const details = e.currentTarget.closest('details');
@@ -124,7 +127,7 @@ const MetricsFilters = memo(({
         {/* Time Range */}
         <div className='flex items-center gap-2'>
           <span className="font-medium">Time Range:</span>
-          <details className="dropdown dropdown-end"
+          <details id="metrics-filter-time-range-dropdown"className="dropdown dropdown-end"
             tabIndex={0}
             onBlur={(e) => {
               if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -132,7 +135,7 @@ const MetricsFilters = memo(({
               }
             }}
           >
-            <summary className="btn btn-sm m-1">
+            <summary id="metrics-filter-time-range-button" className="btn btn-sm m-1">
               {range === 10 ? getDisplayRangeText() : TIME_RANGE_OPTIONS?.[range]}
               <ChevronDownIcon className="w-3 h-3 ml-2" />
             </summary>
@@ -140,6 +143,7 @@ const MetricsFilters = memo(({
               {TIME_RANGE_OPTIONS.map((item, index) => (
                 <li key={index}>
                   <a
+                    id={`metrics-filter-time-range-option-${index}`}
                     className={`${index === range && range !== 10 ? 'active' : ''}`}
                     onClick={(e) => {
                       onTimeRangeChange(index);
@@ -154,6 +158,7 @@ const MetricsFilters = memo(({
               {/* Custom Range Option */}
               <li>
                 <a
+                  id="metrics-filter-time-range-custom"
                   className={`${range === 10 ? 'active' : ''} flex items-center gap-2`}
                   onClick={(e) => {
                     onTimeRangeChange(TIME_RANGE_OPTIONS.length);

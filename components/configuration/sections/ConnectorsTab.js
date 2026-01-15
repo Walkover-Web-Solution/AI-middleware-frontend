@@ -5,8 +5,8 @@ import ToolsSection from "../ToolsSection";
 
 const ConnectorsTab = ({isPublished}) => {
   return (
-    <div className="w-full">
-      <ToolsSection isPublished={isPublished} />
+    <div id="connectors-tab-container" className="w-full">
+      <ToolsSection  isPublished={isPublished} />
     </div>
   );
 };

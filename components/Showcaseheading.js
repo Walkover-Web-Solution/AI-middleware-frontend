@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const Showcaseheading = () => {
   return (
-    <div className="relative flex w-3/4 mx-auto py-20 ">
+    <div id="showcase-heading-container" className="relative flex w-3/4 mx-auto py-20 ">
       <div className="w-full md:w-1/2 z-low">
         <div className="flex items-center mb-2">
           <Image
@@ -25,8 +25,8 @@ const Showcaseheading = () => {
           for tasks like content creation, customer support, and data analysis,
           saving you time and effort.
         </p>
-        <Link href="/login">
-          <button role="button" className="btn btn-primary btn-sm mt-3">
+        <Link id="showcase-heading-login-link" href="/login">
+          <button id="showcase-heading-start-button" role="button" className="btn btn-primary btn-sm mt-3">
             Start Building
           </button>
         </Link>
