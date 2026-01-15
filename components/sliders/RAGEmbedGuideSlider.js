@@ -34,7 +34,7 @@ const RAGEmbedGuideSlider = ({ data, handleCloseSlider, params }) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-base-200">
         <RAGEmbedContent params={params} folderId={data?.embed_id} />
       </div>
     </aside>

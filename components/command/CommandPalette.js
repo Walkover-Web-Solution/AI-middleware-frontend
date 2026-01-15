@@ -132,7 +132,7 @@ case 'integrations':
     }));
 
       
-      case 'rag_embeds':
+      case 'rag_embed':
         return integrationData
           .filter(d => d.type === 'rag_embed')
           .map((d) => ({
@@ -275,7 +275,7 @@ case 'integrations':
     docs: kbGroup,
     integrations: integrationGroup,
     auths: authGroup,
-    rag_embeds: ragEmbedGroup,
+    rag_embed: ragEmbedGroup,
   }), [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
 
   const allResults = useMemo(() => [
@@ -287,7 +287,7 @@ case 'integrations':
     ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
     ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
     ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
-    ...items.rag_embeds.map((it) => ({ group: "RAG Embeds", ...it })),
+    ...items.rag_embed.map((it) => ({ group: "RAG Embeds", ...it })),
   ], [items]);
 
   const groupedResults = useMemo(() => {
@@ -346,7 +346,7 @@ case 'integrations':
       { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
       { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
       { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-      { key: 'rag_embeds', label: 'RAG Embeds', desc: 'RAG embed integrations' },
+      { key: 'rag_embed', label: 'RAG Embed', desc: 'RAG embed integrations' },
     ];
     
     const currentCategoryIndex = allCategories.findIndex(cat => cat.key === currentCategory);
@@ -482,7 +482,7 @@ case 'integrations':
       'apikeys': `/org/${orgId}/apikeys`,
       'docs': `/org/${orgId}/knowledge_base`,
       'integrations': `/org/${orgId}/integration`,
-      'rag_embeds': `/org/${orgId}/RAG_embed`,
+      'rag_embed': `/org/${orgId}/RAG_embed`,
       'Auths': `/org/${orgId}/pauthkey`,
       'flows': `/org/${orgId}/orchestratal_model`,
     };
