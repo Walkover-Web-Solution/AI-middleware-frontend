@@ -117,7 +117,8 @@ const ResourceChunksModal = ({ resourceId, resourceName }) => {
                             Total chunks: {chunks.length}
                         </span>
                         <button
-                            className="btn btn-ghost btn-sm"
+                            type="button"
+                            className="btn btn-primary btn-sm"
                             onClick={handleClose}
                         >
                             Close

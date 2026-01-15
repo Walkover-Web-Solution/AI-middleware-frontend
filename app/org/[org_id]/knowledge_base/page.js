@@ -75,7 +75,7 @@ const Page = ({ params }) => {
     collection_id: item.collection_id,
     _id: item._id,
   }));
-  console.log("table data " , tableData  )
+
   const handleUpdateKnowledgeBase = (item) => {
     const originalItem = knowledgeBaseData.find(kb => kb._id === item._id);
     setSelectedKnowledgeBase(originalItem);
