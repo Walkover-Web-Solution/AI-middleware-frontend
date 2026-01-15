@@ -13,7 +13,7 @@ const ResourceChunksModal = ({ resourceId, resourceName }) => {
 
     useEffect(() => {
         const fetchChunks = async () => {
-            console.log("fetched")
+
             if (!resourceId) {
                 return;
             }
