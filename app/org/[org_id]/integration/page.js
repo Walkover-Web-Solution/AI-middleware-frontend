@@ -30,8 +30,11 @@ const Page = ({ params }) => {
     linksData: state.flowDataReducer.flowData.linksData || [],
   })
   );
+
+
   const [selectedIntegration, setSelectedIntegration] = useState(null);
-  const [filterIntegration, setFilterIntegration] = useState(integrationData);
+  const [embedIntegrations, setEmbedIntegrations] = useState([]); // Type-filtered integrations
+  const [filterIntegration, setFilterIntegration] = useState([]); // Search-filtered integrations
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedIntegrationForLimit, setSelectedIntegrationForLimit] = useState(null);
   
@@ -43,8 +46,11 @@ const Page = ({ params }) => {
     PortalStyles
   } = usePortalDropdown();
 
+  // Filter to show only embed type integrations
   useEffect(() => {
-    setFilterIntegration(integrationData);
+    const filtered = integrationData.filter(item => item.type === "embed");
+    setEmbedIntegrations(filtered);
+    setFilterIntegration(filtered); // Initialize search filter with all embed integrations
   }, [integrationData]);
 
 
@@ -180,10 +186,10 @@ const Page = ({ params }) => {
         {/* Content Section */}
         <div className="w-full">
           <div className="flex flex-row gap-4">
-            {integrationData?.length > 5 && (
-              <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
+            {embedIntegrations?.length > 5 && (
+              <SearchItems data={embedIntegrations} setFilterItems={setFilterIntegration} item="Integration" />
             )}
-            <div className={`flex-shrink-0 ${integrationData?.length > 5 ? 'mr-2' : 'ml-2'}`}>
+            <div className={`flex-shrink-0 ${embedIntegrations?.length > 5 ? 'mr-2' : 'ml-2'}`}>
               <button
                 className="btn btn-primary btn-sm mr-2"
                 onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
@@ -213,7 +219,7 @@ const Page = ({ params }) => {
         </div>
       )}
 
-      <IntegrationModal params={resolvedParams} />
+      <IntegrationModal params={resolvedParams} type="embed" />
       <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider} />
       <UsageLimitModal data={selectedIntegrationForLimit} onConfirm={handleUpdateIntegrationLimit} item="Embed Name" />
       

@@ -19,7 +19,8 @@ function getCurrentCategoryGroup(currentCategory) {
     'apikeys': 'API Keys',
     'Auths': 'Auth Keys',
     'docs': 'Knowledge Base',
-    'integrations': 'Integrations'
+    'integrations': 'Integrations',
+    'rag_embed': 'RAG Embeds'
   };
   return categoryGroupMap[currentCategory] || null;
 }
@@ -46,6 +47,7 @@ const CommandPalette = ({isEmbedUser}) => {
     if (parts.includes("pauthkey")) return "Auths";
     if (parts.includes("knowledge_base")) return "docs";
     if (parts.includes("integration")) return "integrations";
+    if (parts.includes("RAG_embed")) return "rag_embed";
     if (parts.includes("orchestratal_model")) return "flows";
     return null;
   }, [pathname]);
@@ -119,14 +121,26 @@ const CommandPalette = ({isEmbedUser}) => {
           type: "docs",
         }));
 
-      case 'integrations':
-        return integrationData.map((d) => ({
-          id: d._id,
-          title: d.name || d._id,
-          subtitle: "Integration",
-          type: "integrations",
-        }));
+case 'integrations':
+  return integrationData
+    .filter(d => d.type === "embed")
+    .map((d) => ({
+      id: d._id,
+      title: d.name || d._id,
+      subtitle: "Integration",
+      type: "integrations",
+    }));
 
+      
+      case 'rag_embed':
+        return integrationData
+          .filter(d => d.type === 'rag_embed')
+          .map((d) => ({
+            id: d._id,
+            title: d.name || d._id,
+            subtitle: "RAG Embed",
+            type: "rag_embed",
+          }));
       case 'Auths':
         return authData.map((d) => ({
           id: d.id,
@@ -138,7 +152,7 @@ const CommandPalette = ({isEmbedUser}) => {
       default:
         return [];
     }
-  }, [agentList, apikeys, knowledgeBase, integrationData, authData]);
+  }, [apiAgents, chatbotAgents, apikeys, knowledgeBase, integrationData, authData]);
 
   const createAgentItem = (a, type) => ({
     id: a._id,
@@ -226,7 +240,7 @@ const CommandPalette = ({isEmbedUser}) => {
     type: "docs",
   }));
 
-  const integrationGroup = filterBy(integrationData, ["name", "service", "_id"]).map((d) => ({
+  const integrationGroup = filterBy( integrationData.filter(d => d.type === "embed"), ["name", "service", "_id"]).map((d) => ({
     id: d._id,
     title: d.name || d._id,
     subtitle: "Integration",
@@ -240,6 +254,16 @@ const CommandPalette = ({isEmbedUser}) => {
     type: "Auths",
   }));
 
+  const ragEmbedGroup = filterBy(
+    integrationData.filter(d => d.type === 'rag_embed'),
+    ["name", "_id"]
+  ).map((d) => ({
+    id: d._id,
+    title: d.name || d._id,
+    subtitle: "RAG Embed",
+    type: "rag_embed",
+  }));
+
   const items = useMemo(() => ({
     agents: [
       ...apiAgentsGroup,
@@ -251,6 +275,7 @@ const CommandPalette = ({isEmbedUser}) => {
     docs: kbGroup,
     integrations: integrationGroup,
     auths: authGroup,
+    rag_embed: ragEmbedGroup,
   }), [query, agentList, apikeys, knowledgeBase, functions, integrationData, authData]);
 
   const allResults = useMemo(() => [
@@ -262,6 +287,7 @@ const CommandPalette = ({isEmbedUser}) => {
     ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
     ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
     ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
+    ...items.rag_embed.map((it) => ({ group: "RAG Embeds", ...it })),
   ], [items]);
 
   const groupedResults = useMemo(() => {
@@ -320,6 +346,7 @@ const CommandPalette = ({isEmbedUser}) => {
       { key: 'Auths', label: 'Auth Keys', desc: 'Configure Auth Keys' },
       { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
       { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
+      { key: 'rag_embed', label: 'RAG Embed', desc: 'RAG embed integrations' },
     ];
     
     const currentCategoryIndex = allCategories.findIndex(cat => cat.key === currentCategory);
@@ -430,6 +457,10 @@ const CommandPalette = ({isEmbedUser}) => {
         // Always navigate to integrations page with filter parameter
         router.push(`/org/${orgId}/integration?filter=${item.id}`);
         break;
+      case "rag_embed":
+        // Always navigate to RAG embed page with filter parameter
+        router.push(`/org/${orgId}/RAG_embed?filter=${item.id}`);
+        break;
       case "Auths":
         // Always navigate to auth keys page with filter parameter
         router.push(`/org/${orgId}/pauthkey?filter=${item.id}`);
@@ -451,6 +482,7 @@ const CommandPalette = ({isEmbedUser}) => {
       'apikeys': `/org/${orgId}/apikeys`,
       'docs': `/org/${orgId}/knowledge_base`,
       'integrations': `/org/${orgId}/integration`,
+      'rag_embed': `/org/${orgId}/RAG_embed`,
       'Auths': `/org/${orgId}/pauthkey`,
       'flows': `/org/${orgId}/orchestratal_model`,
     };
