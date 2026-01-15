@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
+import { AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -16,7 +16,7 @@ import useTutorialVideos from '@/hooks/useTutorialVideos';
 import useDeleteOperation from '@/customHooks/useDeleteOperation';
 import { CircleQuestionMark } from 'lucide-react';
 
-const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true }) => {
+const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,}) => {
     // Determine if content is read-only (either published or user is not an editor)
     const isReadOnly = isPublished || !isEditor;
     // Use the tutorial videos hook
@@ -26,20 +26,21 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         const modelReducer = state?.modelReducer?.serviceModels;
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-        
-        
+
+
         // Use bridgeData when isPublished=true, otherwise use versionData
         const activeData = isPublished ? bridgeDataFromState : versionData;
         const serviceName = activeData?.service;
         const modelTypeName = activeData?.configuration?.type?.toLowerCase();
         const modelName = activeData?.configuration?.model;
-        
+
         return {
-            knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
+            knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id] || [],
             knowbaseVersionData: isPublished ? (bridgeDataFromState?.doc_ids || []) : (versionData?.doc_ids || []),
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
         };
     });
+
     const [selectedKnowledgebase, setSelectedKnowledgebase] = useState(null);
     const { isDeleting, executeDelete } = useDeleteOperation(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
     const dispatch = useDispatch();
@@ -52,10 +53,26 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         setSearchQuery(e.target?.value || "");
     };
     const handleAddKnowledgebase = (id) => {
-        if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
+        // Find the knowledge base item to get collectionId
+        const knowledgeBaseItem = knowledgeBaseData?.find(item => item._id === id);
+        if (!knowledgeBaseItem) return;
+
+        // Check if ID already exists in the current doc_ids
+        const existingItem = knowbaseVersionData?.find(item =>
+            typeof item === 'string' ? item === id : item.resource_id === id
+        );
+        if (existingItem) return;
+
+        // Format the new item with collection_id and resource_id
+        const newDocItem = {
+            collection_id: knowledgeBaseItem.collectionId,
+            resource_id: id,
+            description:knowledgeBaseItem.description
+        };
+
         dispatch(updateBridgeVersionAction({
             versionId: searchParams?.version,
-            dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
+            dataToSend: { doc_ids: [...(knowbaseVersionData || []), newDocItem] }
         }));
         // Close dropdown after selection
         setTimeout(() => {
@@ -68,7 +85,16 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         await executeDelete(async () => {
             return dispatch(updateBridgeVersionAction({
                 versionId: searchParams?.version,
-                dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
+                dataToSend: {
+                    doc_ids: knowbaseVersionData.filter(docItem => {
+                        // Handle both old format (string) and new format (object)
+                        if (typeof docItem === 'string') {
+                            return docItem !== item?._id;
+                        } else {
+                            return docItem.resource_id !== item?._id;
+                        }
+                    })
+                }
             }));
         });
     };
@@ -105,21 +131,29 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                     className='input input-bordered w-full input-sm'
                 />
                 {(Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [])
-                    .filter(item =>
-                        item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) &&
-                        !knowbaseVersionData?.includes(item?._id)
-                    )
+                    .filter(item => {
+                        const matchesSearch = item?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                        // Check if item already exists in knowbaseVersionData (handle both old and new format)
+                        const alreadyExists = knowbaseVersionData?.some(docItem => {
+                            if (typeof docItem === 'string') {
+                                return docItem === item?._id;
+                            } else {
+                                return docItem.resource_id === item?._id;
+                            }
+                        });
+                        return matchesSearch && !alreadyExists;
+                    })
                     .map(item => (
                         <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                             <div className="flex justify-between items-center w-full">
                                 <div className="flex items-center gap-2">
-                                    {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
-                                    {item?.name.length > 20 ? (
-                                        <div className="tooltip" data-tip={item?.name}>
-                                            {truncate(item?.name, 20)}
+                                    {GetFileTypeIcon(item?.url?.includes('.pdf') ? 'pdf' : 'document', 16, 16)}
+                                    {item?.title?.length > 20 ? (
+                                        <div className="tooltip" data-tip={item?.title}>
+                                            {truncate(item?.title, 20)}
                                         </div>
                                     ) : (
-                                        truncate(item?.name, 20)
+                                        truncate(item?.title, 20)
                                     )}
                                 </div>
                             </div>
@@ -136,30 +170,39 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
     );
 
     const renderKnowledgebase = useMemo(() => {
-        const knowledgebaseItems = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
-            const item = knowledgeBaseData?.find(kb => kb._id === docId);
+        const knowledgebaseItems = (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docItem, index) => {
+            // Handle both old format (string) and new format (object)
+            let resourceId, _collectionId;
+            if (typeof docItem === 'string') {
+                resourceId = docItem;
+                _collectionId = null;
+            } else {
+                resourceId = docItem.resource_id;
+                _collectionId = docItem.collection_id;
+            }
+
+            const item = knowledgeBaseData?.find(kb => kb._id === resourceId);
             return item ? (
                 <div
-                    key={docId}
+                    key={resourceId || index}
                     className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""}transition-colors duration-200`}
                 >
                     <div className="flex items-center gap-2 w-full ml-2">
-                        {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
+                        {GetFileTypeIcon(item?.url?.includes('.pdf') ? 'pdf' : 'document', 16, 16)}
                         <div className="flex items-center gap-2 w-full">
-                            {item?.name?.length > 24 ? (
-                                <div className="tooltip tooltip-top min-w-0" data-tip={item?.name}>
+                            {item?.title?.length > 24 ? (
+                                <div className="tooltip tooltip-top min-w-0" data-tip={item?.title}>
                                     <span className="min-w-0 text-sm truncate text-left">
-                                            <span className="truncate text-sm font-normal block w-[300px]">{item?.name}</span>
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <span className="min-w-0 text-sm truncate text-left">
-                                        <span className="truncate text-sm font-normal block w-[300px]">{item?.name}</span>
+                                        <span className="truncate text-sm font-normal block w-[300px]">{item?.title}</span>
                                     </span>
-                                )}
-                            </div>
-                            {!item?.description && <CircleAlertIcon color='red' size={16} />}
+                                </div>
+                            ) : (
+                                <span className="min-w-0 text-sm truncate text-left">
+                                    <span className="truncate text-sm font-normal block w-[300px]">{item?.title}</span>
+                                </span>
+                            )}
                         </div>
+                    </div>
 
                     {/* Remove button that appears on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
@@ -190,11 +233,11 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
             <div className="flex items-center gap-2 mb-2">
                 <div className="flex items-center gap-2">
                     <p className="text-sm whitespace-nowrap">Knowledge Base</p>
-                     <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                </InfoTooltip>
+                    <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
                 </div>
-               
+
             </div>
             {tutorialState?.showSuggestion && (
                 <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
@@ -226,14 +269,14 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                         {hasKnowledgebases && (
                             <div className="dropdown dropdown-end w-full max-w-md">
                                 <div className="border-2 border-base-200 border-dashed text-center">
-                                        <button
-                                            tabIndex={0}
-                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                                            disabled={isReadOnly}
-                                        >
-                                            <AddIcon className="w-3 h-3" />
-                                            Add Knowledge Base
-                                        </button>
+                                    <button
+                                        tabIndex={0}
+                                        className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                        disabled={isReadOnly}
+                                    >
+                                        <AddIcon className="w-3 h-3" />
+                                        Add Knowledge Base
+                                    </button>
                                 </div>
                                 {knowledgebaseDropdownContent}
                             </div>
@@ -242,7 +285,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
                 )}
             </div>
             <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
-            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
+            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true}/>
         </div>
     );
 };

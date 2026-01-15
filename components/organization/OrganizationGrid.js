@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState , useRef } from 'react';
 import { formatDate, formatRelativeTime } from '@/utils/utility';
 
 const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, currentUserId }) => {
     const [loadingOrgId, setLoadingOrgId] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const tableBodyRef = useRef(null);
+    const rowRef = useRef([]);
     const formattedOrganizations = useMemo(() => {
         return displayedOrganizations
             .slice()
@@ -30,6 +32,33 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
         });
     }, [formattedOrganizations.length]);
 
+    useEffect(() =>{        
+    if (rowRef.current[selectedIndex]) {
+        if (selectedIndex === 0) {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        } else if (selectedIndex === formattedOrganizations.length - 1) {
+            // When at the last row, scroll to the bottom of the page
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        } else {
+            rowRef.current[selectedIndex].scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest'
+            });
+        }
+    }
+    },[selectedIndex])
+    useEffect(() => {
+    return () => {
+        rowRef.current = []; // Cleanup refs on unmount
+    };
+}, []);
     const handleOrgClick = async (orgId, orgName) => {
         if (!orgId) return;
         
@@ -107,7 +136,7 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-base-100 divide-y divide-base-200">
+                    <tbody ref={tableBodyRef} className="bg-base-100 divide-y divide-base-200">
                         {formattedOrganizations.length ? (
                             formattedOrganizations.map((org, index) => {
                                 const isLoading = loadingOrgId === org.id;
@@ -115,6 +144,7 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
                                 return (
                                     <tr
                                         key={org.id ?? index}
+                                        ref={(el)=>rowRef.current[index]=el}
                                         onClick={() => {
                                             setSelectedIndex(index);
                                             handleOrgClick(org.id, org.name);

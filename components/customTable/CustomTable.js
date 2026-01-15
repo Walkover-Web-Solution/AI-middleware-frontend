@@ -12,8 +12,7 @@ const CustomTable = ({
     handleRowClick = () => { },
     handleRowSelection = () => { },
     endComponent = null,
-    customGetColumnLabel = null,
-    customRenderUsageCell = null
+    customGetColumnLabel = null
 }) => {
     const keys = useMemo(() => Object.keys(data[0] || {}), [data]);
     const [selectedRows, setSelectedRows] = useState([]);
@@ -68,29 +67,35 @@ const CustomTable = ({
                 const valueB = activeColumn === 'name'
                     ? b.actualName
                     : activeColumn === 'createdAt'
-                    ? (b.createdAt_original ?? b.created_at_original)
-                    : activeColumn === 'updatedAt'
-                    ? (b.updatedAt_original ?? b.updated_at_original)
-                    : activeColumn === 'agent_limit'
-                    ? b.agent_limit_original
-                    : activeColumn === 'created_by'
-                    ? b.created_by_original
-                    : activeColumn === 'updated_by'
-                    ? b.updated_by_original
-                    : b[activeColumn];
+                        ? (b.createdAt_original ?? b.created_at_original)
+                        : activeColumn === 'updatedAt'
+                            ? (b.updatedAt_original ?? b.updated_at_original)
+                            : activeColumn === 'agent_limit'
+                                ? b.agent_limit_original
+                                : activeColumn === 'created_by'
+                                    ? b.created_by_original
+                                    : activeColumn === 'updated_by'
+                                        ? b.updated_by_original
+                                        : activeColumn === 'totalTokens'
+                                            ? b.totalTokens_original
+                                            : b[activeColumn];
 
-                // Explicit numeric sorting for usage or cost
-                if (activeColumn === 'usage') {
-                    // Sort by cost value when usage column is active
-                    const costA = (a.cost && typeof a.cost === 'string') ? Number(a.cost.replace(/[^0-9.-]+/g, '')) : 0;
-                    const costB = (b.cost && typeof b.cost === 'string') ? Number(b.cost.replace(/[^0-9.-]+/g, '')) : 0;
+                // Explicit numeric sorting for cost column
+                if (activeColumn === 'cost') {
+                    const costA = (a.cost && typeof a.cost === 'string') ? Number(a.cost.replace(/[^0-9.-]+/g, '')) : (typeof a.cost === 'number' ? a.cost : 0);
+                    const costB = (b.cost && typeof b.cost === 'string') ? Number(b.cost.replace(/[^0-9.-]+/g, '')) : (typeof b.cost === 'number' ? b.cost : 0);
                     return ascending ? costA - costB : costB - costA;
                 }
                 
                 // Keep original sorting for totalTokens column for backward compatibility
                 if (activeColumn === 'totalTokens') {
-                    const usageA = Number(a.totalTokens ?? 0);
-                    const usageB = Number(b.totalTokens ?? 0);
+                    const toNumber = (value) => {
+                        if (typeof value === 'number') return value;
+                        if (typeof value === 'string') return Number(value.replace(/[^0-9.-]+/g, ''));
+                        return 0;
+                    };
+                    const usageA = toNumber(a.totalTokens_original ?? a.totalTokens ?? 0);
+                    const usageB = toNumber(b.totalTokens_original ?? b.totalTokens ?? 0);
                     return ascending ? usageA - usageB : usageB - usageA;
                 }
                 
@@ -131,12 +136,11 @@ const CustomTable = ({
                     // Convert to Date objects for proper sorting
                     const dateA = new Date(originalA);
                     const dateB = new Date(originalB);
-                    
                     return ascending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
                 }
                 
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
-                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
+                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
                 }
                 
                 if (typeof valueA === 'number' && typeof valueB === 'number') {
@@ -189,11 +193,7 @@ const CustomTable = ({
 
     // Function to get value from row (handling undefined)
     const getDisplayValue = (row, column) => {
-        // Handle the special usage column by combining tokens and cost
-        if (column === 'usage') {
-            return customRenderUsageCell ? customRenderUsageCell(row) : (row.totalTokens || "-");
-        }
-        
+
         if (row[column] === undefined) return "not available";
 
         if (keysToWrap.includes(column) && row[column] && typeof row[column] === 'string') {

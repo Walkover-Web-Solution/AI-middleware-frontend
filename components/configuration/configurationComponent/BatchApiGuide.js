@@ -21,11 +21,14 @@ const BatchApi = (bridgeId, versionId) => {
         `    "agent_id": "${bridgeId || ''}",\n` +
         `    "batch_variables": [\n` +
         `        {\n` +
-        `            "message": "YOUR MESSAGE",\n` +
+        `            "message": "YOUR MESSAGE"\n` +
         `        },\n` +
         `        {\n` +
-        `            "name": "YOUR NAME",\n` +
+        `            "name": "YOUR NAME"\n` +
         `        },\n` +
+        `        {\n` +
+        `            "age": "YOUR AGE"\n` +
+        `        }\n` +
         `    ]\n` +
         `}'`
     );
@@ -61,7 +64,7 @@ const BatchApiGuide = ({ params, searchParams }) => {
     return (
         <div className="min-h-screen gap-4 flex flex-col">
             <div className="flex flex-col gap-4 p-4">
-                <Section title="Step 1" caption="Create `Auth key`" />
+                <Section title="Step 1" caption="Create Auth Key" />
                 <p className=" text-sm">
                     Follow the on-screen instructions to create a new Auth key. Ignore if already created
                     <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create Auth key</Link>

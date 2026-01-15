@@ -3,6 +3,7 @@ import { Check, X, AlertCircle } from 'lucide-react';
 import { isEqual } from 'lodash';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { DIFFERNCE_DATA_DISPLAY_NAME, CONFIGURATION_KEYS_TO_EXCLUDE } from '@/jsonFiles/bridgeParameter';
+import ComparisonCheck from '@/utils/comparisonCheck';
 
 const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
 
@@ -216,43 +217,58 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
           <span>No differences found between the data sets.</span>
         </div>
       ) : (
-        <>
+        <React.Fragment>
           <div className="divider"></div>
           {Object.entries(categorizedDifferences).map(([category, items]) => (
             <div key={category} className="mb-6">
               <h4 className="font-semibold text-lg mb-3">{DIFFERNCE_DATA_DISPLAY_NAME(category)}</h4>
               <div className="space-y-4">
-                {items.map(({ path, oldValue, newValue, status }) => (
-                  <div key={path} className="card bg-base-200">
-                    <div className="card-body p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <h5 className="card-title text-sm">
-                          {DIFFERNCE_DATA_DISPLAY_NAME(path.split('.')[path.split('.').length - 1 || 0])}
-                        </h5>
-                        {getStatusBadge(status)}
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Current Value:</div>
-                          <div className="bg-base-300 p-3 rounded text-sm">
-                            {formatValue(oldValue, path)}
-                          </div>
+                {items.map(({ path, oldValue, newValue, status }) => {
+                  // Check if this is the prompt field
+                  const isPromptField = path === 'prompt' || path.endsWith('.prompt');
+
+                  return (
+                    <div key={path} className="card bg-base-200">
+                      <div className="card-body p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h5 className="card-title text-sm">
+                            {DIFFERNCE_DATA_DISPLAY_NAME(path.split('.')[path.split('.').length - 1 || 0])}
+                          </h5>
+                          {getStatusBadge(status)}
                         </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Updated Value:</div>
-                          <div className="bg-base-300 p-3 rounded text-sm">
-                            {formatValue(newValue, path)}
+
+                        {isPromptField ? (
+                          // Use ComparisonCheck for prompt field
+                          <ComparisonCheck 
+                            isFromPublishModal={true}
+                            oldContent={oldValue}
+                            newContent={newValue}
+                          />
+                        ) : (
+                          // Use regular grid display for other fields
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">Current Value:</div>
+                              <div className="bg-base-300 p-3 rounded text-sm">
+                                {formatValue(oldValue, path)}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">Updated Value:</div>
+                              <div className="bg-base-300 p-3 rounded text-sm">
+                                {formatValue(newValue, path)}
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
-        </>
+        </React.Fragment>
       )}
     </div>
   );

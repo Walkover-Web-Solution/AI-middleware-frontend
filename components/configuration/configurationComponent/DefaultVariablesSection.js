@@ -11,7 +11,7 @@ const DefaultVariablesSection = memo(({ prompt = '', customVariables = [], isPub
     }, [prompt]);
 
     const defaultVariables = [
-        { name: 'current_time_and_date', description: 'To access the current date and time' },
+        { name: 'current_time_date_and_current_identifier', description: 'To access the current date and time' },
         { name: 'pre_function', description: 'Use this variable if you are using the pre_function' },
         { name: 'timezone', description: 'Access the timezone using a timezone identifier' }
     ];

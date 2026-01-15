@@ -44,10 +44,11 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
   const pathParts = pathname.split('?')[0].split('/');
   const orgId =orgIdFromHeader || pathParts[2];
 
-  const { userdetails, organizations, currrentOrgDetail } = useCustomSelector(state => ({
+  const { userdetails, organizations, currrentOrgDetail, allBridges } = useCustomSelector(state => ({
     userdetails: state.userDetailsReducer.userDetails,
     organizations: state.userDetailsReducer.organizations,
-    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[orgId]
+    currrentOrgDetail: state?.userDetailsReducer?.organizations?.[orgId],
+    allBridges: state.bridgeReducer?.org?.[orgId]?.orgs || []
   }));
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization', [organizations, orgId]);
   const getInitials = (name = '') => {
@@ -502,11 +503,24 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
   const sidebarAgentType = searchParams?.get('type')?.toLowerCase();
   const activeKey = useMemo(() => {
     if (pathParts[3] === 'agents') {
+      // If type is in search params, use it
       if (sidebarAgentType === 'chatbot') return 'chatbot';
+      if (sidebarAgentType === 'api') return 'api';
+      
+      // If no type in search params, check the actual agent's bridgeType from Redux
+      // Path structure: /org/{org_id}/agents/{action}/{agent_id}
+      const agentId = pathParts[5]; // agent_id is at index 5
+      if (agentId && allBridges.length > 0) {
+        const agent = allBridges.find(bridge => bridge._id === agentId);
+        if (agent?.bridgeType === 'chatbot') return 'chatbot';
+        if (agent?.bridgeType === 'api') return 'api';
+      }
+      
+      // Default to api if we can't determine
       return 'api';
     }
     return pathParts[3];
-  }, [pathParts, sidebarAgentType]);
+  }, [pathParts, sidebarAgentType, allBridges]);
   const buildNavUrl = useCallback((key) => {
     const config = NAV_ITEM_CONFIG[key];
     if (config) {

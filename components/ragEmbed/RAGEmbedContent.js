@@ -4,7 +4,7 @@ import { generateAccessKeyAction } from '@/store/action/orgAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-function RAGEmbedContent({ params }) {
+function RAGEmbedContent({ params, folderId }) {
     const dispatch = useDispatch();
     const access_key = useCustomSelector((state) =>
         state?.userDetailsReducer?.organizations?.[params.org_id]?.meta?.auth_token || ""
@@ -22,10 +22,11 @@ function RAGEmbedContent({ params }) {
         </div>
     );
 
-    const renderStepOne = ({ orgId, access_key }) => {
+    const renderStepOne = ({ orgId, access_key, folderId }) => {
         const apiConfig = `{
     "org_id": ${orgId},
-    "user_id": "unique_user_id"
+    "user_id": "unique_user_id",
+    ${folderId ? `"folder_id": "${folderId}"` : ""}
 }`;
 
         return (
@@ -34,6 +35,9 @@ function RAGEmbedContent({ params }) {
                 <div className="mockup-code">
                     <CopyButton data={apiConfig} />
                     <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
+                    {folderId && (
+                        <pre data-prefix=">" className="text-error"><code>folder_id=</code><code className="text-warning">"{folderId}"</code></pre>
+                    )}
                     <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
                 </div>
                 <div className="form-control">
@@ -102,7 +106,7 @@ function RAGEmbedContent({ params }) {
         <div className="p-4">
             <div className="space-y-6">
                 {/* Step 1 */}
-                {renderStepOne({ orgId: params?.org_id, access_key })}
+                {renderStepOne({ orgId: params?.org_id, access_key, folderId })}
 
                 {/* Step 2 */}
                 {renderStepTwo()}

@@ -78,12 +78,6 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
                     </button>
                 )}
             </div>
-            <p className="text-sm">
-                Generate a JWT token using org_id, chatbot_id, and user_id variables, then sign it with the access key.
-            </p>
-            <a className="link link-hover text-sm text-primary" target="_blank" href="/faq/create-jwt-for-chatbot">
-                Learn, How to create JWT token?
-            </a>
         </div>
     );
 }

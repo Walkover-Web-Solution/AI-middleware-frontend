@@ -522,14 +522,14 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
               
               {/* User message footer with timestamp and actions */}
               <div className="flex flex-row-reverse gap-2 m-1 items-center justify-between">
-                <time className="text-xs opacity-50 chat-end relative">
-                  <span className="group-hover:hidden">
-                    {formatRelativeTime(item.created_at)}
-                  </span>
-                  <span className="hidden group-hover:inline">
-                    {formatDateAndTime(item.created_at)}
-                  </span>
-                </time>
+                <time className="text-xs opacity-50 chat-end relative w-[140px] inline-block text-right">
+              <span className="group-hover:hidden">
+                {formatRelativeTime(item.created_at)}
+              </span>
+              <span className="hidden group-hover:inline absolute right-0 top-0">
+                {formatDateAndTime(item.created_at)}
+              </span>
+            </time>
                 <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity see-on-hover">
                   <button
                     className={`btn text-xs font-normal btn-sm hover:btn-primary ${

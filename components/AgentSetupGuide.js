@@ -29,7 +29,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       bridgeType: bridgeDataFromState?.bridgeType
    };
   });
-  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys && prompt!="")? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (modelName !== 'gpt-5-nano'||prompt===""))
+  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys && prompt!="")? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && ((bridgeType === 'chatbot' && modelName !== 'gpt-5-nano') || bridgeType !== 'chatbot' || prompt===""))
   const [isAnimating, setIsAnimating] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
@@ -40,7 +40,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       case '1': // Define Agent's Purpose
         return prompt !== "" || (promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim() !== "");
       case '2': // Configure API Access
-        return !!bridgeApiKey || modelName === 'gpt-5-nano';
+        return !!bridgeApiKey || (modelName === 'gpt-5-nano' && bridgeType === 'chatbot');
       case '3': // Connect External Functions (optional)
         return true; // Always considered complete since it's optional
       case '4': // Choose AI Service (optional)
@@ -95,9 +95,10 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     }
     
     // Hide guide if: 
-    // 1. It's gpt-5-nano model and has prompt OR
+    // 1. It's gpt-5-nano model and has prompt (only for chatbot) OR
     // 2. Both prompt and API key are provided
-    if ((modelName === 'gpt-5-nano' && hasPrompt) || (hasPrompt && hasApiKey)) {
+    // For API agents, always require API key even with gpt-5-nano
+    if ((modelName === 'gpt-5-nano' && hasPrompt && bridgeType === 'chatbot') || (hasPrompt && hasApiKey)) {
       if (isVisible) {
         setIsAnimating(true);
         setTimeout(() => {
@@ -110,18 +111,24 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     } else {
       setIsVisible(true);
     }
-    
-    // Chatbot open/close logic - moved to end to handle all conditions
-    if (bridgeType === 'chatbot' && hasPrompt && (hasApiKey || modelName === 'gpt-5-nano')) {
-      if (typeof window !== 'undefined' && window.openChatbot) {
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType, isVisible]);
+
+  // Function to handle chatbot open/close with delay
+  const checkConfigToOpenChatbot = () => {
+    const hasPrompt =(prompt !== ""|| !shouldPromptShow);
+    const hasApiKey = bridgeApiKey;
+    if (bridgeType === 'chatbot' && hasPrompt && (hasApiKey || (modelName === 'gpt-5-nano' && bridgeType === 'chatbot'))) {
         window?.openChatbot();
-      }
     } else {
-      if (typeof window !== 'undefined' && window.closeChatbot) {
         window?.closeChatbot();
-      }
     }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow, service, showDefaultApikeys, modelName, bridgeType]);
+  };
+
+  useEffect(() => {
+   setTimeout(() => {
+    checkConfigToOpenChatbot();
+   }, 2000);
+  }, [bridgeApiKey, prompt, shouldPromptShow, modelName, bridgeType]);
 
   useEffect(() => {
     if (typeof onVisibilityChange === 'function') {
@@ -141,7 +148,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
       setErrorBorder(promptTextAreaRef, 'textarea', true);
       return;
     }
-    if (!bridgeApiKey && modelName !== 'gpt-5-nano') {
+    if (!bridgeApiKey && !(modelName === 'gpt-5-nano' && bridgeType === 'chatbot')) {
       setShowError(true);
       setErrorType('apikey');
       setErrorBorder(apiKeySectionRef, 'button', true);
@@ -156,7 +163,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     }, 300);
   };
  
-  if (!isVisible || ((bridgeApiKey && prompt !== "") || (modelName === 'gpt-5-nano' && prompt !== ""))) {
+  if (!isVisible || ((bridgeApiKey && prompt !== "") || (modelName === 'gpt-5-nano' && prompt !== "" && bridgeType === 'chatbot'))) {
     resetBorder(promptTextAreaRef, 'textarea');
     resetBorder(apiKeySectionRef, 'select');
     return null;

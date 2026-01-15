@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { createDiff } from '@/utils/utility'
 
-const ComparisonCheck = ({ oldContent, newContent }) => {
+const ComparisonCheck = ({ oldContent, newContent, isFromPublishModal }) => {
     const diffData = createDiff(oldContent || '', newContent || '');
     const isNewContentEmpty = !newContent || newContent.trim() === '';
     const leftScrollRef = useRef(null);
@@ -53,7 +53,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                                                 {line.oldLine || (line.type === 'added' ? ' ' : '')}
                                             </span>
                                         </div>
-                                    ))}
+                                    ))} 
                                     {diffData.length === 0 && (
                                         <div className="p-4 text-base-content text-center">
                                             Generate a new prompt to see differences
@@ -100,7 +100,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                             </div>
                         </div>
                     </div>
-
+                    {!isFromPublishModal && (
                     <div className="flex justify-between items-center mt-2">
                         <div className="text-sm text-base-content flex gap-4">
                             <div className="flex items-center gap-2">
@@ -112,6 +112,7 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                             
                         </div>
                     </div>
+                    )}
                 </>
             )}
         </>

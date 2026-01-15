@@ -83,6 +83,10 @@ const Navbar = ({ isEmbedUser, params }) => {
     return TABS.findIndex(tab => tab.id === activeTab);
   }, [TABS, activeTab]);
 
+  const TAB_WIDTH = useMemo(() => {
+    return isMobile ? 90 : 120; // px
+  }, [isMobile]);
+
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
     if (depth === 3) return false;
@@ -138,11 +142,15 @@ const Navbar = ({ isEmbedUser, params }) => {
       setEditedName(agentName);
       return;
     }
-    if (trimmed !== agentName && trimmed.includes('%')) {
-      toast.error("Agent name cannot contain % character");
+    
+    // Check for special characters (allow only letters, numbers, spaces, hyphens, and underscores)
+    const specialCharRegex = /[^a-zA-Z0-9\s\-_]/;
+    if (specialCharRegex.test(trimmed)) {
+      toast.error("Agent name can only contain letters, numbers, spaces, hyphens, and underscores");
       setEditedName(agentName);
       return;
     }
+    
     if (trimmed !== agentName) {
       dispatch(updateBridgeAction({
         bridgeId: bridgeId,
@@ -262,6 +270,53 @@ const Navbar = ({ isEmbedUser, params }) => {
   const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
 
+  // Keyboard shortcuts for navigation
+  useEffect(() => {
+    let gPressed = false;
+    let timeoutId = null;
+
+    const handleKeyDown = (e) => {
+      const target = e.target;
+      const isInputField = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.isContentEditable;
+      
+      if (isInputField) return;
+
+      if (e.key === 'g' || e.key === 'G') {
+        gPressed = true;
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          gPressed = false;
+        }, 1000);
+      } else if (gPressed) {
+        if (e.key === 'c' || e.key === 'C') {
+          e.preventDefault();
+          handleTabChange('configure');
+          gPressed = false;
+          if (timeoutId) clearTimeout(timeoutId);
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          if (!isEmbedUser) {
+            handleTabChange('testcase');
+          }
+          gPressed = false;
+          if (timeoutId) clearTimeout(timeoutId);
+        } else if (e.key === 'h' || e.key === 'H') {
+          e.preventDefault();
+          handleTabChange('history');
+          gPressed = false;
+          if (timeoutId) clearTimeout(timeoutId);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [handleTabChange, isEmbedUser]);
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
@@ -448,7 +503,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               {/* Saving Status Indicator */}
               {savingStatus?.status && (
                 <div className="flex-shrink-0 ml-2 mr-2">
-                  <div className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 ${savingStatus.status === 'saving' ? 'bg-blue-100 text-blue-800' : savingStatus.status === 'saved' ? 'bg-green-100 text-green-800' : savingStatus.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  <div className="px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 text-base-content">
                     {savingStatus.status === 'saving' && (
                       <>
                         <div className="loading loading-spinner loading-xs"></div>
@@ -491,13 +546,14 @@ const Navbar = ({ isEmbedUser, params }) => {
             {/* Navigation Tabs - Fixed Position with Sliding Animation */}
             <div className="flex items-center gap-1 flex-shrink-0">
               {(isEmbedUser && showHistory) || !isEmbedUser ? (
-                <div className="relative flex items-center gap-1">
+                <div className="relative flex items-center gap-1"
+                  style={{ width: `${TAB_WIDTH * TABS.length}px` }}>
                   {/* Sliding background indicator */}
                   <span
-                    className="absolute inset-0 ml-3 rounded-lg bg-primary shadow-sm transition-all duration-300 ease-in-out"
+                    className="absolute top-0 left-0 h-full rounded-lg bg-primary shadow-sm transition-transform duration-300 ease-in-out"
                     style={{
-                      width: `${100 / (TABS.length || 1)}%`,
-                      transform: `translateX(${activeTabIndex * 100}%)`,
+                      width: `${TAB_WIDTH}px`,
+                      transform: `translateX(${activeTabIndex * TAB_WIDTH}px)`,
                     }}
                   />
                   {TABS.map((tab) => {
@@ -506,17 +562,17 @@ const Navbar = ({ isEmbedUser, params }) => {
                       <button
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
-                        className={`relative z-10 px-3 py-2 sm:px-4 h-8 rounded-lg transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm font-medium whitespace-nowrap ${
-                          isActive
-                            ? 'text-primary-content bg-transparent hover:bg-transparent'
-                            : 'text-base-content/70 hover:text-base-content hover:bg-base-200/30'
-                        }`}
+                        className={`relative z-10 h-8 flex items-center justify-center gap-2 text-sm font-medium transition-colors
+                ${isActive
+                            ? 'text-primary-content'
+                            : 'text-base-content/70 hover:text-base-content'
+                          }`}
+                        style={{ width: `${TAB_WIDTH}px` }} // 🔒 lock tab width
                       >
                         <tab.icon
                           size={14}
-                          className={`w-3.5 h-3.5 transition-opacity ${
-                            isActive ? 'opacity-100' : 'opacity-60'
-                          }`}
+                          className={`w-3.5 h-3.5 transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'
+                            }`}
                         />
                         <span className="truncate text-xs">
                           {isMobile ? tab.shortLabel : tab.label}
@@ -530,10 +586,10 @@ const Navbar = ({ isEmbedUser, params }) => {
                 <div className="w-32 h-8"></div>
               )}
             </div>
-            
+
             {/* Divider */}
-             <div className="h-4 w-px bg-base-300 flex-shrink-0"></div>
-            
+            <div className="h-4 w-px bg-base-300 flex-shrink-0"></div>
+
             {/* Desktop view - show buttons for both users with fixed positioning */}
             <div className="hidden md:flex items-center gap-1 lg:gap-2 flex-shrink-0">
               {/* History button - Fixed Position */}
@@ -549,14 +605,14 @@ const Navbar = ({ isEmbedUser, params }) => {
                   </div>
                 )}
               </div>
-              
+
               {/* Publish/Discard Dropdown - Fixed Position */}
-                {activeTab == 'configure' && (
-              <div className="flex items-center">
-                <div className="dropdown dropdown-end">                  
-                    <button 
+              {activeTab == 'configure' && (
+                <div className="flex items-center">
+                  <div className="dropdown dropdown-end">
+                    <button
                       tabIndex={0}
-                      role="button" 
+                      role="button"
                       className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? 'loading' : ''}`}
                       disabled={isPublishing || isPublished}
                     >
@@ -574,7 +630,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                           <span>Publish</span>
                         </button>
                       </li>
-                      {isDrafted && publishedVersionId != null &&(
+                      {isDrafted && publishedVersionId != null && (
                         <li>
                           <button
                             onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
@@ -588,9 +644,9 @@ const Navbar = ({ isEmbedUser, params }) => {
                       )}
                     </ul>
                   </div>
-              
-              </div>
-                )}
+
+                </div>
+              )}
               {/* Ellipsis menu - Fixed Position */}
               <div className="flex items-center">
                 {!isEmbedUser && (

@@ -12,7 +12,8 @@ export const createOrg = async (dataToSend) => {
     const data = await axios.post(`${PROXY_URL}/api/c/createCompany`, dataToSend)
     return data;
   } catch (error) {
-    toast.error(error.response.data.message)
+    toast.error(error.response.data.message || "Failed to create new organization")
+    return error;
   }
 }
 
