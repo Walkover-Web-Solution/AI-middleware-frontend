@@ -27,10 +27,20 @@ axios.interceptors.response.use(
         return response;
     },
     async function (error) {
-        if ((error?.response?.status === 401 ) && (error?.response?.status === 401 && !sessionStorage.getItem("local_token"))) {
-            clearCookie()
-            if (window.location.href != '/login') setInCookies("previous_url", window.location.href);
-            window.location.href = "/login";
+        if (error?.response?.status === 401) {
+            clearCookie();
+            const isEmbedContext = window.location.pathname.includes('/embed') || 
+                                 sessionStorage.getItem('embedUser') === 'true' ||
+                                 window.location.hostname.includes('embed');
+            
+            if (isEmbedContext) {
+                window.location.href = "/session-expired";
+            } else {
+                if (window.location.href !== '/login') {
+                    setInCookies("previous_url", window.location.href);
+                }
+                window.location.href = "/login";
+            }
         }
         return Promise.reject(error);
     }

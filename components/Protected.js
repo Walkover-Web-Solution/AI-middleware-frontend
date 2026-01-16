@@ -15,7 +15,16 @@ const Protected = (WrappedComponent) => {
     }));
     useEffect(() => {
       if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("local_token")) && (!isEmbedUser || !isEmbedUserFromUserDetails)) {
-        router.replace('/login');
+        // Check if we're in embed context
+        const isEmbedContext = window.location.pathname.includes('/embed') || 
+                             sessionStorage.getItem('embedUser') === 'true' ||
+                             window.location.hostname.includes('embed')
+        
+        if (isEmbedContext) {
+          router.replace('/session-expired');
+        } else {
+          router.replace('/login');
+        }
       }
     }, [router]);
 

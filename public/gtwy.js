@@ -211,9 +211,8 @@
                     this.applySlideStyles(slideType);
                     requestAnimationFrame(() => container.classList.add('open'));
                 }
-
-                window.parent?.postMessage?.({ type: 'open', data: {} }, '*');
-                document.getElementById('iframe-component-gtwyInterfaceEmbed')?.contentWindow?.postMessage({ type: 'open', data: {} }, '*');
+                window.parent?.postMessage?.({ type: 'openGtwy', data: {} }, '*');
+                document.getElementById('iframe-component-gtwyInterfaceEmbed')?.contentWindow?.postMessage({ type: 'openGtwy', data: {} }, '*');
             }
         }
 
@@ -374,9 +373,15 @@
         async loadGtwyEmbed() {
             try {
                 const response = await this.fetchGtwyDetails();
+                if (!response || response.error || !response.data) {
+                    console.error('Login failed, not loading embed:', response);
+                    this.handleLoginFailure();
+                    return;
+                }
                 this.processGtwyDetails(response);
             } catch (error) {
                 console.error('GTWY embed loading error:', error);
+                this.handleLoginFailure();
             }
         }
 
@@ -387,10 +392,21 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: embedToken }
                 } : undefined;
-                return (await fetch(this.urls.login, options)).json();
+                const response = await fetch(this.urls.login, options);
+                if (!response.ok) {
+                    throw new Error(`Login API failed with status: ${response.status}`);
+                }
+                return response.json();
             } catch (error) {
                 console.error('Fetch login user error:', error);
+                throw error; // Re-throw to be caught by loadGtwyEmbed
             }
+        }
+        handleLoginFailure() {
+            console.error('Login failed, preventing embed from opening');
+            this.cleanupGtwyEmbed();
+            this.state.isInitialized = false;
+            this.state.bodyLoaded = false;
         }
 
         processGtwyDetails(data) {
