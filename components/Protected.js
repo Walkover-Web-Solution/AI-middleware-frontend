@@ -14,12 +14,22 @@ const Protected = (WrappedComponent) => {
       isEmbedUserFromUserDetails: state?.userDetailsReducer?.userDetails?.meta?.type === 'embed'
     }));
     useEffect(() => {
-      if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("local_token")) && (!isEmbedUser || !isEmbedUserFromUserDetails)) {
-        router.replace('/login');
-      }
+      const timer = setTimeout(() => {
+        if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("local_token")) && (!isEmbedUser || !isEmbedUserFromUserDetails)) {
+          const isEmbedContext = window.location.pathname.includes('/embed') ||
+            sessionStorage.getItem('embedUser') === 'true' ||
+            window.location.hostname.includes('embed')
+          if (isEmbedContext) {
+            router.replace('/session-expired');
+          } else {
+            router.replace('/login');
+          }
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
     }, [router]);
 
-    return <WrappedComponent {...props} isEmbedUser={!!((isEmbedUser|| isEmbedUserFromUserDetails) && sessionStorage.getItem("local_token"))} isFocus={isFocus} />;
+    return <WrappedComponent {...props} isEmbedUser={!!((isEmbedUser || isEmbedUserFromUserDetails) && sessionStorage.getItem("local_token"))} isFocus={isFocus} />;
   };
   return ProtectedComponent;
 };

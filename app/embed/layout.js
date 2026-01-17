@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation';
 import { setEmbedUserDetailsAction, clearEmbedThemeDetailsAction } from '@/store/action/appInfoAction';
 import { useDispatch } from 'react-redux';
-import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
 import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -19,6 +18,7 @@ const Layout = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentAgentName, setCurrentAgentName] = useState(null);
   const [processedAgentName, setProcessedAgentName] = useState(null);
+  const [openGtwyReceived, setOpenGtwyReceived] = useState(false);
 
   // Memoize URL params parsing to avoid unnecessary re-parsing
   const urlParamsObj = useMemo(() => {
@@ -27,9 +27,8 @@ const Layout = ({ children }) => {
     return decodedParam ? JSON.parse(decodedParam) : {};
   }, [searchParams]);
 
-  const { allBridges, services, embedThemeConfig } = useCustomSelector((state) => ({
+  const { allBridges, embedThemeConfig } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer?.orgs?.[urlParamsObj.org_id]?.orgs || [],
-    services: state.serviceReducer?.services || null,
     embedThemeConfig: state.appInfoReducer?.embedUserDetails?.theme_config || null,
   }));
   const resolvedEmbedTheme = useMemo(() => embedThemeConfig || defaultUserTheme, [embedThemeConfig]);
@@ -46,14 +45,10 @@ const Layout = ({ children }) => {
   // Reset theme config when component mounts
 
 
+  // Listen for openGtwy event from parent
   useEffect(() => {
     window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
-    // Only call getServiceAction if services data is not already present
-    if (!services || Object.keys(services).length === 0) {
-      dispatch(getServiceAction());
-    }
-  }, [dispatch, services]);
-
+  }, []);
 
   useEffect(()=>{
     resetEmbedThemeConfig();
@@ -109,7 +104,7 @@ const Layout = ({ children }) => {
   }, [router]);
 
   const handleAgentNavigation = useCallback(async (agentName, orgId) => {
-    if (!agentName || !orgId || processedAgentName === agentName) {
+    if (!agentName || !orgId || processedAgentName === agentName || !openGtwyReceived) {
       if (processedAgentName === agentName) setIsLoading(false);
       return;
     }
@@ -128,7 +123,7 @@ const Layout = ({ children }) => {
       }
     }
 
-    // Only fetch bridges if not already present in store
+    // Only fetch bridges if not already present in store and openGtwy event received
     try {
       let bridges = allBridges;
       if (!allBridges || allBridges.length === 0) {
@@ -150,14 +145,13 @@ const Layout = ({ children }) => {
       console.error('Error fetching bridges, falling back to create a new agent:', error);
       createNewAgent(agentName, orgId);
     }
-  }, [processedAgentName, dispatch, createNewAgent, navigateToExistingAgent, allBridges]);
+  }, [processedAgentName, dispatch, createNewAgent, navigateToExistingAgent, allBridges, openGtwyReceived]);
 
+  // Initialize tokens and setup immediately (without waiting for openGtwy)
   useEffect(() => {
-    const initialize = () => {
+    const initializeTokens = () => {
       // Reset theme config on initialization
       if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.hideHomeButton) {
-        setIsLoading(true);
-        
         // Clear previous embed user details to prevent theme persistence
         dispatch(clearEmbedThemeDetailsAction());
 
@@ -191,14 +185,31 @@ const Layout = ({ children }) => {
             dispatch(setEmbedUserDetailsAction({ [key]: toBoolean(value) }));
           });
         }
+        
+        // Set agent name but don't navigate yet
         if (urlParamsObj?.agent_name) {
-          setIsLoading(true)
           setCurrentAgentName(urlParamsObj.agent_name);
+        }
+      }
+    };
+
+    initializeTokens();
+  }, [urlParamsObj]);
+
+  // Handle navigation only after openGtwy event is received
+  useEffect(() => {
+    const handleNavigation = () => {
+      if (!openGtwyReceived) {
+        return;
+      }
+
+      if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.hideHomeButton) {
+        setIsLoading(true);
+        
+        if (urlParamsObj?.agent_name) {
         } else if (urlParamsObj?.agent_id) {
-          setIsLoading(true)
           router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
         } else {
-          setIsLoading(true)
           router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
         }
       } else {
@@ -206,8 +217,8 @@ const Layout = ({ children }) => {
       }
     };
 
-    initialize();
-  }, [urlParamsObj]);
+    handleNavigation();
+  }, [openGtwyReceived, urlParamsObj]);
 
   useEffect(() => {
     if (currentAgentName) {
@@ -220,9 +231,9 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = async (event) => {
+      if (event?.data?.data?.type === "openGtwy")
+        setOpenGtwyReceived(true);
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
-
-      
       // Only fetch bridges if not already present in store
       let bridges = allBridges;
       if (!allBridges || allBridges.length === 0) {
