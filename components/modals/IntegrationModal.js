@@ -25,19 +25,19 @@ const IntegrationModal = ({ params, type = "embed" }) => {
     // Only add config if type is not "rag_embed"
     if (type !== "rag_embed") {
       payload.config = {
-        "hideHomeButton": false,
+        "showHomeButton": true,
         "showGuide": true,
         "showHistory": false,
         "showConfigType": false,
         "slide": "right",
         "defaultOpen": true,
-        "hideFullScreenButton": false,
-        "hideCloseButton": false,
-        "hideHeader": false,
-        "hideAdvancedParameters": false,
-        "hideAdvancedConfigurations": false,
-        "hidePreTool": false,
-        "hideCreateManuallyButton": false
+        "showFullScreenButton": true,
+        "showCloseButton": true,
+        "showHeader": true,
+        "showAdvancedParameters": false,
+        "showAdvancedConfigurations": true,
+        "showPreTool": true,
+        "showCreateManuallyButton": true
       };
     }
     

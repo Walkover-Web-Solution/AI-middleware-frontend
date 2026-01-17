@@ -8,8 +8,8 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 
 const PromptTab = ({ isPublished,isEmbedUser }) => {
   const { params, searchParams, isEditor } = useConfigurationContext();
-  const { hideAdvancedParameters } = useCustomSelector(state => ({
-    hideAdvancedParameters: state.appInfoReducer.embedUserDetails.hideAdvancedParameters,
+  const { showAdvancedParameters } = useCustomSelector(state => ({
+    showAdvancedParameters: state.appInfoReducer.embedUserDetails.showAdvancedParameters ?? false,
   }));
   return (
     <div className="flex flex-col w-full">
@@ -20,7 +20,7 @@ const PromptTab = ({ isPublished,isEmbedUser }) => {
                 params={params}
                 searchParams={searchParams}
                 isEmbedUser={isEmbedUser}
-                hideAdvancedParameters={hideAdvancedParameters}
+                showAdvancedParameters={showAdvancedParameters}
                 level={2}
                 className="w-full"
                 isPublished={isPublished}

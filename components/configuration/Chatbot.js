@@ -130,7 +130,7 @@ const Chatbot = ({ params, searchParams }) => {
           "threadId": bridgeName?.replaceAll(" ", "_"),
           "parentId": 'parentChatbot',
           "fullScreen": true,
-          "hideCloseButton": true,
+          "showCloseButton": false,
           "hideIcon": true,
           "version_id": isPublished ? "null" : version,
           "variables": variables || {}

@@ -41,7 +41,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const searchParams = useSearchParams();
   const versionId = useMemo(() => searchParams?.get('version'), [searchParams]);
   const isPublished = useMemo(() => searchParams?.get('isPublished') === 'true', [searchParams]);
-  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory, bridgeName, savingStatus , publishedVersionId } = useCustomSelector(state => {
+  const { bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType, isPublishing, isUpdatingBridge, activeTab, isArchived, showHomeButton, showHistory, bridgeName, savingStatus , publishedVersionId } = useCustomSelector(state => {
     return {
     bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId) || {},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -53,7 +53,7 @@ const Navbar = ({ isEmbedUser, params }) => {
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
-    hideHomeButton: state.appInfoReducer?.embedUserDetails?.hideHomeButton || false,
+    showHomeButton: state.appInfoReducer?.embedUserDetails?.showHomeButton ?? true,
     showHistory: state.appInfoReducer?.embedUserDetails?.showHistory,
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.name || "",
     publishedVersionId: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || null,
@@ -416,7 +416,7 @@ const Navbar = ({ isEmbedUser, params }) => {
         <div className="flex w-full items-center justify-between px-2 sm:px-4 lg:px-6 h-10 min-w-0">
           {/* Left: Agent Name and Versions */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-5 min-w-0 flex-1">
-            {(isEmbedUser && !hideHomeButton) &&
+            {(isEmbedUser && showHomeButton) &&
               <button
                 onClick={handleHomeClick}
                 className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 hover:bg-base-200 px-2 sm:px-3"

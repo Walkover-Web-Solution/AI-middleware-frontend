@@ -151,12 +151,12 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const initializeTokens = () => {
       // Reset theme config on initialization
-      if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.hideHomeButton) {
+      if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.showHomeButton) {
         // Clear previous embed user details to prevent theme persistence
         dispatch(clearEmbedThemeDetailsAction());
 
         if (urlParamsObj.token) {
-          dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
+          dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, showHomeButton: urlParamsObj?.showHomeButton }));
           sessionStorage.setItem('local_token', urlParamsObj.token);
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
@@ -203,7 +203,7 @@ const Layout = ({ children }) => {
         return;
       }
 
-      if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.hideHomeButton) {
+      if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.showHomeButton) {
         setIsLoading(true);
         
         if (urlParamsObj?.agent_name) {
@@ -284,7 +284,7 @@ const Layout = ({ children }) => {
       }
 
       const uiUpdates = {};
-      if (messageData?.hideHomeButton !== undefined) uiUpdates.hideHomeButton = messageData.hideHomeButton;
+      if (messageData?.showHomeButton !== undefined) uiUpdates.showHomeButton = messageData.showHomeButton;
       if (messageData?.showGuide !== undefined) uiUpdates.showGuide = messageData.showGuide;
       if (messageData?.showConfigType !== undefined) uiUpdates.showConfigType = messageData.showConfigType;
       if (messageData?.theme_config) {

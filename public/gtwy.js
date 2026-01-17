@@ -8,8 +8,8 @@
             this.scriptIds = {};
             this.config = {
                 height: '100', heightUnit: 'vh', width: '100', widthUnit: 'vw',
-                buttonName: '', slide: 'full', hideCloseButton: 'false',
-                hideFullScreenButton: 'false', hideHeader: 'false', skipLoadGtwy: false
+                buttonName: '', slide: 'full', showCloseButton: 'false',
+                showFullScreenButton: 'false', showHeader: 'false', skipLoadGtwy: false
             };
             this.urls = {
                 gtwyUrl: 'https://embed.gtwy.ai/embed',
@@ -17,7 +17,7 @@
             };
             this.state = {
                 bodyLoaded: false, fullscreen: false, isInitialized: false, hasParentContainer: false,
-                tempDataToSend: { hideHomeButton: true, showHistory: true, showConfigType: false }
+                tempDataToSend: { showHomeButton: true, showHistory: true, showConfigType: false }
             };
             this.initializeEventListeners();
         }
@@ -26,7 +26,7 @@
             const script = document.getElementById('gtwy-user-script') || document.getElementById('gtwy-main-script');
             if (!script) return {};
 
-            const attrs = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide', 'agent_id', 'agent_name', 'version_id', 'token', 'gtwy_user', 'org_id', 'skipLoadGtwy', 'customIframeId'];
+            const attrs = ['embedToken', 'showCloseButton', 'parentId', 'showFullScreenButton', 'showHeader', 'defaultOpen', 'slide', 'agent_id', 'agent_name', 'version_id', 'token', 'gtwy_user', 'org_id', 'skipLoadGtwy', 'customIframeId'];
             return attrs.reduce((props, attr) => {
                 if (script.hasAttribute(attr)) {
                     let value = script.getAttribute(attr);
@@ -38,7 +38,7 @@
                     if (attr === 'defaultOpen') this.config.defaultOpen = value || false;
                     if (attr === 'slide' && ['full', 'left', 'right'].includes(value)) this.config.slide = value;
                     if (attr === 'skipLoadGtwy') this.config.skipLoadGtwy = value === 'true' || value === true;
-                    if (['hideHeader', 'hideCloseButton', 'hideFullScreenButton'].includes(attr)) this.config[attr] = value;
+                    if (['showHeader', 'showCloseButton', 'showFullScreenButton'].includes(attr)) this.config[attr] = value;
                     
                     props[attr] = value;
                     this.state.tempDataToSend = { ...this.state.tempDataToSend, [attr]: value };
@@ -326,7 +326,7 @@
                 if (header) {
                     this.addStyles();
                     this.parentContainer.appendChild(header);
-                    header.style.display = ['true', true].includes(this.config.hideHeader) ? 'none' : 'block';
+                    header.style.display = ['true', true].includes(this.config.showHeader) ? 'block' : 'none';
                 }
             }
 
@@ -341,10 +341,10 @@
             Object.assign(iframe.style, { width: '100%', height: '100%', border: 'none' });
 
             if (!this.state.hasParentContainer) {
-                const hideHeader = ['true', true].includes(this.config.hideHeader);
+                const showHeader = ['true', true].includes(this.config.showHeader);
                 Object.assign(iframe.style, {
-                    marginTop: hideHeader ? '0vh' : '5vh',
-                    maxHeight: hideHeader ? '100vh' : '95vh'
+                    marginTop: showHeader ? '5vh' : '0vh',
+                    maxHeight: showHeader ? '95vh' : '100vh'
                 });
             }
 
@@ -431,28 +431,28 @@
             if (!container) return;
 
             if (config && Object.keys(config).length > 0) {
-                ['hideCloseButton', 'hideFullScreenButton'].forEach(key => {
+                ['showCloseButton', 'showFullScreenButton'].forEach(key => {
                     if (key in config) {
                         this.config[key] = config[key];
-                        const btn = document.getElementById(key === 'hideCloseButton' ? 'gtwy-close-btn' : 'gtwy-fullscreen-btn');
-                        if (btn) btn.style.display = [true, 'true'].includes(config[key]) ? 'none' : 'flex';
+                        const btn = document.getElementById(key === 'showCloseButton' ? 'gtwy-close-btn' : 'gtwy-fullscreen-btn');
+                        if (btn) btn.style.display = [true, 'true'].includes(config[key]) ? 'flex' : 'none';
                     }
                 });
 
-                if ('hideHeader' in config &&  !this.state.hasParentContainer) {
-                    this.config.hideHeader = config.hideHeader;
+                if ('showHeader' in config &&  !this.state.hasParentContainer) {
+                    this.config.showHeader = config.showHeader;
                     const header = document.getElementById('gtwy-embed-header');
                     const iframe = document.getElementById('iframe-component-gtwyInterfaceEmbed');
-                    const hide = [true, 'true'].includes(config.hideHeader);
+                    const show = [true, 'true'].includes(config.showHeader);
                     
-                    if (header) header.style.display = hide ? 'none' : 'flex';
+                    if (header) header.style.display = show ? 'flex' : 'none';
                     if (iframe) {
                         Object.assign(iframe.style, {
-                            marginTop: hide ? '0px' : '5vh',
-                            maxHeight: hide ? '100vh' : '95vh'
+                            marginTop: show ? '5vh' : '0px',
+                            maxHeight: show ? '95vh' : '100vh'
                         });
                     }
-                    container.classList.toggle('with-header', !hide);
+                    container.classList.toggle('with-header', show);
                 }
 
                 if (config.slide) this.props.slide = config.slide;
@@ -476,8 +476,8 @@
         setPropValues(props) {
             if ([true, 'true'].includes(props.fullScreen)) {
                 document.getElementById('gtwy-iframe-parent-container')?.classList.add('full-screen-gtwyInterfaceEmbed');
-                this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: true };
-                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { hideFullScreenButton: true } });
+                this.state.tempDataToSend = { ...this.state.tempDataToSend, showFullScreenButton: true };
+                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { showFullScreenButton: true } });
             }
             if ('slide' in props) this.props.slide = props.slide;
         }
@@ -525,7 +525,7 @@
         }
 
         const propsToUpdate = {};
-        if ('hideCloseButton' in dataToSend) propsToUpdate.hideCloseButton = dataToSend.hideCloseButton || false;
+        if ('showCloseButton' in dataToSend) propsToUpdate.showCloseButton = dataToSend.showCloseButton || false;
         if (['true', 'false', true, false].includes(dataToSend.fullScreen)) propsToUpdate.fullScreen = dataToSend.fullScreen;
         if ('slide' in dataToSend) propsToUpdate.slide = dataToSend.slide;
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SettingsIcon } from '@/components/Icons';
 import AdvancedParameters from './AdvancedParamenter';
 
-const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvancedParameters = false, isPublished = false, isEditor = true }) => {
+const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, showAdvancedParameters = false, isPublished = false, isEditor = true }) => {
     // Determine if content is read-only (either published or user is not an editor)
     const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
     const advancedSettingsRef = useRef(null);
@@ -24,7 +24,7 @@ const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvance
         };
     }, [showAdvancedSettings]);
 
-    if (hideAdvancedParameters) {
+    if (!showAdvancedParameters) {
         return null;
     }
 
@@ -45,7 +45,7 @@ const AdvancedSettingsButton = ({ params, searchParams, isEmbedUser, hideAdvance
                         params={params}
                         searchParams={searchParams}
                         isEmbedUser={isEmbedUser}
-                        hideAdvancedParameters={hideAdvancedParameters}
+                        showAdvancedParameters={showAdvancedParameters}
                         level={1}
                         className="mt-0"
                         compact

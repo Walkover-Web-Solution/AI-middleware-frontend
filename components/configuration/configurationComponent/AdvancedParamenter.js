@@ -15,7 +15,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import { CircleQuestionMark } from 'lucide-react';
 
-const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false, isEditor = true }) => {
+const AdvancedParameters = ({ params, searchParams, isEmbedUser, showAdvancedParameters, className = "", level = 1, compact = false, isPublished = false, isEditor = true }) => {
  
   const isReadOnly = isPublished || !isEditor;
   // Use the tutorial videos hook
@@ -655,7 +655,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     );
   };
 
-  const shouldShowLevel1 = level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters));
+  const shouldShowLevel1 = level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && showAdvancedParameters));
 
   if (level === 2) {
     if (level2Parameters.length === 0) {

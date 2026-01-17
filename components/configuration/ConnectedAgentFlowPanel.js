@@ -193,7 +193,7 @@ const ConnectedAgentFlowPanel = ({isEmbedUser}) => {
       script.setAttribute('customIframeId', 'gtwyEmbedInterface');
       script.setAttribute('gtwy_user', true);
       script.setAttribute('parentId', 'gtwy');
-      script.setAttribute('hideHeader', true);
+      script.setAttribute('showHeader', false);
       document.head.appendChild(script);
     }
 
