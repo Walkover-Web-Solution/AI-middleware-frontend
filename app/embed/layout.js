@@ -47,17 +47,7 @@ const Layout = ({ children }) => {
 
   // Listen for openGtwy event from parent
   useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.data?.type === 'openGtwy') {
-        setOpenGtwyReceived(true);
-      }
-    };
-    window.addEventListener('message', handleMessage);
     window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
   }, []);
 
   useEffect(()=>{
@@ -241,9 +231,9 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = async (event) => {
+      if (event?.data?.data?.type === "openGtwy")
+        setOpenGtwyReceived(true);
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
-
-      
       // Only fetch bridges if not already present in store
       let bridges = allBridges;
       if (!allBridges || allBridges.length === 0) {

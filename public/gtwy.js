@@ -212,15 +212,15 @@
                     requestAnimationFrame(() => container.classList.add('open'));
                 }
                 window.parent?.postMessage?.({ type: 'openGtwy', data: {} }, '*');
-                document.getElementById('iframe-component-gtwyInterfaceEmbed')?.contentWindow?.postMessage({ type: 'openGtwy', data: {} }, '*');
             }
+            sendMessageToGtwy({ type: 'openGtwy', data: {} })
         }
 
         closeGtwy() {
             const container = document.getElementById('gtwy-iframe-parent-container');
             if (container?.style?.display === 'block') {
                 if (!this.state.hasParentContainer) container.classList.remove('open');
-                
+                window.parent?.postMessage?.({ type: 'closeGtwy', data: {} }, '*');
                 const delay = this.state.hasParentContainer ? 0 : 300;
                 setTimeout(() => {
                     window.parent?.postMessage?.({ type: 'close', data: {} }, '*');
@@ -483,13 +483,15 @@
         }
 
         sendInitialData() {
-            if (this.state.tempDataToSend) {
-                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: this.state.tempDataToSend });
-                const shouldOpen = [this.state.tempDataToSend?.defaultOpen, this.state.config?.defaultOpen, this.config.defaultOpen]
-                    .some(val => [true, 'true'].includes(val));
-                if (shouldOpen) this.openGtwy();
-                this.state.tempDataToSend = null;
-            }
+            setTimeout(() => {
+                if (this.state.tempDataToSend) {
+                    sendMessageToGtwy({ type: 'gtwyInterfaceData', data: this.state.tempDataToSend });
+                    const shouldOpen = [this.state.tempDataToSend?.defaultOpen, this.state.config?.defaultOpen, this.config.defaultOpen]
+                        .some(val => [true, 'true'].includes(val));
+                    if (shouldOpen) this.openGtwy();
+                    this.state.tempDataToSend = null;
+                }
+            }, 1000);
         }
     }
 
