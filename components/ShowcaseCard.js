@@ -28,7 +28,7 @@ const ShowcaseCard = ({ img, heading, text, url }) => {
               height={20}
               alt="Right icon"
               className="transition-transform duration-300 group-hover:translate-x-2 cursor-pointer"
-              onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+              onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
             />
           </div>
           <p className="text-lg text-gray-300 leading-relaxed">{text}</p>

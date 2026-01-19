@@ -1,12 +1,12 @@
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateUserMetaOnboarding } from '@/store/action/orgAction';
-import React from 'react'
-import { useDispatch } from 'react-redux';
-import { createPortal } from 'react-dom';
+import { useCustomSelector } from "@/customHooks/customSelector";
+import { updateUserMetaOnboarding } from "@/store/action/orgAction";
+import React from "react";
+import { useDispatch } from "react-redux";
+import { createPortal } from "react-dom";
 
 const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
   const { currentUser } = useCustomSelector((state) => ({
-    currentUser: state.userDetailsReducer?.userDetails
+    currentUser: state.userDetailsReducer?.userDetails,
   }));
 
   const dispatch = useDispatch();
@@ -29,9 +29,8 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
     }
   };
 
-
   // Check if we're in the browser environment
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
@@ -45,7 +44,17 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
         &times;
       </button>
 
-      <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '76vh', width: '160vh', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{
+          position: "relative",
+          boxSizing: "content-box",
+          maxHeight: "76vh",
+          width: "160vh",
+          aspectRatio: "1.935483870967742",
+          padding: "40px 0",
+        }}
+      >
         <iframe
           src={video}
           loading="lazy"
@@ -64,12 +73,11 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
           }}
           className="rounded-xl"
         />
-
       </div>
     </div>
   );
 
   return createPortal(modalContent, document.body);
-}
+};
 
-export default OnBoarding
+export default OnBoarding;

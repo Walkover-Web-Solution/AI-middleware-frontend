@@ -6,9 +6,9 @@ import { useConfigurationContext } from "../ConfigurationContext";
 import AdvancedParameters from "../configurationComponent/AdvancedParamenter";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
-const PromptTab = ({ isPublished,isEmbedUser }) => {
+const PromptTab = ({ isPublished, isEmbedUser }) => {
   const { params, searchParams, isEditor } = useConfigurationContext();
-  const { hideAdvancedParameters } = useCustomSelector(state => ({
+  const { hideAdvancedParameters } = useCustomSelector((state) => ({
     hideAdvancedParameters: state.appInfoReducer.embedUserDetails.hideAdvancedParameters,
   }));
   return (
@@ -16,17 +16,17 @@ const PromptTab = ({ isPublished,isEmbedUser }) => {
       <InputSection />
 
       <div className="w-full max-w-2xl">
-              <AdvancedParameters
-                params={params}
-                searchParams={searchParams}
-                isEmbedUser={isEmbedUser}
-                hideAdvancedParameters={hideAdvancedParameters}
-                level={2}
-                className="w-full"
-                isPublished={isPublished}
-                isEditor={isEditor}
-              />
-            </div>
+        <AdvancedParameters
+          params={params}
+          searchParams={searchParams}
+          isEmbedUser={isEmbedUser}
+          hideAdvancedParameters={hideAdvancedParameters}
+          level={2}
+          className="w-full"
+          isPublished={isPublished}
+          isEditor={isEditor}
+        />
+      </div>
     </div>
   );
 };

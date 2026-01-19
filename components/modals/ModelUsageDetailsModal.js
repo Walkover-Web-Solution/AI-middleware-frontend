@@ -1,14 +1,14 @@
-import React from 'react'
-import { MODAL_TYPE } from '@/utils/enums';
-import Modal from '../UI/Modal';
-import { closeModal } from '@/utils/utility';
-import { useCustomSelector } from '@/customHooks/customSelector';
+import React from "react";
+import { MODAL_TYPE } from "@/utils/enums";
+import Modal from "../UI/Modal";
+import { closeModal } from "@/utils/utility";
+import { useCustomSelector } from "@/customHooks/customSelector";
 
-const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
+const ModelUsageDetailsModal = ({ usageDetailsData, params }) => {
   const { allBridgesMap } = useCustomSelector((state) => ({
-    allBridgesMap: state.bridgeReducer.org?.[params.org_id]?.orgs || {}
+    allBridgesMap: state.bridgeReducer.org?.[params.org_id]?.orgs || {},
   }));
-  
+
   const handleClose = () => {
     closeModal(MODAL_TYPE.USAGE_DETAILS_MODAL);
   };
@@ -16,17 +16,13 @@ const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.USAGE_DETAILS_MODAL}>
       <div className="flex items-center justify-center">
-        <div 
+        <div
           className="w-full max-w-[50rem] bg-base-100 border border-base-300 rounded-lg p-6 mx-4"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-col space-y-4">
-            <h2 className="text-lg font-semibold text-base-content">
-              Model Usage Details
-            </h2>
-            <p className="text-sm text-base-content mb-4">
-              This model is currently being used by the following:
-            </p>
+            <h2 className="text-lg font-semibold text-base-content">Model Usage Details</h2>
+            <p className="text-sm text-base-content mb-4">This model is currently being used by the following:</p>
 
             <div className="space-y-4">
               {usageDetailsData?.agents?.length > 0 && (
@@ -50,12 +46,15 @@ const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
                   <div className="bg-base-200 p-3 rounded">
                     <ul className="list-disc pl-5">
                       {usageDetailsData.versions.map((version, index) => {
-                        const bridge = Object.values(allBridgesMap).find(bridge => 
-                          bridge.versions?.some(v => v === version.id || v._id === version.id)
+                        const bridge = Object.values(allBridgesMap).find((bridge) =>
+                          bridge.versions?.some((v) => v === version.id || v._id === version.id)
                         );
                         return (
                           <li key={index} className="text-sm py-1">
-                            {bridge?.name} <span className="text-base-content">(Version #{index + 1}, ID: {version.id})</span>
+                            {bridge?.name}{" "}
+                            <span className="text-base-content">
+                              (Version #{index + 1}, ID: {version.id})
+                            </span>
                           </li>
                         );
                       })}
@@ -65,20 +64,16 @@ const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
               )}
             </div>
           </div>
-          
+
           <div className="flex justify-end mt-6">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="btn btn-sm"
-            >
+            <button type="button" onClick={handleClose} className="btn btn-sm">
               Close
             </button>
           </div>
         </div>
       </div>
     </Modal>
-  )
-}
+  );
+};
 
-export default ModelUsageDetailsModal
+export default ModelUsageDetailsModal;

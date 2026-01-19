@@ -9,14 +9,14 @@ const initialState = {
   isFocus: false,
   savingStatus: {
     status: null, // 'saving', 'saved', 'failed'
-    timestamp: null
+    timestamp: null,
   },
   usageMetrics: {
     data: [],
     filters: null,
     // Separate flag to track if filter is user-applied
     filterActive: false,
-    loading: false // Track loading state for metrics API
+    loading: false, // Track loading state for metrics API
   },
 };
 
@@ -35,7 +35,7 @@ export const bridgeReducer = createSlice({
     setSavingStatus: (state, action) => {
       state.savingStatus = {
         status: action.payload.status,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     },
     addorRemoveResponseIdInBridgeReducer: (state, action) => {
@@ -70,8 +70,8 @@ export const bridgeReducer = createSlice({
         [orgId]: {
           ...state.org?.[orgId],
           orgs: bridges ? [...bridges] : state.org?.[orgId]?.orgs || [],
-          ...restPayload
-        }
+          ...restPayload,
+        },
       };
       state.loading = false;
     },
@@ -84,7 +84,7 @@ export const bridgeReducer = createSlice({
       const { org_id, data } = action.payload;
       const id = data._id;
       if (state.org[org_id].functionData) {
-        state.org[org_id].functionData[id] = data
+        state.org[org_id].functionData[id] = data;
       }
     },
     createBridgeReducer: (state, action) => {
@@ -98,25 +98,29 @@ export const bridgeReducer = createSlice({
       state.bridgeVersionMapping[bridgeId][newVersionId] = {
         ...(state.bridgeVersionMapping[bridgeId][parentVersionId] || {}),
         _id: newVersionId,
-        version_description
+        version_description,
       };
       state.allBridgesMap[bridgeId].versions.push(newVersionId);
-      const bridgeIndex = state.org[orgId].orgs.findIndex(org => org._id === bridgeId);
+      const bridgeIndex = state.org[orgId].orgs.findIndex((org) => org._id === bridgeId);
       state.org[orgId].orgs[bridgeIndex].versions.push(newVersionId);
     },
     deleteBridgeVersionReducer: (state, action) => {
       const { versionId, bridgeId, org_id } = action.payload;
       delete state.bridgeVersionMapping[bridgeId][versionId];
-      
+
       // Update allBridgesMap versions array (used by dropdown component)
       if (state.allBridgesMap[bridgeId]) {
-        state.allBridgesMap[bridgeId].versions = state.allBridgesMap[bridgeId].versions.filter(version => version !== versionId);
+        state.allBridgesMap[bridgeId].versions = state.allBridgesMap[bridgeId].versions.filter(
+          (version) => version !== versionId
+        );
       }
-      
+
       // Update org versions array
-      const bridgeIndex = state.org[org_id].orgs.findIndex(org => org._id === bridgeId);
+      const bridgeIndex = state.org[org_id].orgs.findIndex((org) => org._id === bridgeId);
       if (bridgeIndex !== -1) {
-        state.org[org_id].orgs[bridgeIndex].versions = state.org[org_id].orgs[bridgeIndex].versions.filter(version => version !== versionId);
+        state.org[org_id].orgs[bridgeIndex].versions = state.org[org_id].orgs[bridgeIndex].versions.filter(
+          (version) => version !== versionId
+        );
       }
     },
     updateBridgeReducer: (state, action) => {
@@ -126,20 +130,20 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[_id] = {
         ...state.allBridgesMap[_id],
         ...extraData,
-        configuration: { ...configuration }
+        configuration: { ...configuration },
       };
-       
-       if (extraData?.bridgeType || extraData?.bridge_quota) {
+
+      if (extraData?.bridgeType || extraData?.bridge_quota) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update
-          const index = allData.findIndex(bridge => bridge._id === _id);
+          const index = allData.findIndex((bridge) => bridge._id === _id);
           if (index !== -1) {
             // Update the specific bridge object within the array immutably
-          state.org[bridges.org_id].orgs[index] = {
-            ...state.org[bridges.org_id].orgs[index],
-            ...bridges
-          };
+            state.org[bridges.org_id].orgs[index] = {
+              ...state.org[bridges.org_id].orgs[index],
+              ...bridges,
+            };
           }
         }
       }
@@ -151,40 +155,40 @@ export const bridgeReducer = createSlice({
           state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
         } else {
           // Create a new array without the removed bridge_id
-          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(
+            (id) => id !== _id
+          );
         }
       }
 
-      if(bridges?.connected_agent_details)
-      {
+      if (bridges?.connected_agent_details) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update
-          const index = allData.findIndex(bridge => bridge._id === _id);
+          const index = allData.findIndex((bridge) => bridge._id === _id);
           if (index !== -1) {
             // Update the specific bridge object within the array immutably
-          state.org[bridges.org_id].orgs[index] = {
-            ...state.org[bridges.org_id].orgs[index],
-            ...bridges
-          };
+            state.org[bridges.org_id].orgs[index] = {
+              ...state.org[bridges.org_id].orgs[index],
+              ...bridges,
+            };
           }
         }
       }
-      if(bridges?.name)
-        {
-          const allData = state.org[bridges.org_id]?.orgs;
-          if (allData) {
-            // Find the index of the bridge to update
-            const index = allData.findIndex(bridge => bridge._id === _id);
-            if (index !== -1) {
-              // Update the specific bridge object within the array immutably
+      if (bridges?.name) {
+        const allData = state.org[bridges.org_id]?.orgs;
+        if (allData) {
+          // Find the index of the bridge to update
+          const index = allData.findIndex((bridge) => bridge._id === _id);
+          if (index !== -1) {
+            // Update the specific bridge object within the array immutably
             state.org[bridges.org_id].orgs[index] = {
               ...state.org[bridges.org_id].orgs[index],
-              ...bridges
+              ...bridges,
             };
-            }
           }
         }
+      }
       state.loading = false;
     },
     updateBridgeVersionReducer: (state, action) => {
@@ -193,7 +197,7 @@ export const bridgeReducer = createSlice({
       state.bridgeVersionMapping[bridges.parent_id][bridges._id] = {
         ...state.bridgeVersionMapping[bridges.parent_id][bridges._id],
         ...extraData,
-        configuration: { ...configuration }
+        configuration: { ...configuration },
       };
       if (functionData) {
         const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
@@ -203,7 +207,9 @@ export const bridgeReducer = createSlice({
           state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
         } else {
           // Create a new array without the removed bridge_id
-          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(
+            (id) => id !== _id
+          );
         }
       }
       state.loading = false;
@@ -215,12 +221,15 @@ export const bridgeReducer = createSlice({
     },
     updateBridgeToolsReducer: (state, action) => {
       const { orgId, functionData = {} } = action.payload;
-      state.org[orgId].functionData[functionData._id] = { ...(state.org[orgId].functionData[functionData._id] || {}), ...functionData };
+      state.org[orgId].functionData[functionData._id] = {
+        ...(state.org[orgId].functionData[functionData._id] || {}),
+        ...functionData,
+      };
     },
 
     deleteBridgeReducer: (state, action) => {
       const { bridgeId, orgId, restore } = action.payload;
-      const bridge = state.org[orgId]?.orgs?.find(bridge => bridge._id === bridgeId);
+      const bridge = state.org[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId);
       if (bridge) {
         if (restore) {
           // Remove deletedAt to restore the bridge
@@ -233,7 +242,7 @@ export const bridgeReducer = createSlice({
     },
     integrationReducer: (state, action) => {
       const { dataToSend, orgId } = action.payload;
-      state.org[orgId].integrationData[dataToSend.id] = dataToSend
+      state.org[orgId].integrationData[dataToSend.id] = dataToSend;
     },
     updateTriggerDataReducer: (state, action) => {
       const { dataToSend, orgId } = action.payload;
@@ -268,14 +277,14 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[bridgeId] = {
         ...state.allBridgesMap[bridgeId],
         ...publishedVersionData,
-        published_version_id: versionId
+        published_version_id: versionId,
       };
 
       // Mark the version as not drafted
       state.bridgeVersionMapping[bridgeId][versionId].is_drafted = false;
 
       // Update the orgs array with the new published version id
-      state.org[orgId].orgs = state.org[orgId].orgs.map(bridge => {
+      state.org[orgId].orgs = state.org[orgId].orgs.map((bridge) => {
         if (bridge._id === bridgeId) {
           return { ...bridge, published_version_id: versionId };
         }
@@ -289,7 +298,10 @@ export const bridgeReducer = createSlice({
     },
     optimizePromptReducer: (state, action) => {
       const { bridgeId, prompt = "No optimized prompt" } = action.payload;
-      state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
+      state.allBridgesMap[bridgeId]["optimizePromptHistory"] = [
+        ...(state.allBridgesMap?.[bridgeId]?.["optimizePromptHistory"] || []),
+        prompt,
+      ];
     },
     webhookURLForBatchAPIReducer: (state, action) => {
       const { bridge_id, version_id, webhook } = action.payload;
@@ -311,7 +323,7 @@ export const bridgeReducer = createSlice({
     clearBridgeUsageMetricsReducer: (state) => {
       state.usageMetrics = { data: [], filters: null, filterActive: false, loading: false };
     },
-    
+
     // Clear previous bridge and version data before fetching new data
     clearPreviousBridgeDataReducer: (state, action) => {
       const { bridgeId, versionId } = action.payload || {};
@@ -322,11 +334,11 @@ export const bridgeReducer = createSlice({
         state.isFocus = false;
         return;
       }
-      
+
       if (bridgeId && state.allBridgesMap[bridgeId]) {
         delete state.allBridgesMap[bridgeId];
       }
-      
+
       if (bridgeId && state.bridgeVersionMapping[bridgeId]) {
         if (versionId && state.bridgeVersionMapping[bridgeId][versionId]) {
           // Clear specific version
@@ -368,12 +380,12 @@ export const {
   updateTriggerDataReducer,
   removeFunctionDataReducer,
   webhookURLForBatchAPIReducer,
-  getPrebuiltToolsReducer, 
+  getPrebuiltToolsReducer,
   updateAllBridgeReducerAgentVariable,
   setThreadIdForVersionReducer,
   clearPreviousBridgeDataReducer,
   setBridgeUsageMetricsReducer,
-  clearBridgeUsageMetricsReducer
+  clearBridgeUsageMetricsReducer,
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

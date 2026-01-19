@@ -5,9 +5,9 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
     if (typeof value === "string" && (value.startsWith("{") || value.startsWith("["))) {
       try {
         const parsedValue = JSON.parse(value);
-        return JSON.stringify(parsedValue, null, 2); 
+        return JSON.stringify(parsedValue, null, 2);
       } catch {
-        return value; 
+        return value;
       }
     }
     return JSON.stringify(value, null, 2);
@@ -27,7 +27,8 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
                     <span className="flex-1 min-w-0">
                       {key === "name" && integrationData?.[value] ? (
                         <p>
-                          {integrationData[value]?.title}<span>({value})</span>
+                          {integrationData[value]?.title}
+                          <span>({value})</span>
                         </p>
                       ) : (
                         <pre className="text-sm bg-base-200 p-2 rounded whitespace-pre-wrap break-all">

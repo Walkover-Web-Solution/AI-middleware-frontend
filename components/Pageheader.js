@@ -1,7 +1,7 @@
 // PageHeader.js
-import React from 'react';
-import { ExternalLinkIcon } from './Icons';
-import SmartLink from './SmartLink';
+import React from "react";
+import { ExternalLinkIcon } from "./Icons";
+import SmartLink from "./SmartLink";
 
 /**
  * Reusable page header component
@@ -17,8 +17,7 @@ const PageHeader = ({ title, description, docLink }) => {
       {description && (
         <p className="text-base text-base-content opacity-80">
           {description}
-          <SmartLink 
-           href={docLink}>
+          <SmartLink href={docLink}>
             <span className="inline-flex mb-4 ml-1 items-center gap-2 text-sm text-blue-500 hover:text-blue-600 transition-colors font-medium group">
               Learn more <ExternalLinkIcon size={16} />
             </span>
