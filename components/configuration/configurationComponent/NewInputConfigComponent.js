@@ -85,49 +85,62 @@ const NewInputConfigComponent = ({ params }) => {
     [height]
   );
 
-  return (
-    <div>
-      <div className="flex justify-between items-center">
-        <div className="label flex items-center gap-2">
-          <span className="label-text capitalize font-medium">Prompt</span>
-          <div className="h-4 w-px bg-gray-300 mx-2"></div>
-          <div className="flex items-center justify-center">
-            <button
-              className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
-              onClick={() => {
-                openModal(MODAL_TYPE?.PROMPT_SUMMARY);
-              }}
-            >
-              <span>Prompt Summary</span>
-            </button>
-            <div
-              className="tooltip tooltip-right"
-              data-tip={"Prompt summary is only for the agent not for the Versions"}
-            >
-              <Info size={12} className="ml-2" />
+    return (
+        <div id="prompt-config-container">
+            <div className="flex justify-between items-center">
+                <div className="label flex items-center gap-2">
+                    <span className="label-text capitalize font-medium">Prompt</span>
+                    <div className="h-4 w-px bg-gray-300 mx-2"></div>
+                    <div className="flex items-center justify-center">
+                        <button
+                            id="prompt-summary-button"
+                            className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
+                            onClick={() => {
+                                openModal(MODAL_TYPE?.PROMPT_SUMMARY);
+                            }}
+                        >
+                            <span>Prompt Summary</span>
+                        </button>
+                        <div
+                            className="tooltip tooltip-right"
+                            data-tip={
+                                "Prompt summary is only for the agent not for the Versions"
+                            }
+                        >
+                            <Info size={12} className="ml-2" />
+                        </div>
+                    </div>
+                </div>
+                <div className='flex gap-4 '>
+                    <div
+                        id="optimize-prompt-button"
+                        className="label cursor-pointer"
+                        onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}
+                    >
+                        <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
+                            Optimize Prompt
+                        </span>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        <div className="flex gap-4 ">
-          <div className="label cursor-pointer" onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}>
-            <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-              Optimize Prompt
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="form-control">
-        <div
-          ref={divRef}
-          className={`relative transition-all duration-300 min-h-[500px] border border-base-300 rounded-r-lg rounded-l-lg rounded-t-md ${
-            isFullscreen ? "fixed inset-0 w-full h-screen z-low" : "w-full"
-          }`}
-          style={!isFullscreen ? { height: `${height}px` } : {}}
-        >
-          <div id="docStar-embed" className="w-full h-full" />
+            <div className="form-control">
+                <div
+                    id="prompt-editor-container"
+                    ref={divRef}
+                    className={`relative transition-all duration-300 min-h-[500px] border border-base-300 rounded-r-lg rounded-l-lg rounded-t-md ${isFullscreen
+                        ? 'fixed inset-0 w-full h-screen z-low'
+                        : 'w-full'
+                        }`}
+                    style={!isFullscreen ? { height: `${height}px` } : {}}
+                >
+                    <div
+                        id="docStar-embed"
+                        className="w-full h-full"
+                    />
 
           <div className="absolute top-4 right-4 z-low-medium group">
             <button
+                            id="prompt-fullscreen-toggle"
               onClick={toggleFullscreen}
               className="text-base-content bg-base-300 p-2 rounded-full transition hover:bg-base-200"
             >
@@ -141,6 +154,7 @@ const NewInputConfigComponent = ({ params }) => {
 
           {!isFullscreen && (
             <div
+                            id="prompt-resize-handle"
               className={`absolute bottom-0 left-0 right-0 h-3 cursor-row-resize flex items-center justify-center group hover:bg-gray-100 transition-colors ${
                 isResizing ? "bg-gray-200" : ""
               }`}
@@ -150,8 +164,8 @@ const NewInputConfigComponent = ({ params }) => {
             </div>
           )}
         </div>
-        <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none mr-2">
-          <input type="checkbox" className="min-h-[0.75rem]" />
+        <div  id="default-variables-collapse"  className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none mr-2">
+          <input id="default-variables-toggle" type="checkbox" className="min-h-[0.75rem]" />
           <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
             <div className="flex items-center gap-2">
               <span className="text-nowrap">Default Variables</span>

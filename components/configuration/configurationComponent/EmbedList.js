@@ -236,7 +236,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
   const hasTools = bridgeFunctions.length > 0 || selectedPrebuiltTools.length > 0;
   return (
     bridge_functions && (
-      <div>
+      <div  id="embed-list-container">
         <DeleteModal
           onConfirm={handleRemoveFunctionFromBridge}
           item={functionId}
@@ -284,17 +284,18 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                     video={getFunctionCreationVideo()}
                     tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."
                   >
-                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    <CircleQuestionMark  size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                   </InfoTooltip>
                 </div>
               </div>
               <div className="flex flex-col gap-2 w-full">
-                <div className="flex flex-col gap-2 w-full max-w-md">
+                <div id="embed-list-tools-container" className="flex flex-col gap-2 w-full max-w-md">
                   {!hasTools ? (
-                    <div className="dropdown dropdown-end w-full">
+                    <div id="embed-list-no-tools-dropdown" className="dropdown dropdown-end w-full">
                       <div className="border-2 border-base-200 border-dashed p-4 text-center">
                         <p className="text-sm text-base-content/70">No tools found.</p>
                         <button
+                        id="embed-list-add-first-tool-button"
                           tabIndex={0}
                           className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                           disabled={isReadOnly}
@@ -354,13 +355,14 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                         return (
                           <div
                             key={item?.value}
+                             id={`embed-list-prebuilt-tool-${item?.value}`}
                             className={`group flex w-full items-center border border-base-200 cursor-pointer bg-base-100 relative ${hasIssue ? "border-error" : ""} transition-colors duration-200 min-h-[44px]`}
                           >
                             <div className="p-2 flex-1 flex items-center gap-2">
                               {GetPreBuiltToolTypeIcon(item?.value, 16, 16)}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center">
-                                  <span className="flex-1 min-w-0 text-sm font-normal text-base-content truncate">
+                                  <span  className="flex-1 min-w-0 text-sm font-normal text-base-content truncate">
                                     <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ""}>
                                       <span className="truncate block w-[300px]">
                                         {item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}
@@ -378,6 +380,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                               {item?.value === "web_search" && (
                                 <button
+                                 id={`embed-list-prebuilt-tool-config-button-${item?.value}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleOpenPrebuiltConfig();
@@ -390,6 +393,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                                 </button>
                               )}
                               <button
+                              id={`embed-list-prebuilt-tool-delete-button-${item?.value}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleOpenDeletePrebuiltModal(item);
@@ -406,9 +410,10 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                       })}
 
                       {hasTools && (
-                        <div className="dropdown dropdown-end w-full max-w-md">
+                        <div  id="embed-list-add-tool-dropdown" className="dropdown dropdown-end w-full max-w-md">
                           <div className="border-2 border-base-200 border-dashed text-center">
                             <button
+                               id="embed-list-add-tool-button"
                               tabIndex={0}
                               className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                               disabled={isReadOnly}

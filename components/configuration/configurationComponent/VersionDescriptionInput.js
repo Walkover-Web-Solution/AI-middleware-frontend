@@ -55,10 +55,11 @@ function VersionDescriptionInput({ params, searchParams, isEmbedUser }) {
   );
 
   return (
-    <div className="w-full ml-1">
+    <div id="version-description-input-container" className="w-full ml-1">
       <div className="flex flex-row items-center">
         <div className="relative w-full">
           <input
+                    id="version-description-input"
             type="text"
             className="text-md outline-none w-full"
             onBlur={saveBridgeVersionDescription}

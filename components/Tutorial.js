@@ -5,8 +5,9 @@ const Tutorial = ({ video, setShowTutorial }) => {
     setShowTutorial(false);
   };
   return (
-    <div className="fixed inset-0 z-very-high bg-black bg-opacity-70 flex items-center justify-center">
+    <div id="tutorial-modal-overlay" className="fixed inset-0 z-very-high bg-black bg-opacity-70 flex items-center justify-center">
       <button
+            id="tutorial-close-button"
         onClick={() => handleVideoEnd()}
         className="absolute top-4 right-4 text-white text-4xl hover:text-gray-700 z-low-medium"
         aria-label="Close Tutorial"
@@ -26,6 +27,7 @@ const Tutorial = ({ video, setShowTutorial }) => {
         }}
       >
         <iframe
+                id="tutorial-video-iframe"
           src={video}
           loading="lazy"
           title="AI-middleware"

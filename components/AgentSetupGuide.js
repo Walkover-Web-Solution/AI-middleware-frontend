@@ -302,6 +302,7 @@ const AgentSetupGuide = ({
 
           <div className="text-center mt-6 flex-shrink-0">
             <button
+              id="agent-setup-get-started-button"
               onClick={handleStart}
               className="btn btn-lg gap-2 bg-base-content text-base-100 hover:bg-base-content/90 border-base-content shadow-md hover:shadow-lg transition-all duration-200"
             >

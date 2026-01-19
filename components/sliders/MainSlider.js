@@ -410,6 +410,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
               <div className="flex items-center justify-between px-3 mb-2">
                 <div className="text-xs font-medium text-base-content/50 uppercase tracking-wider">Organizations</div>
                 <button
+              id="main-slider-invite-user-button"
                   onClick={() => {
                     setIsOrgDropdownExpanded(false);
                     setIsOrgDropdownOpen(false);
@@ -436,6 +437,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 .slice(0, 2) // Show only first 2
                 .map(([id, org]) => (
                   <button
+                id={`main-slider-switch-org-${id}`}
                     key={id}
                     onClick={() => handleSwitchOrg(id, org.name)}
                     className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left"
@@ -447,6 +449,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 ))}
 
               <button
+            id="main-slider-view-more-orgs-button"
                 onClick={() => handleSwitchOrg()}
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left text-primary"
               >
@@ -464,6 +467,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
 
           {/* User Details button */}
           <button
+            id="main-slider-user-details-button"
             onClick={() => {
               router.push(`/org/${orgId}/userDetails`);
               setIsOrgDropdownOpen(false);
@@ -477,6 +481,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
 
           {/* Logout button */}
           <button
+            id="main-slider-logout-button"
             onClick={() => {
               handleLogout();
               setIsOrgDropdownOpen(false);
@@ -575,6 +580,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
       {/* Mobile backdrop */}
       {isMobile && isMobileVisible && (
         <div
+          id="main-slider-mobile-backdrop"
           className="fixed inset-0 bg-black/50 lg:none z-40 sidebar transition-opacity duration-300 ease-in-out"
           onClick={handleBackdropClick}
         />
@@ -584,6 +590,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
         {/* Mobile menu toggle button - shown only on mobile when sidebar is closed */}
         {isMobile && !isMobileVisible && (
           <button
+          id="main-slider-mobile-menu-toggle"
             onClick={handleMobileMenuToggle}
             className="fixed top-3 left-2 w-8 h-8 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
           >
@@ -607,6 +614,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
           {/* Mobile close button - positioned at the top-right corner */}
           {isMobile && isMobileVisible && (
             <button
+              id="main-slider-mobile-close-button"
               onClick={() => setIsMobileVisible(false)}
               className="absolute -right-3 top-3 w-7 h-7 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
             >
@@ -617,6 +625,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
           {/* Toggle button - only show for desktop */}
           {!isMobile && (
             <button
+              id="main-slider-toggle-button"
               onClick={handleToggle}
               className="absolute -right-3 top-[50px] w-7 h-7 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
             >
@@ -636,6 +645,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                   onMouseLeave={handleOrgLeave}
                 >
                   <button
+                    id="main-slider-org-dropdown-button"
                     onClick={handleOrgClick}
                     className="w-full flex items-center gap-3 py-2 hover:bg-base-200 transition-colors"
                   >
@@ -693,6 +703,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 {isAdminMode && (
                   <div className="mb-4">
                     <button
+                      id="main-slider-back-to-main-menu-button"
                       onClick={handleAdminToggle}
                       onMouseEnter={(e) => onItemEnter("main-menu", e)}
                       onMouseLeave={onItemLeave}
@@ -724,6 +735,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                         <div className="space-y-1">
                           {items.map((key) => (
                             <button
+                              id={`main-slider-nav-${key}`}
                               key={key}
                               onClick={() => {
                                 router.push(buildNavUrl(key));
@@ -767,6 +779,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                     <div className="space-y-1">
                       {settingsMenuItems.map((item) => (
                         <button
+                          id={`main-slider-admin-${item.id}`}
                           key={item.id}
                           onClick={() => {
                             item.onClick();
@@ -791,6 +804,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
               <div className="">
                 {/* Admin Settings Button */}
                 <button
+                  id="main-slider-admin-settings-toggle"
                   onClick={handleAdminToggle}
                   onMouseEnter={(e) => onItemEnter("admin-toggle", e)}
                   onMouseLeave={onItemLeave}
@@ -804,6 +818,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                   )}
                 </button>
                 <button
+                  id="main-slider-tutorial-button"
                   onClick={() => {
                     openModal(MODAL_TYPE.TUTORIAL_MODAL);
                     if (isMobile) setIsMobileVisible(false);
@@ -819,6 +834,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 {!currrentOrgDetail?.meta?.unlimited_access && (
                   <div className="relative">
                     <button
+                    id="main-slider-lifetime-access-button"
                       onClick={() => {
                         router.push(`/org/${orgId}/lifetime-access`);
                         if (isMobile) setIsMobileVisible(false);
@@ -850,6 +866,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 )}
 
                 <button
+                   id="main-slider-speak-to-us-button"
                   data-cal-namespace="30min"
                   data-cal-link="team/gtwy.ai/ai-consultation"
                   data-cal-origin="https://cal.id"
@@ -863,6 +880,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 </button>
 
                 <a
+                  id="main-slider-feedback-link"
                   href="https://gtwy.featurebase.app/"
                   target="_blank"
                   rel="noopener noreferrer"

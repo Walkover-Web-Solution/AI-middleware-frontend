@@ -114,8 +114,9 @@ const ApiKeyInput = ({
   }, [filteredApiKeys, bridge.service, bridge?.configuration?.model, bridgeType]);
 
   return (
-    <div className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
+    <div id="apikey-input-container" className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
       <Dropdown
+            id="apikey-input-dropdown"
         disabled={isReadOnly}
         options={dropdownOptions}
         value={selectedValue || ""}

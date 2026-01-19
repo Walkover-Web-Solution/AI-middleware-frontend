@@ -36,7 +36,13 @@ const CodeBlock = ({ children }) => (
 );
 
 const Link = ({ href, children }) => (
-  <a href={href} className="text-blue-600 hover:underline font-medium" target="_blank" rel="noopener noreferrer">
+  <a 
+    id="api-key-guide-provider-link"
+    href={href} 
+    className="text-blue-600 hover:underline font-medium" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
     {children}
   </a>
 );
@@ -124,6 +130,7 @@ function ApiKeyGuideSlider() {
     >
       <div>
         <button
+          id="api-key-guide-close-button"
           onClick={() => toggleSidebar("Api-Keys-guide-slider", "right")}
           className="absolute top-4 right-4 p-2 rounded-full hover:text-error transition-colors z-10"
           aria-label="Close guide"
@@ -136,9 +143,10 @@ function ApiKeyGuideSlider() {
           <h2 className="text-xl font-bold mb-4">API Key Setup Guide</h2>
 
           {/* Model Selection Tabs */}
-          <div className="flex flex-wrap gap-2">
+          <div  id="api-key-guide-tabs" className="flex flex-wrap gap-2">
             {modelTabs.map((model) => (
               <button
+                id={`api-key-guide-tab-${model.id}`}
                 key={model.id}
                 onClick={() => setSelectedModel(model.id)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${

@@ -15,7 +15,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
   const previewStyle = {
     position: "fixed",
     top: Math.max(20, dropdownRect?.top - 50),
-    left: dropdownRect?.right + -55, // Position to the right of dropdown
+    left: dropdownRect?.right + -125, // Position to the right of dropdown
     zIndex: 99999,
     maxHeight: `${viewportHeight}px`,
     overflowY: "auto",
@@ -24,13 +24,13 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
   // Use createPortal to render directly to document body
   return createPortal(
     <div
-      className="w-[260px] bg-base-100 border border-base-content/20 rounded-lg shadow-xl p-4 transition-all duration-200 ease-in-out"
+      id="model-preview-container"  className="w-[260px] bg-base-100 border border-base-content/20 rounded-lg shadow-xl p-4 transition-all duration-200 ease-in-out"
       style={previewStyle}
     >
-      <div className="space-y-3">
+      <div  className="space-y-3">
         <div className="border-b border-base-300 pb-2">
           <h3 className="text-lg font-semibold text-base-content truncate">{hoveredModel}</h3>
-          {modelSpecs?.description && <p className="text-xs text-base-content/80 mt-1">{modelSpecs.description}</p>}
+          {modelSpecs?.description && <p  className="text-xs text-base-content/80 mt-1">{modelSpecs.description}</p>}
         </div>
 
         {modelSpecs && ["input_cost", "output_cost"].some((type) => modelSpecs[type]) && (
@@ -42,7 +42,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
                 spec && (
                   <div key={type} className="bg-base-200/50 p-2 rounded-md">
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="text-xs font-medium text-base-content capitalize">{type.replace("_", " ")}</h4>
+                      <h4 clclassName="text-xs font-medium text-base-content capitalize">{type.replace("_", " ")}</h4>
                       {cost && <span className="text-xs text-base-content/70">{cost}</span>}
                     </div>
                     <p className="text-xs text-base-content/80 break-words leading-tight">
@@ -204,7 +204,7 @@ const ModelDropdown = ({ params, searchParams, isPublished, isEditor = true }) =
   }, []);
 
   return (
-    <div className="flex flex-col items-start gap-4 relative">
+    <div id="model-dropdown-container" className="flex flex-col items-start gap-4 relative">
       <div className="w-full" ref={dropdownRef}>
         <Dropdown
           disabled={isReadOnly}
@@ -226,11 +226,12 @@ const ModelDropdown = ({ params, searchParams, isPublished, isEditor = true }) =
 
       {/* If model is fine-tuned model */}
       {modelType === "fine-tune" && (
-        <div className="w-full sm:max-w-xs">
-          <div className="label">
+        <div id="fine-tune-model-section"  className="w-full sm:max-w-xs">
+          <div  className="label">
             <span className="label-text text-base-content">Fine-Tune Model</span>
           </div>
           <input
+                     id="fine-tune-model-input"
             type="text"
             name="name"
             key={fineTuneModel}

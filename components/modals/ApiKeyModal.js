@@ -159,7 +159,7 @@ const ApiKeyModal = ({
 
   return (
     <Modal MODAL_ID={MODAL_TYPE?.API_KEY_MODAL}>
-      <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
+      <form id="apikey-modal-form" onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
         <h3 className="font-bold text-lg">{isEditing ? "Update API Key" : "Add New API Key"}</h3>
         {API_KEY_MODAL_INPUT.map((field) => {
           const displayLabel = field.includes("_")
@@ -169,8 +169,8 @@ const ApiKeyModal = ({
             : field.charAt(0).toUpperCase() + field.slice(1);
           const isRequired = field !== "comment" && field !== "apikey_limit";
           return (
-            <div key={field} className="flex flex-col gap-2">
-              <label htmlFor={field} className="label-text">
+            <div id={`apikey-modal-field-${field}`} key={field} className="flex flex-col gap-2">
+              <label className="label-text">
                 {displayLabel}
                 {isRequired && RequiredItem()} <span className="opacity-55">{field === "apikey_limit" && "in $"}</span>
               </label>
@@ -205,7 +205,7 @@ const ApiKeyModal = ({
             </div>
           );
         })}
-        <div className="flex flex-col gap-2">
+        <div id="apikey-modal-service-field" className="flex flex-col gap-2">
           <label htmlFor="service" className="label-text">
             Service{RequiredItem()}
           </label>
@@ -228,11 +228,12 @@ const ApiKeyModal = ({
               : null}
           </select>
         </div>
-        <div className="modal-action">
-          <button type="reset" className="btn btn-sm" onClick={handleClose}>
+        <div id="apikey-modal-actions" className="modal-action">
+          <button id="apikey-modal-cancel-button"  type="reset" className="btn btn-sm" onClick={handleClose}>
             Cancel
           </button>
           <button
+                    id="apikey-modal-submit-button"
             type="submit"
             className={`btn btn-sm btn-primary ${
               (isEditing && !ischanged.isUpdate) || (!isEditing && !ischanged.isAdd) ? "btn-disabled" : ""

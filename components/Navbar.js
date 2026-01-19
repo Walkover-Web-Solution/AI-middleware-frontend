@@ -395,6 +395,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const EllipsisMenu = () => (
     <div className="relative" ref={ellipsisMenuRef}>
       <button
+        id="navbar-ellipsis-menu-toggle"
         onClick={() => setShowEllipsisMenu(!showEllipsisMenu)}
         className="p-2 hover:bg-base-200 rounded-md transition-colors"
         title="More options"
@@ -406,6 +407,7 @@ const Navbar = ({ isEmbedUser, params }) => {
         <div className="absolute right-0 top-full mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-xl z-very-high">
           <div className="">
             <button
+              id="navbar-pause-resume-button"
               onMouseDown={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -432,6 +434,7 @@ const Navbar = ({ isEmbedUser, params }) => {
           </div>
           <div className="">
             <button
+              id="navbar-pause-resume-button"
               onMouseDown={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -477,7 +480,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 hover:bg-base-200 px-2 sm:px-3"
                 title="Go to Home"
               >
-                <Home size={14} className="sm:w-4 sm:h-4" />
+                <Home id="navbar-home-button" size={14} className="sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline text-sm sm:text-sm">Home</span>
               </button>
             )}
@@ -488,6 +491,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 {!isEditingName ? (
                   <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
                     <span
+                      id="navbar-agent-name-display"
                       className="font-semibold text-sm text-base-content truncate flex-shrink"
                       title={`${agentName} - Click to edit`}
                     >
@@ -500,6 +504,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                   </div>
                 ) : (
                   <input
+                    id="navbar-agent-name-input"
                     type="text"
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
@@ -521,6 +526,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                   {/* Published Button */}
                   {publishedVersion && (
                     <button
+                      id="navbar-published-button"
                       onClick={handlePublishedClick}
                       className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap min-w-fit ${
                         isPublished
@@ -614,6 +620,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                     const isActive = activeTab === tab.id;
                     return (
                       <button
+                        id={`navbar-tab-${tab.id}`}
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
                         className={`relative z-10 h-8 flex items-center justify-center gap-2 text-sm font-medium transition-colors
@@ -645,6 +652,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 {!isEmbedUser && (
                   <div className="tooltip tooltip-bottom" data-tip="Updates History">
                     <button
+                      id="navbar-history-button"
                       className="p-1 bg-base-300 rounded-md hover:bg-base-200 transition-colors"
                       onClick={toggleConfigHistorySidebar}
                     >
@@ -655,10 +663,11 @@ const Navbar = ({ isEmbedUser, params }) => {
               </div>
 
               {/* Publish/Discard Dropdown - Fixed Position */}
-              {activeTab == "configure" && (
-                <div className="flex items-center">
-                  <div className="dropdown dropdown-end">
-                    <button
+                {activeTab == "configure" && (
+              <div className="flex items-center">
+                <div className="dropdown dropdown-end">                  
+                    <button 
+                     id="navbar-publish-dropdown-toggle"
                       tabIndex={0}
                       role="button"
                       className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? "loading" : ""}`}
@@ -673,6 +682,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                     >
                       <li>
                         <button
+                          id="navbar-publish-button"
                           onClick={handlePublish}
                           disabled={!isDrafted || isPublishing || isPublished}
                           className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -684,6 +694,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                       {isDrafted && publishedVersionId != null && (
                         <li>
                           <button
+                            id="navbar-revert-button"
                             onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                             disabled={isUpdatingBridge || isPublishing || isPublished}
                             className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -710,13 +721,13 @@ const Navbar = ({ isEmbedUser, params }) => {
       </div>
 
       {/* Mobile Version Dropdown - Below navbar */}
-      <div className="sm:hidden bg-base-100 border-b border-base-200 px-2 py-2">
+      <div id="navbar-mobile-agent-name-display" className="sm:hidden bg-base-100 border-b border-base-200 px-2 py-2">
         <div className="flex items-center justify-between gap-2">
           {/* Agent Name - Editable */}
           <div className="flex items-center min-w-0 flex-1">
             <div className="flex items-center px-1 py-1 rounded-lg min-w-0 max-w-[120px] cursor-pointer group hover:bg-base-200/50 transition-colors">
               {!isEditingName ? (
-                <div className="flex items-center gap-1.5" onClick={handleNameEdit}>
+                <div id="navbar-mobile-agent-name-display-inner" className="flex items-center gap-1.5" onClick={handleNameEdit}>
                   <span
                     className="font-semibold text-sm text-base-content truncate flex-shrink"
                     title={`${agentName} - Click to edit`}
@@ -730,6 +741,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 </div>
               ) : (
                 <input
+                  id="navbar-mobile-agent-name-input"
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
@@ -749,6 +761,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               {/* Published Button */}
               {publishedVersion && (
                 <button
+                  id="navbar-mobile-published-button"
                   onClick={handlePublishedClick}
                   className={`btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 whitespace-nowrap ${
                     isPublished
@@ -793,7 +806,7 @@ const Navbar = ({ isEmbedUser, params }) => {
         <div className=" p-2">
           <div className="flex gap-1 sm:gap-2">
             {!isEmbedUser && (
-              <button
+              <button id="navbar-mobile-history-button"
                 className="tooltip tooltip-left px-2"
                 data-tip="Updates History"
                 onClick={toggleConfigHistorySidebar}
@@ -805,6 +818,7 @@ const Navbar = ({ isEmbedUser, params }) => {
             {/* Mobile Publish/Discard Dropdown */}
             <div className="dropdown dropdown-end flex-1">
               <div
+                id="navbar-mobile-publish-dropdown-toggle"
                 tabIndex={0}
                 role="button"
                 className={`btn btn-xs bg-success gap-1 w-full rounded-full ${isPublishing ? "loading" : ""}`}
@@ -820,6 +834,7 @@ const Navbar = ({ isEmbedUser, params }) => {
               >
                 <li>
                   <button
+                    id="navbar-mobile-publish-button"
                     onClick={handlePublish}
                     disabled={!isDrafted || isPublishing}
                     className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -831,6 +846,7 @@ const Navbar = ({ isEmbedUser, params }) => {
                 {isDrafted && (
                   <li>
                     <button
+                      id="navbar-mobile-revert-button"
                       onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                       disabled={isUpdatingBridge || isPublishing}
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"

@@ -54,13 +54,14 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.CREATE_VARIABLE}>
-      <div className="modal-box" key={keyName}>
+      <div id="create-variable-modal-container" className="modal-box" key={keyName}>
         <h3 className="font-bold text-lg">Create New Variable</h3>
         {/* <form> */}
         <div className="label">
           <span className="label-text">Key</span>
         </div>
         <input
+                   id="create-variable-key-input"
           type="text"
           className="input input-bordered input-md w-full mb-2"
           placeholder="Enter key"
@@ -74,6 +75,7 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
           <span className="label-text">Value</span>
         </div>
         <input
+                    id="create-variable-value-input"
           defaultValue={valueValue}
           type="text"
           className="input input-bordered input-md w-full mb-2"
@@ -84,10 +86,10 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
         <div className="modal-action">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
-            <button className="btn btn-sm" onClick={handleCloseModal}>
+            <button id="create-variable-close-button"className="btn btn-sm" onClick={handleCloseModal}>
               Close
             </button>
-            <button className="btn btn-sm btn-primary ml-2" onClick={CreateVariable}>
+            <button id="create-variable-create-button"className="btn btn-sm btn-primary ml-2" onClick={CreateVariable}>
               Create
             </button>
           </form>

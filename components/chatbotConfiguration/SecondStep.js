@@ -86,9 +86,9 @@ ${variablesObject}
   ];
 
   return (
-    <div className="flex w-full flex-col gap-4 p-4">
+    <div id="second-step-container" className="flex w-full flex-col gap-4 p-4">
       <Section title="Step 2" caption="Add below code in your product." />
-      <div className="mockup-code">
+      <div  id="second-step-main-script-code"className="mockup-code">
         <CopyButton data={DataObject.script} />
         <pre data-prefix=">" className="text-error">
           <code>&lt;script </code>
@@ -124,7 +124,7 @@ ${variablesObject}
 
       <Section title="Available functions" caption="Use this methods to interact with chatbot" />
       {methods?.map((method, index) => (
-        <div key={index}>
+        <div id={`second-step-method-${index}`} key={index}>
           <small>{method.label}</small>
           <CodeBlock code={method.code} />
           {index == 0 && (

@@ -8,6 +8,7 @@ function RadioButton({ name, label, checked, onChange }) {
     <div className="form-control">
       <label className="label gap-2 cursor-pointer">
         <input
+                    id={`radio-${name}-${label.replaceAll(' ', '-').toLowerCase()}`}
           type="radio"
           name={name}
           className="radio checked:bg-blue-500"
@@ -30,7 +31,7 @@ function RadioGroup({ onChange, name, value }) {
   ];
 
   return (
-    <div>
+    <div id="radio-group-position">
       <div className="label">
         <span className="label-text">Position</span>
       </div>
@@ -57,6 +58,7 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
       </div>
       <div className="join">
         <input
+                    id={`dimension-input-${name}`}
           className="input input-bordered join-item input-sm max-w-[90px]"
           type="number"
           placeholder={placeholder}
@@ -66,6 +68,7 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
           name={name}
         />
         <select
+                    id={`dimension-select-${name}-unit`}
           className="select select-bordered join-item select-sm max-w-[70px]"
           value={unit || ""}
           onChange={onChange}
@@ -186,7 +189,7 @@ export default function FormSection({ params, chatbotId = null }) {
   }, [formData]);
 
   return (
-    <div className="space-y-6">
+    <div id="form-section-container" className="space-y-6">
       {/* Display Settings Section */}
       <div className="bg-base-200 rounded-lg max-w-4xl shadow p-6">
         <h3 className="text-lg font-semibold mb-6 border-b border-base-content/20 pb-2">Display Settings</h3>
@@ -199,6 +202,7 @@ export default function FormSection({ params, chatbotId = null }) {
                 <span className="label-text font-medium">Chatbot Title</span>
               </div>
               <input
+                                id="form-section-chatbot-title"
                 type="text"
                 placeholder="Enter chatbot title"
                 className="input input-bordered w-full max-w-xs input-sm"
@@ -214,6 +218,7 @@ export default function FormSection({ params, chatbotId = null }) {
                 <span className="label-text font-medium">Chatbot Subtitle</span>
               </div>
               <input
+                                id="form-section-chatbot-subtitle"
                 type="text"
                 placeholder="Enter chatbot subtitle"
                 className="input input-bordered w-full max-w-xs input-sm"
@@ -229,6 +234,7 @@ export default function FormSection({ params, chatbotId = null }) {
                 <span className="label-text font-medium">Button Title</span>
               </div>
               <input
+                                id="form-section-button-title"
                 type="text"
                 placeholder="Enter button title"
                 className="input input-bordered w-full max-w-xs input-sm"
@@ -244,6 +250,7 @@ export default function FormSection({ params, chatbotId = null }) {
                 <span className="label-text font-medium">Button Icon URL</span>
               </div>
               <input
+                             id="form-section-icon-url"
                 type="text"
                 placeholder="Enter icon URL"
                 className="input input-bordered w-full max-w-xs input-sm"
@@ -294,6 +301,7 @@ export default function FormSection({ params, chatbotId = null }) {
               </div>
               <div className="flex items-center gap-3">
                 <input
+                                id="form-section-theme-color"
                   type="color"
                   key={formData?.themeColor}
                   defaultValue={formData.themeColor}

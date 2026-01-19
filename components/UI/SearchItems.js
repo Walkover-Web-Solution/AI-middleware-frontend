@@ -105,6 +105,7 @@ const SearchItems = ({ data, setFilterItems, item, style = "", isEmbedUser }) =>
     <div className={containerClasses}>
       <div className="relative">
         <input
+          id="search-items-input"
           type="text"
           ref={searchInputRef}
           aria-label={`Search ${itemLabel} by Name, SlugName, Service, or ID`}
@@ -127,6 +128,7 @@ const SearchItems = ({ data, setFilterItems, item, style = "", isEmbedUser }) =>
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
             {filterParam && (
               <button
+              id="search-items-clear-filter-button"
                 onClick={clearFilter}
                 className="btn btn-xs btn-ghost p-1 hover:bg-error hover:text-error-content"
                 title="Clear filter"

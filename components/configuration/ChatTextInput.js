@@ -553,10 +553,10 @@ function ChatTextInput({
   };
 
   return (
-    <div className="input-group flex justify-end items-end gap-2 w-full relative">
+    <div  id="chat-text-input-container" className="input-group flex justify-end items-end gap-2 w-full relative">
       {/* --- CORRECTED PREVIEW CONTAINER --- */}
       {(uploadedImages.length > 0 || uploadedFiles.length > 0) && (
-        <div className="absolute bottom-16 left-0 w-full flex flex-nowrap overflow-x-auto items-end gap-2 p-2 bg-base-100 border-t rounded-t-lg">
+        <div id="chat-preview-container" className="absolute bottom-16 left-0 w-full flex flex-nowrap overflow-x-auto items-end gap-2 p-2 bg-base-100 border-t rounded-t-lg">
           {/* Image Previews */}
           {uploadedImages.map((url, index) => (
             <div key={index} className="relative flex-shrink-0">
@@ -568,6 +568,7 @@ function ChatTextInput({
                 className="w-16 h-16 object-cover bg-base-300 p-1 rounded-lg"
               />
               <button
+                                id={`chat-remove-image-${index}`}
                 className="absolute -top-2 -right-2 text-white rounded-full"
                 onClick={() => {
                   const newImages = uploadedImages.filter((_, i) => i !== index);
@@ -589,6 +590,7 @@ function ChatTextInput({
               </div>
 
               <button
+                               id={`chat-remove-file-${index}`}
                 className="absolute -top-2 -right-2 text-white rounded-full"
                 onClick={() => {
                   const newFiles = uploadedFiles.filter((_, i) => i !== index);
@@ -602,22 +604,27 @@ function ChatTextInput({
         </div>
       )}
 
-      {/* Media URL Preview */}
-      {mediaUrls && (
-        <div className="absolute bottom-16 left-0 w-full flex items-center gap-2 p-2 bg-base-100 border-t rounded-t-lg">
-          <LinkIcon size={16} className="text-base-content" />
-          <span className="text-sm truncate flex-1">{mediaUrls}</span>
-          <button onClick={removeUrl} className="btn btn-ghost btn-xs">
-            <CloseCircleIcon size={16} />
-          </button>
-        </div>
-      )}
+            {/* Media URL Preview */}
+            {mediaUrls && (
+                <div id="chat-media-url-preview" className="absolute bottom-16 left-0 w-full flex items-center gap-2 p-2 bg-base-100 border-t rounded-t-lg">
+                    <LinkIcon size={16} className="text-base-content" />
+                    <span className="text-sm truncate flex-1">{mediaUrls}</span>
+                    <button
+                     id="chat-remove-url-button"
+                        onClick={removeUrl}
+                        className="btn btn-ghost btn-xs"
+                    >
+                        <CloseCircleIcon size={16} />
+                    </button>
+                </div>
+            )}
 
       {/* URL Input Modal */}
       {showUrlInput && (
-        <div className="absolute bottom-16 left-0 w-full p-3 bg-base-100 border rounded-lg shadow-lg">
+        <div  id="chat-url-input-modal" className="absolute bottom-16 left-0 w-full p-3 bg-base-100 border rounded-lg shadow-lg">
           <div className="flex gap-2 items-center">
             <input
+                            id="chat-url-input"
               type="url"
               placeholder="Enter YouTube URL"
               value={urlInput}
@@ -628,10 +635,10 @@ function ChatTextInput({
                 if (e.key === "Escape") setShowUrlInput(false);
               }}
             />
-            <button onClick={addMediaUrl} className="btn btn-primary btn-sm">
+            <button id="chat-url-add-button" onClick={addMediaUrl} className="btn btn-primary btn-sm">
               Add
             </button>
-            <button onClick={() => setShowUrlInput(false)} className="btn btn-ghost btn-sm">
+            <button id="chat-url-cancel-button"onClick={() => setShowUrlInput(false)} className="btn btn-ghost btn-sm">
               Cancel
             </button>
           </div>
@@ -641,7 +648,7 @@ function ChatTextInput({
 
       {/* Validation Error Display */}
       {validationError && (
-        <div className="absolute bottom-16 left-0 w-full p-3 bg-error/10 border border-error/20 rounded-lg">
+        <div id="chat-validation-error" className="absolute bottom-16 left-0 w-full p-3 bg-error/10 border border-error/20 rounded-lg">
           <p className="text-sm text-error">{validationError}</p>
           <p className="text-xs text-error/70 mt-1">Please fill in the missing variables in the Variables panel.</p>
         </div>
@@ -651,6 +658,7 @@ function ChatTextInput({
       <div className="input-group flex justify-end items-end gap-2 w-full relative">
         {modelType !== "completion" && (
           <textarea
+                       id="chat-message-textarea"
             ref={inputRef}
             placeholder="Type here"
             className={`textarea bg-white dark:bg-black/15 textarea-bordered w-full max-h-[200px] resize-none overflow-y-auto h-auto ${
@@ -667,6 +675,7 @@ function ChatTextInput({
           />
         )}
         <input
+                    id="chat-file-input"
           ref={(el) => setFileInput(el)} // Use callback ref to set the state
           type="file"
           accept={
@@ -689,9 +698,10 @@ function ChatTextInput({
         />
         {/* DaisyUI Dropdown for Attachments */}
         {(isVision || isFileSupported || isVideoSupported) && (
-          <div className="dropdown dropdown-top dropdown-end">
+          <div id="chat-attachment-dropdown" className="dropdown dropdown-top dropdown-end">
             <div className="tooltip tooltip-top" data-tip="Attach files">
               <label
+                               id="chat-attachment-button"
                 tabIndex={0}
                 className={`btn btn-circle transition-all duration-200 ${
                   uploading ? "btn-disabled bg-base-300" : "btn-ghost hover:btn-primary hover:scale-105"
@@ -714,7 +724,7 @@ function ChatTextInput({
               {/* Images Option */}
               {isVision && (
                 <li>
-                  <a onClick={() => handleAttachmentOption("images")} className="flex items-center gap-3 p-3">
+                  <a id="chat-attach-images-option" onClick={() => handleAttachmentOption("images")} className="flex items-center gap-3 p-3">
                     <div className="p-1.5 bg-base-100 rounded-lg">
                       <UploadIcon size={16} className="text-base-content" />
                     </div>
@@ -729,7 +739,7 @@ function ChatTextInput({
               {/* Videos Option */}
               {isVideoSupported && (
                 <li>
-                  <a onClick={() => handleAttachmentOption("videos")} className="flex items-center gap-3 p-3">
+                  <a id="chat-attach-videos-option" onClick={() => handleAttachmentOption("videos")} className="flex items-center gap-3 p-3">
                     <div className="p-1.5 bg-base-100 rounded-lg">
                       <PlayIcon size={16} className="text-base-content" />
                     </div>
@@ -744,7 +754,7 @@ function ChatTextInput({
               {/* Files Option */}
               {isFileSupported && (
                 <li>
-                  <a onClick={() => handleAttachmentOption("files")} className="flex items-center gap-3 p-3">
+                  <a id="chat-attach-files-option" onClick={() => handleAttachmentOption("files")} className="flex items-center gap-3 p-3">
                     <div className="p-1.5 bg-base-100 rounded-lg">
                       <PdfIcon height={16} width={16} className="text-base-content" />
                     </div>
@@ -759,7 +769,7 @@ function ChatTextInput({
               {/* URL Option */}
               {isVideoSupported && (
                 <li>
-                  <a onClick={() => handleAttachmentOption("url")} className="flex items-center gap-3 p-3">
+                  <a id="chat-attach-url-option"onClick={() => handleAttachmentOption("url")} className="flex items-center gap-3 p-3">
                     <div className="p-1.5 bg-base-100 rounded-lg">
                       <LinkIcon size={16} className="text-base-content" />
                     </div>
@@ -776,6 +786,7 @@ function ChatTextInput({
         {/* Enhanced Send Button */}
         <div className="tooltip tooltip-top" data-tip="Send message">
           <button
+                      id="chat-send-button"
             className={`btn btn-circle transition-all duration-200 ${
               loading || uploading || modelType === "image"
                 ? "btn-disabled"

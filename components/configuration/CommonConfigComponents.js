@@ -25,9 +25,9 @@ const CommonConfigComponents = ({
   );
 
   return (
-    <div className="flex flex-col mt-4 w-full">
+    <div id="common-config-container" className="flex flex-col mt-4 w-full">
       {/* LLM Configuration Header */}
-      <div className="mb-4 mt-2">
+      <div  className="mb-4 mt-2">
         <h3 className="text-base-content text-md font-medium">LLM Configuration</h3>
       </div>
 
@@ -48,7 +48,7 @@ const CommonConfigComponents = ({
 
       <div className="space-y-6">
         {/* Service Provider and Model Row */}
-        <div className="grid grid-cols-2 mt-2 gap-6">
+        <div id="service-model-row" className="grid grid-cols-2 mt-2 gap-6">
           <div className="space-y-2">
             <label className="block text-base-content/70 text-sm font-medium">Service Provider</label>
             <ServiceDropdown
@@ -75,7 +75,7 @@ const CommonConfigComponents = ({
 
         {/* API Key Section */}
         {shouldRenderApiKey && (
-          <div className="space-y-2">
+          <div id="api-key-section" className="space-y-2">
             <label className="block text-base-content/70 text-sm font-medium">API Key</label>
             <ApiKeyInput
               apiKeySectionRef={apiKeySectionRef}
@@ -92,11 +92,11 @@ const CommonConfigComponents = ({
 
         {/* Parameters Section with Border */}
         {((!hideAdvancedParameters && isEmbedUser) || !isEmbedUser) && (
-          <div className="border-t border-base-200 pt-6">
+          <div id="parameters-section" className="border-t border-base-200 pt-6">
             <div className="mb-4">
-              <h2 className="text-base-content text-md font-medium">Parameters</h2>
+              <h2  className="text-base-content text-md font-medium">Parameters</h2>
             </div>
-            <div className="max-w-2xl">
+            <div id="parameters-content" className="max-w-2xl">
               <AdvancedParameters
                 params={params}
                 searchParams={searchParams}

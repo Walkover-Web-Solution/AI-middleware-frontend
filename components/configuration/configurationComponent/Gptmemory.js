@@ -60,6 +60,7 @@ const GptMemory = ({ params, searchParams, isPublished, isEditor = true }) => {
 
         <label className="label cursor-pointer gap-2">
           <input
+                     id="gpt-memory-toggle"
             type="checkbox"
             checked={gpt_memory}
             onChange={handleCheckboxChange}
@@ -87,6 +88,7 @@ const GptMemory = ({ params, searchParams, isPublished, isEditor = true }) => {
             </p>
           </div>
           <textarea
+                    id="gpt-memory-context-textarea"
             disabled={isReadOnly}
             className="textarea textarea-bordered w-full min-h-[400px] "
             defaultValue={gpt_memory_context}

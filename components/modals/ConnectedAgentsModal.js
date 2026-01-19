@@ -49,11 +49,11 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.CONNECTED_AGENTS_MODAL}>
-      <div className="modal-box focus:outline-none" tabIndex="-1">
+      <div  id="connected-agents-modal-container" className="modal-box focus:outline-none" tabIndex="-1">
         <h3 className="font-bold text-lg mb-4">Connected Agents for API Key: {apiKey.name}</h3>
 
         {connectedAgents.length > 0 ? (
-          <div className="overflow-y-auto max-h-96">
+          <div id="connected-agents-list" className="overflow-y-auto max-h-96">
             {connectedAgents.map((agent) => (
               <AgentCard key={agent.bridgeId} agent={agent} />
             ))}
@@ -64,7 +64,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
 
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn focus:outline-none focus:ring-0" onClick={handleClose}>
+            <button id="connected-agents-close-button" className="btn focus:outline-none focus:ring-0" onClick={handleClose}>
               Close
             </button>
           </form>
@@ -77,6 +77,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
 // Fixed AgentCard component to prevent scrolling text displacement
 const AgentCard = ({ agent }) => (
   <div
+        id={`connected-agent-card-${agent.bridgeId}`}
     className="mb-4 p-4 border rounded-lg bg-base-200"
     style={{
       transform: "translateZ(0)", // Force hardware acceleration
@@ -109,7 +110,7 @@ const AgentCard = ({ agent }) => (
 
 // Extracted empty state component
 const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center py-8 text-base-content/70">
+  <div id="connected-agents-empty-state" className="flex flex-col items-center justify-center py-8 text-base-content/70">
     <BotIcon className="w-12 h-12 mb-2 opacity-50" />
     <p>No agents are connected to this API key.</p>
   </div>

@@ -102,6 +102,7 @@ function ConfigHistorySlider({ versionId }) {
             <p className="text-xl font-semibold">Updates History</p>
           </div>
           <CloseIcon
+            id="config-history-slider-close-icon"
             className="cursor-pointer hover:text-error transition-colors"
             onClick={handleCloseConfigHistorySlider}
           />
@@ -134,6 +135,7 @@ function ConfigHistorySlider({ versionId }) {
                 {historyData?.length > 0 ? (
                   historyData.map((item, index) => (
                     <li
+                      id={`config-history-item-${index}`}
                       key={item?.id ?? index}
                       className="p-3 rounded-lg bg-base-100 shadow-sm hover:shadow-md transition duration-200"
                     >

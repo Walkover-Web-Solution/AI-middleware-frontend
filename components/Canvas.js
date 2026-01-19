@@ -154,12 +154,16 @@ function Canvas({
   };
 
   return (
-    <div style={{ width, height }} className="flex flex-col bg-base-100">
+    <div id="canvas-container" style={{ width, height }} className="flex flex-col bg-base-100">
       {/* Header with Reset Button */}
       <div className="flex  items-center pb-1 mb-1 pl-2" style={{ justifyContent: "flex-end" }}>
         {messages?.length > 0 && (
-          <button className="btn btn-sm  btn-outline btn-error hover:btn-error" onMouseDown={handleResetChat}>
-            <RotateCcw size={14} />
+          <button 
+            id="canvas-reset-chat-button"
+            className="btn btn-sm  btn-outline btn-error hover:btn-error"
+            onMouseDown={handleResetChat}
+          >
+            <RotateCcw size={14}/>
             Reset Chat
           </button>
         )}
@@ -170,7 +174,7 @@ function Canvas({
         {/* Messages Area */}
         <div id="messages" className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 py-4 space-y-4">
           {safeMessages.length === 0 && !loading && (
-            <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
+            <div id="canvas-empty-state" className="flex flex-col items-center justify-center h-full text-center opacity-60">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <Lightbulb />
               </div>
@@ -228,6 +232,7 @@ function Canvas({
                           </div>
                         ) : (
                           <button
+                            id={`canvas-apply-button-${message.id}`}
                             className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm"
                             onClick={() => handleApply(message)}
                           >
@@ -243,7 +248,8 @@ function Canvas({
                           </div>
                         ) : (
                           <button
-                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm"
+                            id={`canvas-copy-button-${message.id}`}
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleCopy(message.id, message.optimized)}
                           >
                             <CopyIconComponent size={14} />
@@ -263,7 +269,7 @@ function Canvas({
 
           {/* Loading State */}
           {loading && (
-            <div className="chat chat-start">
+            <div id="canvas-loading-state" className="chat chat-start">
               <div className="chat-header mb-1">
                 <span className="text-sm font-medium">assistant</span>
                 <time className="text-xs opacity-50 pl-2">
@@ -286,6 +292,7 @@ function Canvas({
           <div className="flex gap-3 items-center max-w-4xl mx-auto justify-center">
             <div className="flex-1 relative mt-1">
               <textarea
+                id="canvas-instruction-textarea"
                 ref={textareaRef}
                 className="w-full textarea textarea-bordered"
                 placeholder={` how you'd like to improve your ${label}...`}
@@ -313,6 +320,7 @@ function Canvas({
             </div>
 
             <button
+             id="canvas-send-button"
               className={`btn btn-circle transition-all duration-200 ${
                 loading
                   ? "btn-disabled"
@@ -327,7 +335,7 @@ function Canvas({
 
           {/* Error Message */}
           {errorMessage && (
-            <div className="max-w-4xl mx-auto mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div id="canvas-error-message"className="max-w-4xl mx-auto mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-center gap-2">
                 <svg
                   className="w-4 h-4 text-red-500 flex-shrink-0"

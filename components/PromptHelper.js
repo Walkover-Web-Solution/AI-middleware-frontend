@@ -112,6 +112,7 @@ const PromptHelper = ({
 
   return (
     <div
+      id="prompt-helper-container"
       ref={modalRef}
       className=" z-very-high w-full bottom-2 bg-base-100 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
       onBlur={handleModalBlur}
@@ -124,7 +125,12 @@ const PromptHelper = ({
         </div>
 
         {showCloseButton && (
-          <button onClick={onClose} className="btn btn-xs btn-error" title="Close Prompt Helper">
+          <button
+            id="prompt-helper-close-button"
+            onClick={onClose}
+            className="btn btn-xs btn-error"
+            title="Close Prompt Helper"
+          >
             Close Helper
           </button>
         )}

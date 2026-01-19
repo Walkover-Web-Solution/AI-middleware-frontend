@@ -119,6 +119,7 @@ function BridgeNode({ data }) {
       />
 
       <button
+        id="bridge-node-button"
         onClick={handleBridgeClick}
         className={`text-white rounded-full w-20 h-20 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform nodrag relative overflow-hidden ${
           bridgeConfig
@@ -205,6 +206,7 @@ function AgentNode({ id, data }) {
           {/* Enhanced Delete Button - Only show for non-master agents */}
           {!isMasterAgent && (
             <button
+              id={`agent-delete-button-${id}`}
               onClick={handleDeleteData}
               className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white shadow-xl hover:shadow-2xl hover:shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-all duration-300 z-40 flex items-center justify-center border-2 border-white/20 hover:border-white/40 backdrop-blur-sm overflow-hidden"
               title="Delete Agent"
@@ -254,6 +256,7 @@ function AgentNode({ id, data }) {
 
             {/* Add Next Step Button */}
             <button
+              id={`agent-add-next-button-${id}`}
               onClick={(e) => {
                 e.stopPropagation();
                 handleAdd();

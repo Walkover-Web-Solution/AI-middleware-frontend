@@ -99,8 +99,8 @@ const ActionModel = ({ params, searchParams, actionId, setActionId, isPublished 
   }, [handleActionSubmit, selectedAction, handleModalClose]);
 
   return (
-    <div className="cursor-pointer">
-      <button
+    <div id="action-model-container" className="cursor-pointer">
+      <button id="action-add-button"
         className="btn btn-outline btn-sm w-fit"
         onClick={() => {
           document.getElementById("actionModel").showModal();
@@ -112,7 +112,7 @@ const ActionModel = ({ params, searchParams, actionId, setActionId, isPublished 
       </button>
 
       <dialog id={MODAL_TYPE.ACTION_MODAL} className="modal">
-        <div className="modal-box w-full bg-base-100 text-base-content">
+        <div id="action-modal-box" className="modal-box w-full bg-base-100 text-base-content">
           <ActionSelect
             isPublished={isPublished}
             isEditor={isEditor}
@@ -138,10 +138,11 @@ const ActionModel = ({ params, searchParams, actionId, setActionId, isPublished 
           )}
 
           <div className="modal-action">
-            <button className="btn" onClick={handleModalClose}>
+            <button id="action-modal-close-button"  className="btn" onClick={handleModalClose}>
               Close
             </button>
             <button
+                            id="action-modal-submit-button"
               className="btn ml-2 btn-primary"
               disabled={isCreateButtonDisabled || isPublished || !isEditor}
               onClick={handleCreateUpdate}
@@ -161,6 +162,7 @@ const ActionSelect = ({ selectedAction, setSelectedAction, handleInputChange, is
       <span className="label-text text-lg">Select an Action</span>
     </div>
     <select
+         id="action-type-select"
       disabled={isPublished || !isEditor}
       className="select select-sm select-bordered"
       value={selectedAction}
@@ -188,6 +190,7 @@ const ActionDescription = ({ descriptionRef, handleInputChange, isPublished, isE
       <span className="label-text text-lg">Description</span>
     </div>
     <textarea
+            id="action-description-textarea"
       disabled={isPublished || !isEditor}
       className="textarea bg-white dark:bg-black/15 textarea-bordered h-24"
       placeholder="Enter a brief bio"
@@ -208,6 +211,7 @@ const ActionDataInput = ({ dataRef, handleInputChange, isPublished, isEditor = t
       <span className="label-text text-lg">Data Structure for Frontend</span>
     </div>
     <textarea
+            id="action-data-structure-textarea"
       disabled={isPublished || !isEditor}
       className="textarea bg-white dark:bg-black/15 textarea-bordered h-24"
       placeholder="Enter data structure format"

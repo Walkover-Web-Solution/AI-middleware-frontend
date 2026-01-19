@@ -12,10 +12,10 @@ const PromptTab = ({ isPublished, isEmbedUser }) => {
     hideAdvancedParameters: state.appInfoReducer.embedUserDetails.hideAdvancedParameters,
   }));
   return (
-    <div className="flex flex-col w-full">
+    <div id="prompt-tab-container" className="flex flex-col w-full">
       <InputSection />
 
-      <div className="w-full max-w-2xl">
+      <div id="prompt-tab-advanced-params-wrapper"className="w-full max-w-2xl">
         <AdvancedParameters
           params={params}
           searchParams={searchParams}

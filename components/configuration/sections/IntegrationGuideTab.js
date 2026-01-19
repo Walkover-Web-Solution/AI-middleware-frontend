@@ -14,14 +14,22 @@ const IntegrationGuideTab = ({ isPublished }) => {
   const { params } = useConfigurationContext();
 
   // Get bridge data and integration data from Redux store
-  const { slugName, prompt, bridgeTypeFromRedux, publishedVersionId } = useCustomSelector((state) => {
-    return {
-      slugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-      prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt,
-      bridgeTypeFromRedux: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.toLowerCase(),
-      publishedVersionId: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id,
-    };
-  });
+  const { slugName, prompt, bridgeTypeFromRedux, publishedVersionId } =
+    useCustomSelector((state) => {
+      return {
+        slugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+        prompt:
+          state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration
+            ?.prompt,
+        bridgeTypeFromRedux:
+          state?.bridgeReducer?.allBridgesMap?.[
+            params?.id
+          ]?.bridgeType?.toLowerCase(),
+        publishedVersionId:
+          state?.bridgeReducer?.allBridgesMap?.[params?.id]
+            ?.published_version_id,,
+      };
+    });
 
   // Initialize activeTab state based on bridge type
   const [activeTab, setActiveTab] = useState(() => {
@@ -30,7 +38,8 @@ const IntegrationGuideTab = ({ isPublished }) => {
 
   useEffect(() => {
     // Set initial active tab based on the bridge type from Redux
-    let initialTab = bridgeTypeFromRedux !== "trigger" ? bridgeTypeFromRedux : "chatbot";
+    let initialTab =
+      bridgeTypeFromRedux !== "trigger" ? bridgeTypeFromRedux : "chatbot";
 
     // If the bridge type is chatbot from Redux, force chatbot tab
     if (bridgeTypeFromRedux === "chatbot") {
@@ -81,9 +90,14 @@ const IntegrationGuideTab = ({ isPublished }) => {
   // Render locked state when no published version exists
   if (!hasPublishedVersion) {
     return (
-      <div className="p-6 space-y-6 relative">
+      <div
+        id="integration-guide-locked-container"
+        className="p-6 space-y-6 relative"
+      >
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-base-content mb-2">Integration Guide</h2>
+          <h2 className="text-xl font-semibold text-base-content mb-2">
+            Integration Guide
+          </h2>
           <p className="text-sm text-base-content/70">Choose your integration type and follow the guide</p>
         </div>
 
@@ -96,12 +110,15 @@ const IntegrationGuideTab = ({ isPublished }) => {
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-semibold text-base-content">Publish Version Required</h3>
+            <h3 className="text-xl font-semibold text-base-content">
+              Publish Version Required
+            </h3>
 
             {/* Description */}
             <p className="text-base-content/70 max-w-md text-sm">
-              You need to publish a version of this agent before you can access the integration guide. Please publish
-              your agent first to unlock integration options.
+              You need to publish a version of this agent before you can access
+              the integration guide. Please publishyour agent first to unlock
+              integration options.
             </p>
           </div>
         </div>
@@ -110,21 +127,29 @@ const IntegrationGuideTab = ({ isPublished }) => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div id="integration-guide-container" className="p-6 space-y-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-base-content mb-2">Integration Guide</h2>
+        <h2 className="text-xl font-semibold text-base-content mb-2">
+          Integration Guide
+        </h2>
         <p className="text-sm text-base-content/70">Choose your integration type and follow the guide</p>
       </div>
 
       <div className="flex flex-col gap-4">
         {/* Dynamic Tabs based on bridge type */}
-        {!tabs.some((tab) => tab.id === "chatbot") && (
-          <div className="tabs tabs-boxed bg-base-100 p-1 rounded-lg">
-            {tabs.map((tab) => (
+        {!tabs.some(((tab)) => tab.id === "chatbot") && (
+          <div
+            id="integration-guide-tabs"
+            className="tabs tabs-boxed bg-base-100 p-1 rounded-lg"
+          >
+            {tabs.map(((tab)) => (
               <button
+                id={`integration-tab-${tab.id}`}
                 key={tab.id}
                 className={`tab flex-1 transition-colors ${
-                  activeTab === tab.id ? "tab-active bg-base-200 font-medium shadow-sm" : "hover:bg-base-200/50"
+                  activeTab === tab.id
+                    ? "tab-active bg-base-200 font-medium shadow-sm"
+                    : "hover:bg-base-200/50"
                 }`}
                 onClick={() => setActiveTab(tab.id)}
               >

@@ -115,6 +115,7 @@ const PromptTextarea = memo(
 
     return (
       <div
+    id="prompt-textarea-wrapper"
         ref={wrapperRef}
         className={`
         bg-white dark:bg-black/15 border flex
@@ -130,6 +131,7 @@ const PromptTextarea = memo(
       `}
       >
         <textarea
+       id="prompt-textarea"
           ref={textareaRef}
           disabled={isPublished || !isEditor}
           contentEditable={!isPublished && isEditor}

@@ -37,10 +37,11 @@ function ChatBotSlider() {
       <div className="flex flex-col overflow-hidden gap-4 w-full">
         <div className="flex flex-row justify-between">
           <p className="text-xl font-semibold">Chatbots</p>
-          <CloseIcon className="block md:hidden" onClick={handleCloseChatbotSlider} />
+          <CloseIcon id="chatbot-slider-close-icon" className="block md:hidden" onClick={handleCloseChatbotSlider} />
         </div>
         {/* Input field for chatbot search */}
         <input
+                    id="chatbot-slider-search-input"
           type="text"
           placeholder="Search..."
           value={chatbotSearchQuery}
@@ -55,6 +56,7 @@ function ChatBotSlider() {
             .map((item) => (
               <li key={item._id} className=" w-full">
                 <a
+                                   id={`chatbot-slider-item-${item._id}`}
                   className={`${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
                   onClick={() => handleNavigation(item._id)}
                 >

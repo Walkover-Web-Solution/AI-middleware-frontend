@@ -673,11 +673,11 @@ const CommandPalette = ({ isEmbedUser }) => {
 
   return (
     <div
-      className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4"
+      id="command-palette-backdrop" className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={closePalette}
       style={{ zIndex: 999999 }}
     >
-      <div className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div id="command-palette-modal"className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="border-b border-base-300">
           {filterParam && (
             <div className="flex items-center justify-between bg-warning/10 px-3 py-2 text-sm">
@@ -686,6 +686,7 @@ const CommandPalette = ({ isEmbedUser }) => {
                 <span>Filter active on current page</span>
               </div>
               <button
+                id="command-palette-clear-filter"
                 onClick={clearCurrentFilter}
                 className="btn btn-xs btn-ghost hover:bg-error hover:text-error-content"
                 title="Clear filter"
@@ -697,13 +698,14 @@ const CommandPalette = ({ isEmbedUser }) => {
           <div className="flex items-center gap-2 p-3">
             <Search className="w-4 h-4 opacity-70" />
             <input
+              id="command-palette-search-input"
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search agents, bridges, API keys, docs..."
               className="flex-1 bg-transparent outline-none"
             />
-            <button className="btn btn-sm" onClick={closePalette}>
+            <button id="command-palette-close-button"className="btn btn-sm" onClick={closePalette}>
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -727,6 +729,7 @@ const CommandPalette = ({ isEmbedUser }) => {
                       }`}
                     >
                       <button
+                        id={`command-palette-category-${cat.key}`}
                         data-nav-index={categoryNavIndex}
                         onClick={() => navigateCategory(cat.key)}
                         className="flex-1 flex items-center justify-between"
@@ -737,6 +740,7 @@ const CommandPalette = ({ isEmbedUser }) => {
 
                       {categoryItems.length > 0 && (
                         <button
+                          id={`command-palette-toggle-${cat.key}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleLandingCategory(cat.key);
@@ -764,6 +768,7 @@ const CommandPalette = ({ isEmbedUser }) => {
 
                             return (
                               <li
+                                id={`command-palette-item-${item.type}-${item.id}`}
                                 key={`${item.type}-${item.id}`}
                                 data-nav-index={itemNavIndex}
                                 onClick={() => navigateTo(item)}
@@ -816,6 +821,7 @@ const CommandPalette = ({ isEmbedUser }) => {
                                 const active = globalIdx === activeIndex;
                                 return (
                                   <li
+                                    id={`command-palette-result-${row.type}-${row.id}`}
                                     key={`${row.type}-${row.id}`}
                                     data-nav-index={globalIdx}
                                     onClick={() => navigateTo(row)}

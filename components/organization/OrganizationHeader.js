@@ -66,6 +66,7 @@ const OrganizationHeader = ({ organizationsArray, setDisplayedOrganizations }) =
               />
             </div>
             <button
+                           id="org-header-create-workspace-button"
               onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
               className="btn btn-primary btn-sm whitespace-nowrap"
             >
@@ -73,7 +74,7 @@ const OrganizationHeader = ({ organizationsArray, setDisplayedOrganizations }) =
             </button>
           </div>
 
-          <div className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer">
+          <div  id="org-header-user-menu-button" className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer">
             <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
               {getInitials(userdetails?.name || orgName)}
             </span>
@@ -81,26 +82,33 @@ const OrganizationHeader = ({ organizationsArray, setDisplayedOrganizations }) =
         </div>
       )}
 
-      {/* Show button alone when no search is needed */}
-      {(!organizationsArray || organizationsArray?.length <= 5) && (
-        <div className="flex flex-row justify-between items-center">
-          <div className="flex justify-start">
-            <button onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn btn-primary btn-sm">
-              + Create New Workspace
-            </button>
-          </div>
-          <div className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer">
-            <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
-              {getInitials(userdetails?.name || orgName)}
-            </span>
-          </div>
+            {/* Show button alone when no search is needed */}
+            {(!organizationsArray || organizationsArray?.length <= 5) && (
+                <div className='flex flex-row justify-between items-center'>
+                    <div className='flex justify-start'>
+                        <button
+                            id="org-header-create-workspace-button-alt"
+                            onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
+                            className="btn btn-primary btn-sm"
+                        >
+                            + Create New Workspace
+                        </button>
+                    </div>
+                     <div id="org-header-user-menu-button-alt" className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
+  <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
+    {getInitials(userdetails?.name || orgName)}
+  </span>
+</div>
+                </div>
+
+            )}
+            <div ref={sliderWrapperRef} className='absolute top-[84px] right-[-6px]'>
+            {open && <MainSlider openDetails={true} userdetailsfromOrg={userdetails}  orgIdFromHeader={orgId}  />}
+            </div>
+          
+
         </div>
-      )}
-      <div ref={sliderWrapperRef} className="absolute top-[84px] right-[-6px]">
-        {open && <MainSlider openDetails={true} userdetailsfromOrg={userdetails} orgIdFromHeader={orgId} />}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default OrganizationHeader;

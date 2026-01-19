@@ -717,11 +717,15 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
-        <div className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl max-w-6xl w-[90vw] my-8 flex flex-col p-6 md:p-10 transition-all duration-300 ease-in-out animate-fadeIn">
+        <div 
+          id="publish-bridge-modal-container"
+          className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl max-w-6xl w-[90vw] my-8 flex flex-col p-6 md:p-10 transition-all duration-300 ease-in-out animate-fadeIn"
+        >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Publish Bridge Version</h2>
             <div className="flex gap-2">
               <button
+                id="publish-toggle-comparison-button"
                 onClick={toggleComparison}
                 className={`btn btn-sm btn-outline flex gap-1 ${!showComparison ? "hidden" : "block"}`}
                 title="Compare Version Changes"
@@ -729,7 +733,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 <ArrowRightLeft size={16} />
                 {showComparison ? "Hide Changes" : "View Changes"}
               </button>
-              <button onClick={handleCloseModal} className="btn btn-sm btn-circle btn-ghost">
+              </div>
+            
+              <button
+                id="publish-close-x-button"
+                onClick={handleCloseModal}
+                className="btn btn-sm btn-circle btn-ghost"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -744,6 +754,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
             }`}
           >
             <input
+              id="publish-summary-accordion-toggle"
               type="checkbox"
               className="peer"
               defaultChecked={summaryAccordionOpen}
@@ -799,7 +810,11 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-bold">Changes Summary</h3>
                   {Object.keys(changesSummary).length > 0 && (
-                    <button className="btn btn-sm btn-outline flex gap-1" onClick={toggleComparison}>
+                    <button
+                      id="publish-view-all-changes-button"
+                      className="btn btn-sm btn-outline flex gap-1"
+                      onClick={toggleComparison}
+                    >
                       <ArrowRightLeft size={16} />
                       View All Changes
                     </button>
@@ -860,6 +875,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     {/* Select All option */}
                     {allConnectedAgents.filter((agent) => agent._id !== params?.id && agent?.haveToPublish).length >
                       1 && (
+                        id="publish-select-all-agents-button"
                       <button onClick={toggleSelectAllAgents} className="btn btn-sm btn-outline flex gap-1">
                         {allConnectedAgents
                           .filter((agent) => agent._id !== params?.id && agent?.haveToPublish)
@@ -910,6 +926,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                       <span className="label-text-alt text-xs text-base-content/60">Must be globally unique</span>
                     </label>
                     <input
+                      id="publish-slug-name-input"
                       type="text"
                       name="url_slugname"
                       placeholder="Enter a unique slug name"
@@ -931,6 +948,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                       <span className="label-text font-medium">Description</span>
                     </label>
                     <textarea
+                      id="publish-description-textarea"
                       name="description"
                       placeholder="Enter a description"
                       className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-20"
@@ -945,6 +963,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                       <span className="label-text font-medium">Visibility</span>
                     </label>
                     <select
+                      id="publish-visibility-select"
                       className="select select-bordered w-full"
                       name="availability"
                       value={formData.availability}
@@ -969,6 +988,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                               <div key={index} className="badge badge-outline gap-2 py-3 px-3">
                                 <span className="text-sm">{user}</span>
                                 <button
+                                  id={`publish-remove-user-${index}`}
                                   onClick={() => handleRemoveUser(index)}
                                   className="hover:text-error transition-colors"
                                   type="button"
@@ -983,6 +1003,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
                       <div className="join w-full">
                         <input
+                          id="publish-add-user-email-input"
                           type="email"
                           placeholder="Enter email address"
                           className="input input-bordered join-item flex-1"
@@ -1001,6 +1022,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                           }}
                         />
                         <button
+                          id="publish-add-user-button"
                           type="button"
                           className="btn btn-sm join-item"
                           onClick={handleAddEmail}
@@ -1018,10 +1040,16 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
-            <button className="btn btn-sm" onClick={handleCloseModal} disabled={isLoading}>
+            <button
+              id="publish-cancel-button"
+              className="btn btn-sm"
+              onClick={handleCloseModal}
+              disabled={isLoading}
+            >
               Cancel
             </button>
             <button
+              id="publish-confirm-button"
               className={`btn btn-primary btn-sm ${isLoading ? "loading" : ""}`}
               onClick={handlePublishBridge}
               disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim()) || isReadOnly}

@@ -11,7 +11,7 @@ const BridgeTypeCards = ({
   isModal,
 }) => {
   return (
-    <div className={`space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold ${isModal ? "bg-base-200 rounded-xl p-6" : ""}`}>
+    <div id="bridge-type-cards-container" className={`space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold ${isModal ? "bg-base-200 rounded-xl p-6" : ""}`}>
       <div className="flex justify-between items-center">
         <label className="text-md  text-base-content">Select Agent Type</label>
         {validationErrors?.bridgeType && <span className="text-red-500 text-sm">{validationErrors.bridgeType}</span>}
@@ -23,6 +23,7 @@ const BridgeTypeCards = ({
       >
         {/* API Card */}
         <div
+                  id="bridge-type-api-card"
           className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-200 rounded-xl border-base-content/30 min-w-[280px] md:min-w-0 ${
             selectedBridgeTypeCard === "api" ? "ring-2 ring-blue-500" : ""
           }`}
@@ -49,6 +50,7 @@ const BridgeTypeCards = ({
 
         {/* Chatbot Card */}
         {!isModal && (
+                    id="bridge-type-chatbot-card"
           <div
             className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-200 rounded-xl border-base-content/30 min-w-[280px] md:min-w-0 ${
               selectedBridgeTypeCard === "chatbot" ? "ring-2 ring-green-500" : ""
@@ -77,6 +79,7 @@ const BridgeTypeCards = ({
 
         {/* Batch API Card */}
         {!isModal && (
+                    id="bridge-type-batch-card"
           <div
             className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-content/30    rounded-xl min-w-[280px] md:min-w-0 ${
               selectedBridgeTypeCard === "batch" ? "ring-2 ring-purple-500" : ""
@@ -105,6 +108,7 @@ const BridgeTypeCards = ({
 
         {/* Triggers Card */}
         {!isEmbedUser && !isModal && (
+                    id="bridge-type-trigger-card"
           <div
             className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-content/30 rounded-xl min-w-[280px] md:min-w-0 ${
               selectedBridgeTypeCard === "trigger" ? "ring-2 ring-amber-500" : ""
@@ -143,7 +147,7 @@ const CreateBridgeCards = ({
 }) => {
   return isModal ? (
     <Modal MODAL_ID={MODAL_TYPE.BRIDGE_TYPE_MODAL}>
-      <div className="modal-box max-w-[80vw]">
+      <div id="bridge-type-modal-container" className="modal-box max-w-[80vw]">
         <BridgeTypeCards
           selectedBridgeTypeCard={selectedBridgeTypeCard}
           handleBridgeTypeSelection={handleBridgeTypeSelection}

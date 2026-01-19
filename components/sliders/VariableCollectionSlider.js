@@ -1003,6 +1003,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
             )}
           </div>
           <button
+            id="variable-slider-bulk-edit-button"
             type="button"
             className="btn btn-ghost btn-sm p-1 absolute top-6 right-6"
             onClick={closeSlider}
@@ -1020,6 +1021,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
               {!bulkEditMode && (
                 <>
                   <button
+                    id="variable-slider-bulk-edit-button"
                     type="button"
                     className="btn btn-outline btn-xs gap-1"
                     onClick={handleBulkEditToggle}
@@ -1032,10 +1034,20 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
               )}
               {bulkEditMode && (
                 <>
-                  <button type="button" className="btn btn-ghost btn-xs" onClick={handleBulkEditToggle}>
+                  <button
+                    id="variable-slider-bulk-edit-cancel-button"
+                    type="button"
+                    className="btn btn-ghost btn-xs"
+                    onClick={handleBulkEditToggle}
+                  >
                     Cancel
                   </button>
-                  <button type="button" className="btn btn-primary btn-xs" onClick={handleBulkEditSave}>
+                  <button
+                    id="variable-slider-bulk-edit-save-button"
+                    type="button"
+                    className="btn btn-primary btn-xs"
+                    onClick={handleBulkEditSave}
+                  >
                     Save Changes
                   </button>
                 </>
@@ -1067,6 +1079,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                       <div key={variable.id || `${variable.key}-${index}`} className="px-3 py-2 text-sm">
                         <div className="grid grid-cols-[1fr,1.2fr,1fr,0.8fr,0.6fr,auto] gap-2 items-center">
                           <input
+                            id={`variable-key-input-${index}`}
                             type="text"
                             className={`input input-xs input-bordered w-full ${
                               missingVariables.includes(variable.key)
@@ -1082,6 +1095,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
 
                           {variable.type === "boolean" ? (
                             <select
+                              id={`variable-value-select-${index}`}
                               className={`select select-xs select-bordered w-full ${
                                 missingVariables.includes(variable.key)
                                   ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
@@ -1100,6 +1114,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                             </select>
                           ) : variable.type === "number" ? (
                             <input
+                              id={`variable-value-number-${index}`}
                               type="number"
                               step="any"
                               className={`input input-xs input-bordered w-full ${
@@ -1115,6 +1130,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                             />
                           ) : variable.type === "string" ? (
                             <input
+                              id={`variable-value-text-${index}`}
                               type="text"
                               className={`input input-xs input-bordered w-full ${
                                 missingVariables.includes(variable.key)
@@ -1142,6 +1158,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                             />
                           ) : (
                             <textarea
+                              id={`variable-value-textarea-${index}`}
                               className="textarea textarea-xs textarea-bordered w-full min-h-[60px]"
                               disabled={!isCurrentRowEnabled || !variable.key.trim()}
                               value={variable.value}
@@ -1153,6 +1170,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
 
                           {variable.type === "boolean" ? (
                             <select
+                              id={`variable-default-select-${index}`}
                               className="select select-xs select-bordered w-full"
                               disabled={!isCurrentRowEnabled || !variable.key.trim()}
                               value={
@@ -1173,6 +1191,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                             </select>
                           ) : variable.type === "number" ? (
                             <input
+                              id={`variable-default-number-${index}`}
                               type="number"
                               step="any"
                               className="input input-xs input-bordered w-full"
@@ -1184,6 +1203,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                             />
                           ) : variable.type === "object" || variable.type === "array" ? (
                             <textarea
+                              id={`variable-default-textarea-${index}`}
                               className="textarea textarea-xs textarea-bordered w-full min-h-[90px] font-mono text-xs"
                               disabled={!isCurrentRowEnabled || !variable.key.trim()}
                               value={variable.defaultValue}
@@ -1193,6 +1213,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                             />
                           ) : (
                             <input
+                              id={`variable-default-text-${index}`}
                               type="text"
                               className="input input-xs input-bordered w-full"
                               disabled={!isCurrentRowEnabled || !variable.key.trim()}
@@ -1204,6 +1225,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                           )}
 
                           <select
+                            id={`variable-type-select-${index}`}
                             className="select select-xs select-bordered w-full"
                             disabled={!isCurrentRowEnabled || !variable.key.trim()}
                             value={variable.type}
@@ -1221,6 +1243,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
                           </select>
 
                           <button
+                            id={`variable-required-toggle-${index}`}
                             type="button"
                             className={`badge badge-xs cursor-pointer hover:opacity-80 ${
                               variable.required ? "badge-primary" : "badge-ghost"
@@ -1234,6 +1257,7 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
 
                           <div className="flex justify-end gap-1">
                             <button
+                              id={`variable-delete-button-${index}`}
                               type="button"
                               className="btn btn-ghost btn-xs text-error"
                               disabled={!isCurrentRowEnabled || !variable.key.trim()}

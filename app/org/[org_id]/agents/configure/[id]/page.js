@@ -28,15 +28,13 @@ export const runtime = "edge";
 const ConfigBundle = ({ onClick }) => {
   return (
     <div
+      id="config-bundle-panel"
       className=" w-full h-full border-r-2 border-primary flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Configuration Panel"
       style={{ minWidth: "15px" }}
       onClick={onClick}
     >
-      <div
-        className="font-bold text-xs whitespace-nowrap select-none"
-        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-      >
+      <div id="config-bundle-label" className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Config
       </div>
     </div>
@@ -46,15 +44,13 @@ const ConfigBundle = ({ onClick }) => {
 const ChatBundle = ({ onClick }) => {
   return (
     <div
+    id="chat-bundle-panel"
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Chat Panel"
       style={{ minWidth: "20px" }}
       onClick={onClick}
     >
-      <div
-        className=" font-bold text-xs whitespace-nowrap select-none"
-        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-      >
+      <div id="chat-bundle-label" className=" font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Chat
       </div>
     </div>
@@ -64,15 +60,13 @@ const ChatBundle = ({ onClick }) => {
 const PromptHelperBundle = ({ onClick }) => {
   return (
     <div
+    id="prompt-helper-bundle-panel"
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Prompt Helper Panel"
       style={{ minWidth: "20px" }}
       onClick={onClick}
     >
-      <div
-        className="font-bold text-xs whitespace-nowrap select-none"
-        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-      >
+      <div id="prompt-helper-bundle-label" className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Helper
       </div>
     </div>
@@ -82,15 +76,13 @@ const PromptHelperBundle = ({ onClick }) => {
 const NotesBundle = ({ onClick }) => {
   return (
     <div
+    id="notes-bundle-panel"
       className="w-full h-full flex items-center justify-center hover:bg-primary/30 transition-colors duration-200 cursor-pointer"
       title="Expand Notes Panel"
       style={{ minWidth: "20px" }}
       onClick={onClick}
     >
-      <div
-        className="font-bold text-xs whitespace-nowrap select-none"
-        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-      >
+      <div id="notes-bundle-label"className="font-bold text-xs whitespace-nowrap select-none" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
         Notes
       </div>
     </div>
@@ -549,15 +541,19 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   // Show error state with retry option
   if (hasError && !hasData) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-base-100">
-        <div className="text-center p-8">
-          <div className="mb-4">
-            <CircleAlert className="w-16 h-16 mx-auto text-error" />
+      <div id="error-container" className="w-full h-full flex items-center justify-center bg-base-100">
+        <div id="error-content" className="text-center p-8">
+          <div id="error-icon-container" className="mb-4">
+            <CircleAlert id="error-icon" className="w-16 h-16 mx-auto text-error" />
           </div>
-          <h3 className="text-lg font-semibold text-base-content mb-2">Unable to load agent configuration</h3>
-          <p className="text-base-content/60 mb-4">There was an error loading the agent data. Please try again.</p>
-          <button onClick={() => window.location.reload()} className="btn btn-primary">
-            <RefreshIcon className="w-4 h-4 mr-2" />
+          <h3 id="error-title" className="text-lg font-semibold text-base-content mb-2">Unable to load agent configuration</h3>
+          <p id="error-message" className="text-base-content/60 mb-4">There was an error loading the agent data. Please try again.</p>
+          <button
+            id="retry-button"
+            onClick={() => window.location.reload()}
+            className="btn btn-primary"
+          >
+            <RefreshIcon  id="refresh-icon" className="w-4 h-4 mr-2" />
             Retry
           </button>
         </div>
@@ -567,6 +563,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
   return (
     <div
+    id="configure-page-container"
       ref={containerRef}
       className={`w-full bg-base-300 h-full transition-all duration-300 ease-in-out overflow-hidden ${!isFocus ? "max-h-[calc(100vh-2rem)]" : "overflow-y-hidden"} ${uiState.isDesktop ? "flex flex-row" : "overflow-y-auto"}`}
     >
@@ -574,9 +571,10 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
       {uiState.isDesktop ? (
         isAgentFlowView ? (
-          <div className="w-full h-full">
-            <div className="h-full overflow-y-auto py-4">
+          <div id="agent-flow-container" className="w-full h-full">
+            <div id="agent-flow-scroll-container" className="h-full overflow-y-auto py-4">
               <ConfigurationPage
+                id="agent-flow-configuration-page"
                 promptTextAreaRef={promptTextAreaRef}
                 params={resolvedParams}
                 searchParams={resolvedSearchParams}
@@ -597,9 +595,10 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           </div>
         ) : (
           // Desktop: Use react-resizable-panels for smooth resizing
-          <PanelGroup direction="horizontal" className="w-full h-full">
+          <PanelGroup id="main-panel-group" direction="horizontal" className="w-full h-full">
             {/* Configuration Panel */}
             <Panel
+              id="config-panel"
               ref={configPanelRef}
               defaultSize={panelSizes.config}
               minSize={3}
@@ -617,13 +616,14 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               {uiState.isConfigCollapsed && <ConfigBundle onClick={handleExpandConfig} />}
 
               {/* Configuration Content - Always in DOM, just hidden when collapsed */}
-              <div className={`h-full flex flex-col ${uiState.isConfigCollapsed ? "hidden" : ""}`}>
+              <div
+                id="config-content-container"
+                className={`h-full flex flex-col ${uiState.isConfigCollapsed ? 'hidden' : ''}`}
+              >
                 {/* Configuration Content */}
-                <div
-                  ref={leftPanelScrollRef}
-                  className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? "px-2" : " pl-8  px-4"}`}
-                >
+                <div id="config-scroll-container" ref={leftPanelScrollRef} className={`flex-1 overflow-y-auto overflow-x-hidden ${uiState.isPromptHelperOpen ? 'px-2' : ' pl-8  px-4'}`}>
                   <ConfigurationPage
+                   id="configuration-page"
                     promptTextAreaRef={promptTextAreaRef}
                     params={resolvedParams}
                     searchParams={resolvedSearchParams}
@@ -645,16 +645,17 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             </Panel>
 
             {/* Resizer Handle with Custom Line */}
-            <PanelResizeHandle className="w-2 bg-base-100 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
-              </div>
+            <PanelResizeHandle id="main-resize-handle" className="w-2 bg-base-100 hover:bg-primary/50 transition-colors duration-200 relative flex items-center justify-center group">
+               <div className="absolute inset-0 flex items-center justify-center">
+                      <div id="main-resize-line" className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
+                    </div>
             </PanelResizeHandle>
 
             {/* Chat/PromptHelper Panel - Conditional based on focus mode */}
             {!uiState.isPromptHelperOpen || !isFocus ? (
               // Chat Panel (Two-panel mode)
               <Panel
+                id="chat-panel"
                 ref={chatPanelRef}
                 defaultSize={panelSizes.chat}
                 minSize={3}
@@ -670,12 +671,11 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 {uiState.isChatCollapsed ? (
                   <ChatBundle onClick={handleExpandChat} />
                 ) : (
-                  <div className="h-full flex flex-col" id="parentChatbot">
-                    <div
-                      className={`flex-1 overflow-x-hidden ${isGuideVisible ? "overflow-y-hidden" : "overflow-y-auto"}`}
-                    >
-                      <div className="h-full flex flex-col">
+                  <div id="parentChatbot" className="h-full flex flex-col" >
+                    <div className={`flex-1 overflow-x-hidden ${isGuideVisible ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
+                      <div id="chat-container" className="h-full flex flex-col">
                         <AgentSetupGuide
+                         id="agent-setup-guide"
                           promptTextAreaRef={promptTextAreaRef}
                           params={resolvedParams}
                           searchParams={resolvedSearchParams}
@@ -684,24 +684,24 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                         {/* Only show experimental Chat for non-chatbot types */}
                         {bridgeType !== "chatbot" && (
                           <>
-                            {!sessionStorage.getItem("orchestralUser") ? (
-                              <div className="flex-1 min-h-0">
-                                {bridgeType === "batch" && versionService === "openai" ? (
-                                  <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
+                            {!sessionStorage.getItem('orchestralUser') ? (
+                              <div id="chat-content-container" className="flex-1 min-h-0">
+                                {bridgeType === 'batch' && versionService === 'openai' ? (
+                                  <WebhookForm id="webhook-form" params={resolvedParams} searchParams={resolvedSearchParams} />
                                 ) : (
-                                  <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                                  <Chat id="chat-component" params={resolvedParams} searchParams={resolvedSearchParams} />
                                 )}
                               </div>
                             ) : (
-                              <div className="flex-1 min-h-0">
-                                <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
+                              <div   id="alternative-chat-container" className="flex-1 min-h-0">
+                                <Chat id="alternative-chat-component" params={resolvedParams} searchParams={resolvedSearchParams} />
                               </div>
                             )}
                           </>
                         )}
                       </div>
                     </div>
-                    <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+                    <Chatbot id="chatbot-component" params={resolvedParams} searchParams={resolvedSearchParams} />
                   </div>
                 )}
               </Panel>
@@ -710,26 +710,28 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               <>
                 {/* PromptHelper Panel */}
                 <Panel
-                  ref={promptHelperPanelRef}
-                  defaultSize={panelSizes.promptHelper}
-                  minSize={3}
-                  maxSize={100}
-                  className="bg-base-50"
-                  collapsible={false}
-                  onResize={(size) => {
-                    // Don't update state if we're manually keeping it collapsed
-                    if (isManualResizeRef.current) return;
-
-                    const isCollapsed = size <= 5;
-                    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
-                      updateUiState({ isPromptHelperCollapsed: isCollapsed });
-                    }
-                  }}
-                >
+                id="prompt-helper-panel"
+  ref={promptHelperPanelRef}
+  defaultSize={panelSizes.promptHelper}
+  minSize={3}
+  maxSize={100}
+  className="bg-base-50"
+  collapsible={false}
+  onResize={(size) => {
+    // Don't update state if we're manually keeping it collapsed
+    if (isManualResizeRef.current) return;
+    
+    const isCollapsed = size <= 5;
+    if (uiState.isPromptHelperCollapsed !== isCollapsed) {
+      updateUiState({ isPromptHelperCollapsed: isCollapsed });
+    }
+  }}
+>
                   {uiState.isPromptHelperCollapsed ? (
                     <PromptHelperBundle onClick={handleExpandPromptHelper} />
                   ) : (
                     <PromptHelper
+                    id="prompt-helper"
                       isVisible={uiState.isPromptHelperOpen && !isMobileView}
                       params={resolvedParams}
                       searchParams={resolvedSearchParams}
@@ -783,9 +785,9 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
                 {/* Resizer Handle between PromptHelper and Notes with Custom Line */}
                 {uiState.showNotes && !isEmbedUser && (
-                  <PanelResizeHandle className="w-2 bg-base-300 hover:bg-success/50 transition-colors duration-200 relative flex items-center justify-center group">
+                  <PanelResizeHandle id="prompt-notes-resize-handle" className="w-2 bg-base-300 hover:bg-success/50 transition-colors duration-200 relative flex items-center justify-center group">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
+                      <div id="prompt-notes-resize-line" className="w-0.5 h-6 bg-base-content/20 group-hover:bg-success/80 transition-colors duration-200 rounded-full" />
                     </div>
                   </PanelResizeHandle>
                 )}
@@ -793,6 +795,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 {/* Notes Panel */}
                 {uiState.showNotes && !isEmbedUser && (
                   <Panel
+                    id="notes-panel"
                     ref={notesPanelRef}
                     defaultSize={panelSizes.notes}
                     minSize={3}
@@ -810,6 +813,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                       <NotesBundle onClick={handleExpandNotes} />
                     ) : (
                       <NotesPanel
+                      id="notes-panel-component"
                         isVisible={true}
                         params={resolvedParams}
                         isEmbedUser={isEmbedUser}
@@ -824,10 +828,11 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           </PanelGroup>
         )
       ) : isAgentFlowView ? (
-        <div className="overflow-y-auto w-full h-full">
-          <div className="min-h-screen border-b border-base-300 bg-base-100">
-            <div className="py-4 px-4">
+        <div id="mobile-agent-flow-container" className="overflow-y-auto w-full h-full">
+          <div id="mobile-agent-flow-content" className="min-h-screen border-b border-base-300 bg-base-100">
+            <div id="mobile-agent-flow-inner" className="py-4 px-4">
               <ConfigurationPage
+                id="mobile-agent-flow-configuration-page"
                 promptTextAreaRef={promptTextAreaRef}
                 params={resolvedParams}
                 searchParams={resolvedSearchParams}
@@ -848,11 +853,12 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
         </div>
       ) : (
         // Mobile: Simple stacked layout
-        <div className="overflow-y-auto">
+         <div id="mobile-container" className="overflow-y-auto">
           {/* Configuration Panel */}
-          <div className="min-h-screen border-b border-base-300 bg-base-100">
+          <div id="mobile-config-section" className="min-h-screen border-b border-base-300 bg-base-100">
             <div className="py-4 px-4">
               <ConfigurationPage
+                  id="mobile-configuration-page"
                 promptTextAreaRef={promptTextAreaRef}
                 params={resolvedParams}
                 searchParams={resolvedSearchParams}
@@ -871,37 +877,34 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             </div>
           </div>
 
-          {/* Chat Panel */}
-          <div className="min-h-screen" id="parentChatbot">
-            <div className="h-full flex flex-col">
-              <AgentSetupGuide
-                promptTextAreaRef={promptTextAreaRef}
-                params={resolvedParams}
-                searchParams={resolvedSearchParams}
-              />
-
-              {/* Only show experimental Chat for non-chatbot types */}
-              {bridgeType !== "chatbot" && (
-                <>
-                  {!sessionStorage.getItem("orchestralUser") ? (
-                    <div className="flex-1 min-h-0">
-                      {bridgeType === "batch" && versionService === "openai" ? (
-                        <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
-                      ) : (
-                        <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex-1 min-h-0">
-                      <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-                    </div>
-                  )}
-                </>
-              )}
+            {/* Chat Panel */}
+            <div id="parentChatbot"  className="min-h-screen" >
+              <div id="mobile-chat-container" className="h-full flex flex-col">
+                  <AgentSetupGuide id="mobile-agent-setup-guide" promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} />
+                
+                {/* Only show experimental Chat for non-chatbot types */}
+                {bridgeType !== 'chatbot' && (
+                  <>
+                    {!sessionStorage.getItem('orchestralUser') ? (
+                      <div  id="mobile-chat-content-container" className="flex-1 min-h-0">
+                        {bridgeType === 'batch' && versionService === 'openai' ? (
+                          <WebhookForm  id="mobile-webhook-form" params={resolvedParams} searchParams={resolvedSearchParams} />
+                        ) : (
+                          <Chat id="mobile-chat-component"params={resolvedParams} searchParams={resolvedSearchParams} />
+                        )}
+                      </div>
+                    ) : (
+                      <div id="mobile-alternative-chat-container" className="flex-1 min-h-0">
+                        <Chat  id="mobile-alternative-chat-component"params={resolvedParams} searchParams={resolvedSearchParams} />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              <Chatbot  id="mobile-chatbot-component"params={resolvedParams} searchParams={resolvedSearchParams} />
             </div>
-            <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
           </div>
-        </div>
+        )
       )}
     </div>
   );

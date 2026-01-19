@@ -433,7 +433,7 @@ const ThreadContainer = ({
   }, [searchMessageId, scrollToSearchedMessage]);
 
   return (
-    <div className="drawer-content flex flex-col items-center overflow-hidden justify-center">
+    <div id="thread-container" className="drawer-content flex flex-col items-center overflow-hidden justify-center">
       <div className="w-full min-h-screen">
         <div
           id="scrollableDiv"
@@ -495,6 +495,7 @@ const ThreadContainer = ({
 
         {showScrollToBottom && (
           <button
+            id="thread-container-scroll-to-bottom"
             onClick={() => scrollToBottom(historyRef)}
             className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-[5]"
             aria-label="Scroll to bottom"

@@ -23,7 +23,7 @@ const InputSection = memo(() => {
   return (
     <>
       {((!hidePreTool && isEmbedUser) || !isEmbedUser) && (
-        <div className="w-full cursor-default flex flex-wrap justify-between items-start gap-2">
+        <div id="input-section-pre-embed-wrapper" className="w-full cursor-default flex flex-wrap justify-between items-start gap-2">
           <div className="flex-1">
             <PreEmbedList
               isPublished={isPublished}

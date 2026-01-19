@@ -43,7 +43,11 @@ const LoginPage = ({ loading }) => {
           {/* Logo and centered secure login label in same row */}
           <div className="flex items-center justify-between mb-8">
             <div className="w-16 relative">
-              <a href={process.env.NEXT_PUBLIC_FRONTEND_URL} className="inline-block cursor-pointer relative">
+              <a
+                id="login-page-logo-link"
+                href={process.env.NEXT_PUBLIC_FRONTEND_URL}
+                className="inline-block cursor-pointer relative"
+              >
                 <div className="relative w-20 h-20 flex items-center justify-center">
                   <div className="relative">
                     {/* Rotating box positioned behind the logo - offset to match reference image */}
@@ -98,7 +102,9 @@ const LoginPage = ({ loading }) => {
             <div className="flex-1 flex justify-center">
               <div className="inline-flex items-center gap-2 px-6 py-2 bg-white/80 backdrop-blur-sm border border-black/10 rounded-full shadow-sm">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs tracking-wider text-black/60">SECURE LOGIN</span>
+                <span className="text-xs tracking-wider text-black/60">
+                  SECURE LOGIN
+                </span>
               </div>
             </div>
 
@@ -115,8 +121,12 @@ const LoginPage = ({ loading }) => {
 
                 {/* Welcome Text */}
                 <div className="text-center mb-6">
-                  <h1 className="text-4xl font-semibold text-base-content tracking-tight mb-4">Welcome Back</h1>
-                  <p className="text-base-content tracking-wide">Login to access your AI workspace</p>
+                  <h1 className="text-4xl font-semibold text-base-content tracking-tight mb-4">
+                    Welcome Back
+                  </h1>
+                  <p className="text-base-content tracking-wide">
+                    Login to access your AI workspace
+                  </p>
                 </div>
 
                 {/* Login Options */}
@@ -132,21 +142,28 @@ const LoginPage = ({ loading }) => {
             {/* Stats Section - Below login card */}
             <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">2000+</div>
+                <div className="text-sm font-semibold text-base-content">
+                  2000+
+                </div>
                 <div className="text-xs text-base-content/60">INTEGRATIONS</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">99.9%</div>
+                <div className="text-sm font-semibold text-base-content">
+                  99.9%
+                </div>
                 <div className="text-xs text-base-content/60">UPTIME</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">24/7</div>
+                <div className="text-sm font-semibold text-base-content">
+                  24/7
+                </div>
                 <div className="text-xs text-base-content/60">SUPPORT</div>
               </div>
             </div>
             <p className="mt-6 text-center text-xs text-base-content/30 tracking-wide leading-relaxed">
               By continuing, you agree to gtwy&apos;s{" "}
               <a
+                id="login-page-terms-link"
                 href="https://gtwy.ai/terms/"
                 target="_blank"
                 rel="noreferrer"
@@ -157,6 +174,7 @@ const LoginPage = ({ loading }) => {
               <br />
               and acknowledge our{" "}
               <a
+                id="login-page-privacy-link"
                 href="https://gtwy.ai/privacy/"
                 target="_blank"
                 rel="noreferrer"

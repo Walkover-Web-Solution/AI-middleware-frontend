@@ -224,7 +224,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
   const computedModelsList = serviceModels?.[fallbackService] || {};
 
   return (
-    <div className="space-y-2">
+    <div id="fallback-model-container"  className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           <label className="block text-base-content/70 text-sm font-medium">Fallback Model</label>
@@ -233,6 +233,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
           </InfoTooltip>
         </div>
         <input
+         id="fallback-model-toggle"
           disabled={isReadOnly}
           type="checkbox"
           className="toggle toggle-sm"
@@ -254,7 +255,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
         <div className="w-full p-3 border border-base-200 rounded-lg bg-base-50" ref={dropdownContainerRef}>
           <div className="grid grid-cols-2 gap-4">
             {/* Fallback Service */}
-            <div className="space-y-2">
+            <div  className="space-y-2">
               <label className="block text-base-content/70 text-xs font-medium">Fallback Service</label>
               <div className="relative w-full">
                 <details
@@ -269,6 +270,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                   disabled={bridgeType === "batch" || isReadOnly}
                 >
                   <summary
+                   id="fallback-service-dropdown-button"
                     tabIndex={0}
                     disabled={isReadOnly}
                     role="button"
@@ -285,6 +287,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                     <ChevronDownIcon size={16} />
                   </summary>
                   <ul
+                   id="fallback-service-dropdown-menu"
                     tabIndex={0}
                     className="dropdown-content z-high menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300 max-h-80 overflow-y-auto"
                   >
@@ -295,6 +298,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                           <li key={svc.value}>
                             {hasApiKeys ? (
                               <a
+                            id={`fallback-service-item-${svc.value}`}
                                 className={`flex items-center gap-2 ${fallbackService === svc.value ? "active" : ""}`}
                                 onClick={(e) => {
                                   handleFallbackServiceChange(svc.value);
@@ -332,10 +336,11 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
             </div>
 
             {/* Fallback Model */}
-            <div className="space-y-2">
+            <div  className="space-y-2">
               <label className="block text-base-content/70 text-xs font-medium">Fallback Model</label>
               <details id="fallback-model-dropdown" className="dropdown w-full">
                 <summary
+                 id="fallback-model-dropdown-button"
                   tabIndex={0}
                   disabled={isReadOnly}
                   role="button"
@@ -345,6 +350,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                   <ChevronDownIcon size={16} />
                 </summary>
                 <ul
+                 id="fallback-model-dropdown-menu"
                   tabIndex={0}
                   className="dropdown-content mb-6 z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[340px] w-[260px] overflow-y-auto border border-base-300"
                 >
@@ -358,7 +364,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
                     });
                     if (validModels.length === 0) return null;
                     return (
-                      <li key={group} className="px-2 py-1 cursor-pointer">
+                      <li key={group} id={`fallback-model-group-${group}`} className="px-2 py-1 cursor-pointer">
                         <span className="text-sm text-base-content">{group}</span>
                         <ul>
                           {Object.keys(options || {}).map((option) => {
@@ -394,7 +400,7 @@ const FallbackModel = ({ params, searchParams, bridgeType, isPublished, isEditor
           </div>
 
           {fallbackModelName && currentModel && fallbackModelName === currentModel && (
-            <div className="alert alert-warning mt-3 py-2 px-2">
+            <div id="fallback-model-same-model-alert" className="alert alert-warning mt-3 py-2 px-2">
               <div className="flex items-center gap-2">
                 <AlertIcon size={12} />
                 <span className="text-xs">This model is already selected please change the model</span>

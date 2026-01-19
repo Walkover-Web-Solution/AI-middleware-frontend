@@ -33,6 +33,7 @@ const OptimizedTextarea = memo(({ value, onChange, className, disabled, placehol
   return (
     <div ref={divRef}>
       <textarea
+       id="prompt-summary-textarea"
         ref={contentRef}
         disabled={disabled}
         onInput={handleInput}
@@ -153,9 +154,9 @@ export const AgentSummaryContent = memo(
     }, [showValidationError, displayValue, isGeneratingSummary, bridge_summary]);
 
     return (
-      <div className="space-y-4">
+      <div id="agent-summary-content" className="space-y-4">
         {(showTitle || showButtons) && (
-          <div className="flex justify-between items-center">
+          <div id="agent-summary-header"className="flex justify-between items-center">
             {showTitle && (
               <h3 className="font-bold text-lg flex items-center gap-2">
                 Agent Summary
@@ -165,6 +166,7 @@ export const AgentSummaryContent = memo(
             {showButtons && (
               <div className="flex gap-2">
                 <button
+                            id="agent-summary-generate-button"
                   className={`btn btn-ghost btn-sm ${isGeneratingSummary ? "opacity-50 cursor-not-allowed" : ""}`}
                   onClick={handleGenerateSummary}
                   disabled={isGeneratingSummary}
@@ -193,6 +195,7 @@ export const AgentSummaryContent = memo(
           />
           <div className="flex gap-2">
             <button
+                     id="agent-summary-save-button"
               className="btn btn-primary btn-sm"
               onClick={handleSaveSummary}
               disabled={validationProps.isDisabled || !isEditor}
@@ -217,7 +220,7 @@ const PromptSummaryModal = ({ modalType, params, autoGenerateSummary = false, se
 
   return (
     <Modal MODAL_ID={modalType}>
-      <div className="modal-box w-11/12 max-w-5xl">
+      <div id="prompt-summary-modal-box"className="modal-box w-11/12 max-w-5xl">
         <AgentSummaryContent
           params={params}
           autoGenerateSummary={autoGenerateSummary}
@@ -226,7 +229,7 @@ const PromptSummaryModal = ({ modalType, params, autoGenerateSummary = false, se
           onSave={() => closeModal(modalType)}
         />
         <div className="modal-action">
-          <button className="btn btn-sm" onClick={handleClose}>
+          <button id="prompt-summary-close-button" className="btn btn-sm" onClick={handleClose}>
             Close
           </button>
         </div>
