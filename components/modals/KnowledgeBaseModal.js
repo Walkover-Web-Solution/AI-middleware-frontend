@@ -53,7 +53,8 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
             }
         }
         
-        const expectedExt = MIME_EXTENSION_MAP[file.type];
+        const mimeType = typeof file.type === "string" ? file.type.toLowerCase() : "";
+        const expectedExt = MIME_EXTENSION_MAP[mimeType];
         // Both MIME type and file extension must be allowed and consistent
         return Boolean(expectedExt) && ext === expectedExt;
     };
