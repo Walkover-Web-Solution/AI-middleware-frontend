@@ -414,9 +414,7 @@ function MainSlider({ isEmbedUser , openDetails , userdetailsfromOrg , orgIdFrom
             <button 
               id="main-slider-invite-user-button"
               onClick={() => {
-                setIsOrgDropdownExpanded(false);
-                setIsOrgDropdownOpen(false);
-                openModal(MODAL_TYPE.INVITE_USER);
+              window.dispatchEvent(new Event ('openAddUserDialog'))
               }}
               className="text-xs text-blue-400 hover:text-blue-600 transition-colors font-medium"
             >
