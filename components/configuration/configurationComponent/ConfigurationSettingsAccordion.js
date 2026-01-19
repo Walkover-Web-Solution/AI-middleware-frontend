@@ -15,7 +15,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
   const {
     params,
     searchParams,
-    hideAdvancedConfigurations,
+    showAdvancedConfigurations,
     bridgeType,
     modelType,
     currentView,
@@ -83,7 +83,7 @@ const ConfigurationSettingsAccordion = ({ isEmbedUser, isPublished, isEditor = t
                 </div>
               </div>
 
-              {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
+              {((isEmbedUser && showAdvancedConfigurations) || !isEmbedUser) && (
                 <div className="bg-base-100 rounded-lg">
                   <AdvancedConfiguration
                     params={params}

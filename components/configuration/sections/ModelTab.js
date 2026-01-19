@@ -20,8 +20,8 @@ const ModelTab = () => {
     service,
     showDefaultApikeys,
     isEmbedUser,
-    hideAdvancedParameters,
-    hideAdvancedConfigurations,
+    showAdvancedParameters,
+    showAdvancedConfigurations,
     bridgeType,
     isPublished,
     isEditor
@@ -93,7 +93,7 @@ const ModelTab = () => {
               params={params}
               searchParams={searchParams}
               isEmbedUser={isEmbedUser}
-              hideAdvancedParameters={hideAdvancedParameters}
+              showAdvancedParameters={showAdvancedParameters}
               isPublished={isPublished}
               isEditor={isEditor}
             />
@@ -113,7 +113,7 @@ const ModelTab = () => {
             params={params}
             searchParams={searchParams}
             isEmbedUser={isEmbedUser}
-            hideAdvancedParameters={hideAdvancedParameters}
+            showAdvancedParameters={showAdvancedParameters}
             level={1}
             className="mt-0"
             defaultExpanded
@@ -125,7 +125,7 @@ const ModelTab = () => {
         </div>
         </div>
          {/* Fallback Model Section */}
-        {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
+        {((isEmbedUser && showAdvancedConfigurations) || !isEmbedUser) && (
           <div className="space-y-2">
             <FallbackModel
               params={params}

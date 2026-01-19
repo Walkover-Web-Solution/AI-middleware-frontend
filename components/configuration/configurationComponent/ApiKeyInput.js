@@ -7,7 +7,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import Dropdown from '@/components/UI/Dropdown';
 
-const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, hideAdvancedParameters = false, isPublished, isEditor = true }) => {
+const ApiKeyInput = ({ params, searchParams, apiKeySectionRef, isEmbedUser, showAdvancedParameters = false, isPublished, isEditor = true }) => {
     // Determine if content is read-only (either published or user is not an editor)
     const isReadOnly = isPublished || !isEditor;
     const dispatch = useDispatch();

@@ -407,7 +407,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
       "threadId": String(item?.id),
       variables,
       version_id: 'null',
-      hideCloseButton: 'false'
+      showCloseButton: 'true'
     });
     setTimeout(() => window.openChatbot(), 100)
   }

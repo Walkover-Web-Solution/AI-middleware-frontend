@@ -14,7 +14,7 @@ const SettingsTab = () => {
     params,
     searchParams,
     isEmbedUser,
-    hideAdvancedConfigurations,
+    showAdvancedConfigurations,
     bridgeType,
     modelType,
     currentView,
@@ -85,7 +85,7 @@ const SettingsTab = () => {
               </div>
             </div>
 
-            {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
+            {((isEmbedUser && showAdvancedConfigurations) || !isEmbedUser) && (
               <div className="">
                 <AdvancedConfiguration
                   params={params}

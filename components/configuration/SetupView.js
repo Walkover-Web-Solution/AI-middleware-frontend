@@ -11,7 +11,7 @@ const SetupView = memo(() => {
         params, 
         searchParams, 
         isEmbedUser, 
-        hideAdvancedParameters,
+        showAdvancedParameters,
         apiKeySectionRef,
         promptTextAreaRef,
         bridgeApiKey,
@@ -42,7 +42,7 @@ const SetupView = memo(() => {
                         service={service}
                         showDefaultApikeys={showDefaultApikeys}
                         isEmbedUser={isEmbedUser}
-                        hideAdvancedParameters={hideAdvancedParameters}
+                        showAdvancedParameters={showAdvancedParameters}
                         isPublished={isPublished}
                         isEditor={isEditor}
                     />
@@ -50,7 +50,7 @@ const SetupView = memo(() => {
                         params={params} 
                         searchParams={searchParams} 
                         isEmbedUser={isEmbedUser} 
-                        hideAdvancedParameters={hideAdvancedParameters}
+                        showAdvancedParameters={showAdvancedParameters}
                         isPublished={isPublished}
                         className="max-w-md"
                         level={2}

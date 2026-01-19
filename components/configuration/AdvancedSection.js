@@ -8,7 +8,7 @@ const AdvancedSection = memo(() => {
         params, 
         searchParams, 
         isEmbedUser, 
-        hideAdvancedConfigurations, 
+        showAdvancedConfigurations, 
         bridgeType, 
         modelType 
     } = useConfigurationContext();
@@ -16,7 +16,7 @@ const AdvancedSection = memo(() => {
     return (
         <>
             
-            {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
+            {((isEmbedUser && showAdvancedConfigurations) || !isEmbedUser) && (
                 <AdvancedConfiguration
                     params={params}
                     searchParams={searchParams}
