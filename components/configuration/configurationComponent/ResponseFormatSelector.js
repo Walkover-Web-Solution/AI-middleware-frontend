@@ -116,6 +116,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = 
                 <div className="form-control w-fit" key={value}>
                     <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
                         <input
+                           id={`response-format-radio-${value}`}
                             disabled={isReadOnly}
                             type="radio"
                             name="radio-10"
@@ -132,11 +133,11 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = 
                     <label className="form-control w-full mb-4">
                         <span className="text-sm block mb-2">Webhook URL</span>
                         <input
+                            id="webhook"
                             disabled={isReadOnly}
                             type="text"
                             placeholder="https://example.com/webhook"
-                            className="input input-bordered max-w-xs input-sm w-full"
-                            id="webhook"
+                            className="input input-bordered max-w-xs input-sm w-full"                
                             defaultValue={webhookData?.url}
                             onBlur={handleChangeWebhook}
                         />
@@ -145,9 +146,9 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = 
                     <label className="form-control mb-4">
                         <span className="text-sm block mb-2">Headers (JSON format)</span>
                         <textarea
-                            disabled={isReadOnly}
-                            className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"
                             id="headers"
+                            disabled={isReadOnly}
+                            className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"   
                             defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
                             onBlur={handleChangeHeaders}
                             placeholder='{"Content-Type": "application/json"}'
@@ -155,6 +156,7 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = 
                         {errors.headers && <p className="text-red-500 text-xs mt-2">{errors.headers}</p>}
                     </label>
                     <button 
+                    id="response-format-apply-button"
                         className="btn btn-primary btn-sm my-2 float-right" 
                         onClick={() => handleResponseChange("custom")} 
                         disabled={

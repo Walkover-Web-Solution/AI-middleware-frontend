@@ -117,6 +117,7 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
       {imageState === 'loaded' && type === 'large' && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
+            id="thread-item-image-open-new-tab"
             onClick={() => window.open(src, '_blank')}
             className="btn btn-sm btn-circle btn-ghost bg-base-100/80 hover:bg-base-100"
             title="Open in new tab"
@@ -532,6 +533,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
             </time>
                 <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity see-on-hover">
                   <button
+                    id="thread-item-user-aiconfig-button"
                     className={`btn text-xs font-normal btn-sm hover:btn-primary ${
                       isLastMessage() ? '' : 'see-on-hover'
                     }`}
@@ -541,6 +543,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                     <span>AI Config</span>
                   </button>
                   <button
+                    id="thread-item-user-variables-button"
                     className={`btn text-xs font-normal btn-sm hover:btn-primary ${
                       isLastMessage() ? '' : 'see-on-hover'
                     }`}
@@ -550,6 +553,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                     <span>Variables</span>
                   </button>
                   <button
+                    id="thread-item-user-system-prompt-button"
                     className={`btn text-xs font-normal btn-sm hover:btn-primary ${
                       isLastMessage() ? '' : 'see-on-hover'
                     }`}
@@ -559,6 +563,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                     <span>System Prompt</span>
                   </button>
                   <button
+                    id="thread-item-user-more-button"
                     className={`btn text-xs font-normal btn-sm hover:btn-primary ${
                       isLastMessage() ? '' : 'see-on-hover'
                     }`}
@@ -583,7 +588,8 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                     // tools_call_data can be an array of objects, each with multiple toolu_* keys
                     .flatMap((toolObj) => Object.entries(toolObj || {}))
                     .map(([toolKey, tool], index) => (
-                      <div
+                      <div 
+                        id={`thread-item-tool-${toolKey || index}`}
                         key={toolKey || index}
                         onClick={(event) => handleToolPrimaryClick(event, tool)}
                         className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 see"
@@ -595,6 +601,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                         </div>
                         <div className="flex gap-3">
                           <div
+                            id={`thread-item-tool-logs-${toolKey || index}`}
                             className="tooltip tooltip-top relative text-base-content"
                             data-tip="function logs"
                           >
@@ -609,6 +616,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                             data-tip="function data"
                           >
                             <FileClockIcon
+                             id={`thread-item-tool-data-${toolKey || index}`}
                               size={22}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -635,6 +643,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                 <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors mb-7">
                   <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                     <BotIcon
+                       id="thread-item-bot-icon"
                       className="cursor-pointer bot-icon text-base-content"
                       size={20}
                       onClick={(e) => {
@@ -663,6 +672,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                           {item.chatbot_message && (
                             <li>
                               <button
+                                id="thread-item-select-chatbot-message"
                                 className={`px-2 py-1 rounded-md ${messageType === 'chatbot_message' || messageType === 0 ? "bg-primary text-white" : "hover:bg-base-200"
                                   }`}
                                 onClick={() => selectMessageType('chatbot_message')}
@@ -676,6 +686,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                           {item.llm_message && (
                             <li>
                               <button
+                               id="thread-item-select-llm-message"
                                 className={`px-2 py-1 rounded-md ${messageType === 'llm_message' || messageType === 1 ? "bg-primary text-white" : "hover:bg-base-200"
                                   }`}
                                 onClick={() => selectMessageType('llm_message')}
@@ -689,6 +700,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                           {item.updated_llm_message && (
                             <li>
                               <button
+                                id="thread-item-select-updated-message"
                                 className={`px-2 py-1 rounded-md ${messageType === 'updated_llm_message' || messageType === 2 ? "bg-primary text-white" : "hover:bg-base-200"
                                   }`}
                                 onClick={() => selectMessageType('updated_llm_message')}
@@ -728,6 +740,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                   {!item?.llm_urls?.length && !item?.fromRTLayer && (
                     <div className={`tooltip absolute top-2 right-2 text-sm cursor-pointer transition-opacity ${isLastMessage() ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} data-tip="Edit message">
                       <button
+                         id="thread-item-edit-message-button"
                         className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
                         onClick={handleEdit}
                       >
@@ -741,6 +754,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                     isLastMessage() ? 'opacity-70' : 'opacity-0 group-hover:opacity-70'
                   }`}>
                     <button
+                      id="thread-item-add-test-case-button"
                       className="btn text-xs font-normal btn-sm hover:btn-primary"
                       onClick={() => handleAddTestCase(item, index)}
                     >
@@ -748,6 +762,7 @@ const ThreadItem = ({ index, item, thread, threadHandler, formatDateAndTime, int
                       <span>Test Case</span>
                     </button>
                     <button
+                     id="thread-item-debug-agent-button"
                       className="btn text-xs font-normal btn-sm hover:btn-primary"
                       onClick={() => handleAskAi(item)}
                     >

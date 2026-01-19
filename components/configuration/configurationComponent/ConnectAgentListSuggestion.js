@@ -31,7 +31,7 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
             })
             .map((bridge) => {
                 return (
-                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge, bridgeData) : null}>
+                    <li key={bridge?._id} id={`connect-agent-suggestion-item-${bridge?._id}`}onClick={() => bridge?.published_version_id ? handleItemClick(bridge, bridgeData) : null}>
                         <div className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? 'opacity-50' : ''}`}>
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap" title={bridge?.name?.length > 20 ? bridge?.name : ""}>
                                 {bridge?.name?.length > 20 ? `${bridge?.name.slice(0, 20)}...` : bridge?.name || 'Untitled'}
@@ -64,10 +64,11 @@ function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, 
     ), [bridges, searchQuery, connect_agents, bridgeData]);
 
     return (
-        <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+        <ul id="connect-agent-suggestion-dropdown" tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
             <div className='flex flex-col gap-2 w-full'>
                 <li className="text-sm font-semibold disabled">Available Agents</li>
                 <input
+                id="connect-agent-suggestion-search-input"
                     type='text'
                     placeholder='Search Agent'
                     value={searchQuery}

@@ -28,6 +28,7 @@ const DemoModal = ({ speakToUs }) => {
     return (
         <Modal MODAL_ID={MODAL_TYPE.DEMO_MODAL}>
             <div
+               id="demo-modal-container"
                 className={`modal-box flex flex-col gap-6  ${speakToUs
                         ? "bg-base-100 text-base-content border max-w-[95vw] w-[700px] border-base-300"
                         : "bg-gradient-to-br from-slate-900 to-slate-800 max-w-[95vw] w-[1300px] text-base-content border border-base-300/50"
@@ -38,6 +39,7 @@ const DemoModal = ({ speakToUs }) => {
                         {speakToUs ? 'Speak to Us' : 'Discover GTWY AI'}
                     </h3>
                     <button
+                        id="demo-modal-close-button"
                         onClick={handleClose}
                         className="btn btn-ghost p-2 rounded-full hover:bg-gray-100 transition-colors group"
                     >
@@ -46,7 +48,7 @@ const DemoModal = ({ speakToUs }) => {
                 </div>
 
                 {speakToUs ? (
-                    <div className="p-6 bg-base-200 rounded-xl">
+                    <div id="demo-modal-speak-to-us-content"  className="p-6 bg-base-200 rounded-xl">
                         <p className="text-base-content mb-4">
                             Discover how GTWY AI can transform your workflow. With our <strong>“Speak to Us”</strong> option, you’ll:
                         </p>
@@ -73,10 +75,11 @@ const DemoModal = ({ speakToUs }) => {
                         </p>
                     </div>
                 ) : (
-                    <div className="relative group rounded-xl overflow-hidden border-2 border-base-300/50 shadow-xl hover:border-base-300/30 transition-all duration-300">
+                    <div id="demo-modal-video-content" className="relative group rounded-xl overflow-hidden border-2 border-base-300/50 shadow-xl hover:border-base-300/30 transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 pointer-events-none" />
                         <div className="aspect-video w-full overflow-hidden rounded-lg">
                             <iframe
+                                id="demo-modal-video-iframe"
                                 src="https://video-faq.viasocket.com/embed/cm60d6r5a031w121t2akjkw9y?embed_v=2"
                                 loading="lazy"
                                 title="AI-middleware"
@@ -91,6 +94,7 @@ const DemoModal = ({ speakToUs }) => {
 
                 <div className="modal-action mt-4">
                     <button
+                        id="demo-modal-schedule-button"
                         data-cal-namespace="30min"
                         data-cal-link={speakToUs ? "team/gtwy.ai/ai-consultation" : "team/gtwy.ai/30min"}
                         data-cal-origin="https://cal.id"

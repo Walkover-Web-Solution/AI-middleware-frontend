@@ -89,6 +89,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
   return (
     <div
+      id="chat-details-slider"
       ref={sidebarRef}
       className={`fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md ${
         isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
@@ -102,6 +103,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                 Chat Details
               </h2>
               <button 
+                id="chat-details-close-button"
                 onClick={() => setIsSliderOpen(false)} 
                 className="btn btn-ghost btn-circle hover:bg-base-100 transition-colors duration-200"
               >
@@ -137,6 +139,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                           {typeof displayValue === "object" ? (
                             <div className="relative">
                               <pre 
+                                id={`chat-details-${key}-value`}
                                 className={`bg-base-200 p-4 rounded-lg text-sm overflow-auto whitespace-pre-wrap border border-base-200 ${
                                   JSON.stringify(displayValue).length > 200 ? 'cursor-pointer hover:border-primary transition-colors duration-200' : ''
                                 }`}
@@ -148,6 +151,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                 <div className="absolute top-2 right-2">
                                   <div className="dropdown dropdown-end">
                                     <div 
+                                     id="chat-details-variables-copy-dropdown"
                                       tabIndex={0} 
                                       role="button" 
                                       className="btn btn-sm btn-ghost tooltip tooltip-primary tooltip-left hover:bg-base-300 transition-colors duration-200"
@@ -159,6 +163,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                     <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-64 p-2 shadow bg-base-100 border border-base-300">
                                       <li>
                                         <a 
+                                          id="chat-details-copy-current-values"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             copyToClipboard(displayValue, "Current values copied to clipboard", `current-${key}`);
@@ -174,6 +179,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                       </li>
                                       <li>
                                         <a 
+                                          id="chat-details-copy-key-value-pairs"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const keyValuePairs = generateKeyValuePairs(displayValue);
@@ -198,6 +204,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               <div className="text-base-content break-words" dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
                               {key === "system Prompt" && (
                                 <button
+                                  id="chat-details-copy-system-prompt"
                                   onClick={() =>
                                     copyToClipboard(rawSystemPrompt, "System prompt copied to clipboard", "system-prompt")
                                   }

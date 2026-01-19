@@ -73,6 +73,7 @@ const orgId = currentOrgId || orgIdFromUrl; // ✅ MOVE UP
                             />
                         </div>
                         <button
+                           id="org-header-create-workspace-button"
                             onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
                             className="btn btn-primary btn-sm whitespace-nowrap"
                         >
@@ -80,7 +81,7 @@ const orgId = currentOrgId || orgIdFromUrl; // ✅ MOVE UP
                         </button>
                     </div>
                    
-                      <div className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
+                      <div  id="org-header-user-menu-button" className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
   <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
     {getInitials(userdetails?.name || orgName)}
   </span>
@@ -93,13 +94,14 @@ const orgId = currentOrgId || orgIdFromUrl; // ✅ MOVE UP
                 <div className='flex flex-row justify-between items-center'>
                     <div className='flex justify-start'>
                         <button
+                            id="org-header-create-workspace-button-alt"
                             onClick={() => openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
                             className="btn btn-primary btn-sm"
                         >
                             + Create New Workspace
                         </button>
                     </div>
-                     <div className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
+                     <div id="org-header-user-menu-button-alt" className="shrink-0 w-9 h-9 bg-primary rounded-sm flex items-center justify-center cursor-pointer" >
   <span onClick={() => setOpen(true)} className="text-primary-content font-semibold text-sm">
     {getInitials(userdetails?.name || orgName)}
   </span>

@@ -46,6 +46,7 @@ const UsageLimitModal = ({ data, onConfirm ,item }) => {
     <Modal MODAL_ID={MODAL_TYPE.API_KEY_LIMIT_MODAL}>
       <div className="flex items-center justify-center">
         <div 
+          id="usage-limit-modal-container"
           className="min-w-[25rem] max-w-[50rem] bg-base-100 border border-base-300 rounded-lg p-6 mx-4"
           onClick={(e) => e.stopPropagation()}
         >
@@ -58,9 +59,10 @@ const UsageLimitModal = ({ data, onConfirm ,item }) => {
             </p>
           </div>
           
-          <form onSubmit={handleSubmit} className="mt-4">
+          <form id="usage-limit-form" onSubmit={handleSubmit} className="mt-4">
             <div className="form-control w-full">
               <input
+                id="usage-limit-input"
                 type="number"
                 placeholder="Enter limit in $"
                 className="input input-bordered w-full input-sm"
@@ -74,6 +76,7 @@ const UsageLimitModal = ({ data, onConfirm ,item }) => {
             
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-6">
               <button
+                id="usage-limit-cancel-button"
                 type="button"
                 onClick={handleClose}
                 className="btn btn-sm"
@@ -82,6 +85,7 @@ const UsageLimitModal = ({ data, onConfirm ,item }) => {
                 Cancel
               </button>
               <button
+                id="usage-limit-save-button"
                 type="submit"
                 className="btn btn-primary btn-sm"
                 disabled={isLoading}

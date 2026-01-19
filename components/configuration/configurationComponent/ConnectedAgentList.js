@@ -216,7 +216,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                     id={item?.bridge_id}
                     className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full overflow-hidden ${(!bridge?.connected_agent_details?.description && !item.description) ? "border-red-600" : ""} transition-colors duration-200`}
                 >
-                    <div
+                    <div                  
                         className="p-2 flex-1 flex items-center"
                         onClick={() => handleAgentClicked(item)}
                     >
@@ -239,6 +239,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                     {/* Action buttons that appear on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
                         <button
+                        id={`connected-agent-config-button-${item?.bridge_id}`}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenAgentVariable(name, item);
@@ -250,6 +251,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                             <SettingsIcon size={16} />
                         </button>
                         <button
+                        id={`connected-agent-delete-button-${item?.bridge_id}`}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenDeleteModal(name, item);
@@ -266,7 +268,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
         });
 
         return (
-            <div className="w-full max-w-md">
+            <div id="connected-agent-list-agents-container" className="w-full max-w-md">
                 <div className={`grid gap-2 w-full`}>
                     {agentItems}
                 </div>
@@ -275,10 +277,10 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
     }, [displayItems, bridgeData, shouldShowToggle, isExpanded, toggleExpanded, hiddenItemsCount, handleAgentClicked, handleOpenAgentVariable, handleOpenDeleteModal]);
 
     return (
-        <div>
-            <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
+        <div id="connected-agent-list-container">
+            <div id="connected-agent-list-content" className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
                 <>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div  className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-2">
                             <p className="text-sm whitespace-nowrap">Agents</p>
                             <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
@@ -289,12 +291,13 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                     </div>
             <div className="flex flex-col gap-2 w-full">
                         {!hasAgents ? (
-                            <div className="dropdown dropdown-end w-full max-w-md">
+                            <div  className="dropdown dropdown-end w-full max-w-md">
                                 <div className="border-2 border-base-200 border-dashed p-4 text-center">
                                     <p className="text-sm text-base-content/70">
                                         No agents found.
                                     </p>
                                     <button
+                                    id="connected-agent-list-add-first-agent-button"
                                         tabIndex={0}
                                         className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                         disabled={!shouldToolsShow || isReadOnly}
@@ -319,9 +322,10 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                             <>
                                 {renderEmbed}
                                 {hasAgents && (
-                                    <div className="dropdown dropdown-end w-full max-w-md">
+                                    <div  id="connected-agent-list-add-agent-dropdown" className="dropdown dropdown-end w-full max-w-md">
                                         <div className="border-2 border-base-200 border-dashed text-center">
                                                 <button
+                                                id="connected-agent-list-add-agent-button"
                                                     tabIndex={0}
                                                     className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                                     disabled={isReadOnly}
@@ -348,7 +352,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
             </div>
                 </>
             </div>
-            <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
+            <AgentDescriptionModal id="connected-agent-list-description-modal" setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <DeleteModal
                 onConfirm={handleRemoveAgent}
                 item={selectedBridge}

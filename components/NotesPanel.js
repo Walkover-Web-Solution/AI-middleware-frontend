@@ -36,7 +36,7 @@ const NotesPanel = ({
   if (!isVisible || isEmbedUser) return null;
 
   return (
-    <div className="h-full bg-base-100 flex flex-col">
+    <div id="notes-panel-container" className="h-full bg-base-100 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-base-300 bg-base-50">
         <div className="flex items-center gap-2">
@@ -45,6 +45,7 @@ const NotesPanel = ({
         
         {showCloseButton && onClose && (
           <button
+            id="notes-panel-close-button"
             onClick={onClose}
             className="btn btn-xs btn-error"
             title="Close Prompt Helper"

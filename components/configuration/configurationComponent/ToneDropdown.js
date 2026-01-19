@@ -136,6 +136,7 @@ const ToneDropdown = ({ params, searchParams, isPublished, isEditor = true }) =>
       
       {/* Tone Dropdown */}
       <select
+      id="tone-select"
         disabled={isReadOnly}
         value={selectedTone}
         onChange={handleToneChange}

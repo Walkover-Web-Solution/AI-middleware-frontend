@@ -121,10 +121,11 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   };
   const testCaseArray = Array.isArray(testCases) ? testCases : [];
   return (
-    <div className="bg-base-100 h-full overflow-y-auto border-r border-base-content/20">
-      <div className="p-4 border-b border-base-content/20 flex flex-row justify-between">
+    <div  id="testcase-sidebar" className="bg-base-100 h-full overflow-y-auto border-r border-base-content/20">
+      <div id="testcase-sidebar-header" className="p-4 border-b border-base-content/20 flex flex-row justify-between">
         <h2 className="text-lg font-semibold text-base-content">Test Cases</h2>
         <button
+          id="testcase-run-all-button"
           className="btn btn-sm text-base-content bg-blue-500   rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors duration-200"
           onClick={runAllTests}
           disabled={testCaseArray.length === 0 || runningTests.size > 0}
@@ -142,13 +143,14 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
         
       </div>
 
-      <div className="p-4 space-y-3">
+      <div id="testcase-list-container"className="p-4 space-y-3">
         {testCaseArray.length === 0 ? (
-          <div className="text-center py-12 text-base-content">
+          <div  id="testcase-empty-state" className="text-center py-12 text-base-content">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-base-content/60" />
             <p className="text-base font-medium mb-2">No test cases available</p>
             <p className="text-sm text-base-content/70 mb-6">Generate test cases to validate your bridge configuration</p>
             <button
+              id="testcase-generate-button"
               className="btn btn-primary btn-md gap-2 shadow-lg hover:shadow-xl transition-all duration-200"
               onClick={generateMoreTestCases}
               disabled={generatingTestCases}
@@ -171,6 +173,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
             const isExpanded = expandedTests.has(testCase._id);
             return (
               <div
+                id={`testcase-card-${testCase._id}`}
                 key={testCase._id}
                 className={`group border rounded-lg p-3 transition-all duration-200 cursor-pointer hover:bg-base-200/50 hover:border-primary/50 ${getStatusColor(testCase._id)}`}
                 onClick={() => handleTestCaseClick(testCase)}
@@ -202,6 +205,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                   </div>
                   <div className="flex items-center space-x-1">
                     <button
+                      id={`testcase-toggle-expand-${testCase._id}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleExpanded(testCase._id);
@@ -212,6 +216,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                       {isExpanded ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                     <button
+                      id={`testcase-run-button-${testCase._id}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         runSingleTest(testCase._id);
@@ -227,6 +232,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                       )}
                     </button>
                     <button
+                     id={`testcase-delete-button-${testCase._id}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteTestCase(testCase._id);
@@ -262,7 +268,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="mt-3 p-3 bg-base-100 rounded">
+                  <div id={`testcase-details-${testCase._id}`} className="mt-3 p-3 bg-base-100 rounded">
                     <div className="space-y-2 text-xs">
                       <div>
                         <span className="font-bold text-base-content"
@@ -296,6 +302,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                       {testCase.version_history && Object.keys(testCase.version_history).length > 0 && (
                         <div onClick={(e) => { e.stopPropagation();}}>
                           <div
+                            id={`testcase-history-toggle-${testCase._id}`}
                             className="flex items-center justify-between cursor-pointer py-1"
                             onClick={(e) => { e.stopPropagation(); toggleVersionHistory(testCase._id) }}
                           >
@@ -310,7 +317,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                           </div>
 
                           {expandedVersions[testCase._id] && (
-                            <div className="mt-2 border border-base-content/20 rounded overflow-hidden">
+                            <div id={`testcase-history-table-${testCase._id}`}className="mt-2 border border-base-content/20 rounded overflow-hidden">
                               <table className="w-full text-xs">
                                 <thead className="bg-base-200">
                                   <tr>

@@ -103,6 +103,7 @@ const ResponseStyleDropdown = ({ params, searchParams, isPublished, isEditor = t
       
       {/* Response Style Dropdown */}
       <select
+        id="response-style-select"
         disabled={isReadOnly}
         value={selectedStyle}
         onChange={handleStyleChange}

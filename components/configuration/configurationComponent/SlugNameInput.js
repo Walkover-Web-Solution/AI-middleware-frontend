@@ -17,11 +17,12 @@ const SlugNameInput = ({ params }) => {
     };
 
     return (
-        <label className="form-control max-w-xs">
+        <label  id="slug-name-input-container" className="form-control max-w-xs">
             <div className="label">
                 <span className="label-text font-medium">Enter Slugname</span>
             </div>
             <input
+                id="slug-name-input"
                 type="text"
                 key={slugName}
                 maxLength={30}

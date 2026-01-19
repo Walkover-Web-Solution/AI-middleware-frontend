@@ -205,7 +205,7 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
     <div>
       {state.isLoading && <LoadingSpinner />}
       <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal backdrop-blur-sm">
-        <div className="modal-box max-w-2xl w-full mx-4 bg-gradient-to-br from-base-100 to-base-200 shadow-2xl border border-base-300">
+        <div id="create-new-bridge-modal-container" className="modal-box max-w-2xl w-full mx-4 bg-gradient-to-br from-base-100 to-base-200 shadow-2xl border border-base-300">
           {/* Modal Header */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
             <div className="flex items-center gap-3">
@@ -217,6 +217,7 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
               </div>
             </div>
             <button 
+              id="create-new-bridge-close-button"
               className="btn btn-sm btn-circle btn-ghost hover:bg-base-300"
               onClick={handleCloseModal}
             >
@@ -226,7 +227,7 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
 
           {/* Global Error Message */}
           {state.globalError && (
-            <div className="alert alert-error mb-6 shadow-lg">
+            <div id="create-new-bridge-error-alert" className="alert alert-error mb-6 shadow-lg">
               <Plus size={20} className="text-primary" />
               <span className="font-medium">{state.globalError}</span>
             </div>
@@ -289,6 +290,7 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
           {/* Modal Actions */}
           <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-base-300">
             <button
+              id="create-new-bridge-cancel-button"
               className="btn btn-sm"
               onClick={handleCloseModal}
             >
@@ -296,6 +298,7 @@ function CreateNewBridge({ orgid, isEmbedUser, defaultBridgeType = 'api' }) {
             </button>
             
             <button
+              id="create-new-bridge-submit-button"
               className="btn btn-sm btn-primary"
               onClick={handleCreateAgent}
               disabled={state.isAiLoading || state.isLoading}

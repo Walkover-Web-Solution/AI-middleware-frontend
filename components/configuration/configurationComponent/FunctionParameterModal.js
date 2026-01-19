@@ -59,6 +59,7 @@ const ParameterCard = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 justify-between w-full">
           <input
+            id={`param-name-input-${currentPath}`}
             disabled={isPublished || !isEditor}
             type="text"
             value={editingName}
@@ -84,6 +85,7 @@ const ParameterCard = ({
           <div className="flex items-center mr-4 gap-2">
             <label className="flex items-center gap-1 text-xs">
               <input
+              id={`param-required-checkbox-${currentPath}`}
                 type="checkbox"
                 className="checkbox checkbox-xs"
                 checked={(() => {
@@ -230,6 +232,7 @@ const ParameterCard = ({
             </label>
             <label className="flex items-center gap-2">
               <input
+              id={`param-fill-ai-checkbox-${currentPath}`}
                 type="checkbox"
                 className="checkbox checkbox-xs"
                 checked={!(currentPath in variablesPath)}
@@ -251,6 +254,7 @@ const ParameterCard = ({
         
         <div className="flex items-center gap-2 text-xs">
           <select
+          id={`param-type-select-${currentPath}`}
             disabled={isReadOnly}
             className="select select-xs select-bordered text-xs"
             value={param.type || "string"}
@@ -263,6 +267,7 @@ const ParameterCard = ({
             <option value="boolean">Boolean</option>
           </select>
           <button
+          id={`param-delete-button-${currentPath}`}
             onClick={() => onDelete(currentPath)}
             className="btn btn-sm btn-ghost text-error text-xs"
             title="Delete parameter"
@@ -279,6 +284,7 @@ const ParameterCard = ({
       {/* Description */}
       <div className="text-xs">
         <textarea
+        id={`param-description-textarea-${currentPath}`}
           placeholder="Description of parameter..."
           className="col-[1] row-[1] m-0 w-full overflow-y-hidden whitespace-pre-wrap break-words outline-none bg-transparent p-0 caret-black placeholder:text-quaternary dark:caret-slate-200 text-xs resize-none"
           value={param.description || ""}
@@ -291,6 +297,7 @@ const ParameterCard = ({
       {param.type !== "object" && (
           <div className="flex items-center gap-1 text-xs mb-1">
             <input
+            id={`param-enum-checkbox-${currentPath}`}
               disabled={isReadOnly}
               type="checkbox"
               className="checkbox checkbox-xs"
@@ -307,6 +314,7 @@ const ParameterCard = ({
           
           {param.hasOwnProperty('enum') && (
             <input
+              id={`param-enum-input-${currentPath}`}
               disabled={isReadOnly}
               type="text"
               placeholder="['a','b','c']"
@@ -331,6 +339,7 @@ const ParameterCard = ({
             <div className="mb-1 flex flex-row ml-1 items-center justify-end">
               <label className="block text-xs mb-0 mr-1">Value Path:</label>
               <input
+               id={`param-value-path-input-${currentPath}`}
                 disabled={isReadOnly}
                 type="text"
                 placeholder="your_path"
@@ -354,6 +363,7 @@ const ParameterCard = ({
         <div>
           <div className="flex items-center justify-between">
             <button
+            id={`param-expand-button-${currentPath}`}
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center gap-1 text-xs font-medium"
             >
@@ -361,6 +371,7 @@ const ParameterCard = ({
               <span className="text-xs">Properties</span>
             </button>
             <button
+            id={`param-add-property-button-${currentPath}`}
               onClick={() => onAddChild(currentPath)}
               disabled={isReadOnly}
               className="btn btn-sm btn-ghost text-primary gap-1"
@@ -1110,13 +1121,14 @@ if (!isEqual(toolData, function_details)) {
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col">
+      <div  id="function-param-modal-box" className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col">
         {/* Modal Header */}
-        <div className="flex items-start flex-col mb-3 pb-2 border-b gap-1 border-base-300">
-          <div className="flex justify-between w-full items-center">
-          <h2 className="text-lg font-semibold">Config {name}</h2>
-          <div className="flex justify-end gap-2 mt-1">
+        <div id="function-param-modal-header" className="flex items-start flex-col mb-3 pb-2 border-b gap-1 border-base-300">
+          <div   className="flex justify-between w-full items-center">
+          <h2  className="text-lg font-semibold">Config {name}</h2>
+          <div  className="flex justify-end gap-2 mt-1">
             <select 
+             id="function-param-mode-select" 
               disabled={isReadOnly}
               className="select select-xs select-bordered text-xs min-w-20"
               value={isTextareaVisible ? 'advanced' : 'simple'}
@@ -1125,7 +1137,7 @@ if (!isEqual(toolData, function_details)) {
                 handleToggleChange({ target: { checked: isAdvanced } });
               }}
             >
-              <option value="simple">Simple</option>
+              <option  value="simple">Simple</option>
               <option value="advanced">Advanced</option>
             </select>
             {isTextareaVisible && (
@@ -1139,29 +1151,30 @@ if (!isEqual(toolData, function_details)) {
             )}
           </div>
         </div>
-          <div className="flex flex-row items-center gap-2">
+          <div  className="flex flex-row items-center gap-2">
             {(name === 'Tool' || name === 'Pre Tool') && (
-              <div className="flex flex-row gap-1">
-                <InfoIcon size={14} />
-                <div className="label-text-alt">
+              <div  className="flex flex-row gap-1">
+                <InfoIcon id="function-param-info-icon" size={14} />
+                <div id="function-param-info-text" className="label-text-alt">
                   Function used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.
                 </div>
               </div>
             )}
           </div>
         </div>
-        <div className="flex flex-row mb-1">
+        <div  className="flex flex-row mb-1">
           
-          <div className="flex gap-2">
+          <div id="function-param-options-wrapper" className="flex gap-2">
             {(name === 'Agent' || (name === 'orchestralAgent' && isMasterAgent)) && (
               <div className="flex items-center justify-between gap-1 mr-12 text-xs">
-                <div className="flex items-center gap-2">
-                  <label className="label p-0 flex items-center gap-1">
+                <div  className="flex items-center gap-2">
+                  <label  className="label p-0 flex items-center gap-1">
                     <span className="mr-2">Agent's Thread ID</span>
-                    <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
-                      <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    <InfoTooltip id="function-param-thread-id-tooltip" className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
+                      <CircleQuestionMark id="function-param-thread-id-icon" size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                     </InfoTooltip>
                       <input
+                        id="function-param-thread-id-toggle"
                         disabled={isReadOnly}
                         type="checkbox"
                         className="toggle toggle-sm"
@@ -1176,15 +1189,16 @@ if (!isEqual(toolData, function_details)) {
                 </div>
 
                 {Array.isArray(versions) && versions.length > 0 && (
-                  <div className="flex flex-row ml-2">
+                  <div id="function-param-version-wrapper" className="flex flex-row ml-2">
                     <div className="form-control flex flex-row w-full max-w-xs items-center">
                       <label className="label flex items-center gap-1">
                         <span className="label-text">Agent's Version</span>
-                        <InfoTooltip tooltipContent="Select the version of the agent you want to use.">
-                          <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        <InfoTooltip  id="function-param-version-tooltip"tooltipContent="Select the version of the agent you want to use.">
+                          <CircleQuestionMark id="function-param-version-icon" size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
                         </InfoTooltip>
                       </label>
                       <select
+                      id="function-param-version-select"
                         disabled={isReadOnly}
                         className="select select-xs select-bordered ml-2"
                         value={toolData?.version_id || (publishedVersion ? 'published' : '')}
@@ -1201,7 +1215,7 @@ if (!isEqual(toolData, function_details)) {
                       >
                         {/* Published Version Option - only show if published version exists */}
                         {publishedVersion && (
-                          <option value="published">
+                          <option id="function-param-version-select-published" value="published">
                             Published Version
                           </option>
                         )}
@@ -1220,14 +1234,15 @@ if (!isEqual(toolData, function_details)) {
         </div>
 
 
-        <div className="flex justify-between items-center mb-1">
+        <div id="function-param-toggle-row" className="flex justify-between items-center mb-1">
          
                  
           <div>
             {toolData?.old_fields && isTextareaVisible && (
-              <div className="flex items-center text-sm gap-3">
-                <p>Check for old data</p>
+              <div  className="flex items-center text-sm gap-3">
+                <p >Check for old data</p>
                 <input
+                  id="function-param-old-data-checkbox"
                   disabled={isReadOnly}
                   type="checkbox"
                   className="toggle toggle-sm"
@@ -1245,6 +1260,7 @@ if (!isEqual(toolData, function_details)) {
 
           {isTextareaVisible && (
             <p
+             id="function-param-optimize-button"
               className="cursor-pointer label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
               onClick={handleOptimizeRawJson}
             >
@@ -1262,12 +1278,13 @@ if (!isEqual(toolData, function_details)) {
             {/* Name and Description Toggle */}
             <div className="mb-3">
               <button
+              id="function-param-name-desc-toggle"
                 disabled={isReadOnly}
                 onClick={() => setShowNameDescription(!showNameDescription)}
                 className="flex items-center gap-2 text-xs  font-semibold text-base-content transition-colors"
               >
                <h1 className="text-xs">Name & Description</h1>
-                {showNameDescription ? <ChevronDownIcon size={14} /> : <ChevronRightIcon size={14} />}
+                {showNameDescription ? <ChevronDownIcon  size={14} /> : <ChevronRightIcon id="function-param-name-desc-toggle-icon" size={14} />}
               </button>
               
               {showNameDescription && (
@@ -1279,13 +1296,14 @@ if (!isEqual(toolData, function_details)) {
                     </label>
                     {(name === "Orchestral Agent" || name === "Agent") ? (
                       <input
+                       id="function-param-name-input"
                         type="text"
                         className="input input-sm text-xs input-bordered w-full"
                         value={tool_name}
                         disabled
                       />
                     ) : (
-                        <input className="input input-sm text-xs input-bordered w-full" value={toolName}
+                        <input id="function-param-name-input" className="input input-sm text-xs input-bordered w-full" value={toolName}
                           onChange={(e) => {
                             setToolName(e.target.value);
                             setIsToolNameManuallyChanged(true);
@@ -1303,6 +1321,7 @@ if (!isEqual(toolData, function_details)) {
                       Description
                     </label>
                     <textarea
+                     id="function-param-desc-textarea"
                       disabled={isReadOnly}
                       className="textarea bg-white dark:bg-black/15 textarea-sm textarea-bordered w-full resize-y"
                       rows={2}
@@ -1321,6 +1340,7 @@ if (!isEqual(toolData, function_details)) {
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold text-xs text-base-content">Parameters</h3>
               <button
+               id="function-param-add-param-button"
                 disabled={isReadOnly}
                 onClick={handleAddParameter}
                 className="btn btn-sm btn-primary gap-1"
@@ -1329,7 +1349,7 @@ if (!isEqual(toolData, function_details)) {
                 Parameter
               </button>
             </div>
-            <div className="space-y-3 flex-1">
+            <div id="function-param-params-list" className="space-y-3 flex-1">
               {Object.entries(toolData?.fields || {}).length > 0 ? (
                 Object.entries(toolData?.fields || {}).map(([key, param]) => (
                   <ParameterCard
@@ -1365,6 +1385,7 @@ if (!isEqual(toolData, function_details)) {
         ) : (
           <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
             <textarea
+            id="function-param-json-textarea"
             disabled={isReadOnly}
               type="input"
               value={objectFieldValue}
@@ -1375,6 +1396,7 @@ if (!isEqual(toolData, function_details)) {
             />
             {isOldFieldViewTrue && (
               <textarea
+              id="function-param-old-fields-textarea"
               disabled={isReadOnly}
                 type="text"
                 value={
@@ -1392,10 +1414,11 @@ if (!isEqual(toolData, function_details)) {
         {/* Modal Actions - Always visible at bottom */}
         <div className="modal-action mt-2">
           <form method="dialog" className="flex flex-row gap-2">
-            <button className="btn btn-sm" onClick={handleCloseModal}>
+            <button id="function-param-close-button" className="btn btn-sm" onClick={handleCloseModal}>
               Close
             </button>
             <button
+              id="function-param-save-button"
               className="btn btn-sm btn-primary"
               onClick={handleSaveData}
               disabled={!isModified || isLoading || isPublished}

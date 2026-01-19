@@ -32,7 +32,7 @@ const ModelTab = () => {
   );
 
   return (
-    <div className="flex flex-col mt-4 w-full">
+    <div id="model-tab-container"  className="flex flex-col mt-4 w-full">
       {/* LLM Configuration Header */}
       <div className="mb-4 mt-2">
         <h3 className="text-base-content text-md font-medium">LLM Configuration</h3>
@@ -51,7 +51,7 @@ const ModelTab = () => {
         isEditor={isEditor}
       />}
 
-      <div className="space-y-6">
+      <div id="model-tab-config-section" className="space-y-6">
         {/* Service Provider and Model Row */}
         <div className="grid grid-cols-2 mt-2 gap-6">
           <div className="space-y-2">
@@ -104,7 +104,7 @@ const ModelTab = () => {
         )}
         
         {/* Parameters Section with Border */}
-        <div className="border-t border-base-200 pt-6">
+        <div id="model-tab-parameters-section" className="border-t border-base-200 pt-6">
           <div className="mb-4">
             <h2 className="text-base-content text-md font-medium">Parameters</h2>
           </div>

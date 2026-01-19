@@ -160,7 +160,8 @@ const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true 
                     </InfoTooltip>
                 </div>
                 <label className="swap">
-                    <input 
+                    <input
+                        id="guardrails-toggle"
                         disabled={isReadOnly}
                         type="checkbox" 
                         checked={guardrailsEnabled} 
@@ -196,6 +197,7 @@ const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true 
                     <div className="m-2 mb-4">
                         {!showOptions ? (
                             <button
+                            id="guardrails-add-button"
                                 disabled={isReadOnly}
                             onClick={handleToggleOptions}
                             className="btn btn-sm btn-outline w-full flex items-center gap-2"
@@ -209,6 +211,7 @@ const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true 
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm font-medium">Available Guards</span>
                                     <button
+                                        id="guardrails-close-button"
                                         disabled={isReadOnly}
                                         onClick={handleToggleOptions}
                                         className="btn btn-ghost btn-sm btn-circle"
@@ -223,6 +226,7 @@ const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true 
                                             <div key={key} className="form-control">
                                             <div className="label cursor-pointer justify-start gap-2">
                                                 <input 
+                                                   id={`guardrail-checkbox-${key}`}
                                                     disabled={isReadOnly}
                                                     type="checkbox" 
                                                     className="checkbox checkbox-sm" 
@@ -240,6 +244,7 @@ const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true 
                                     <div className="form-control col-span-full">
                                         <div className="label cursor-pointer justify-start gap-2">
                                             <input 
+                                                id="guardrail-checkbox-custom"
                                                 disabled={isReadOnly}
                                                 type="checkbox" 
                                                 className="checkbox checkbox-sm" 
@@ -254,6 +259,7 @@ const GuardrailSelector = ({ params, searchParams, isPublished, isEditor = true 
                                         {showCustomInput && (
                                             <div className="mt-2">
                                                 <textarea
+                                                    id="guardrail-custom-prompt-textarea"
                                                     disabled={isReadOnly}
                                                     placeholder="Write your custom guardrail prompt here..."
                                                     className="textarea textarea-sm bg-white dark:bg-black/15 textarea-bordered w-full h-24 text-sm"

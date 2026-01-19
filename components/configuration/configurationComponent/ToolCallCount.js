@@ -39,7 +39,8 @@ function ToolCallCount({ params, searchParams, isPublished, isEditor = true }) {
                 </InfoTooltip>
             </div>
             <input
-            disabled={isReadOnly}
+                id="tool-call-count-input"
+                disabled={isReadOnly}
                 type="number"
                 placeholder="Type here"
                 className="input input-sm input-bordered w-full"

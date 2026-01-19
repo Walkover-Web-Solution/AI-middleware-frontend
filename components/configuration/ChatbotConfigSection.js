@@ -22,7 +22,7 @@ const ChatbotConfigSection = ({ isPublished, isEditor = true }) => {
 
     return (
         <div className="z-very-low mt-2 text-base-content w-full max-w-md cursor-pointer" tabIndex={0}>
-            <div className={`info p-1 ${isChatbotAccordionOpen ? 'border border-base-content/20' : 'border border-base-content/20 '} flex items-center justify-between font-medium w-full !cursor-pointer input input-sm`} onClick={toggleChatbotAccordion}>
+            <div id="chatbot-config-accordion-toggle" className={`info p-1 ${isChatbotAccordionOpen ? 'border border-base-content/20' : 'border border-base-content/20 '} flex items-center justify-between font-medium w-full !cursor-pointer input input-sm`} onClick={toggleChatbotAccordion}>
                 <InfoTooltip tooltipContent="Configure chatbot-specific settings including user references, starter questions, and action lists." className="cursor-pointer mr-2">
                     <div className="cursor-pointer label-text inline-block ml-1">
                         Chatbot Configuration

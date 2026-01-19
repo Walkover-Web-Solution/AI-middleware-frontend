@@ -321,7 +321,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
 
     if (!bridgeVersionsArray.length) {
         return (
-            <div className='flex items-center gap-2'>
+            <div id="bridge-version-dropdown-empty"  className='flex items-center gap-2'>
                 <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName} agent_description={versionDescription} />
                 <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion} />
             </div>
@@ -329,9 +329,9 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
     }
 
     return (
-        <div className='flex items-center gap-1'>
+        <div id="bridge-version-dropdown-container" className='flex items-center gap-1'>
             {/* Version Tabs Container */}
-            <div className="flex items-center gap-1">
+            <div  id="bridge-version-tabs" className="flex items-center gap-1">
                 {versionsToShow.map((version, index) => {
                     const isActive = searchParams.get?.('version') === version;
                     const isPublished = version === publishedVersion;
@@ -339,10 +339,11 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                     const versionDesc = getVersionDescription(version);
                     const canDelete = bridgeVersionsArray.length > 1 && !isPublished;
                     return (
-                        <div key={version} className="relative group">
+                        <div  key={version} className="relative group">
                             <div className="tooltip tooltip-bottom" data-tip={versionDesc}>
                                 
                             <button
+                                id={`version-button-${version}`}
                                 onClick={() => handleVersionChange(version)}
                                 className={`
                                    btn btn-xs flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 relative whitespace-nowrap min-w-fit
@@ -364,7 +365,8 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
 
                             {/* Delete Button - appears on hover, positioned outside button */}
                             {canDelete && (
-                                <span
+                                <span          
+                              id={`version-delete-button-${version}`} 
                                     onClick={(e) => { 
                                         e.stopPropagation(); 
                                         setselectedDataToDelete({ version, index: bridgeVersionsArray.indexOf(version) + 1 }); 
@@ -383,8 +385,9 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
 
                 {/* Version Dropdown */}
                 {hasMoreVersions && (
-                    <div className="relative" ref={dropdownRef}>
+                    <div  id="version-dropdown-wrapper" className="relative" ref={dropdownRef}>
                         <button
+                            id="version-dropdown-toggle"
                             onClick={() => setShowVersionDropdown(!showVersionDropdown)}
                             className="flex items-center gap-1 px-2 py-1 text-xs bg-base-100 text-base-content hover:bg-base-200 rounded-md transition-all duration-200"
                             title={`Show All Versions (${bridgeVersionsArray.length - versionsToShow.length} more)`}
@@ -401,7 +404,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                         {showVersionDropdown && (
                             <div className="absolute top-full left-0 mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                                 <div className="p-2">
-                                    <div className="text-xs font-medium text-base-content/70 mb-2 px-2">All Versions</div>
+                                    <div  id="version-dropdown-menu" className="text-xs font-medium text-base-content/70 mb-2 px-2">All Versions</div>
                                     {bridgeVersionsArray.map((version, index) => {
                                         const isActive = searchParams?.get?.('version') === version;
                                         const isPublished = version === publishedVersion;
@@ -412,6 +415,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                                         return (
                                             <div key={version} className="relative group">
                                                 <button
+                                                  id={`version-dropdown-button-${version}`}
                                                     onClick={() => {
                                                         handleVersionChange(version);
                                                         setShowVersionDropdown(false);
@@ -439,6 +443,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
                                                     {/* Delete Button */}
                                                     {canDelete && (
                                                         <span
+                                                            id={`version-dropdown-delete-${version}`}
                                                             onClick={(e) => { 
                                                                 e.stopPropagation(); 
                                                                 setselectedDataToDelete({ version, index: versionDisplayName }); 
@@ -463,6 +468,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser, maxVersions 
 
                 {/* Create New Version Button */}
                 <button
+                    id="create-new-version-button"
                     onClick={() => openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
                     className="flex items-center gap-1 px-2 py-1 text-xs bg-base-100 text-base-content  hover:bg-base-200 rounded-md transition-all duration-200"
                     title="Create New Version"

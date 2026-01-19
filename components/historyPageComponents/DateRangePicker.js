@@ -98,7 +98,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
 
 
   return (
-    <div className="border-b border-base-300 sticky flex flex-col gap-2 top-0 bg-base-200 z-low">
+    <div id="history-date-range-picker" className="border-b border-base-300 sticky flex flex-col gap-2 top-0 bg-base-200 z-low">
       <div>
         <label htmlFor="from" className="block text-sm font-medium text-base-content ">From</label>
         <input
@@ -127,13 +127,14 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selecte
       </div>
 
       <button
+        id="history-date-range-apply-button"
         className='btn btn-primary btn-sm'
         onClick={handleDataChange}
         disabled={!startingDate || !endingDate} // Disable if either date is empty
       >
         Apply
       </button>
-      <button className='btn btn-outline btn-sm' onClick={handleClear}>Clear</button>
+      <button id="history-date-range-clear-button" className='btn btn-outline btn-sm' onClick={handleClear}>Clear</button>
     </div>
   );
 };

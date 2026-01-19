@@ -19,11 +19,12 @@ const DateRangePicker = ({ onDateRangeSelect, isOpen, onClose, initialStartDate,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-base-100 rounded-lg p-6 shadow-xl w-96">
+    <div id="date-range-picker-backdrop" className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div id="date-range-picker-modal"className="bg-base-100 rounded-lg p-6 shadow-xl w-96">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Select Date Range</h3>
           <button 
+            id="date-range-picker-close-button"
             onClick={onClose}
             className="btn btn-sm btn-circle btn-ghost"
           >
@@ -36,6 +37,7 @@ const DateRangePicker = ({ onDateRangeSelect, isOpen, onClose, initialStartDate,
             <label className="block text-sm font-medium mb-2">Start Date</label>
             <div className="flex flex-col space-y-2">
               <input 
+                id="date-range-picker-start-date"
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -49,6 +51,7 @@ const DateRangePicker = ({ onDateRangeSelect, isOpen, onClose, initialStartDate,
             <label className="block text-sm font-medium mb-2">End Date</label>
             <div className="flex flex-col space-y-2">
               <input 
+                id="date-range-picker-end-date"
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
@@ -62,6 +65,7 @@ const DateRangePicker = ({ onDateRangeSelect, isOpen, onClose, initialStartDate,
         
         <div className="flex justify-between mt-6">
           <button 
+            id="date-range-picker-clear-button"
             onClick={handleClear}
             className="btn btn-ghost"
           >
@@ -69,12 +73,14 @@ const DateRangePicker = ({ onDateRangeSelect, isOpen, onClose, initialStartDate,
           </button>
           <div className="space-x-2">
             <button 
+              id="date-range-picker-cancel-button"
               onClick={onClose}
               className="btn btn-ghost"
             >
               Cancel
             </button>
             <button 
+              id="date-range-picker-apply-button"
               onClick={handleApply}
               className="btn btn-primary"
               disabled={!startDate || !endDate}

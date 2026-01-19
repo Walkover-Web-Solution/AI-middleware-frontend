@@ -355,11 +355,11 @@ const Sidebar = memo(({
   }
 
   return (
-    <div className="drawer-side justify-items-stretch text-xs bg-base-200 min-w-[290px] max-w-[290px] border-r border-base-300 relative" id="sidebar">
+    <div  className="drawer-side justify-items-stretch text-xs bg-base-200 min-w-[290px] max-w-[290px] border-r border-base-300 relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-2 gap-2 flex flex-col">
-        <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg min-h-0">
-          <input type="checkbox" className="peer" />
+        <div  id="history-sidebar-advance-filter" className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg min-h-0">
+          <input id="history-sidebar-advance-filter-toggle" type="checkbox" className="peer" />
           <div className="collapse-title font-semibold min-h-0 py-3 flex items-center">
             <span className="text-xs">Advance Filter</span>
           </div>
@@ -373,6 +373,7 @@ const Sidebar = memo(({
                   {USER_FEEDBACK_FILTER_OPTIONS?.map((value, index) => (
                     <label key={index} className="flex items-center gap-1 cursor-pointer">
                       <input
+                        id={`history-sidebar-filter-${value}`}
                         type="radio"
                         name="filterOption"
                         value={value}
@@ -390,7 +391,7 @@ const Sidebar = memo(({
 
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-xs">Show Error Chat History</span>
-                  <input type="checkbox" className="toggle toggle-xs" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
+                  <input id="history-sidebar-error-toggle" type="checkbox" className="toggle toggle-xs" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
                 </div>
               </div>
             </div>
@@ -398,6 +399,7 @@ const Sidebar = memo(({
         </div>
         <div className='flex items-center'>
           <select
+            id="history-sidebar-version-select"
             className="select select-bordered select-sm w-full text-xs"
             value={selectedVersion}
             onChange={handleVersionChange}
@@ -415,6 +417,7 @@ const Sidebar = memo(({
         </div>
         <form onSubmit={handleSearch} className="relative">
           <input
+            id="history-sidebar-search-input"
             type="text"
             ref={searchRef}
             placeholder="Search..."
@@ -422,7 +425,7 @@ const Sidebar = memo(({
             className="input input-bordered input-sm w-full pr-6 text-xs"
           />
           {searchQuery && (
-            <X onClick={clearInput} size={18} className="absolute right-2 top-2 cursor-pointer"/>
+            <X id="history-sidebar-search-clear" onClick={clearInput} size={18} className="absolute right-2 top-2 cursor-pointer"/>
           )}
         </form>
       </div>
@@ -450,6 +453,7 @@ const Sidebar = memo(({
                   <div className={`${"flex-col"}`} key={item?.thread_id}>
                     <div className="flex flex-col">
                       <li
+                       id={`history-sidebar-thread-${item?.thread_id}`}
                         className={`${decodeURIComponent(searchParams?.thread_id) === item?.thread_id
                           ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
                           : ""
@@ -483,6 +487,7 @@ const Sidebar = memo(({
                           {/* Show chevron button only when no search query */}
                           {!searchQuery && decodeURIComponent(searchParams?.thread_id) === item?.thread_id && (
                             <div
+                              id={`history-sidebar-thread-toggle-${item?.thread_id}`}
                               onClick={(e) => {
                                 e?.stopPropagation();
                                 handleToggleThread(item?.thread_id);
@@ -518,6 +523,7 @@ const Sidebar = memo(({
                                       .map((subThreadId, index) => {
                                         return (
                                           <li
+                                            id={`history-sidebar-subthread-${subThreadId?.sub_thread_id}`}
                                             key={index}
                                             className={`cursor-pointer group ${searchParams?.subThread_id === subThreadId?.sub_thread_id
                                               ? "hover:bg-base-primary hover:text-base-100"
@@ -560,7 +566,7 @@ const Sidebar = memo(({
                                 <div className="space-y-1.5">
                                   {item?.sub_thread?.map((subThread, index) => (
                                     <div key={index}>
-                                      <li className={`ml-4 ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
+                                      <li id={`history-sidebar-search-subthread-${subThread?.sub_thread_id}`} className={`ml-4 ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
                                         ? "cursor-pointer hover:bg-base-primary hover:text-base-100 rounded-md transition-all duration-200 text-xs bg-primary text-base-100"
                                         : "cursor-pointer hover:bg-base-300 hover:text-base-content rounded-md transition-all duration-200 text-xs"
                                         } flex-grow group`}
@@ -587,6 +593,7 @@ const Sidebar = memo(({
                                       {subThread?.messages?.length > 0 && (<div className="mt-2 ml-4 space-y-2">
                                         {subThread?.messages?.map((msg, msgIndex) => (
                                           <div
+                                            id={`history-sidebar-message-${msg?.message_id}`}
                                             key={msgIndex}
                                             onClick={() => handleSetMessageId(msg?.message_id)}
                                             className={`cursor-pointer rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content border-l-2 border-transparent hover:border-base-300`}
@@ -610,6 +617,7 @@ const Sidebar = memo(({
                               <div className="space-y-1.5 ml-2">
                                 {item?.message?.map((msg, index) => (
                                   <div
+                                    id={`history-sidebar-thread-message-${msg?.message_id}`}
                                     key={index}
                                     onClick={() => handleSetMessageId(msg?.message_id)}
                                     className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-xs bg-base-100 hover:bg-base-200 text-base-content hover:text-gray-800 border-l-2 border-transparent hover:border-base-300`}

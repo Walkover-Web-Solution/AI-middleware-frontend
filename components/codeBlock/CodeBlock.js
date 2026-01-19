@@ -92,12 +92,13 @@ function CodeBlock({
     }, []);
 
     return !inline && match ? (
-        <div className={blockClasses}>
+        <div id="code-block-container" className={blockClasses}>
             <div className="flex items-center justify-between px-3 py-2 border-b border-base-300 bg-base-100/70">
                 <span className="text-xs font-semibold uppercase tracking-wider text-base-content/70">
                     {languageLabel || "Code"}
                 </span>
                 <button
+                    id="code-block-copy-button"
                     type="button"
                     onClick={handleCopy}
                     className="btn btn-ghost btn-xs font-medium text-xs px-2 py-1 text-base-content"

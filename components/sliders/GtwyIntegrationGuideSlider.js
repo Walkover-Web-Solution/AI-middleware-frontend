@@ -251,6 +251,7 @@ const ThemePaletteEditor = ({ theme, onColorChange }) => {
             className=" rounded bg-base-200"
           >
             <button
+              id={`theme-palette-toggle-${mode}`}
               type="button"
               className="w-full flex items-center justify-between px-3 py-2 text-left"
               onClick={() => toggleMode(mode)}
@@ -287,6 +288,7 @@ const ThemePaletteEditor = ({ theme, onColorChange }) => {
                           </p>
                         </div>
                         <input
+                          id={`theme-color-${mode}-${token}`}
                           type="color"
                           className="w-10 h-10 border border-base-300 rounded cursor-pointer bg-transparent shrink-0"
                           value={hexValue}
@@ -511,6 +513,7 @@ const ApiKeysInput = ({ configuration, onChange, orgId }) => {
               </div>
 
               <select
+                id={`api-key-select-${serviceKey}`}
                 className="select select-bordered select-primary w-full select-sm"
                 value={selectedId}
                 onChange={(e) => handleApiKeyChange(serviceKey, e.target.value)}
@@ -542,6 +545,7 @@ const ConfigInput = ({ config, value, onChange }) => {
       case "toggle":
         return (
           <input
+            id={`config-toggle-${key}`}
             type="checkbox"
             className="toggle toggle-sm"
             checked={value || false}
@@ -552,6 +556,7 @@ const ConfigInput = ({ config, value, onChange }) => {
       case "select":
         return (
           <select
+           id={`config-select-${key}`}
             className="select select-bordered select-primary w-full select-sm"
             value={value ?? config.defaultValue}
             onChange={(e) => onChange(key, e.target.value)}
@@ -1057,6 +1062,7 @@ window.openGtwy({
         <div className="flex justify-between items-center border-b border-base-300 pb-4">
           <h3 className="font-bold text-lg">Embed Setup</h3>
           <CloseIcon
+            id="gtwy-integration-slider-close-icon"
             className="cursor-pointer hover:text-error transition-colors"
             onClick={handleClose}
           />
@@ -1100,6 +1106,7 @@ window.openGtwy({
                     <p className="text-xs text-base-content/70">Customize the colors of GTWY to match your application's design.</p>
                   </div>
                   <button
+                    id="gtwy-integration-theme-reset-button"
                     className="btn btn-outline btn-xs"
                     onClick={handleThemeReset}
                     type="button"
@@ -1114,6 +1121,7 @@ window.openGtwy({
                 />
                 <div className="divider my-4"></div>
                 <button
+                  id="gtwy-integration-save-config-button"
                   className={`btn btn-primary btn-sm w-full gap-2 ${themeSaveDisabled ? "btn-disabled" : ""}`}
                   type="button"
                   onClick={handleConfigurationSave}
@@ -1170,6 +1178,7 @@ window.openGtwy({
                     <div className="text-sm text-base-content/70 leading-relaxed ml-1">
                       RS256 is an asymmetric signing algorithm defined in
                       <a
+                        id="gtwy-integration-rfc-link"
                         href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.1"
                         className="text-blue-600 underline ml-1"
                         target="_blank"
@@ -1195,6 +1204,7 @@ window.openGtwy({
                       </div>
                     ) : (
                       <button
+                        id="gtwy-integration-generate-access-key-button"
                         onClick={handleGenerateAccessKey}
                         className="btn btn-primary btn-sm w-56 mt-3"
                       >
