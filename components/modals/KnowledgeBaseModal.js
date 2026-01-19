@@ -8,7 +8,7 @@ import { createResourceAction, updateResourceAction, } from "@/store/action/know
 import { uploadImage } from "@/config/utilityApi";
 import { toast } from "react-toastify";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
-
+import { MIME_EXTENSION_MAP } from "@/utils/enums";
 const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = () => { }, addToVersion = false, knowbaseVersionData = [], searchParams }) => {
     const dispatch = useDispatch();
     const [isCreatingResource, setIsCreatingResource] = useState(false);
@@ -38,12 +38,24 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
         }
     }, [selectedResource]);
 
-    const ALLOWED_FILE_TYPES = ["application/pdf", "text/plain"];
-    const ALLOWED_EXTENSIONS = [".pdf", ".txt"];
-
     const isAllowedFile = (file) => {
-        const ext = "." + (file?.name?.split(".").pop() || "").toLowerCase();
-        return ALLOWED_FILE_TYPES.includes(file.type) || ALLOWED_EXTENSIONS.includes(ext);
+        if (!file || typeof file.name !== "string") {
+            return false;
+        }
+        
+        const nameParts = file.name.split(".");
+        let ext = "";
+        
+        if (nameParts.length > 1) {
+            const lastPart = nameParts[nameParts.length - 1];
+            if (lastPart) {
+                ext = "." + lastPart.toLowerCase();
+            }
+        }
+        
+        const expectedExt = MIME_EXTENSION_MAP[file.type];
+        // Both MIME type and file extension must be allowed and consistent
+        return Boolean(expectedExt) && ext === expectedExt;
     };
 
     const handleFileUpload = async (event) => {
