@@ -91,6 +91,11 @@ export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini', 'o4-mini'];
 
 export const AUTH_COLUMNS = ['name', 'redirection_url', 'client_id']
 
+export const MIME_EXTENSION_MAP = {
+  "application/pdf": ".pdf",
+  "text/plain": ".txt"
+};
+
 export const AGENT_SETUP_GUIDE_STEPS = [
   {
     step: '1',

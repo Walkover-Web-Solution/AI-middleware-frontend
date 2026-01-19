@@ -8,7 +8,7 @@ import { createResourceAction, updateResourceAction, } from "@/store/action/know
 import { uploadImage } from "@/config/utilityApi";
 import { toast } from "react-toastify";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
-
+import { MIME_EXTENSION_MAP } from "@/utils/enums";
 const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = () => { }, addToVersion = false, knowbaseVersionData = [], searchParams }) => {
     const dispatch = useDispatch();
     const [isCreatingResource, setIsCreatingResource] = useState(false);
@@ -37,9 +37,38 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
             setInputType('url'); // Default for create mode
         }
     }, [selectedResource]);
+
+    const isAllowedFile = (file) => {
+        if (!file || typeof file.name !== "string") {
+            return false;
+        }
+        
+        const nameParts = file.name.split(".");
+        let ext = "";
+        
+        if (nameParts.length > 1) {
+            const lastPart = nameParts[nameParts.length - 1];
+            if (lastPart) {
+                ext = "." + lastPart.toLowerCase();
+            }
+        }
+        
+        const mimeType = typeof file.type === "string" ? file.type.toLowerCase() : "";
+        const expectedExt = MIME_EXTENSION_MAP[mimeType];
+        // Both MIME type and file extension must be allowed and consistent
+        return Boolean(expectedExt) && ext === expectedExt;
+    };
+
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
+
+        // ✅ Only PDF + TXT allowed
+        if (!isAllowedFile(file)) {
+            toast.error("Only PDF or TXT files are allowed.");
+            event.target.value = "";
+            return;
+        }
 
         setIsUploading(true);
         try {
@@ -317,7 +346,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                         onChange={handleFileUpload}
                                         className="file-input file-input-bordered file-input-sm w-full"
                                         disabled={isCreatingResource || isUploading}
-                                        accept=".pdf,.doc,.docx,.txt"
+                                        accept=".pdf,.txt"
                                     />
                                     {isUploading && (
                                         <div className="flex items-center gap-2 mt-2">
@@ -325,7 +354,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             <span className="text-sm text-gray-600">Uploading file...</span>
                                         </div>
                                     )}
-                                    <span className="label-text-alt text-gray-400 mt-1">Supported formats: .pdf, .doc, .docx, .txt</span>
+                                    <span className="label-text-alt text-gray-400 mt-1">Supported formats: .pdf, .txt</span>
                                 </>
                             )}
 
