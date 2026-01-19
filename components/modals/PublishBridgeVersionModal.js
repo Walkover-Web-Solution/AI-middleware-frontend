@@ -717,7 +717,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
-        <div 
+        <div
           id="publish-bridge-modal-container"
           className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl max-w-6xl w-[90vw] my-8 flex flex-col p-6 md:p-10 transition-all duration-300 ease-in-out animate-fadeIn"
         >
@@ -733,8 +733,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 <ArrowRightLeft size={16} />
                 {showComparison ? "Hide Changes" : "View Changes"}
               </button>
-              </div>
-            
               <button
                 id="publish-close-x-button"
                 onClick={handleCloseModal}
@@ -875,8 +873,11 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     {/* Select All option */}
                     {allConnectedAgents.filter((agent) => agent._id !== params?.id && agent?.haveToPublish).length >
                       1 && (
+                      <button
                         id="publish-select-all-agents-button"
-                      <button onClick={toggleSelectAllAgents} className="btn btn-sm btn-outline flex gap-1">
+                        onClick={toggleSelectAllAgents}
+                        className="btn btn-sm btn-outline flex gap-1"
+                      >
                         {allConnectedAgents
                           .filter((agent) => agent._id !== params?.id && agent?.haveToPublish)
                           .every((agent) => selectedAgentsToPublish.has(agent._id))
@@ -1040,12 +1041,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
-            <button
-              id="publish-cancel-button"
-              className="btn btn-sm"
-              onClick={handleCloseModal}
-              disabled={isLoading}
-            >
+            <button id="publish-cancel-button" className="btn btn-sm" onClick={handleCloseModal} disabled={isLoading}>
               Cancel
             </button>
             <button

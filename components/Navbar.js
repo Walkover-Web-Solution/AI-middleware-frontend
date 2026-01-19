@@ -663,11 +663,11 @@ const Navbar = ({ isEmbedUser, params }) => {
               </div>
 
               {/* Publish/Discard Dropdown - Fixed Position */}
-                {activeTab == "configure" && (
-              <div className="flex items-center">
-                <div className="dropdown dropdown-end">                  
-                    <button 
-                     id="navbar-publish-dropdown-toggle"
+              {activeTab == "configure" && (
+                <div className="flex items-center">
+                  <div className="dropdown dropdown-end">
+                    <button
+                      id="navbar-publish-dropdown-toggle"
                       tabIndex={0}
                       role="button"
                       className={`inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 rounded-md gap-1 lg:gap-1.5 px-2 lg:px-3 has-[>svg]:px-2 lg:has-[>svg]:px-2.5 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm shadow-lg shadow-emerald-500/20 transition-all duration-200 font-medium min-w-0 ${isPublishing ? "loading" : ""}`}
@@ -727,7 +727,11 @@ const Navbar = ({ isEmbedUser, params }) => {
           <div className="flex items-center min-w-0 flex-1">
             <div className="flex items-center px-1 py-1 rounded-lg min-w-0 max-w-[120px] cursor-pointer group hover:bg-base-200/50 transition-colors">
               {!isEditingName ? (
-                <div id="navbar-mobile-agent-name-display-inner" className="flex items-center gap-1.5" onClick={handleNameEdit}>
+                <div
+                  id="navbar-mobile-agent-name-display-inner"
+                  className="flex items-center gap-1.5"
+                  onClick={handleNameEdit}
+                >
                   <span
                     className="font-semibold text-sm text-base-content truncate flex-shrink"
                     title={`${agentName} - Click to edit`}
@@ -806,7 +810,8 @@ const Navbar = ({ isEmbedUser, params }) => {
         <div className=" p-2">
           <div className="flex gap-1 sm:gap-2">
             {!isEmbedUser && (
-              <button id="navbar-mobile-history-button"
+              <button
+                id="navbar-mobile-history-button"
                 className="tooltip tooltip-left px-2"
                 data-tip="Updates History"
                 onClick={toggleConfigHistorySidebar}

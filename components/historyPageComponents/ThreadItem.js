@@ -580,7 +580,7 @@ const ThreadItem = ({
             </time>
             <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity see-on-hover">
               <button
-                    id="thread-item-user-aiconfig-button"
+                id="thread-item-user-aiconfig-button"
                 className={`btn text-xs font-normal btn-sm hover:btn-primary ${isLastMessage() ? "" : "see-on-hover"}`}
                 onClick={() => handleUserButtonClick("AiConfig")}
               >
@@ -588,7 +588,7 @@ const ThreadItem = ({
                 <span>AI Config</span>
               </button>
               <button
-                    id="thread-item-user-variables-button"
+                id="thread-item-user-variables-button"
                 className={`btn text-xs font-normal btn-sm hover:btn-primary ${isLastMessage() ? "" : "see-on-hover"}`}
                 onClick={() => handleUserButtonClick("variables")}
               >
@@ -596,7 +596,7 @@ const ThreadItem = ({
                 <span>Variables</span>
               </button>
               <button
-                    id="thread-item-user-system-prompt-button"
+                id="thread-item-user-system-prompt-button"
                 className={`btn text-xs font-normal btn-sm hover:btn-primary ${isLastMessage() ? "" : "see-on-hover"}`}
                 onClick={() => handleUserButtonClick("system Prompt")}
               >
@@ -604,7 +604,7 @@ const ThreadItem = ({
                 <span>System Prompt</span>
               </button>
               <button
-                    id="thread-item-user-more-button"
+                id="thread-item-user-more-button"
                 className={`btn text-xs font-normal btn-sm hover:btn-primary ${isLastMessage() ? "" : "see-on-hover"}`}
                 onClick={() => handleUserButtonClick("more")}
               >
@@ -630,7 +630,7 @@ const ThreadItem = ({
                     // tools_call_data can be an array of objects, each with multiple toolu_* keys
                     .flatMap((toolObj) => Object.entries(toolObj || {}))
                     .map(([toolKey, tool], index) => (
-                      <div 
+                      <div
                         id={`thread-item-tool-${toolKey || index}`}
                         key={toolKey || index}
                         onClick={(event) => handleToolPrimaryClick(event, tool)}
@@ -655,7 +655,7 @@ const ThreadItem = ({
                           </div>
                           <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
                             <FileClockIcon
-                             id={`thread-item-tool-data-${toolKey || index}`}
+                              id={`thread-item-tool-data-${toolKey || index}`}
                               size={22}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -682,7 +682,7 @@ const ThreadItem = ({
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors mb-7">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   <BotIcon
-                       id="thread-item-bot-icon"
+                    id="thread-item-bot-icon"
                     className="cursor-pointer bot-icon text-base-content"
                     size={20}
                     onClick={(e) => {
@@ -709,7 +709,7 @@ const ThreadItem = ({
                         {item.chatbot_message && (
                           <li>
                             <button
-                                id="thread-item-select-chatbot-message"
+                              id="thread-item-select-chatbot-message"
                               className={`px-2 py-1 rounded-md ${
                                 messageType === "chatbot_message" || messageType === 0
                                   ? "bg-primary text-white"
@@ -729,7 +729,7 @@ const ThreadItem = ({
                         {item.llm_message && (
                           <li>
                             <button
-                               id="thread-item-select-llm-message"
+                              id="thread-item-select-llm-message"
                               className={`px-2 py-1 rounded-md ${
                                 messageType === "llm_message" || messageType === 1
                                   ? "bg-primary text-white"
@@ -749,7 +749,7 @@ const ThreadItem = ({
                         {item.updated_llm_message && (
                           <li>
                             <button
-                                id="thread-item-select-updated-message"
+                              id="thread-item-select-updated-message"
                               className={`px-2 py-1 rounded-md ${
                                 messageType === "updated_llm_message" || messageType === 2
                                   ? "bg-primary text-white"
@@ -808,7 +808,7 @@ const ThreadItem = ({
                     data-tip="Edit message"
                   >
                     <button
-                         id="thread-item-edit-message-button"
+                      id="thread-item-edit-message-button"
                       className="btn btn-sm btn-circle btn-ghost hover:btn-primary text-base-content"
                       onClick={handleEdit}
                     >
@@ -824,7 +824,7 @@ const ThreadItem = ({
                   }`}
                 >
                   <button
-                      id="thread-item-add-test-case-button"
+                    id="thread-item-add-test-case-button"
                     className="btn text-xs font-normal btn-sm hover:btn-primary"
                     onClick={() => handleAddTestCase(item, index)}
                   >
@@ -832,7 +832,7 @@ const ThreadItem = ({
                     <span>Test Case</span>
                   </button>
                   <button
-                     id="thread-item-debug-agent-button"
+                    id="thread-item-debug-agent-button"
                     className="btn text-xs font-normal btn-sm hover:btn-primary"
                     onClick={() => handleAskAi(item)}
                   >

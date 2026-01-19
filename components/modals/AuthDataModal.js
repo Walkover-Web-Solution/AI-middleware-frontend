@@ -15,7 +15,7 @@ const AuthDataModal = ({ data }) => {
 
   return (
     <Modal MODAL_ID={MODAL_TYPE?.AUTH_DATA_MODAL}>
-      <div id="auth-data-modal-container"  className="modal-box max-w-2xl w-full">
+      <div id="auth-data-modal-container" className="modal-box max-w-2xl w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">

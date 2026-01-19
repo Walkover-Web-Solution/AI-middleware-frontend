@@ -37,7 +37,7 @@ const StarterQuestionToggle = ({ params, searchParams, isPublished, isEditor = t
         </InfoTooltip>
       </div>
       <input
-             id="starter-question-toggle"
+        id="starter-question-toggle"
         type="checkbox"
         checked={IsstarterQuestionEnable}
         onChange={handleToggle}

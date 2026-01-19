@@ -43,7 +43,8 @@ function ConnectedAgentListSuggestion({
           return (
             <li
               key={bridge?._id}
-              id={`connect-agent-suggestion-item-${bridge?._id}`}onClick={() => (bridge?.published_version_id ? handleItemClick(bridge, bridgeData) : null)}
+              id={`connect-agent-suggestion-item-${bridge?._id}`}
+              onClick={() => (bridge?.published_version_id ? handleItemClick(bridge, bridgeData) : null)}
             >
               <div
                 className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? "opacity-50" : ""}`}
@@ -83,14 +84,15 @@ function ConnectedAgentListSuggestion({
   );
 
   return (
-    <ul id="connect-agent-suggestion-dropdown"
+    <ul
+      id="connect-agent-suggestion-dropdown"
       tabIndex={0}
       className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1"
     >
       <div className="flex flex-col gap-2 w-full">
         <li className="text-sm font-semibold disabled">Available Agents</li>
         <input
-                id="connect-agent-suggestion-search-input"
+          id="connect-agent-suggestion-search-input"
           type="text"
           placeholder="Search Agent"
           value={searchQuery}

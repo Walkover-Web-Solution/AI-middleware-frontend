@@ -15,7 +15,7 @@ const PromptTab = ({ isPublished, isEmbedUser }) => {
     <div id="prompt-tab-container" className="flex flex-col w-full">
       <InputSection />
 
-      <div id="prompt-tab-advanced-params-wrapper"className="w-full max-w-2xl">
+      <div id="prompt-tab-advanced-params-wrapper" className="w-full max-w-2xl">
         <AdvancedParameters
           params={params}
           searchParams={searchParams}

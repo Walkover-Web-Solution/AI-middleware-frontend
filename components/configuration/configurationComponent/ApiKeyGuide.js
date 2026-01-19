@@ -36,11 +36,11 @@ const CodeBlock = ({ children }) => (
 );
 
 const Link = ({ href, children }) => (
-  <a 
+  <a
     id="api-key-guide-provider-link"
-    href={href} 
-    className="text-blue-600 hover:underline font-medium" 
-    target="_blank" 
+    href={href}
+    className="text-blue-600 hover:underline font-medium"
+    target="_blank"
     rel="noopener noreferrer"
   >
     {children}
@@ -143,7 +143,7 @@ function ApiKeyGuideSlider() {
           <h2 className="text-xl font-bold mb-4">API Key Setup Guide</h2>
 
           {/* Model Selection Tabs */}
-          <div  id="api-key-guide-tabs" className="flex flex-wrap gap-2">
+          <div id="api-key-guide-tabs" className="flex flex-wrap gap-2">
             {modelTabs.map((model) => (
               <button
                 id={`api-key-guide-tab-${model.id}`}

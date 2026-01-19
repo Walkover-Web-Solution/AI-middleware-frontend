@@ -64,10 +64,10 @@ const InfoTooltip = ({ video = "", children, tooltipContent, docLink }) => {
               border border-base-300 space-y-2 pointer-events-auto
             "
           >
-            <p  className="whitespace-pre-line">
+            <p className="whitespace-pre-line">
               {tooltipContent}
               {docLink && (
-                <SmartLink  href={docLink}>
+                <SmartLink href={docLink}>
                   <span className="inline-flex  items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300  font-medium group">
                     Learn more
                   </span>
@@ -77,7 +77,7 @@ const InfoTooltip = ({ video = "", children, tooltipContent, docLink }) => {
             </p>
             {video !== "" && (
               <button
-               id="info-tooltip-video-button"
+                id="info-tooltip-video-button"
                 onClick={() => setShowTutorial(true)}
                 className="mt-1 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 pointer-events-auto"
               >

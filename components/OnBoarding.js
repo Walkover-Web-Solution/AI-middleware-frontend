@@ -35,7 +35,10 @@ const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
   }
 
   const modalContent = (
-    <div  id="onboarding-modal-overlay" className="fixed inset-0 z-very-high  bg-black bg-opacity-70 flex items-center justify-center">
+    <div
+      id="onboarding-modal-overlay"
+      className="fixed inset-0 z-very-high  bg-black bg-opacity-70 flex items-center justify-center"
+    >
       <button
         id="onboarding-close-button"
         onClick={() => handleVideoEnd()}

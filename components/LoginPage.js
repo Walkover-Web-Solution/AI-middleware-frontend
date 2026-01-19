@@ -102,9 +102,7 @@ const LoginPage = ({ loading }) => {
             <div className="flex-1 flex justify-center">
               <div className="inline-flex items-center gap-2 px-6 py-2 bg-white/80 backdrop-blur-sm border border-black/10 rounded-full shadow-sm">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs tracking-wider text-black/60">
-                  SECURE LOGIN
-                </span>
+                <span className="text-xs tracking-wider text-black/60">SECURE LOGIN</span>
               </div>
             </div>
 
@@ -121,12 +119,8 @@ const LoginPage = ({ loading }) => {
 
                 {/* Welcome Text */}
                 <div className="text-center mb-6">
-                  <h1 className="text-4xl font-semibold text-base-content tracking-tight mb-4">
-                    Welcome Back
-                  </h1>
-                  <p className="text-base-content tracking-wide">
-                    Login to access your AI workspace
-                  </p>
+                  <h1 className="text-4xl font-semibold text-base-content tracking-tight mb-4">Welcome Back</h1>
+                  <p className="text-base-content tracking-wide">Login to access your AI workspace</p>
                 </div>
 
                 {/* Login Options */}
@@ -142,21 +136,15 @@ const LoginPage = ({ loading }) => {
             {/* Stats Section - Below login card */}
             <div className="grid grid-cols-3  gap-8 mt-10 w-full max-w-md">
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">
-                  2000+
-                </div>
+                <div className="text-sm font-semibold text-base-content">2000+</div>
                 <div className="text-xs text-base-content/60">INTEGRATIONS</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">
-                  99.9%
-                </div>
+                <div className="text-sm font-semibold text-base-content">99.9%</div>
                 <div className="text-xs text-base-content/60">UPTIME</div>
               </div>
               <div className="text-center border border-base-content/20 px-2 py-4">
-                <div className="text-sm font-semibold text-base-content">
-                  24/7
-                </div>
+                <div className="text-sm font-semibold text-base-content">24/7</div>
                 <div className="text-xs text-base-content/60">SUPPORT</div>
               </div>
             </div>

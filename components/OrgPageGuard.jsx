@@ -66,8 +66,14 @@ const OrgPageGuard = ({ children }) => {
 
       {/* Simple onboarding modal */}
       {showOnboarding && (
-        <div id="org-page-guard-modal-overlay" className="fixed inset-0 z-50 bg-base-100 bg-opacity-50 flex items-center justify-center p-4">
-          <div id="org-page-guard-modal-container" className="relative w-full h-full max-w-5xl max-h-[99vh] bg-base-200 rounded-lg shadow-2xl overflow-hidden">
+        <div
+          id="org-page-guard-modal-overlay"
+          className="fixed inset-0 z-50 bg-base-100 bg-opacity-50 flex items-center justify-center p-4"
+        >
+          <div
+            id="org-page-guard-modal-container"
+            className="relative w-full h-full max-w-5xl max-h-[99vh] bg-base-200 rounded-lg shadow-2xl overflow-hidden"
+          >
             {/* Close Button */}
             <button
               id="org-page-guard-close-button"

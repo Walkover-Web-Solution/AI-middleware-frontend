@@ -54,16 +54,12 @@ const ConfirmationModal = ({
 
         {/* Actions */}
         <div className="modal-action flex justify-end gap-2">
-          <button 
-            id="confirmation-modal-cancel-button"
-            className="btn btn-sm" 
-            onClick={handleCancel}
-          >
+          <button id="confirmation-modal-cancel-button" className="btn btn-sm" onClick={handleCancel}>
             {cancelText}
           </button>
-          <button 
+          <button
             id="confirmation-modal-confirm-button"
-            className={`btn btn-sm ${confirmButtonClass}`} 
+            className={`btn btn-sm ${confirmButtonClass}`}
             onClick={onConfirm}
           >
             {confirmText}

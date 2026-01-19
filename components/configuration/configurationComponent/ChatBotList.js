@@ -25,10 +25,11 @@ const ChatBotList = ({ params }) => {
     bridgeType === "chatbot" && (
       <div id="chatbot-list-container" className="form-control">
         <p className="text-xl font-medium text-base-content">ChatBot</p>
-        <div  id="chatbot-cards-wrapper" className="flex flex-wrap gap-4">
+        <div id="chatbot-cards-wrapper" className="flex flex-wrap gap-4">
           {chatbotData?.map((chatBot, index) => (
             <div
-              id={`chatbot-card-${chatBot._id}`} key={index}
+              id={`chatbot-card-${chatBot._id}`}
+              key={index}
               onClick={() => router.push(`/org/${params.org_id}/chatbot/configure/${chatBot._id}`)}
               className="flex max-w-xs flex-col items-center rounded-md border border-base-300 md:flex-row cursor-pointer transform transition duration-150 ease-in-out hover:bg-base-200"
             >
@@ -48,12 +49,19 @@ const ChatBotList = ({ params }) => {
         </button>
 
         {isSliderOpen && (
-          <aside id="chatbot-slider" className="absolute right-0 top-0 z-high flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg ">
+          <aside
+            id="chatbot-slider"
+            className="absolute right-0 top-0 z-high flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg "
+          >
             <div className="flex items-center justify-between ">
               <h1 className="text-xl font-medium flex items-center gap-2 text-base-content">
                 <BotIcon /> Chat Bot list
               </h1>
-              <button id="chatbot-slider-close-button"className="btn btn-outline btn-circle btn-sm" onClick={handleAddChatbotClick}>
+              <button
+                id="chatbot-slider-close-button"
+                className="btn btn-outline btn-circle btn-sm"
+                onClick={handleAddChatbotClick}
+              >
                 <CloseIcon size={16} />
               </button>
             </div>
@@ -63,7 +71,7 @@ const ChatBotList = ({ params }) => {
                 <div id="chatbot-list-items" className="space-y-3 ">
                   {chatBotList?.map((chatBot, index) => (
                     <a
-                             id={`chatbot-list-item-${chatBot._id}`}
+                      id={`chatbot-list-item-${chatBot._id}`}
                       onClick={(e) => {
                         e.preventDefault(); // Prevent the default anchor action
                         // Toggle the checkbox's checked status programmatically

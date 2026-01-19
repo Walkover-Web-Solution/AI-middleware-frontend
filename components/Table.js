@@ -3,7 +3,11 @@ import React from "react";
 
 function Table({ data }) {
   if (!data || data.length === 0) {
-    return <div id="table-no-data" className="text-center my-5 text-lg font-semibold text-gray-600">No data available.</div>;
+    return (
+      <div id="table-no-data" className="text-center my-5 text-lg font-semibold text-gray-600">
+        No data available.
+      </div>
+    );
   }
 
   const columnNames = Object.keys(data[0]);

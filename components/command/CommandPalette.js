@@ -673,11 +673,16 @@ const CommandPalette = ({ isEmbedUser }) => {
 
   return (
     <div
-      id="command-palette-backdrop" className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4"
+      id="command-palette-backdrop"
+      className="fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={closePalette}
       style={{ zIndex: 999999 }}
     >
-      <div id="command-palette-modal"className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div
+        id="command-palette-modal"
+        className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="border-b border-base-300">
           {filterParam && (
             <div className="flex items-center justify-between bg-warning/10 px-3 py-2 text-sm">
@@ -705,7 +710,7 @@ const CommandPalette = ({ isEmbedUser }) => {
               placeholder="Search agents, bridges, API keys, docs..."
               className="flex-1 bg-transparent outline-none"
             />
-            <button id="command-palette-close-button"className="btn btn-sm" onClick={closePalette}>
+            <button id="command-palette-close-button" className="btn btn-sm" onClick={closePalette}>
               <X className="w-4 h-4" />
             </button>
           </div>

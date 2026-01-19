@@ -158,12 +158,12 @@ function Canvas({
       {/* Header with Reset Button */}
       <div className="flex  items-center pb-1 mb-1 pl-2" style={{ justifyContent: "flex-end" }}>
         {messages?.length > 0 && (
-          <button 
+          <button
             id="canvas-reset-chat-button"
             className="btn btn-sm  btn-outline btn-error hover:btn-error"
             onMouseDown={handleResetChat}
           >
-            <RotateCcw size={14}/>
+            <RotateCcw size={14} />
             Reset Chat
           </button>
         )}
@@ -174,7 +174,10 @@ function Canvas({
         {/* Messages Area */}
         <div id="messages" className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 py-4 space-y-4">
           {safeMessages.length === 0 && !loading && (
-            <div id="canvas-empty-state" className="flex flex-col items-center justify-center h-full text-center opacity-60">
+            <div
+              id="canvas-empty-state"
+              className="flex flex-col items-center justify-center h-full text-center opacity-60"
+            >
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <Lightbulb />
               </div>
@@ -249,7 +252,7 @@ function Canvas({
                         ) : (
                           <button
                             id={`canvas-copy-button-${message.id}`}
-                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            className="btn btn-sm btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm"
                             onClick={() => handleCopy(message.id, message.optimized)}
                           >
                             <CopyIconComponent size={14} />
@@ -320,7 +323,7 @@ function Canvas({
             </div>
 
             <button
-             id="canvas-send-button"
+              id="canvas-send-button"
               className={`btn btn-circle transition-all duration-200 ${
                 loading
                   ? "btn-disabled"
@@ -335,7 +338,10 @@ function Canvas({
 
           {/* Error Message */}
           {errorMessage && (
-            <div id="canvas-error-message"className="max-w-4xl mx-auto mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div
+              id="canvas-error-message"
+              className="max-w-4xl mx-auto mt-3 p-3 bg-red-50 border border-red-200 rounded-lg"
+            >
               <div className="flex items-center gap-2">
                 <svg
                   className="w-4 h-4 text-red-500 flex-shrink-0"

@@ -41,7 +41,7 @@ function ChatBotSlider() {
         </div>
         {/* Input field for chatbot search */}
         <input
-                    id="chatbot-slider-search-input"
+          id="chatbot-slider-search-input"
           type="text"
           placeholder="Search..."
           value={chatbotSearchQuery}
@@ -56,7 +56,7 @@ function ChatBotSlider() {
             .map((item) => (
               <li key={item._id} className=" w-full">
                 <a
-                                   id={`chatbot-slider-item-${item._id}`}
+                  id={`chatbot-slider-item-${item._id}`}
                   className={`${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
                   onClick={() => handleNavigation(item._id)}
                 >

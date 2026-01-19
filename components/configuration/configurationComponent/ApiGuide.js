@@ -86,7 +86,12 @@ const ApiGuide = ({ params, searchParams, modelType, isEmbedUser, prompt = "" })
           <p className=" text-sm">
             Follow the on-screen instructions to create a new Auth Key. Ignore if already created
             <br />{" "}
-            <Link id="api-guide-create-authkey-link" href={`/org/${params.org_id}/pauthkey`} target="_blank" className="link link-primary">
+            <Link
+              id="api-guide-create-authkey-link"
+              href={`/org/${params.org_id}/pauthkey`}
+              target="_blank"
+              className="link link-primary"
+            >
               Create Auth Key
             </Link>
           </p>
@@ -95,7 +100,7 @@ const ApiGuide = ({ params, searchParams, modelType, isEmbedUser, prompt = "" })
       <div id="api-guide-step2-section" className="flex flex-col gap-4 p-4">
         <Section title={`${isEmbedUser ? "Step 1" : "Step 2"}`} caption="Use the API" />
         <div id="api-guide-curl-code-block" className="mockup-code relative">
-          <CopyButton  data={ComplitionApi(params.id, modelType, isEmbedUser, prompt)} />
+          <CopyButton data={ComplitionApi(params.id, modelType, isEmbedUser, prompt)} />
           <pre className="break-words whitespace-pre-wrap">
             <code>{ComplitionApi(params.id, modelType, isEmbedUser, prompt)}</code>
           </pre>
@@ -108,7 +113,7 @@ const ApiGuide = ({ params, searchParams, modelType, isEmbedUser, prompt = "" })
       </div>
       <div id="api-guide-response-section" className="flex flex-col gap-4 p-4">
         <Section title="Response Format" />
-        <div id="api-guide-response-code-block"className="mockup-code relative">
+        <div id="api-guide-response-code-block" className="mockup-code relative">
           <CopyButton data={ResponseFormat()} />
           <pre className="break-words whitespace-pre-wrap">
             <code>{ResponseFormat()}</code>

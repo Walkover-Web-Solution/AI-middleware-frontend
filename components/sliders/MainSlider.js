@@ -410,7 +410,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
               <div className="flex items-center justify-between px-3 mb-2">
                 <div className="text-xs font-medium text-base-content/50 uppercase tracking-wider">Organizations</div>
                 <button
-              id="main-slider-invite-user-button"
+                  id="main-slider-invite-user-button"
                   onClick={() => {
                     setIsOrgDropdownExpanded(false);
                     setIsOrgDropdownOpen(false);
@@ -437,7 +437,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 .slice(0, 2) // Show only first 2
                 .map(([id, org]) => (
                   <button
-                id={`main-slider-switch-org-${id}`}
+                    id={`main-slider-switch-org-${id}`}
                     key={id}
                     onClick={() => handleSwitchOrg(id, org.name)}
                     className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left"
@@ -449,7 +449,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 ))}
 
               <button
-            id="main-slider-view-more-orgs-button"
+                id="main-slider-view-more-orgs-button"
                 onClick={() => handleSwitchOrg()}
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-base-200 transition-colors text-left text-primary"
               >
@@ -590,7 +590,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
         {/* Mobile menu toggle button - shown only on mobile when sidebar is closed */}
         {isMobile && !isMobileVisible && (
           <button
-          id="main-slider-mobile-menu-toggle"
+            id="main-slider-mobile-menu-toggle"
             onClick={handleMobileMenuToggle}
             className="fixed top-3 left-2 w-8 h-8 bg-base-100 border border-base-300 flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
           >
@@ -834,7 +834,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 {!currrentOrgDetail?.meta?.unlimited_access && (
                   <div className="relative">
                     <button
-                    id="main-slider-lifetime-access-button"
+                      id="main-slider-lifetime-access-button"
                       onClick={() => {
                         router.push(`/org/${orgId}/lifetime-access`);
                         if (isMobile) setIsMobileVisible(false);
@@ -866,7 +866,7 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
                 )}
 
                 <button
-                   id="main-slider-speak-to-us-button"
+                  id="main-slider-speak-to-us-button"
                   data-cal-namespace="30min"
                   data-cal-link="team/gtwy.ai/ai-consultation"
                   data-cal-origin="https://cal.id"

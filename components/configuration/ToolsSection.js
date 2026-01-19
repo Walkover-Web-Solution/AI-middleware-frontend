@@ -18,7 +18,7 @@ const ToolsSection = memo(({ isPublished }) => {
 
   return (
     <div id="tools-section-container" className="flex mt-4 gap-4 flex-col">
-      <EmbedList  params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
+      <EmbedList params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
       <ConnectedAgentList params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
       <KnowledgebaseList params={params} searchParams={searchParams} isPublished={isPublished} isEditor={isEditor} />
     </div>

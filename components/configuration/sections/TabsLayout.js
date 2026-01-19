@@ -42,7 +42,7 @@ const TabsLayout = ({ tabs, activeTab, onTabChange, hideTabs = false }) => {
               const Icon = tab.icon;
               return (
                 <button
-                id={`tab-button-${tab.id}`}
+                  id={`tab-button-${tab.id}`}
                   key={tab.id}
                   type="button"
                   role="tab"
@@ -61,7 +61,7 @@ const TabsLayout = ({ tabs, activeTab, onTabChange, hideTabs = false }) => {
         </div>
       )}
 
-      <div  id="tabs-layout-content" role="tabpanel" className="pb-6">
+      <div id="tabs-layout-content" role="tabpanel" className="pb-6">
         {activeContent}
       </div>
     </div>

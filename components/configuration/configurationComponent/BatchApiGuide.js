@@ -63,12 +63,17 @@ const Section = ({ title, caption, children }) => (
 const BatchApiGuide = ({ params, searchParams }) => {
   return (
     <div id="batch-api-guide-container" className="min-h-screen gap-4 flex flex-col">
-      <div id="batch-api-guide-step1-section"className="flex flex-col gap-4 p-4">
+      <div id="batch-api-guide-step1-section" className="flex flex-col gap-4 p-4">
         <Section title="Step 1" caption="Create `Auth key`" />
         <p className=" text-sm">
           Follow the on-screen instructions to create a new Auth key. Ignore if already created
           <br />{" "}
-          <Link  id="batch-api-guide-create-authkey-link" href={`/org/${params.org_id}/pauthkey`} target="_blank" className="link link-primary">
+          <Link
+            id="batch-api-guide-create-authkey-link"
+            href={`/org/${params.org_id}/pauthkey`}
+            target="_blank"
+            className="link link-primary"
+          >
             Create Auth key
           </Link>
         </p>
@@ -88,7 +93,7 @@ const BatchApiGuide = ({ params, searchParams }) => {
       </div>
       <div id="batch-api-guide-response-section" className="flex flex-col gap-4 p-4">
         <Section title="Response Format" />
-        <div id="batch-api-guide-response-code-block"className="mockup-code relative">
+        <div id="batch-api-guide-response-code-block" className="mockup-code relative">
           <CopyButton data={BatchResponseFormat()} />
           <pre className="break-words whitespace-pre-wrap">
             <code>{BatchResponseFormat()}</code>

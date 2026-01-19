@@ -37,10 +37,13 @@ const Page = ({ params }) => {
     ...item,
     actualName: item?.name,
     name: (
-      <div className="flex gap-2 cursor-pointer" onClick={() => {
-      setSelectedResourceForChunks({ id: item._id, name: item.title });
-      openModal(MODAL_TYPE.RESOURCE_CHUNKS_MODAL);
-    }}>
+      <div
+        className="flex gap-2 cursor-pointer"
+        onClick={() => {
+          setSelectedResourceForChunks({ id: item._id, name: item.title });
+          openModal(MODAL_TYPE.RESOURCE_CHUNKS_MODAL);
+        }}
+      >
         <div className="tooltip flex items-center gap-2" data-tip={item.title}>
           <span>{GetFileTypeIcon(item?.url?.includes(".pdf") ? "pdf" : "document", 16, 16)}</span>
           <span> {item.title}</span>

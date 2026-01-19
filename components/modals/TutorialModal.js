@@ -79,7 +79,10 @@ const TutorialModal = () => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
       {/* Main Modal */}
-      <div id="tutorial-modal-container" className="relative z-low w-full max-w-5xl bg-base-100 rounded-xl shadow-2xl overflow-hidden border border-base-300">
+      <div
+        id="tutorial-modal-container"
+        className="relative z-low w-full max-w-5xl bg-base-100 rounded-xl shadow-2xl overflow-hidden border border-base-300"
+      >
         {/* Header */}
         <div className=" px-8 py-6 ">
           <div className="flex items-center justify-between">
@@ -148,7 +151,8 @@ const TutorialModal = () => {
                           </button>
                         )}
 
-                        <div id={`tutorial-toggle-${index}`}
+                        <div
+                          id={`tutorial-toggle-${index}`}
                           className={`text-slate-400 transition-transform duration-200 cursor-pointer ${
                             isActive ? "rotate-180" : "hover:translate-x-1"
                           }`}

@@ -52,7 +52,8 @@ const InviteUserModal = () => {
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.INVITE_USER}>
-      <form  id="invite-user-modal-container"
+      <form
+        id="invite-user-modal-container"
         onSubmit={(e) => {
           e.preventDefault();
           handleInviteSubmit();
@@ -60,7 +61,7 @@ const InviteUserModal = () => {
         className="modal-box max-w-md"
       >
         {/* Header */}
-        <div  className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
               <UserPlus size={20} className="text-primary" />
@@ -110,7 +111,7 @@ const InviteUserModal = () => {
             Cancel
           </button>
           <button
-           id="invite-user-send-button"
+            id="invite-user-send-button"
             type="submit"
             disabled={isInviting || !email.trim()}
             className={`btn btn-primary btn-sm ${isInviting ? "loading" : ""}`}

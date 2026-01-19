@@ -117,76 +117,83 @@ const ResponseFormatSelector = ({ params, searchParams, isPublished, isEditor = 
     { value: "custom", label: "Custom" },
   ];
 
-    return (
-        <div>
-            <div className="flex items-center gap-2">
-                  <span className="label-text">Select Response Format</span>
-                <InfoTooltip tooltipContent="Configure the response format for your API calls">
-                    <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-                </InfoTooltip>
-              </div>
-            {responseOptions.map(({ value, label }) => (
-                <div className="form-control w-fit" key={value}>
-                    <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
-                        <input
-                           id={`response-format-radio-${value}`}
-                            disabled={isReadOnly}
-                            type="radio"
-                            name="radio-10"
-                            className="radio radio-sm"
-                            checked={selectedOption === value}
-                            onChange={() => { setSelectedOption(value); handleResponseChange(value); }}
-                        />
-                        <span className="text-sm">{label}</span>
-                    </label>
-                </div>
-            ))}
-            <div className={`${selectedOption === 'custom' ? "border border-base-300 rounded" : ""}`}>
-                <div className={`border-t border-base-300 pt-4 px-4 ${selectedOption === 'custom' ? "" : "hidden"}`}>
-                    <label className="form-control w-full mb-4">
-                        <span className="text-sm block mb-2">Webhook URL</span>
-                        <input
-                            id="webhook"
-                            disabled={isReadOnly}
-                            type="text"
-                            placeholder="https://example.com/webhook"
-                            className="input input-bordered max-w-xs input-sm w-full"                
-                            defaultValue={webhookData?.url}
-                            onBlur={handleChangeWebhook}
-                        />
-                        {errors.webhook && <p className="text-red-500 text-xs mt-2">{errors.webhook}</p>}
-                    </label>
-                    <label className="form-control mb-4">
-                        <span className="text-sm block mb-2">Headers (JSON format)</span>
-                        <textarea
-                            id="headers"
-                            disabled={isReadOnly}
-                            className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"   
-                            defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
-                            onBlur={handleChangeHeaders}
-                            placeholder='{"Content-Type": "application/json"}'
-                        ></textarea>
-                        {errors.headers && <p className="text-red-500 text-xs mt-2">{errors.headers}</p>}
-                    </label>
-                    <button 
-                    id="response-format-apply-button"
-                        className="btn btn-primary btn-sm my-2 float-right" 
-                        onClick={() => handleResponseChange("custom")} 
-                        disabled={
-                            errors.webhook !== '' || 
-                            errors.headers !== '' || 
-                            isReadOnly || 
-                            // Check if there are any changes to apply compared to initial values
-                            (webhookData.url === initialValues.url && 
-                             JSON.stringify(webhookData.headers) === JSON.stringify(initialValues.headers))
-                        }
-                    >
-                        Apply
-                    </button>
-                </div>
-            </div>
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="label-text">Select Response Format</span>
+        <InfoTooltip tooltipContent="Configure the response format for your API calls">
+          <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+        </InfoTooltip>
+      </div>
+      {responseOptions.map(({ value, label }) => (
+        <div className="form-control w-fit" key={value}>
+          <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
+            <input
+              id={`response-format-radio-${value}`}
+              disabled={isReadOnly}
+              type="radio"
+              name="radio-10"
+              className="radio radio-sm"
+              checked={selectedOption === value}
+              onChange={() => {
+                setSelectedOption(value);
+                handleResponseChange(value);
+              }}
+            />
+            <span className="text-sm">{label}</span>
+          </label>
         </div>
-    );
+      ))}
+      <div className={`${selectedOption === "custom" ? "border border-base-300 rounded" : ""}`}>
+        <div className={`border-t border-base-300 pt-4 px-4 ${selectedOption === "custom" ? "" : "hidden"}`}>
+          <label className="form-control w-full mb-4">
+            <span className="text-sm block mb-2">Webhook URL</span>
+            <input
+              id="webhook"
+              disabled={isReadOnly}
+              type="text"
+              placeholder="https://example.com/webhook"
+              className="input input-bordered max-w-xs input-sm w-full"
+              defaultValue={webhookData?.url}
+              onBlur={handleChangeWebhook}
+            />
+            {errors.webhook && <p className="text-red-500 text-xs mt-2">{errors.webhook}</p>}
+          </label>
+          <label className="form-control mb-4">
+            <span className="text-sm block mb-2">Headers (JSON format)</span>
+            <textarea
+              id="headers"
+              disabled={isReadOnly}
+              className="textarea bg-white dark:bg-black/15 textarea-bordered h-24 w-full textarea-sm"
+              defaultValue={
+                typeof webhookData?.headers === "object"
+                  ? JSON.stringify(webhookData?.headers, null, 2)
+                  : webhookData?.headers
+              }
+              onBlur={handleChangeHeaders}
+              placeholder='{"Content-Type": "application/json"}'
+            ></textarea>
+            {errors.headers && <p className="text-red-500 text-xs mt-2">{errors.headers}</p>}
+          </label>
+          <button
+            id="response-format-apply-button"
+            className="btn btn-primary btn-sm my-2 float-right"
+            onClick={() => handleResponseChange("custom")}
+            disabled={
+              errors.webhook !== "" ||
+              errors.headers !== "" ||
+              isReadOnly ||
+              // Check if there are any changes to apply compared to initial values
+              (webhookData.url === initialValues.url &&
+                JSON.stringify(webhookData.headers) === JSON.stringify(initialValues.headers))
+            }
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ResponseFormatSelector;

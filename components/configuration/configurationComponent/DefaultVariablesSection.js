@@ -17,7 +17,10 @@ const DefaultVariablesSection = memo(({ prompt = "", customVariables = [], isPub
   ];
 
   return (
-    <div id="default-variables-section"  className="bg-gradient-to-r bg-base-1 border-t-0 border border-base-content/10 rounded-t-none">
+    <div
+      id="default-variables-section"
+      className="bg-gradient-to-r bg-base-1 border-t-0 border border-base-content/10 rounded-t-none"
+    >
       {/* Header - Always visible */}
       <div
         className="flex items-center gap-2 p-2 cursor-pointer hover:bg-base-200/50 transition-colors"
@@ -48,7 +51,7 @@ const DefaultVariablesSection = memo(({ prompt = "", customVariables = [], isPub
           )}
 
           <button
-                        id="default-variables-manage-button"
+            id="default-variables-manage-button"
             className="flex items-center btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1 ml-auto"
             onClick={(e) => {
               e.stopPropagation();

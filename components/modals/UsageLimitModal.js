@@ -88,7 +88,7 @@ const UsageLimitModal = ({ data, onConfirm, item }) => {
                 className="btn btn-primary btn-sm"
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : 'Save Limit'}
+                {isLoading ? "Saving..." : "Save Limit"}
               </button>
             </div>
           </form>

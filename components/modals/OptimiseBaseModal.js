@@ -137,14 +137,17 @@ function OptimiseBaseModal({
 
   return (
     <Modal MODAL_ID={modalType}>
-      <div id="optimise-base-modal-container" className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-base-100 overflow-hidden flex flex-col">
+      <div
+        id="optimise-base-modal-container"
+        className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-base-100 overflow-hidden flex flex-col"
+      >
         {/* Fixed Header */}
         <div className="flex justify-between items-center pb-2 pt-2 bg-base-100 z-low">
           <h3 className="font-bold text-lg">{title}</h3>
           <button
             id="optimise-toggle-diff-button"
             className="btn btn-sm btn-primary"
-            onClick={() => setDiff(prev => !prev)}
+            onClick={() => setDiff((prev) => !prev)}
             type="button"
           >
             {diff ? "Instructions" : "Show Diff"}

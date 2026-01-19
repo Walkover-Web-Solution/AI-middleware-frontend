@@ -7,16 +7,11 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "./Protected";
 
 const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = "api" }) => {
-const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = "api" }) => {
   const { tutorialData } = useCustomSelector((state) => ({
     tutorialData: state.flowDataReducer?.flowData?.tutorialData || [],
   }));
-  const agentCreationTutorial = tutorialData?.find(
-    (item) => item.title === "Agent Creation"
-  );
-  const embedAgentCreationTutorial = tutorialData?.find(
-    (item) => item.title === "Agent Creation Video: Embed"
-  );
+  const agentCreationTutorial = tutorialData?.find((item) => item.title === "Agent Creation");
+  const embedAgentCreationTutorial = tutorialData?.find((item) => item.title === "Agent Creation Video: Embed");
   const agentCreationvideoUrl = agentCreationTutorial?.videoUrl || "";
   const embedAgentCreationvideoUrl = embedAgentCreationTutorial?.videoUrl || "";
   return (
@@ -47,15 +42,10 @@ const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = "api" }) => {
             <div className="text-center flex flex-row gap-2">
               <button
                 id="agent-empty-create-agent-button"
-               
                 className="btn btn-primary btn-sm"
-               
                 onClick={() => {
-                 
                   openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
-               ;
                 }}
-              
               >
                 + Create New Agent
               </button>
@@ -81,21 +71,14 @@ const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = "api" }) => {
         <div className="flex justify-center">
           <div className=" rounded-2xl p-6 border border-base-300/50">
             <div className="text-center mb-3">
-              <h2 className="text-lg mb-4 font-bold text-base-content">
-                Watch How to Create Your First Agent
-              </h2>
+              <h2 className="text-lg mb-4 font-bold text-base-content">Watch How to Create Your First Agent</h2>
             </div>
             <div className=" h-[70vh] w-[80vw] rounded-xl flex justify-center items-center overflow-hidden">
               <iframe
                 src={
-                  
                   isEmbedUser
-                   
                     ? embedAgentCreationvideoUrl
-                   
-                    : agentCreationvideoUrl ||
-                      "https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
-                
+                    : agentCreationvideoUrl || "https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
                 }
                 height={!isEmbedUser ? "100%" : "80%"}
                 width={!isEmbedUser ? "70%" : "100%"}
@@ -109,11 +92,7 @@ const AgentEmptyState = ({ orgid, isEmbedUser, defaultBridgeType = "api" }) => {
 
         {/* Features Section */}
 
-        <CreateNewBridge
-          orgid={orgid}
-          isEmbedUser={isEmbedUser}
-          defaultBridgeType={defaultBridgeType}
-        />
+        <CreateNewBridge orgid={orgid} isEmbedUser={isEmbedUser} defaultBridgeType={defaultBridgeType} />
       </div>
     </div>
   );

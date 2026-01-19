@@ -29,42 +29,51 @@ function RAGEmbedContent({ params, folderId }) {
     ${folderId ? `"folder_id": "${folderId}"` : ""}
 }`;
 
-        return (
-            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8 mb-6 rounded-lg">
-                <Section title="Step 1: Connect Knowledge Base" caption="Use the following API configuration and access key." />
-                <div id="rag-embed-step1-api-config" className="mockup-code">
-                    <CopyButton data={apiConfig} />
-                    <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
-                    {folderId && (
-                        <pre data-prefix=">" className="text-error"><code>folder_id=</code><code className="text-warning">"{folderId}"</code></pre>
-                    )}
-                    <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
-                </div>
-                <div className="form-control">
-                    <label className="label">
-                        <span className="label-text font-medium">JWT Access Key</span>
-                    </label>
-                    {access_key ? (
-                        <div id="rag-embed-access-key-display"  className="mockup-code">
-                            <CopyButton data={access_key} />
-                            <pre data-prefix=">" className="text-error">
-                                <code>Access Key: </code>
-                                <code className="text-warning">{access_key}</code>
-                            </pre>
-                        </div>
-                    ) : (
-                        <button
-                            id="rag-embed-generate-access-key-button"
-                            onClick={handleGenerateAccessKey}
-                            className="btn btn-primary btn-sm w-56"
-                        >
-                            Show Access Key
-                        </button>
-                    )}
-                </div>
+    return (
+      <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8 mb-6 rounded-lg">
+        <Section title="Step 1: Connect Knowledge Base" caption="Use the following API configuration and access key." />
+        <div id="rag-embed-step1-api-config" className="mockup-code">
+          <CopyButton data={apiConfig} />
+          <pre data-prefix=">" className="text-error">
+            <code>org_id=</code>
+            <code className="text-warning">{orgId}</code>
+          </pre>
+          {folderId && (
+            <pre data-prefix=">" className="text-error">
+              <code>folder_id=</code>
+              <code className="text-warning">"{folderId}"</code>
+            </pre>
+          )}
+          <pre data-prefix=">" className="text-error">
+            <code>user_id=</code>
+            <code className="text-warning">"unique_user_id"</code>
+          </pre>
+        </div>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-medium">JWT Access Key</span>
+          </label>
+          {access_key ? (
+            <div id="rag-embed-access-key-display" className="mockup-code">
+              <CopyButton data={access_key} />
+              <pre data-prefix=">" className="text-error">
+                <code>Access Key: </code>
+                <code className="text-warning">{access_key}</code>
+              </pre>
             </div>
-        );
-    }
+          ) : (
+            <button
+              id="rag-embed-generate-access-key-button"
+              onClick={handleGenerateAccessKey}
+              className="btn btn-primary btn-sm w-56"
+            >
+              Show Access Key
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const renderStepTwo = () => {
     const DataObject = {

@@ -83,7 +83,7 @@ const ParameterCard = ({
           <div className="flex items-center mr-4 gap-2">
             <label className="flex items-center gap-1 text-xs">
               <input
-              id={`param-required-checkbox-${currentPath}`}
+                id={`param-required-checkbox-${currentPath}`}
                 type="checkbox"
                 className="checkbox checkbox-xs"
                 checked={(() => {
@@ -233,7 +233,7 @@ const ParameterCard = ({
             </label>
             <label className="flex items-center gap-2">
               <input
-              id={`param-fill-ai-checkbox-${currentPath}`}
+                id={`param-fill-ai-checkbox-${currentPath}`}
                 type="checkbox"
                 className="checkbox checkbox-xs"
                 checked={!(currentPath in variablesPath)}
@@ -255,7 +255,7 @@ const ParameterCard = ({
 
         <div className="flex items-center gap-2 text-xs">
           <select
-          id={`param-type-select-${currentPath}`}
+            id={`param-type-select-${currentPath}`}
             disabled={isReadOnly}
             className="select select-xs select-bordered text-xs"
             value={param.type || "string"}
@@ -268,7 +268,7 @@ const ParameterCard = ({
             <option value="boolean">Boolean</option>
           </select>
           <button
-          id={`param-delete-button-${currentPath}`}
+            id={`param-delete-button-${currentPath}`}
             onClick={() => onDelete(currentPath)}
             className="btn btn-sm btn-ghost text-error text-xs"
             title="Delete parameter"
@@ -284,7 +284,7 @@ const ParameterCard = ({
       {/* Description */}
       <div className="text-xs">
         <textarea
-        id={`param-description-textarea-${currentPath}`}
+          id={`param-description-textarea-${currentPath}`}
           placeholder="Description of parameter..."
           className="col-[1] row-[1] m-0 w-full overflow-y-hidden whitespace-pre-wrap break-words outline-none bg-transparent p-0 caret-black placeholder:text-quaternary dark:caret-slate-200 text-xs resize-none"
           value={param.description || ""}
@@ -297,7 +297,7 @@ const ParameterCard = ({
         {param.type !== "object" && (
           <div className="flex items-center gap-1 text-xs mb-1">
             <input
-            id={`param-enum-checkbox-${currentPath}`}
+              id={`param-enum-checkbox-${currentPath}`}
               disabled={isReadOnly}
               type="checkbox"
               className="checkbox checkbox-xs"
@@ -314,7 +314,7 @@ const ParameterCard = ({
 
             {param.hasOwnProperty("enum") && (
               <input
-              id={`param-enum-input-${currentPath}`}
+                id={`param-enum-input-${currentPath}`}
                 disabled={isReadOnly}
                 type="text"
                 placeholder="['a','b','c']"
@@ -339,7 +339,7 @@ const ParameterCard = ({
           <div className="mb-1 flex flex-row ml-1 items-center justify-end">
             <label className="block text-xs mb-0 mr-1">Value Path:</label>
             <input
-               id={`param-value-path-input-${currentPath}`}
+              id={`param-value-path-input-${currentPath}`}
               disabled={isReadOnly}
               type="text"
               placeholder="your_path"
@@ -362,7 +362,7 @@ const ParameterCard = ({
         <div>
           <div className="flex items-center justify-between">
             <button
-            id={`param-expand-button-${currentPath}`}
+              id={`param-expand-button-${currentPath}`}
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center gap-1 text-xs font-medium"
             >
@@ -370,7 +370,7 @@ const ParameterCard = ({
               <span className="text-xs">Properties</span>
             </button>
             <button
-            id={`param-add-property-button-${currentPath}`}
+              id={`param-add-property-button-${currentPath}`}
               onClick={() => onAddChild(currentPath)}
               disabled={isReadOnly}
               className="btn btn-sm btn-ghost text-primary gap-1"
@@ -1131,14 +1131,20 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div  id="function-param-modal-box" className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col">
+      <div
+        id="function-param-modal-box"
+        className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col"
+      >
         {/* Modal Header */}
-        <div id="function-param-modal-header" className="flex items-start flex-col mb-3 pb-2 border-b gap-1 border-base-300">
-          <div   className="flex justify-between w-full items-center">
-            <h2  className="text-lg font-semibold">Config {name}</h2>
-            <div  className="flex justify-end gap-2 mt-1">
+        <div
+          id="function-param-modal-header"
+          className="flex items-start flex-col mb-3 pb-2 border-b gap-1 border-base-300"
+        >
+          <div className="flex justify-between w-full items-center">
+            <h2 className="text-lg font-semibold">Config {name}</h2>
+            <div className="flex justify-end gap-2 mt-1">
               <select
-             id="function-param-mode-select" 
+                id="function-param-mode-select"
                 disabled={isReadOnly}
                 className="select select-xs select-bordered text-xs min-w-20"
                 value={isTextareaVisible ? "advanced" : "simple"}
@@ -1147,7 +1153,7 @@ function FunctionParameterModal({
                   handleToggleChange({ target: { checked: isAdvanced } });
                 }}
               >
-                <option  value="simple">Simple</option>
+                <option value="simple">Simple</option>
                 <option value="advanced">Advanced</option>
               </select>
               {isTextareaVisible && (
@@ -1157,9 +1163,9 @@ function FunctionParameterModal({
               )}
             </div>
           </div>
-          <div  className="flex flex-row items-center gap-2">
+          <div className="flex flex-row items-center gap-2">
             {(name === "Tool" || name === "Pre Tool") && (
-              <div  className="flex flex-row gap-1">
+              <div className="flex flex-row gap-1">
                 <InfoIcon id="function-param-info-icon" size={14} />
                 <div id="function-param-info-text" className="label-text-alt">
                   Function used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all
@@ -1169,21 +1175,26 @@ function FunctionParameterModal({
             )}
           </div>
         </div>
-        <div  className="flex flex-row mb-1">
+        <div className="flex flex-row mb-1">
           <div id="function-param-options-wrapper" className="flex gap-2">
             {(name === "Agent" || (name === "orchestralAgent" && isMasterAgent)) && (
               <div className="flex items-center justify-between gap-1 mr-12 text-xs">
-                <div  className="flex items-center gap-2">
-                  <label  className="label p-0 flex items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <label className="label p-0 flex items-center gap-1">
                     <span className="mr-2">Agent's Thread ID</span>
-                    <InfoTooltip id="function-param-thread-id-tooltip"
+                    <InfoTooltip
+                      id="function-param-thread-id-tooltip"
                       className="info"
                       tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with."
                     >
-                      <CircleQuestionMark id="function-param-thread-id-icon" size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                      <CircleQuestionMark
+                        id="function-param-thread-id-icon"
+                        size={14}
+                        className="text-gray-500 hover:text-gray-700 cursor-help"
+                      />
                     </InfoTooltip>
                     <input
-                        id="function-param-thread-id-toggle"
+                      id="function-param-thread-id-toggle"
                       disabled={isReadOnly}
                       type="checkbox"
                       className="toggle toggle-sm"
@@ -1202,12 +1213,19 @@ function FunctionParameterModal({
                     <div className="form-control flex flex-row w-full max-w-xs items-center">
                       <label className="label flex items-center gap-1">
                         <span className="label-text">Agent's Version</span>
-                        <InfoTooltip  id="function-param-version-tooltip"tooltipContent="Select the version of the agent you want to use.">
-                          <CircleQuestionMark id="function-param-version-icon" size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                        <InfoTooltip
+                          id="function-param-version-tooltip"
+                          tooltipContent="Select the version of the agent you want to use."
+                        >
+                          <CircleQuestionMark
+                            id="function-param-version-icon"
+                            size={14}
+                            className="text-gray-500 hover:text-gray-700 cursor-help"
+                          />
                         </InfoTooltip>
                       </label>
                       <select
-                      id="function-param-version-select"
+                        id="function-param-version-select"
                         disabled={isReadOnly}
                         className="select select-xs select-bordered ml-2"
                         value={toolData?.version_id || (publishedVersion ? "published" : "")}
@@ -1223,7 +1241,11 @@ function FunctionParameterModal({
                         }}
                       >
                         {/* Published Version Option - only show if published version exists */}
-                        {publishedVersion && <option id="function-param-version-select-published" value="published">Published Version</option>}
+                        {publishedVersion && (
+                          <option id="function-param-version-select-published" value="published">
+                            Published Version
+                          </option>
+                        )}
                         {versions.map((v, idx) => (
                           <option key={v} value={v}>
                             Version {idx + 1}
@@ -1241,8 +1263,8 @@ function FunctionParameterModal({
         <div id="function-param-toggle-row" className="flex justify-between items-center mb-1">
           <div>
             {toolData?.old_fields && isTextareaVisible && (
-              <div  className="flex items-center text-sm gap-3">
-                <p >Check for old data</p>
+              <div className="flex items-center text-sm gap-3">
+                <p>Check for old data</p>
                 <input
                   id="function-param-old-data-checkbox"
                   disabled={isReadOnly}
@@ -1260,7 +1282,7 @@ function FunctionParameterModal({
           <div className="flex justify-between">
             {isTextareaVisible && (
               <p
-             id="function-param-optimize-button"
+                id="function-param-optimize-button"
                 className="cursor-pointer label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
                 onClick={handleOptimizeRawJson}
               >
@@ -1277,13 +1299,17 @@ function FunctionParameterModal({
               {/* Name and Description Toggle */}
               <div className="mb-3">
                 <button
-              id="function-param-name-desc-toggle"
+                  id="function-param-name-desc-toggle"
                   disabled={isReadOnly}
                   onClick={() => setShowNameDescription(!showNameDescription)}
                   className="flex items-center gap-2 text-xs  font-semibold text-base-content transition-colors"
                 >
                   <h1 className="text-xs">Name & Description</h1>
-                  {showNameDescription ? <ChevronDownIcon  size={14} /> : <ChevronRightIcon id="function-param-name-desc-toggle-icon" size={14} />}
+                  {showNameDescription ? (
+                    <ChevronDownIcon size={14} />
+                  ) : (
+                    <ChevronRightIcon id="function-param-name-desc-toggle-icon" size={14} />
+                  )}
                 </button>
 
                 {showNameDescription && (
@@ -1293,14 +1319,15 @@ function FunctionParameterModal({
                       <label className="block text-xs font-medium mb-1">Name</label>
                       {name === "Orchestral Agent" || name === "Agent" ? (
                         <input
-                       id="function-param-name-input"
+                          id="function-param-name-input"
                           type="text"
                           className="input input-sm text-xs input-bordered w-full"
                           value={tool_name}
                           disabled
                         />
                       ) : (
-                        <input id="function-param-name-input"
+                        <input
+                          id="function-param-name-input"
                           className="input input-sm text-xs input-bordered w-full"
                           value={toolName}
                           onChange={(e) => {
@@ -1315,100 +1342,94 @@ function FunctionParameterModal({
                       )}
                     </div>
 
-                  {/* Description Field */}
-                  <div>
-                    <label className="block text-xs mb-1">
-                      Description
-                    </label>
-                    <textarea
-                     id="function-param-desc-textarea"
-                      disabled={isReadOnly}
-                      className="textarea bg-white dark:bg-black/15 textarea-sm textarea-bordered w-full resize-y"
-                      rows={2}
-                      value={toolData?.description || ""}
-                      onChange={(e) => {
-                        setToolData({ ...toolData, description: e.target.value });
-                        setIsModified(true);
-                      }}
-                      placeholder="Enter tool description"
+                    {/* Description Field */}
+                    <div>
+                      <label className="block text-xs mb-1">Description</label>
+                      <textarea
+                        id="function-param-desc-textarea"
+                        disabled={isReadOnly}
+                        className="textarea bg-white dark:bg-black/15 textarea-sm textarea-bordered w-full resize-y"
+                        rows={2}
+                        value={toolData?.description || ""}
+                        onChange={(e) => {
+                          setToolData({ ...toolData, description: e.target.value });
+                          setIsModified(true);
+                        }}
+                        placeholder="Enter tool description"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-semibold text-xs text-base-content">Parameters</h3>
+                <button
+                  id="function-param-add-param-button"
+                  disabled={isReadOnly}
+                  onClick={handleAddParameter}
+                  className="btn btn-sm btn-primary gap-1"
+                >
+                  <PlusCircleIcon size={16} />
+                  Parameter
+                </button>
+              </div>
+              <div id="function-param-params-list" className="space-y-3 flex-1">
+                {Object.entries(toolData?.fields || {}).length > 0 ? (
+                  Object.entries(toolData?.fields || {}).map(([key, param]) => (
+                    <ParameterCard
+                      isPublished={isPublished}
+                      key={key}
+                      paramKey={key}
+                      param={param}
+                      depth={0}
+                      path={[]}
+                      onDelete={handleDeleteParameter}
+                      onAddChild={handleAddChildParameter}
+                      onRequiredChange={handleRequiredChange}
+                      onDescriptionChange={handleDescriptionChange}
+                      onTypeChange={handleTypeChange}
+                      onEnumChange={handleEnumChange}
+                      onParameterNameChange={handleParameterNameChange}
+                      variablesPath={variablesPath}
+                      onVariablePathChange={handleVariablePathChange}
+                      name={name}
+                      isMasterAgent={isMasterAgent}
+                      toolData={toolData}
                     />
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-full min-h-[100px]">
+                    <div className="text-xs opacity-60 text-gray-500 text-center">
+                      No parameters defined yet. Click the "+ Parameter" button above to add your first parameter.
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold text-xs text-base-content">Parameters</h3>
-              <button
-               id="function-param-add-param-button"
-                disabled={isReadOnly}
-                onClick={handleAddParameter}
-                className="btn btn-sm btn-primary gap-1"
-              >
-                <PlusCircleIcon size={16} />
-                Parameter
-              </button>
-            </div>
-            <div id="function-param-params-list" className="space-y-3 flex-1">
-              {Object.entries(toolData?.fields || {}).length > 0 ? (
-                Object.entries(toolData?.fields || {}).map(([key, param]) => (
-                  <ParameterCard
-                    isPublished={isPublished}
-                    key={key}
-                    paramKey={key}
-                    param={param}
-                    depth={0}
-                    path={[]}
-                    onDelete={handleDeleteParameter}
-                    onAddChild={handleAddChildParameter}
-                    onRequiredChange={handleRequiredChange}
-                    onDescriptionChange={handleDescriptionChange}
-                    onTypeChange={handleTypeChange}
-                    onEnumChange={handleEnumChange}
-                    onParameterNameChange={handleParameterNameChange}
-                    variablesPath={variablesPath}
-                    onVariablePathChange={handleVariablePathChange}
-                    name={name}
-                    isMasterAgent={isMasterAgent}
-                    toolData={toolData}
-                  />
-                ))
-              ) : (
-                <div className="flex items-center justify-center h-full min-h-[100px]">
-                  <div className="text-xs opacity-60 text-gray-500 text-center">
-                    No parameters defined yet. Click the "+ Parameter" button above to add your first parameter.
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
-            <textarea
-            id="function-param-json-textarea"
-            disabled={isReadOnly}
-              type="input"
-              value={objectFieldValue}
-              className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
-              onChange={(e) => setObjectFieldValue(e.target.value)}
-              onBlur={handleTextFieldChange}
-              placeholder="Enter valid JSON object here..."
-            />
-            {isOldFieldViewTrue && (
+                )}
+              </div>
+            </>
+          ) : (
+            <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
               <textarea
-              id="function-param-old-fields-textarea"
-              disabled={isReadOnly}
-                type="text"
-                value={
-                  toolData?.old_fields
-                    ? JSON.stringify(toolData["old_fields"], undefined, 4)
-                    : ""
-                }
+                id="function-param-json-textarea"
+                disabled={isReadOnly}
+                type="input"
+                value={objectFieldValue}
                 className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
+                onChange={(e) => setObjectFieldValue(e.target.value)}
+                onBlur={handleTextFieldChange}
+                placeholder="Enter valid JSON object here..."
               />
-            )}
-          </div>
-        )}
+              {isOldFieldViewTrue && (
+                <textarea
+                  id="function-param-old-fields-textarea"
+                  disabled={isReadOnly}
+                  type="text"
+                  value={toolData?.old_fields ? JSON.stringify(toolData["old_fields"], undefined, 4) : ""}
+                  className="textarea bg-white dark:bg-black/15 textarea-bordered border border-base-300 w-full min-h-96 resize-y"
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {/* Modal Actions - Always visible at bottom */}

@@ -61,7 +61,7 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
           <span className="label-text">Key</span>
         </div>
         <input
-                   id="create-variable-key-input"
+          id="create-variable-key-input"
           type="text"
           className="input input-bordered input-md w-full mb-2"
           placeholder="Enter key"
@@ -75,7 +75,7 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
           <span className="label-text">Value</span>
         </div>
         <input
-                    id="create-variable-value-input"
+          id="create-variable-value-input"
           defaultValue={valueValue}
           type="text"
           className="input input-bordered input-md w-full mb-2"
@@ -86,10 +86,10 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
         <div className="modal-action">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
-            <button id="create-variable-close-button"className="btn btn-sm" onClick={handleCloseModal}>
+            <button id="create-variable-close-button" className="btn btn-sm" onClick={handleCloseModal}>
               Close
             </button>
-            <button id="create-variable-create-button"className="btn btn-sm btn-primary ml-2" onClick={CreateVariable}>
+            <button id="create-variable-create-button" className="btn btn-sm btn-primary ml-2" onClick={CreateVariable}>
               Create
             </button>
           </form>

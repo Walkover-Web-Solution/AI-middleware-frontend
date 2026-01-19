@@ -368,18 +368,22 @@ const AdvancedParameters = ({
     const isLevel2 = level === 2 || compact;
 
     return (
-      <div key={key} id={`advanced-param-field-${key}`} className={`group w-full max-w-md ${isLevel2 ? "space-y-1" : "space-y-2"}`}>
+      <div
+        key={key}
+        id={`advanced-param-field-${key}`}
+        className={`group w-full max-w-md ${isLevel2 ? "space-y-1" : "space-y-2"}`}
+      >
         <div className="flex items-center justify-between gap-2 mb-1 min-h-[32px]">
-          <div  className="flex items-center gap-2">
-            <span  className={labelTextClass}>{name || key}</span>
+          <div className="flex items-center gap-2">
+            <span className={labelTextClass}>{name || key}</span>
             {description && (
-              <InfoTooltip  tooltipContent={description}>
+              <InfoTooltip tooltipContent={description}>
                 <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
               </InfoTooltip>
             )}
             {field === "boolean" && (
               <input
-              id={`advanced-param-checkbox-${key}`}
+                id={`advanced-param-checkbox-${key}`}
                 name={key}
                 type="checkbox"
                 className="checkbox checkbox-xs"
@@ -397,7 +401,7 @@ const AdvancedParameters = ({
           <div className="w-[110px] flex justify-end flex-shrink-0 min-h-[32px]">
             {!isDefaultValue && (
               <button
-               id={`advanced-param-reset-${key}`}
+                id={`advanced-param-reset-${key}`}
                 type="button"
                 className="text-xs text-base-content/60 hover:text-base-content cursor-pointer px-3 py-1 rounded hover:bg-base-200 transition-colors whitespace-nowrap inline-block"
                 onClick={() => setSliderValue("default", key, isDeafaultObject)}
@@ -415,7 +419,7 @@ const AdvancedParameters = ({
             {/* Text input */}
             {field === "text" && (
               <input
-             id={`advanced-param-text-${key}`}
+                id={`advanced-param-text-${key}`}
                 type="text"
                 value={isDefaultValue ? "default" : inputConfiguration?.[key] || ""}
                 onFocus={(e) => {
@@ -442,7 +446,7 @@ const AdvancedParameters = ({
             {/* Number input */}
             {field === "number" && (
               <input
-              id={`advanced-param-number-${key}`}
+                id={`advanced-param-number-${key}`}
                 type="number"
                 min={min}
                 max={max}
@@ -466,7 +470,7 @@ const AdvancedParameters = ({
             {/* Select input */}
             {field === "select" && (
               <select
-              id={`advanced-param-select-${key}`}
+                id={`advanced-param-select-${key}`}
                 value={isDefaultValue ? "default" : configuration?.[key]?.[defaultValue?.key] || configuration?.[key]}
                 onChange={(e) => handleSelectChange(e, key, defaultValue, "{}", isDeafaultObject)}
                 className={`select ${selectSizeClass} w-full bg-base-300 border-base-200 text-base-content/70 text-sm`}
@@ -475,8 +479,8 @@ const AdvancedParameters = ({
               >
                 {isDefaultValue && <option value="default">default</option>}
                 {options?.map((option) => (
-                  <option 
-                    key={typeof option === "object" ? option?.value || option?.type : option} 
+                  <option
+                    key={typeof option === "object" ? option?.value || option?.type : option}
                     value={typeof option === "object" ? option?.value || option?.type : option}
                   >
                     {typeof option === "object" ? option?.displayName || option?.type || option?.value : option}
@@ -488,7 +492,8 @@ const AdvancedParameters = ({
             {field === "slider" && (
               <div className="flex items-center gap-2 w-full">
                 <button
-                  id={`advanced-param-slider-min-btn-${key}`}type="button"
+                  id={`advanced-param-slider-min-btn-${key}`}
+                  type="button"
                   className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`}
                   disabled={isReadOnly}
                   onClick={() => {
@@ -503,7 +508,7 @@ const AdvancedParameters = ({
                 </button>
                 {sliderValueNode}
                 <input
-               id={`advanced-param-slider-${key}`}
+                  id={`advanced-param-slider-${key}`}
                   type="range"
                   min={min || 0}
                   max={max || 100}
@@ -534,7 +539,8 @@ const AdvancedParameters = ({
                   name={key}
                   disabled={isReadOnly}
                 />
-                <button id={`advanced-param-slider-max-btn-${key}`}
+                <button
+                  id={`advanced-param-slider-max-btn-${key}`}
                   type="button"
                   className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20 text-sm`}
                   disabled={isReadOnly}
@@ -553,9 +559,9 @@ const AdvancedParameters = ({
 
             {/* Dropdown input */}
             {field === "dropdown" && (
-              <div  id={`advanced-param-dropdown-wrapper-${key}`}  className="relative w-full" ref={dropdownContainerRef}>
+              <div id={`advanced-param-dropdown-wrapper-${key}`} className="relative w-full" ref={dropdownContainerRef}>
                 <div
-              id={`advanced-param-dropdown-trigger-${key}`}
+                  id={`advanced-param-dropdown-trigger-${key}`}
                   className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
                   disabled={isReadOnly}
                   onClick={() => !isReadOnly && setShowDropdown(!showDropdown)}
@@ -568,15 +574,18 @@ const AdvancedParameters = ({
                         : "Select a tool choice option..."}
                   </span>
                   <div className="ml-auto">
-                    {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon  size={14} />}
+                    {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
                   </div>
                 </div>
 
                 {showDropdown && (
-                  <div id={`advanced-param-dropdown-menu-${key}`} className="absolute top-full left-0 right-0 bg-base-300 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
+                  <div
+                    id={`advanced-param-dropdown-menu-${key}`}
+                    className="absolute top-full left-0 right-0 bg-base-300 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2"
+                  >
                     <div className="p-2 top-0 bg-base-100">
                       <input
-                     id={`advanced-param-dropdown-search-${key}`}
+                        id={`advanced-param-dropdown-search-${key}`}
                         type="text"
                         placeholder="Search functions..."
                         value={searchQuery}
@@ -589,7 +598,7 @@ const AdvancedParameters = ({
                     {options &&
                       options.map((option) => (
                         <div
-                     id={`advanced-param-dropdown-option-${key}-${option}`}
+                          id={`advanced-param-dropdown-option-${key}-${option}`}
                           key={option}
                           className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
                           onClick={() => {
@@ -600,7 +609,7 @@ const AdvancedParameters = ({
                         >
                           <label className="flex items-center gap-2">
                             <input
-                         id={`advanced-param-dropdown-option-radio-${key}-${option}`}
+                              id={`advanced-param-dropdown-option-radio-${key}-${option}`}
                               type="radio"
                               name="function-select"
                               checked={selectedOptions?.some((opt) => opt?.name === option)}
@@ -640,9 +649,12 @@ const AdvancedParameters = ({
                                 setShowDropdown(false);
                               }}
                             >
-                              <label id={`advanced-param-dropdown-tool-label-${key}-${func?._id}`} className="flex items-center gap-2">
+                              <label
+                                id={`advanced-param-dropdown-tool-label-${key}-${func?._id}`}
+                                className="flex items-center gap-2"
+                              >
                                 <input
-                                id={`advanced-param-dropdown-tool-radio-${key}-${func?._id}`}
+                                  id={`advanced-param-dropdown-tool-radio-${key}-${func?._id}`}
                                   type="radio"
                                   name="function-select"
                                   checked={selectedOptions?.some((opt) => opt?.id === func?._id)}
@@ -678,9 +690,12 @@ const AdvancedParameters = ({
                                 setShowDropdown(false);
                               }}
                             >
-                              <label id={`advanced-param-dropdown-agent-label-${key}-${agent.bridge_id}`} className="flex items-center gap-2">
+                              <label
+                                id={`advanced-param-dropdown-agent-label-${key}-${agent.bridge_id}`}
+                                className="flex items-center gap-2"
+                              >
                                 <input
-                                id={`advanced-param-dropdown-agent-radio-${key}-${agent.bridge_id}`}
+                                  id={`advanced-param-dropdown-agent-radio-${key}-${agent.bridge_id}`}
                                   type="radio"
                                   name="function-select"
                                   checked={selectedOptions?.some((opt) => opt?.id === agent.bridge_id)}
@@ -704,7 +719,7 @@ const AdvancedParameters = ({
         {field === "select" && !isDefaultValue && configuration?.[key]?.type === "json_schema" && (
           <div id={`advanced-param-json-schema-${key}`} className="mt-3 space-y-2">
             <div id={`advanced-param-json-schema-header-${key}`} className="flex justify-end">
-              <span             
+              <span
                 className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity text-xs"
                 onClick={() => {
                   openModal(MODAL_TYPE.JSON_SCHEMA);
@@ -715,7 +730,7 @@ const AdvancedParameters = ({
             </div>
 
             <textarea
-             id={`advanced-param-json-schema-textarea-${key}`}
+              id={`advanced-param-json-schema-textarea-${key}`}
               key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
               type="input"
               defaultValue={objectFieldValue || JSON.stringify(configuration?.[key]?.value || {}, null, 2)}
@@ -766,7 +781,11 @@ const AdvancedParameters = ({
     }
 
     return (
-      <div id="advanced-param-level2-container" className={`z-very-low mt-2 text-base-content w-full ${className}`} tabIndex={0}>
+      <div
+        id="advanced-param-level2-container"
+        className={`z-very-low mt-2 text-base-content w-full ${className}`}
+        tabIndex={0}
+      >
         {/* Level 2 Parameters - Displayed Outside Accordion */}
         {level2Parameters.length > 0 && (
           <div className="w-full gap-4 flex flex-col px-2 py-2 cursor-default items-start">
@@ -788,9 +807,14 @@ const AdvancedParameters = ({
 
     // Level 1 parameters now render without accordion
     return (
-      <div id="advanced-param-level1-container" className={`z-very-low mt-4 text-base-content w-full ${className}`} tabIndex={0}>
+      <div
+        id="advanced-param-level1-container"
+        className={`z-very-low mt-4 text-base-content w-full ${className}`}
+        tabIndex={0}
+      >
         {tutorialState.showSuggestion && (
-          <TutorialSuggestionToast  id="advanced-param-tutorial-suggestion"
+          <TutorialSuggestionToast
+            id="advanced-param-tutorial-suggestion"
             setTutorialState={setTutorialState}
             flagKey={"AdvanceParameter"}
             TutorialDetails={"Advanced Parameters"}

@@ -119,7 +119,7 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
     <div className="mb-8">
       <div className="overflow-x-auto rounded-lg shadow-lg border border-base-300 bg-base-100">
         <table
-                    id="organization-grid-table"
+          id="organization-grid-table"
           className="table bg-base-100 shadow-md overflow-visible relative z-50 border-collapse focus:outline-none focus:ring-2 focus:ring-primary/40"
           tabIndex={0}
           onKeyDown={handleKeyDown}
@@ -144,7 +144,7 @@ const OrganizationGrid = ({ displayedOrganizations = [], handleSwitchOrg, curren
                 const isSelected = index === selectedIndex;
                 return (
                   <tr
-                                       id={`organization-grid-row-${org.id}`}
+                    id={`organization-grid-row-${org.id}`}
                     key={org.id ?? index}
                     ref={(el) => (rowRef.current[index] = el)}
                     onClick={() => {

@@ -583,235 +583,371 @@ export default function AddNewModelModal() {
     !spec.usecase ||
     spec.usecase.length === 0;
 
-    return (
-
-        <Modal MODAL_ID={MODAL_TYPE.ADD_NEW_MODEL_MODAL}>
-            <div id="add-new-model-modal-container"  className='modal-box min-w-[70rem]'>
-                <div className="min-h-screen bg-base-100 pt-4">
-                    <div className="w-full mx-auto">
-                        <div className="relative text-center">
-                            <button
-                                id="add-model-reset-button"
-                                onClick={resetFormToDefault}
-                                className="btn btn-ghost absolute right-0 top-1/3 tooltip tooltip-left"
-                                data-tip="Reset form to default values"
-                            >
-                                <RefreshCw size={20} />
-                            </button>
-                            <div>
-                                <h1 className="text-2xl font-bold">Add a New Model</h1>
-                                <p className="mt-2 text-base-content/70">Add and configure a new model for your agent in just a few steps.</p>
-                            </div>
-                        </div>
-                        <div className="card w-full">
-
-                            <div className="card-body p-6 md:p-8">
-                                <div className="space-y-8">
-                                    <h2 className="card-title">Model Details</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="form-control">
-                                            <label className="label"><span className="label-text">Service</span></label>
-                                            <select  id="add-model-service-select" value={config.service} onChange={e => handleTopLevelChange('service', e.target.value)}
-                                                className="select select-bordered w-full">
-                                                {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
-                                                    <option key={value} value={value}>{displayName}</option>
-                                                )) : null}
-                                            </select>
-                                        </div>
-                                        <div className="form-control">
-                                            <label className="label"><span className="label-text">Model Name<span className="text-error">*</span></span></label>
-                                            <input id="add-model-name-input" type="text" value={config.model_name}
-                                                onChange={e => {
-                                                    const value = e.target.value;
-                                                    handleTopLevelChange('model_name', value);
-                                                    handleConfigChange("model", 'default', value);
-                                                    setConfig(prev => ({
-                                                        ...prev,
-                                                        configuration: {
-                                                            ...prev.configuration,
-                                                            model: {
-                                                                "field": "drop",
-                                                                "default": value,
-                                                                "level": 1
-                                                            }
-                                                        }
-                                                    }));
-                                                }}
-                                                className="input input-bordered w-full"
-                                                placeholder={PLACEHOLDERS[config.service]?.model_name} />
-                                        </div>
-                                        <div className="form-control">
-                                            <label className="label"><span className="label-text">Display Name <span className="text-error">*</span></span></label>
-                                            <input id="add-model-display-name-input" type="text" value={config.display_name}
-                                                onChange={e => handleTopLevelChange('display_name', e.target.value)}
-                                                className="input input-bordered w-full"
-                                                placeholder={PLACEHOLDERS[config.service]?.display_name} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h2 className="text-lg font-semibold mb-3">Model Capabilities</h2>
-                                        <p className="text-sm text-base-content/60 mb-4">Enable/disable the features this model supports.</p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            <div className="form-control p-4 rounded-lg border border-base-300">
-                                                <label className="label cursor-pointer justify-start gap-4">
-                                                    <input id="add-model-vision-checkbox" type="checkbox" checked={!!config?.validationConfig?.vision} onChange={e => handleValidationChange('vision', e.target.checked)} className="checkbox checkbox-primary" />
-                                                    <span className="label-text font-medium">Supports Vision</span>
-                                                </label>
-                                            </div>
-                                            <div className="form-control p-4 rounded-lg border border-base-300">
-                                                <label className="label cursor-pointer justify-start gap-4">
-                                                    <input id="add-model-tools-checkbox" type="checkbox" checked={!!config.validationConfig?.tools} onChange={e => handleValidationChange('tools', e.target.checked)} className="checkbox checkbox-primary" />
-                                                    <span className="label-text font-medium">Supports Tools</span>
-                                                </label>
-                                            </div>
-                                            <div className="form-control p-4 rounded-lg border border-base-300">
-                                                <label className="label cursor-pointer justify-start gap-4">
-                                                    <input id="add-model-system-prompt-checkbox" type="checkbox" checked={!!config.validationConfig?.system_prompt} onChange={e => handleValidationChange('system_prompt', e.target.checked)} className="checkbox checkbox-primary" />
-                                                    <span className="label-text font-medium">Support System Prompt</span>
-                                                </label>
-                                            </div>
-                                            <div className="form-control p-4 rounded-lg border border-base-300">
-                                                <label className="label"><span className="label-text font-medium">Model Type</span></label>
-                                                <select
-                                                    id="add-model-type-select"
-                                                    value={config.validationConfig?.type}
-                                                    onChange={e => handleValidationChange('type', e.target.value)}
-                                                    className="select select-bordered w-full"
-                                                >
-                                                    <option value="chat">Chat</option>
-                                                    <option value="fine-tune">Fine-tune</option>
-                                                    <option value="image">Image</option>
-                                                    <option value="reasoning">Reasoning</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {config.validationConfig?.specification && (
-                                        <div>
-                                            <h3 className="text-lg font-semibold mb-3">Reference Specification</h3>
-                                            <div className="space-y-4">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="form-control">
-                                                        <label className="label"><span className="label-text">Input Cost / Mtok<span className="text-error">*</span></span></label>
-                                                        <input  id="add-model-input-cost-input" type="number" value={config.validationConfig.specification.input_cost}
-                                                            onChange={e => handleSpecificationChange('input_cost', e.target.value === '' ? '' : parseFloat(e.target.value))}
-                                                            className="input input-bordered w-full" step="0.001"
-                                                            placeholder={PLACEHOLDERS[config.service]?.input_cost}
-                                                            min={0} />
-                                                    </div>
-                                                    <div className="form-control">
-                                                        <label className="label"><span className="label-text">Output Cost / Mtok<span className="text-error">*</span></span></label>
-                                                        <input id="add-model-output-cost-input" type="number" value={config.validationConfig.specification.output_cost}
-                                                            onChange={e => {
-                                                                const value = parseFloat(e.target.value);
-                                                                if (value < 0) {
-                                                                    e.target.value = '';
-                                                                } else {
-                                                                    handleSpecificationChange('output_cost', value);
-                                                                }
-                                                            }}
-                                                            min={0}
-                                                            className="input input-bordered w-full" step="0.001"
-                                                            placeholder={PLACEHOLDERS[config.service]?.output_cost} />
-                                                    </div>
-                                                </div>
-                                                <div className="form-control">
-                                                    <label className="label"><span className="label-text">Description<span className="text-error">*</span></span></label>
-                                                    <textarea id="add-model-description-textarea" value={config.validationConfig.specification.description}
-                                                        onChange={e => handleSpecificationChange('description', e.target.value)}
-                                                        onBlur={e => handleSpecificationChange('description', e.target.value.trim())}
-                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full" rows={3}
-                                                        placeholder={PLACEHOLDERS[config.service]?.description}></textarea>
-                                                </div>
-                                                <div className="form-control">
-                                                    <label className="label"><span className="label-text">Knowledge Cutoff<span className="text-error">*</span></span></label>
-                                                    <input id="add-model-knowledge-cutoff-input" type="text" value={config.validationConfig.specification.knowledge_cutoff}
-                                                        onChange={e => handleSpecificationChange('knowledge_cutoff', e.target.value)}
-                                                        onBlur={e => handleSpecificationChange('knowledge_cutoff', e.target.value.trim())}
-                                                        className="input input-bordered w-full"
-                                                        placeholder={PLACEHOLDERS[config.service]?.knowledge_cutoff} />
-                                                </div>
-                                                <div className="form-control">
-                                                    <label className="label"><span className="label-text">Use Case</span></label>
-                                                    <textarea id="add-model-usecase-textarea" value={(config.validationConfig.specification.usecase || []).join('\n')}
-                                                        onChange={e => handleSpecificationChange('usecase', e.target.value.split('\n').filter(Boolean))}
-                                                        onBlur={e => handleSpecificationChange('usecase', e.target.value.trim().split('\n'))}
-                                                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full"
-                                                        rows={3}
-                                                        placeholder={PLACEHOLDERS[config.service]?.usecase} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                            Model Parameters
-                                            <span className="text-xs text-base-content/40 font-normal">(advanced tuning)</span>
-                                        </h3>
-                                        {!showNewParamForm && (
-                                            <button id="add-model-add-param-button" className="btn btn-primary btn-sm mb-5" onClick={() => setShowNewParamForm(true)}>
-                                                + Add Model Parameter
-                                            </button>
-                                        )}
-                                        {showNewParamForm && (
-                                            <div  id="add-model-new-param-form"  className="p-4 border border-primary/20 rounded-lg bg-primary/5 mb-6">
-                                                <h4 className="text-md font-medium mb-3">New Parameter Details</h4>
-                                                <form className="space-y-4"
-                                                    onSubmit={e => { e.preventDefault(); handleAddNewParam(); }}>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div className="form-control">
-                                                            <label className="label"><span className="label-text">Parameter Name</span></label>
-                                                            <input id="add-model-param-name-input" type="text" autoFocus
-                                                                value={newParamData.name}
-                                                                onChange={e => setNewParamData(p => ({ ...p, name: e.target.value.replace(/\s/g, '_') }))}
-                                                                className="input input-bordered w-full" />
-                                                        </div>
-                                                        <div className="form-control">
-                                                            <label className="label"><span className="label-text">Field Type</span></label>
-                                                            <select id="add-model-param-type-select"  value={newParamData.type}
-                                                                onChange={e => setNewParamData(p => ({ ...p, type: e.target.value }))}
-                                                                className="select select-bordered w-full">
-                                                                <option value="slider">Numeric (Slider)</option>
-                                                                <option value="boolean">On/Off (Boolean)</option>
-                                                                <option value="text">Free (Text)</option>
-                                                                <option value="number">Number (Input)</option>
-                                                                <option value="dropdown">Dropdown (Choices)</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex space-x-2">
-                                                        <button id="add-model-save-param-button" type="submit" className="btn btn-primary">Save</button>
-                                                        <button  id="add-model-cancel-param-button"  type="button" onClick={() => setShowNewParamForm(false)} className="btn btn-ghost">Cancel</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        )}
-                                        <div className="space-y-2">{renderSelectableKeys()}</div>
-                                    </div>
-                                </div>
-                                <div className="card-actions justify-end border-t border-base-200 pt-6 mt-8">
-                                {error?.message && (
-                                    <div className="w-full mb-4">
-                                        <div className="error-container p-4 bg-red-50 border-l-4 border-red-500 rounded-md shadow-sm">
-                                           {error?.message}
-                                        </div>
-                                    </div>
-                                )}
-                                    <button id="add-model-close-button" type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn btn-sm">
-                                        Close
-                                    </button>
-                                    <button id="add-model-save-button" type="button"
-                                        onClick={handleAddModel}
-                                        className="btn btn-sm btn-primary"
-                                        disabled={isFormInvalid}>
-                                        Save Model
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <Modal MODAL_ID={MODAL_TYPE.ADD_NEW_MODEL_MODAL}>
+      <div id="add-new-model-modal-container" className="modal-box min-w-[70rem]">
+        <div className="min-h-screen bg-base-100 pt-4">
+          <div className="w-full mx-auto">
+            <div className="relative text-center">
+              <button
+                id="add-model-reset-button"
+                onClick={resetFormToDefault}
+                className="btn btn-ghost absolute right-0 top-1/3 tooltip tooltip-left"
+                data-tip="Reset form to default values"
+              >
+                <RefreshCw size={20} />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold">Add a New Model</h1>
+                <p className="mt-2 text-base-content/70">
+                  Add and configure a new model for your agent in just a few steps.
+                </p>
+              </div>
             </div>
-        </Modal>
-    );
+            <div className="card w-full">
+              <div className="card-body p-6 md:p-8">
+                <div className="space-y-8">
+                  <h2 className="card-title">Model Details</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text">Service</span>
+                      </label>
+                      <select
+                        id="add-model-service-select"
+                        value={config.service}
+                        onChange={(e) => handleTopLevelChange("service", e.target.value)}
+                        className="select select-bordered w-full"
+                      >
+                        {Array.isArray(SERVICES)
+                          ? SERVICES.map(({ value, displayName }) => (
+                              <option key={value} value={value}>
+                                {displayName}
+                              </option>
+                            ))
+                          : null}
+                      </select>
+                    </div>
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text">
+                          Model Name<span className="text-error">*</span>
+                        </span>
+                      </label>
+                      <input
+                        id="add-model-name-input"
+                        type="text"
+                        value={config.model_name}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleTopLevelChange("model_name", value);
+                          handleConfigChange("model", "default", value);
+                          setConfig((prev) => ({
+                            ...prev,
+                            configuration: {
+                              ...prev.configuration,
+                              model: {
+                                field: "drop",
+                                default: value,
+                                level: 1,
+                              },
+                            },
+                          }));
+                        }}
+                        className="input input-bordered w-full"
+                        placeholder={PLACEHOLDERS[config.service]?.model_name}
+                      />
+                    </div>
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text">
+                          Display Name <span className="text-error">*</span>
+                        </span>
+                      </label>
+                      <input
+                        id="add-model-display-name-input"
+                        type="text"
+                        value={config.display_name}
+                        onChange={(e) => handleTopLevelChange("display_name", e.target.value)}
+                        className="input input-bordered w-full"
+                        placeholder={PLACEHOLDERS[config.service]?.display_name}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold mb-3">Model Capabilities</h2>
+                    <p className="text-sm text-base-content/60 mb-4">
+                      Enable/disable the features this model supports.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="form-control p-4 rounded-lg border border-base-300">
+                        <label className="label cursor-pointer justify-start gap-4">
+                          <input
+                            id="add-model-vision-checkbox"
+                            type="checkbox"
+                            checked={!!config?.validationConfig?.vision}
+                            onChange={(e) => handleValidationChange("vision", e.target.checked)}
+                            className="checkbox checkbox-primary"
+                          />
+                          <span className="label-text font-medium">Supports Vision</span>
+                        </label>
+                      </div>
+                      <div className="form-control p-4 rounded-lg border border-base-300">
+                        <label className="label cursor-pointer justify-start gap-4">
+                          <input
+                            id="add-model-tools-checkbox"
+                            type="checkbox"
+                            checked={!!config.validationConfig?.tools}
+                            onChange={(e) => handleValidationChange("tools", e.target.checked)}
+                            className="checkbox checkbox-primary"
+                          />
+                          <span className="label-text font-medium">Supports Tools</span>
+                        </label>
+                      </div>
+                      <div className="form-control p-4 rounded-lg border border-base-300">
+                        <label className="label cursor-pointer justify-start gap-4">
+                          <input
+                            id="add-model-system-prompt-checkbox"
+                            type="checkbox"
+                            checked={!!config.validationConfig?.system_prompt}
+                            onChange={(e) => handleValidationChange("system_prompt", e.target.checked)}
+                            className="checkbox checkbox-primary"
+                          />
+                          <span className="label-text font-medium">Support System Prompt</span>
+                        </label>
+                      </div>
+                      <div className="form-control p-4 rounded-lg border border-base-300">
+                        <label className="label">
+                          <span className="label-text font-medium">Model Type</span>
+                        </label>
+                        <select
+                          id="add-model-type-select"
+                          value={config.validationConfig?.type}
+                          onChange={(e) => handleValidationChange("type", e.target.value)}
+                          className="select select-bordered w-full"
+                        >
+                          <option value="chat">Chat</option>
+                          <option value="fine-tune">Fine-tune</option>
+                          <option value="image">Image</option>
+                          <option value="reasoning">Reasoning</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  {config.validationConfig?.specification && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Reference Specification</h3>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text">
+                                Input Cost / Mtok<span className="text-error">*</span>
+                              </span>
+                            </label>
+                            <input
+                              id="add-model-input-cost-input"
+                              type="number"
+                              value={config.validationConfig.specification.input_cost}
+                              onChange={(e) =>
+                                handleSpecificationChange(
+                                  "input_cost",
+                                  e.target.value === "" ? "" : parseFloat(e.target.value)
+                                )
+                              }
+                              className="input input-bordered w-full"
+                              step="0.001"
+                              placeholder={PLACEHOLDERS[config.service]?.input_cost}
+                              min={0}
+                            />
+                          </div>
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text">
+                                Output Cost / Mtok<span className="text-error">*</span>
+                              </span>
+                            </label>
+                            <input
+                              id="add-model-output-cost-input"
+                              type="number"
+                              value={config.validationConfig.specification.output_cost}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value);
+                                if (value < 0) {
+                                  e.target.value = "";
+                                } else {
+                                  handleSpecificationChange("output_cost", value);
+                                }
+                              }}
+                              min={0}
+                              className="input input-bordered w-full"
+                              step="0.001"
+                              placeholder={PLACEHOLDERS[config.service]?.output_cost}
+                            />
+                          </div>
+                        </div>
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text">
+                              Description<span className="text-error">*</span>
+                            </span>
+                          </label>
+                          <textarea
+                            id="add-model-description-textarea"
+                            value={config.validationConfig.specification.description}
+                            onChange={(e) => handleSpecificationChange("description", e.target.value)}
+                            onBlur={(e) => handleSpecificationChange("description", e.target.value.trim())}
+                            className="textarea bg-white dark:bg-black/15 textarea-bordered w-full"
+                            rows={3}
+                            placeholder={PLACEHOLDERS[config.service]?.description}
+                          ></textarea>
+                        </div>
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text">
+                              Knowledge Cutoff<span className="text-error">*</span>
+                            </span>
+                          </label>
+                          <input
+                            id="add-model-knowledge-cutoff-input"
+                            type="text"
+                            value={config.validationConfig.specification.knowledge_cutoff}
+                            onChange={(e) => handleSpecificationChange("knowledge_cutoff", e.target.value)}
+                            onBlur={(e) => handleSpecificationChange("knowledge_cutoff", e.target.value.trim())}
+                            className="input input-bordered w-full"
+                            placeholder={PLACEHOLDERS[config.service]?.knowledge_cutoff}
+                          />
+                        </div>
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text">Use Case</span>
+                          </label>
+                          <textarea
+                            id="add-model-usecase-textarea"
+                            value={(config.validationConfig.specification.usecase || []).join("\n")}
+                            onChange={(e) =>
+                              handleSpecificationChange("usecase", e.target.value.split("\n").filter(Boolean))
+                            }
+                            onBlur={(e) => handleSpecificationChange("usecase", e.target.value.trim().split("\n"))}
+                            className="textarea bg-white dark:bg-black/15 textarea-bordered w-full"
+                            rows={3}
+                            placeholder={PLACEHOLDERS[config.service]?.usecase}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                      Model Parameters
+                      <span className="text-xs text-base-content/40 font-normal">(advanced tuning)</span>
+                    </h3>
+                    {!showNewParamForm && (
+                      <button
+                        id="add-model-add-param-button"
+                        className="btn btn-primary btn-sm mb-5"
+                        onClick={() => setShowNewParamForm(true)}
+                      >
+                        + Add Model Parameter
+                      </button>
+                    )}
+                    {showNewParamForm && (
+                      <div
+                        id="add-model-new-param-form"
+                        className="p-4 border border-primary/20 rounded-lg bg-primary/5 mb-6"
+                      >
+                        <h4 className="text-md font-medium mb-3">New Parameter Details</h4>
+                        <form
+                          className="space-y-4"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            handleAddNewParam();
+                          }}
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="form-control">
+                              <label className="label">
+                                <span className="label-text">Parameter Name</span>
+                              </label>
+                              <input
+                                id="add-model-param-name-input"
+                                type="text"
+                                autoFocus
+                                value={newParamData.name}
+                                onChange={(e) =>
+                                  setNewParamData((p) => ({ ...p, name: e.target.value.replace(/\s/g, "_") }))
+                                }
+                                className="input input-bordered w-full"
+                              />
+                            </div>
+                            <div className="form-control">
+                              <label className="label">
+                                <span className="label-text">Field Type</span>
+                              </label>
+                              <select
+                                id="add-model-param-type-select"
+                                value={newParamData.type}
+                                onChange={(e) => setNewParamData((p) => ({ ...p, type: e.target.value }))}
+                                className="select select-bordered w-full"
+                              >
+                                <option value="slider">Numeric (Slider)</option>
+                                <option value="boolean">On/Off (Boolean)</option>
+                                <option value="text">Free (Text)</option>
+                                <option value="number">Number (Input)</option>
+                                <option value="dropdown">Dropdown (Choices)</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button id="add-model-save-param-button" type="submit" className="btn btn-primary">
+                              Save
+                            </button>
+                            <button
+                              id="add-model-cancel-param-button"
+                              type="button"
+                              onClick={() => setShowNewParamForm(false)}
+                              className="btn btn-ghost"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+                    <div className="space-y-2">{renderSelectableKeys()}</div>
+                  </div>
+                </div>
+                <div className="card-actions justify-end border-t border-base-200 pt-6 mt-8">
+                  {error?.message && (
+                    <div className="w-full mb-4">
+                      <div className="error-container p-4 bg-red-50 border-l-4 border-red-500 rounded-md shadow-sm">
+                        {error?.message}
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    id="add-model-close-button"
+                    type="button"
+                    onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)}
+                    className="btn btn-sm"
+                  >
+                    Close
+                  </button>
+                  <button
+                    id="add-model-save-button"
+                    type="button"
+                    onClick={handleAddModel}
+                    className="btn btn-sm btn-primary"
+                    disabled={isFormInvalid}
+                  >
+                    Save Model
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
 }

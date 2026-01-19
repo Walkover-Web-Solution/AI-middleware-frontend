@@ -468,7 +468,7 @@ const ApiKeysInput = ({ configuration, onChange, orgId }) => {
                 <div className="w-32 text-sm font-medium text-base-content">{displayName}:</div>
 
                 <select
-                id={`api-key-select-${serviceKey}`}
+                  id={`api-key-select-${serviceKey}`}
                   className="select select-bordered select-primary w-full select-sm"
                   value={selectedId}
                   onChange={(e) => handleApiKeyChange(serviceKey, e.target.value)}
@@ -512,7 +512,7 @@ const ConfigInput = ({ config, value, onChange }) => {
       case "select":
         return (
           <select
-           id={`config-select-${key}`}
+            id={`config-select-${key}`}
             className="select select-bordered select-primary w-full select-sm"
             value={value ?? config.defaultValue}
             onChange={(e) => onChange(key, e.target.value)}
@@ -991,14 +991,14 @@ window.openGtwy({
         aria-label="Integration Guide Slider"
       >
         <div className="flex flex-col w-full gap-4">
-        <div className="flex justify-between items-center border-b border-base-300 pb-4">
-          <h3 className="font-bold text-lg">Embed Setup</h3>
-          <CloseIcon
-            id="gtwy-integration-slider-close-icon"
-            className="cursor-pointer hover:text-error transition-colors"
-            onClick={handleClose}
-          />
-        </div>
+          <div className="flex justify-between items-center border-b border-base-300 pb-4">
+            <h3 className="font-bold text-lg">Embed Setup</h3>
+            <CloseIcon
+              id="gtwy-integration-slider-close-icon"
+              className="cursor-pointer hover:text-error transition-colors"
+              onClick={handleClose}
+            />
+          </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Left Column - Configuration Form */}
@@ -1030,27 +1030,29 @@ window.openGtwy({
                 </div>
               </div>
 
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h4 className="card-title text-primary text-base mb-0">Theme Palette</h4>
-                    <p className="text-xs text-base-content/70">Customize the colors of GTWY to match your application's design.</p>
+              <div className="card bg-base-100 shadow-sm">
+                <div className="card-body p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h4 className="card-title text-primary text-base mb-0">Theme Palette</h4>
+                      <p className="text-xs text-base-content/70">
+                        Customize the colors of GTWY to match your application's design.
+                      </p>
+                    </div>
+                    <button
+                      id="gtwy-integration-theme-reset-button"
+                      className="btn btn-outline btn-xs"
+                      onClick={handleThemeReset}
+                      type="button"
+                    >
+                      Reset
+                    </button>
                   </div>
-                  <button
-                    id="gtwy-integration-theme-reset-button"
-                    className="btn btn-outline btn-xs"
-                    onClick={handleThemeReset}
-                    type="button"
-                  >
-                    Reset
-                  </button>
-                </div>
 
                   <ThemePaletteEditor theme={configuration?.theme_config} onColorChange={handlePaletteColorChange} />
                   <div className="divider my-4"></div>
                   <button
-                  id="gtwy-integration-save-config-button"
+                    id="gtwy-integration-save-config-button"
                     className={`btn btn-primary btn-sm w-full gap-2 ${themeSaveDisabled ? "btn-disabled" : ""}`}
                     type="button"
                     onClick={handleConfigurationSave}
@@ -1107,7 +1109,7 @@ window.openGtwy({
                       <div className="text-sm text-base-content/70 leading-relaxed ml-1">
                         RS256 is an asymmetric signing algorithm defined in
                         <a
-                        id="gtwy-integration-rfc-link"
+                          id="gtwy-integration-rfc-link"
                           href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.1"
                           className="text-blue-600 underline ml-1"
                           target="_blank"
@@ -1117,34 +1119,33 @@ window.openGtwy({
                         </a>
                       </div>
 
-                    {gtwyAccessToken ? (
-                      <div className="relative mt-3">
-                        <div className="mockup-code">
-                          <pre data-prefix=">">
-                            <code className="text-error">Access Token: </code>
-                            <code className="text-warning">{gtwyAccessToken}</code>
-                          </pre>
+                      {gtwyAccessToken ? (
+                        <div className="relative mt-3">
+                          <div className="mockup-code">
+                            <pre data-prefix=">">
+                              <code className="text-error">Access Token: </code>
+                              <code className="text-warning">{gtwyAccessToken}</code>
+                            </pre>
+                          </div>
+                          <CopyButton
+                            data={gtwyAccessToken}
+                            onCopy={() => handleCopy(gtwyAccessToken, "accessKey")}
+                            copied={copied.accessKey}
+                          />
                         </div>
-                        <CopyButton
-                          data={gtwyAccessToken}
-                          onCopy={() => handleCopy(gtwyAccessToken, 'accessKey')}
-                          copied={copied.accessKey}
-                        />
-                      </div>
-                    ) : (
-                      <button
-                        id="gtwy-integration-generate-access-key-button"
-                        onClick={handleGenerateAccessKey}
-                        className="btn btn-primary btn-sm w-56 mt-3"
-                      >
-                        Show Access Key
-                      </button>
-                    )}
+                      ) : (
+                        <button
+                          id="gtwy-integration-generate-access-key-button"
+                          onClick={handleGenerateAccessKey}
+                          className="btn btn-primary btn-sm w-56 mt-3"
+                        >
+                          Show Access Key
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
 
               <div className="card bg-base-100 border border-base-300">
                 <div className="card-body">

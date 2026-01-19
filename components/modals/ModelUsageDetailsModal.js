@@ -29,7 +29,7 @@ const ModelUsageDetailsModal = ({ usageDetailsData, params }) => {
               {usageDetailsData?.agents?.length > 0 && (
                 <div>
                   <h3 className="font-medium text-base-content mb-2">Agents ({usageDetailsData.agents.length})</h3>
-                  <div id="model-usage-agents-list"  className="bg-base-200 p-3 rounded">
+                  <div id="model-usage-agents-list" className="bg-base-200 p-3 rounded">
                     <ul className="list-disc pl-5">
                       {usageDetailsData.agents.map((agent, index) => (
                         <li id={`model-usage-agent-${agent.id}`} key={index} className="text-sm py-1">
@@ -44,7 +44,7 @@ const ModelUsageDetailsModal = ({ usageDetailsData, params }) => {
               {usageDetailsData?.versions?.length > 0 && (
                 <div>
                   <h3 className="font-medium text-base-content mb-2">Versions ({usageDetailsData.versions.length})</h3>
-                  <div  id="model-usage-versions-list" className="bg-base-200 p-3 rounded">
+                  <div id="model-usage-versions-list" className="bg-base-200 p-3 rounded">
                     <ul className="list-disc pl-5">
                       {usageDetailsData.versions.map((version, index) => {
                         const bridge = Object.values(allBridgesMap).find((bridge) =>
@@ -67,12 +67,7 @@ const ModelUsageDetailsModal = ({ usageDetailsData, params }) => {
           </div>
 
           <div className="flex justify-end mt-6">
-            <button
-              id="model-usage-close-button"
-              type="button"
-              onClick={handleClose}
-              className="btn btn-sm"
-            >
+            <button id="model-usage-close-button" type="button" onClick={handleClose} className="btn btn-sm">
               Close
             </button>
           </div>

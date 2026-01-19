@@ -203,12 +203,15 @@ const ConnectedAgentFlowPanel = ({ isEmbedUser }) => {
         <button
           id="agent-flow-back-button"
           className="btn btn-xs btn-outline gap-1"
-          onClick={() => switchView?.('config')}
+          onClick={() => switchView?.("config")}
         >
           ⬅ Back to Config
         </button>
       </div>
-      <div id="agent-flow-canvas-container"className="w-full h-[calc(100vh-8rem)] min-h-[600px] border border-base-200 rounded-xl overflow-hidden bg-base-50">
+      <div
+        id="agent-flow-canvas-container"
+        className="w-full h-[calc(100vh-8rem)] min-h-[600px] border border-base-200 rounded-xl overflow-hidden bg-base-50"
+      >
         <AgentToAgentConnection
           params={{ ...params, bridgeId: params.id }}
           searchParams={searchParams}

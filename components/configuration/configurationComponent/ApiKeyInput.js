@@ -116,7 +116,7 @@ const ApiKeyInput = ({
   return (
     <div id="apikey-input-container" className="relative form-control w-auto text-base-content" ref={apiKeySectionRef}>
       <Dropdown
-            id="apikey-input-dropdown"
+        id="apikey-input-dropdown"
         disabled={isReadOnly}
         options={dropdownOptions}
         value={selectedValue || ""}

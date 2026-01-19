@@ -129,7 +129,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   };
   const testCaseArray = Array.isArray(testCases) ? testCases : [];
   return (
-    <div  id="testcase-sidebar" className="bg-base-100 h-full overflow-y-auto border-r border-base-content/20">
+    <div id="testcase-sidebar" className="bg-base-100 h-full overflow-y-auto border-r border-base-content/20">
       <div id="testcase-sidebar-header" className="p-4 border-b border-base-content/20 flex flex-row justify-between">
         <h2 className="text-lg font-semibold text-base-content">Test Cases</h2>
         <button
@@ -155,9 +155,9 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
         {/* Run All Button */}
       </div>
 
-      <div id="testcase-list-container"className="p-4 space-y-3">
+      <div id="testcase-list-container" className="p-4 space-y-3">
         {testCaseArray.length === 0 ? (
-          <div  id="testcase-empty-state" className="text-center py-12 text-base-content">
+          <div id="testcase-empty-state" className="text-center py-12 text-base-content">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-base-content/60" />
             <p className="text-base font-medium mb-2">No test cases available</p>
             <p className="text-sm text-base-content/70 mb-6">
@@ -258,7 +258,7 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                       )}
                     </button>
                     <button
-                     id={`testcase-delete-button-${testCase._id}`}
+                      id={`testcase-delete-button-${testCase._id}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteTestCase(testCase._id);
@@ -371,7 +371,10 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                           </div>
 
                           {expandedVersions[testCase._id] && (
-                            <div id={`testcase-history-table-${testCase._id}`}className="mt-2 border border-base-content/20 rounded overflow-hidden">
+                            <div
+                              id={`testcase-history-table-${testCase._id}`}
+                              className="mt-2 border border-base-content/20 rounded overflow-hidden"
+                            >
                               <table className="w-full text-xs">
                                 <thead className="bg-base-200">
                                   <tr>

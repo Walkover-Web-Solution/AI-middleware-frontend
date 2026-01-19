@@ -50,7 +50,7 @@ const IntegrationModal = ({ params, type = "embed" }) => {
       <div id="integration-modal-container" className="modal-box">
         <h3 className="font-bold text-lg mb-4">Enter Embed Name{RequiredItem()}</h3>
         <input
-         id="integration-name-input"
+          id="integration-name-input"
           type="text"
           placeholder="Enter embed name"
           className="input input-bordered input-sm w-full mb-2 placeholder-opacity-50"
@@ -66,7 +66,8 @@ const IntegrationModal = ({ params, type = "embed" }) => {
         <div className="modal-action">
           <form method="dialog">
             <button
-              id="integration-close-button"className="btn btn-sm"
+              id="integration-close-button"
+              className="btn btn-sm"
               onClick={() => {
                 closeModal(MODAL_TYPE.INTEGRATION_MODAL);
                 integrationNameRef.current.value = "";
@@ -74,7 +75,11 @@ const IntegrationModal = ({ params, type = "embed" }) => {
             >
               Close
             </button>
-            <button id="integration-create-button"className="btn btn-sm btn-primary ml-2" onClick={handleCreateNewIntegration}>
+            <button
+              id="integration-create-button"
+              className="btn btn-sm btn-primary ml-2"
+              onClick={handleCreateNewIntegration}
+            >
               Create
             </button>
           </form>

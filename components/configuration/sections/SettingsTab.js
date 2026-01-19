@@ -59,7 +59,10 @@ const SettingsTab = () => {
         {modelType !== "image" && (
           <>
             {!isEmbedUser && (
-              <div id="agent-flow-section" className="border border-base-200 p-3 flex items-center justify-between gap-4">
+              <div
+                id="agent-flow-section"
+                className="border border-base-200 p-3 flex items-center justify-between gap-4"
+              >
                 <div>
                   <p className="text-sm font-medium text-base-content">Connected Agent Flow</p>
                   <p className="text-xs text-base-content/60">Switch to orchestral flow builder.</p>
@@ -117,7 +120,7 @@ const SettingsTab = () => {
       </div>
 
       {/* Chatbot Configuration - Keep Accordion */}
-      <div  id="chatbot-config-section" className="w-full max-w-2xl">
+      <div id="chatbot-config-section" className="w-full max-w-2xl">
         <ChatbotConfigSection isPublished={isPublished} isEditor={isEditor} />
       </div>
     </div>

@@ -59,7 +59,7 @@ function VersionDescriptionInput({ params, searchParams, isEmbedUser }) {
       <div className="flex flex-row items-center">
         <div className="relative w-full">
           <input
-                    id="version-description-input"
+            id="version-description-input"
             type="text"
             className="text-md outline-none w-full"
             onBlur={saveBridgeVersionDescription}

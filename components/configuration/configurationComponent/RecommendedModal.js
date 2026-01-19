@@ -84,7 +84,7 @@ const RecommendedModal = ({
         {shouldPromptShow && (
           <div className="flex flex-col items-start gap-2">
             <button
-                                    id="get-recommended-model-button"
+              id="get-recommended-model-button"
               className="flex items-center gap-2  rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
               onClick={handleGetRecommendations}
               disabled={isLoadingRecommendations || isPublished || !isEditor}
@@ -95,11 +95,10 @@ const RecommendedModal = ({
             {modelRecommendations && (
               <div className="p-4 bg-base-100 rounded-lg border border-base-300 w-full mb-2">
                 {modelRecommendations.error ? (
-                  <p 
-                                             className="text-red-500 text-sm">{modelRecommendations.error}</p>
+                  <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
                 ) : (
                   <div className="space-y-2">
-                    <p  className="text-base-content">
+                    <p className="text-base-content">
                       <span className="font-medium">Recommended Provider:</span>{" "}
                       {modelRecommendations?.available?.service}
                     </p>

@@ -16,7 +16,8 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
       </div>
       <div className="flex items-center justify-start">
         <input
-           id="input-with-copy-input" className="input input-bordered join-item input-sm w-[25rem]"
+          id="input-with-copy-input"
+          className="input input-bordered join-item input-sm w-[25rem]"
           placeholder={placeholder}
           value={value}
           disabled={disabled}

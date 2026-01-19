@@ -218,8 +218,8 @@ const Dropdown = ({
                     return (
                       <li key={String(opt.value)} className="whitespace-nowrap">
                         <a
-                         id={`dropdown-option-${opt.value}`}
-                         className={cx(
+                          id={`dropdown-option-${opt.value}`}
+                          className={cx(
                             "flex items-start gap-2 w-full rounded-md hover:bg-base-200",
                             isActive ? "active text-primary" : ""
                           )}

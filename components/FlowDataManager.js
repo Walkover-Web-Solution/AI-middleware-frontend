@@ -601,7 +601,12 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                 <div className="badge badge-primary badge-sm font-medium mb-2">SELECT AGENT</div>
                 <h2 className="text-xl font-bold text-base-content">{title}</h2>
               </div>
-              <button id="agent-sidebar-close-button" onClick={onClose} className="btn btn-circle btn-ghost hover:btn-error" aria-label="Close">
+              <button
+                id="agent-sidebar-close-button"
+                onClick={onClose}
+                className="btn btn-circle btn-ghost hover:btn-error"
+                aria-label="Close"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -616,7 +621,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             <div className="form-control">
               <div className="input-group flex items-center gap-2">
                 <input
-                  id="agent-sidebar-search-input" 
+                  id="agent-sidebar-search-input"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search agents..."
@@ -694,7 +699,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                       <div className="card-body p-2">
                         <div className="flex items-center justify-between">
                           <button
-                          id={`agent-sidebar-select-${agent._id || agent.__key}`}
+                            id={`agent-sidebar-select-${agent._id || agent.__key}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSelectAgent(agent);
@@ -736,7 +741,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                           <div className="card-actions">
                             <div className="tooltip tooltip-left" data-tip="Configure Agent">
                               <button
-                              id={`agent-sidebar-config-${agent._id || agent.__key}`}
+                                id={`agent-sidebar-config-${agent._id || agent.__key}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleOpenAgentConfigSidebar(agent);
@@ -760,7 +765,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
           <div className="border-t border-base-300 mb-24 p-4 bg-base-100 flex-shrink-0">
             <div className="dropdown dropdown-top w-full">
               <div
-              id="agent-sidebar-create-toggle"
+                id="agent-sidebar-create-toggle"
                 tabIndex={0}
                 role="button"
                 className="btn btn-primary btn-sm w-full shadow-lg hover:shadow-xl transition-all duration-200"
@@ -791,7 +796,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                       </label>
                       <div className="join w-full">
                         <button
-                        id="agent-sidebar-create-type-name"
+                          id="agent-sidebar-create-type-name"
                           onClick={() => handleTypeChange("name")}
                           className={`btn btn-sm join-item flex-1 ${
                             creationType === "name" ? "btn-primary" : "btn-outline btn-primary"
@@ -800,7 +805,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                           📝 Name
                         </button>
                         <button
-                        id="agent-sidebar-create-type-purpose"
+                          id="agent-sidebar-create-type-purpose"
                           onClick={() => handleTypeChange("purpose")}
                           className={`btn btn-sm join-item flex-1 ${
                             creationType === "purpose" ? "btn-primary" : "btn-outline btn-primary"
@@ -815,7 +820,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                     <div className="form-control">
                       {creationType === "name" ? (
                         <input
-                        id="agent-sidebar-create-name-input"
+                          id="agent-sidebar-create-name-input"
                           type="text"
                           value={inputValue}
                           onChange={(e) => setInputValue(e.target.value)}
@@ -824,7 +829,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                         />
                       ) : (
                         <textarea
-                        id="agent-sidebar-create-purpose-textarea"
+                          id="agent-sidebar-create-purpose-textarea"
                           value={inputValue}
                           onChange={(e) => setInputValue(e.target.value)}
                           placeholder="Describe what the agent should do..."
@@ -836,7 +841,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
 
                     {/* Create Button */}
                     <button
-                    id="agent-sidebar-create-submit-button"
+                      id="agent-sidebar-create-submit-button"
                       onClick={handleCreateAgent}
                       disabled={!inputValue.trim() || isCreating}
                       className={`btn btn-sm w-full ${
@@ -1016,7 +1021,12 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId, onAgent
       header={
         <div className="flex items-center justify-between px-6 py-4 border border-base-200">
           <h2 className="text-xl font-semibold">Agent Configuration</h2>
-          <button id="agent-config-sidebar-close-button" onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
+          <button
+            id="agent-config-sidebar-close-button"
+            onClick={onClose}
+            className="btn btn-ghost btn-circle btn-sm"
+            aria-label="Close sidebar"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>

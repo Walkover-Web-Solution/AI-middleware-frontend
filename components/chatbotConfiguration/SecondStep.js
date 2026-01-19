@@ -88,7 +88,7 @@ ${variablesObject}
   return (
     <div id="second-step-container" className="flex w-full flex-col gap-4 p-4">
       <Section title="Step 2" caption="Add below code in your product." />
-      <div  id="second-step-main-script-code"className="mockup-code">
+      <div id="second-step-main-script-code" className="mockup-code">
         <CopyButton data={DataObject.script} />
         <pre data-prefix=">" className="text-error">
           <code>&lt;script </code>

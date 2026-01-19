@@ -63,7 +63,8 @@ function CreateFineTuneModal({ params, selectedThreadIds }) {
               All Responses &#40; including no feedback &#41;
             </span>
             <input
-              id="fine-tune-all-responses-checkbox" type="checkbox"
+              id="fine-tune-all-responses-checkbox"
+              type="checkbox"
               className="checkbox"
               onChange={(e) => handleStatusChange(e, 0)}
               checked={status?.includes(0)}
@@ -77,7 +78,8 @@ function CreateFineTuneModal({ params, selectedThreadIds }) {
               Positive Feedback Responses
             </span>
             <input
-               id="fine-tune-positive-feedback-checkbox"  type="checkbox"
+              id="fine-tune-positive-feedback-checkbox"
+              type="checkbox"
               className="checkbox"
               onChange={(e) => handleStatusChange(e, 1)}
               checked={status?.includes(0) || status?.includes(1)}
@@ -92,7 +94,8 @@ function CreateFineTuneModal({ params, selectedThreadIds }) {
               Negative Feedback Responses
             </span>
             <input
-              id="fine-tune-negative-feedback-checkbox" type="checkbox"
+              id="fine-tune-negative-feedback-checkbox"
+              type="checkbox"
               className="checkbox"
               onChange={(e) => handleStatusChange(e, 2)}
               checked={status?.includes(0) || status?.includes(2)}
@@ -107,8 +110,15 @@ function CreateFineTuneModal({ params, selectedThreadIds }) {
         <div className="modal-action">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
-            <button id="fine-tune-close-button" className="btn mr-2">Close</button>
-            <button id="fine-tune-download-button"className="btn btn-primary" onClick={handleDownloadFineTuneData} disabled={status?.length === 0}>
+            <button id="fine-tune-close-button" className="btn mr-2">
+              Close
+            </button>
+            <button
+              id="fine-tune-download-button"
+              className="btn btn-primary"
+              onClick={handleDownloadFineTuneData}
+              disabled={status?.length === 0}
+            >
               Download
             </button>
           </form>

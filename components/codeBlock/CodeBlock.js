@@ -93,7 +93,7 @@ function CodeBlock({ inline, className, children, ...props }) {
           {languageLabel || "Code"}
         </span>
         <button
-                    id="code-block-copy-button"
+          id="code-block-copy-button"
           type="button"
           onClick={handleCopy}
           className="btn btn-ghost btn-xs font-medium text-xs px-2 py-1 text-base-content"

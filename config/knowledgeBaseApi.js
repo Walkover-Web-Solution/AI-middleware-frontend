@@ -97,12 +97,12 @@ export const deleteResource = async (id) => {
 };
 
 export const getResourceChunks = async (resourceId) => {
-    try {
-        const response = await axios.get(`${URL}/api/rag/resource/${resourceId}/chunks`);
-        return response?.data;
-    } catch (error) {
-        toast.error(error?.response?.data?.message || 'Failed to fetch resource chunks');
-        console.error(error);
-        throw error;
-    }
+  try {
+    const response = await axios.get(`${URL}/api/rag/resource/${resourceId}/chunks`);
+    return response?.data;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Failed to fetch resource chunks");
+    console.error(error);
+    throw error;
+  }
 };

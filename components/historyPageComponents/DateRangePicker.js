@@ -85,7 +85,10 @@ const DateRangePicker = ({
   // ... existing code ...
 
   return (
-    <div id="history-date-range-picker" className="border-b border-base-300 sticky flex flex-col gap-2 top-0 bg-base-200 z-low">
+    <div
+      id="history-date-range-picker"
+      className="border-b border-base-300 sticky flex flex-col gap-2 top-0 bg-base-200 z-low"
+    >
       <div>
         <label htmlFor="from" className="block text-sm font-medium text-base-content ">
           From

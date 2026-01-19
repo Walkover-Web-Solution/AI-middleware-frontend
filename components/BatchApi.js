@@ -117,7 +117,7 @@ const WebhookForm = ({ params, searchParams }) => {
           <span className="label-text font-semibold">Messages</span>
         </label>
         <textarea
-                    id="batch-api-messages-textarea"
+          id="batch-api-messages-textarea"
           onChange={handleMessagesChange}
           placeholder="Enter messages separated by commas"
           className="textarea bg-white dark:bg-black/15 textarea-bordered w-full min-h-64"
@@ -126,7 +126,7 @@ const WebhookForm = ({ params, searchParams }) => {
       </div>
 
       {responseData && (
-        <div id="batch-api-response-container"className="form-control mb-4">
+        <div id="batch-api-response-container" className="form-control mb-4">
           <label className="label">
             <span className="label-text text-lg font-semibold">Response Data</span>
           </label>
@@ -134,18 +134,18 @@ const WebhookForm = ({ params, searchParams }) => {
         </div>
       )}
 
-            <div className="flex justify-end">
-                <button
-                    id="batch-api-submit-button"
-                    type="submit"
-                    disabled={!isFormValid || isSubmitting}
-                    className={buttonClass}
-                >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                </button>
-            </div>
-        </form>
-    );
+      <div className="flex justify-end">
+        <button
+          id="batch-api-submit-button"
+          type="submit"
+          disabled={!isFormValid || isSubmitting}
+          className={buttonClass}
+        >
+          {isSubmitting ? "Sending..." : "Send Message"}
+        </button>
+      </div>
+    </form>
+  );
 };
 
 export default React.memo(WebhookForm);

@@ -89,7 +89,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
   }
 
   const toastContent = (
-    <div  id="tutorial-suggestion-toast-container" className="fixed top-1 right-1 z-very-high">
+    <div id="tutorial-suggestion-toast-container" className="fixed top-1 right-1 z-very-high">
       <div className="card w-80 bg-base-100 shadow-xl border border-base-300 animate-in slide-in-from-top-2 duration-300">
         {/* Progress indicator */}
         <div className="w-full h-1 bg-base-300 rounded-t-2xl overflow-hidden">

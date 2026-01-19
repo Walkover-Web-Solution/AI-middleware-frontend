@@ -32,7 +32,7 @@ const ModelTab = () => {
   );
 
   return (
-    <div id="model-tab-container"  className="flex flex-col mt-4 w-full">
+    <div id="model-tab-container" className="flex flex-col mt-4 w-full">
       {/* LLM Configuration Header */}
       <div className="mb-4 mt-2">
         <h3 className="text-base-content text-md font-medium">LLM Configuration</h3>

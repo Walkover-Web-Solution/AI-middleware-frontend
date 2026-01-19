@@ -118,7 +118,7 @@ export default function TriggersList({ params, isEmbedUser, isReadOnly }) {
           </div>
           {hasTriggers && (
             <button
-                        id="triggers-add-button"
+              id="triggers-add-button"
               onClick={() => openTrigger()}
               className="btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
               disabled={isViewer}
@@ -135,7 +135,7 @@ export default function TriggersList({ params, isEmbedUser, isReadOnly }) {
             <div className="border-2 border-dashed border-base-200 p-4 text-center">
               <p className="text-sm text-base-content/70">No triggers found.</p>
               <button
-                                id="triggers-add-first-button"
+                id="triggers-add-first-button"
                 onClick={() => openTrigger()}
                 className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                 disabled={isReadOnly}
@@ -150,13 +150,13 @@ export default function TriggersList({ params, isEmbedUser, isReadOnly }) {
             <div className="flex flex-col gap-2">
               {activeTriggers.map((trigger) => (
                 <div
-                                 id={`trigger-card-${trigger?.id}`}
+                  id={`trigger-card-${trigger?.id}`}
                   key={trigger?.id}
                   onClick={() => openTrigger(trigger?.id)}
                   className="group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full transition-colors duration-200"
                 >
                   <div className="p-2 flex-1 flex items-center">
-                    <div  className="flex items-center gap-2 w-full">
+                    <div className="flex items-center gap-2 w-full">
                       <Zap size={16} className="shrink-0" />
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-normal block truncate">{trigger?.title}</span>

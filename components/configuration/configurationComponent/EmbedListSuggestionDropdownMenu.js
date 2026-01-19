@@ -80,7 +80,11 @@ function EmbedListSuggestionDropdownMenu({
           const status = value?.status || integrationData?.[functionName]?.status;
           const title = value?.title || integrationData?.[functionName]?.title || "Untitled";
           return (
-            <li id={`embed-suggestion-function-${value?._id}`} key={value?._id} onClick={() => handleItemClick(value?._id)}>
+            <li
+              id={`embed-suggestion-function-${value?._id}`}
+              key={value?._id}
+              onClick={() => handleItemClick(value?._id)}
+            >
               <div className="flex justify-between items-center w-full">
                 <div title={title?.length > 20 ? title : ""}>
                   <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
@@ -130,7 +134,8 @@ function EmbedListSuggestionDropdownMenu({
       )}
       {!tutorialState?.showTutorial && (
         <ul
-          id="embed-suggestion-dropdown-menu" tabIndex={0}
+          id="embed-suggestion-dropdown-menu"
+          tabIndex={0}
           className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0"
         >
           <div className="flex flex-col gap-2 w-full">
@@ -140,7 +145,7 @@ function EmbedListSuggestionDropdownMenu({
               <li className="text-sm font-semibold disabled">Available Tools</li>
             )}
             <input
-                         id="embed-suggestion-search-input"
+              id="embed-suggestion-search-input"
               type="text"
               placeholder={`Search ${name == "preFunction" ? "Pre Function" : "Tool"}`}
               value={searchQuery}
@@ -157,7 +162,11 @@ function EmbedListSuggestionDropdownMenu({
                 <li className="text-sm font-semibold disabled mt-2">Prebuilt Tools</li>
                 {availablePrebuiltTools.length > 0 ? (
                   availablePrebuiltTools.map((item) => (
-                    <li id={`embed-suggestion-prebuilt-${item?.value}`}  key={item?._id} onClick={() => handlePrebuiltToolClick(item)}>
+                    <li
+                      id={`embed-suggestion-prebuilt-${item?.value}`}
+                      key={item?._id}
+                      onClick={() => handlePrebuiltToolClick(item)}
+                    >
                       <div className="flex justify-between items-center w-full">
                         <div className="flex items-center gap-2">
                           {GetPreBuiltToolTypeIcon(item?.value, 16, 16)}
@@ -179,7 +188,8 @@ function EmbedListSuggestionDropdownMenu({
             )}
 
             {!hideCreateFunction && (
-              <li id="embed-suggestion-add-new-button"
+              <li
+                id="embed-suggestion-add-new-button"
                 className="border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2"
                 onClick={() =>
                   openViasocket(undefined, {

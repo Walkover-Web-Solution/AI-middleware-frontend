@@ -227,7 +227,10 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
     <Modal MODAL_ID={MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL}>
       <div className="fixed max-w-11/12 inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
         {/* Header */}
-        <div id="prebuilt-tools-config-modal-container" className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl flex flex-col p-6 transition-all duration-300 ease-in-out animate-fadeIn">
+        <div
+          id="prebuilt-tools-config-modal-container"
+          className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl flex flex-col p-6 transition-all duration-300 ease-in-out animate-fadeIn"
+        >
           <div className="flex items-center justify-between border-b border-base-300">
             <h3 className="font-bold text-xl mb-4">Configure Web Search</h3>
           </div>
@@ -238,7 +241,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                 <label className="label !px-0">
                   <span className="label-text font-medium text-md">Allowed Domains</span>
                 </label>
-                <p  className="text-xs text-base-content/60 mb-3">
+                <p className="text-xs text-base-content/60 mb-3">
                   Add domains to filter Web Search. Leave empty to allow all domains.
                 </p>
               </div>
@@ -250,7 +253,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                 </label>
                 <div className="flex items-center gap-2">
                   <input
-                 id="prebuilt-tools-config-domain-input"
+                    id="prebuilt-tools-config-domain-input"
                     type="text"
                     name="domain"
                     value={newDomain}
@@ -263,7 +266,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                     disabled={isLoading}
                   />
                   <button
-                  id="prebuilt-tools-config-add-domain-button"
+                    id="prebuilt-tools-config-add-domain-button"
                     type="button"
                     onClick={handleAddDomain}
                     className="btn btn-primary btn-sm"
@@ -276,7 +279,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                 </div>
                 {!isEditing && validationError && (
                   <div className="label">
-                    <span  className="label-text-alt text-error">{validationError}</span>
+                    <span className="label-text-alt text-error">{validationError}</span>
                   </div>
                 )}
               </div>
@@ -293,7 +296,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                         <div className="flex-1">
                           {isEditing && editingIndex === index ? (
                             <input
-                          id={`prebuilt-tools-config-edit-input-${index}`}
+                              id={`prebuilt-tools-config-edit-input-${index}`}
                               type="text"
                               defaultValue={editingValueRef.current}
                               onChange={handleEditInputChange}
@@ -313,7 +316,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                           {isEditing && editingIndex === index ? (
                             <>
                               <button
-                             id={`prebuilt-tools-config-save-edit-button-${index}`}
+                                id={`prebuilt-tools-config-save-edit-button-${index}`}
                                 type="button"
                                 onClick={handleSaveEdit}
                                 className="btn btn-ghost btn-xs p-1 hover:bg-green-100 hover:text-success"
@@ -323,7 +326,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                                 <Check size={14} />
                               </button>
                               <button
-                            id={`prebuilt-tools-config-cancel-edit-button-${index}`}
+                                id={`prebuilt-tools-config-cancel-edit-button-${index}`}
                                 type="button"
                                 onClick={handleCancelEdit}
                                 className="btn btn-ghost btn-xs p-1 hover:bg-gray-100 hover:text-base-content"
@@ -336,7 +339,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                           ) : (
                             <>
                               <button
-                            id={`prebuilt-tools-config-edit-button-${index}`}
+                                id={`prebuilt-tools-config-edit-button-${index}`}
                                 type="button"
                                 onClick={() => handleEditDomain(index)}
                                 className="btn btn-ghost btn-xs p-1 hover:bg-blue-100 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200 tooltip"
@@ -346,7 +349,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                                 <Edit size={14} />
                               </button>
                               <button
-                            id={`prebuilt-tools-config-delete-button-${index}`}
+                                id={`prebuilt-tools-config-delete-button-${index}`}
                                 type="button"
                                 onClick={() => handleRemoveDomain(index)}
                                 className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error opacity-0 group-hover:opacity-100 transition-opacity duration-200 tooltip"
@@ -362,7 +365,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
                       {/* Show validation error directly below this specific domain when editing */}
                       {isEditing && editingIndex === index && validationError && (
                         <div className="px-3">
-                          <span  className="text-xs text-error">{validationError}</span>
+                          <span className="text-xs text-error">{validationError}</span>
                         </div>
                       )}
                     </div>
@@ -374,7 +377,7 @@ const PrebuiltToolsConfigModal = ({ initialDomains = [], onSave }) => {
             {/* Footer */}
             <div className="flex justify-end gap-3 pt-4">
               <button
-            id="prebuilt-tools-config-close-button"
+                id="prebuilt-tools-config-close-button"
                 type="button"
                 className="btn btn-sm hover:text-base-content"
                 onClick={handleClose}

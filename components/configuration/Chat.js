@@ -341,7 +341,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     <div id="chat-container" className="px-4 pt-4 bg-base-300">
       <div id="chat-header" className="w-full flex justify-between items-center px-2">
         <button
-        id="chat-toggle-testcases-button"
+          id="chat-toggle-testcases-button"
           className="btn btn-sm btn-square"
           onClick={() => setShowTestCases((prev) => !prev)}
           title="Toggle Test Cases"
@@ -367,7 +367,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                 <option value="ai">AI</option>
                 <option value="exact">Exact</option>
               </select>
-              <button  id="chat-add-testcase-button" className="btn btn-sm" onClick={handleResetChat}>
+              <button id="chat-add-testcase-button" className="btn btn-sm" onClick={handleResetChat}>
                 {" "}
                 <PlusIcon size={14} />
                 Add Test Case
@@ -380,12 +380,15 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       <div id="chat-content-wrapper" className="flex mt-4 h-[86vh] overflow-hidden relative">
         {/* Overlay Test Cases Sidebar */}
         {showTestCases && (
-          <div id="chat-testcase-sidebar-overlay"className="absolute inset-0 z-low flex">
+          <div id="chat-testcase-sidebar-overlay" className="absolute inset-0 z-low flex">
             {/* Optional backdrop */}
             <div className="absolute inset-0 bg-black/30" onClick={() => setShowTestCases(false)}></div>
 
             {/* Sidebar */}
-            <div id="chat-testcase-sidebar" className="relative w-[70%] h-full border border-base-content/30 rounded-md bg-base-100 shadow-lg z-30 animate-slideIn">
+            <div
+              id="chat-testcase-sidebar"
+              className="relative w-[70%] h-full border border-base-content/30 rounded-md bg-base-100 shadow-lg z-30 animate-slideIn"
+            >
               <TestCaseSidebar params={params} resolvedParams={searchParams} onTestCaseClick={handleTestCaseClick} />
             </div>
           </div>
@@ -395,7 +398,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         <div id="chat-messages-section" className="w-full flex-grow min-w-0 relative">
           {/* Loading overlay for testcase loading */}
           {isLoadingTestCase && (
-            <div id="chat-loading-overlay" className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-md z-50">
+            <div
+              id="chat-loading-overlay"
+              className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-md z-50"
+            >
               <div className="flex items-center gap-3 bg-base-100 p-4 rounded-lg shadow-lg border border-base-content/20">
                 <span className="loading loading-spinner loading-md text-primary"></span>
                 <span className="text-base font-medium">Loading test case conversation...</span>
@@ -405,13 +411,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
           <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 w-full z-low">
             <div
-              id="chat-messages-container"ref={messagesContainerRef}
+              id="chat-messages-container"
+              ref={messagesContainerRef}
               className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
             >
               {messages.map((message, index) => {
                 return (
                   <div
-                  id={`chat-message-${index}`}
+                    id={`chat-message-${index}`}
                     key={index}
                     className={`chat show-on-hover ${
                       message.sender === "user" ? "chat-end flex flex-col mt-2" : "chat-start"
@@ -431,11 +438,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                       {message?.sender === "assistant" && message?.fallback && (
                         <div className="my-1">
                           <div className="max-w-[30rem] text-primary rounded-lg text-xs overflow-hidden transition-all duration-200 hover:bg-base-200/90">
-                            <input
-                              id={`retry-${message.id}`}
-                              type="checkbox"
-                              className="peer hidden"
-                            />
+                            <input id={`retry-${message.id}`} type="checkbox" className="peer hidden" />
 
                             <label
                               htmlFor={`retry-${message.id}`}
@@ -748,7 +751,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
               })}
             </div>
 
-            <div id="chat-input-wrapper"className=" border-base-content/30 px-4 pt-4 mb-2 sm:mb-0 w-full">
+            <div id="chat-input-wrapper" className=" border-base-content/30 px-4 pt-4 mb-2 sm:mb-0 w-full">
               <div className="relative flex flex-col gap-4 w-full">
                 <div className="flex flex-row gap-2">
                   <ChatTextInput

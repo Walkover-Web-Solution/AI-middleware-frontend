@@ -386,7 +386,7 @@ const AccessManagementModal = ({ agent }) => {
 
         <div className="mb-4">
           {/* Email input with contextual Add/Invite actions */}
-          <div  id="access-management-search-section" className="bg-base-200 rounded-lg mb-4">
+          <div id="access-management-search-section" className="bg-base-200 rounded-lg mb-4">
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
@@ -446,7 +446,10 @@ const AccessManagementModal = ({ agent }) => {
 
             {/* Show search results */}
             {emailInput.trim() && searchResults.length > 0 && (
-              <div id="access-management-search-results" className="mt-3 border border-base-300 rounded-lg bg-base-100 max-h-60 overflow-y-auto">
+              <div
+                id="access-management-search-results"
+                className="mt-3 border border-base-300 rounded-lg bg-base-100 max-h-60 overflow-y-auto"
+              >
                 <ul className="menu p-0">
                   {searchResults.map((user) => (
                     <li key={user.user_id || user.id}>
@@ -481,7 +484,7 @@ const AccessManagementModal = ({ agent }) => {
 
             {/* Show no results message with invite button - only when not typing */}
             {!isSearching && emailInput.trim() && searchResults.length === 0 && !isTypingRef.current && (
-              <div  id="access-management-no-results" className="mt-3 p-3 border border-base-300 rounded-lg bg-base-100">
+              <div id="access-management-no-results" className="mt-3 p-3 border border-base-300 rounded-lg bg-base-100">
                 <div className="text-center">
                   <p className="text-sm">
                     No users found with email: <span className="font-medium">{emailInput}</span>
@@ -500,7 +503,7 @@ const AccessManagementModal = ({ agent }) => {
           </div>
         </div>
 
-        <div  id="access-management-members-section" className="mt-6">
+        <div id="access-management-members-section" className="mt-6">
           <h3 className="text-sm font-medium mb-2">Users with Access to this Agent</h3>
           <div className="border border-base-200 rounded-lg">
             <div className="max-h-[50vh] overflow-y-auto">
@@ -521,7 +524,7 @@ const AccessManagementModal = ({ agent }) => {
                       </div>
                       {/* Don't show remove button for admin/owner */}
                       <button
-                          id={`access-management-remove-button-${agentMember.id}`}
+                        id={`access-management-remove-button-${agentMember.id}`}
                         className="btn btn-ghost btn-xs btn-circle text-error ml-1"
                         onClick={() => removeUserFromAgent(agentMember.id || agentMember.user_id)}
                         disabled={isUpdating}
@@ -552,7 +555,7 @@ const AccessManagementModal = ({ agent }) => {
         </div>
 
         <div className="mt-4 flex justify-end">
-          <button id="access-management-close-button"onClick={handleClose} className="btn btn-sm">
+          <button id="access-management-close-button" onClick={handleClose} className="btn btn-sm">
             Close
           </button>
         </div>

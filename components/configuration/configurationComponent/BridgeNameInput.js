@@ -90,7 +90,7 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
     <div id="bridge-name-input-container" className="flex flex-row items-center">
       <div className="relative w-full">
         <textarea
-        id="bridge-name-input"
+          id="bridge-name-input"
           className="font-bold min-h-[25px] text-xl outline-none resize-none leading-tight bg-transparent"
           style={{
             width: "40ch",

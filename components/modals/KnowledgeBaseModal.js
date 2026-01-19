@@ -227,20 +227,20 @@ const KnowledgeBaseModal = ({
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
   };
 
-    return (
-        <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
-            <div className="modal-box w-11/12 max-w-xl border-2 border-base-300">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-base-300">
-                    <h3 className="font-bold text-lg">{selectedResource ? "Edit" : "Create"} Knowledge Base</h3>
-                    <button
-                        id="knowledgebase-modal-close-button"
-                        onClick={handleClose}
-                        className="btn btn-circle btn-ghost btn-sm"
-                        disabled={isCreatingResource}
-                    >
-                        ✕
-                    </button>
-                </div>
+  return (
+    <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
+      <div className="modal-box w-11/12 max-w-xl border-2 border-base-300">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-base-300">
+          <h3 className="font-bold text-lg">{selectedResource ? "Edit" : "Create"} Knowledge Base</h3>
+          <button
+            id="knowledgebase-modal-close-button"
+            onClick={handleClose}
+            className="btn btn-circle btn-ghost btn-sm"
+            disabled={isCreatingResource}
+          >
+            ✕
+          </button>
+        </div>
 
         <form onSubmit={selectedResource ? handleUpdateResource : handleCreateResource} className="space-y-4">
           {/* Name Field */}
@@ -251,7 +251,7 @@ const KnowledgeBaseModal = ({
               </span>
             </label>
             <input
-                            id="knowledgebase-name-input"
+              id="knowledgebase-name-input"
               type="text"
               name="title"
               className="input input-bordered input-sm"
@@ -271,7 +271,7 @@ const KnowledgeBaseModal = ({
               </span>
             </label>
             <textarea
-                            id="knowledgebase-description-textarea"
+              id="knowledgebase-description-textarea"
               name="description"
               className="textarea textarea-bordered textarea-sm"
               placeholder="Brief description of the knowledge base content"
@@ -286,7 +286,7 @@ const KnowledgeBaseModal = ({
             <div className="flex gap-4 mb-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                                    id="knowledgebase-input-type-url"
+                  id="knowledgebase-input-type-url"
                   type="radio"
                   name="inputType"
                   className="radio radio-primary radio-sm"
@@ -297,7 +297,7 @@ const KnowledgeBaseModal = ({
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                                    id="knowledgebase-input-type-file"
+                  id="knowledgebase-input-type-file"
                   type="radio"
                   name="inputType"
                   className="radio radio-primary radio-sm"
@@ -308,7 +308,7 @@ const KnowledgeBaseModal = ({
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                                    id="knowledgebase-input-type-content"
+                  id="knowledgebase-input-type-content"
                   type="radio"
                   name="inputType"
                   className="radio radio-primary radio-sm"
@@ -332,7 +332,7 @@ const KnowledgeBaseModal = ({
               {!uploadedFile && (
                 <>
                   <input
-                                        id="knowledgebase-file-upload"
+                    id="knowledgebase-file-upload"
                     type="file"
                     onChange={handleFileUpload}
                     className="file-input file-input-bordered file-input-sm w-full"
@@ -358,7 +358,7 @@ const KnowledgeBaseModal = ({
                       <span className="text-xs text-gray-500">({formatFileSize(uploadedFile.size)})</span>
                     </div>
                     <button
-                                            id="knowledgebase-remove-file-button"
+                      id="knowledgebase-remove-file-button"
                       type="button"
                       onClick={removeUploadedFile}
                       className="btn btn-ghost btn-xs text-error hover:bg-error hover:text-white"
@@ -379,7 +379,7 @@ const KnowledgeBaseModal = ({
                 </span>
               </label>
               <textarea
-                                id="knowledgebase-content-textarea-create"
+                id="knowledgebase-content-textarea-create"
                 name="content"
                 className="textarea textarea-bordered textarea-sm w-full h-32"
                 placeholder="Enter content here..."
@@ -398,7 +398,7 @@ const KnowledgeBaseModal = ({
                   </span>
                 </label>
                 <textarea
-                                    id="knowledgebase-content-textarea-edit"
+                  id="knowledgebase-content-textarea-edit"
                   name="content"
                   className="textarea textarea-bordered textarea-sm w-full h-32"
                   placeholder="Enter content here..."
@@ -414,7 +414,7 @@ const KnowledgeBaseModal = ({
                   <span className="label-text text-sm font-medium">URL</span>
                 </label>
                 <input
-                                    id="knowledgebase-url-input-edit"
+                  id="knowledgebase-url-input-edit"
                   type="url"
                   name="url"
                   className="input input-bordered input-sm bg-gray-100"
@@ -436,7 +436,7 @@ const KnowledgeBaseModal = ({
                 </span>
               </label>
               <input
-                                id="knowledgebase-url-input-create"
+                id="knowledgebase-url-input-create"
                 type="url"
                 name="url"
                 className="input input-bordered input-sm"
@@ -455,7 +455,7 @@ const KnowledgeBaseModal = ({
                   <span className="label-text text-sm font-medium">Chunking Type</span>
                 </label>
                 <select
-                                    id="knowledgebase-chunking-type-select"
+                  id="knowledgebase-chunking-type-select"
                   name="chunkingType"
                   className="select select-bordered select-sm"
                   value={chunkingType}
@@ -475,7 +475,7 @@ const KnowledgeBaseModal = ({
                     <span className="label-text text-sm font-medium">Chunking URL</span>
                   </label>
                   <input
-                                        id="knowledgebase-chunking-url-input"
+                    id="knowledgebase-chunking-url-input"
                     type="url"
                     name="chunkingUrl"
                     className="input input-bordered input-sm"
@@ -491,7 +491,7 @@ const KnowledgeBaseModal = ({
                       <span className="label-text text-sm font-medium">Chunk Size</span>
                     </label>
                     <input
-                                            id="knowledgebase-chunk-size-input"
+                      id="knowledgebase-chunk-size-input"
                       type="number"
                       name="chunkSize"
                       className="input input-bordered input-sm"
@@ -514,7 +514,7 @@ const KnowledgeBaseModal = ({
                         <span className="label-text text-sm font-medium">Chunk Overlap</span>
                       </label>
                       <input
-                                                id="knowledgebase-chunk-overlap-input"
+                        id="knowledgebase-chunk-overlap-input"
                         type="number"
                         name="chunkingOverlap"
                         className="input input-bordered input-sm"
@@ -535,89 +535,93 @@ const KnowledgeBaseModal = ({
             </div>
           )}
 
-                    {/* Query Settings Accordion */}
-                    {!selectedResource && (
-                        <div className="collapse collapse-arrow border border-base-300 bg-base-100">
-                            <input
-                                id="knowledgebase-advanced-settings-toggle"
-                                type="checkbox"
-                                checked={showQuerySettings}
-                                onChange={(e) => setShowQuerySettings(e.target.checked)}
-                                disabled={isCreatingResource}
-                            />
-                            <div className="collapse-title text-sm font-medium">
-                                Advanced Settings
-                            </div>
-                            <div className="collapse-content">
-                                <div className="">
-                                    <div className="form-control">
-                                        <label className="label">
-                                            <span className="label-text text-sm font-medium">Query Access Type</span>
-                                        </label>
-                                        <div className="flex gap-4">
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    id="knowledgebase-query-type-fastest"
-                                                    type="radio"
-                                                    name="queryAccessType"
-                                                    value="fastest"
-                                                    className="radio radio-primary radio-sm"
-                                                    defaultChecked
-                                                    disabled={isCreatingResource}
-                                                />
-                                                <span className="text-sm">Fastest</span>
-                                            </label>
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    id="knowledgebase-query-type-moderate"
-                                                    type="radio"
-                                                    name="queryAccessType"
-                                                    value="moderate"
-                                                    className="radio radio-primary radio-sm"
-                                                    disabled={isCreatingResource}
-                                                />
-                                                <span className="text-sm">Moderate</span>
-                                            </label>
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    id="knowledgebase-query-type-high-accuracy"
-                                                    type="radio"
-                                                    name="queryAccessType"
-                                                    value="high_accuracy"
-                                                    className="radio radio-primary radio-sm"
-                                                    disabled={isCreatingResource}
-                                                />
-                                                <span className="text-sm">High Accuracy</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex justify-end gap-2">
-                        <button
-                            id="knowledgebase-cancel-button"
-                            type="button"
-                            className="btn btn-ghost btn-sm"
-                            onClick={handleClose}
-                            disabled={isCreatingResource}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            id="knowledgebase-submit-button"
-                            type="submit"
-                            className="btn btn-primary btn-sm"
-                            disabled={isCreatingResource}
-                        >
-                            {isCreatingResource ? (selectedResource ? "Updating..." : "Adding...") : (selectedResource ? "Update Resource" : "Add Resource")}
-                        </button>
+          {/* Query Settings Accordion */}
+          {!selectedResource && (
+            <div className="collapse collapse-arrow border border-base-300 bg-base-100">
+              <input
+                id="knowledgebase-advanced-settings-toggle"
+                type="checkbox"
+                checked={showQuerySettings}
+                onChange={(e) => setShowQuerySettings(e.target.checked)}
+                disabled={isCreatingResource}
+              />
+              <div className="collapse-title text-sm font-medium">Advanced Settings</div>
+              <div className="collapse-content">
+                <div className="">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text text-sm font-medium">Query Access Type</span>
+                    </label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          id="knowledgebase-query-type-fastest"
+                          type="radio"
+                          name="queryAccessType"
+                          value="fastest"
+                          className="radio radio-primary radio-sm"
+                          defaultChecked
+                          disabled={isCreatingResource}
+                        />
+                        <span className="text-sm">Fastest</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          id="knowledgebase-query-type-moderate"
+                          type="radio"
+                          name="queryAccessType"
+                          value="moderate"
+                          className="radio radio-primary radio-sm"
+                          disabled={isCreatingResource}
+                        />
+                        <span className="text-sm">Moderate</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          id="knowledgebase-query-type-high-accuracy"
+                          type="radio"
+                          name="queryAccessType"
+                          value="high_accuracy"
+                          className="radio radio-primary radio-sm"
+                          disabled={isCreatingResource}
+                        />
+                        <span className="text-sm">High Accuracy</span>
+                      </label>
                     </div>
-                </form>
+                  </div>
+                </div>
+              </div>
             </div>
-        </Modal>
-    );
+          )}
+          <div className="flex justify-end gap-2">
+            <button
+              id="knowledgebase-cancel-button"
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={handleClose}
+              disabled={isCreatingResource}
+            >
+              Cancel
+            </button>
+            <button
+              id="knowledgebase-submit-button"
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={isCreatingResource}
+            >
+              {isCreatingResource
+                ? selectedResource
+                  ? "Updating..."
+                  : "Adding..."
+                : selectedResource
+                  ? "Update Resource"
+                  : "Add Resource"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
+  );
 };
 
 export default KnowledgeBaseModal;

@@ -229,11 +229,11 @@ const ApiKeyModal = ({
           </select>
         </div>
         <div id="apikey-modal-actions" className="modal-action">
-          <button id="apikey-modal-cancel-button"  type="reset" className="btn btn-sm" onClick={handleClose}>
+          <button id="apikey-modal-cancel-button" type="reset" className="btn btn-sm" onClick={handleClose}>
             Cancel
           </button>
           <button
-                    id="apikey-modal-submit-button"
+            id="apikey-modal-submit-button"
             type="submit"
             className={`btn btn-sm btn-primary ${
               (isEditing && !ischanged.isUpdate) || (!isEditing && !ischanged.isAdd) ? "btn-disabled" : ""
