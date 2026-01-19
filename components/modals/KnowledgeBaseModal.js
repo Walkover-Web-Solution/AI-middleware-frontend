@@ -37,9 +37,25 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
             setInputType('url'); // Default for create mode
         }
     }, [selectedResource]);
+
+    const ALLOWED_FILE_TYPES = ["application/pdf", "text/plain"];
+    const ALLOWED_EXTENSIONS = [".pdf", ".txt"];
+
+    const isAllowedFile = (file) => {
+        const ext = "." + (file?.name?.split(".").pop() || "").toLowerCase();
+        return ALLOWED_FILE_TYPES.includes(file.type) || ALLOWED_EXTENSIONS.includes(ext);
+    };
+
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
+
+        // ✅ Only PDF + TXT allowed
+        if (!isAllowedFile(file)) {
+            toast.error("Only PDF or TXT files are allowed.");
+            event.target.value = "";
+            return;
+        }
 
         setIsUploading(true);
         try {
@@ -310,7 +326,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                         onChange={handleFileUpload}
                                         className="file-input file-input-bordered file-input-sm w-full"
                                         disabled={isCreatingResource || isUploading}
-                                        accept=".pdf,.doc,.docx,.txt"
+                                        accept=".pdf,.txt"
                                     />
                                     {isUploading && (
                                         <div className="flex items-center gap-2 mt-2">
@@ -318,7 +334,7 @@ const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = ()
                                             <span className="text-sm text-gray-600">Uploading file...</span>
                                         </div>
                                     )}
-                                    <span className="label-text-alt text-gray-400 mt-1">Supported formats: .pdf, .doc, .docx, .txt</span>
+                                    <span className="label-text-alt text-gray-400 mt-1">Supported formats: .pdf, .txt</span>
                                 </>
                             )}
 
