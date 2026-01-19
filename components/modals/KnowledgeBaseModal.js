@@ -8,52 +8,74 @@ import { createResourceAction, updateResourceAction } from "@/store/action/knowl
 import { uploadImage } from "@/config/utilityApi";
 import { toast } from "react-toastify";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { MIME_EXTENSION_MAP } from "@/utils/enums";
+const KnowledgeBaseModal = ({ params, selectedResource, setSelectedResource = () => { }, addToVersion = false, knowbaseVersionData = [], searchParams }) => {
+    const dispatch = useDispatch();
+    const [isCreatingResource, setIsCreatingResource] = useState(false);
+    const [inputType, setInputType] = useState('url'); // 'url', 'file', 'content'
+    const [chunkingType, setChunkingType] = useState('recursive');
+    const [uploadedFile, setUploadedFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false)
+    const [showQuerySettings, setShowQuerySettings] = useState(false);
+    React.useEffect(() => {
+        if (selectedResource?.settings?.chunkingType) {
+            setChunkingType(selectedResource.settings.chunkingType);
+        } else {
+            setChunkingType('recursive');
+        }
 
-const KnowledgeBaseModal = ({
-  params,
-  selectedResource,
-  setSelectedResource = () => {},
-  addToVersion = false,
-  knowbaseVersionData = [],
-  searchParams,
-}) => {
-  const dispatch = useDispatch();
-  const [isCreatingResource, setIsCreatingResource] = useState(false);
-  const [inputType, setInputType] = useState("url"); // 'url', 'file', 'content'
-  const [chunkingType, setChunkingType] = useState("recursive");
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [showQuerySettings, setShowQuerySettings] = useState(false);
-  React.useEffect(() => {
-    if (selectedResource?.settings?.chunkingType) {
-      setChunkingType(selectedResource.settings.chunkingType);
-    } else {
-      setChunkingType("recursive");
-    }
+        // Detect input type based on existing resource data
+        if (selectedResource) {
+            if (selectedResource.url) {
+                setInputType('url');
+            } else if (selectedResource.content && selectedResource.url === "") {
+                setInputType('content');
+            } else {
+                setInputType('url'); // Default for edit mode
+            }
+        } else {
+            setInputType('url'); // Default for create mode
+        }
+    }, [selectedResource]);
 
-    // Detect input type based on existing resource data
-    if (selectedResource) {
-      if (selectedResource.url) {
-        setInputType("url");
-      } else if (selectedResource.content && selectedResource.url === "") {
-        setInputType("content");
-      } else {
-        setInputType("url"); // Default for edit mode
-      }
-    } else {
-      setInputType("url"); // Default for create mode
-    }
-  }, [selectedResource]);
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const isAllowedFile = (file) => {
+        if (!file || typeof file.name !== "string") {
+            return false;
+        }
+        
+        const nameParts = file.name.split(".");
+        let ext = "";
+        
+        if (nameParts.length > 1) {
+            const lastPart = nameParts[nameParts.length - 1];
+            if (lastPart) {
+                ext = "." + lastPart.toLowerCase();
+            }
+        }
+        
+        const mimeType = typeof file.type === "string" ? file.type.toLowerCase() : "";
+        const expectedExt = MIME_EXTENSION_MAP[mimeType];
+        // Both MIME type and file extension must be allowed and consistent
+        return Boolean(expectedExt) && ext === expectedExt;
+    };
 
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await uploadImage(formData, true);
-      const fileUrl = response.url || response.file_url || response.data?.url;
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // ✅ Only PDF + TXT allowed
+        if (!isAllowedFile(file)) {
+            toast.error("Only PDF or TXT files are allowed.");
+            event.target.value = "";
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await uploadImage(formData, true);
+            const fileUrl = response.url || response.file_url || response.data?.url;
 
       setUploadedFile({
         name: file.name,
@@ -333,21 +355,21 @@ const KnowledgeBaseModal = ({
                 <>
                   <input
                                         id="knowledgebase-file-upload"
-                    type="file"
-                    onChange={handleFileUpload}
-                    className="file-input file-input-bordered file-input-sm w-full"
-                    disabled={isCreatingResource || isUploading}
-                    accept=".pdf,.doc,.docx,.txt"
-                  />
-                  {isUploading && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="loading loading-spinner loading-sm"></span>
-                      <span className="text-sm text-gray-600">Uploading file...</span>
-                    </div>
-                  )}
-                  <span className="label-text-alt text-gray-400 mt-1">Supported formats: .pdf, .doc, .docx, .txt</span>
-                </>
-              )}
+                                        type="file"
+                                        onChange={handleFileUpload}
+                                        className="file-input file-input-bordered file-input-sm w-full"
+                                        disabled={isCreatingResource || isUploading}
+                                        accept=".pdf,.txt"
+                                    />
+                                    {isUploading && (
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            <span className="text-sm text-gray-600">Uploading file...</span>
+                                        </div>
+                                    )}
+                                    <span className="label-text-alt text-gray-400 mt-1">Supported formats: .pdf, .txt</span>
+                                </>
+                            )}
 
               {/* Display uploaded file only */}
               {uploadedFile && (
