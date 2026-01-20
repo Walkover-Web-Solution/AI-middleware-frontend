@@ -18,15 +18,37 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 //   }
 // }
 
-export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date }) => {
+export const getMetricsDataApi = async ({
+  apikey_id,
+  service,
+  model,
+  thread_id,
+  bridge_id,
+  version_id,
+  range,
+  factor,
+  start_date,
+  end_date,
+}) => {
   try {
-    const response = await axios.post(`${URL}/api/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date });
+    const response = await axios.post(`${URL}/api/metrics`, {
+      apikey_id,
+      service,
+      model,
+      thread_id,
+      bridge_id,
+      version_id,
+      range,
+      factor,
+      start_date,
+      end_date,
+    });
     return response.data?.data || [];
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 // User Feedback and Analytics APIs
 // export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
@@ -45,6 +67,9 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
 
 // Fine-tuning Data APIs
 export const downloadFineTuneData = async (bridge_id, threadIds, status = [0]) => {
-  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds, user_feedback: status });
+  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, {
+    thread_ids: threadIds,
+    user_feedback: status,
+  });
   return response?.data;
-}
+};
