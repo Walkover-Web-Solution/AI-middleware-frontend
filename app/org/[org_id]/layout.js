@@ -162,6 +162,50 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   
   useRtLayerEventHandler();
 
+  // MSG91 Proxy Auth Token
+  const PROXY_AUTH_TOKEN = getFromCookies('proxy_token');
+
+  // Initialize MSG91 proxy auth configuration
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Configuration for MSG91 Proxy Auth
+      const configuration = {
+        authToken: "clV0YUt4UURVbzJYZTRwMHdBNkZ6QjZoay9qMmRRcjZhMGVXMGtCT1ZtdGNaelFxMmlNaGdNcEJuRy9UWmFSZHQvMHc0YnJYUHExakh5NDNGVjZMOEdXVmg3OG82R094Yk5tdE9XckxjUTV1dlNzUERXRWxaOWIwWm5JRmlMVHl5UmpZUHVDK2piOURJUi9IdytncFZBRWc5QnRyRDRVeUFOZlBCY1FST0FOZStISUVtK055VWNxaGduZWpGeUZxVWxYWjd6YXI2YTF0aGxHZTNka1BlQT09",
+        pass: true,
+        hideisHidden:true,
+        type: 'user-management',
+        success: (data) => {
+          // get verified token in response
+          console.log('MSG91 Auth success response', data);
+          toast.success('Authentication verified successfully!');
+        },
+        failure: (error) => {
+          // handle error
+          console.log('MSG91 Auth failure reason', error);
+          toast.error('Authentication failed. Please try again.');
+        },
+      };
+
+      // Load MSG91 Proxy Auth Script
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://test.proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
+      script.onload = function() {
+        if (typeof initVerification === 'function') {
+          initVerification(configuration);
+        }
+      };
+      document.head.appendChild(script);
+
+      // Cleanup function to remove script on unmount
+      return () => {
+        // if (script && script.parentNode) {
+        //   script.parentNode.removeChild(script);
+        // }
+      };
+    }
+  }, []);
+
 
   useEffect(() => {
     const validateOrg = async () => {
