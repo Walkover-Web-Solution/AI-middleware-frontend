@@ -210,7 +210,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
         const item = knowledgeBaseData?.find((kb) => kb._id === resourceId);
         return item ? (
           <div
-            id={`knowledgebase-card-${docId}`}
+            id={`knowledgebase-card-${item._id}`}
             key={resourceId || index}
             className={`group flex items-center border border-base-200 cursor-pointer bg-base-100 relative min-h-[44px] w-full ${item?.description?.trim() === "" ? "border-red-600" : ""}transition-colors duration-200`}
           >
@@ -234,7 +234,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
             {/* Remove button that appears on hover */}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
               <button
-                id={`knowledgebase-delete-button-${docId}`}
+                id={`knowledgebase-delete-button-${item._id}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenDeleteModal(item);

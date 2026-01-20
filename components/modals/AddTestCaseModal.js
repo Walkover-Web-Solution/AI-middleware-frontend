@@ -330,7 +330,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
                         </div>
                       ) : (
                         <textarea
-                          id={`add-testcase-second-last-remove-tool-${idx}`}
+                          id={`add-testcase-second-last-remove-tool`}
                           defaultValue={secondLastMessage.content}
                           className="textarea bg-white dark:bg-black/15 w-full text-sm p-3 focus:outline-none rounded-lg shadow-sm resize-none overflow-hidden"
                           onInput={handleTextareaInput}
