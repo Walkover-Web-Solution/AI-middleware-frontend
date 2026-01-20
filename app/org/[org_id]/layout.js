@@ -67,7 +67,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(userDetails());
       dispatch(getDescriptionsAction());
     }
-     dispatch(getLinksAction());
+    dispatch(getLinksAction());
 
     if (pathName.endsWith("apikeys") && !isEmbedUser) {
       dispatch(getApiKeyGuideAction());
@@ -77,7 +77,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     const updateUserMeta = async () => {
       // Skip user meta updates for embed users
       if (isEmbedUser) return;
-      
+
       const unlimited_access = getFromCookies("unlimited_access");
       const utmSource = getFromCookies("utm_source");
       const utmMedium = getFromCookies("utm_medium");
@@ -158,8 +158,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, []);
 
 
-    useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser,currrentOrgDetail?.role_name==="Viewer");
-  
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser, currrentOrgDetail?.role_name === "Viewer");
+
   useRtLayerEventHandler();
 
   // MSG91 Proxy Auth Token
@@ -172,7 +172,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       const configuration = {
         authToken: PROXY_AUTH_TOKEN,
         pass: true,
-        hideisHidden:true,
+        hideisHidden: true,
         type: 'user-management',
         success: (data) => {
           // get verified token in response
@@ -190,7 +190,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       const script = document.createElement('script');
       script.type = 'text/javascript';
       script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
-      script.onload = function() {
+      script.onload = function () {
         if (typeof initVerification === 'function') {
           initVerification(configuration);
         }
@@ -251,8 +251,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
       dispatch(getPrebuiltToolsAction())
-      if(!isEmbedUser){
-        currrentOrgDetail?.role_name!="Viewer" && dispatch(getAllAuthData(resolvedParams?.org_id))
+      if (!isEmbedUser) {
+        currrentOrgDetail?.role_name != "Viewer" && dispatch(getAllAuthData(resolvedParams?.org_id))
         dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
         dispatch(getPrebuiltPromptsAction())
         dispatch(getUsersAction());
@@ -378,12 +378,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
                 version_id: resolvedSearchParams?.get('version')
               }))
             }
-          }else {
-              dispatch(updateApiAction(path[5], {
-                pre_tools: preTools[0],
-                status: "0",
-                version_id: resolvedSearchParams?.get('version')
-              }))
+          } else {
+            dispatch(updateApiAction(path[5], {
+              pre_tools: preTools[0],
+              status: "0",
+              version_id: resolvedSearchParams?.get('version')
+            }))
           }
           dispatch(deleteFunctionAction({ script_id: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
 
