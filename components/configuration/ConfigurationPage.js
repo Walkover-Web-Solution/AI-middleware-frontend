@@ -260,7 +260,7 @@ const ConfigurationPage = ({
                     <SetupView />
                 </div>
                 <div className="mt-auto">
-                    {renderHelpSection()}
+                    {searchParams?.tab !== 'agent-flow' && renderHelpSection()}
                 </div>
             </div>
 
