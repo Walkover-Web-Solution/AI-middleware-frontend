@@ -170,7 +170,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     if (typeof window !== 'undefined') {
       // Configuration for MSG91 Proxy Auth
       const configuration = {
-        authToken: "clV0YUt4UURVbzJYZTRwMHdBNkZ6QjZoay9qMmRRcjZhMGVXMGtCT1ZtdGNaelFxMmlNaGdNcEJuRy9UWmFSZHQvMHc0YnJYUHExakh5NDNGVjZMOEdXVmg3OG82R094Yk5tdE9XckxjUTV1dlNzUERXRWxaOWIwWm5JRmlMVHl5UmpZUHVDK2piOURJUi9IdytncFZBRWc5QnRyRDRVeUFOZlBCY1FST0FOZStISUVtK055VWNxaGduZWpGeUZxVWxYWjd6YXI2YTF0aGxHZTNka1BlQT09",
+        authToken: PROXY_AUTH_TOKEN,
         pass: true,
         hideisHidden:true,
         type: 'user-management',
@@ -189,7 +189,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       // Load MSG91 Proxy Auth Script
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src = 'https://test.proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
+      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
       script.onload = function() {
         if (typeof initVerification === 'function') {
           initVerification(configuration);
