@@ -6,6 +6,7 @@ import useTutorialVideos from "@/hooks/useTutorialVideos";
 import { generateRandomID, openModal } from "@/utils/utility";
 import { ChevronDownIcon, ChevronUpIcon } from "@/components/Icons";
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
+import JsonSchemaBuilderModal from "@/components/modals/JsonSchemaBuilderModal";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -718,15 +719,26 @@ const AdvancedParameters = ({
         {/* JSON Schema textarea and modal - positioned below the key/label */}
         {field === "select" && !isDefaultValue && configuration?.[key]?.type === "json_schema" && (
           <div id={`advanced-param-json-schema-${key}`} className="mt-3 space-y-2">
-            <div id={`advanced-param-json-schema-header-${key}`} className="flex justify-end">
-              <span
-                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity text-xs"
-                onClick={() => {
-                  openModal(MODAL_TYPE.JSON_SCHEMA);
-                }}
-              >
-                Response Builder
-              </span>
+            <div id={`advanced-param-json-schema-header-${key}`} className="flex justify-between items-center">
+              <div className="flex gap-2 mt-4 ml-auto">
+                <span
+                  className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity text-xs"
+                  onClick={() => {
+                    openModal(MODAL_TYPE.JSON_SCHEMA_BUILDER);
+                  }}
+                >
+                  Build Visually
+                </span>
+                <span className="text-xs text-base-content/50">|</span>
+                <span
+                  className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity text-xs"
+                  onClick={() => {
+                    openModal(MODAL_TYPE.JSON_SCHEMA);
+                  }}
+                >
+                  Build with AI
+                </span>
+              </div>
             </div>
 
             <textarea
@@ -747,6 +759,11 @@ const AdvancedParameters = ({
               className="textarea textarea-bordered w-full h-32 font-mono text-xs"
               placeholder="Enter JSON schema..."
               disabled={isReadOnly}
+            />
+            <JsonSchemaBuilderModal
+              params={params}
+              searchParams={searchParams}
+              isReadOnly={isReadOnly}
             />
             <JsonSchemaModal
               params={params}
