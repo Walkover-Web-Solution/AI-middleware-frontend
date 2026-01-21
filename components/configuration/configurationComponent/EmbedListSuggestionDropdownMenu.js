@@ -79,7 +79,6 @@ function EmbedListSuggestionDropdownMenu({
           const functionName = value?.script_id;
           const status = value?.status || integrationData?.[functionName]?.status;
           const title = value?.title || integrationData?.[functionName]?.title || "Untitled";
-          const iconUrl = integrationData?.[functionName]?.serviceIcons?.[0];
           return (
             <li
               id={`embed-suggestion-function-${value?._id}`}
@@ -87,16 +86,24 @@ function EmbedListSuggestionDropdownMenu({
               onClick={() => handleItemClick(value?._id)}
             >
               <div className="flex justify-between items-center w-full">
-                  <div className="flex items-center gap-2 flex-1 min-w-0" title={title?.length > 20 ? title : ""}>
-                    {iconUrl && (
-                        <img 
-                            src={iconUrl} 
-                            alt={title}
-                            className="w-6 h-6 flex-shrink-0"
-                            onError={(e) => { e.target.style.display = 'none'; }}
+                <div className="flex items-center gap-2 flex-1 min-w-0" title={title?.length > 20 ? title : ""}>
+                  {integrationData?.[functionName]?.serviceIcons?.length > 0 ? (
+                    <div className="flex items-center -space-x-2 flex-shrink-0">
+                      {integrationData[functionName].serviceIcons.slice(0, 5).map((icon, index) => (
+                        <img
+                          key={index}
+                          src={icon}
+                          alt={`${title} icon ${index + 1}`}
+                          className="w-6 h-6 rounded-full border-2 border-base-100 flex-shrink-0 object-contain bg-white p-0.5"
+                          style={{ zIndex: 5 - index }}
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                          }}
                         />
-                    )}
-                   
+                      ))}
+                    </div>
+                  ) : null}
+
                   <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                     {title?.length > 20 ? `${title.slice(0, 20)}...` : title}
                   </p>
