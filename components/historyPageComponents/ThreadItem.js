@@ -175,6 +175,16 @@ const ThreadItem = ({
   const { sliderState, openSlider, closeSlider } = useSlider();
   const dropupRef = useRef(null);
   const router = useRouter();
+  const handleVisualizeClick = () => {
+    if (!params?.org_id || !params?.id) return;
+    const searchParams = new URLSearchParams();
+    if (item?.message_id) searchParams.set("message_id", item.message_id);
+    if (item?.thread_id) searchParams.set("thread_id", item.thread_id);
+    if (item?.sub_thread_id || item?.thread_id) {
+      searchParams.set("subThread_id", item?.sub_thread_id || item?.thread_id);
+    }
+    router.push(`/org/${params.org_id}/agents/history/${params.id}/visualize?${searchParams.toString()}`);
+  };
 
   useEffect(() => {
     setMessageType(getInitialMessageType());
@@ -529,32 +539,21 @@ const ThreadItem = ({
   };
 
   return (
-    <div
-      key={`item-id-${item?.id}`}
-      id={`message-${messageId}`}
-      ref={(el) => (threadRefs.current[messageId] = el)}
-      className="text-sm"
-    >
+    <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="text-sm">
       <div className="show-on-hover">
         {/* 1. First: Render User Message if exists */}
-        <div className="chat group chat-end mb-4">
-          <div className="chat-image avatar flex justify-center items-center">
-            <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors">
-              <div className="relative rounded-full bg-base-300 flex justify-center items-center">
-                <UserIcon size={20} className="text-base-content" />
+            <div className="chat group chat-end mb-4">
+              <div className="chat-image avatar flex justify-center items-center">
+                <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors">
+                  <div className="relative rounded-full bg-base-300 flex justify-center items-center">
+                    <UserIcon size={20} className="text-base-content" />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div
-            className="flex justify-start flex-row-reverse items-center gap-1"
-            style={{ width: "-webkit-fill-available" }}
-          >
-            <div
-              className="chat-bubble-primary chat-bubble transition-all ease-in-out duration-300 relative group break-words"
-              style={{ wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}
-            >
-              {/* User attachments - shown above message text */}
-              {renderAttachments(normalizeImageUrls(item?.user_urls, "user"))}
+              <div className="flex justify-start flex-row-reverse items-center gap-1" style={{ width: "-webkit-fill-available" }}>
+                <div className="chat-bubble-primary chat-bubble transition-all ease-in-out duration-300 relative group break-words" style={{ wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
+                  {/* User attachments - shown above message text */}
+                  {renderAttachments(normalizeImageUrls(item?.user_urls, "user"))}
 
               <ReactMarkdown
                 components={{
@@ -579,6 +578,15 @@ const ThreadItem = ({
               </span>
             </time>
             <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity see-on-hover">
+                  <button
+                    className={`btn text-xs font-normal btn-sm hover:btn-primary ${
+                      isLastMessage() ? '' : 'see-on-hover'
+                    }`}
+                    onClick={handleVisualizeClick}
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    <span>Visualize</span>
+                  </button>
               <button
                 id="thread-item-user-aiconfig-button"
                 className={`btn text-xs font-normal btn-sm hover:btn-primary ${isLastMessage() ? "" : "see-on-hover"}`}
@@ -611,6 +619,7 @@ const ThreadItem = ({
                 <AddIcon className="h-3 w-3" />
                 <span>More...</span>
               </button>
+                  
             </div>
           </div>
         </div>

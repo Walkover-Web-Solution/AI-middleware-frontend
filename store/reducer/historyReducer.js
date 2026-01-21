@@ -4,6 +4,9 @@ const initialState = {
   history: [],
   versionHistory: [],
   thread: [],
+  recursiveHistory: null,
+  recursiveHistoryLoading: false,
+  recursiveHistoryError: null,
   selectedVersion: "all",
   loading: false,
   success: false,
@@ -72,6 +75,15 @@ export const historyReducer = createSlice({
         state.thread.push(Messages);
       }
     },
+    fetchRecursiveHistoryStart: (state) => {
+      state.recursiveHistoryLoading = true;
+      state.recursiveHistoryError = null;
+    },
+    fetchRecursiveHistorySuccess: (state, action) => {
+      state.recursiveHistory = action.payload.data;
+      state.recursiveHistoryLoading = false;
+      state.recursiveHistoryError = null;
+    },
   },
 });
 
@@ -87,5 +99,7 @@ export const {
   clearHistoryData,
   addThreadUsingRtLayer,
   addThreadNMessageUsingRtLayer,
+  fetchRecursiveHistoryStart,
+  fetchRecursiveHistorySuccess,
 } = historyReducer.actions;
 export default historyReducer.reducer;

@@ -4,7 +4,7 @@ import {
   getSubThreadIds,
   getThreads,
   updateHistoryMessage,
-  userFeedbackCount,
+  userFeedbackCount, getRecursiveHistory,
 } from "@/config";
 import {
   fetchAllHistoryReducer,
@@ -12,6 +12,8 @@ import {
   fetchThreadReducer,
   updateHistoryMessageReducer,
   userFeedbackCountReducer,
+  fetchRecursiveHistoryStart,
+  fetchRecursiveHistorySuccess,
 } from "../reducer/historyReducer";
 
 export const getHistoryAction =
@@ -83,3 +85,16 @@ export const getSubThreadsAction =
       console.error(error);
     }
   };
+
+export const getRecursiveHistoryAction = ({ agent_id, thread_id, message_id }) => async (dispatch) => {
+  try {
+    dispatch(fetchRecursiveHistoryStart());
+
+    const data = await getRecursiveHistory({ agent_id, thread_id, message_id });
+
+    dispatch(fetchRecursiveHistorySuccess({ data }));
+    return data;
+  } catch (error) {
+    console.error('Error in getRecursiveHistoryAction:', error);
+  }
+}
