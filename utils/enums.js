@@ -21,6 +21,7 @@ export const MODAL_TYPE = {
   OPTIMIZE_PROMPT: "optmize_prompt_modal",
   PUBLISH_BRIDGE_VERSION: "publish_bridge_version_modal",
   VERSION_DESCRIPTION_MODAL: "version_description_modal",
+  TEMPLATE_NAME_MODAL: "template_name_modal",
   API_KEY_MODAL: "API_KEY_MODAL",
   PAUTH_KEY_MODAL: "PAUTH_KEY_MODAL",
   FINE_TUNE_MODAL: "fine-tune-modal",
@@ -104,7 +105,7 @@ export const AUTH_COLUMNS = ["name", "redirection_url", "client_id"];
 
 export const MIME_EXTENSION_MAP = {
   "application/pdf": ".pdf",
-  "text/plain": ".txt"
+  "text/plain": ".txt",
 };
 
 export const AGENT_SETUP_GUIDE_STEPS = [
