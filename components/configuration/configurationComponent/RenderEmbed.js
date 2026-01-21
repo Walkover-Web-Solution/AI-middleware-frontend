@@ -66,15 +66,17 @@ const RenderEmbed = ({
           >
             <div className="flex items-center gap-2 w-full">
               {iconUrl ? (
-              <img 
-                src={iconUrl} 
-                alt={title}
-                className="w-4 h-4 flex-shrink-0"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-            ) : (
-              <SquareFunctionIcon size={16} className="shrink-0" />
-            )}
+                <img
+                  src={iconUrl}
+                  alt={title}
+                  className="w-6 h-6flex-shrink-0"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              ) : (
+                <SquareFunctionIcon size={16} className="shrink-0" />
+              )}
               {title?.length > 24 ? (
                 <div className="tooltip tooltip-top min-w-0" data-tip={title}>
                   <span className="min-w-0 text-sm truncate text-left">
