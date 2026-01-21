@@ -92,7 +92,7 @@ function EmbedListSuggestionDropdownMenu({
                         <img 
                             src={iconUrl} 
                             alt={title}
-                            className="w-4 h-4 flex-shrink-0"
+                            className="w-6 h-6 flex-shrink-0"
                             onError={(e) => { e.target.style.display = 'none'; }}
                         />
                     )}
