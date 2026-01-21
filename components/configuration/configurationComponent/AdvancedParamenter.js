@@ -760,11 +760,7 @@ const AdvancedParameters = ({
               placeholder="Enter JSON schema..."
               disabled={isReadOnly}
             />
-            <JsonSchemaBuilderModal
-              params={params}
-              searchParams={searchParams}
-              isReadOnly={isReadOnly}
-            />
+            <JsonSchemaBuilderModal params={params} searchParams={searchParams} isReadOnly={isReadOnly} />
             <JsonSchemaModal
               params={params}
               searchParams={searchParams}

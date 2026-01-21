@@ -1,5 +1,5 @@
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
-import { closeModal, openModal } from "@/utils/utility";
+import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { TrashIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/Icons";
 import React, { useEffect, useState, useCallback } from "react";
@@ -188,7 +188,7 @@ const SchemaPropertyCard = ({
 
 function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
   const dispatch = useDispatch();
-  
+
   const { json_schema } = useCustomSelector((state) => ({
     json_schema:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.response_type
@@ -210,7 +210,12 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
         type: json_schema.schema?.type || json_schema.type || "object",
         properties: json_schema.schema?.properties || json_schema.properties || {},
         required: json_schema.schema?.required || json_schema.required || [],
-        additionalProperties: json_schema.schema?.additionalProperties !== undefined ? json_schema.schema.additionalProperties : (json_schema.additionalProperties !== undefined ? json_schema.additionalProperties : false),
+        additionalProperties:
+          json_schema.schema?.additionalProperties !== undefined
+            ? json_schema.schema.additionalProperties
+            : json_schema.additionalProperties !== undefined
+              ? json_schema.additionalProperties
+              : false,
       });
     }
   }, [json_schema]);
@@ -309,10 +314,10 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
       if (keyParts.length === 1) {
         // Delete top-level property
         delete newProperties[keyParts[0]];
-        
+
         // Remove from top-level required array
-        const newRequired = (prevData.required || []).filter(item => item !== propertyToDelete);
-        
+        const newRequired = (prevData.required || []).filter((item) => item !== propertyToDelete);
+
         return {
           ...prevData,
           properties: newProperties,
@@ -322,7 +327,7 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
         // Delete nested property
         let current = newProperties;
         let parent = null;
-        
+
         for (let i = 0; i < keyParts.length - 1; i++) {
           const key = keyParts[i];
           parent = current[key];
@@ -332,12 +337,12 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
             current = current[key].properties;
           }
         }
-        
+
         delete current[propertyToDelete];
-        
+
         // Remove from parent's required array
         if (parent && parent.required) {
-          parent.required = parent.required.filter(item => item !== propertyToDelete);
+          parent.required = parent.required.filter((item) => item !== propertyToDelete);
         }
 
         return {
