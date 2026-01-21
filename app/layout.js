@@ -3,6 +3,7 @@ import "../styles/performance-optimizations.css";
 import Wrapper from "@/wrapper/Wrapper";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { DM_Sans } from "next/font/google";
+import NetworkStatus from "@/components/NetworkStatus";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
     <html lang="en" data-theme="light">
       <GoogleTagManager gtmId="GTM-PXRN8T45" />
       <body suppressHydrationWarning className={dmSans.className}>
+        <NetworkStatus />
         <Wrapper>{children}</Wrapper>
       </body>
     </html>
