@@ -160,6 +160,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
         updateFuntionApiAction({
           function_id: functionId,
           dataToSend: dataToSend,
+          embedToken: embedToken,
         })
       );
       setToolData("");
