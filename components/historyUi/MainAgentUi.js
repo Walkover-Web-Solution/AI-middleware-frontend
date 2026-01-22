@@ -29,20 +29,14 @@ export function MainAgentUI({
         <div className="w-8 h-8 flex items-center justify-center border border-primary rounded-none bg-base-200">
           <Bot size={16} className="text-base-content" />
         </div>
-        <div className="text-xs text-base-content/60 font-semibold">
-          MAIN AGENT
-        </div>
-        <div className="font-semibold border border-primary text-primary text-sm p-2 bg-primary/10">
-          {name}
-        </div>
+        <div className="text-xs text-base-content/60 font-semibold">MAIN AGENT</div>
+        <div className="font-semibold border border-primary text-primary text-sm p-2 bg-primary/10">{name}</div>
       </div>
 
       {/* Tools Section */}
       {tools.length > 0 && (
         <div className="space-y-2">
-          <div className="text-center text-xs tracking-widest text-base-content/60">
-            TOOL CALLS
-          </div>
+          <div className="text-center text-xs tracking-widest text-base-content/60">TOOL CALLS</div>
           <div className="space-y-2">
             {tools.map((tool, index) => (
               <div
@@ -52,9 +46,7 @@ export function MainAgentUI({
               >
                 <div className="flex items-center gap-2">
                   <span className="text-primary">🔧</span>
-                  <span className="text-sm text-base-content truncate">
-                    {tool?.name || "Unknown Tool"}
-                  </span>
+                  <span className="text-sm text-base-content truncate">{tool?.name || "Unknown Tool"}</span>
                 </div>
                 <button
                   type="button"
@@ -73,9 +65,7 @@ export function MainAgentUI({
       {/* Response Section */}
       {responsePreview && (
         <div className="space-y-2">
-          <div className="text-center text-xs tracking-widest text-base-content/60">
-            RESPONSE
-          </div>
+          <div className="text-center text-xs tracking-widest text-base-content/60">RESPONSE</div>
           <div className="text-[10px] text-base-content/60 text-center">
             {agentCount} agent{agentCount === 1 ? "" : "s"} • {toolCount} tool{toolCount === 1 ? "" : "s"} called
           </div>
@@ -87,9 +77,7 @@ export function MainAgentUI({
               <span className="text-success">✓</span>
               <span className="text-xs font-semibold text-success">Delivered</span>
             </div>
-            <p className="text-sm text-base-content/80 line-clamp-3">
-              {responsePreview}
-            </p>
+            <p className="text-sm text-base-content/80 line-clamp-3">{responsePreview}</p>
           </div>
         </div>
       )}

@@ -21,8 +21,6 @@ const nodeTypes = {
   generic: GenericNode,
 };
 
-
-
 export default function Page({ params, searchParams }) {
   const resolvedParams = use(params);
   const resolvedSearchParams = use(searchParams);
@@ -32,27 +30,16 @@ export default function Page({ params, searchParams }) {
   const [selectedResponse, setSelectedResponse] = useState(null);
   const orgId = resolvedParams?.org_id;
   const bridgeId = resolvedParams?.id;
-  const {
-    recursiveHistory,
-    recursiveHistoryLoading,
-    embedToken,
-    mainAgentName,
-  } = useCustomSelector((state) => {
+  const { recursiveHistory, recursiveHistoryLoading, embedToken, mainAgentName } = useCustomSelector((state) => {
     const recursiveHistory = state?.historyReducer?.recursiveHistory;
     const recursiveHistoryLoading = state?.historyReducer?.recursiveHistoryLoading;
 
     const embedToken = state?.bridgeReducer?.org?.[orgId]?.embed_token;
 
     const orgAgents = state?.bridgeReducer?.org?.[orgId]?.orgs || [];
-    const agent = orgAgents.find(
-      (item) => item?._id === bridgeId || item?.id === bridgeId
-    );
+    const agent = orgAgents.find((item) => item?._id === bridgeId || item?.id === bridgeId);
 
-    const mainAgentName =
-      agent?.name ||
-      agent?.agent_name ||
-      agent?.bridge_name ||
-      "main_agent";
+    const mainAgentName = agent?.name || agent?.agent_name || agent?.bridge_name || "main_agent";
 
     return {
       recursiveHistory,
@@ -61,7 +48,6 @@ export default function Page({ params, searchParams }) {
       mainAgentName,
     };
   });
-
 
   const messageId = resolvedSearchParams?.message_id;
   const threadId = resolvedSearchParams?.thread_id;
@@ -106,19 +92,14 @@ export default function Page({ params, searchParams }) {
     );
   }, [bridgeId, messageId, threadId, subThreadId]);
 
- 
   const recursiveMessage = recursiveHistory?.data || null;
 
   const responsePreview = useMemo(() => {
     const content =
-      recursiveMessage?.updated_llm_message ||
-      recursiveMessage?.llm_message ||
-      recursiveMessage?.chatbot_message ||
-      "";
+      recursiveMessage?.updated_llm_message || recursiveMessage?.llm_message || recursiveMessage?.chatbot_message || "";
     if (!content) return "";
     return content.length > 120 ? `${content.slice(0, 120)}...` : content;
   }, [recursiveMessage]);
-
 
   // Fetch recursive history using data from URL
   useEffect(() => {
@@ -129,11 +110,13 @@ export default function Page({ params, searchParams }) {
 
     const fetchRecursiveHistory = async () => {
       try {
-        await dispatch(getRecursiveHistoryAction({
-          agent_id: bridgeId,
-          thread_id: threadId,
-          message_id: messageId,
-        }));
+        await dispatch(
+          getRecursiveHistoryAction({
+            agent_id: bridgeId,
+            thread_id: threadId,
+            message_id: messageId,
+          })
+        );
       } catch (error) {
         console.error("❌ Error fetching recursive history:", error);
       }
@@ -154,8 +137,6 @@ export default function Page({ params, searchParams }) {
     return [];
   };
 
-
-
   const toolCalls = useMemo(() => {
     return normalizeToolCalls(recursiveMessage?.tools_call_data);
   }, [recursiveMessage?.tools_call_data]);
@@ -172,22 +153,14 @@ export default function Page({ params, searchParams }) {
     const functionData = {
       id: tool?.id ?? null,
       args: tool?.args ?? (tool?.user ? { _query: tool.user } : {}),
-      data:
-        tool?.data ??
-        (toolType
-          ? { metadata: { type: toolType }, response: tool }
-          : { response: tool }),
+      data: tool?.data ?? (toolType ? { metadata: { type: toolType }, response: tool } : { response: tool }),
     };
 
     if (toolType === "agent") {
       const childMessage = tool?.data?.response || tool?.response || tool || null;
       const childTools = normalizeToolCalls(childMessage?.tools_call_data);
       return {
-        name:
-          tool?.name ||
-          tool?.AiConfig?.model ||
-          tool?.bridge_id ||
-          "Unknown Agent",
+        name: tool?.name || tool?.AiConfig?.model || tool?.bridge_id || "Unknown Agent",
         functionData,
         nodeType: "agent",
         children: childTools.map(buildToolNode),
@@ -203,7 +176,6 @@ export default function Page({ params, searchParams }) {
   };
 
   const derivedAgents = useMemo(() => {
-
     if (toolCalls.length === 0) return [];
 
     const orderedTools = toolCalls;
@@ -215,25 +187,16 @@ export default function Page({ params, searchParams }) {
       const functionData = {
         id: tool?.id ?? null,
         args: tool?.args ?? (tool?.user ? { _query: tool.user } : {}),
-        data:
-          tool?.data ??
-          (toolType
-            ? { metadata: { type: toolType }, response: tool }
-            : { response: tool }),
+        data: tool?.data ?? (toolType ? { metadata: { type: toolType }, response: tool } : { response: tool }),
       };
 
       if (toolType === "agent") {
-        const childMessage =
-          tool?.data?.response || tool?.response || tool || null;
+        const childMessage = tool?.data?.response || tool?.response || tool || null;
         const childToolCalls = normalizeToolCalls(childMessage?.tools_call_data);
         const childParallelTools = childToolCalls.map(buildToolNode);
 
         currentAgent = {
-          name:
-            tool?.name ||
-            tool?.AiConfig?.model ||
-            tool?.bridge_id ||
-            "Unknown Agent",
+          name: tool?.name || tool?.AiConfig?.model || tool?.bridge_id || "Unknown Agent",
           functionData,
           nodeType: "agent",
           parallelTools: childParallelTools,
@@ -284,22 +247,25 @@ export default function Page({ params, searchParams }) {
     return data;
   }, [toolCalls]);
 
-  const handleToolPrimaryClick = useCallback((tool) => {
-    if (!tool) return;
-    const flowHitId = tool?.data?.metadata?.flowHitId;
-    if (typeof window !== "undefined" && window.openViasocket) {
-      window.openViasocket(tool?.id, {
-        flowHitId,
-        embedToken,
-        meta: {
-          type: "tool",
-          bridge_id: bridgeId,
-        },
-      });
-      return;
-    }
-    setSelectedTool(tool);
-  }, [embedToken, bridgeId]);
+  const handleToolPrimaryClick = useCallback(
+    (tool) => {
+      if (!tool) return;
+      const flowHitId = tool?.data?.metadata?.flowHitId;
+      if (typeof window !== "undefined" && window.openViasocket) {
+        window.openViasocket(tool?.id, {
+          flowHitId,
+          embedToken,
+          meta: {
+            type: "tool",
+            bridge_id: bridgeId,
+          },
+        });
+        return;
+      }
+      setSelectedTool(tool);
+    },
+    [embedToken, bridgeId]
+  );
 
   // Store edges at component level so they can be accessed by edges memo
   const treeEdgesRef = React.useRef([]);
@@ -321,11 +287,9 @@ export default function Page({ params, searchParams }) {
       return [];
     };
 
-    const getChildAgents = (agent) =>
-      getAgentToolList(agent).filter((tool) => tool?.nodeType === "agent");
+    const getChildAgents = (agent) => getAgentToolList(agent).filter((tool) => tool?.nodeType === "agent");
 
-    const getToolsForDisplay = (agent) =>
-      getAgentToolList(agent).filter((tool) => tool?.nodeType !== "agent");
+    const getToolsForDisplay = (agent) => getAgentToolList(agent).filter((tool) => tool?.nodeType !== "agent");
 
     const estimateNodeHeight = (agent) => {
       const tools = getToolsForDisplay(agent);
@@ -356,7 +320,7 @@ export default function Page({ params, searchParams }) {
       const subtreeHeight = getSubtreeHeight(agent);
       const nodeHeight = estimateNodeHeight(agent);
       const y = yOffset + subtreeHeight / 2 - nodeHeight / 2;
-      
+
       // Create node for this agent using BatchUI
       allNodes.push({
         id: nodeId,
@@ -381,7 +345,7 @@ export default function Page({ params, searchParams }) {
                 ]}
                 onToolClick={(tool) => {
                   setSelectedTool(tool);
-                  toggleSidebar('tool-full-slider', 'right');
+                  toggleSidebar("tool-full-slider", "right");
                 }}
                 onToolSliderClick={(tool) => handleToolPrimaryClick(tool)}
               />
@@ -397,7 +361,7 @@ export default function Page({ params, searchParams }) {
           source: parentId,
           target: nodeId,
           style: {
-            stroke: '#22c55e',
+            stroke: "#22c55e",
             strokeWidth: 2,
             animated: true,
           },
@@ -419,10 +383,7 @@ export default function Page({ params, searchParams }) {
 
     // Build the tree starting from derived agents
     if (derivedAgents.length > 0) {
-      const totalTreeHeight = derivedAgents.reduce(
-        (sum, agent) => sum + getSubtreeHeight(agent),
-        0
-      );
+      const totalTreeHeight = derivedAgents.reduce((sum, agent) => sum + getSubtreeHeight(agent), 0);
       let runningOffset = alignY - totalTreeHeight / 2;
       derivedAgents.forEach((agent) => {
         buildTreeNodes(agent, "2", 1, runningOffset);
@@ -443,9 +404,7 @@ export default function Page({ params, searchParams }) {
           ui: {
             width: 260,
             containerClass: "p-4 border border-base-300 ",
-            render: () => (
-              <UserPromptUI text={recursiveMessage?.user || ""} />
-            ),
+            render: () => <UserPromptUI text={recursiveMessage?.user || ""} />,
           },
         },
       },
@@ -464,12 +423,12 @@ export default function Page({ params, searchParams }) {
                 name={mainAgentName}
                 onToolClick={(tool) => {
                   setSelectedTool(tool);
-                  toggleSidebar('tool-full-slider', 'right');
+                  toggleSidebar("tool-full-slider", "right");
                 }}
                 onToolSliderClick={(tool) => handleToolPrimaryClick(tool)}
                 onResponseClick={() => {
                   setSelectedResponse(recursiveMessage);
-                  toggleSidebar('response-full-slider', 'right');
+                  toggleSidebar("response-full-slider", "right");
                 }}
                 responsePreview={responsePreview}
                 tools={mainAgentTools}
@@ -482,27 +441,20 @@ export default function Page({ params, searchParams }) {
       },
       ...allNodes,
     ];
-  }, [
-    derivedAgents,
-    mainAgentTools,
-    recursiveMessage?.user,
-    mainAgentName,
-    responsePreview,
-    recursiveMessage,
-  ]);
+  }, [derivedAgents, mainAgentTools, recursiveMessage?.user, mainAgentName, responsePreview, recursiveMessage]);
 
   const edges = useMemo(() => {
     const edgeStyle = {
-      stroke: '#22c55e', // Green color
+      stroke: "#22c55e", // Green color
       strokeWidth: 2,
       animated: true,
     };
 
     // Start with the edge from User Prompt to Main Agent
     const edgeList = [
-      { 
-        id: "e1-2", 
-        source: "1", 
+      {
+        id: "e1-2",
+        source: "1",
         target: "2",
         style: edgeStyle,
         animated: true,
@@ -530,26 +482,17 @@ export default function Page({ params, searchParams }) {
           <h1 className="text-lg font-semibold text-base-content">Agent Execution Flow</h1>
           <span className="text-base-content/40">•</span>
           <p className="text-sm text-base-content/60">
-            Executed {recursiveMessage?.created_at ? formatRelativeTime(recursiveMessage.created_at) : 'recently'}
+            Executed {recursiveMessage?.created_at ? formatRelativeTime(recursiveMessage.created_at) : "recently"}
           </p>
         </div>
-        <button
-          onClick={handleGoBack}
-          className="text-base-content hover:text-primary transition-colors"
-          title="Close"
-        >
+        <button onClick={handleGoBack} className="text-base-content hover:text-primary transition-colors" title="Close">
           <X size={24} />
         </button>
       </div>
 
       {/* ReactFlow Container */}
       <div className="flex-1 relative">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          fitView
-        >
+        <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView>
           <Background />
         </ReactFlow>
       </div>
@@ -557,7 +500,7 @@ export default function Page({ params, searchParams }) {
       <ToolFullSlider
         tool={selectedTool}
         onClose={() => {
-          toggleSidebar('tool-full-slider', 'right');
+          toggleSidebar("tool-full-slider", "right");
           setSelectedTool(null);
         }}
         onBack={handleGoBack}
@@ -566,7 +509,7 @@ export default function Page({ params, searchParams }) {
       <ResponseFullSlider
         response={selectedResponse}
         onClose={() => {
-          toggleSidebar('response-full-slider', 'right');
+          toggleSidebar("response-full-slider", "right");
           setSelectedResponse(null);
         }}
         onBack={handleGoBack}

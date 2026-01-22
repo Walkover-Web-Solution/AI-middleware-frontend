@@ -22,7 +22,6 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
     onToolSliderClick(tool?.functionData ?? tool);
   };
 
-
   const handleAgentClick = (agentKey, functionData, agentName, tools) => {
     const nextOpen = openAgentKey === agentKey ? null : agentKey;
     setOpenAgentKey(nextOpen);
@@ -41,19 +40,11 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
   const renderToolGrid = (tools, depth = 0) => {
     if (!Array.isArray(tools) || tools.length === 0) return null;
     return (
-      <div
-        className="grid grid-cols-2 gap-2"
-        style={{ marginLeft: depth * 12 }}
-      >
+      <div className="grid grid-cols-2 gap-2" style={{ marginLeft: depth * 12 }}>
         {tools.map((tool, index) => {
-          const isLastOdd =
-            tools.length % 2 !== 0 && index === tools.length - 1;
-          const toolName =
-            typeof tool === "string"
-              ? tool
-              : tool?.name || tool?.id || `tool_${index + 1}`;
-          const hasChildren =
-            Array.isArray(tool?.children) && tool.children.length > 0;
+          const isLastOdd = tools.length % 2 !== 0 && index === tools.length - 1;
+          const toolName = typeof tool === "string" ? tool : tool?.name || tool?.id || `tool_${index + 1}`;
+          const hasChildren = Array.isArray(tool?.children) && tool.children.length > 0;
           const isAgentNode = tool?.nodeType === "agent";
 
           return (
@@ -70,7 +61,7 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
                     : handleToolClick(tool)
                 }
                 className={`cursor-pointer flex items-center justify-between border px-3 py-2 text-xs text-base-content gap-2
-                              ${isAgentNode ? 'hover:border-blue-400 hover:bg-blue-400/10' : 'hover:border-orange-400 hover:bg-orange-400/10'}`}
+                              ${isAgentNode ? "hover:border-blue-400 hover:bg-blue-400/10" : "hover:border-orange-400 hover:bg-orange-400/10"}`}
                 title={toolName}
               >
                 <span className="flex items-center gap-2 flex-1 min-w-0">
@@ -99,21 +90,24 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
               {hasChildren && (
                 <div className="col-span-2 mt-2">
                   {/* Show summary for child agents */}
-                  {isAgentNode && (() => {
-                    const childToolCount = tool.children.filter(t => t?.nodeType !== 'agent').length;
-                    const childAgentCount = tool.children.filter(t => t?.nodeType === 'agent').length;
-                    const parts = [];
-                    if (childAgentCount > 0) parts.push(`${childAgentCount} agent${childAgentCount > 1 ? 's' : ''}`);
-                    if (childToolCount > 0) parts.push(`${childToolCount} tool${childToolCount > 1 ? 's' : ''}`);
-                    const summary = parts.join(' ');
-                    
-                    return summary ? (
-                      <div className="flex items-center gap-2 text-[10px] text-base-content/60 mb-2 ml-3">
-                        <Zap size={10} className="text-yellow-500" />
-                        <span>{summary} called by {toolName}</span>
-                      </div>
-                    ) : null;
-                  })()}
+                  {isAgentNode &&
+                    (() => {
+                      const childToolCount = tool.children.filter((t) => t?.nodeType !== "agent").length;
+                      const childAgentCount = tool.children.filter((t) => t?.nodeType === "agent").length;
+                      const parts = [];
+                      if (childAgentCount > 0) parts.push(`${childAgentCount} agent${childAgentCount > 1 ? "s" : ""}`);
+                      if (childToolCount > 0) parts.push(`${childToolCount} tool${childToolCount > 1 ? "s" : ""}`);
+                      const summary = parts.join(" ");
+
+                      return summary ? (
+                        <div className="flex items-center gap-2 text-[10px] text-base-content/60 mb-2 ml-3">
+                          <Zap size={10} className="text-yellow-500" />
+                          <span>
+                            {summary} called by {toolName}
+                          </span>
+                        </div>
+                      ) : null;
+                    })()}
                   {renderToolGrid(tool.children, depth + 1)}
                 </div>
               )}
@@ -187,23 +181,16 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
         {agents?.map((agent, agentIndex) => {
           const agentKey = `${agentIndex}`;
 
-              // Check if this is an actual agent (has functionData) or just "FUNCTIONS" group
-              const isActualAgent = Boolean(agent.functionData);
-              const functionData = agent.functionData;
+          // Check if this is an actual agent (has functionData) or just "FUNCTIONS" group
+          const isActualAgent = Boolean(agent.functionData);
+          const functionData = agent.functionData;
           return (
             <div key={agentIndex} className="space-y-2">
               {/* AGENT ROW - Only show for actual agents */}
               {isActualAgent && (
                 <div className="relative">
                   <div
-                    onClick={() =>
-                      handleAgentClick(
-                        agentKey,
-                        functionData,
-                        agent.name,
-                        agent.parallelTools
-                      )
-                    }
+                    onClick={() => handleAgentClick(agentKey, functionData, agent.name, agent.parallelTools)}
                     ref={(node) => {
                       if (node) rowRefs.current[agentKey] = node;
                     }}
@@ -222,48 +209,52 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
                 </div>
               )}
 
-                  {/* Show FUNCTIONS label for non-agent groups */}
+              {/* Show FUNCTIONS label for non-agent groups */}
               {!isActualAgent && agent.name === "FUNCTIONS" && (
-                <div className="text-xs font-semibold text-base-content/60 mb-1">
-                  MAIN AGENT TOOLS
-                </div>
+                <div className="text-xs font-semibold text-base-content/60 mb-1">MAIN AGENT TOOLS</div>
               )}
 
               {isActualAgent && agent.isLoading && (
-                <div className={`flex items-center gap-2 text-[10px] text-base-content/60 ${isActualAgent ? 'ml-4' : ''}`}>
+                <div
+                  className={`flex items-center gap-2 text-[10px] text-base-content/60 ${isActualAgent ? "ml-4" : ""}`}
+                >
                   <span className="h-3 w-3 border-2 hover:border-primary border-t-transparent rounded-full animate-spin" />
                   <span>Loading tools...</span>
                 </div>
               )}
 
-                  {/* PARALLEL TOOLS */}
-                  {Array.isArray(agent.parallelTools) && agent.parallelTools.length > 0 && (
-                    <div className={`space-y-1 ${isActualAgent ? 'ml-4' : ''}`}>
-                      {isActualAgent && (() => {
-                        const toolCount = agent.parallelTools.filter(t => t?.nodeType !== 'agent').length;
-                        const agentCount = agent.parallelTools.filter(t => t?.nodeType === 'agent').length;
-                        const parts = [];
-                        if (agentCount > 0) parts.push(`${agentCount} agent${agentCount > 1 ? 's' : ''}`);
-                        if (toolCount > 0) parts.push(`${toolCount} tool${toolCount > 1 ? 's' : ''}`);
-                        const summary = parts.join(' ');
-                        
-                        return (
-                          <div className="flex items-center gap-2 text-[10px] text-base-content/60 mb-2">
-                            <Zap size={12} className="text-yellow-500" />
-                            <span>{summary} called by {agent.name}</span>
-                          </div>
-                        );
-                      })()}
+              {/* PARALLEL TOOLS */}
+              {Array.isArray(agent.parallelTools) && agent.parallelTools.length > 0 && (
+                <div className={`space-y-1 ${isActualAgent ? "ml-4" : ""}`}>
+                  {isActualAgent &&
+                    (() => {
+                      const toolCount = agent.parallelTools.filter((t) => t?.nodeType !== "agent").length;
+                      const agentCount = agent.parallelTools.filter((t) => t?.nodeType === "agent").length;
+                      const parts = [];
+                      if (agentCount > 0) parts.push(`${agentCount} agent${agentCount > 1 ? "s" : ""}`);
+                      if (toolCount > 0) parts.push(`${toolCount} tool${toolCount > 1 ? "s" : ""}`);
+                      const summary = parts.join(" ");
 
-                      {renderToolGrid(agent.parallelTools)}
-                    </div>
-                  )}
+                      return (
+                        <div className="flex items-center gap-2 text-[10px] text-base-content/60 mb-2">
+                          <Zap size={12} className="text-yellow-500" />
+                          <span>
+                            {summary} called by {agent.name}
+                          </span>
+                        </div>
+                      );
+                    })()}
+
+                  {renderToolGrid(agent.parallelTools)}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      {openAgentKey && selectedFunctionData &&
+      {openAgentKey &&
+        selectedFunctionData &&
         createPortal(
           <div
             ref={popupRef}
@@ -275,9 +266,7 @@ export function BatchUI({ agents, onToolClick, onToolSliderClick, isLoading = fa
               overscrollBehavior: "contain",
             }}
           >
-            <div className="text-[11px] font-semibold text-base-content tracking-wide mb-3">
-              FUNCTION DATA:
-            </div>
+            <div className="text-[11px] font-semibold text-base-content tracking-wide mb-3">FUNCTION DATA:</div>
 
             <div className="space-y-3">
               <div>
