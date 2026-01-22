@@ -114,10 +114,12 @@ export const getRecursiveHistory = async ({ agent_id, thread_id, message_id }) =
     const encodedThreadId = encodeURIComponent(thread_id);
     const encodedMessageId = encodeURIComponent(message_id);
 
-    const response = await axios.get(`${URL}/api/history/recursive/${encodedAgentId}/${encodedThreadId}/${encodedMessageId}`);
+    const response = await axios.get(
+      `${URL}/api/history/recursive/${encodedAgentId}/${encodedThreadId}/${encodedMessageId}`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching recursive history:', error);
+    console.error("Error fetching recursive history:", error);
     throw error;
   }
 };
