@@ -256,7 +256,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                                 No knowledge base found.
                             </p>
                             <button
-                               id="knowledgebase-add-first-button"
+                               id="knowledgebase-add-button"
                                 tabIndex={0}
                                 className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                 disabled={!shouldToolsShow || isReadOnly}
@@ -274,7 +274,7 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true,
                             <div className="dropdown dropdown-end w-full max-w-md">
                                 <div className="border-2 border-base-200 border-dashed text-center">
                                         <button
-                                            id="knowledgebase-add-more-button"
+                                            id="knowledgebase-add-button"
                                             tabIndex={0}
                                             className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                             disabled={isReadOnly}

@@ -274,7 +274,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                           No tools found.
                         </p>
                         <button
-                        id="embed-list-add-first-tool-button"
+                        id="embed-list-add-tool-button"
                           tabIndex={0}
                           className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                           disabled={isReadOnly}

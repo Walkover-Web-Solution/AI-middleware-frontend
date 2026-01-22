@@ -297,7 +297,7 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
                                         No agents found.
                                     </p>
                                     <button
-                                    id="connected-agent-list-add-first-agent-button"
+                                    id="connected-agent-list-add-agent-button"
                                         tabIndex={0}
                                         className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
                                         disabled={!shouldToolsShow || isReadOnly}
