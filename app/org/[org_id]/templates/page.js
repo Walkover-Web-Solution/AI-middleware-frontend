@@ -13,6 +13,7 @@ import useDeleteOperation from "@/customHooks/useDeleteOperation";
 import TemplatePlayground from "@/components/modals/TemplatePlayground";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { generateRichUITemplate } from '@/config/utilityApi';
 
 export const runtime = 'edge';
 
@@ -38,9 +39,12 @@ const TemplatesPage = ({ params }) => {
   const [playgroundTemplate, setPlaygroundTemplate] = useState(null);
   const { isDeleting, executeDelete } = useDeleteOperation();
 
-  // Create Prompt State
-  const [prompt, setPrompt] = useState('');
+  // Chat State
+  const [messages, setMessages] = useState([]);
+  const [currentInput, setCurrentInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [chatStarted, setChatStarted] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Editor State
   const [editorTemplate, setEditorTemplate] = useState(null); // The template being edited (or new data)
@@ -101,56 +105,64 @@ const TemplatesPage = ({ params }) => {
   const handleBackToList = () => {
     router.replace(`/org/${resolvedParams.org_id}/templates`);
     setViewMode('list');
-    setPrompt('');
+    setMessages([]);
+    setCurrentInput('');
+    setChatStarted(false);
+    setIsAnimating(false);
     setEditorTemplate(null);
   };
 
-  const handleGenerateWithAI = async () => {
-    if (!prompt.trim()) return;
+  const handleSendMessage = async () => {
+    if (!currentInput.trim()) return;
+    
+    // Start animation if this is the first message
+    if (!chatStarted) {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setChatStarted(true);
+        setIsAnimating(false);
+      }, 500); // Animation duration
+    }
+    
+    const userMessage = {
+      id: Date.now(),
+      type: 'user',
+      content: currentInput.trim(),
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setCurrentInput('');
     setIsGenerating(true);
 
-    // Simulate AI generation
-    setTimeout(() => {
-      setIsGenerating(false);
-      const generatedData = {
-        _isNew: true,
-        name: `Widget - ${prompt.substring(0, 15)}...`,
-        description: `AI Generated widget based on: ${prompt}`,
-        html: `<div class="p-4 bg-base-200 rounded">AI Generated Content for: ${prompt}</div>`,
-        json_schema: { schema: { type: "object", properties: { note: { type: "string" } } } }
+    try {
+      // Call GTWY AI API for rich UI template generation
+      const data = await generateRichUITemplate({
+        message: userMessage.content,
+        context: 'template_generation'
+      });
+      
+      const aiMessage = {
+        id: Date.now() + 1,
+        type: 'assistant',
+        content: data.result || data.response || 'Sorry, I could not generate a response.',
+        timestamp: new Date()
       };
-
-      setEditorTemplate(generatedData);
-      setSchemaValue(JSON.stringify(generatedData.json_schema.schema, null, 2));
-      setHtmlValue(generatedData.html);
-      setViewMode('editor');
-    }, 1500);
+      
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error calling AI API:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'assistant',
+        content: 'Sorry, there was an error processing your request. Please try again.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsGenerating(false);
+    }
   };
-
-  const handleStartBlank = () => {
-    const blankData = {
-      _isNew: true,
-      name: '',
-      description: '',
-      html: '<div class="card bg-base-100 shadow-xl">\n  <div class="card-body">\n    <h2 class="card-title">{{title}}</h2>\n    <p>{{description}}</p>\n  </div>\n</div>',
-      json_schema: {
-        schema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            description: { type: "string" }
-          },
-          required: ["title"]
-        }
-      }
-    };
-
-    setEditorTemplate(blankData);
-    setSchemaValue(JSON.stringify(blankData.json_schema.schema, null, 2));
-    setHtmlValue(blankData.html);
-    setViewMode('editor');
-  };
-
   const handleSaveTemplate = async (event) => {
     event.preventDefault();
     setIsSaving(true);
@@ -205,49 +217,138 @@ const TemplatesPage = ({ params }) => {
           <X size={24} />
         </button>
 
-        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto w-full px-4">
-          {isGenerating ? (
-            <div className="flex flex-col items-center">
-              <div className="relative w-24 h-24 mb-6">
-                <div className="absolute inset-0 border-4 border-base-200 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <Sparkles className="absolute inset-0 m-auto text-primary animate-pulse" size={32} />
-              </div>
-              <h3 className="text-xl font-medium mb-2">Generating Widget...</h3>
-              <p className="text-base-content/60 max-w-sm text-center">Interpreting your request and building the perfect widget structure for you.</p>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-4xl font-semibold text-base-content mb-12">Create a widget</h2>
+        {/* Chat Started Layout */}
+        {chatStarted ? (
+          <div className="flex flex-col h-full max-w-4xl mx-auto w-full">
+            {/* Messages Container */}
+            <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+              {messages.map((message) => (
+                <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+                  <div className={`max-w-[75%] ${message.type === 'user' ? 'ml-16' : 'mr-16'}`}>
+                    <div className={`rounded-2xl px-5 py-4 shadow-sm ${
+                      message.type === 'user' 
+                        ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-content' 
+                        : 'bg-base-100 text-base-content border border-base-200'
+                    }`}>
+                      <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
+                      <div className={`text-xs mt-3 ${
+                        message.type === 'user' ? 'text-primary-content/60' : 'text-base-content/40'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
 
-              <div className="w-full max-w-2xl relative mb-12">
-                <div className="relative flex items-center w-full shadow-2xl rounded-2xl bg-base-100 border border-base-200/50 transition-all hover:border-primary/20 focus-within:ring-2 focus-within:ring-primary/20 p-2">
-                  <div className="p-3 text-base-content/40">
-                    <Plus size={24} />
+              {/* Loading indicator */}
+              {isGenerating && (
+                <div className="flex justify-start animate-fade-in">
+                  <div className="mr-16 max-w-[75%]">
+                    <div className="bg-base-100 border border-base-200 rounded-2xl px-5 py-4 shadow-sm">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                        <span className="text-sm text-base-content/60">AI is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Input - Fixed at bottom */}
+            <div className="border-t border-base-200 bg-base-50/50 backdrop-blur-sm px-6 py-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="relative flex items-center w-full rounded-2xl bg-base-100 border border-base-300 transition-all hover:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary shadow-lg p-2">
+                  <div className="p-3 text-base-content/50">
+                    <Plus size={20} />
                   </div>
                   <input
                     type="text"
-                    className="w-full py-4 bg-transparent border-none outline-none text-base-content placeholder:text-base-content/30 text-lg"
-                    placeholder="Describe your widget..."
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleGenerateWithAI()}
+                    className="w-full py-4 px-2 bg-transparent border-none outline-none text-base-content placeholder:text-base-content/40 text-base"
+                    placeholder="Continue the conversation..."
+                    value={currentInput}
+                    onChange={(e) => setCurrentInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                    disabled={isGenerating}
                     autoFocus
                   />
                   <button
-                    className={`p-3 m-1 rounded-xl transition-all duration-200 ${prompt.trim() ? 'bg-base-content text-base-100 hover:scale-105' : 'bg-base-200 text-base-content/20'}`}
-                    onClick={handleGenerateWithAI}
-                    disabled={!prompt.trim()}
+                    className={`p-3 m-1 rounded-xl transition-all duration-200 ${
+                      currentInput.trim() && !isGenerating
+                        ? 'bg-primary text-primary-content hover:bg-primary/90 shadow-md hover:shadow-lg transform hover:scale-105' 
+                        : 'bg-base-200 text-base-content/30 cursor-not-allowed'
+                    }`}
+                    onClick={handleSendMessage}
+                    disabled={!currentInput.trim() || isGenerating}
                   >
                     <ArrowUp size={20} />
                   </button>
                 </div>
               </div>
-
-
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        ) : (
+          /* Initial Center Layout */
+          <div className={`flex flex-col items-center justify-center h-full transition-all duration-700 ease-out ${
+            isAnimating ? 'transform translate-y-full opacity-0 scale-95' : 'transform translate-y-0 opacity-100 scale-100'
+          }`}>
+            {isGenerating ? (
+              <div className="flex flex-col items-center">
+                <div className="relative w-28 h-28 mb-8">
+                  <div className="absolute inset-0 border-4 border-base-200 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <Sparkles className="absolute inset-0 m-auto text-primary animate-pulse" size={36} />
+                </div>
+                <h3 className="text-2xl font-medium mb-3 text-base-content">Generating Widget...</h3>
+                <p className="text-base-content/60 max-w-md text-center text-lg leading-relaxed">
+                  Interpreting your request and building the perfect widget structure for you.
+                </p>
+              </div>
+            ) : (
+              <div className="text-center max-w-2xl mx-auto px-6">
+                <h2 className="text-4xl font-bold text-base-content mb-4 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  Create New Widget
+                </h2>
+                <p className="text-base-content/60 text-lg mb-12 leading-relaxed">
+                  Describe your widget idea and I'll help you build it step by step
+                </p>
+                
+                <div className="w-full max-w-2xl relative">
+                  <div className="relative flex items-center w-full shadow-2xl rounded-2xl bg-base-100 border border-base-200/50 transition-all hover:border-primary/30 focus-within:ring-4 focus-within:ring-primary/10 focus-within:border-primary p-3">
+                    <div className="p-3 text-primary/60">
+                      <Plus size={24} />
+                    </div>
+                    <input
+                      type="text"
+                      className="w-full py-5 px-3 bg-transparent border-none outline-none text-base-content placeholder:text-base-content/40 text-lg"
+                      placeholder="Describe your widget..."
+                      value={currentInput}
+                      onChange={(e) => setCurrentInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                      autoFocus
+                    />
+                    <button
+                      className={`p-4 m-1 rounded-xl transition-all duration-300 ${
+                        currentInput.trim() 
+                          ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-content hover:shadow-xl transform hover:scale-110 shadow-lg' 
+                          : 'bg-base-200 text-base-content/30 cursor-not-allowed'
+                      }`}
+                      onClick={handleSendMessage}
+                      disabled={!currentInput.trim()}
+                    >
+                      <ArrowUp size={22} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }

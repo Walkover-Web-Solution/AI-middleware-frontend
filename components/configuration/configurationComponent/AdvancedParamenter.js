@@ -9,14 +9,15 @@ import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/TutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
-import { Check, CircleQuestionMark } from 'lucide-react';
+import { Check, CircleQuestionMark, ExternalLink } from 'lucide-react';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters, className = "", level = 1, compact = false, isPublished = false, isEditor = true }) => {
- 
+
   const isReadOnly = isPublished || !isEditor;
   // Use the tutorial videos hook
   const { getAdvanceParameterVideo } = useTutorialVideos();
@@ -32,8 +33,9 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const [messages, setMessages] = useState([]);
   const dropdownContainerRef = useRef(null);
   const dispatch = useDispatch();
+  const router = useRouter();
 
-   useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownContainerRef.current && !dropdownContainerRef.current.contains(event.target)) {
         setShowDropdown(false);
@@ -333,7 +335,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     if (key === 'response_type' && isEmbedUser && !showResponseType) {
       return null;
     }
-    
+
     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
     const isDefaultValue = configuration?.[key] === 'default';
@@ -407,433 +409,458 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
             )}
           </div>
         </div>
-        
+
         {field !== 'boolean' && (
-        <div className="flex items-center gap-2 w-full">
-          {/* Text input */}
-          {field === 'text' && (
-            <input
-              type="text"
-              value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || '')}
-              onFocus={(e) => {
-                if (isDefaultValue) {
-                  e.target.blur();
-                  setSliderValue('', key, isDeafaultObject);
+          <div className="flex items-center gap-2 w-full">
+            {/* Text input */}
+            {field === 'text' && (
+              <input
+                type="text"
+                value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || '')}
+                onFocus={(e) => {
+                  if (isDefaultValue) {
+                    e.target.blur();
+                    setSliderValue('', key, isDeafaultObject);
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: ''
+                    }));
+                    setTimeout(() => {
+                      e.target.focus();
+                    }, 0);
+                  }
+                }}
+                onChange={(e) => {
                   setInputConfiguration((prev) => ({
                     ...prev,
-                    [key]: ''
+                    [key]: e.target.value
                   }));
-                  setTimeout(() => {
-                    e.target.focus();
-                  }, 0);
-                }
-              }}
-              onChange={(e) => {
-                setInputConfiguration((prev) => ({
-                  ...prev,
-                  [key]: e.target.value
-                }));
-              }}
-              onBlur={(e) => {
-                if (isDefaultValue && e.target.value) {
-                  setSliderValue(e.target.value, key, isDeafaultObject);
-                } else {
-                  handleInputChange(e, key);
-                }
-              }}
-              className={`input input-bordered ${inputSizeClass} w-full`}
-              name={key}
-              disabled={isReadOnly}
-              placeholder=""
-            />
-          )}
-          
-          {/* Number input */}
-          {field === 'number' && (
-            <input
-              type="number"
-              min={min}
-              max={max}
-              step={step}
-              value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || 0)}
-              onChange={(e) => {
-                setInputConfiguration((prev) => ({
-                  ...prev,
-                  [key]: e.target.value
-                }));
-              }}
-              onBlur={(e) => {
-                if (isDefaultValue && e.target.value !== (defaultValue || 0).toString()) {
-                  setSliderValue(e.target.value, key, isDeafaultObject);
-                } else {
-                  handleInputChange(e, key);
-                }
-              }}
-              className={`input input-bordered ${inputSizeClass} w-full`}
-              name={key}
-              disabled={isReadOnly}
-            />
-          )}
-          
-          {/* Select input */}
-          {field === 'select' && (
-            <div className="w-full">
-              <select
-                value={(() => {
-                  if (key === 'response_type') {
-                    // Handle response_type specifically
-                    if (configuration?.[key]?.is_template) {
-                      return 'template';
-                    } else if (configuration?.[key]?.type) {
-                      return configuration?.[key]?.type;
-                    } else if (configuration?.[key] === 'default') {
-                      return 'default';
-                    } else {
-                      return configuration?.[key] || 'default';
-                    }
-                  }
-                  // For other keys, use the original logic
-                  return isDefaultValue ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key]);
-                })()}
-                onChange={(e) => {
-                  const selectedValue = e.target.value;
-                  if (key === 'response_type') {
-                    if (selectedValue === 'template') {
-                      // Set type to json_schema AND is_template to true
-                      const updatedDataToSend = {
-                        configuration: {
-                          response_type: {
-                            type: "json_schema", // Ensure type is json_schema
-                            json_schema: configuration?.response_type?.json_schema || {},
-                            is_template: true,
-                            template_id: configuration?.response_type?.template_id || []
-                          }
-                        }
-                      };
-                      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
-                      return;
-                    } else if (selectedValue === 'json_schema') {
-                      // Set type to json_schema AND is_template to false
-                      const updatedDataToSend = {
-                        configuration: {
-                          [key]: {
-                            type: 'json_schema',
-                            is_template: false,
-                            json_schema: configuration?.[key]?.json_schema || {}
-                          }
-                        }
-                      };
-                      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
-                      return;
-                    } else if (selectedValue === 'default') {
-                      // Handle default case
-                      setSliderValue("default", key, isDeafaultObject);
-                      return;
-                    }
-                  }
-                  // Fallback for other keys or normal types
-                  handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject);
                 }}
-                className={`select select-bordered ${selectSizeClass} w-full`}
+                onBlur={(e) => {
+                  if (isDefaultValue && e.target.value) {
+                    setSliderValue(e.target.value, key, isDeafaultObject);
+                  } else {
+                    handleInputChange(e, key);
+                  }
+                }}
+                className={`input input-bordered ${inputSizeClass} w-full`}
                 name={key}
                 disabled={isReadOnly}
-              >
-                {isDefaultValue && <option value="default">default</option>}
-                {options?.map((option) => (
-                  <option key={typeof option === 'object' ? option?.value || option?.type : option} value={typeof option === 'object' ? option?.value || option?.type : option}>
-                    {typeof option === 'object' ? option?.displayName || option?.type || option?.value : option}
-                  </option>
-                ))}
-                {key === 'response_type' && richUiTemplates?.length > 0 && (
-                  <option value="template">Template</option>
-                )}
-              </select>
+                placeholder=""
+              />
+            )}
 
-              {/* Template UI - Only show if mode is template */}
-              {key === 'response_type' && configuration?.[key]?.is_template && (
-                <>
-                  <div className="mb-3 p-3 bg-base-200 rounded-lg mt-2">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="text-sm font-medium">Available Templates:</div>
-                      {selectedTemplates.length > 0 && (
-                        <button
-                          type="button"
-                          className="btn btn-xs btn-primary"
-                          onClick={handleApplyTemplates}
-                          disabled={isReadOnly}
-                        >
-                          Apply Selected ({selectedTemplates.length})
-                        </button>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 gap-2">
-                      {richUiTemplates.map((templateObj) => {
-                        const templateName = templateObj.name || `Template`;
-                        const isSelected = selectedTemplates.includes(templateObj._id);
-
-                        return (
-                          <div
-                            key={templateObj._id}
-                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${isSelected ? 'bg-primary/10 border-primary text-primary' : 'bg-base-100 border-base-200 hover:bg-base-200'}`}
-                            onClick={() => {
-                              if (isReadOnly) return;
-                              setSelectedTemplates(prev => {
-                                if (prev.includes(templateObj._id)) {
-                                  return prev.filter(i => i !== templateObj._id);
-                                }
-                                return [...prev, templateObj._id];
-                              });
-                            }}
-                          >
-                            <span className="text-sm font-medium capitalize">{templateName}</span>
-                            {isSelected && (
-                              <Check className="w-5 h-5" />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* JSON Schema UI - Only show if mode is json_schema AND NOT template */}
-              {configuration?.[key]?.type === "json_schema" && !configuration?.[key]?.is_template && (
-                <>
-                  <div className="flex justify-between items-center mb-2 mt-2">
-                    <span
-                      className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => {
-                        openModal(MODAL_TYPE.JSON_SCHEMA);
-                      }}
-                    >
-                      Response Builder
-                    </span>
-                  </div>
-
-                  <textarea
-                    key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
-                    type="input"
-                    defaultValue={
-                      objectFieldValue ||
-                      JSON.stringify(
-                        configuration?.[key]?.value || configuration?.[key] || {},
-                        null,
-                        2
-                      )
-                    }
-                    onBlur={(e) => {
-                      setObjectFieldValue(e.target.value);
-                      try {
-                        const parsedValue = JSON.parse(e.target.value);
-                        handleSelectChange({ target: { value: "json_schema" } }, key, defaultValue, parsedValue, true);
-                      } catch (error) {
-                        console.error(error)
-                        toast.error('Invalid JSON schema');
-                      }
-                    }}
-                    className="textarea textarea-bordered w-full h-32 font-mono text-xs"
-                    placeholder="Enter JSON schema..."
-                    disabled={isReadOnly}
-                  />
-                  <JsonSchemaModal
-                    params={params}
-                    searchParams={searchParams}
-                    messages={messages}
-                    setMessages={setMessages}
-                    thread_id={thread_id}
-                    onResetThreadId={() => {
-                      const newId = generateRandomID();
-                      setThreadId(newId);
-                      setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                        bridgeId: params?.id,
-                        versionId: searchParams?.version,
-                        thread_id: newId,
-                      }));
-                    }}
-                  />
-                </>
-              )}
-            </div>
-          )}
-          {/* Slider input */}
-          {field === 'slider' && (
-            <div className="flex items-center gap-2 w-full">
-              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
-                if (isDefaultValue) {
-                  setSliderValue(min || 0, key, isDeafaultObject);
-                } else {
-                  setSliderValue('min', key);
-                }
-              }}>Min</button>
-              {sliderValueNode}
+            {/* Number input */}
+            {field === 'number' && (
               <input
-                type="range"
-                min={min || 0}
-                max={max || 100}
-                step={step || 1}
-                key={`${key}-${configuration?.[key]}-${service}-${model}`}
-                defaultValue={isDefaultValue ? 'default' : sliderDisplayValue ?? ''}
+                type="number"
+                min={min}
+                max={max}
+                step={step}
+                value={isDefaultValue ? 'default' : (inputConfiguration?.[key] || 0)}
                 onChange={(e) => {
-                  if (isDefaultValue) {
-                    setSliderValue(e.target.value, key, isDeafaultObject);
-                  }
-                  const el = document.getElementById(sliderValueId);
-                  if (el) el.innerText = e.target.value;
-                  debouncedInputChange(e, key, true);
+                  setInputConfiguration((prev) => ({
+                    ...prev,
+                    [key]: e.target.value
+                  }));
                 }}
-                className={`range range-accent h-2 rounded-full ${rangeSizeClass} flex-1`}
+                onBlur={(e) => {
+                  if (isDefaultValue && e.target.value !== (defaultValue || 0).toString()) {
+                    setSliderValue(e.target.value, key, isDeafaultObject);
+                  } else {
+                    handleInputChange(e, key);
+                  }
+                }}
+                className={`input input-bordered ${inputSizeClass} w-full`}
                 name={key}
                 disabled={isReadOnly}
               />
-              <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
-                if (isDefaultValue) {
-                  setSliderValue(max || 100, key, isDeafaultObject);
-                } else {
-                  setSliderValue('max', key);
-                }
-              }}>Max</button>
-            </div>
-          )}
-          
-          {/* Dropdown input */}
-          {field === 'dropdown' && (
-            <div className="relative w-full" ref={dropdownContainerRef}>
-              <div
-                className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
-                disabled={isReadOnly}
-                onClick={() => !isReadOnly && setShowDropdown(!showDropdown)}
-              >
-                <span className="truncate text-base-content text-xs">
-                  {isDefaultValue
-                    ? 'default'
-                    : selectedOptions?.length > 0
-                      ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
-                      : 'Select a tool choice option...'}
-                </span>
-                <div className="ml-auto">
-                  {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
-                </div>
-              </div>
+            )}
 
-              {showDropdown && (
-                <div className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
-                  <div className="p-2 top-0 bg-base-100">
-                    <input
-                      type="text"
-                      placeholder="Search functions..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`input input-bordered ${inputSizeClass} w-full`}
+            {/* Select input */}
+            {field === 'select' && (
+              <div className="w-full">
+                <select
+                  value={(() => {
+                    if (key === 'response_type') {
+                      // Handle response_type specifically
+                      if (configuration?.[key]?.is_template) {
+                        return 'template';
+                      } else if (configuration?.[key]?.type) {
+                        return configuration?.[key]?.type;
+                      } else if (configuration?.[key] === 'default') {
+                        return 'default';
+                      } else {
+                        return configuration?.[key] || 'default';
+                      }
+                    }
+                    // For other keys, use the original logic
+                    return isDefaultValue ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key]);
+                  })()}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    if (key === 'response_type') {
+                      if (selectedValue === 'template') {
+                        // Set type to json_schema AND is_template to true
+                        const updatedDataToSend = {
+                          configuration: {
+                            response_type: {
+                              type: "json_schema", // Ensure type is json_schema
+                              json_schema: configuration?.response_type?.json_schema || {},
+                              is_template: true,
+                              template_id: configuration?.response_type?.template_id || []
+                            }
+                          }
+                        };
+                        dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
+                        return;
+                      } else if (selectedValue === 'json_schema') {
+                        // Set type to json_schema AND is_template to false
+                        const updatedDataToSend = {
+                          configuration: {
+                            [key]: {
+                              type: 'json_schema',
+                              is_template: false,
+                              json_schema: configuration?.[key]?.json_schema || {}
+                            }
+                          }
+                        };
+                        dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
+                        return;
+                      } else if (selectedValue === 'default') {
+                        // Handle default case
+                        setSliderValue("default", key, isDeafaultObject);
+                        return;
+                      }
+                    }
+                    // Fallback for other keys or normal types
+                    handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject);
+                  }}
+                  className={`select select-bordered ${selectSizeClass} w-full`}
+                  name={key}
+                  disabled={isReadOnly}
+                >
+                  {isDefaultValue && <option value="default">default</option>}
+                  {options?.map((option) => (
+                    <option key={typeof option === 'object' ? option?.value || option?.type : option} value={typeof option === 'object' ? option?.value || option?.type : option}>
+                      {typeof option === 'object' ? option?.displayName || option?.type || option?.value : option}
+                    </option>
+                  ))}
+                  {key === 'response_type' && richUiTemplates?.length > 0 && (
+                    <option value="template">Template</option>
+                  )}
+                </select>
+
+                {/* Template UI - Only show if mode is template */}
+                {key === 'response_type' && configuration?.[key]?.is_template && (
+                  <>
+                    <div className="mb-3 p-3 bg-base-200 rounded-lg mt-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium">Available Templates:</div>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-ghost gap-1 text-primary"
+                            onClick={() => router.push(`/org/${params?.org_id}/templates`)}
+                            title="Manage Templates"
+                          >
+                            <ExternalLink size={12} />
+                            Manage
+                          </button>
+                        </div>
+                        {selectedTemplates.length > 0 && (
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-primary"
+                            onClick={handleApplyTemplates}
+                            disabled={isReadOnly}
+                          >
+                            Apply Selected ({selectedTemplates.length})
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {richUiTemplates.map((templateObj) => {
+                          const templateName = templateObj.name || `Template`;
+                          const isSelected = selectedTemplates.includes(templateObj._id);
+
+                          return (
+                            <div
+                              key={templateObj._id}
+                              className={`flex flex-col gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${isSelected ? 'bg-primary/10 border-primary' : 'bg-base-100 border-base-200 hover:bg-base-200'}`}
+                              onClick={() => {
+                                if (isReadOnly) return;
+                                setSelectedTemplates(prev => {
+                                  if (prev.includes(templateObj._id)) {
+                                    return prev.filter(i => i !== templateObj._id);
+                                  }
+                                  return [...prev, templateObj._id];
+                                });
+                              }}
+                            >
+                              {/* Content Preview */}
+                              {templateObj.html && (
+                                <div className="relative w-full h-40 bg-base-100 rounded border border-base-300 overflow-hidden pointer-events-none mb-2">
+                                  <div className="absolute inset-0 w-full h-full overflow-hidden">
+                                    <div
+                                      className="transform scale-[0.5] origin-top-left w-[200%]"
+                                      dangerouslySetInnerHTML={{ __html: templateObj.html }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between w-full">
+                                <span className="text-sm font-medium capitalize truncate">{templateName}</span>
+                                {isSelected && (
+                                  <Check className="w-5 h-5 text-primary shrink-0" />
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* JSON Schema UI - Only show if mode is json_schema AND NOT template */}
+                {configuration?.[key]?.type === "json_schema" && !configuration?.[key]?.is_template && (
+                  <>
+                    <div className="flex justify-between items-center mb-2 mt-2">
+                      <span
+                        className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => {
+                          openModal(MODAL_TYPE.JSON_SCHEMA);
+                        }}
+                      >
+                        Response Builder
+                      </span>
+                    </div>
+
+                    <textarea
+                      key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
+                      type="input"
+                      defaultValue={
+                        objectFieldValue ||
+                        JSON.stringify(
+                          configuration?.[key]?.value || configuration?.[key] || {},
+                          null,
+                          2
+                        )
+                      }
+                      onBlur={(e) => {
+                        setObjectFieldValue(e.target.value);
+                        try {
+                          const parsedValue = JSON.parse(e.target.value);
+                          handleSelectChange({ target: { value: "json_schema" } }, key, defaultValue, parsedValue, true);
+                        } catch (error) {
+                          console.error(error)
+                          toast.error('Invalid JSON schema');
+                        }
+                      }}
+                      className="textarea textarea-bordered w-full h-32 font-mono text-xs"
+                      placeholder="Enter JSON schema..."
                       disabled={isReadOnly}
                     />
-                  </div>
-                  {/* Static options (auto, none, required) */}
-                  {options && options.map(option => (
-                    <div
-                      key={option}
-                      className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
-                      onClick={() => {
-                        setSelectedOptions([{ name: option, id: option }]);
-                        handleDropdownChange(option, key);
-                        setShowDropdown(false);
+                    <JsonSchemaModal
+                      params={params}
+                      searchParams={searchParams}
+                      messages={messages}
+                      setMessages={setMessages}
+                      thread_id={thread_id}
+                      onResetThreadId={() => {
+                        const newId = generateRandomID();
+                        setThreadId(newId);
+                        setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                          bridgeId: params?.id,
+                          versionId: searchParams?.version,
+                          thread_id: newId,
+                        }));
                       }}
-                    >
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="function-select"
-                          checked={selectedOptions?.some(opt => opt?.name === option)}
-                          className="radio radio-xs"
-                          disabled={isReadOnly}
-                        />
-                        <span className="font-medium text-xs">{option}</span>
-                        <span className="text-gray-500 text-xs">
-                          {option === 'none'
-                            ? "Model won't call a function; it will generate a message."
-                            : option === 'auto'
-                              ? "Model can generate a response or call a function."
-                              : "One or more specific functions must be called"}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
-                  
-                  {/* Tools Section */}
-                  {version_function_data && Object.values(version_function_data).length > 0 && (
-                    <>
-                      <div className="px-2 py-1 sticky top-0 z-10">
-                        <span className="text-xs font-semibold text-base-content/70">TOOLS</span>
-                      </div>
-                      {Object.values(version_function_data)
-                        .filter(func => {
-                          const funcName = func?.script_id || func?.title || '';
-                          return funcName.toLowerCase().includes(searchQuery.toLowerCase());
-                        })
-                        .map(func => (
-                          <div
-                            key={func?._id}
-                            className="p-2 hover:bg-base-200 cursor-pointer"
-                            onClick={() => {
-                              setSelectedOptions([{ name: func?.title, id: func?._id }]);
-                              handleDropdownChange(func?._id, key);
-                              setShowDropdown(false);
-                            }}
-                          >
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name="function-select"
-                                checked={selectedOptions?.some(opt => opt?.id === func?._id)}
-                                className="radio radio-xs"
-                                disabled={isReadOnly}
-                              />
-                              <span className="font-medium text-xs">{integrationData?.[func?.script_id]?.title || func?.title}</span>
-                            </label>
-                          </div>
-                        ))}
-                    </>
-                  )}
-                  
-                  {/* Agents Section */}
-                  {connected_agents && Object.keys(connected_agents).length > 0 && (
-                    <>
-                      <div className="px-2 py-1 sticky top-0 z-10">
-                        <span className="text-xs font-semibold text-base-content/70">AGENTS</span>
-                      </div>
-                      {Object.entries(connected_agents)
-                        .filter(([name, agent]) => {
-                          return name.toLowerCase().includes(searchQuery.toLowerCase());
-                        })
-                        .map(([name, agent]) => (
-                          <div
-                            key={agent.bridge_id}
-                            className="p-2 hover:bg-base-200 cursor-pointer"
-                            onClick={() => {
-                              setSelectedOptions([{ name, id: agent.bridge_id }]);
-                              handleDropdownChange(agent.bridge_id, key);
-                              setShowDropdown(false);
-                            }}
-                          >
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name="function-select"
-                                checked={selectedOptions?.some(opt => opt?.id === agent.bridge_id)}
-                                className="radio radio-xs"
-                                disabled={isReadOnly}
-                              />
-                              <span className="font-medium text-xs">{name}</span>
-                            </label>
-                          </div>
-                        ))}
-                    </>
-                  )}
+                    />
+                  </>
+                )}
+              </div>
+            )}
+            {/* Slider input */}
+            {field === 'slider' && (
+              <div className="flex items-center gap-2 w-full">
+                <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
+                  if (isDefaultValue) {
+                    setSliderValue(min || 0, key, isDeafaultObject);
+                  } else {
+                    setSliderValue('min', key);
+                  }
+                }}>Min</button>
+                {sliderValueNode}
+                <input
+                  type="range"
+                  min={min || 0}
+                  max={max || 100}
+                  step={step || 1}
+                  key={`${key}-${configuration?.[key]}-${service}-${model}`}
+                  defaultValue={isDefaultValue ? 'default' : sliderDisplayValue ?? ''}
+                  onChange={(e) => {
+                    if (isDefaultValue) {
+                      setSliderValue(e.target.value, key, isDeafaultObject);
+                    }
+                    const el = document.getElementById(sliderValueId);
+                    if (el) el.innerText = e.target.value;
+                    debouncedInputChange(e, key, true);
+                  }}
+                  className={`range range-accent h-2 rounded-full ${rangeSizeClass} flex-1`}
+                  name={key}
+                  disabled={isReadOnly}
+                />
+                <button type="button" className={`btn ${buttonSizeClass} btn-ghost border border-base-content/20`} disabled={isReadOnly} onClick={() => {
+                  if (isDefaultValue) {
+                    setSliderValue(max || 100, key, isDeafaultObject);
+                  } else {
+                    setSliderValue('max', key);
+                  }
+                }}>Max</button>
+              </div>
+            )}
+
+            {/* Dropdown input */}
+            {field === 'dropdown' && (
+              <div className="relative w-full" ref={dropdownContainerRef}>
+                <div
+                  className={`flex items-center gap-2 input input-bordered ${inputSizeClass} w-full min-h-[2rem] cursor-pointer`}
+                  disabled={isReadOnly}
+                  onClick={() => !isReadOnly && setShowDropdown(!showDropdown)}
+                >
+                  <span className="truncate text-base-content text-xs">
+                    {isDefaultValue
+                      ? 'default'
+                      : selectedOptions?.length > 0
+                        ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
+                        : 'Select a tool choice option...'}
+                  </span>
+                  <div className="ml-auto">
+                    {showDropdown ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+
+                {showDropdown && (
+                  <div className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto mt-1 p-2">
+                    <div className="p-2 top-0 bg-base-100">
+                      <input
+                        type="text"
+                        placeholder="Search functions..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className={`input input-bordered ${inputSizeClass} w-full`}
+                        disabled={isReadOnly}
+                      />
+                    </div>
+                    {/* Static options (auto, none, required) */}
+                    {options && options.map(option => (
+                      <div
+                        key={option}
+                        className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                        onClick={() => {
+                          setSelectedOptions([{ name: option, id: option }]);
+                          handleDropdownChange(option, key);
+                          setShowDropdown(false);
+                        }}
+                      >
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="function-select"
+                            checked={selectedOptions?.some(opt => opt?.name === option)}
+                            className="radio radio-xs"
+                            disabled={isReadOnly}
+                          />
+                          <span className="font-medium text-xs">{option}</span>
+                          <span className="text-gray-500 text-xs">
+                            {option === 'none'
+                              ? "Model won't call a function; it will generate a message."
+                              : option === 'auto'
+                                ? "Model can generate a response or call a function."
+                                : "One or more specific functions must be called"}
+                          </span>
+                        </label>
+                      </div>
+                    ))}
+
+                    {/* Tools Section */}
+                    {version_function_data && Object.values(version_function_data).length > 0 && (
+                      <>
+                        <div className="px-2 py-1 sticky top-0 z-10">
+                          <span className="text-xs font-semibold text-base-content/70">TOOLS</span>
+                        </div>
+                        {Object.values(version_function_data)
+                          .filter(func => {
+                            const funcName = func?.script_id || func?.title || '';
+                            return funcName.toLowerCase().includes(searchQuery.toLowerCase());
+                          })
+                          .map(func => (
+                            <div
+                              key={func?._id}
+                              className="p-2 hover:bg-base-200 cursor-pointer"
+                              onClick={() => {
+                                setSelectedOptions([{ name: func?.title, id: func?._id }]);
+                                handleDropdownChange(func?._id, key);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name="function-select"
+                                  checked={selectedOptions?.some(opt => opt?.id === func?._id)}
+                                  className="radio radio-xs"
+                                  disabled={isReadOnly}
+                                />
+                                <span className="font-medium text-xs">{integrationData?.[func?.script_id]?.title || func?.title}</span>
+                              </label>
+                            </div>
+                          ))}
+                      </>
+                    )}
+
+                    {/* Agents Section */}
+                    {connected_agents && Object.keys(connected_agents).length > 0 && (
+                      <>
+                        <div className="px-2 py-1 sticky top-0 z-10">
+                          <span className="text-xs font-semibold text-base-content/70">AGENTS</span>
+                        </div>
+                        {Object.entries(connected_agents)
+                          .filter(([name, agent]) => {
+                            return name.toLowerCase().includes(searchQuery.toLowerCase());
+                          })
+                          .map(([name, agent]) => (
+                            <div
+                              key={agent.bridge_id}
+                              className="p-2 hover:bg-base-200 cursor-pointer"
+                              onClick={() => {
+                                setSelectedOptions([{ name, id: agent.bridge_id }]);
+                                handleDropdownChange(agent.bridge_id, key);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name="function-select"
+                                  checked={selectedOptions?.some(opt => opt?.id === agent.bridge_id)}
+                                  className="radio radio-xs"
+                                  disabled={isReadOnly}
+                                />
+                                <span className="font-medium text-xs">{name}</span>
+                              </label>
+                            </div>
+                          ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
 

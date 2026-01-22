@@ -341,10 +341,23 @@ export const getFinishReasons = async () => {
   }
 }
 export const getLinks = async () => {
-  try{
+  try {
     const response = await axios.get("https://flow.sokt.io/func/scriiS7RkdxI");
     return response;
-  }catch(error){
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+
+export const generateRichUITemplate = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/api/utils/call-gtwy`, {
+      type: 'rich_ui_template',
+      ...data
+    });
+    return response.data;
+  } catch (error) {
     console.error(error);
     throw new Error(error);
   }
