@@ -93,8 +93,8 @@ import {
   Shield,
   ExternalLink,
   Upload,
-  Link
-} from 'lucide-react';
+  Link,
+} from "lucide-react";
 
 /**
  * Monitor play icon showing a monitor with play button
@@ -781,9 +781,8 @@ export const DatabaseIcon = (props) => <Database {...props} />;
 
 export const ShieldIcon = (props) => <Shield {...props} />;
 
-export const ExternalLinkIcon=(props)=> <ExternalLink  {...props} />
+export const ExternalLinkIcon = (props) => <ExternalLink {...props} />;
 
 export const UploadIcon = (props) => <Upload {...props} />;
 
 export const LinkIcon = (props) => <Link {...props} />;
-

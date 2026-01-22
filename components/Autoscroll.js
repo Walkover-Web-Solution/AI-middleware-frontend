@@ -2,7 +2,7 @@ import React from "react";
 
 const Autoscroll = ({ items }) => {
   return (
-    <div  id="autoscroll-container" className="grid grid-cols-4 gap-4 p-4">
+    <div id="autoscroll-container" className="grid grid-cols-4 gap-4 p-4">
       {items.map((item, index) => (
         <div
           id={`autoscroll-item-${index}`}

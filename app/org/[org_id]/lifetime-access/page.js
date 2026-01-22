@@ -1,23 +1,21 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import MainLayout from '@/components/layoutComponents/MainLayout';
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { setInCookies } from '@/utils/utility';
+import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import MainLayout from "@/components/layoutComponents/MainLayout";
+import { useCustomSelector } from "@/customHooks/customSelector";
+import { setInCookies } from "@/utils/utility";
 
 const LifetimeAccessPage = () => {
   const params = useParams();
   const router = useRouter();
-  const currrentOrgDetail = useCustomSelector((state) =>
-      state?.userDetailsReducer?.organizations?.[params.org_id]
-    );
+  const currrentOrgDetail = useCustomSelector((state) => state?.userDetailsReducer?.organizations?.[params.org_id]);
 
   useEffect(() => {
     // Load Tally embed script
-    setInCookies('current_org_id', params.org_id);
-    const script = document.createElement('script');
-    script.src = 'https://tally.so/widgets/embed.js';
+    setInCookies("current_org_id", params.org_id);
+    const script = document.createElement("script");
+    script.src = "https://tally.so/widgets/embed.js";
     script.async = true;
     document.head.appendChild(script);
 

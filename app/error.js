@@ -4,15 +4,24 @@ import { useRouter } from "next/navigation";
 
 export default function Error({ error, reset }) {
   const router = useRouter();
-  const isProd = process.env.NEXT_PUBLIC_ENV === 'PROD';
-
+  const isProd = process.env.NEXT_PUBLIC_ENV === "PROD";
 
   const handleTryAgain = () => {
     window.location.reload();
   };
 
   const handleGoHome = () => {
-    router.replace(isProd ? "/login" : "/org");
+    // Check if we're in embed context
+    const isEmbedContext =
+      window.location.pathname.includes("/embed") ||
+      sessionStorage.getItem("embedUser") === "true" ||
+      window.location.hostname.includes("embed");
+
+    if (isEmbedContext) {
+      router.replace("/session-expired");
+    } else {
+      router.replace(isProd ? "/login" : "/org");
+    }
   };
 
   return (
@@ -39,8 +48,12 @@ export default function Error({ error, reset }) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <button className="btn btn-sm  btn-primary" onClick={handleTryAgain}>Try again</button>
-              <button className="btn btn-sm" onClick={handleGoHome}>Go Home</button>
+              <button className="btn btn-sm  btn-primary" onClick={handleTryAgain}>
+                Try again
+              </button>
+              <button className="btn btn-sm" onClick={handleGoHome}>
+                Go Home
+              </button>
             </div>
           </div>
         </div>
