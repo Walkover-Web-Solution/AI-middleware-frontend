@@ -29,8 +29,8 @@ export default function RootLayout({ children }) {
     <html lang="en" data-theme="light">
       <GoogleTagManager gtmId="GTM-PXRN8T45" />
       <body suppressHydrationWarning className={dmSans.className}>
-        <NetworkStatus />
         <Wrapper>{children}</Wrapper>
+        <NetworkStatus />
       </body>
     </html>
   );
