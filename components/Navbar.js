@@ -90,8 +90,9 @@ const Navbar = ({ isEmbedUser, params }) => {
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
     if (depth === 3) return false;
+    if (searchParams?.get('tab') === 'agent-flow') return false;
     return ['configure', 'history', 'testcase'].some(seg => pathname.includes(seg));
-  }, [pathParts.length, pathname]);
+  }, [pathParts.length, pathname, searchParams]);
 
   // Close ellipsis menu when clicking outside
   useEffect(() => {

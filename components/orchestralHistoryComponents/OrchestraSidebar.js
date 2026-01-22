@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, GitBranch, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getOrchestralSubThreads } from '@/config/orchestralHistoryApi';
+import { formatRelativeTime } from '@/utils/utility';
 
 const OrchestraSidebar = ({
   historyData,
@@ -55,18 +56,6 @@ const OrchestraSidebar = ({
     }
   }, [decodedSubThreadId]);
 
-  const formatRelativeTime = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    return date.toLocaleDateString();
-  };
 
   const filteredHistoryData = historyData?.filter(item => {
     if (!searchTerm) return true;
@@ -102,16 +91,13 @@ const OrchestraSidebar = ({
         
         if (response.success && response.threads?.length > 0) {
           setSubThreadsMap(prev => ({ ...prev, [threadId]: response.threads }));
-          
-          // Auto-select first sub-thread if none selected
-          if (!selectedSubThreadId && threadHandler) {
-            const firstSubThread = response.threads[0];
-            setSelectedSubThreadId(firstSubThread.sub_thread_id);
-            // Find the parent thread item
-            const threadItem = historyData.find(t => t.thread_id === threadId);
-            if (threadItem) {
-              threadHandler(threadId, firstSubThread, 'select-subthread');
-            }
+
+          // Auto-select first sub-thread on expand
+          const firstSubThread = response.threads[0];
+          setSelectedSubThreadId(firstSubThread.sub_thread_id);
+          const threadItem = historyData.find(t => t.thread_id === threadId);
+          if (threadItem && threadHandler) {
+            threadHandler(threadId, firstSubThread, 'select-subthread');
           }
         } else {
           // If empty response, use thread_id as sub_thread_id
@@ -127,12 +113,10 @@ const OrchestraSidebar = ({
           }));
           
           // Auto-select fallback sub-thread
-          if (!selectedSubThreadId && threadHandler) {
-            setSelectedSubThreadId(threadId);
-            const threadItem = historyData.find(t => t.thread_id === threadId);
-            if (threadItem) {
-              threadHandler(threadId, fallbackSubThread, 'select-subthread');
-            }
+          setSelectedSubThreadId(threadId);
+          const threadItem = historyData.find(t => t.thread_id === threadId);
+          if (threadItem && threadHandler) {
+            threadHandler(threadId, fallbackSubThread, 'select-subthread');
           }
         }
       } catch (error) {
@@ -150,15 +134,20 @@ const OrchestraSidebar = ({
         }));
         
         // Auto-select fallback sub-thread
-        if (!selectedSubThreadId && threadHandler) {
-          setSelectedSubThreadId(threadId);
-          const threadItem = historyData.find(t => t.thread_id === threadId);
-          if (threadItem) {
-            threadHandler(threadId, fallbackSubThread, 'select-subthread');
-          }
+        setSelectedSubThreadId(threadId);
+        const threadItem = historyData.find(t => t.thread_id === threadId);
+        if (threadItem && threadHandler) {
+          threadHandler(threadId, fallbackSubThread, 'select-subthread');
         }
       } finally {
         setLoadingSubThreads(prev => ({ ...prev, [threadId]: false }));
+      }
+    } else if (isExpanding && subThreadsMap[threadId]?.length) {
+      const firstSubThread = subThreadsMap[threadId][0];
+      setSelectedSubThreadId(firstSubThread?.sub_thread_id);
+      const threadItem = historyData.find(t => t.thread_id === threadId);
+      if (threadItem && threadHandler) {
+        threadHandler(threadId, firstSubThread, 'select-subthread');
       }
     }
   };
@@ -322,7 +311,7 @@ const OrchestraSidebar = ({
                                     </span>
                                   </div>
                                   <span className="text-xs opacity-60 flex-shrink-0">
-                                    {formatRelativeTime(subThread?.updated_at || subThread?.created_at)}
+                                    {formatRelativeTime(subThread?.created_at || subThread?.updated_at)}
                                   </span>
                                 </div>
                               </div>

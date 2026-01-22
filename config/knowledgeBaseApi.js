@@ -17,8 +17,8 @@ export const createKnowledgeBaseEntry = async (data) => {
 
 export const getAllKnowBaseData = async () => {
   try {
-    const response = await axios.get(`${URL}/api/rag/resource`);
-    return response?.data?.data?.resources;
+    // const response = await axios.get(`${URL}/api/rag/resource`);
+    // return response?.data?.data?.resources;
   } catch (error) {
     console.error(error);
     return error;
