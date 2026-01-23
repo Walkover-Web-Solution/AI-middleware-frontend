@@ -2,7 +2,7 @@
 "use client";
 import { addThreadNMessageUsingRtLayer, addThreadUsingRtLayer } from "@/store/reducer/historyReducer";
 import { handleRtLayerMessage, setChatTestCaseIdAction, addChatErrorMessage } from "@/store/action/chatAction";
-import { useDispatch } from "react-redux";
+
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import WebSocketClient from "rtlayer-client";
@@ -10,6 +10,9 @@ import { toast } from "react-toastify";
 import { didCurrentTabInitiateUpdate } from "@/utils/utility";
 import { RefreshIcon } from "@/components/Icons";
 import { buildLlmUrls } from "@/utils/attachmentUtils";
+import { getModelAction } from "@/store/action/modelAction";
+import { getServiceAction } from "@/store/action/serviceAction";
+import { useDispatch, useSelector } from "react-redux";
 
 function useRtLayerEventHandler(channelIdentifier = "") {
   const [client, setClient] = useState(null);
@@ -19,6 +22,7 @@ function useRtLayerEventHandler(channelIdentifier = "") {
   const pathName = usePathname();
   const listenerRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const SERVICES = useSelector((state) => state.serviceReducer.services);
 
   // Extract path parameters with error handling
   const { bridgeId, orgId } = useMemo(() => {
@@ -354,7 +358,46 @@ function useRtLayerEventHandler(channelIdentifier = "") {
       setConnectionError(error.message);
     }
   }, [client, channelId, processHistoryData]);
+  // Listen to global channel for model config updates
+  useEffect(() => {
+    if (!client) return;
 
+    const globalListener = client.on("global_model_updates", (message) => {
+      try {
+        // Parse the message
+        let parsedData = typeof message === "string" ? JSON.parse(message) : message;
+
+        // Check if this is a model_config_updated event
+        if (parsedData?.event === "model_config_updated") {
+          // Refresh only the specific service that was updated
+          const serviceToRefresh = parsedData.service;
+
+          if (serviceToRefresh) {
+            dispatch(getModelAction({ service: serviceToRefresh }));
+          } else {
+            // Fallback: if no service specified, refresh all services
+            if (Array.isArray(SERVICES) && SERVICES.length > 0) {
+              SERVICES.forEach((service) => {
+                if (service?.value) {
+                  dispatch(getModelAction({ service: service.value }));
+                }
+              });
+            } else {
+              dispatch(getServiceAction());
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error processing model config update:", error);
+      }
+    });
+
+    return () => {
+      if (globalListener && typeof globalListener.remove === "function") {
+        globalListener.remove();
+      }
+    };
+  }, [client, dispatch]);
   // Cleanup on unmount
   useEffect(() => {
     return () => {
