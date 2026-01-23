@@ -457,7 +457,7 @@ export const addorRemoveResponseIdInBridgeAction = (bridge_id, org_id, responseO
     const response = await addorRemoveResponseIdInBridge(bridge_id, org_id, responseObj);
     dispatch(updateBridgeReducer(response.data))
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 };
 

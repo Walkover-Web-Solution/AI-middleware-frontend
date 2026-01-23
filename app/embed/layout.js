@@ -54,43 +54,29 @@ const Layout = ({ children }) => {
   }, [])
 
   const createNewAgent = useCallback(
-    (agent_name, orgId, agent_purpose) => {
-      // Reset theme config when creating a new agent
-      const dataToSend = agent_purpose
-        ? { purpose: agent_purpose.trim() }
-        : {
-          service: "openai",
-          model: "gpt-4o",
-          name: agent_name.trim(),
-          slugName: generateRandomID(),
-          bridgeType: "api",
-          type: "chat",
-        };
-      dispatch(isPending());
-      dispatch(
-        createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
-          const createdAgent = response?.data?.agent;
-          if (createdAgent) {
-            const targetVersion = createdAgent?.published_version_id || createdAgent?.versions?.[0];
-            sendDataToParent(
-              "drafted",
-              {
-                name: createdAgent.name,
-                agent_id: createdAgent._id,
-              },
-              "Agent created Successfully"
-            );
-            if (targetVersion) {
-              router.push(`/org/${orgId}/agents/configure/${createdAgent._id}?version=${targetVersion}`);
-            }
-          }
-          setIsLoading(false);
-          setProcessedAgentName(agent_name);
-        })
-      ).catch(() => {
+    async (agent_name, orgId, agent_purpose) => {
+      try {
+        setIsLoading(true);
+
+        const result = await dispatch(
+          createEmbedAgentAction({
+            purpose: agent_purpose,
+            agent_name: agent_name,
+            orgId: orgId,
+            isEmbedUser: true,
+            router: router,
+            sendDataToParent: sendDataToParent,
+          })
+        );
+
+        if (result?.success) {
+          setProcessedAgentName(agent_name || result.agent?.name);
+        }
+      } catch (error) {
+        console.error("Error creating agent:", error);
+      } finally {
         setIsLoading(false);
-        setProcessedAgentName(agent_name);
-      });
+      }
     },
     [dispatch, router]
   );
