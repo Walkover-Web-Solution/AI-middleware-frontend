@@ -9,14 +9,10 @@ export function FinalResponseUI({ status, preview, onClick }) {
       </div>
 
       {/* Heading */}
-      <div className="text-xs text-base-content/60 font-semibold py-2">
-        FINAL RESPONSE
-      </div>
+      <div className="text-xs text-base-content/60 font-semibold py-2">FINAL RESPONSE</div>
 
       {/* Status */}
-      <div className="text-green-600 font-semibold text-sm bg-base-200 border-green-500 border p-2">
-        {status}
-      </div>
+      <div className="text-green-600 font-semibold text-sm bg-base-200 border-green-500 border p-2">{status}</div>
 
       {preview && (
         <button
