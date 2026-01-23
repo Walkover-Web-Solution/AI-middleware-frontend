@@ -173,6 +173,19 @@ const Layout = ({ children }) => {
               dispatch(setEmbedUserDetailsAction({ theme_config: parsedTheme }));
               return;
             }
+            if (key === "prompt") {
+              // Store prompt object directly (contains embedCustomFields)
+              let parsedPrompt = value;
+              if (typeof value === "string") {
+                try {
+                  parsedPrompt = JSON.parse(value);
+                } catch (err) {
+                  console.error("Invalid prompt JSON in embed params", err);
+                }
+              }
+              dispatch(setEmbedUserDetailsAction({ prompt: parsedPrompt }));
+              return;
+            }
             dispatch(setEmbedUserDetailsAction({ [key]: toBoolean(value) }));
           });
         }

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { initializeVariablesState, updateVariables } from "@/store/reducer/variableReducer";
-import { sendDataToParent, toggleSidebar } from "@/utils/utility";
+import { extractPromptVariables, sendDataToParent, toggleSidebar } from "@/utils/utility";
 import { CloseIcon } from "@/components/Icons";
 import { Trash2, Upload, Play } from "lucide-react";
 
@@ -213,7 +213,16 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
     if (!prompt) {
       return new Set();
     }
-    const matches = prompt.match(/\{\{([^}]+)\}\}/g);
+
+    // Handle both string (old format) and object (new format)
+    let promptText = "";
+    if (typeof prompt === "string") {
+      promptText = prompt;
+    } else if (typeof prompt === "object" && prompt !== null) {
+      promptText = prompt.instructions || "";
+    }
+
+    const matches = promptText.match(/\{\{([^}]+)\}\}/g);
     if (!matches) {
       return new Set();
     }
@@ -945,9 +954,8 @@ const VariableCollectionSlider = ({ params, versionId, isEmbedUser }) => {
   useEffect(() => {
     // sync prompt variables into groups
     if (!prompt || !variableGroups.length) return;
-    const regex = /{{(.*?)}}/g;
-    const matches = [...prompt.matchAll(regex)];
-    const promptVariables = [...new Set(matches.map((match) => match[1].trim()))];
+
+    const promptVariables = extractPromptVariables(prompt);
     if (!promptVariables.length) return;
 
     variableGroups.forEach((group) => {

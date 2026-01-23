@@ -5,7 +5,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { DIFFERNCE_DATA_DISPLAY_NAME, CONFIGURATION_KEYS_TO_EXCLUDE } from "@/jsonFiles/bridgeParameter";
 import ComparisonCheck from "@/utils/comparisonCheck";
 
-const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
+const PublishVersionDataComparisonView = ({ oldData, newData, params, hidePromptDiff = false }) => {
   const { apikeyData, functionData, knowledgeBaseData } = useCustomSelector((state) => ({
     apikeyData: state?.apiKeysReducer?.apikeys[params.org_id] || [],
     functionData: state?.bridgeReducer?.org[params.org_id]?.functionData || {},
@@ -223,6 +223,93 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
     return categories;
   }, [flattenedDifferences]);
 
+  // Extract and compare prompt fields separately
+  const promptFieldComparison = useMemo(() => {
+    // Find the prompt difference
+    const promptDiff = differences["configuration.prompt"];
+    if (!promptDiff) return null;
+
+    const extractFields = (prompt) => {
+      if (!prompt) {
+        return { role: "", goal: "", instructions: "", customFields: [] };
+      }
+
+      if (typeof prompt === "string") {
+        return { role: "", goal: "", instructions: prompt, customFields: [] };
+      } else if (typeof prompt === "object" && prompt !== null) {
+        return {
+          role: prompt.role || "",
+          goal: prompt.goal || "",
+          instructions: prompt.instructions || "",
+          customFields: prompt.embedCustomFields || [],
+        };
+      }
+
+      return { role: "", goal: "", instructions: "", customFields: [] };
+    };
+
+    const oldFields = extractFields(promptDiff.oldValue);
+    const newFields = extractFields(promptDiff.newValue);
+
+    const normalize = (value) => (value ?? "").toString();
+    const changedFields = [];
+
+    // Check Role
+    if (normalize(oldFields.role) !== normalize(newFields.role)) {
+      changedFields.push({
+        name: "Role",
+        oldValue: oldFields.role,
+        newValue: newFields.role,
+      });
+    }
+
+    // Check Goal
+    if (normalize(oldFields.goal) !== normalize(newFields.goal)) {
+      changedFields.push({
+        name: "Goal",
+        oldValue: oldFields.goal,
+        newValue: newFields.goal,
+      });
+    }
+
+    // Check Instructions
+    if (normalize(oldFields.instructions) !== normalize(newFields.instructions)) {
+      changedFields.push({
+        name: "Instructions",
+        oldValue: oldFields.instructions,
+        newValue: newFields.instructions,
+      });
+    }
+
+    // Check Custom Fields
+    const customFieldKeys = Array.from(
+      new Set([...oldFields.customFields.map((f) => f.key), ...newFields.customFields.map((f) => f.key)])
+    );
+
+    const changedCustomFields = customFieldKeys
+      .filter((key) => {
+        const oldField = oldFields.customFields.find((f) => f.key === key);
+        const newField = newFields.customFields.find((f) => f.key === key);
+        return normalize(oldField?.value) !== normalize(newField?.value);
+      })
+      .map((key) => {
+        const oldField = oldFields.customFields.find((f) => f.key === key);
+        const newField = newFields.customFields.find((f) => f.key === key);
+        return {
+          key,
+          label: newField?.label || oldField?.label || key,
+          oldValue: oldField?.value || "",
+          newValue: newField?.value || "",
+        };
+      });
+
+    return {
+      hasChanges: changedFields.length > 0 || changedCustomFields.length > 0,
+      changedFields,
+      changedCustomFields,
+    };
+  }, [differences]);
+
   return (
     <div className="bg-base-100 overflow-auto">
       {!hasDifferences ? (
@@ -241,6 +328,11 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
                   // Check if this is the prompt field
                   const isPromptField = path === "prompt" || path.endsWith(".prompt");
 
+                  // Skip the prompt field here - we'll render it separately below
+                  if (isPromptField) {
+                    return null;
+                  }
+
                   return (
                     <div key={path} className="card bg-base-200">
                       <div className="card-body p-4">
@@ -251,26 +343,58 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
                           {getStatusBadge(status)}
                         </div>
 
-                        {isPromptField ? (
-                          // Use ComparisonCheck for prompt field
-                          <ComparisonCheck isFromPublishModal={true} oldContent={oldValue} newContent={newValue} />
-                        ) : (
-                          // Use regular grid display for other fields
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">Current Value:</div>
-                              <div className="bg-base-300 p-3 rounded text-sm">{formatValue(oldValue, path)}</div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">Updated Value:</div>
-                              <div className="bg-base-300 p-3 rounded text-sm">{formatValue(newValue, path)}</div>
-                            </div>
+                        {/* Use regular grid display for non-prompt fields */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Current Value:</div>
+                            <div className="bg-base-300 p-3 rounded text-sm">{formatValue(oldValue, path)}</div>
                           </div>
-                        )}
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Updated Value:</div>
+                            <div className="bg-base-300 p-3 rounded text-sm">{formatValue(newValue, path)}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
+
+                {/* Render prompt field changes separately by field */}
+                {category === "configuration" && promptFieldComparison?.hasChanges && (
+                  <>
+                    {promptFieldComparison.changedFields.map((field) => (
+                      <div key={field.name} className="card bg-base-200">
+                        <div className="card-body p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <h5 className="card-title text-sm">Prompt - {field.name}</h5>
+                            {getStatusBadge("changed")}
+                          </div>
+                          <ComparisonCheck
+                            isFromPublishModal={true}
+                            oldContent={field.oldValue}
+                            newContent={field.newValue}
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    {promptFieldComparison.changedCustomFields.map((field) => (
+                      <div key={field.key} className="card bg-base-200">
+                        <div className="card-body p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <h5 className="card-title text-sm">Prompt - {field.label}</h5>
+                            {getStatusBadge("changed")}
+                          </div>
+                          <ComparisonCheck
+                            isFromPublishModal={true}
+                            oldContent={field.oldValue}
+                            newContent={field.newValue}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           ))}

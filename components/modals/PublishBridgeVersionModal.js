@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useMemo, useEffect } from "react";
 import { X, AlertTriangle, Settings, CircleX, ArrowRightLeft, Check, Bot } from "lucide-react";
+import { isEqual } from "lodash";
 import {
   getAllBridgesAction,
   getBridgeVersionAction,
@@ -17,6 +18,7 @@ import Protected from "../Protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
 import { AgentSummaryContent } from "./PromptSummaryModal";
+import Diff_Modal from "@/components/modals/DiffModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -319,6 +321,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       filteredVersionData: filterData(versionData, KEYS_TO_COMPARE),
     };
   }, [bridgeData, versionData]);
+
+  const promptBeforePublish = filteredBridgeData?.configuration?.prompt;
+  const promptAfterPublish = filteredVersionData?.configuration?.prompt;
+  const hasPromptChanges = useMemo(() => {
+    if (!promptBeforePublish && !promptAfterPublish) return false;
+    return !isEqual(promptBeforePublish, promptAfterPublish);
+  }, [promptBeforePublish, promptAfterPublish]);
 
   const differences = useMemo(() => {
     if (!filteredBridgeData || !filteredVersionData) return {};
@@ -715,357 +724,391 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   ]);
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
-        <div
-          id="publish-bridge-modal-container"
-          className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl max-w-6xl w-[90vw] my-8 flex flex-col p-6 md:p-10 transition-all duration-300 ease-in-out animate-fadeIn"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Publish Bridge Version</h2>
-            <div className="flex gap-2">
-              <button
-                id="publish-toggle-comparison-button"
-                onClick={toggleComparison}
-                className={`btn btn-sm btn-outline flex gap-1 ${!showComparison ? "hidden" : "block"}`}
-                title="Compare Version Changes"
-              >
-                <ArrowRightLeft size={16} />
-                {showComparison ? "Hide Changes" : "View Changes"}
-              </button>
-              <button
-                id="publish-close-x-button"
-                onClick={handleCloseModal}
-                className="btn btn-sm btn-circle btn-ghost"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* Agent Summary Accordion */}
+    <>
+      <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
           <div
-            className={`collapse collapse-arrow border bg-base-100 rounded-lg mb-6 summary-accordion ${
-              showSummaryValidation && (!bridge_summary || bridge_summary.trim() === "")
-                ? "border-red-500"
-                : "border-base-300"
-            }`}
+            id="publish-bridge-modal-container"
+            className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl max-w-6xl w-[90vw] my-8 flex flex-col p-6 md:p-10 transition-all duration-300 ease-in-out animate-fadeIn"
           >
-            <input
-              id="publish-summary-accordion-toggle"
-              type="checkbox"
-              className="peer"
-              defaultChecked={summaryAccordionOpen}
-              checked={summaryAccordionOpen}
-              onChange={(e) => setSummaryAccordionOpen(e.target.checked)}
-            />
-            <div className="collapse-title font-medium flex items-center">
-              <Bot className="w-5 h-5 mr-2" />
-              Agent Summary
-              {showSummaryValidation && (!bridge_summary || bridge_summary.trim() === "") && (
-                <span className="text-red-500 ml-2">*</span>
-              )}
-            </div>
-            <div className="collapse-content">
-              <AgentSummaryContent
-                params={params}
-                prompt={prompt}
-                versionId={searchParams?.get("version")}
-                showTitle={false}
-                showButtons={true}
-                onSave={() => setShowSummaryValidation(false)}
-                isMandatory={showSummaryValidation}
-                showValidationError={showSummaryValidation}
-                isEditor={isEditor}
-              />
-            </div>
-          </div>
-
-          {/* Warning Section */}
-          {!showComparison && (
-            <div className="alert bg-base/70 mb-6">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                  <h3 className="font-medium">Are you sure you want to publish this version?</h3>
-                </div>
-                <div className="pl-7">
-                  <p className="text-sm">Keep these important points in mind:</p>
-                  <ul className="list-disc ml-4 mt-1 space-y-1 text-sm">
-                    <li>Published version will be available to all users</li>
-                    <li>Changes will be immediately reflected in the published version</li>
-                    <li>Published changes cannot be reverted</li>
-                  </ul>
-                </div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Publish Bridge Version</h2>
+              <div className="flex gap-2">
+                <button
+                  id="publish-toggle-comparison-button"
+                  onClick={toggleComparison}
+                  className={`btn btn-sm btn-outline flex gap-1 ${!showComparison ? "hidden" : "block"}`}
+                  title="Compare Version Changes"
+                >
+                  <ArrowRightLeft size={16} />
+                  {showComparison ? "Hide Changes" : "View Changes"}
+                </button>
+                <button
+                  id="publish-close-x-button"
+                  onClick={handleCloseModal}
+                  className="btn btn-sm btn-circle btn-ghost"
+                >
+                  <X size={18} />
+                </button>
               </div>
             </div>
-          )}
 
-          {/* Changes Summary */}
-          {!showComparison && (
-            <div className="mb-6">
-              <div className="bg-base-200 rounded-lg p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold">Changes Summary</h3>
-                  {Object.keys(changesSummary).length > 0 && (
-                    <button
-                      id="publish-view-all-changes-button"
-                      className="btn btn-sm btn-outline flex gap-1"
-                      onClick={toggleComparison}
-                    >
-                      <ArrowRightLeft size={16} />
-                      View All Changes
-                    </button>
+            {/* Agent Summary (default view) */}
+            {!showComparison && (
+              <div
+                className={`collapse collapse-arrow border bg-base-100 rounded-lg mb-6 summary-accordion ${
+                  showSummaryValidation && (!bridge_summary || bridge_summary.trim() === "")
+                    ? "border-red-500"
+                    : "border-base-300"
+                }`}
+              >
+                <input
+                  id="publish-summary-accordion-toggle"
+                  type="checkbox"
+                  className="peer"
+                  defaultChecked={summaryAccordionOpen}
+                  checked={summaryAccordionOpen}
+                  onChange={(e) => setSummaryAccordionOpen(e.target.checked)}
+                />
+                <div className="collapse-title font-medium flex items-center">
+                  <Bot className="w-5 h-5 mr-2" />
+                  Agent Summary
+                  {showSummaryValidation && (!bridge_summary || bridge_summary.trim() === "") && (
+                    <span className="text-red-500 ml-2">*</span>
                   )}
                 </div>
-
-                {Object.keys(changesSummary).length === 0 ? (
-                  <div className="alert alert-success">
-                    <Check />
-                    <span>No differences found between the versions.</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    {/* Extracted config changes */}
-                    <div className="flex flex-wrap gap-1">
-                      {Object.keys(extractedConfigChanges).length > 0 &&
-                        Object.keys(extractedConfigChanges).map((key) => (
-                          <div key={key} className="card bg-base-100">
-                            <div className="card-body p-3">
-                              <div className="flex justify-between items-center">
-                                <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      {Object.keys(changesSummary)
-                        .filter((key) => !Object.keys(extractedConfigChanges).includes(key))
-                        .map((key) => (
-                          <div key={key} className="card bg-base-100">
-                            <div className="card-body p-3">
-                              <div className="flex justify-between items-center">
-                                <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
+                <div className="collapse-content">
+                  <AgentSummaryContent
+                    params={params}
+                    prompt={prompt}
+                    versionId={searchParams?.get("version")}
+                    showTitle={false}
+                    showButtons={true}
+                    onSave={() => setShowSummaryValidation(false)}
+                    isMandatory={showSummaryValidation}
+                    showValidationError={showSummaryValidation}
+                    isEditor={isEditor}
+                  />
+                </div>
               </div>
+            )}
 
-              {/* Connected Agents Section */}
-              {isLoadingAgents ? (
-                <div className="mt-4 pt-4 border-t border-base-300">
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <div className="loading loading-spinner loading-lg text-primary"></div>
-                    <p className="mt-3 text-sm text-base-content/70">Loading connected agents...</p>
+            {/* Warning Section */}
+            {!showComparison && (
+              <div className="alert bg-base/70 mb-6">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <h3 className="font-medium">Are you sure you want to publish this version?</h3>
+                  </div>
+                  <div className="pl-7">
+                    <p className="text-sm">Keep these important points in mind:</p>
+                    <ul className="list-disc ml-4 mt-1 space-y-1 text-sm">
+                      <li>Published version will be available to all users</li>
+                      <li>Changes will be immediately reflected in the published version</li>
+                      <li>Published changes cannot be reverted</li>
+                    </ul>
                   </div>
                 </div>
-              ) : allConnectedAgents.length > 1 ? (
-                <div className="mt-4 pt-4 border-t border-base-300">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-md font-semibold flex items-center gap-2">
-                      <Bot className="w-5 h-5 text-primary" />
-                      Connected Agents ({allConnectedAgents.length - 1})
-                    </h4>
+              </div>
+            )}
 
-                    {/* Select All option */}
-                    {allConnectedAgents.filter((agent) => agent._id !== params?.id && agent?.haveToPublish).length >
-                      1 && (
+            {/* Changes Summary */}
+            {!showComparison && (
+              <div className="mb-6">
+                <div className="bg-base-200 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold">Changes Summary</h3>
+                    {Object.keys(changesSummary).length > 0 && (
                       <button
-                        id="publish-select-all-agents-button"
-                        onClick={toggleSelectAllAgents}
+                        id="publish-view-all-changes-button"
                         className="btn btn-sm btn-outline flex gap-1"
+                        onClick={toggleComparison}
                       >
-                        {allConnectedAgents
-                          .filter((agent) => agent._id !== params?.id && agent?.haveToPublish)
-                          .every((agent) => selectedAgentsToPublish.has(agent._id))
-                          ? "Deselect All"
-                          : "Select All"}
+                        <ArrowRightLeft size={16} />
+                        View All Changes
                       </button>
                     )}
                   </div>
 
-                  <div className="space-y-3">{renderAgentHierarchy(allConnectedAgents)}</div>
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {/* Full Data Comparison View */}
-          {showComparison && (
-            <div>
-              <div className="bg-base-100 rounded-lg p-2">
-                <PublishVersionDataComparisonView
-                  oldData={filteredBridgeData}
-                  newData={filteredVersionData}
-                  showOnlyDifferences={true}
-                  onClose={toggleComparison}
-                  params={params}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-4">
-            {/* Public Agent Configuration Form */}
-            {isPublicAgent && (
-              <div className="bg-base-200/50 p-4 rounded-lg mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Settings className="h-5 w-5 text-primary" />
-                  <h4 className="font-medium text-base-content">Public Agent Configuration</h4>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Slug Name Field */}
-                  <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text font-medium">
-                        Slug Name <span className="text-error">*</span>
-                      </span>
-                      <span className="label-text-alt text-xs text-base-content/60">Must be globally unique</span>
-                    </label>
-                    <input
-                      id="publish-slug-name-input"
-                      type="text"
-                      name="url_slugname"
-                      placeholder="Enter a unique slug name"
-                      className={`input input-bordered w-full ${error?.error ? "input-error" : ""}`}
-                      value={formData.url_slugname}
-                      onChange={handleChange}
-                      required
-                    />
-                    {error?.error && (
-                      <label className="label">
-                        <span className="label-text-alt text-error">{error?.error}</span>
-                      </label>
-                    )}
-                  </div>
-
-                  {/* Description Field */}
-                  <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text font-medium">Description</span>
-                    </label>
-                    <textarea
-                      id="publish-description-textarea"
-                      name="description"
-                      placeholder="Enter a description"
-                      className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-20"
-                      value={formData.description}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  {/* Visibility Field */}
-                  <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text font-medium">Visibility</span>
-                    </label>
-                    <select
-                      id="publish-visibility-select"
-                      className="select select-bordered w-full"
-                      name="availability"
-                      value={formData.availability}
-                      onChange={handleChange}
-                    >
-                      <option value="public">Public</option>
-                      <option value="private">Private (Only allowed users can access)</option>
-                    </select>
-                  </div>
-
-                  {/* Allowed Users Field */}
-                  {formData.availability === "private" && (
-                    <div className="form-control w-full">
-                      <label className="label">
-                        <span className="label-text font-medium">Allowed Users</span>
-                      </label>
-
-                      {formData.allowedUsers?.length > 0 && (
-                        <div className="mb-3 p-3 bg-base-200/50 rounded-lg min-h-[3rem]">
-                          <div className="flex flex-wrap gap-2">
-                            {formData.allowedUsers.map((user, index) => (
-                              <div key={index} className="badge badge-outline gap-2 py-3 px-3">
-                                <span className="text-sm">{user}</span>
-                                <button
-                                  id={`publish-remove-user-${index}`}
-                                  onClick={() => handleRemoveUser(index)}
-                                  className="hover:text-error transition-colors"
-                                  type="button"
-                                >
-                                  <CircleX className="h-4 w-4" />
-                                </button>
+                  {Object.keys(changesSummary).length === 0 ? (
+                    <div className="alert alert-success">
+                      <Check />
+                      <span>No differences found between the versions.</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {/* Extracted config changes */}
+                      <div className="flex flex-wrap gap-1">
+                        {Object.keys(extractedConfigChanges).length > 0 &&
+                          Object.keys(extractedConfigChanges).map((key) => (
+                            <div key={key} className="card bg-base-100">
+                              <div className="card-body p-3">
+                                <div className="flex justify-between items-center">
+                                  <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
+                                </div>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="join w-full">
-                        <input
-                          id="publish-add-user-email-input"
-                          type="email"
-                          placeholder="Enter email address"
-                          className="input input-bordered join-item flex-1"
-                          value={formData.newEmail || ""}
-                          onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              newEmail: e.target.value,
-                            }));
-                          }}
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddEmail();
-                            }
-                          }}
-                        />
-                        <button
-                          id="publish-add-user-button"
-                          type="button"
-                          className="btn btn-sm join-item"
-                          onClick={handleAddEmail}
-                          disabled={!formData.newEmail || !formData.newEmail.includes("@")}
-                        >
-                          Add
-                        </button>
+                            </div>
+                          ))}
+                        {Object.keys(changesSummary)
+                          .filter((key) => !Object.keys(extractedConfigChanges).includes(key))
+                          .map((key) => (
+                            <div key={key} className="card bg-base-100">
+                              <div className="card-body p-3">
+                                <div className="flex justify-between items-center">
+                                  <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}
                 </div>
+
+                {/* Connected Agents Section */}
+                {isLoadingAgents ? (
+                  <div className="mt-4 pt-4 border-t border-base-300">
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <div className="loading loading-spinner loading-lg text-primary"></div>
+                      <p className="mt-3 text-sm text-base-content/70">Loading connected agents...</p>
+                    </div>
+                  </div>
+                ) : allConnectedAgents.length > 1 ? (
+                  <div className="mt-4 pt-4 border-t border-base-300">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-md font-semibold flex items-center gap-2">
+                        <Bot className="w-5 h-5 text-primary" />
+                        Connected Agents ({allConnectedAgents.length - 1})
+                      </h4>
+
+                      {/* Select All option */}
+                      {allConnectedAgents.filter((agent) => agent._id !== params?.id && agent?.haveToPublish).length >
+                        1 && (
+                        <button
+                          id="publish-select-all-agents-button"
+                          onClick={toggleSelectAllAgents}
+                          className="btn btn-sm btn-outline flex gap-1"
+                        >
+                          {allConnectedAgents
+                            .filter((agent) => agent._id !== params?.id && agent?.haveToPublish)
+                            .every((agent) => selectedAgentsToPublish.has(agent._id))
+                            ? "Deselect All"
+                            : "Select All"}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">{renderAgentHierarchy(allConnectedAgents)}</div>
+                  </div>
+                ) : null}
               </div>
             )}
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
-            <button id="publish-cancel-button" className="btn btn-sm" onClick={handleCloseModal} disabled={isLoading}>
-              Cancel
-            </button>
-            <button
-              id="publish-confirm-button"
-              className={`btn btn-primary btn-sm ${isLoading ? "loading" : ""}`}
-              onClick={handlePublishBridge}
-              disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim()) || isReadOnly}
-              title={isReadOnly ? "You don't have permission to publish" : ""}
-            >
-              {isLoading ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  {isPublicAgent ? "Saving & Publishing..." : "Publishing..."}
-                </>
-              ) : (
-                <>{isPublicAgent ? "Save & Publish" : "Confirm Publish"}</>
+            {/* Full Data Comparison View */}
+            {showComparison && (
+              <div>
+                <div
+                  className={`border rounded-lg p-4 mb-6 ${
+                    showSummaryValidation && (!bridge_summary || bridge_summary.trim() === "")
+                      ? "border-red-500"
+                      : "border-base-300"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bot className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Agent Summary</h3>
+                    {showSummaryValidation && (!bridge_summary || bridge_summary.trim() === "") && (
+                      <span className="text-red-500">*</span>
+                    )}
+                  </div>
+                  <AgentSummaryContent
+                    params={params}
+                    prompt={prompt}
+                    versionId={searchParams?.get("version")}
+                    showTitle={false}
+                    showButtons={true}
+                    onSave={() => setShowSummaryValidation(false)}
+                    isMandatory={showSummaryValidation}
+                    showValidationError={showSummaryValidation}
+                    isEditor={isEditor}
+                  />
+                </div>
+                <div className="bg-base-100 rounded-lg p-2">
+                  <PublishVersionDataComparisonView
+                    oldData={filteredBridgeData}
+                    newData={filteredVersionData}
+                    hidePromptDiff={hasPromptChanges}
+                    showOnlyDifferences={true}
+                    onClose={toggleComparison}
+                    params={params}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4">
+              {/* Public Agent Configuration Form */}
+              {isPublicAgent && (
+                <div className="bg-base-200/50 p-4 rounded-lg mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Settings className="h-5 w-5 text-primary" />
+                    <h4 className="font-medium text-base-content">Public Agent Configuration</h4>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Slug Name Field */}
+                    <div className="form-control w-full">
+                      <label className="label">
+                        <span className="label-text font-medium">
+                          Slug Name <span className="text-error">*</span>
+                        </span>
+                        <span className="label-text-alt text-xs text-base-content/60">Must be globally unique</span>
+                      </label>
+                      <input
+                        id="publish-slug-name-input"
+                        type="text"
+                        name="url_slugname"
+                        placeholder="Enter a unique slug name"
+                        className={`input input-bordered w-full ${error?.error ? "input-error" : ""}`}
+                        value={formData.url_slugname}
+                        onChange={handleChange}
+                        required
+                      />
+                      {error?.error && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">{error?.error}</span>
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Description Field */}
+                    <div className="form-control w-full">
+                      <label className="label">
+                        <span className="label-text font-medium">Description</span>
+                      </label>
+                      <textarea
+                        id="publish-description-textarea"
+                        name="description"
+                        placeholder="Enter a description"
+                        className="textarea bg-white dark:bg-black/15 textarea-bordered w-full h-20"
+                        value={formData.description}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    {/* Visibility Field */}
+                    <div className="form-control w-full">
+                      <label className="label">
+                        <span className="label-text font-medium">Visibility</span>
+                      </label>
+                      <select
+                        id="publish-visibility-select"
+                        className="select select-bordered w-full"
+                        name="availability"
+                        value={formData.availability}
+                        onChange={handleChange}
+                      >
+                        <option value="public">Public</option>
+                        <option value="private">Private (Only allowed users can access)</option>
+                      </select>
+                    </div>
+
+                    {/* Allowed Users Field */}
+                    {formData.availability === "private" && (
+                      <div className="form-control w-full">
+                        <label className="label">
+                          <span className="label-text font-medium">Allowed Users</span>
+                        </label>
+
+                        {formData.allowedUsers?.length > 0 && (
+                          <div className="mb-3 p-3 bg-base-200/50 rounded-lg min-h-[3rem]">
+                            <div className="flex flex-wrap gap-2">
+                              {formData.allowedUsers.map((user, index) => (
+                                <div key={index} className="badge badge-outline gap-2 py-3 px-3">
+                                  <span className="text-sm">{user}</span>
+                                  <button
+                                    id={`publish-remove-user-${index}`}
+                                    onClick={() => handleRemoveUser(index)}
+                                    className="hover:text-error transition-colors"
+                                    type="button"
+                                  >
+                                    <CircleX className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="join w-full">
+                          <input
+                            id="publish-add-user-email-input"
+                            type="email"
+                            placeholder="Enter email address"
+                            className="input input-bordered join-item flex-1"
+                            value={formData.newEmail || ""}
+                            onChange={(e) => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                newEmail: e.target.value,
+                              }));
+                            }}
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddEmail();
+                              }
+                            }}
+                          />
+                          <button
+                            id="publish-add-user-button"
+                            type="button"
+                            className="btn btn-sm join-item"
+                            onClick={handleAddEmail}
+                            disabled={!formData.newEmail || !formData.newEmail.includes("@")}
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
+              <button id="publish-cancel-button" className="btn btn-sm" onClick={handleCloseModal} disabled={isLoading}>
+                Cancel
+              </button>
+              <button
+                id="publish-confirm-button"
+                className={`btn btn-primary btn-sm ${isLoading ? "loading" : ""}`}
+                onClick={handlePublishBridge}
+                disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim()) || isReadOnly}
+                title={isReadOnly ? "You don't have permission to publish" : ""}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    {isPublicAgent ? "Saving & Publishing..." : "Publishing..."}
+                  </>
+                ) : (
+                  <>{isPublicAgent ? "Save & Publish" : "Confirm Publish"}</>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="modal-backdrop" onClick={handleCloseModal}></div>
-    </Modal>
+        <div className="modal-backdrop" onClick={handleCloseModal}></div>
+      </Modal>
+      {hasPromptChanges && (
+        <Diff_Modal oldContent={promptBeforePublish} newContent={promptAfterPublish} isFromPublishModal={true} />
+      )}
+    </>
   );
 }
 

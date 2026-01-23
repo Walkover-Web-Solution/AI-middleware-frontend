@@ -1,5 +1,6 @@
 import { modelSuggestionApi } from "@/config/index";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { convertPromptToString } from "@/utils/utility";
 import React, { useState, useCallback } from "react";
 
 const RecommendedModal = ({
@@ -45,7 +46,10 @@ const RecommendedModal = ({
     setIsLoadingRecommendations(true);
 
     try {
-      const currentPrompt = promptTextAreaRef.current?.querySelector("textarea")?.value?.trim() || prompt.trim();
+      // Use the helper function to convert prompt to string (handles all fields)
+      const promptText = convertPromptToString(prompt);
+
+      const currentPrompt = promptTextAreaRef.current?.querySelector("textarea")?.value?.trim() || promptText.trim();
       if (((bridgeApiKey || deafultApiKeys) && currentPrompt !== "") || service === "ai_ml") {
         const response = await modelSuggestionApi({ versionId: searchParams?.version });
         if (response?.success) {

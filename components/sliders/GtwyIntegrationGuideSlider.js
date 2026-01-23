@@ -12,6 +12,7 @@ import CopyButton from "../copyButton/CopyButton";
 import defaultUserTheme from "@/public/themes/default-user-theme.json";
 import { closeModal, openModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
+import PromptFieldModal from "../modals/PromptFieldModal";
 
 const COLOR_LABEL_MAP = {
   "base-100": "Page Background",
@@ -578,6 +579,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedConfig, setLastSavedConfig] = useState(null);
+  const [editingField, setEditingField] = useState(null);
 
   // Get config and root-level data from Redux store
   const integrationData = useCustomSelector((state) =>
@@ -851,6 +853,65 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     }
   };
 
+  const handleSaveCustomField = (newField) => {
+    setConfiguration((prev) => {
+      const currentPrompt = prev.prompt || {
+        role: "",
+        goal: "",
+        instructions: "",
+        embedCustomFields: [],
+      };
+
+      const currentCustomFields = Array.isArray(currentPrompt.embedCustomFields) ? currentPrompt.embedCustomFields : [];
+
+      const existingIndex = currentCustomFields.findIndex((f) => f.key === newField.key);
+      let updatedFields;
+
+      if (existingIndex >= 0) {
+        updatedFields = [...currentCustomFields];
+        updatedFields[existingIndex] = {
+          ...updatedFields[existingIndex],
+          label: newField.label,
+          type: newField.type,
+        };
+      } else {
+        updatedFields = [
+          ...currentCustomFields,
+          {
+            key: newField.key,
+            label: newField.label,
+            type: newField.type,
+            value: "",
+          },
+        ];
+      }
+
+      return {
+        ...prev,
+        prompt: {
+          ...currentPrompt,
+          embedCustomFields: updatedFields,
+        },
+      };
+    });
+    setEditingField(null);
+  };
+
+  const handleDeleteCustomField = (key) => {
+    setConfiguration((prev) => {
+      const currentPrompt = prev.prompt || {};
+      const currentCustomFields = Array.isArray(currentPrompt.embedCustomFields) ? currentPrompt.embedCustomFields : [];
+
+      return {
+        ...prev,
+        prompt: {
+          ...currentPrompt,
+          embedCustomFields: currentCustomFields.filter((f) => f.key !== key),
+        },
+      };
+    });
+  };
+
   const handleConfigChange = (key, value) => {
     setConfiguration((prev) => ({
       ...prev,
@@ -921,6 +982,28 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   }, [configChanged, themeEditorDiffers]);
 
   // Add event listener for outside clicks AFTER configChanged is defined
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const sidebar = document.getElementById("gtwy-integration-slider");
+
+      // Do not close if click is inside sidebar, inside a modal/dialog, or if any dialog is open
+      const isInsideModal =
+        event.target.closest(".modal-box") || event.target.closest(".modal") || event.target.closest("dialog");
+      const isAnyModalOpen = document.querySelector("dialog[open]");
+
+      if (sidebar && !sidebar.contains(event.target) && isOpen && !isInsideModal && !isAnyModalOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, configChanged, themeEditorDiffers]);
 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
@@ -1027,6 +1110,61 @@ window.openGtwy({
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* Prompt Field Configuration */}
+              <div className="card bg-base-100 shadow-sm">
+                <div className="card-body p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="card-title text-primary text-base mb-0">Prompt Fields</h4>
+                    <button
+                      className="btn btn-xs btn-outline btn-primary"
+                      onClick={() => {
+                        setEditingField(null);
+                        openModal(MODAL_TYPE.PROMPT_FIELD_MODAL);
+                      }}
+                    >
+                      + Custom Field
+                    </button>
+                  </div>
+                  <p className="text-xs text-base-content/70 mb-3">Configure fields visible to the user.</p>
+
+                  {/* Custom Fields List */}
+                  {configuration.prompt?.embedCustomFields && configuration.prompt.embedCustomFields.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      <div className="text-xs font-semibold opacity-60 uppercase pl-1">Custom Fields</div>
+                      {configuration.prompt.embedCustomFields.map((field) => (
+                        <div
+                          key={field.key}
+                          className="flex items-center justify-between bg-base-200/50 hover:bg-base-200 p-2 rounded-lg text-sm transition-colors border border-base-200 cursor-pointer"
+                          onClick={() => {
+                            setEditingField(field);
+                            openModal(MODAL_TYPE.PROMPT_FIELD_MODAL);
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col">
+                              <span className="font-medium">{field.label}</span>
+                              <span className="text-[10px] opacity-50 capitalize">
+                                {field.type} • {field.key}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent opening edit modal
+                              handleDeleteCustomField(field.key);
+                            }}
+                            className="btn btn-ghost btn-xs btn-square text-error/70 hover:text-error hover:bg-error/10"
+                            title="Delete custom field"
+                          >
+                            <CloseIcon size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1375,6 +1513,12 @@ window.openGtwy({
           </div>
         </div>
       </aside>
+
+      <PromptFieldModal
+        existingFields={configuration.prompt?.embedCustomFields || []}
+        onSave={handleSaveCustomField}
+        fieldToEdit={editingField}
+      />
 
       {/* Confirmation Modal using the reusable component */}
       <ConfirmationModal

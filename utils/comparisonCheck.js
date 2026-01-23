@@ -2,8 +2,10 @@ import React, { useRef } from "react";
 import { createDiff } from "@/utils/utility";
 
 const ComparisonCheck = ({ oldContent, newContent, isFromPublishModal }) => {
+  // Simple string comparison - field extraction handled in DiffModal
   const diffData = createDiff(oldContent || "", newContent || "");
   const isNewContentEmpty = !newContent || newContent.trim() === "";
+
   const leftScrollRef = useRef(null);
   const rightScrollRef = useRef(null);
   const syncingRef = useRef(false);
@@ -19,7 +21,7 @@ const ComparisonCheck = ({ oldContent, newContent, isFromPublishModal }) => {
   return (
     <>
       {isNewContentEmpty ? (
-        <div className="flex flex-col items-center justify-center h-[70vh] w-full bg-base-200 rounded-lg p-6">
+        <div className="flex flex-col items-center justify-center min-h-[200px] w-full bg-base-200 rounded-lg p-6">
           <div className="text-center">
             <h3 className="text-xl font-bold mb-2">No Current or Published Prompt Available</h3>
             <p className="text-base-content/70">You need to publish your prompt first to see a comparison.</p>
@@ -27,7 +29,7 @@ const ComparisonCheck = ({ oldContent, newContent, isFromPublishModal }) => {
         </div>
       ) : (
         <>
-          <div className="flex gap-2 h-[70vh] w-full mt-3">
+          <div className="flex gap-2 max-h-[60vh] w-full mt-3">
             <div className="w-1/2 flex flex-col">
               <div className="label">
                 <span className="label-text font-medium text-red-600">Published Prompt</span>

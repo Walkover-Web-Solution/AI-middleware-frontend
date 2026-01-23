@@ -331,24 +331,55 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   }, []);
   const savePrompt = useCallback(
     (newPrompt) => {
-      const newValue = (newPrompt || "").trim();
-      const promptVariables = extractPromptVariables(newValue);
-      const variablesState = {};
+      // Handle both string (old format) and object (new format)
+      let newValue,
+        promptVariables,
+        variablesState = {};
 
-      promptVariables.forEach((varName) => {
-        variablesState[varName] = {
-          status: "required",
-          default_value: "",
-        };
-      });
+      if (typeof newPrompt === "string") {
+        // Old format: string prompt
+        newValue = (newPrompt || "").trim();
+        promptVariables = extractPromptVariables(newValue);
+        console.log("this are the prompt variable ", promptVariables);
+        promptVariables.forEach((varName) => {
+          variablesState[varName] = {
+            status: "required",
+            default_value: "",
+          };
+        });
 
-      if (newValue !== reduxPrompt.trim()) {
+        if (newValue !== reduxPrompt.trim()) {
+          dispatch(
+            updateBridgeVersionAction({
+              versionId: resolvedSearchParams?.version,
+              dataToSend: {
+                configuration: {
+                  prompt: newValue,
+                },
+                variables_state: variablesState,
+              },
+            })
+          );
+        }
+      } else if (typeof newPrompt === "object" && newPrompt !== null) {
+        // New format: object with role, goal, instructions, embedCustomFields
+        // Extract variables from ALL fields (not just instructions)
+        promptVariables = extractPromptVariables(newPrompt);
+
+        promptVariables.forEach((varName) => {
+          variablesState[varName] = {
+            status: "required",
+            default_value: "",
+          };
+        });
+
+        // Always save the object (no comparison needed for objects)
         dispatch(
           updateBridgeVersionAction({
             versionId: resolvedSearchParams?.version,
             dataToSend: {
               configuration: {
-                prompt: newValue,
+                prompt: newPrompt, // Save the entire object
               },
               variables_state: variablesState,
             },
