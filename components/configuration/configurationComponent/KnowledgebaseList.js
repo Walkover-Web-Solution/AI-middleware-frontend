@@ -251,90 +251,74 @@ const KnowledgebaseList = ({ params, searchParams, isPublished, isEditor = true 
       })
       .filter(Boolean);
 
-    return <div className={`grid gap-2 w-full max-w-md`}>{knowledgebaseItems}</div>;
-  }, [knowbaseVersionData, knowledgeBaseData]);
-  return (
-    <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex items-center gap-2">
-          <p className="text-sm whitespace-nowrap">Knowledge Base</p>
-          <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
-            <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
-          </InfoTooltip>
-        </div>
-      </div>
-      {tutorialState?.showSuggestion && (
-        <TutorialSuggestionToast
-          setTutorialState={setTutorialState}
-          flagKey={"knowledgeBase"}
-          TutorialDetails={"KnowledgeBase Configuration"}
-        />
-      )}
-      {tutorialState?.showTutorial && (
-        <OnBoarding
-          setShowTutorial={() => setTutorialState((prev) => ({ ...prev, showTutorial: false }))}
-          video={getKnowledgeBaseVideo()}
-          flagKey={"knowledgeBase"}
-        />
-      )}
-      <div className="flex flex-col gap-2 w-full ">
-        {!hasKnowledgebases ? (
-          <div className="dropdown dropdown-end w-full max-w-md">
-            <div className="border-2 border-base-200 border-dashed p-4 text-center">
-              <p className="text-sm text-base-content/70">No knowledge base found.</p>
-              <button
-                id="knowledgebase-add-first-button"
-                tabIndex={0}
-                className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                disabled={!shouldToolsShow || isReadOnly}
-              >
-                <AddIcon className="w-3 h-3" />
-                Add
-              </button>
+        return (
+            <div className={`grid gap-2 w-full max-w-md`}>
+                {knowledgebaseItems}
             </div>
-            {knowledgebaseDropdownContent}
-          </div>
-        ) : (
-          <>
-            {renderKnowledgebase}
-            {hasKnowledgebases && (
-              <div className="dropdown dropdown-end w-full max-w-md">
-                <div className="border-2 border-base-200 border-dashed text-center">
-                  <button
-                    id="knowledgebase-add-more-button"
-                    tabIndex={0}
-                    className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                    disabled={isReadOnly}
-                  >
-                    <AddIcon className="w-3 h-3" />
-                    Add Knowledge Base
-                  </button>
+        );
+    }, [knowbaseVersionData, knowledgeBaseData]);
+    return (
+        <div className="w-full gap-2 flex flex-col px-2 py-2 cursor-default">
+            <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                    <p className="text-sm whitespace-nowrap">Knowledge Base</p>
+                    <InfoTooltip tooltipContent="A Knowledge Base stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update.">
+                        <CircleQuestionMark size={14} className="text-gray-500 hover:text-gray-700 cursor-help" />
+                    </InfoTooltip>
                 </div>
-                {knowledgebaseDropdownContent}
-              </div>
+
+            </div>
+            {tutorialState?.showSuggestion && (
+                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
             )}
-          </>
-        )}
-      </div>
-      <DeleteModal
-        onConfirm={handleDeleteKnowledgebase}
-        item={selectedKnowledgebase}
-        name="knowledgebase"
-        title="Are you sure?"
-        description="This action Remove the selected Knowledgebase from the Agent."
-        buttonTitle="Remove"
-        modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL}
-        loading={isDeleting}
-        isAsync={true}
-      />
-      <KnowledgeBaseModal
-        params={params}
-        searchParams={searchParams}
-        knowbaseVersionData={knowbaseVersionData}
-        addToVersion={true}
-      />
-    </div>
-  );
+            {tutorialState?.showTutorial && (
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={getKnowledgeBaseVideo()} flagKey={"knowledgeBase"} />
+            )}
+            <div className="flex flex-col gap-2 w-full ">
+                {!hasKnowledgebases ? (
+                    <div className="dropdown dropdown-end w-full max-w-md">
+                        <div className="border-2 border-base-200 border-dashed p-4 text-center">
+                            <p className="text-sm text-base-content/70">
+                                No knowledge base found.
+                            </p>
+                            <button
+                               id="knowledgebase-add-button"
+                                tabIndex={0}
+                                className="flex items-center justify-center gap-1 mt-3 text-base-content hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                disabled={!shouldToolsShow || isReadOnly}
+                            >
+                                <AddIcon className="w-3 h-3" />
+                                Add
+                            </button>
+                        </div>
+                        {knowledgebaseDropdownContent}
+                    </div>
+                ) : (
+                    <>
+                        {renderKnowledgebase}
+                        {hasKnowledgebases && (
+                            <div className="dropdown dropdown-end w-full max-w-md">
+                                <div className="border-2 border-base-200 border-dashed text-center">
+                                        <button
+                                            id="knowledgebase-add-button"
+                                            tabIndex={0}
+                                            className="flex items-center justify-center gap-1 p-2 text-base-content/50 hover:text-base-content/80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                                            disabled={isReadOnly}
+                                        >
+                                            <AddIcon className="w-3 h-3" />
+                                            Add Knowledge Base
+                                        </button>
+                                </div>
+                                {knowledgebaseDropdownContent}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} loading={isDeleting} isAsync={true} />
+            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true}/>
+        </div>
+    );
 };
 
 export default KnowledgebaseList;
