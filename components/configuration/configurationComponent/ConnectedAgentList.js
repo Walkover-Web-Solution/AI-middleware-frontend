@@ -41,7 +41,9 @@ const ConnectedAgentList = ({ params, searchParams, isPublished, isEditor = true
 
     return {
       bridgeData: bridges,
-      connect_agents: isPublished ? bridgeDataFromState?.connected_agents || {} : versionData?.connected_agents || {},
+      connect_agents: isPublished
+        ? bridgeDataFromState?.agents?.connected_agents || bridgeDataFromState?.connected_agents || {}
+        : versionData?.agents?.connected_agents || versionData?.connected_agents || {},
       shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
       model: modelName,
       variables_path: isPublished ? bridgeDataFromState?.variables_path || {} : versionData?.variables_path || {},

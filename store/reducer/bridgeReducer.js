@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   allBridgesMap: {},
   bridgeVersionMapping: {},
+  bridgeVersionBackup: {}, // Backup for optimistic updates
   org: {},
   loading: false,
   error: false,
@@ -193,26 +194,60 @@ export const bridgeReducer = createSlice({
     },
     updateBridgeVersionReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
-      const { _id, configuration, ...extraData } = bridges;
-      state.bridgeVersionMapping[bridges.parent_id][bridges._id] = {
-        ...state.bridgeVersionMapping[bridges.parent_id][bridges._id],
-        ...extraData,
-        configuration: { ...configuration },
-      };
+      // Use the complete bridges object that was already merged in the action
+      // Don't destructure or we'll lose fields like agents, variables_path, etc.
+      state.bridgeVersionMapping[bridges.parent_id][bridges._id] = bridges;
       if (functionData) {
         const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
 
         if (functionData?.function_operation) {
           // Create a new array with the added bridge_id
-          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [
+            ...existingBridgeIds,
+            bridges._id,
+          ];
         } else {
           // Create a new array without the removed bridge_id
           state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(
-            (id) => id !== _id
+            (id) => id !== bridges._id
           );
         }
       }
       state.loading = false;
+    },
+
+    // Create a backup of the bridge version before any updates
+    backupBridgeVersionReducer: (state, action) => {
+      const { bridgeId, versionId } = action.payload;
+
+      // Make sure bridgeVersionBackup exists
+      if (!state.bridgeVersionBackup) {
+        state.bridgeVersionBackup = {};
+      }
+
+      // Only make a backup if the version exists
+      if (state.bridgeVersionMapping?.[bridgeId]?.[versionId]) {
+        // Deep clone to avoid reference issues
+        if (!state.bridgeVersionBackup[bridgeId]) {
+          state.bridgeVersionBackup[bridgeId] = {};
+        }
+        state.bridgeVersionBackup[bridgeId][versionId] = JSON.parse(
+          JSON.stringify(state.bridgeVersionMapping[bridgeId][versionId])
+        );
+      }
+    },
+
+    // Restore from backup when an API call fails
+    bridgeVersionRollBackReducer: (state, action) => {
+      const { bridgeId, versionId } = action.payload;
+
+      // Only restore if we have a backup
+      if (state.bridgeVersionBackup?.[bridgeId]?.[versionId]) {
+        // Restore the backup
+        state.bridgeVersionMapping[bridgeId][versionId] = JSON.parse(
+          JSON.stringify(state.bridgeVersionBackup[bridgeId][versionId])
+        );
+      }
     },
 
     updateBridgeActionReducer: (state, action) => {
@@ -369,6 +404,8 @@ export const {
   createBridgeReducer,
   updateBridgeReducer,
   updateBridgeVersionReducer,
+  backupBridgeVersionReducer,
+  bridgeVersionRollBackReducer,
   publishBrigeVersionReducer,
   updateBridgeToolsReducer,
   deleteBridgeReducer,
