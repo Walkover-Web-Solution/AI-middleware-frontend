@@ -68,6 +68,7 @@ export const MODAL_TYPE = {
   ACCESS_MANAGEMENT_MODAL: "ACCESS_MANAGEMENT_MODAL",
   UNSAVED_CHANGES_MODAL: "UNSAVED_CHANGES_MODAL",
   RESOURCE_CHUNKS_MODAL: "RESOURCE_CHUNKS_MODAL",
+  KEYBOARD_SHORTCUTS_MODAL: "KEYBOARD_SHORTCUTS_MODAL",
 };
 
 export const API_KEY_MODAL_INPUT = ["name", "apikey", "comment", "apikey_limit"];
@@ -103,7 +104,7 @@ export const AUTH_COLUMNS = ["name", "redirection_url", "client_id"];
 
 export const MIME_EXTENSION_MAP = {
   "application/pdf": ".pdf",
-  "text/plain": ".txt"
+  "text/plain": ".txt",
 };
 
 export const AGENT_SETUP_GUIDE_STEPS = [

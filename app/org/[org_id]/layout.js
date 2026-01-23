@@ -48,6 +48,9 @@ const MainSlider = dynamic(() => import("@/components/sliders/MainSlider"), { lo
 const ChatDetails = dynamic(() => import("@/components/historyPageComponents/ChatDetails"), {
   loading: () => <LoadingSpinner />,
 });
+const KeyboardShortcutsModal = dynamic(() => import("@/components/modals/KeyboardShortcutsModal"), {
+  loading: () => <LoadingSpinner />,
+});
 
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
@@ -486,6 +489,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         {/* Chat Details Sidebar */}
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
         <ServiceInitializer />
+        <KeyboardShortcutsModal />
       </div>
     );
   } else {
