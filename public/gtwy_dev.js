@@ -17,7 +17,7 @@
             };
             this.state = {
                 bodyLoaded: false, fullscreen: false, isInitialized: false, hasParentContainer: false,
-                tempDataToSend: { hideHomeButton: true, showHistory: true, showConfigType: false }
+                tempDataToSend: {}
             };
             this.initializeEventListeners();
         }
@@ -213,7 +213,9 @@
                 }
                 window.parent?.postMessage?.({ type: 'openGtwy', data: {} }, '*');
             }
-            sendMessageToGtwy({ type: 'openGtwy', data: {} })
+            setTimeout(()=>{
+                sendMessageToGtwy({ type: 'openGtwy', data: {} })
+            },4000)
         }
 
         closeGtwy() {

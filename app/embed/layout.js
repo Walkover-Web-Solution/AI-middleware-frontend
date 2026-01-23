@@ -3,10 +3,9 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { setEmbedUserDetailsAction, clearEmbedThemeDetailsAction } from "@/store/action/appInfoAction";
 import { useDispatch } from "react-redux";
-import { createBridgeAction, getAllBridgesAction, updateBridgeAction } from "@/store/action/bridgeAction";
-import { generateRandomID, sendDataToParent, toBoolean } from "@/utils/utility";
+import { getAllBridgesAction, updateBridgeAction, createEmbedAgentAction } from "@/store/action/bridgeAction";
+import { sendDataToParent, toBoolean } from "@/utils/utility";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { isPending } from "@/store/reducer/bridgeReducer";
 import ServiceInitializer from "@/components/organization/ServiceInitializer";
 import { ThemeManager } from "@/customHooks/useThemeManager";
 import defaultUserTheme from "@/public/themes/default-user-theme.json";
@@ -54,43 +53,29 @@ const Layout = ({ children }) => {
   }, []);
 
   const createNewAgent = useCallback(
-    (agent_name, orgId, agent_purpose) => {
-      // Reset theme config when creating a new agent
-      const dataToSend = agent_purpose
-        ? { purpose: agent_purpose.trim() }
-        : {
-            service: "openai",
-            model: "gpt-4o",
-            name: agent_name.trim(),
-            slugName: generateRandomID(),
-            bridgeType: "api",
-            type: "chat",
-          };
-      dispatch(isPending());
-      dispatch(
-        createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
-          const createdAgent = response?.data?.agent;
-          if (createdAgent) {
-            const targetVersion = createdAgent?.published_version_id || createdAgent?.versions?.[0];
-            sendDataToParent(
-              "drafted",
-              {
-                name: createdAgent.name,
-                agent_id: createdAgent._id,
-              },
-              "Agent created Successfully"
-            );
-            if (targetVersion) {
-              router.push(`/org/${orgId}/agents/configure/${createdAgent._id}?version=${targetVersion}`);
-            }
-          }
-          setIsLoading(false);
-          setProcessedAgentName(agent_name);
-        })
-      ).catch(() => {
+    async (agent_name, orgId, agent_purpose) => {
+      try {
+        setIsLoading(true);
+
+        const result = await dispatch(
+          createEmbedAgentAction({
+            purpose: agent_purpose,
+            agent_name: agent_name,
+            orgId: orgId,
+            isEmbedUser: true,
+            router: router,
+            sendDataToParent: sendDataToParent,
+          })
+        );
+
+        if (result?.success) {
+          setProcessedAgentName(agent_name || result.agent?.name);
+        }
+      } catch (error) {
+        console.error("Error creating agent:", error);
+      } finally {
         setIsLoading(false);
-        setProcessedAgentName(agent_name);
-      });
+      }
     },
     [dispatch, router]
   );
@@ -157,15 +142,12 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const initializeTokens = () => {
       // Reset theme config on initialization
-      if (
-        (urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id || urlParamsObj.gtwy_user)) ||
-        urlParamsObj?.hideHomeButton
-      ) {
+      if (urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id || urlParamsObj.gtwy_user)) {
         // Clear previous embed user details to prevent theme persistence
         dispatch(clearEmbedThemeDetailsAction());
 
         if (urlParamsObj.token) {
-          dispatch(setEmbedUserDetailsAction({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
+          dispatch(setEmbedUserDetailsAction({ isEmbedUser: true }));
           sessionStorage.setItem("local_token", urlParamsObj.token);
           sessionStorage.setItem("gtwy_org_id", urlParamsObj?.org_id);
           sessionStorage.setItem("gtwy_folder_id", urlParamsObj?.folder_id);
@@ -205,32 +187,41 @@ const Layout = ({ children }) => {
     initializeTokens();
   }, [urlParamsObj]);
 
-  // Handle navigation only after openGtwy event is received
+  // Handle navigation - immediate for agent parameters, wait for openGtwy for others
   useEffect(() => {
     const handleNavigation = () => {
+      const hasAgentParams = urlParamsObj?.agent_name || urlParamsObj?.agent_id || urlParamsObj?.agent_purpose;
+
+      if (hasAgentParams && urlParamsObj.org_id) {
+        setIsLoading(true);
+
+        if (urlParamsObj?.agent_name) {
+          if (currentAgentName) {
+            handleAgentNavigation(currentAgentName, urlParamsObj.org_id);
+          }
+        } else if (urlParamsObj?.agent_id) {
+          router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
+        } else if (urlParamsObj?.agent_purpose) {
+          createNewAgent("", urlParamsObj.org_id, urlParamsObj.agent_purpose);
+        }
+        return;
+      }
+
       if (!openGtwyReceived) {
         return;
       }
 
-      if (
-        (urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id || urlParamsObj.gtwy_user)) ||
-        urlParamsObj?.hideHomeButton
-      ) {
+      if (urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id || urlParamsObj.gtwy_user)) {
         setIsLoading(true);
-
-        if (urlParamsObj?.agent_name) {
-        } else if (urlParamsObj?.agent_id) {
-          router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
-        } else {
-          router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
-        }
+        // No agent parameters, go to agents list
+        router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
       } else {
         setIsLoading(false);
       }
     };
 
     handleNavigation();
-  }, [openGtwyReceived, urlParamsObj]);
+  }, [openGtwyReceived, urlParamsObj, currentAgentName, handleAgentNavigation, router, createNewAgent]);
 
   useEffect(() => {
     if (currentAgentName) {
@@ -262,6 +253,7 @@ const Layout = ({ children }) => {
         setIsLoading(true);
         handleAgentNavigation(messageData.agent_name, orgId);
       } else if (messageData?.agent_id && orgId) {
+        setIsLoading(true);
         const bridgeData = bridges.find((bridge) => bridge._id === messageData.agent_id);
         const history = messageData?.history;
 
@@ -282,8 +274,8 @@ const Layout = ({ children }) => {
         );
         return;
       } else if (messageData?.agent_purpose) {
-        createNewAgent("", orgId, messageData.agent_purpose);
         setIsLoading(true);
+        createNewAgent("", orgId, messageData.agent_purpose);
       }
 
       if (messageData?.meta?.length > 0 && messageData?.agent_id && orgId) {
@@ -302,7 +294,6 @@ const Layout = ({ children }) => {
       }
 
       const uiUpdates = {};
-      if (messageData?.hideHomeButton !== undefined) uiUpdates.hideHomeButton = messageData.hideHomeButton;
       if (messageData?.showGuide !== undefined) uiUpdates.showGuide = messageData.showGuide;
       if (messageData?.showConfigType !== undefined) uiUpdates.showConfigType = messageData.showConfigType;
       if (messageData?.theme_config) {
@@ -328,7 +319,7 @@ const Layout = ({ children }) => {
     return () => {
       // window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [allBridges]);
 
   // Memoize loading component to avoid unnecessary re-renders
   const LoadingComponent = useMemo(

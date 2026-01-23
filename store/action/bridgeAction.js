@@ -15,7 +15,6 @@ import {
   getAllFunctionsApi,
   getAllResponseTypesApi,
   getBridgeVersionApi,
-  getChatBotOfBridge,
   getPrebuiltToolsApi,
   getSingleBridge,
   getTestcasesScrore,
@@ -133,6 +132,108 @@ export const createBridgeWithAiAction =
         toast.error("Something went wrong");
       }
       console.error(error);
+      throw error;
+    }
+  };
+
+export const createEmbedAgentAction =
+  ({ purpose, agent_name, orgId, isEmbedUser, router, sendDataToParent }) =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(isPending());
+
+      // Generate unique name if not provided
+      const generateUniqueName = () => {
+        const timestamp = Date.now();
+        const randomNum = Math.floor(Math.random() * 1000);
+        return `Agent_${timestamp}_${randomNum}`;
+      };
+
+      let response;
+
+      if (purpose && purpose.trim()) {
+        // Try AI creation with purpose first
+        try {
+          const aiDataToSend = {
+            purpose: purpose.trim(),
+            bridgeType: "api",
+          };
+
+          response = await dispatch(createBridgeWithAiAction({ dataToSend: aiDataToSend, orgId }));
+
+          if (response?.data) {
+            const createdAgent = response.data.agent;
+
+            if (isEmbedUser && sendDataToParent) {
+              sendDataToParent(
+                "drafted",
+                {
+                  name: createdAgent?.name,
+                  agent_id: createdAgent?._id,
+                },
+                "Agent created Successfully"
+              );
+            }
+
+            if (router && createdAgent) {
+              router.push(`/org/${orgId}/agents/configure/${createdAgent._id}?version=${createdAgent.versions[0]}`);
+            }
+
+            return { success: true, agent: createdAgent };
+          }
+        } catch (aiError) {
+          console.log("AI creation failed, falling back to manual creation:", aiError);
+          // Fall through to manual creation
+        }
+      }
+
+      // Manual creation fallback
+      const name = agent_name?.trim() || generateUniqueName();
+      const slugName = generateUniqueName();
+
+      const fallbackDataToSend = {
+        service: "openai",
+        model: "gpt-4o",
+        name,
+        slugName: slugName,
+        bridgeType: "api",
+        type: "chat",
+      };
+
+      response = await new Promise((resolve, reject) => {
+        dispatch(
+          createBridgeAction({ dataToSend: fallbackDataToSend, orgid: orgId }, (data) => {
+            resolve(data);
+          })
+        ).catch(reject);
+      });
+
+      if (response?.data) {
+        const createdAgent = response.data.agent;
+
+        if (isEmbedUser && sendDataToParent) {
+          sendDataToParent(
+            "drafted",
+            {
+              name: createdAgent?.name,
+              agent_id: createdAgent?._id,
+            },
+            "Agent created Successfully"
+          );
+        }
+
+        if (router && createdAgent) {
+          router.push(`/org/${orgId}/agents/configure/${createdAgent._id}?version=${createdAgent.versions[0]}`);
+        }
+
+        return { success: true, agent: createdAgent };
+      }
+
+      throw new Error("Failed to create agent");
+    } catch (error) {
+      console.error("Error in createEmbedAgentAction:", error);
+      const errorMessage = error?.response?.data?.message || "Error while creating agent";
+      toast.error(errorMessage);
       throw error;
     }
   };
@@ -422,15 +523,6 @@ export const addorRemoveResponseIdInBridgeAction = (bridge_id, org_id, responseO
   }
 };
 
-export const getChatBotOfBridgeAction = (orgId, bridgeId) => async (dispatch) => {
-  try {
-    const response = await getChatBotOfBridge(orgId, bridgeId);
-    dispatch(updateBridgeReducer(response.data));
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   try {
     dispatch(isPending());
@@ -495,7 +587,7 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   try {
     const reponse = await getTestcasesScrore(version_id);
     return reponse;
-  } catch (_error) {
+  } catch {
     toast.error("Failed to genrate testcase score");
   }
 };
@@ -507,7 +599,7 @@ export const deleteFunctionAction =
       const reponse = await deleteFunctionApi(script_id);
       dispatch(removeFunctionDataReducer({ orgId, functionId }));
       return reponse;
-    } catch (_error) {
+    } catch {
       toast.error("Failed to delete function");
     }
   };
