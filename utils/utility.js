@@ -419,9 +419,13 @@ export const simulateStreaming = (text, setStreamed, setIsStreaming, callback) =
 };
 
 export const createDiff = (oldText, newText) => {
-  const oldLines = oldText?.split("\n");
-  const newLines = newText?.split("\n");
-  const maxLines = Math.max(oldLines?.length, newLines?.length);
+  // Simple string comparison - field extraction is handled in DiffModal
+  const oldTextString = oldText || "";
+  const newTextString = newText || "";
+
+  const oldLines = oldTextString.split("\n");
+  const newLines = newTextString.split("\n");
+  const maxLines = Math.max(oldLines.length, newLines.length);
 
   const diffLines = [];
 
@@ -430,21 +434,21 @@ export const createDiff = (oldText, newText) => {
     const newLine = newLines[i] || "";
 
     if (oldLine === newLine) {
-      diffLines?.push({
+      diffLines.push({
         type: "equal",
         oldLine,
         newLine,
         lineNumber: i + 1,
       });
     } else if (!oldLine) {
-      diffLines?.push({
+      diffLines.push({
         type: "added",
         oldLine: "",
         newLine,
         lineNumber: i + 1,
       });
     } else if (!newLine) {
-      diffLines?.push({
+      diffLines.push({
         type: "deleted",
         oldLine,
         newLine: "",
@@ -899,13 +903,93 @@ export const useOutsideClick = (elementRef, triggerRef, onOutsideClick, isActive
 
 export const extractPromptVariables = (prompt) => {
   if (!prompt) return [];
+
   const variableRegex = /\{\{([^}]+)\}\}/g;
-  const matches = [];
-  let match;
-  while ((match = variableRegex.exec(prompt)) !== null) {
-    if (!matches.includes(match[1])) {
-      matches.push(match[1]);
+  const matches = new Set();
+
+  const extractFromText = (text) => {
+    if (!text || typeof text !== "string") return;
+    let match;
+    while ((match = variableRegex.exec(text)) !== null) {
+      matches.add(match[1].trim());
+    }
+  };
+
+  if (typeof prompt === "string") {
+    extractFromText(prompt);
+    return Array.from(matches);
+  }
+
+  if (typeof prompt === "object" && prompt !== null) {
+    extractFromText(prompt.role);
+    extractFromText(prompt.goal);
+    extractFromText(prompt.instructions);
+
+    const customFields = prompt.embedCustomFields;
+    if (Array.isArray(customFields)) {
+      customFields.forEach((field) => {
+        if (typeof field === "string") {
+          extractFromText(field);
+        } else if (field && typeof field === "object") {
+          extractFromText(field.value);
+        }
+      });
     }
   }
-  return matches;
+
+  return Array.from(matches);
+};
+
+/**
+ * Convert prompt object to a formatted string for AI models
+ * Handles both old string format and new object format with multiple fields
+ * @param {string|object} prompt - The prompt data (string or object with role, goal, instructions, customFields)
+ * @returns {string} - Formatted string representation of the prompt
+ */
+export const convertPromptToString = (prompt) => {
+  // Handle null/undefined
+  if (!prompt) return "";
+
+  // If already a string (old format), return as is
+  if (typeof prompt === "string") {
+    return prompt;
+  }
+
+  // If object (new format), build formatted string
+  if (typeof prompt === "object" && prompt !== null) {
+    const parts = [];
+
+    // Add Role if present
+    if (prompt.role && prompt.role.trim()) {
+      parts.push(`Role: ${prompt.role.trim()}`);
+    }
+
+    // Add Goal if present
+    if (prompt.goal && prompt.goal.trim()) {
+      parts.push(`Goal: ${prompt.goal.trim()}`);
+    }
+
+    // Add Instructions if present
+    if (prompt.instructions && prompt.instructions.trim()) {
+      parts.push(`Instructions: ${prompt.instructions.trim()}`);
+    }
+
+    // Add Custom Fields if present
+    const customFields = prompt.embedCustomFields;
+    if (Array.isArray(customFields) && customFields.length > 0) {
+      customFields.forEach((field) => {
+        if (field && typeof field === "object" && field.label && field.value) {
+          if (field.value.trim()) {
+            parts.push(`${field.label}: ${field.value.trim()}`);
+          }
+        }
+      });
+    }
+
+    // Join all parts with double newline for readability
+    return parts.join("\n\n");
+  }
+
+  // Fallback for unexpected types
+  return "";
 };

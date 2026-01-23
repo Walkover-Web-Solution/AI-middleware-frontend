@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { genrateSummaryAction, updateBridgeAction } from "@/store/action/bridgeAction";
-import { closeModal } from "@/utils/utility";
+import { closeModal, convertPromptToString } from "@/utils/utility";
 import React, { useCallback, useEffect, useRef, useState, useMemo, memo } from "react";
 import { useDispatch } from "react-redux";
 import Modal from "../UI/Modal";
@@ -115,7 +115,10 @@ export const AgentSummaryContent = memo(
       }
     }, [autoGenerateSummary, setAutoGenerateSummary]);
     const handleGenerateSummary = useCallback(async () => {
-      if (prompt.trim() === "") {
+      // Use the helper function to convert prompt to string (handles all fields)
+      const promptText = convertPromptToString(prompt);
+
+      if (promptText.trim() === "") {
         setErrorMessage("Prompt is required");
         return;
       }

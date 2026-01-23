@@ -16,7 +16,7 @@ import { toast } from "react-toastify";
 import { SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon, CloseCircleIcon } from "@/components/Icons";
 import { Paperclip } from "lucide-react";
 import { PdfIcon } from "@/icons/pdfIcon";
-import { toggleSidebar } from "@/utils/utility";
+import { extractPromptVariables, toggleSidebar } from "@/utils/utility";
 import { buildUserUrls } from "@/utils/attachmentUtils";
 
 const VARIABLE_SLIDER_DISABLE_KEY = "variableSliderDisabled";
@@ -180,10 +180,7 @@ function ChatTextInput({
   const validatePromptVariables = useCallback(() => {
     if (!prompt) return { isValid: true, missingVariables: [] };
 
-    // Extract variables from prompt using regex
-    const regex = /{{(.*?)}}/g;
-    const matches = [...prompt.matchAll(regex)];
-    const promptVariables = [...new Set(matches.map((match) => match[1].trim()))];
+    const promptVariables = extractPromptVariables(prompt);
 
     if (!promptVariables.length) return { isValid: true, missingVariables: [] };
 

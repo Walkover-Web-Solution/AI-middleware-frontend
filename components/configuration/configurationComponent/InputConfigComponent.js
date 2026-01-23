@@ -5,8 +5,7 @@ import { openModal } from "@/utils/utility";
 import PromptSummaryModal from "../../modals/PromptSummaryModal";
 import Diff_Modal from "@/components/modals/DiffModal";
 import PromptHeader from "./PromptHeader";
-import PromptTextarea from "./PromptTextarea";
-import DefaultVariablesSection from "./DefaultVariablesSection";
+import DynamicPromptFields from "./DynamicPromptFields";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 // Ultra-smooth InputConfigComponent with ref-based approach
@@ -28,7 +27,7 @@ const InputConfigComponent = memo(
     isEditor,
     isEmbedUser,
   }) => {
-    const { showVariables } = useCustomSelector((state) => state.appInfoReducer.embedUserDetails);
+    const {} = useCustomSelector((state) => state.appInfoReducer.embedUserDetails);
     // Optimized Redux selector with memoization and shallow comparison
     const { prompt: reduxPrompt, oldContent } = usePromptSelector(params, searchParams);
     // Refs for zero-render typing experience
@@ -48,7 +47,19 @@ const InputConfigComponent = memo(
     const handlePromptChange = useCallback(
       (value) => {
         // Update refs immediately - no re-render
-        const hasChanges = value.trim() !== reduxPrompt.trim();
+        console.log("value", value);
+
+        // Handle both string (old format) and object (new format)
+        let hasChanges = false;
+        if (typeof value === "string") {
+          // Old format: compare strings
+          hasChanges = value.trim() !== reduxPrompt.trim();
+        } else if (typeof value === "object" && value !== null) {
+          // New format: compare objects (simplified - just check if object exists)
+          // More sophisticated comparison could be done with JSON.stringify
+          hasChanges = true; // Always mark as changed when object is passed
+        }
+
         hasUnsavedChangesRef.current = hasChanges;
         // Update save button state only when needed
         if (hasChanges !== promptState.hasUnsavedChanges) {
@@ -73,23 +84,33 @@ const InputConfigComponent = memo(
       [reduxPrompt, promptState.hasUnsavedChanges, setPromptState]
     );
 
-    // Optimized save handler using current editor text (contentEditable div)
-    const handleSavePrompt = useCallback(() => {
-      const currentValue = (textareaRef.current?.value || "").trim();
-      savePrompt(currentValue);
-      oldContentRef.current = currentValue;
-      hasUnsavedChangesRef.current = false;
+    // Optimized save handler - accepts both string (old format) and object (new format)
+    const handleSavePrompt = useCallback(
+      (dataToSave) => {
+        // If called without argument, get value from textarea (old behavior)
+        // If called with argument, use it directly (new behavior from DynamicPromptFields)
+        const currentValue = dataToSave !== undefined ? dataToSave : (textareaRef.current?.value || "").trim();
+        console.log("currentValue", currentValue);
+        savePrompt(currentValue);
 
-      // Update state only for UI elements that need it
-      setPromptState((prev) => ({
-        ...prev,
-        prompt: currentValue,
-        newContent: "",
-        hasUnsavedChanges: false,
-      }));
-      // Don't close Prompt Helper when saving
-      // handleCloseTextAreaFocus();
-    }, [savePrompt, setPromptState]);
+        // Update refs for string values only
+        if (typeof currentValue === "string") {
+          oldContentRef.current = currentValue;
+          hasUnsavedChangesRef.current = false;
+        }
+
+        // Update state only for UI elements that need it
+        setPromptState((prev) => ({
+          ...prev,
+          prompt: typeof currentValue === "string" ? currentValue : prev.prompt,
+          newContent: "",
+          hasUnsavedChanges: false,
+        }));
+        // Don't close Prompt Helper when saving
+        // handleCloseTextAreaFocus();
+      },
+      [savePrompt, setPromptState]
+    );
 
     // Memoized handlers to prevent unnecessary re-renders
     const handleOpenDiffModal = useCallback(() => {
@@ -116,43 +137,11 @@ const InputConfigComponent = memo(
       updateUiState({ isPromptHelperOpen: false });
     }, [updateUiState]);
 
-    // Handle textarea focus
-    const handleTextareaFocus = useCallback(() => {
-      setIsTextareaFocused(true);
-    }, []);
-
-    // Handle textarea blur with delay to allow button clicks
-    const handleTextareaBlur = useCallback(() => {
-      // Delay to allow button clicks to register before hiding
-      setTimeout(() => {
-        setIsTextareaFocused(false);
-      }, 200);
-    }, []);
-
     // Memoized values to prevent recalculation
     const isDisabled = useMemo(() => !promptState.hasUnsavedChanges, [promptState.hasUnsavedChanges]);
 
-    // Early return for unsupported service types
-    const handleKeyDown = useCallback(
-      (event) => {
-        // Disable Tab key when PromptHelper is open
-        if (event.key === "Tab" && uiState.isPromptHelperOpen) {
-          event.preventDefault();
-          return;
-        }
-
-        // Close PromptHelper on Escape key
-        if (event.key === "Escape" && uiState.isPromptHelperOpen) {
-          event.preventDefault();
-          updateUiState({ isPromptHelperOpen: false });
-          return;
-        }
-      },
-      [uiState.isPromptHelperOpen, updateUiState]
-    );
-
     return (
-      <div id="input-config-container" ref={promptTextAreaRef}>
+      <div ref={promptTextAreaRef}>
         <PromptHeader
           hasUnsavedChanges={promptState.hasUnsavedChanges}
           onSave={handleSavePrompt}
@@ -171,21 +160,15 @@ const InputConfigComponent = memo(
         />
 
         <div className="form-control relative">
-          <PromptTextarea
-            textareaRef={textareaRef}
-            initialValue={reduxPrompt}
+          <DynamicPromptFields
+            promptData={reduxPrompt}
             onChange={handlePromptChange}
-            isPromptHelperOpen={uiState.isPromptHelperOpen}
-            onKeyDown={handleKeyDown}
+            onSave={handleSavePrompt}
             isPublished={isPublished}
             isEditor={isEditor}
-            onSave={handleSavePrompt}
-            onFocus={handleTextareaFocus}
-            onTextAreaBlur={handleTextareaBlur}
+            setIsTextareaFocused={setIsTextareaFocused}
+            isEmbedUser={isEmbedUser}
           />
-          {((isEmbedUser && showVariables) || !isEmbedUser) && (
-            <DefaultVariablesSection isPublished={isPublished} prompt={reduxPrompt} isEditor={isEditor} />
-          )}
         </div>
 
         <Diff_Modal oldContent={oldContentRef.current} newContent={textareaRef.current?.value || reduxPrompt} />

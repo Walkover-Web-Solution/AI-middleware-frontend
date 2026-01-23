@@ -1,6 +1,6 @@
 "use client";
 import { MODAL_TYPE } from "@/utils/enums";
-import { allowedAttributes, generateKeyValuePairs, openModal } from "@/utils/utility";
+import { allowedAttributes, generateKeyValuePairs, openModal, convertPromptToString } from "@/utils/utility";
 import { CloseCircleIcon, CopyIcon } from "@/components/Icons";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
@@ -63,7 +63,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
   };
 
   const replaceVariablesInPrompt = (prompt) => {
-    return prompt.replace(/{{(.*?)}}/g, (_, variableName) => {
+    // Use the helper function to convert prompt to string (handles all fields)
+    const promptText = convertPromptToString(prompt);
+
+    return promptText.replace(/{{(.*?)}}/g, (_, variableName) => {
       const value = variablesKeyValue[variableName];
       if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
         return value;
