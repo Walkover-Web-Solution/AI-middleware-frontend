@@ -31,6 +31,8 @@ import {
 import { toast } from "react-toastify";
 import posthog, { trackAgentEvent } from "@/utils/posthog";
 import {
+  backupBridgeVersionReducer,
+  bridgeVersionRollBackReducer,
   clearBridgeUsageMetricsReducer,
   clearPreviousBridgeDataReducer,
   createBridgeReducer,
@@ -306,31 +308,175 @@ export const updateBridgeAction =
   };
 
 export const updateBridgeVersionAction =
-  ({ versionId, dataToSend }) =>
-  async (dispatch) => {
+  ({ versionId, dataToSend, bridgeId }) =>
+  async (dispatch, getState) => {
     try {
       if (!versionId) {
         toast.error("You cannot update published data");
         return;
       }
 
-      // Show saving indication in navbar
+      // Step 1: Find the parent bridge ID if not provided
+      let parentBridgeId = bridgeId;
+      if (!parentBridgeId) {
+        const state = getState().bridgeReducer;
+        for (const bId in state.bridgeVersionMapping) {
+          if (state.bridgeVersionMapping[bId][versionId]) {
+            parentBridgeId = bId;
+            break;
+          }
+        }
+      }
+
+      if (!parentBridgeId) {
+        console.error("Could not find parent bridge ID for version:", versionId);
+        return;
+      }
+
+      dispatch(backupBridgeVersionReducer({ bridgeId: parentBridgeId, versionId }));
+
+      const currentVersion = getState().bridgeReducer.bridgeVersionMapping[parentBridgeId][versionId];
+
+      // Build optimistic data with proper deep merging
+      const optimisticData = {
+        ...currentVersion,
+        ...dataToSend,
+        _id: versionId,
+        parent_id: parentBridgeId,
+      };
+
+      // Deep merge configuration if present
+      if (dataToSend.configuration) {
+        optimisticData.configuration = {
+          ...currentVersion.configuration,
+          ...dataToSend.configuration,
+        };
+      }
+
+      // Deep merge agents.connected_agents if present
+      if (dataToSend.agents) {
+        // Check if this is a removal (no agent_status) or addition (has agent_status)
+        const isRemoval = !dataToSend.agents.agent_status;
+
+        // Handle both flat structure (API response) and nested structure (optimistic updates)
+        // After refresh: currentVersion.connected_agents (flat)
+        // After optimistic update: currentVersion.agents.connected_agents (nested)
+        const currentConnectedAgents = currentVersion.agents?.connected_agents || currentVersion.connected_agents || {};
+
+        if (isRemoval && dataToSend.agents.connected_agents) {
+          // Remove the specified agent(s)
+          const agentsToRemove = Object.keys(dataToSend.agents.connected_agents);
+          const updatedConnectedAgents = { ...currentConnectedAgents };
+
+          agentsToRemove.forEach((agentName) => {
+            delete updatedConnectedAgents[agentName];
+          });
+
+          // Always use nested structure for consistency
+          optimisticData.agents = {
+            agent_status: currentVersion.agents?.agent_status || currentVersion.agent_status,
+            connected_agents: updatedConnectedAgents,
+          };
+          // Remove flat structure if it exists
+          delete optimisticData.connected_agents;
+          delete optimisticData.agent_status;
+        } else {
+          // Add or update agent(s)
+          // Merge with existing agents from either location
+          const mergedConnectedAgents = {
+            ...currentConnectedAgents,
+            ...dataToSend.agents.connected_agents,
+          };
+
+          // Always use nested structure for consistency
+          optimisticData.agents = {
+            ...currentVersion.agents,
+            ...dataToSend.agents,
+            connected_agents: mergedConnectedAgents,
+          };
+          // Remove flat structure if it exists
+          delete optimisticData.connected_agents;
+          if (dataToSend.agents.agent_status) {
+            delete optimisticData.agent_status;
+          }
+        }
+      }
+
+      // Deep merge variables_path if present
+      if (dataToSend.variables_path) {
+        optimisticData.variables_path = {
+          ...currentVersion.variables_path,
+          ...dataToSend.variables_path,
+        };
+      }
+
+      // Handle function_ids for EmbedList - update optimistically based on functionData
+      if (dataToSend.functionData) {
+        const currentFunctionIds = currentVersion.function_ids || [];
+        if (dataToSend.functionData.function_operation === "1") {
+          // Add function if not already present
+          if (!currentFunctionIds.includes(dataToSend.functionData.function_id)) {
+            optimisticData.function_ids = [...currentFunctionIds, dataToSend.functionData.function_id];
+          }
+        } else {
+          // Remove function
+          optimisticData.function_ids = currentFunctionIds.filter((id) => id !== dataToSend.functionData.function_id);
+        }
+      }
+
+      // Handle doc_ids if present (complete array replacement)
+      if (dataToSend.doc_ids !== undefined) {
+        optimisticData.doc_ids = dataToSend.doc_ids;
+      }
+
+      // Handle built_in_tools_data if present
+      if (dataToSend.built_in_tools_data) {
+        optimisticData.built_in_tools = currentVersion.built_in_tools || [];
+        if (dataToSend.built_in_tools_data.built_in_tools_operation === "1") {
+          // Add tool if not already present
+          if (!optimisticData.built_in_tools.includes(dataToSend.built_in_tools_data.built_in_tools)) {
+            optimisticData.built_in_tools = [
+              ...optimisticData.built_in_tools,
+              dataToSend.built_in_tools_data.built_in_tools,
+            ];
+          }
+        } else {
+          // Remove tool
+          optimisticData.built_in_tools = optimisticData.built_in_tools.filter(
+            (tool) => tool !== dataToSend.built_in_tools_data.built_in_tools
+          );
+        }
+      }
+
+      // Handle web_search_filters if present (complete array replacement)
+      if (dataToSend.web_search_filters !== undefined) {
+        optimisticData.web_search_filters = dataToSend.web_search_filters;
+      }
+
+      dispatch(
+        updateBridgeVersionReducer({
+          bridges: optimisticData,
+          functionData: dataToSend?.functionData || null,
+        })
+      );
+
+      // Show saving indi\ation in navbar
       dispatch(setSavingStatus({ status: "saving" }));
 
-      dispatch(isPending());
       markUpdateInitiatedByCurrentTab(versionId);
+
+      // Step 5: Make the actual API call
       const data = await updateBridgeVersionApi({ versionId, dataToSend });
       const updatedVersion = data?.agent;
 
       if (data?.success && updatedVersion) {
-        dispatch(
-          updateBridgeVersionReducer({ bridges: updatedVersion, functionData: dataToSend?.functionData || null })
-        );
-        // Update status to show success
+        // Don't update again - the optimistic update is already correct
+        // Only update the status to show success
         dispatch(setSavingStatus({ status: "saved" }));
 
         // Clear the status after 3 seconds
       } else {
+        dispatch(bridgeVersionRollBackReducer({ bridgeId: parentBridgeId, versionId }));
         // Update status to show warning
         dispatch(setSavingStatus({ status: "failed" }));
 
@@ -341,6 +487,25 @@ export const updateBridgeVersionAction =
       }
     } catch (error) {
       console.error(error);
+
+      if (versionId) {
+        let parentBridgeId = bridgeId;
+        if (!parentBridgeId) {
+          const state = getState().bridgeReducer;
+          for (const bId in state.bridgeVersionMapping) {
+            if (state.bridgeVersionMapping[bId][versionId]) {
+              parentBridgeId = bId;
+              break;
+            }
+          }
+        }
+
+        if (parentBridgeId) {
+          dispatch(bridgeVersionRollBackReducer({ bridgeId: parentBridgeId, versionId }));
+          toast.error("Failed to update version. Changes have been reverted.");
+        }
+      }
+
       dispatch(isError());
       // Show error status
       dispatch(setSavingStatus({ status: "failed" }));
