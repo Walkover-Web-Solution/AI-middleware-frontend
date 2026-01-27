@@ -25,6 +25,8 @@ import {
   NAV_SECTIONS,
 } from "@/utils/mainSliderHelper";
 import InviteUserModal from "../modals/InviteuserModal";
+import { logoutUser } from "../../config/authApi";
+// import {  removeFromCookies } from "../../utils/cookies";
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
@@ -123,6 +125,10 @@ function MainSlider({ isEmbedUser, openDetails, userdetailsfromOrg, orgIdFromHea
       await logoutUserFromMsg91({
         headers: { proxy_auth_token: getFromCookies("proxy_token") ?? "" },
       });
+          const token = getFromCookies("local_token");
+    if (token) {
+      await logoutUser(token); // Blacklist token
+    }
       clearCookie();
       sessionStorage.clear();
       if (process.env.NEXT_PUBLIC_ENV === "PROD") {
