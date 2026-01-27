@@ -20,26 +20,8 @@ export const logoutUserFromMsg91 = async (headers) => {
   return User;
 };
 
-
-// export const logoutUser = async (token) => {
-//   try {
-//     const response = await axios.post(
-//       `${URL}/api/auth/logout`, 
-//       {}, 
-//       {
-//         headers: { Authorization: token }
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     console.error("Logout API error:", error);
-//     throw error;
-//   }
-// };
-
 export const logoutUser = async (token) => {
   try {
-    console.log("🔵 Frontend: Calling backend logout API");
     const response = await axios.post(
       `${URL}/api/auth/logout`, 
       {}, 
@@ -47,10 +29,8 @@ export const logoutUser = async (token) => {
         headers: { Authorization: token }
       }
     );
-    console.log("🔵 Frontend: Backend logout response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("🔴 Frontend: Logout API error:", error.response?.data || error.message);
     throw error;
   }
 };
