@@ -219,7 +219,7 @@ const PromptSummaryModal = ({ modalType, params, autoGenerateSummary = false, se
   };
 
   return (
-    <Modal MODAL_ID={modalType}>
+    <Modal MODAL_ID={modalType} onClose={handleClose}>
       <div id="prompt-summary-modal-box" className="modal-box w-11/12 max-w-5xl">
         <AgentSummaryContent
           params={params}

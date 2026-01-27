@@ -14,7 +14,7 @@ const ModelUsageDetailsModal = ({ usageDetailsData, params }) => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.USAGE_DETAILS_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.USAGE_DETAILS_MODAL} onClose={handleClose}>
       <div className="flex items-center justify-center">
         <div
           id="model-usage-details-modal-container"

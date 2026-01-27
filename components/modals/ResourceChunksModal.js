@@ -43,7 +43,7 @@ const ResourceChunksModal = ({ resourceId, resourceName }) => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.RESOURCE_CHUNKS_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.RESOURCE_CHUNKS_MODAL} onClose={handleClose}>
       <div className="modal-box w-11/12 max-w-5xl border-2 border-base-300">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-base-300">

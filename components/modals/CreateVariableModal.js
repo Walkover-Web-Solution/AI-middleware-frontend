@@ -53,7 +53,7 @@ function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.CREATE_VARIABLE}>
+    <Modal MODAL_ID={MODAL_TYPE.CREATE_VARIABLE} onClose={handleCloseModal}>
       <div id="create-variable-modal-container" className="modal-box" key={keyName}>
         <h3 className="font-bold text-lg">Create New Variable</h3>
         {/* <form> */}

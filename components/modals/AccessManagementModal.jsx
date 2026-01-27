@@ -376,7 +376,7 @@ const AccessManagementModal = ({ agent }) => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.ACCESS_MANAGEMENT_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.ACCESS_MANAGEMENT_MODAL} onClose={handleClose}>
       <div id="access-management-modal-container" className="modal-box max-w-3xl">
         <div className="flex justify-between items-center mb-4">
           <div>

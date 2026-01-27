@@ -715,7 +715,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   ]);
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
+    <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION} onClose={handleCloseModal}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
         <div
           id="publish-bridge-modal-container"

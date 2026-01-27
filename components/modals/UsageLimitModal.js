@@ -43,7 +43,7 @@ const UsageLimitModal = ({ data, onConfirm, item }) => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.API_KEY_LIMIT_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.API_KEY_LIMIT_MODAL} onClose={handleClose}>
       <div className="flex items-center justify-center">
         <div
           id="usage-limit-modal-container"
