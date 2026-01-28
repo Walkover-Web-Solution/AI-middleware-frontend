@@ -42,7 +42,7 @@ const HistoryPagePromptUpdateModal = ({
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL} onClose={handleClose}>
       <div id="history-prompt-update-modal-container" className="modal-box w-11/12 max-w-7xl bg-base-100">
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-lg mb-4">Update Prompt</h3>

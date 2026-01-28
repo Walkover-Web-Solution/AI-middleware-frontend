@@ -77,7 +77,7 @@ const TutorialModal = () => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL} onClose={internalClose}>
       {/* Main Modal */}
       <div
         id="tutorial-modal-container"

@@ -25,7 +25,7 @@ const DemoModal = ({ speakToUs }) => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.DEMO_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.DEMO_MODAL} onClose={handleClose}>
       <div
         id="demo-modal-container"
         className={`modal-box flex flex-col gap-6  ${

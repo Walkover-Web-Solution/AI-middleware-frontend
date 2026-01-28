@@ -5,7 +5,7 @@ import Modal from "../UI/Modal";
 
 const VersionDescriptionModal = ({ versionDescriptionRef, handleCreateNewVersion }) => {
   return (
-    <Modal MODAL_ID={MODAL_TYPE.VERSION_DESCRIPTION_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.VERSION_DESCRIPTION_MODAL} onClose={() => closeModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}>
       <div id="version-description-modal-container" className="modal-box">
         <h3 className="font-bold text-lg mb-4">Create New Version</h3>
         <input

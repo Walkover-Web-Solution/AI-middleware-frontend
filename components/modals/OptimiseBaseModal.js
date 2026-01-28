@@ -136,7 +136,7 @@ function OptimiseBaseModal({
   const textareaContent = getTextareaContent();
 
   return (
-    <Modal MODAL_ID={modalType}>
+    <Modal MODAL_ID={modalType} onClose={handleCloseModal}>
       <div
         id="optimise-base-modal-container"
         className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-base-100 overflow-hidden flex flex-col"

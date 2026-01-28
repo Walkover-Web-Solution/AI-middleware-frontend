@@ -7,7 +7,7 @@ import { CloseIcon } from "@/components/Icons";
 
 const Diff_Modal = ({ oldContent, newContent }) => {
   return (
-    <Modal MODAL_ID={MODAL_TYPE.DIFF_PROMPT}>
+    <Modal MODAL_ID={MODAL_TYPE.DIFF_PROMPT} onClose={() => closeModal(MODAL_TYPE.DIFF_PROMPT)}>
       <div id="diff-modal-box" className="modal-box max-w-[80%]">
         <div id="diff-modal-header" className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold">Compare Published Prompt and Current Prompt</h3>

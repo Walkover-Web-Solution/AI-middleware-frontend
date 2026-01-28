@@ -14,7 +14,7 @@ const EditMessageModal = ({
   handleShowGeneratedPrompt,
 }) => {
   return (
-    <Modal MODAL_ID={MODAL_TYPE.EDIT_MESSAGE_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.EDIT_MESSAGE_MODAL} onClose={() => closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL)}>
       <div
         id="edit-message-modal-container"
         className="bg-base-100 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6"

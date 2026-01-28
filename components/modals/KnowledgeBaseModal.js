@@ -256,7 +256,7 @@ const KnowledgeBaseModal = ({
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL} onClose={handleClose}>
       <div className="modal-box w-11/12 max-w-xl border-2 border-base-300">
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-base-300">
           <h3 className="font-bold text-lg">{selectedResource ? "Edit" : "Create"} Knowledge Base</h3>

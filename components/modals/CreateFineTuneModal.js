@@ -51,8 +51,13 @@ function CreateFineTuneModal({ params, selectedThreadIds }) {
       console.error("Error fetching data:", error);
     }
   };
+
+  const handleClose = () => {
+    setStatus([0]);
+    closeModal(MODAL_TYPE.FINE_TUNE_MODAL);
+  };
   return (
-    <Modal MODAL_ID={MODAL_TYPE.FINE_TUNE_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.FINE_TUNE_MODAL} onClose={handleClose}>
       <div id="fine-tune-modal-container" className="modal-box">
         <h3 className="font-bold text-lg">Choose Response Category</h3>
         <p className="py-2 text-sm mb-2">Select the category on the basis of user feedback</p>

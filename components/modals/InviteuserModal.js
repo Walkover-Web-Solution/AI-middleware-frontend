@@ -51,7 +51,7 @@ const InviteUserModal = () => {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.INVITE_USER}>
+    <Modal MODAL_ID={MODAL_TYPE.INVITE_USER} onClose={handleClose}>
       <form
         id="invite-user-modal-container"
         onSubmit={(e) => {

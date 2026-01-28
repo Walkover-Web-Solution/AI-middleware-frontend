@@ -689,7 +689,7 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.JSON_SCHEMA_BUILDER}>
+    <Modal MODAL_ID={MODAL_TYPE.JSON_SCHEMA_BUILDER} onClose={handleCloseModal}>
       <div
         id="json-schema-builder-modal-container"
         className="modal-box max-w-4xl overflow-hidden text-xs max-h-[90%] my-20 flex flex-col"

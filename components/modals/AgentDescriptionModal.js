@@ -5,7 +5,7 @@ import Modal from "../UI/Modal";
 
 const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description, isAgentToAgentConnect = true }) => {
   return (
-    <Modal MODAL_ID={MODAL_TYPE?.AGENT_DESCRIPTION_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE?.AGENT_DESCRIPTION_MODAL} onClose={() => closeModal(MODAL_TYPE.AGENT_DESCRIPTION_MODAL)}>
       <div id="agent-description-modal-box" className="modal-box max-w-2xl">
         <h3 className="font-bold text-lg">Add Agent Description</h3>
         <div className="py-4">

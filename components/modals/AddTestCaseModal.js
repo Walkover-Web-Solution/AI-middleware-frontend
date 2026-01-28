@@ -195,7 +195,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation, chann
   };
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.ADD_TEST_CASE_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.ADD_TEST_CASE_MODAL} onClose={handleClose}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
         <form
           id="add-testcase-modal-form"

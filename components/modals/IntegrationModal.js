@@ -46,7 +46,7 @@ const IntegrationModal = ({ params, type = "embed" }) => {
     integrationNameRef.current.value = "";
   };
   return (
-    <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL} onClose={() => closeModal(MODAL_TYPE.INTEGRATION_MODAL)} >
       <div id="integration-modal-container" className="modal-box">
         <h3 className="font-bold text-lg mb-4">Enter Embed Name{RequiredItem()}</h3>
         <input

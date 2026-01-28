@@ -48,7 +48,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
   const handleClose = () => closeModal(MODAL_TYPE.CONNECTED_AGENTS_MODAL);
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.CONNECTED_AGENTS_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.CONNECTED_AGENTS_MODAL} onClose={handleClose}>
       <div id="connected-agents-modal-container" className="modal-box focus:outline-none" tabIndex="-1">
         <h3 className="font-bold text-lg mb-4">Connected Agents for API Key: {apiKey.name}</h3>
 

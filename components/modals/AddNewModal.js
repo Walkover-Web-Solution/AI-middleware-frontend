@@ -238,6 +238,8 @@ export default function AddNewModelModal() {
       outputConfig: { ...newOutPutConfig },
     };
 
+   
+
     return {
       ...finalConfig,
       configuration: {
@@ -583,8 +585,12 @@ export default function AddNewModelModal() {
     !spec.usecase ||
     spec.usecase.length === 0;
 
+     const handleClose = () => {
+      closeModal(MODAL_TYPE.ADD_NEW_MODEL_MODAL);
+    };
+
   return (
-    <Modal MODAL_ID={MODAL_TYPE.ADD_NEW_MODEL_MODAL}>
+    <Modal MODAL_ID={MODAL_TYPE.ADD_NEW_MODEL_MODAL} onClose={handleClose}>
       <div id="add-new-model-modal-container" className="modal-box min-w-[70rem]">
         <div className="min-h-screen bg-base-100 pt-4">
           <div className="w-full mx-auto">
