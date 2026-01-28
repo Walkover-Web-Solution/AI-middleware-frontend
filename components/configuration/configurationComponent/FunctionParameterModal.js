@@ -1102,11 +1102,11 @@ function FunctionParameterModal({
           const { _id, description, ...dataToSend } = toolData;
           await dispatch(updateFuntionApiAction({
             function_id: functionId,
-            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description, title: flowResponse?.title, title: flowResponse?.title },
+            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description,title: flowResponse?.title },
             embedToken: embedToken,
           }));
 
-          setToolData(prev => ({ ...prev, description: flowResponse.metadata.description, title: flowResponse.title, title: flowResponse.title }));
+          setToolData(prev => ({ ...prev, description: flowResponse.metadata.description,title: flowResponse.title }));
           toast.success('Description updated successfully');
           setIsDescriptionEditing(false);
         } else {
