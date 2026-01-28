@@ -64,7 +64,24 @@ const RenderEmbed = ({
             }
           >
             <div className="flex items-center gap-2 w-full">
-              <SquareFunctionIcon size={16} className="shrink-0" />
+              {integrationData?.[functionName]?.serviceIcons?.length > 0 ? (
+                <div className="flex items-center -space-x-2 flex-shrink-0">
+                  {integrationData[functionName].serviceIcons.slice(0, 5).map((icon, index) => (
+                    <img
+                      key={index}
+                      src={icon}
+                      alt={`${title} icon ${index + 1}`}
+                      className="w-6 h-6 rounded-full border-2 border-base-100 flex-shrink-0 object-contain bg-white p-0.5"
+                      style={{ zIndex: 5 - index }}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <SquareFunctionIcon size={16} className="shrink-0" />
+              )}
               {title?.length > 24 ? (
                 <div className="tooltip tooltip-top min-w-0" data-tip={title}>
                   <span className="min-w-0 text-sm truncate text-left">
