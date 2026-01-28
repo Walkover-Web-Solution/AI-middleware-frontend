@@ -1,6 +1,6 @@
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { closeModal } from "@/utils/utility";
-import { MODAL_TYPE } from "@/utils/enums";
+import { MODAL_TYPE, PARAMETER_TYPES } from "@/utils/enums";
 import { TrashIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/Icons";
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
@@ -20,6 +20,7 @@ const SchemaPropertyCard = ({
   onRequiredChange,
   onDescriptionChange,
   onTypeChange,
+  onArrayItemTypeChange,
   onPropertyNameChange,
   schemaData,
 }) => {
@@ -107,12 +108,31 @@ const SchemaPropertyCard = ({
             value={property.type || "string"}
             onChange={(e) => onTypeChange(currentPath, e.target.value)}
           >
-            <option value="string">String</option>
-            <option value="object">Object</option>
-            <option value="array">Array</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
+            {PARAMETER_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
           </select>
+          {property.type === "array" && (
+            <>
+              <span className="text-xs text-base-content/70">Items:</span>
+              <select
+                id={`schema-prop-array-item-type-select-${currentPath}`}
+                disabled={isReadOnly}
+                className="select select-xs select-bordered text-xs"
+                value={property.items?.type || "string"}
+                onChange={(e) => onArrayItemTypeChange(currentPath, e.target.value)}
+                title="Array item type"
+              >
+                {PARAMETER_TYPES.filter((type) => type.value !== "array").map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
           <button
             id={`schema-prop-delete-button-${currentPath}`}
             onClick={() => onDelete(currentPath)}
@@ -135,6 +155,55 @@ const SchemaPropertyCard = ({
           disabled={isReadOnly}
         />
       </div>
+
+      {/* Array items properties section when item type is object */}
+      {property.type === "array" && property.items?.type === "object" && (
+        <div className="mt-2">
+          <div className="flex items-center justify-between">
+            <button
+              id={`schema-prop-array-items-expand-button-${currentPath}`}
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 text-xs font-medium"
+            >
+              {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRightIcon size={16} />}
+              <span className="text-xs">Item Properties</span>
+            </button>
+            <button
+              id={`schema-prop-array-items-add-property-button-${currentPath}`}
+              onClick={() => onAddChild(currentPath + ".items")}
+              disabled={isReadOnly}
+              className="btn btn-sm btn-ghost text-primary gap-1"
+              title="Add property to array items"
+            >
+              <PlusCircleIcon size={10} />
+              <span className="text-xs">Add property</span>
+            </button>
+          </div>
+
+          {isExpanded && property.items?.properties && Object.keys(property.items.properties).length > 0 && (
+            <div className="space-y-1 mt-2">
+              {Object.entries(property.items.properties).map(([childKey, childProperty], index) => (
+                <SchemaPropertyCard
+                  key={childKey}
+                  isReadOnly={isReadOnly}
+                  propertyKey={childKey}
+                  property={childProperty}
+                  depth={depth + 1}
+                  path={[...path, propertyKey]}
+                  onDelete={onDelete}
+                  onAddChild={onAddChild}
+                  onRequiredChange={onRequiredChange}
+                  onDescriptionChange={onDescriptionChange}
+                  onTypeChange={onTypeChange}
+                  onArrayItemTypeChange={onArrayItemTypeChange}
+                  onPropertyNameChange={onPropertyNameChange}
+                  schemaData={schemaData}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {property.type === "object" && (
         <div className="mt-2">
@@ -174,6 +243,7 @@ const SchemaPropertyCard = ({
                   onRequiredChange={onRequiredChange}
                   onDescriptionChange={onDescriptionChange}
                   onTypeChange={onTypeChange}
+                  onArrayItemTypeChange={onArrayItemTypeChange}
                   onPropertyNameChange={onPropertyNameChange}
                   schemaData={schemaData}
                 />
@@ -230,8 +300,28 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
         const [head, ...tail] = remainingKeyParts;
         if (currentProperties[head]) {
           const isArray = currentProperties[head].type === "array";
-          const nestedKey = isArray ? "items" : "properties";
-          currentProperties[head][nestedKey] = _updateProperty(currentProperties[head][nestedKey] || {}, tail);
+          if (isArray) {
+            // For arrays, navigate to items first
+            if (!currentProperties[head].items) {
+              currentProperties[head].items = {};
+            }
+            // If items is an object type, navigate to its properties
+            if (currentProperties[head].items.type === "object") {
+              if (!currentProperties[head].items.properties) {
+                currentProperties[head].items.properties = {};
+              }
+              currentProperties[head].items.properties = _updateProperty(
+                currentProperties[head].items.properties,
+                tail
+              );
+            } else {
+              // For non-object items, just update items directly
+              currentProperties[head].items = _updateProperty(currentProperties[head].items || {}, tail);
+            }
+          } else {
+            // For objects, navigate to properties
+            currentProperties[head].properties = _updateProperty(currentProperties[head].properties || {}, tail);
+          }
         }
       }
       return currentProperties;
@@ -271,27 +361,48 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
   const handleAddChildProperty = useCallback(
     (parentPath) => {
       setSchemaData((prevData) => {
-        const updatedProperties = updateProperty(prevData.properties, parentPath.split("."), (property) => {
-          if (!property.properties) {
-            property.properties = {};
+        const pathParts = parentPath.split(".");
+        const isArrayItems = pathParts[pathParts.length - 1] === "items";
+
+        // Remove "items" from path if present, as we need to navigate to the parent property first
+        const navigationPath = isArrayItems ? pathParts.slice(0, -1) : pathParts;
+
+        const updatedProperties = updateProperty(prevData.properties, navigationPath, (property) => {
+          // Determine where to add the new property
+          let targetObject;
+          if (isArrayItems) {
+            // Adding to array items
+            if (!property.items) {
+              property.items = { type: "object", properties: {} };
+            }
+            if (!property.items.properties) {
+              property.items.properties = {};
+            }
+            targetObject = property.items;
+          } else {
+            // Adding to regular object
+            if (!property.properties) {
+              property.properties = {};
+            }
+            targetObject = property;
           }
 
           let counter = 0;
           let newKey = `new${counter}`;
-          while (property.properties[newKey]) {
+          while (targetObject.properties[newKey]) {
             counter++;
             newKey = `new${counter}`;
           }
 
-          property.properties[newKey] = {
+          targetObject.properties[newKey] = {
             type: "string",
             description: "",
           };
 
-          if (!property.required) {
-            property.required = [];
+          if (!targetObject.required) {
+            targetObject.required = [];
           }
-          property.required = [...property.required, newKey];
+          targetObject.required = [...targetObject.required, newKey];
 
           return property;
         });
@@ -332,7 +443,15 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
           const key = keyParts[i];
           parent = current[key];
           if (current[key].type === "array") {
-            current = current[key].items;
+            // Navigate to array items
+            if (current[key].items && current[key].items.type === "object") {
+              // For object-type items, navigate to items.properties
+              current = current[key].items.properties;
+              parent = current[key].items; // Update parent to items for required array
+            } else {
+              // For non-object items
+              current = current[key].items;
+            }
           } else {
             current = current[key].properties;
           }
@@ -441,6 +560,33 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
           }
 
           return updatedProperty;
+        });
+
+        return {
+          ...prevData,
+          properties: updatedProperties,
+        };
+      });
+    },
+    [updateProperty]
+  );
+
+  const handleArrayItemTypeChange = useCallback(
+    (key, newItemType) => {
+      setSchemaData((prevData) => {
+        const updatedProperties = updateProperty(prevData.properties, key.split("."), (property) => {
+          const updatedItems = { type: newItemType };
+
+          // Initialize properties object if item type is object
+          if (newItemType === "object") {
+            updatedItems.properties = property.items?.properties || {};
+            updatedItems.additionalProperties = false;
+          }
+
+          return {
+            ...property,
+            items: updatedItems,
+          };
         });
 
         return {
@@ -595,6 +741,7 @@ function JsonSchemaBuilderModal({ params, searchParams, isReadOnly = false }) {
                     onRequiredChange={handleRequiredChange}
                     onDescriptionChange={handleDescriptionChange}
                     onTypeChange={handleTypeChange}
+                    onArrayItemTypeChange={handleArrayItemTypeChange}
                     onPropertyNameChange={handlePropertyNameChange}
                     schemaData={schemaData}
                   />

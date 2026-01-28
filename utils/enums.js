@@ -149,6 +149,14 @@ export const AGENT_SETUP_GUIDE_STEPS = [
   },
 ];
 
+export const PARAMETER_TYPES = [
+  { value: "string", label: "String" },
+  { value: "object", label: "Object" },
+  { value: "array", label: "Array" },
+  { value: "number", label: "Number" },
+  { value: "boolean", label: "Boolean" },
+];
+
 export const TUTORIALS = [
   {
     title: "Agent Creation",
