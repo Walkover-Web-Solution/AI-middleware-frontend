@@ -1101,24 +1101,14 @@ function FunctionParameterModal({
         const flowResponse = await updateFlow(embedToken, toolData.script_id, toolData?.description || "", toolName);
         if (flowResponse?.metadata?.description) {
           const { _id, description, ...dataToSend } = toolData;
-          await dispatch(
-            updateFuntionApiAction({
-              function_id: functionId,
-              dataToSend: {
-                ...dataToSend,
-                description: flowResponse?.metadata?.description,
-                title: flowResponse?.title,
-                title: flowResponse?.title,
-              },
-            })
-          );
-          setToolData((prev) => ({
-            ...prev,
-            description: flowResponse.metadata.description,
-            title: flowResponse.title,
-            title: flowResponse.title,
+          await dispatch(updateFuntionApiAction({
+            function_id: functionId,
+            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description,title: flowResponse?.title },
+            embedToken: embedToken,
           }));
-          toast.success("Description updated successfully");
+
+          setToolData(prev => ({ ...prev, description: flowResponse.metadata.description,title: flowResponse.title }));
+          toast.success('Description updated successfully');
           setIsDescriptionEditing(false);
         } else {
           throw new Error("Failed to get updated description from flow API");
