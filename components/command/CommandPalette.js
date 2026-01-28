@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X, ChevronDown, ChevronRight, Filter } from "lucide-react";
-import { formatRelativeTime, formatDate } from "@/utils/utility";
+import { formatRelativeTime, formatDate, openModal, closeModal } from "@/utils/utility";
+import { MODAL_TYPE } from "@/utils/enums";
 import Protected from "../Protected";
 
 function getOrgIdFromPath(pathname) {
@@ -530,6 +531,16 @@ const CommandPalette = ({ isEmbedUser }) => {
       ) {
         e.preventDefault();
         openPalette();
+      }
+      // Check for Ctrl+/ or Cmd+/ to toggle keyboard shortcuts modal
+      if ((e.ctrlKey || e.metaKey) && e.key === "/" && !isEmbedUser) {
+        e.preventDefault();
+        const modal = document.getElementById(MODAL_TYPE.KEYBOARD_SHORTCUTS_MODAL);
+        if (modal && modal.hasAttribute("open")) {
+          closeModal(MODAL_TYPE.KEYBOARD_SHORTCUTS_MODAL);
+        } else {
+          openModal(MODAL_TYPE.KEYBOARD_SHORTCUTS_MODAL);
+        }
       }
       if (e.key === "Escape") {
         closePalette();

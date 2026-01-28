@@ -369,6 +369,7 @@ function Home({ params, searchParams, isEmbedUser }) {
   const [isUsageFilterSubmitting, setIsUsageFilterSubmitting] = useState(false);
   const usageFilterPopoverRef = useRef(null);
   const [selectedAgentForAccess, setSelectedAgentForAccess] = useState(null);
+  const [shouldSortByMetrics, _setShouldSortByMetrics] = useState(false); // Track if user wants sorting
 
   // Use portal dropdown hook
   const { handlePortalOpen, handlePortalCloseImmediate, PortalDropdown, PortalStyles } = usePortalDropdown({
@@ -449,7 +450,7 @@ function Home({ params, searchParams, isEmbedUser }) {
     });
   }, [processedBridges, bridgeTypeFilter]);
 
-  // Show all bridges but always prioritize metrics API agents
+  // Show all bridges but only sort when user explicitly requests it
   const applyUsageFilter = (list) => {
     if (!Array.isArray(list)) return list;
 
@@ -459,7 +460,12 @@ function Home({ params, searchParams, isEmbedUser }) {
       hasMetrics: usageFilterIds.has(item._id),
     }));
 
-    // Always prioritize bridges with metrics, regardless of filter status
+    // Only sort if user has explicitly requested sorting
+    if (!shouldSortByMetrics) {
+      return listWithMetricsFlag; // Return unsorted list
+    }
+
+    // Sort: prioritize bridges with metrics
     return [...listWithMetricsFlag].sort((a, b) => {
       // Put bridges with metrics first
       if (a.hasMetrics && !b.hasMetrics) return -1;
