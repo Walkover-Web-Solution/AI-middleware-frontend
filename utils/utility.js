@@ -2,6 +2,7 @@ import { BuildingIcon, CheckCircleIcon, LinkIcon } from "@/components/Icons";
 import AIMLIcon from "@/icons/AIMLIcon";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
+import FavIcon from "@/icons/FavIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import Grok from "@/icons/Grok";
@@ -11,6 +12,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
+import FavIconSVG from "@/public/favicon";
 import { cloneDeep } from "lodash";
 import { Image } from "lucide-react";
 
@@ -385,6 +387,8 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
       return <WebSearchIcon height={height} width={width} />;
     case "image_generation":
       return <Image height={height} width={width} alt="image generation icon" />;
+    case "Gtwy_Web_Search":
+      return <FavIconSVG height={24} width={24} />;
     default:
       return null;
   }

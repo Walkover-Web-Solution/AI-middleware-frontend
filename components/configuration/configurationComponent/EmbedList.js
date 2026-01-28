@@ -53,7 +53,8 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
     prebuiltToolsData,
     toolsVersionData,
     showInbuiltTools,
-    prebuiltToolsFilters,
+    webSearchFilters,
+    gtwyWebSearchFilters,
   } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const bridgeDataFromState = state?.bridgeReducer?.allBridgesMap?.[params?.id];
@@ -75,9 +76,12 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
       variables_path: isPublished ? bridgeDataFromState?.variables_path || {} : versionData?.variables_path || {},
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
       toolsVersionData: isPublished ? bridgeDataFromState?.built_in_tools : versionData?.built_in_tools,
-      prebuiltToolsFilters: isPublished
+      webSearchFilters: isPublished
         ? bridgeDataFromState?.web_search_filters || []
         : versionData?.web_search_filters || [],
+      gtwyWebSearchFilters: isPublished
+        ? bridgeDataFromState?.gtwy_web_search_filters || []
+        : versionData?.gtwy_web_search_filters || [],
     };
   });
   // Use the tutorial videos hook
@@ -97,6 +101,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
     openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL);
   };
   const [selectedPrebuiltTool, setSelectedPrebuiltTool] = useState(null);
+  const [prebuiltToolName, setPrebuiltToolName] = useState(null);
 
   // Delete operation hooks
   const { isDeleting: isDeletingTool, executeDelete: executeToolDelete } = useDeleteOperation(
@@ -206,19 +211,26 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
   };
 
   // Handle opening prebuilt tools configuration modal
-  const handleOpenPrebuiltConfig = () => {
+  const handleOpenPrebuiltConfig = (toolName) => {
+    setPrebuiltToolName(toolName);
     openModal(MODAL_TYPE.PREBUILT_TOOLS_CONFIG_MODAL);
   };
+
+  // Get the correct filters based on the current prebuilt tool
+  const currentPrebuiltToolFilters = prebuiltToolName === "Gtwy_Web_Search" ? gtwyWebSearchFilters : webSearchFilters;
 
   // Handle saving prebuilt tools configuration
   const handleSavePrebuiltConfig = async (domains) => {
     try {
+      // Use different key based on prebuilt tool name
+      const filterKey = prebuiltToolName === "Gtwy_Web_Search" ? "gtwy_web_search_filters" : "web_search_filters";
+
       await dispatch(
         updateBridgeVersionAction({
           bridgeId: params?.id,
           versionId: searchParams?.version,
           dataToSend: {
-            web_search_filters: domains,
+            [filterKey]: domains,
           },
         })
       );
@@ -364,7 +376,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                                 <div className="flex items-center">
                                   <span className="flex-1 min-w-0 text-sm font-normal text-base-content truncate">
                                     <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ""}>
-                                      <span className="truncate block w-[300px]">
+                                      <span className="truncate block w-[300px] flex justify-left">
                                         {item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}
                                       </span>
                                     </div>
@@ -378,12 +390,12 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
                               </div>
                             </div>
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 pr-2 flex-shrink-0">
-                              {item?.value === "web_search" && (
+                              {(item?.value === "web_search" || item?.value === "Gtwy_Web_Search") && (
                                 <button
                                   id={`embed-list-prebuilt-tool-config-button-${item?.value}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleOpenPrebuiltConfig();
+                                    handleOpenPrebuiltConfig(item?.value);
                                   }}
                                   className="btn btn-ghost btn-sm p-1 hover:bg-base-300"
                                   title="Config"
@@ -451,7 +463,7 @@ const EmbedList = ({ params, searchParams, isPublished, isEditor = true }) => {
         </div>
 
         {/* Prebuilt Tools Configuration Modal */}
-        <PrebuiltToolsConfigModal initialDomains={prebuiltToolsFilters} onSave={handleSavePrebuiltConfig} />
+        <PrebuiltToolsConfigModal initialDomains={currentPrebuiltToolFilters} onSave={handleSavePrebuiltConfig} />
       </div>
     )
   );
