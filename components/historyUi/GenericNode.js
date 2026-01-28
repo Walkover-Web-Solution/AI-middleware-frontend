@@ -1,4 +1,4 @@
-import { Handle, Position } from "reactflow";
+import { Handle, Position } from "@xyflow/react";
 
 export default function GenericNode({ data }) {
   const { ui, source, target } = data;

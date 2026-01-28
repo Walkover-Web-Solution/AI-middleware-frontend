@@ -3,6 +3,9 @@
   "plugins": ["unused-imports", "import", "no-commented-code", "prettier"],
   "settings": {
     "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      },
       "alias": {
         "map": [["@", "."]],
         "extensions": [".js", ".jsx", ".ts", ".tsx"]

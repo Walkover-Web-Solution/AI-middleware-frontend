@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState, use } from "react";
-import ReactFlow, { Background } from "reactflow";
-import "reactflow/dist/style.css";
+import { ReactFlow, Background } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
