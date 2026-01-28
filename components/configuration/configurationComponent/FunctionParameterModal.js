@@ -10,6 +10,7 @@ import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { PlusCircleIcon, CircleQuestionMark } from "lucide-react";
+import { PARAMETER_TYPES } from "@/utils/enums";
 
 // Parameter Card Component
 const ParameterCard = ({
@@ -261,11 +262,11 @@ const ParameterCard = ({
             value={param.type || "string"}
             onChange={(e) => onTypeChange(currentPath, e.target.value)}
           >
-            <option value="string">String</option>
-            <option value="object">Object</option>
-            <option value="array">Array</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
+            {PARAMETER_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
           </select>
           <button
             id={`param-delete-button-${currentPath}`}

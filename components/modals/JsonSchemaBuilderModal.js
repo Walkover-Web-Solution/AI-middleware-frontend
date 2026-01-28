@@ -1,6 +1,6 @@
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { closeModal } from "@/utils/utility";
-import { MODAL_TYPE } from "@/utils/enums";
+import { MODAL_TYPE, PARAMETER_TYPES } from "@/utils/enums";
 import { TrashIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/Icons";
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
@@ -108,11 +108,11 @@ const SchemaPropertyCard = ({
             value={property.type || "string"}
             onChange={(e) => onTypeChange(currentPath, e.target.value)}
           >
-            <option value="string">String</option>
-            <option value="object">Object</option>
-            <option value="array">Array</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
+            {PARAMETER_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
           </select>
           {property.type === "array" && (
             <>
@@ -125,10 +125,11 @@ const SchemaPropertyCard = ({
                 onChange={(e) => onArrayItemTypeChange(currentPath, e.target.value)}
                 title="Array item type"
               >
-                <option value="string">String</option>
-                <option value="number">Number</option>
-                <option value="boolean">Boolean</option>
-                <option value="object">Object</option>
+                {PARAMETER_TYPES.filter((type) => type.value !== "array").map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
               </select>
             </>
           )}
