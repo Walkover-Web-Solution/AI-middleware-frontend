@@ -15,12 +15,12 @@ export default function NetworkStatus() {
       window.location.reload();
     };
 
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
 
     return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
     };
   }, []);
 
@@ -48,49 +48,37 @@ export default function NetworkStatus() {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-white flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-[99999] bg-base-100 flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.02]">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-black rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-base-content rounded-full" />
       </div>
 
       <div className="relative z-10 text-center px-6 max-w-lg mx-auto">
         <div className="mb-8 flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-black/5 flex items-center justify-center">
-            <WifiOff className="w-10 h-10 text-black/60" strokeWidth={1.5} />
+          <div className="w-20 h-20 rounded-full bg-base-content/5 flex items-center justify-center">
+            <WifiOff className="w-10 h-10 text-base-content/60" strokeWidth={1.5} />
           </div>
         </div>
 
         <div className="mb-12">
-          <h1 className="text-black text-4xl mb-4 tracking-tight font-light">
-            No Connection
-          </h1>
-          <p className="text-black/50 leading-relaxed">
-            Please check your internet connection and try again.
-          </p>
+          <h1 className="text-base-content text-4xl mb-4 tracking-tight font-light">No Connection</h1>
+          <p className="text-base-content/50 leading-relaxed">Please check your internet connection and try again.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={handleRetry}
-            className="flex items-center justify-center gap-2 bg-black text-white px-8 py-3 hover:bg-black/80 transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" strokeWidth={2} />
-            <span className="font-medium">Retry</span>
+          <button onClick={handleRetry} className="btn btn-primary gap-2 group">
+            <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" strokeWidth={2} />
+            <span>Retry</span>
           </button>
-          
-          <button
-            onClick={handleGoHome}
-            className="flex items-center justify-center gap-2 bg-transparent text-black px-8 py-3 border border-black/20 hover:border-black/40 transition-colors"
-          >
+
+          <button onClick={handleGoHome} className="btn btn-outline gap-2">
             <Home className="w-4 h-4" strokeWidth={2} />
-            <span className="font-medium">Go Home</span>
+            <span>Go Home</span>
           </button>
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-sm text-black/20">
-        gtwy
-      </div>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-sm text-base-content/20">gtwy</div>
     </div>
   );
 }
