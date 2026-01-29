@@ -17,11 +17,13 @@ import {
   BotIcon,
   ChevronDown,
   RefreshCcw,
+  ArrowLeftRightIcon,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeAction, dicardBridgeVersionAction, archiveBridgeAction } from "@/store/action/bridgeAction";
+import { convertAgentToTemplate } from "@/config/bridgeApi";
 import { updateBridgeVersionReducer } from "@/store/reducer/bridgeReducer";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal, toggleSidebar, sendDataToParent } from "@/utils/utility";
@@ -30,6 +32,7 @@ const ChatBotSlider = dynamic(() => import("./sliders/ChatBotSlider"), { ssr: fa
 const ConfigHistorySlider = dynamic(() => import("./sliders/ConfigHistorySlider"), { ssr: false });
 import Protected from "./Protected";
 const DeleteModal = dynamic(() => import("./UI/DeleteModal"), { ssr: false });
+const TemplateNameModal = dynamic(() => import("./modals/TemplateNameModal"), { ssr: false });
 import useDeleteOperation from "@/customHooks/useDeleteOperation";
 import BridgeVersionDropdown from "./configuration/configurationComponent/BridgeVersionDropdown";
 const VariableCollectionSlider = dynamic(() => import("./sliders/VariableCollectionSlider"), { ssr: false });
@@ -47,6 +50,7 @@ const Navbar = ({ isEmbedUser, params }) => {
   const [editedName, setEditedName] = useState("");
   const { isDeleting: isDiscardingWithHook, executeDelete } = useDeleteOperation();
   const ellipsisMenuRef = useRef(null);
+  const templateNameRef = useRef(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -270,6 +274,25 @@ const Navbar = ({ isEmbedUser, params }) => {
       toast.error("Failed to publish version");
     }
   }, [isDrafted]);
+
+  const handleConvertToTemplateClick = useCallback(() => {
+    openModal(MODAL_TYPE.TEMPLATE_NAME_MODAL);
+  }, []);
+
+  const handleConvertToTemplate = useCallback(async () => {
+    const templateName = templateNameRef.current?.value?.trim();
+    if (!templateName) {
+      toast.error("Template name is required");
+      return;
+    }
+    try {
+      await convertAgentToTemplate(bridgeId, templateName);
+      closeModal(MODAL_TYPE.TEMPLATE_NAME_MODAL);
+      templateNameRef.current.value = "";
+    } catch (err) {
+      console.error("Error converting to template:", err);
+    }
+  }, [bridgeId]);
 
   const handleTabChange = useCallback(
     (tabId) => {
@@ -704,6 +727,17 @@ const Navbar = ({ isEmbedUser, params }) => {
                           </button>
                         </li>
                       )}
+                      <li>
+                        <button
+                          id="navbar-convert-to-template-button"
+                          onClick={handleConvertToTemplateClick}
+                          disabled={isPublishing}
+                          className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ArrowLeftRightIcon size={14} className="text-info" />
+                          <span>Convert to Template</span>
+                        </button>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -890,6 +924,7 @@ const Navbar = ({ isEmbedUser, params }) => {
         loading={isDiscardingWithHook}
         isAsync={true}
       />
+      <TemplateNameModal templateNameRef={templateNameRef} handleConvertToTemplate={handleConvertToTemplate} />
     </div>
   );
 };
