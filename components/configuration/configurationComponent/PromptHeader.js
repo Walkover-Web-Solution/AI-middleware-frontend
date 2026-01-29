@@ -1,4 +1,6 @@
 import React, { memo, useCallback } from "react";
+import { SettingsIcon } from "@/components/Icons";
+import { toggleSidebar } from "@/utils/utility";
 
 // Optimized header component with memoization
 const PromptHeader = memo(
@@ -100,6 +102,21 @@ const PromptHeader = memo(
               Prompt Helper
             </span>
           )}
+          <button
+            id="global-manage-variables-button"
+            className="flex items-center btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleSidebar("variable-collection-slider", "right");
+            }}
+            title="Manage Variables"
+            disabled={isPublished || !isEditor}
+          >
+            <div className="flex items-center gap-1">
+              <SettingsIcon size={12} />
+              <span className="text-sm">Manage Variables</span>
+            </div>
+          </button>
         </div>
       </div>
     );

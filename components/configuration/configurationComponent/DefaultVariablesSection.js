@@ -1,6 +1,6 @@
 import React, { memo, useState, useMemo } from "react";
-import { ChevronDownIcon, SettingsIcon } from "@/components/Icons";
-import { toggleSidebar, extractPromptVariables } from "@/utils/utility";
+import { ChevronDownIcon } from "@/components/Icons";
+import { extractPromptVariables } from "@/utils/utility";
 
 // Optimized default variables section with accordion
 const DefaultVariablesSection = memo(({ prompt = "", customVariables = [], isPublished = false, isEditor = true }) => {
@@ -36,7 +36,7 @@ const DefaultVariablesSection = memo(({ prompt = "", customVariables = [], isPub
             {usedVariables.length > 0 && "|"}
           </div>
 
-          {/* Used Variables */}
+          {/* Used Variables (small preview) */}
           {usedVariables.length > 0 && (
             <div className="flex items-center gap-1">
               <span className="text-xs text-base-content/60">Used:</span>
@@ -49,22 +49,6 @@ const DefaultVariablesSection = memo(({ prompt = "", customVariables = [], isPub
               </p>
             </div>
           )}
-
-          <button
-            id="default-variables-manage-button"
-            className="flex items-center btn btn-outline hover:bg-base-200 hover:text-base-content btn-xs gap-1 ml-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSidebar("variable-collection-slider", "right");
-            }}
-            title="Manage Variables"
-            disabled={isPublished || !isEditor}
-          >
-            <div className="flex items-center gap-1">
-              <SettingsIcon size={12} />
-              <span>Manage Variables</span>
-            </div>
-          </button>
         </div>
         <ChevronDownIcon
           size={14}

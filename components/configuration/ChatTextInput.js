@@ -182,7 +182,32 @@ function ChatTextInput({
 
     // Extract variables from prompt using regex
     const regex = /{{(.*?)}}/g;
-    const matches = [...prompt.matchAll(regex)];
+    // Handle both string and object formats
+    let promptText = "";
+    if (typeof prompt === "string") {
+      promptText = prompt;
+    } else if (typeof prompt === "object") {
+      // Check if this is embed user format (has customPrompt and useDefaultPrompt is false)
+      const isEmbedFormat = prompt.customPrompt && prompt.useDefaultPrompt === false;
+
+      if (isEmbedFormat) {
+        // For embed users: use customPrompt template to find variables, and only check visible embedFields
+        if (prompt.customPrompt) promptText += prompt.customPrompt + " ";
+        // Note: We use customPrompt to find variables, but validation will check visible embedFields
+      } else {
+        // For main users: extract from default fields (role, goal, instruction)
+        if (prompt.role) promptText += prompt.role + " ";
+        if (prompt.goal) promptText += prompt.goal + " ";
+        if (prompt.instruction) promptText += prompt.instruction + " ";
+        // Also extract from embedFields if present (for backward compatibility)
+        if (Array.isArray(prompt.embedFields)) {
+          prompt.embedFields.forEach((field) => {
+            if (field.value) promptText += field.value + " ";
+          });
+        }
+      }
+    }
+    const matches = promptText ? [...promptText.matchAll(regex)] : [];
     const promptVariables = [...new Set(matches.map((match) => match[1].trim()))];
 
     if (!promptVariables.length) return { isValid: true, missingVariables: [] };
@@ -218,7 +243,38 @@ function ChatTextInput({
       inputRef.current.style.height = "40px"; // Set initial height
     }
     // Skip prompt validation for chat models - they don't require a system prompt
-    if (prompt?.trim() === "" && modelType !== "completion" && modelType !== "embedding" && modelType !== "chat") {
+    // Extract text from prompt (handle both string and object formats)
+    let promptText = "";
+    if (typeof prompt === "string") {
+      promptText = prompt;
+    } else if (typeof prompt === "object" && prompt !== null) {
+      // Check if this is embed user format (has customPrompt and useDefaultPrompt is false)
+      const isEmbedFormat = prompt.customPrompt && prompt.useDefaultPrompt === false;
+
+      if (isEmbedFormat) {
+        // For embed users: only extract from visible embedFields (not hidden)
+        if (Array.isArray(prompt.embedFields)) {
+          prompt.embedFields.forEach((field) => {
+            // Only include visible fields (not hidden)
+            if (!field.hidden && field.value) {
+              promptText += field.value + " ";
+            }
+          });
+        }
+      } else {
+        // For main users: extract from default fields (role, goal, instruction)
+        if (prompt.role) promptText += prompt.role + " ";
+        if (prompt.goal) promptText += prompt.goal + " ";
+        if (prompt.instruction) promptText += prompt.instruction + " ";
+        // Also extract from embedFields if present (for backward compatibility)
+        if (Array.isArray(prompt.embedFields)) {
+          prompt.embedFields.forEach((field) => {
+            if (field.value) promptText += field.value + " ";
+          });
+        }
+      }
+    }
+    if (promptText.trim() === "" && modelType !== "completion" && modelType !== "embedding" && modelType !== "chat") {
       dispatch(setChatError(channelIdentifier, "Prompt is required"));
       return;
     }
